@@ -72,14 +72,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -134,14 +127,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -196,14 +182,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -258,14 +237,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -320,14 +292,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -382,14 +347,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -444,14 +402,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -506,14 +457,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -568,14 +512,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -630,14 +567,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -692,14 +622,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -754,14 +677,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -816,14 +732,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -878,14 +787,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -940,14 +842,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1002,14 +897,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1064,14 +952,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1126,14 +1007,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1188,14 +1062,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1250,14 +1117,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1312,14 +1172,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1374,14 +1227,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1436,14 +1282,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1498,14 +1337,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1560,14 +1392,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1622,14 +1447,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1684,14 +1502,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1746,14 +1557,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1808,14 +1612,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1870,14 +1667,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1932,14 +1722,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1994,14 +1777,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2056,14 +1832,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2118,14 +1887,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2180,14 +1942,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2242,14 +1997,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2304,14 +2052,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2366,14 +2107,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2428,14 +2162,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2490,14 +2217,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2552,14 +2272,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2614,14 +2327,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2676,14 +2382,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2738,14 +2437,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2800,14 +2492,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2862,14 +2547,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2924,14 +2602,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2986,14 +2657,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3048,14 +2712,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3110,14 +2767,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3172,14 +2822,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3234,14 +2877,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3296,14 +2932,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3358,14 +2987,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3420,14 +3042,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3482,14 +3097,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3544,14 +3152,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3606,14 +3207,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3668,14 +3262,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3730,14 +3317,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3792,14 +3372,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3854,14 +3427,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3916,14 +3482,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5593,14 +5152,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5655,14 +5207,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5717,14 +5262,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5779,14 +5317,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5841,14 +5372,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5903,14 +5427,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5965,14 +5482,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6027,14 +5537,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6089,14 +5592,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6151,14 +5647,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6213,14 +5702,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6275,14 +5757,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6337,14 +5812,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6399,14 +5867,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6461,14 +5922,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6523,14 +5977,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6585,14 +6032,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6647,14 +6087,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6709,14 +6142,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6771,14 +6197,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6833,14 +6252,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6895,14 +6307,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6957,14 +6362,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7019,14 +6417,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7081,14 +6472,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7143,14 +6527,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7205,14 +6582,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7267,14 +6637,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7329,14 +6692,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7391,14 +6747,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7453,14 +6802,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7515,14 +6857,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7577,14 +6912,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7639,14 +6967,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7701,14 +7022,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7763,14 +7077,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7825,14 +7132,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7887,14 +7187,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7949,14 +7242,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8011,14 +7297,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8073,14 +7352,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8135,14 +7407,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8197,14 +7462,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8259,14 +7517,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8321,14 +7572,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8383,14 +7627,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8445,14 +7682,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8507,14 +7737,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8569,14 +7792,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8631,14 +7847,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8693,14 +7902,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8755,14 +7957,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8817,14 +8012,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8879,14 +8067,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8941,14 +8122,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9003,14 +8177,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9065,14 +8232,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9127,14 +8287,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9189,14 +8342,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9251,14 +8397,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9313,14 +8452,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9375,14 +8507,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9437,14 +8562,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9499,14 +8617,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9561,14 +8672,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9623,14 +8727,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9685,14 +8782,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9747,14 +8837,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9809,14 +8892,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9871,14 +8947,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9933,14 +9002,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9995,14 +9057,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10057,14 +9112,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10119,14 +9167,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10181,14 +9222,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10243,14 +9277,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10305,14 +9332,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10367,14 +9387,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10429,14 +9442,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10491,14 +9497,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10553,14 +9552,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10615,14 +9607,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10677,14 +9662,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10739,14 +9717,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10801,14 +9772,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10863,14 +9827,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10925,14 +9882,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10987,14 +9937,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11049,14 +9992,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11111,14 +10047,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11173,14 +10102,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11235,14 +10157,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11297,14 +10212,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11359,14 +10267,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11421,14 +10322,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11483,14 +10377,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11545,14 +10432,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11607,14 +10487,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11669,14 +10542,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11731,14 +10597,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11793,14 +10652,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11855,14 +10707,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11917,14 +10762,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11979,14 +10817,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12041,14 +10872,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12103,14 +10927,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12165,14 +10982,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12227,14 +11037,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12289,14 +11092,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12351,14 +11147,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12413,14 +11202,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12475,14 +11257,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12537,14 +11312,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12599,14 +11367,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12661,14 +11422,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12723,14 +11477,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12785,14 +11532,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12847,14 +11587,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12909,14 +11642,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12971,14 +11697,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13033,14 +11752,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13095,14 +11807,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13157,14 +11862,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13219,14 +11917,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13281,14 +11972,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13343,14 +12027,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13405,14 +12082,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13467,14 +12137,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13529,14 +12192,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13591,14 +12247,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13653,14 +12302,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13715,14 +12357,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13777,14 +12412,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13839,14 +12467,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13901,14 +12522,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -13963,14 +12577,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -14025,14 +12632,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -14087,14 +12687,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -14149,14 +12742,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -14211,14 +12797,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -14273,14 +12852,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -14335,14 +12907,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -14397,14 +12962,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -14459,14 +13017,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17367,14 +15918,7 @@ exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17429,14 +15973,7 @@ exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17500,14 +16037,7 @@ exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
             "value": "{{ .arguments.sortOrder }}"
           }
         ],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17629,14 +16159,7 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17717,14 +16240,7 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17820,14 +16336,7 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18114,14 +16623,7 @@ exports[`fusion with statusCodeUnions: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18187,14 +16689,7 @@ exports[`fusion with statusCodeUnions: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18363,14 +16858,7 @@ exports[`fusion: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18425,14 +16913,7 @@ exports[`fusion: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18583,14 +17064,7 @@ exports[`github starred with unions: github_starred_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18731,14 +17205,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18793,14 +17260,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18855,14 +17315,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18917,14 +17370,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18979,14 +17425,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19041,14 +17480,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19103,14 +17535,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19165,14 +17590,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19227,14 +17645,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19289,14 +17700,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19351,14 +17755,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19413,14 +17810,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19475,14 +17865,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19537,14 +17920,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19599,14 +17975,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19661,14 +18030,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19723,14 +18085,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19785,14 +18140,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19847,14 +18195,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19914,14 +18255,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
             "value": "{{ .arguments.url }}"
           }
         ],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19976,14 +18310,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20268,14 +18595,7 @@ exports[`json placeholder array: jsp_array_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20330,14 +18650,7 @@ exports[`json placeholder array: jsp_array_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20434,14 +18747,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20496,14 +18802,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20558,14 +18857,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20620,14 +18912,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20787,14 +19072,7 @@ exports[`non alphanumeric fields: non_alphanumeric_fields_data_sources 1`] = `
             "value": "{{ .arguments.shopUrl }}"
           }
         ],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20858,14 +19136,7 @@ exports[`non alphanumeric fields: non_alphanumeric_fields_data_sources 1`] = `
             "value": "{{ .arguments.connectionAds }}"
           }
         ],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21007,14 +19278,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": true,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": true
       },
       "Subscription": {
         "Enabled": false
@@ -21069,14 +19333,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": true,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": true
       },
       "Subscription": {
         "Enabled": false
@@ -21136,14 +19393,7 @@ exports[`petstore: petstore_data_sources 1`] = `
             "value": "{{ .arguments.status }}"
           }
         ],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21203,14 +19453,7 @@ exports[`petstore: petstore_data_sources 1`] = `
             "value": "{{ .arguments.tags }}"
           }
         ],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21265,14 +19508,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21336,14 +19572,7 @@ exports[`petstore: petstore_data_sources 1`] = `
             "value": "{{ .arguments.status }}"
           }
         ],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21410,14 +19639,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           }
         },
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21477,14 +19699,7 @@ exports[`petstore: petstore_data_sources 1`] = `
             "value": "{{ .arguments.additionalMetadata }}"
           }
         ],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21539,14 +19754,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21601,14 +19809,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": true,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": true
       },
       "Subscription": {
         "Enabled": false
@@ -21663,14 +19864,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21725,14 +19919,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21787,14 +19974,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": true,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": true
       },
       "Subscription": {
         "Enabled": false
@@ -21849,14 +20029,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21920,14 +20093,7 @@ exports[`petstore: petstore_data_sources 1`] = `
             "value": "{{ .arguments.password }}"
           }
         ],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21982,14 +20148,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -22044,14 +20203,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -22106,14 +20258,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": true,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": true
       },
       "Subscription": {
         "Enabled": false
@@ -22168,14 +20313,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -22519,14 +20657,7 @@ exports[`simple petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -22581,14 +20712,7 @@ exports[`simple petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -22643,14 +20767,7 @@ exports[`simple petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -22818,14 +20935,7 @@ exports[`subscription as object field: subscription_as_object_field_data_sources
             "value": "{{ .arguments.shopUrl }}"
           }
         ],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -22920,14 +21030,7 @@ exports[`users: users_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -22982,14 +21085,7 @@ exports[`users: users_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -23053,14 +21149,7 @@ exports[`users: users_data_sources 1`] = `
             "value": "{{ .arguments.sortOrder }}"
           }
         ],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -23183,14 +21272,7 @@ exports[`weather: weather_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -23277,14 +21359,7 @@ exports[`with url encoded params: stripe_query_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": true,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": true
       },
       "Subscription": {
         "Enabled": false
@@ -23388,14 +21463,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -23450,14 +21518,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -23512,14 +21573,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -23579,14 +21633,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
             "value": "{{ .arguments.refreshToken }}"
           }
         ],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -23641,14 +21688,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "proxyUrl": {
-          "kind": 0,
-          "environmentVariableDefaultValue": "",
-          "environmentVariableName": "",
-          "placeholderVariableName": "",
-          "staticVariableContent": ""
-        }
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false

@@ -73,14 +73,7 @@ exports[`Should be merged: merged_apis 1`] = `
           },
           "header": {},
           "query": [],
-          "urlEncodeBody": false,
-          "proxyUrl": {
-            "kind": 0,
-            "environmentVariableDefaultValue": "",
-            "environmentVariableName": "",
-            "placeholderVariableName": "",
-            "staticVariableContent": ""
-          }
+          "urlEncodeBody": false
         },
         "UpstreamSchema": "",
         "HooksConfiguration": {
@@ -160,14 +153,7 @@ exports[`Should be merged: merged_apis 1`] = `
             "placeholderVariableName": "",
             "staticVariableContent": ""
           },
-          "urlEncodeBody": false,
-          "proxyUrl": {
-            "kind": 0,
-            "environmentVariableDefaultValue": "",
-            "environmentVariableName": "",
-            "placeholderVariableName": "",
-            "staticVariableContent": ""
-          }
+          "urlEncodeBody": false
         },
         "UpstreamSchema": "",
         "HooksConfiguration": {
@@ -265,14 +251,7 @@ exports[`Should be merged: merged_apis 1`] = `
           },
           "header": {},
           "query": [],
-          "urlEncodeBody": false,
-          "proxyUrl": {
-            "kind": 0,
-            "environmentVariableDefaultValue": "",
-            "environmentVariableName": "",
-            "placeholderVariableName": "",
-            "staticVariableContent": ""
-          }
+          "urlEncodeBody": false
         },
         "UpstreamSchema": "",
         "HooksConfiguration": {
@@ -350,14 +329,7 @@ exports[`Should be merged: merged_apis 1`] = `
             "placeholderVariableName": "",
             "staticVariableContent": ""
           },
-          "urlEncodeBody": false,
-          "proxyUrl": {
-            "kind": 0,
-            "environmentVariableDefaultValue": "",
-            "environmentVariableName": "",
-            "placeholderVariableName": "",
-            "staticVariableContent": ""
-          }
+          "urlEncodeBody": false
         },
         "UpstreamSchema": "",
         "HooksConfiguration": {
