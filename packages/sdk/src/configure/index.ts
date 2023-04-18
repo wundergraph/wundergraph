@@ -102,13 +102,14 @@ export interface WunderGraphCorsConfiguration {
 	allowCredentials?: boolean;
 }
 
-export type ApiIntrospector<T> = Promise<(options: ApiIntrospectionOptions) => Promise<Api<T>>>;
+export type ApiIntrospector<T> = (options: ApiIntrospectionOptions) => Promise<Api<T>>;
+export type AsyncApiIntrospector<T> = Promise<ApiIntrospector<T>>;
 
 export interface WunderGraphConfigApplicationConfig<
 	TCustomClaim extends string = string,
 	TPublicClaim extends TCustomClaim | WellKnownClaim = TCustomClaim | WellKnownClaim
 > {
-	apis: ApiIntrospector<any>[];
+	apis: AsyncApiIntrospector<any>[];
 	codeGenerators?: CodeGen[];
 	options?: NodeOptions;
 	server?: WunderGraphHooksAndServerConfig;
@@ -690,17 +691,21 @@ const resolveUploadConfiguration = (
 const resolveApplication = async (
 	roles: string[],
 	customClaims: string[],
-	apis: ApiIntrospector<any>[],
+	apis: AsyncApiIntrospector<any>[],
 	apiIntrospectionOptions: ApiIntrospectionOptions,
 	cors: CorsConfiguration,
 	s3?: S3Provider,
 	hooks?: HooksConfiguration
 ): Promise<ResolvedApplication> => {
-	const resolvedApis: Api<any>[] = [];
-	for (const api of apis) {
-		const generator = await api;
-		resolvedApis.push(await generator(apiIntrospectionOptions));
+	const pendingApis: Promise<Api<any>>[] = [];
+
+	// Generate the promises first, then await them all at once
+	// to run them in parallel
+	const generators = await Promise.all(apis);
+	for (const generator of generators) {
+		pendingApis.push(generator(apiIntrospectionOptions));
 	}
+	const resolvedApis = await Promise.all(pendingApis);
 
 	const merged = mergeApis(roles, customClaims, ...resolvedApis);
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
