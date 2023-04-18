@@ -189,8 +189,7 @@ export const introspectGraphql = async (
 						upstreamAuthentication: buildUpstreamAuthentication(introspection),
 						mTLS: buildMTLSConfiguration(introspection),
 						urlEncodeBody: false,
-						httpProxyUrl:
-							introspection.httpProxyUrl !== undefined ? mapInputVariable(introspection.httpProxyUrl) : undefined,
+						httpProxyUrl: introspection.httpProxyUrl != null ? mapInputVariable(introspection.httpProxyUrl) : undefined,
 					},
 					Subscription: {
 						Enabled: subscriptionsEnabled,

@@ -208,9 +208,7 @@ class RESTApiBuilder {
 					upstreamAuthentication: buildUpstreamAuthentication(this.introspection),
 					urlEncodeBody: false,
 					httpProxyUrl:
-						this.introspection.httpProxyUrl !== undefined
-							? mapInputVariable(this.introspection.httpProxyUrl)
-							: undefined,
+						this.introspection.httpProxyUrl != null ? mapInputVariable(this.introspection.httpProxyUrl) : undefined,
 				},
 				Subscription: {
 					Enabled: false,
