@@ -61,11 +61,11 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 		WG_CONFIG = JSON.parse(configContent);
 
 		if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.listenInternal?.port) {
-			const nodeUrl = fallbackNodeUrl({
+			const internalNodeUrl = fallbackNodeUrl({
 				host: defaultHost,
 				port: resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.listenInternal.port),
 			});
-			clientFactory = internalClientFactory(WG_CONFIG.api.operations, nodeUrl);
+			clientFactory = internalClientFactory(WG_CONFIG.api.operations, internalNodeUrl);
 		} else {
 			throw new Error('User defined api is not set.');
 		}
@@ -166,8 +166,11 @@ export const createServer = async ({
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
 
-	const nodeURL = WG_CONFIG?.api?.nodeOptions?.nodeUrl
-		? resolveConfigurationVariable(WG_CONFIG?.api?.nodeOptions?.nodeUrl)
+	const internalNodeURL = WG_CONFIG.api?.nodeOptions?.listenInternal?.port
+		? fallbackNodeUrl({
+				host: defaultHost,
+				port: resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.listenInternal.port),
+		  })
 		: '';
 
 	let id = 0;
@@ -313,7 +316,7 @@ export const createServer = async ({
 			wundergraphDir,
 			webhooks: config.api.webhooks,
 			internalClientFactory: clientFactory,
-			nodeURL,
+			nodeURL: internalNodeURL,
 		});
 		fastify.log.debug('Webhooks plugin registered');
 	}
@@ -332,7 +335,7 @@ export const createServer = async ({
 			await fastify.register(FastifyFunctionsPlugin, {
 				operations: operationsConfig.typescript_operation_files,
 				internalClientFactory: clientFactory,
-				nodeURL,
+				nodeURL: internalNodeURL,
 			});
 			fastify.log.debug('Functions plugin registered');
 		}
