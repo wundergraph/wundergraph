@@ -102,8 +102,18 @@ export type SubscriptionRequestOptions<
 	OperationName extends string = any,
 	Input extends object | undefined = object | undefined
 > = WithInput<Input, OperationRequestOptions<OperationName, Input>> & {
+	/**
+	 * Subscribe to a live query
+	 */
 	liveQuery?: Boolean;
+	/**
+	 * Receive the initial response and then stop the subscription
+	 */
 	subscribeOnce?: Boolean;
+	/**
+	 * Set to false to use fetch streaming instead of EventSource (SSE)
+	 */
+	sse?: Boolean;
 };
 
 export interface SubscriptionResult {

@@ -28,6 +28,7 @@ import type { LoadOperationsOutput } from '../graphql/operations';
 import FastifyFunctionsPlugin from './plugins/functions';
 import { WgEnv } from '../configure/options';
 import { OpenApiServerConfig } from './plugins/omnigraph';
+import { OperationsClient } from './operations-client';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -72,15 +73,24 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 	}
 }
 
-export const configureWunderGraphServer = <
-	GeneratedHooksConfig extends HooksConfiguration,
-	GeneratedClient extends InternalClient,
-	GeneratedWebhooksConfig extends WebhooksConfig = WebhooksConfig
->(
-	configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>
-): WunderGraphHooksAndServerConfig => {
-	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig>(configWrapper());
-};
+function configureWunderGraphServer(configWrapper: () => WunderGraphServerConfig): WunderGraphServerConfig;
+
+function configureWunderGraphServer(configWrapper: () => any): any {
+	return _configureWunderGraphServer(configWrapper());
+}
+
+export { configureWunderGraphServer };
+
+// export const configureWunderGraphServer = <
+// 	GeneratedHooksConfig extends HooksConfiguration,
+// 	GeneratedClient extends InternalClient,
+// 	GeneratedWebhooksConfig extends WebhooksConfig = WebhooksConfig,
+// 	GeneratedOperations extends OperationsClient = OperationsClient
+// >(
+// 	configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>
+// ): WunderGraphHooksAndServerConfig => {
+// 	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig>(configWrapper());
+// };
 
 const _configureWunderGraphServer = <
 	GeneratedHooksConfig extends HooksConfiguration,
@@ -242,6 +252,13 @@ export const createServer = async ({
 					method: req.body.__wg.clientRequest?.method || 'GET',
 				},
 				internalClient: clientFactory({ 'x-request-id': req.id }, req.body.__wg.clientRequest),
+				operations: new OperationsClient({
+					baseURL: nodeURL,
+					clientRequest: req.body.__wg.clientRequest,
+					extraHeaders: {
+						'x-request-id': req.id,
+					},
+				}),
 			};
 		});
 

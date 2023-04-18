@@ -6,6 +6,7 @@ import type { ConfigurationVariable, WunderGraphConfiguration } from '@wundergra
 import type { WebhooksConfig } from '../webhooks/types';
 import type { InputVariable } from '../configure/variables';
 import type { ListenOptions, LoggerLevel, ResolvedListenOptions } from '../configure/options';
+import { OperationsClient } from './operations-client';
 
 declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
@@ -13,19 +14,22 @@ declare module 'fastify' {
 
 export type AuthenticationHookRequest<
 	User extends WunderGraphUser = WunderGraphUser,
-	IC extends InternalClient = InternalClient
+	IC extends InternalClient = InternalClient,
+	InternalOperations extends OperationsClient = OperationsClient
 > = BaseRequestContext<User, IC> & AuthenticationRequestContext<User>;
 
 export interface FastifyRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
-	IC extends InternalClient = InternalClient
+	IC extends InternalClient = InternalClient,
+	InternalOperations extends OperationsClient = OperationsClient
 > {
-	ctx: AuthenticationHookRequest<User, IC>;
+	ctx: AuthenticationHookRequest<User, IC, InternalOperations>;
 }
 
 export interface BaseRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
-	IC extends InternalClient = InternalClient
+	IC extends InternalClient = InternalClient,
+	InternalOperations extends OperationsClient = OperationsClient
 > {
 	/**
 	 * The user that is currently logged in.
@@ -39,8 +43,13 @@ export interface BaseRequestContext<
 	log: FastifyLoggerInstance;
 	/**
 	 * The internal client that is used to communicate with the server.
+	 * @deprecated Use `operations` instead.
 	 */
 	internalClient: IC;
+	/**
+	 * The operations client that is used to communicate with the server.
+	 */
+	operations: Omit<InternalOperations, 'cancelSubscriptions'>;
 }
 export interface AuthenticationRequestContext<User extends WunderGraphUser = WunderGraphUser> {
 	/**

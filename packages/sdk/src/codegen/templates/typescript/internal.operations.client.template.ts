@@ -3,6 +3,7 @@
 //language=handlebars
 export const template = `
 import type { OperationsClientType } from "@wundergraph/sdk/server";
+import type { ClientOperationErrors } from "@wundergraph/sdk/client";
 import type { OperationErrors } from "./ts-operation-errors";
 import { {{ modelImports }} } from "./models"
 
@@ -11,7 +12,7 @@ export interface Queries {
     {{#each internalQueries}}
         '{{operationPath}}': {
 					input: {{#if hasInternalInput}}Internal{{operationName}}Input{{ else }}never{{/if}},
-          response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, errors?: OperationErrors['{{operationPath}}'][] }{{else}}{ data?: {{operationName}}Response['data'], errors?: Required<{{operationName}}Response>['errors'] }{{/if}}
+          response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{operationName}}Response['data'], error?: ClientOperationErrors }{{/if}}
 				};
     {{/each}}
 {{/if}}
@@ -22,7 +23,7 @@ export interface Mutations {
     {{#each internalMutations}}
 			'{{operationPath}}': {
 				input: {{#if hasInternalInput}}Internal{{operationName}}Input{{ else }}never{{/if}},
-      	response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, errors?: OperationErrors['{{operationPath}}'][] }{{else}}{ data?: {{operationName}}Response['data'], errors?: Required<{{operationName}}Response>['errors'] }{{/if}}
+      	response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{operationName}}Response['data'], error?: ClientOperationErrors }{{/if}}
 			};
     {{/each}}
 {{/if}}
@@ -33,7 +34,7 @@ export interface Subscriptions {
 		{{#each internalSubscriptions}}
 			'{{operationPath}}': {
 				input: {{#if hasInternalInput}}Internal{{operationName}}Input{{ else }}never{{/if}},
-      	response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, errors?: OperationErrors['{{operationPath}}'][] }{{else}}{ data?: {{operationName}}Response['data'], errors?: Required<{{operationName}}Response>['errors'] }{{/if}}
+      	response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{operationName}}Response['data'], error?: ClientOperationErrors }{{/if}}
 			};
 		{{/each}}
 {{/if}}
