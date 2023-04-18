@@ -59,7 +59,7 @@ interface LogoutResponse {
 }
 
 export class Client {
-	constructor(private options: ClientConfig) {
+	constructor(protected options: ClientConfig) {
 		this.baseHeaders = {
 			'WG-SDK-Version': options.sdkVersion,
 		};
@@ -197,7 +197,7 @@ export class Client {
 	 * Network errors or non-200 status codes are converted to an error. Application errors
 	 * as from GraphQL are returned as an Error from type GraphQLResponseError.
 	 */
-	private async fetchResponseToClientResponse(response: globalThis.Response): Promise<ClientResponse> {
+	protected async fetchResponseToClientResponse(response: globalThis.Response): Promise<ClientResponse> {
 		// The Promise returned from fetch() won't reject on HTTP error status
 		// even if the response is an HTTP 404 or 500.
 
@@ -364,7 +364,7 @@ export class Client {
 			cb(result);
 			return result;
 		}
-		if ('EventSource' in globalThis) {
+		if ('EventSource' in globalThis && options.sse !== false) {
 			return this.subscribeWithSSE<Data, Error>(options, cb);
 		}
 		for await (const event of this.subscribeWithFetch<Data, Error>(options)) {
