@@ -16,8 +16,12 @@
 
 [<img height="auto" src="./assets/logo2.png">](https://wundergraph.com/)
 
+[![Star us on GitHub](https://img.shields.io/github/stars/wundergraph/wundergraph?color=FFD700&label=Stars&logo=Github)](https://github.com/wundergraph/wundergraph)
+[![Post on our Discourse forum](https://img.shields.io/discourse/topics?color=fbf5af&label=Discourse&logo=Discourse&server=https%3A%2F%2Fcommunity.wundergraph.com%2F)](https://community.wundergraph.com/)
 [![Join our Discord Server](https://img.shields.io/badge/Discord-chat%20with%20us-%235865F2?style=flat&logo=discord&logoColor=%23fff)](https://discord.com/invite/Jjmc8TC)
 [![Tweet at us on Twitter](https://img.shields.io/badge/Twitter-tweet%20at%20us-1da1f2?style=flat&logo=twitter&logoColor=%23fff)](https://twitter.com/wundergraphcom)
+
+[Love WunderGraph? Give us a ⭐ on GitHub!](https:://github.com/wundergraph/wundergraph)
 
 </div>
 
