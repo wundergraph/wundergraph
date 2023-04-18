@@ -47,7 +47,14 @@ export const WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS = (() => {
 	return isNaN(seconds) ? 0 : seconds;
 })();
 
+/**
+ * ApiIntrospectionOptions contains options that are passed to
+ * all ApiIntrospector<T> functions
+ */
 export interface ApiIntrospectionOptions {
+	/**
+	 * Global proxy URL, which might be overridden at the data source level
+	 */
 	httpProxyUrl?: string;
 }
 

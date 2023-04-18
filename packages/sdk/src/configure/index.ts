@@ -102,7 +102,17 @@ export interface WunderGraphCorsConfiguration {
 	allowCredentials?: boolean;
 }
 
+/**
+ * ApiIntrospector<T> is a function type which the API generators must conform to.
+ * Given an ApiIntrospectionOptions, they should return a Promise that resolves
+ * to an Api<T>
+ */
 export type ApiIntrospector<T> = (options: ApiIntrospectionOptions) => Promise<Api<T>>;
+/**
+ * AsyncApiIntrospector<T> is the type returned by all functions that generate something
+ * "introspectable" (e.g. an API). These get awaited in parallel while resolving the
+ * application configuration.
+ */
 export type AsyncApiIntrospector<T> = Promise<ApiIntrospector<T>>;
 
 export interface WunderGraphConfigApplicationConfig<
