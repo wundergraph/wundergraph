@@ -212,7 +212,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 				WG_NODE_URL: `http://0.0.0.0:${nodePort}`,
 				WG_NODE_HOST: '0.0.0.0',
 				WG_NODE_PORT: nodePort.toString(),
-				WG_INTERNAL_NODE_PORT: internalNodePort.toString(),
+				WG_NODE_INTERNAL_PORT: internalNodePort.toString(),
 				WG_SERVER_URL: `http://0.0.0.0:${serverPort}`,
 				WG_SERVER_HOST: '0.0.0.0',
 				WG_SERVER_PORT: serverPort.toString(),

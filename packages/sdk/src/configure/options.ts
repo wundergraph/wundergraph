@@ -15,7 +15,7 @@ export enum WgEnv {
 	PublicNodeUrl = 'WG_PUBLIC_NODE_URL',
 	NodeHost = 'WG_NODE_HOST',
 	NodePort = 'WG_NODE_PORT',
-	InternalNodePort = 'WG_INTERNAL_NODE_PORT',
+	InternalNodePort = 'WG_NODE_INTERNAL_PORT',
 	ServerUrl = 'WG_SERVER_URL',
 	ServerHost = 'WG_SERVER_HOST',
 	ServerPort = 'WG_SERVER_PORT',
