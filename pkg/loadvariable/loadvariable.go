@@ -8,11 +8,19 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
+// String is a shorthand for LookupString when you do not care about
+// the value being explicitly set
 func String(variable *wgpb.ConfigurationVariable) string {
 	val, _ := LookupString(variable)
 	return val
 }
 
+// LookupString returns the value for the given configuration variable as well
+// as wether it was explicitly set. If the variable is nil or the environment
+// variable it references is not set, it returns false as its second value.
+// Otherwise (e.g. environment variable set but empty, static string), the
+// second return value is true. If you don't need to know if the variable
+// was explicitly set, use String.
 func LookupString(variable *wgpb.ConfigurationVariable) (string, bool) {
 	if variable == nil {
 		return "", false
