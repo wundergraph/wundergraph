@@ -139,7 +139,7 @@ const introspectInInterval = async <
 ) => {
 	const pollingRunner = async () => {
 		try {
-			const cacheKey = introspectionCacheConfigurationKey(introspection, configuration);
+			const cacheKey = introspectionCacheConfigurationKey(introspection, configuration, options);
 			const api = await generator(introspection, options);
 			const updated = await updateIntrospectionCache(api, bucket, cacheKey);
 			if (updated) {
@@ -187,11 +187,15 @@ export interface IntrospectionCacheConfiguration {
 	dataSource?: CachedDataSource;
 }
 
-const introspectionCacheConfigurationKey = <Introspection extends IntrospectionConfiguration>(
-	introspection: Introspection,
-	config: IntrospectionCacheConfiguration
+const introspectionCacheConfigurationKey = <
+	TIntrospection extends IntrospectionConfiguration,
+	TOptions extends ApiIntrospectionOptions
+>(
+	introspection: TIntrospection,
+	config: IntrospectionCacheConfiguration,
+	options: TOptions
 ) => {
-	return objectHash([config.keyInput, introspection]);
+	return objectHash([config.keyInput, introspection, options]);
 };
 
 const introspectionCacheConfigurationDataSource = (config: IntrospectionCacheConfiguration) => {
@@ -210,7 +214,7 @@ async function introspectWithCacheOptions<
 ) {
 	const cache = new LocalCache().bucket('introspection');
 	const dataSource = introspectionCacheConfigurationDataSource(configuration);
-	const cacheKey = introspectionCacheConfigurationKey(introspection, configuration);
+	const cacheKey = introspectionCacheConfigurationKey(introspection, configuration, options);
 
 	/**
 	 * This section is only executed when WG_DATA_SOURCE_POLLING_MODE is set to 'true'
