@@ -45,7 +45,7 @@ type FactoryResolver interface {
 type ApiTransportFactory interface {
 	RoundTripper(transport *http.Transport, enableStreamingMode bool) http.RoundTripper
 	DefaultTransportTimeout() time.Duration
-	DefaultProxyURLString() string
+	DefaultHTTPProxyURL() *url.URL
 }
 
 type DefaultFactoryResolver struct {
@@ -89,8 +89,8 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 	}
 }
 
-// requiresCustomHTTPClient returns true iff the given FetchConfiguration requires a dedicated HTTP client
-func (d *DefaultFactoryResolver) requiresCustomHTTPClient(ds *wgpb.DataSourceConfiguration, cfg *wgpb.FetchConfiguration) bool {
+// requiresDedicatedHTTPClient returns true iff the given FetchConfiguration requires a dedicated HTTP client
+func (d *DefaultFactoryResolver) requiresDedicatedHTTPClient(ds *wgpb.DataSourceConfiguration, cfg *wgpb.FetchConfiguration) bool {
 	// when a custom timeout is specified, we can't use the shared http.Client
 	if ds != nil && ds.RequestTimeoutSeconds > 0 {
 		return true
@@ -102,10 +102,8 @@ func (d *DefaultFactoryResolver) requiresCustomHTTPClient(ds *wgpb.DataSourceCon
 		}
 		// if the data source uses a custom proxy, create a dedicated client
 		if dataSourceUsesHTTPProxy(ds) {
-			value, found := loadvariable.LookupString(cfg.ProxyUrl)
-			if found && value != d.transportFactory.DefaultProxyURLString() {
-				return true
-			}
+			_, found := loadvariable.LookupString(cfg.HttpProxyUrl)
+			return found
 		}
 	}
 	return false
@@ -168,19 +166,20 @@ func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration,
 			return nil, err
 		}
 	} else {
-		transport = d.baseTransport
+		transport = d.baseTransport.Clone()
 	}
 	// Proxy
-	proxyURLString := d.transportFactory.DefaultProxyURLString()
-	value, found := loadvariable.LookupString(cfg.ProxyUrl)
+	var proxyURL *url.URL
+	proxyURLString, found := loadvariable.LookupString(cfg.HttpProxyUrl)
 	if found {
-		proxyURLString = value
-	}
-	if proxyURLString != "" {
-		proxyURL, err := url.Parse(proxyURLString)
+		proxyURL, err = url.Parse(proxyURLString)
 		if err != nil {
 			return nil, fmt.Errorf("invalid proxy URL %q: %w", proxyURLString, err)
 		}
+	} else {
+		proxyURL = d.transportFactory.DefaultHTTPProxyURL()
+	}
+	if proxyURL != nil {
 		transport.Proxy = func(r *http.Request) (*url.URL, error) {
 			return proxyURL, nil
 		}
@@ -241,7 +240,7 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 			BatchFactory:    d.graphql.BatchFactory,
 		}
 
-		if d.requiresCustomHTTPClient(ds, ds.CustomGraphql.Fetch) {
+		if d.requiresDedicatedHTTPClient(ds, ds.CustomGraphql.Fetch) {
 			client, err := d.newHTTPClient(ds, ds.CustomGraphql.Fetch)
 			if err != nil {
 				return nil, err
@@ -255,7 +254,7 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 
 		return factory, nil
 	case wgpb.DataSourceKind_REST:
-		if d.requiresCustomHTTPClient(ds, ds.CustomRest.Fetch) {
+		if d.requiresDedicatedHTTPClient(ds, ds.CustomRest.Fetch) {
 			client, err := d.newHTTPClient(ds, ds.CustomRest.Fetch)
 			if err != nil {
 				return nil, err
@@ -271,7 +270,7 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 		wgpb.DataSourceKind_MONGODB,
 		wgpb.DataSourceKind_SQLITE,
 		wgpb.DataSourceKind_PRISMA:
-		if d.requiresCustomHTTPClient(ds, nil) {
+		if d.requiresDedicatedHTTPClient(ds, nil) {
 			client, err := d.newHTTPClient(ds, nil)
 			if err != nil {
 				return nil, err

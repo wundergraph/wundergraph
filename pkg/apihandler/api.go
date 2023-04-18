@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
+	"net/url"
 	"os"
 	"time"
 
@@ -29,12 +30,12 @@ type Logging struct {
 }
 
 type Options struct {
-	ServerUrl       string
-	PublicNodeUrl   string
-	Listener        *Listener
-	Logging         Logging
-	DefaultTimeout  time.Duration
-	DefaultProxyURL string
+	ServerUrl           string
+	PublicNodeUrl       string
+	Listener            *Listener
+	Logging             Logging
+	DefaultTimeout      time.Duration
+	DefaultHTTPProxyURL *url.URL
 }
 
 type CookieBasedSecrets struct {

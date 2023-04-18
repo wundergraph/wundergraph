@@ -2,6 +2,7 @@ package node
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -86,6 +87,14 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 		}
 	}
 
+	var defaultHTTPProxyURL *url.URL
+	if defaultHTTPProxyURLString := loadvariable.String(graphConfig.Api.GetNodeOptions().GetDefaultHttpProxyUrl()); defaultHTTPProxyURLString != "" {
+		defaultHTTPProxyURL, err = url.Parse(defaultHTTPProxyURLString)
+		if err != nil {
+			return nil, fmt.Errorf("invalid default HTTP proxy URL %q: %w", defaultHTTPProxyURLString, err)
+		}
+	}
+
 	config := WunderNodeConfig{
 		Api: &apihandler.Api{
 			PrimaryHost:           fmt.Sprintf("%s:%d", listener.Host, listener.Port),
@@ -107,8 +116,8 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 				Logging: apihandler.Logging{
 					Level: logLevel,
 				},
-				DefaultTimeout:  defaultRequestTimeout,
-				DefaultProxyURL: loadvariable.String(graphConfig.Api.GetNodeOptions().GetDefaultHttpProxyUrl()),
+				DefaultTimeout:      defaultRequestTimeout,
+				DefaultHTTPProxyURL: defaultHTTPProxyURL,
 			},
 		},
 		Server: &Server{

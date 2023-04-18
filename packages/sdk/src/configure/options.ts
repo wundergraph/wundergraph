@@ -18,7 +18,7 @@ export enum WgEnv {
 	ServerUrl = 'WG_SERVER_URL',
 	ServerHost = 'WG_SERVER_HOST',
 	ServerPort = 'WG_SERVER_PORT',
-	ProxyUrl = 'WG_PROXY_URL',
+	HttpProxyUrl = 'WG_HTTP_PROXY',
 }
 
 export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'debug';
@@ -38,7 +38,7 @@ const DefaultNodeOptions = {
 		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'info'),
 	},
 	defaultRequestTimeoutSeconds: 0,
-	defaultHttpProxyUrl: new EnvironmentVariable(WgEnv.ProxyUrl, ''),
+	defaultHttpProxyUrl: new EnvironmentVariable(WgEnv.HttpProxyUrl, ''),
 };
 
 export interface ListenOptions {

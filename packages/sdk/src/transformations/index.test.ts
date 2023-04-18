@@ -47,7 +47,6 @@ test('renameTypes', async () => {
 								mTLS: undefined,
 								upstreamAuthentication: undefined,
 								urlEncodeBody: false,
-								proxyUrl: mapInputVariable(''),
 							},
 							UpstreamSchema: '',
 							HooksConfiguration: {
@@ -118,7 +117,6 @@ test('renameTypes', async () => {
 						mTLS: undefined,
 						upstreamAuthentication: undefined,
 						urlEncodeBody: false,
-						proxyUrl: mapInputVariable(''),
 					},
 					UpstreamSchema: '',
 					HooksConfiguration: {
@@ -190,7 +188,6 @@ test('renameTypeFields', async () => {
 								mTLS: undefined,
 								upstreamAuthentication: undefined,
 								urlEncodeBody: false,
-								proxyUrl: mapInputVariable(''),
 							},
 							UpstreamSchema: '',
 							HooksConfiguration: {
@@ -281,7 +278,6 @@ test('renameTypeFields', async () => {
 								upstreamAuthentication: undefined,
 								mTLS: undefined,
 								urlEncodeBody: false,
-								proxyUrl: mapInputVariable(''),
 							},
 							UpstreamSchema: '',
 							HooksConfiguration: {

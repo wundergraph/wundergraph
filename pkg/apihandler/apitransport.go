@@ -26,7 +26,7 @@ import (
 type ApiTransportFactory interface {
 	RoundTripper(transport *http.Transport, enableStreamingMode bool) http.RoundTripper
 	DefaultTransportTimeout() time.Duration
-	DefaultProxyURLString() string
+	DefaultHTTPProxyURL() *url.URL
 }
 
 type apiTransportFactory struct {
@@ -41,8 +41,8 @@ func (f *apiTransportFactory) DefaultTransportTimeout() time.Duration {
 	return f.opts.API.Options.DefaultTimeout
 }
 
-func (f *apiTransportFactory) DefaultProxyURLString() string {
-	return f.opts.API.Options.DefaultProxyURL
+func (f *apiTransportFactory) DefaultHTTPProxyURL() *url.URL {
+	return f.opts.API.Options.DefaultHTTPProxyURL
 }
 
 type ApiTransport struct {

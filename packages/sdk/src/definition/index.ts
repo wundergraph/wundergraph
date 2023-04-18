@@ -298,7 +298,7 @@ export interface HTTPUpstream extends IntrospectionConfiguration {
 	headers?: (builder: IHeadersBuilder) => IHeadersBuilder;
 	authentication?: HTTPUpstreamAuthentication;
 	mTLS?: HTTPmTlsConfiguration;
-	proxyUrl?: InputVariable;
+	httpProxyUrl?: InputVariable;
 }
 
 export type HTTPmTlsConfiguration = {

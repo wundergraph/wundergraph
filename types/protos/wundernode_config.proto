@@ -365,7 +365,7 @@ message FetchConfiguration {
 	MTLSConfiguration mTLS = 8;
 	ConfigurationVariable baseUrl = 9;
 	ConfigurationVariable path = 10;
-	ConfigurationVariable proxyUrl = 11;
+	optional ConfigurationVariable httpProxyUrl = 11;
 }
 
 message MTLSConfiguration {

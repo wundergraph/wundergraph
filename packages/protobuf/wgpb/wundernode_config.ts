@@ -1027,7 +1027,7 @@ export interface FetchConfiguration {
   mTLS: MTLSConfiguration | undefined;
   baseUrl: ConfigurationVariable | undefined;
   path: ConfigurationVariable | undefined;
-  proxyUrl: ConfigurationVariable | undefined;
+  httpProxyUrl?: ConfigurationVariable | undefined;
 }
 
 export interface FetchConfiguration_HeaderEntry {
@@ -2892,7 +2892,7 @@ function createBaseFetchConfiguration(): FetchConfiguration {
     mTLS: undefined,
     baseUrl: undefined,
     path: undefined,
-    proxyUrl: undefined,
+    httpProxyUrl: undefined,
   };
 }
 
@@ -2918,7 +2918,7 @@ export const FetchConfiguration = {
       mTLS: isSet(object.mTLS) ? MTLSConfiguration.fromJSON(object.mTLS) : undefined,
       baseUrl: isSet(object.baseUrl) ? ConfigurationVariable.fromJSON(object.baseUrl) : undefined,
       path: isSet(object.path) ? ConfigurationVariable.fromJSON(object.path) : undefined,
-      proxyUrl: isSet(object.proxyUrl) ? ConfigurationVariable.fromJSON(object.proxyUrl) : undefined,
+      httpProxyUrl: isSet(object.httpProxyUrl) ? ConfigurationVariable.fromJSON(object.httpProxyUrl) : undefined,
     };
   },
 
@@ -2946,8 +2946,8 @@ export const FetchConfiguration = {
     message.baseUrl !== undefined &&
       (obj.baseUrl = message.baseUrl ? ConfigurationVariable.toJSON(message.baseUrl) : undefined);
     message.path !== undefined && (obj.path = message.path ? ConfigurationVariable.toJSON(message.path) : undefined);
-    message.proxyUrl !== undefined &&
-      (obj.proxyUrl = message.proxyUrl ? ConfigurationVariable.toJSON(message.proxyUrl) : undefined);
+    message.httpProxyUrl !== undefined &&
+      (obj.httpProxyUrl = message.httpProxyUrl ? ConfigurationVariable.toJSON(message.httpProxyUrl) : undefined);
     return obj;
   },
 
@@ -2981,8 +2981,8 @@ export const FetchConfiguration = {
     message.path = (object.path !== undefined && object.path !== null)
       ? ConfigurationVariable.fromPartial(object.path)
       : undefined;
-    message.proxyUrl = (object.proxyUrl !== undefined && object.proxyUrl !== null)
-      ? ConfigurationVariable.fromPartial(object.proxyUrl)
+    message.httpProxyUrl = (object.httpProxyUrl !== undefined && object.httpProxyUrl !== null)
+      ? ConfigurationVariable.fromPartial(object.httpProxyUrl)
       : undefined;
     return message;
   },
