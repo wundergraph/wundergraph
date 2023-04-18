@@ -29,7 +29,13 @@ import { loadFile } from '../codegen/templates/typescript';
 import * as https from 'https';
 import { IntrospectionCacheConfiguration, introspectWithCache } from './introspection-cache';
 import { mapInputVariable, resolveVariable } from '../configure/variables';
-import { buildMTLSConfiguration, buildUpstreamAuthentication, GraphQLApi, GraphQLIntrospection } from './index';
+import {
+	buildMTLSConfiguration,
+	buildUpstreamAuthentication,
+	GraphQLApi,
+	GraphQLIntrospection,
+	ApiIntrospectionOptions,
+} from './index';
 import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
 import { urlHash, urlIsLocalNetwork } from '../localcache';
@@ -92,7 +98,8 @@ export const graphqlIntrospectionCacheConfiguration = async (
 
 export const introspectGraphql = async (
 	introspection: GraphQLIntrospection,
-	openAPI?: boolean
+	options: ApiIntrospectionOptions,
+	generatedFromOpenApi?: boolean
 ): Promise<GraphQLApi> => {
 	const headersBuilder = new HeadersBuilder();
 	const introspectionHeadersBuilder = new HeadersBuilder();
@@ -108,10 +115,12 @@ export const introspectGraphql = async (
 	const headers = mapHeaders(headersBuilder);
 	const introspectionHeaders = resolveGraphqlIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
 
-	let upstreamSchema = await introspectGraphQLSchema(introspection, introspectionHeaders);
+	let upstreamSchema = await introspectGraphQLSchema(introspection, options, introspectionHeaders);
 	upstreamSchema = lexicographicSortSchema(upstreamSchema);
 	const federationEnabled = introspection.isFederation || false;
-	const cleanUpstreamSchema = openAPI ? printSchemaWithDirectives(upstreamSchema) : cleanupSchema(upstreamSchema);
+	const cleanUpstreamSchema = generatedFromOpenApi
+		? printSchemaWithDirectives(upstreamSchema)
+		: cleanupSchema(upstreamSchema);
 
 	const { schemaSDL: schemaSDLWithCustomScalars, customScalarTypeFields } = transformSchema.replaceCustomScalars(
 		cleanUpstreamSchema,
@@ -218,12 +227,16 @@ export const introspectGraphql = async (
 	);
 };
 
-export const introspectGraphqlWithCache = async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
+export const introspectGraphqlWithCache = async (introspection: GraphQLIntrospection) => {
 	const cacheConfig = await graphqlIntrospectionCacheConfiguration(introspection);
 	return introspectWithCache(introspection, cacheConfig, introspectGraphql);
 };
 
-const introspectGraphQLSchema = async (introspection: GraphQLIntrospection, headers?: Record<string, string>) => {
+const introspectGraphQLSchema = async (
+	introspection: GraphQLIntrospection,
+	options: ApiIntrospectionOptions,
+	headers?: Record<string, string>
+) => {
 	if (introspection.loadSchemaFromString) {
 		try {
 			if (introspection.isFederation) {
@@ -238,7 +251,7 @@ const introspectGraphQLSchema = async (introspection: GraphQLIntrospection, head
 		}
 	}
 	try {
-		return introspectGraphQLAPI(introspection, headers);
+		return introspectGraphQLAPI(introspection, options, headers);
 	} catch (e: any) {
 		throw new Error(`Introspecting GraphQL API failed for apiNamespace '${introspection.apiNamespace}': ${e}`);
 	}
@@ -255,6 +268,7 @@ interface GraphQLIntrospectionResponse {
 
 const introspectGraphQLAPI = async (
 	introspection: GraphQLIntrospection,
+	options: ApiIntrospectionOptions,
 	headers?: Record<string, string>
 ): Promise<GraphQLSchema> => {
 	const data = JSON.stringify({
@@ -264,8 +278,9 @@ const introspectGraphQLAPI = async (
 
 	let proxyConfig: AxiosProxyConfig | undefined;
 
-	if (introspection.httpProxyUrl !== undefined) {
-		const proxyUrlString = resolveVariable(introspection.httpProxyUrl);
+	const httpProxyUrl = introspection.httpProxyUrl !== undefined ? introspection.httpProxyUrl : options.httpProxyUrl;
+	if (httpProxyUrl) {
+		const proxyUrlString = resolveVariable(httpProxyUrl);
 		try {
 			const proxyUrl = new URL(proxyUrlString);
 			const defaultPort = proxyUrl.protocol.toLowerCase() === 'https' ? 443 : 80;

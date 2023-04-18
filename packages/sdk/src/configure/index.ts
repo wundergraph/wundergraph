@@ -21,8 +21,10 @@ import {
 	Api,
 	DatabaseApiCustom,
 	DataSource,
+	GraphQLApi,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
+	ApiIntrospectionOptions,
 	RESTApiCustom,
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
@@ -74,7 +76,13 @@ import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsCon
 import { HooksConfiguration, ResolvedServerOptions, WunderGraphHooksAndServerConfig } from '../server/types';
 import { getWebhooks } from '../webhooks';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
-import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
+import {
+	EnvironmentVariable,
+	InputVariable,
+	mapInputVariable,
+	resolveConfigurationVariable,
+	resolveVariable,
+} from './variables';
 import logger, { FatalLogger, Logger } from '../logger';
 import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
@@ -94,11 +102,13 @@ export interface WunderGraphCorsConfiguration {
 	allowCredentials?: boolean;
 }
 
+export type ApiIntrospector<T> = Promise<(options: ApiIntrospectionOptions) => Promise<Api<T>>>;
+
 export interface WunderGraphConfigApplicationConfig<
 	TCustomClaim extends string = string,
 	TPublicClaim extends TCustomClaim | WellKnownClaim = TCustomClaim | WellKnownClaim
 > {
-	apis: Promise<Api<any>>[];
+	apis: ApiIntrospector<any>[];
 	codeGenerators?: CodeGen[];
 	options?: NodeOptions;
 	server?: WunderGraphHooksAndServerConfig;
@@ -402,10 +412,18 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	const roles = config.authorization?.roles || ['admin', 'user'];
 	const customClaims = Object.keys(config.authentication?.customClaims ?? {});
 
+	const apiIntrospectionOptions: ApiIntrospectionOptions = {
+		httpProxyUrl:
+			config.options?.defaultHttpProxyUrl !== undefined
+				? resolveVariable(config.options?.defaultHttpProxyUrl)
+				: undefined,
+	};
+
 	const resolved = await resolveApplication(
 		roles,
 		customClaims,
 		config.apis,
+		apiIntrospectionOptions,
 		cors,
 		config.s3UploadProvider || [],
 		config.server?.hooks
@@ -672,12 +690,18 @@ const resolveUploadConfiguration = (
 const resolveApplication = async (
 	roles: string[],
 	customClaims: string[],
-	apis: Promise<Api<any>>[],
+	apis: ApiIntrospector<any>[],
+	apiIntrospectionOptions: ApiIntrospectionOptions,
 	cors: CorsConfiguration,
 	s3?: S3Provider,
 	hooks?: HooksConfiguration
 ): Promise<ResolvedApplication> => {
-	const resolvedApis = await Promise.all(apis);
+	const resolvedApis: Api<any>[] = [];
+	for (const api of apis) {
+		const generator = await api;
+		resolvedApis.push(await generator(apiIntrospectionOptions));
+	}
+
 	const merged = mergeApis(roles, customClaims, ...resolvedApis);
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
 	return {

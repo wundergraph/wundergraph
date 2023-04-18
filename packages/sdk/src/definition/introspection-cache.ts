@@ -3,6 +3,7 @@ import {
 	ApiType,
 	DataSource,
 	IntrospectionConfiguration,
+	ApiIntrospectionOptions,
 	WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS,
 	WG_DATA_SOURCE_POLLING_MODE,
 	WG_ENABLE_INTROSPECTION_CACHE,
@@ -118,17 +119,28 @@ const updateIntrospectionCache = async <Introspection extends IntrospectionConfi
 	return false;
 };
 
-const introspectInInterval = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
+type ApiGenerator<
+	TIntrospection extends IntrospectionConfiguration,
+	TOptions extends ApiIntrospectionOptions,
+	TApiType extends ApiType
+> = (introspection: TIntrospection, options: TOptions) => Promise<Api<TApiType>>;
+
+const introspectInInterval = async <
+	TIntrospection extends IntrospectionConfiguration,
+	TOptions extends ApiIntrospectionOptions,
+	TApiType extends ApiType
+>(
 	intervalInSeconds: number,
 	configuration: IntrospectionCacheConfiguration,
-	introspection: Introspection,
+	introspection: TIntrospection,
 	bucket: LocalCacheBucket,
-	generator: (introspection: Introspection) => Promise<Api<A>>
+	generator: ApiGenerator<TIntrospection, TOptions, TApiType>,
+	options: TOptions
 ) => {
 	const pollingRunner = async () => {
 		try {
 			const cacheKey = introspectionCacheConfigurationKey(introspection, configuration);
-			const api = await generator(introspection);
+			const api = await generator(introspection, options);
 			const updated = await updateIntrospectionCache(api, bucket, cacheKey);
 			if (updated) {
 				Logger.info(`Introspection cache updated. Trigger rebuild of WunderGraph config.`);
@@ -186,11 +198,16 @@ const introspectionCacheConfigurationDataSource = (config: IntrospectionCacheCon
 	return config?.dataSource ?? 'remote';
 };
 
-export const introspectWithCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
-	introspection: Introspection,
+async function introspectWithCacheOptions<
+	TIntrospection extends IntrospectionConfiguration,
+	TOptions extends ApiIntrospectionOptions,
+	TApiType extends ApiType
+>(
+	introspection: TIntrospection,
 	configuration: IntrospectionCacheConfiguration,
-	generator: (introspection: Introspection) => Promise<Api<A>>
-): Promise<Api<A>> => {
+	generator: ApiGenerator<TIntrospection, TOptions, TApiType>,
+	options: TOptions
+) {
 	const cache = new LocalCache().bucket('introspection');
 	const dataSource = introspectionCacheConfigurationDataSource(configuration);
 	const cacheKey = introspectionCacheConfigurationKey(introspection, configuration);
@@ -205,9 +222,9 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 		const defaultPollingInterval = dataSource === 'localNetwork' ? WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS : 0;
 		const pollingInterval = introspection.introspection?.pollingIntervalSeconds ?? defaultPollingInterval;
 		if (pollingInterval > 0) {
-			await introspectInInterval(pollingInterval, configuration, introspection, cache, generator);
+			await introspectInInterval(pollingInterval, configuration, introspection, cache, generator, options);
 		}
-		return {} as Api<A>;
+		return {} as Api<TApiType>;
 	}
 
 	const isIntrospectionDisabledBySource = introspection.introspection?.disableCache === true;
@@ -230,9 +247,9 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 
 	if (isIntrospectionCacheEnabled) {
 		if (WG_ENABLE_INTROSPECTION_OFFLINE || dataSource === 'localFilesystem' || !WG_INTROSPECTION_CACHE_SKIP) {
-			const cached = (await cache.getJSON(cacheKey)) as IntrospectionCacheFile<A>;
+			const cached = (await cache.getJSON(cacheKey)) as IntrospectionCacheFile<TApiType>;
 			if (cached) {
-				return fromCacheEntry<A>(cached);
+				return fromCacheEntry<TApiType>(cached);
 			}
 		}
 	}
@@ -250,9 +267,9 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 		);
 	}
 
-	let api: Api<A> | undefined;
+	let api: Api<TApiType> | undefined;
 	try {
-		api = await generator(introspection);
+		api = await generator(introspection, options);
 	} catch (e: any) {
 		/*
 		 * If the introspection cache is enabled, try to fallback to it
@@ -260,7 +277,7 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 		if (isIntrospectionCacheEnabled) {
 			const result = await cache.getJSON(cacheKey);
 			if (result) {
-				api = fromCacheEntry<A>(result as IntrospectionCacheFile<A>);
+				api = fromCacheEntry<TApiType>(result as IntrospectionCacheFile<TApiType>);
 			}
 		}
 
@@ -273,8 +290,22 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	 * We got a result. If the cache is enabled, populate it
 	 */
 	if (isIntrospectionCacheEnabled && api) {
-		await cache.setJSON(cacheKey, toCacheEntry<A>(api));
+		await cache.setJSON(cacheKey, toCacheEntry<TApiType>(api));
 	}
 
 	return api;
+}
+
+export const introspectWithCache = <
+	TIntrospection extends IntrospectionConfiguration,
+	TOptions extends ApiIntrospectionOptions,
+	TApiType extends ApiType
+>(
+	introspection: TIntrospection,
+	configuration: IntrospectionCacheConfiguration,
+	generator: ApiGenerator<TIntrospection, TOptions, TApiType>
+): ((options: TOptions) => Promise<Api<TApiType>>) => {
+	return (options: TOptions) => {
+		return introspectWithCacheOptions(introspection, configuration, generator, options);
+	};
 };
