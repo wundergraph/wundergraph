@@ -15,7 +15,7 @@ export enum WgEnv {
 	PublicNodeUrl = 'WG_PUBLIC_NODE_URL',
 	NodeHost = 'WG_NODE_HOST',
 	NodePort = 'WG_NODE_PORT',
-	InternalNodePort = 'WG_NODE_INTERNAL_PORT',
+	NodeInternalPort = 'WG_NODE_INTERNAL_PORT',
 	ServerUrl = 'WG_SERVER_URL',
 	ServerHost = 'WG_SERVER_HOST',
 	ServerPort = 'WG_SERVER_PORT',
@@ -25,7 +25,7 @@ export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'de
 
 export const defaultHost = 'localhost';
 export const defaultNodePort = '9991';
-export const defaultInternalNodePort = '9994';
+export const defaultNodeInternalPort = '9993';
 export const defaultServerPort = '9992';
 
 const DefaultNodeOptions = {
@@ -34,7 +34,7 @@ const DefaultNodeOptions = {
 		port: new EnvironmentVariable(WgEnv.NodePort, defaultNodePort),
 	},
 	listenInternal: {
-		port: new EnvironmentVariable(WgEnv.InternalNodePort, defaultInternalNodePort),
+		port: new EnvironmentVariable(WgEnv.NodeInternalPort, defaultNodeInternalPort),
 	},
 	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, `http://${defaultHost}:${defaultNodePort}`),
 	publicNodeUrl: new EnvironmentVariable(WgEnv.PublicNodeUrl, `http://${defaultHost}:${defaultNodePort}`),
@@ -49,20 +49,20 @@ export interface ListenOptions {
 	port?: InputVariable;
 }
 
-export interface InternalListenOptions extends Omit<ListenOptions, 'host'> {}
+export interface ListenInternalOptions extends Omit<ListenOptions, 'host'> {}
 
 export interface ResolvedListenOptions {
 	host: ConfigurationVariable;
 	port: ConfigurationVariable;
 }
 
-export interface ResolvedInternalListenOptions extends Omit<ResolvedListenOptions, 'host'> {}
+export interface ResolvedListenInternalOptions extends Omit<ResolvedListenOptions, 'host'> {}
 
 export interface NodeOptions {
 	nodeUrl?: InputVariable;
 	publicNodeUrl?: InputVariable;
 	listen?: ListenOptions;
-	listenInternal?: InternalListenOptions;
+	listenInternal?: ListenInternalOptions;
 	logger?: {
 		level?: InputVariable<LoggerLevel>;
 	};
@@ -82,7 +82,7 @@ export interface ResolvedNodeOptions {
 	nodeUrl: ConfigurationVariable;
 	publicNodeUrl: ConfigurationVariable;
 	listen: ResolvedListenOptions;
-	listenInternal: ResolvedInternalListenOptions;
+	listenInternal: ResolvedListenInternalOptions;
 	logger: {
 		level: ConfigurationVariable;
 	};

@@ -584,7 +584,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	for _, listener := range internalListeners {
 		l := listener
 		g.Go(func() error {
-			n.log.Info(fmt.Sprintf("Internal node listening at http://%s", l.Addr().String()))
+			n.log.Debug(fmt.Sprintf("Internal node listening at http://%s", l.Addr().String()))
 
 			err := n.internalServer.Serve(l)
 			if err == nil {
