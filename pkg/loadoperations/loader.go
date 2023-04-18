@@ -11,7 +11,6 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/wundergraph/wundergraph/pkg/relay"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
@@ -21,6 +20,8 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/astprinter"
 	"github.com/wundergraph/graphql-go-tools/pkg/asttransform"
 	"github.com/wundergraph/graphql-go-tools/pkg/astvisitor"
+
+	"github.com/wundergraph/wundergraph/pkg/relay"
 )
 
 type Loader struct {
