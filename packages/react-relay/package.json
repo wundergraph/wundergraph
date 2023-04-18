@@ -18,7 +18,7 @@
   },
   "scripts": {
     "build": "tsc --noEmit && tsup src/index.ts --dts --format esm,cjs",
-    "test": "jest && tsd"
+    "test": "jest --passWithNoTests && tsd"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
@@ -60,6 +60,7 @@
     "jest-environment-jsdom": "^29.5.0",
     "nock": "^13.2.9",
     "node-fetch": "^3.3.1",
+    "tsd": "^0.24.1",
     "tsup": "^6.5.0",
     "typescript": "^5.0.3"
   }

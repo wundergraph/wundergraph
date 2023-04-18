@@ -308,6 +308,7 @@ importers:
       node-fetch: ^3.3.1
       react-relay: ^15.0.0
       relay-runtime: ^15.0.0
+      tsd: ^0.24.1
       tsup: ^6.5.0
       typescript: ^5.0.3
     dependencies:
@@ -326,6 +327,7 @@ importers:
       jest-environment-jsdom: 29.5.0
       nock: 13.2.9
       node-fetch: 3.3.1
+      tsd: 0.24.1
       tsup: 6.5.0_4nchvo4eogszfxemdbko76zc7a
       typescript: 5.0.4
 
