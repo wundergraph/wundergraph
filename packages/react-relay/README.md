@@ -25,6 +25,12 @@ npx create-wundergraph-app my-project --example vite-react-relay
 
 ## Add relay to an existing WunderGraph + Relay project
 
+Install WunderGraph Relay sdk into your project
+
+```sh
+npm install @wundergraph/react-relay
+```
+
 Make sure you have set your code generation to include the base typescript client.
 
 ```typescript
