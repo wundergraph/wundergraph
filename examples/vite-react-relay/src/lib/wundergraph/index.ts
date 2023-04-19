@@ -1,5 +1,5 @@
 import { createClient } from '../../../.wundergraph/generated/client';
-import { createWunderGraphRelayApp } from '../../../../../packages/react-relay/src/createWunderGraphRelayApp';
+import { createWunderGraphRelayApp } from '@wundergraph/react-relay';
 
 const client = createClient();
 
