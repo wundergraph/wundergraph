@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"start": "npm run start:services && npm run wait-on:services && npm run db:push && run-p dev wundergraph open",
+		"start": "npm run start:services && npm run wait-on:services && npm run db:push && run-p wundergraph dev open",
 		"start:services": "docker-compose up -d",
 		"wait-on:services": "wait-on -d 5000 tcp:54321",
 		"wundergraph": "wunderctl up --debug",
@@ -54,9 +54,9 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@tanstack/svelte-query": "^4.27.0",
-		"@wundergraph/sdk": "^0.143.1",
-		"@wundergraph/svelte-query": "^0.2.2",
+		"@tanstack/svelte-query": "^4.29.1",
+		"@wundergraph/sdk": "^0.146.0",
+		"@wundergraph/svelte-query": "^0.2.9",
 		"svelte-dnd-action": "^0.9.22"
 	}
 }
