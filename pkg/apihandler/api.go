@@ -36,12 +36,13 @@ type OpenTelemetry struct {
 }
 
 type Options struct {
-	ServerUrl      string
-	PublicNodeUrl  string
-	Listener       *Listener
-	Logging        Logging
-	DefaultTimeout time.Duration
-	OpenTelemetry  *OpenTelemetry
+	ServerUrl        string
+	PublicNodeUrl    string
+	Listener         *Listener
+	InternalListener *Listener
+	Logging          Logging
+	DefaultTimeout   time.Duration
+	OpenTelemetry    *OpenTelemetry
 }
 
 type CookieBasedSecrets struct {

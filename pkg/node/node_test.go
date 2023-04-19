@@ -92,8 +92,10 @@ func TestNode(t *testing.T) {
 	}))
 	defer productService.Close()
 
-	port, err := freeport.GetFreePort()
+	ports, err := freeport.GetFreePorts(2)
 	require.NoError(t, err)
+	port := ports[0]
+	internalPort := ports[1]
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -102,7 +104,7 @@ func TestNode(t *testing.T) {
 
 	node := New(ctx, BuildInfo{}, "", logger)
 
-	nodeConfig := WunderNodeConfig{
+	nodeConfig := &WunderNodeConfig{
 		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               5,
@@ -156,6 +158,10 @@ func TestNode(t *testing.T) {
 				Listener: &apihandler.Listener{
 					Host: "localhost",
 					Port: uint16(port),
+				},
+				InternalListener: &apihandler.Listener{
+					Host: "localhost",
+					Port: uint16(internalPort),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 				OpenTelemetry: &apihandler.OpenTelemetry{
@@ -328,8 +334,10 @@ func TestInMemoryCache(t *testing.T) {
 	}))
 	defer productService.Close()
 
-	port, err := freeport.GetFreePort()
+	ports, err := freeport.GetFreePorts(2)
 	require.NoError(t, err)
+	port := ports[0]
+	internalPort := ports[1]
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -338,7 +346,7 @@ func TestInMemoryCache(t *testing.T) {
 
 	node := New(ctx, BuildInfo{}, "", logger)
 
-	nodeConfig := WunderNodeConfig{
+	nodeConfig := &WunderNodeConfig{
 		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               5,
@@ -389,6 +397,10 @@ func TestInMemoryCache(t *testing.T) {
 				Listener: &apihandler.Listener{
 					Host: "localhost",
 					Port: uint16(port),
+				},
+				InternalListener: &apihandler.Listener{
+					Host: "localhost",
+					Port: uint16(internalPort),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 				OpenTelemetry: &apihandler.OpenTelemetry{
@@ -455,8 +467,10 @@ func TestWebHooks(t *testing.T) {
 	}))
 	defer testServer.Close()
 
-	port, err := freeport.GetFreePort()
+	ports, err := freeport.GetFreePorts(2)
 	require.NoError(t, err)
+	port := ports[0]
+	internalPort := ports[1]
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -466,7 +480,7 @@ func TestWebHooks(t *testing.T) {
 	logger := logging.New(true, false, zapcore.DebugLevel)
 	node := New(ctx, BuildInfo{}, "", logger)
 
-	nodeConfig := WunderNodeConfig{
+	nodeConfig := &WunderNodeConfig{
 		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               5,
@@ -508,6 +522,10 @@ func TestWebHooks(t *testing.T) {
 				Listener: &apihandler.Listener{
 					Host: "localhost",
 					Port: uint16(port),
+				},
+				InternalListener: &apihandler.Listener{
+					Host: "localhost",
+					Port: uint16(internalPort),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 				OpenTelemetry: &apihandler.OpenTelemetry{
@@ -585,8 +603,10 @@ func BenchmarkNode(t *testing.B) {
 	}))
 	defer productService.Close()
 
-	port, err := freeport.GetFreePort()
+	ports, err := freeport.GetFreePorts(2)
 	require.NoError(t, err)
+	port := ports[0]
+	internalPort := ports[1]
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -595,7 +615,7 @@ func BenchmarkNode(t *testing.B) {
 
 	node := New(ctx, BuildInfo{}, "", logger)
 
-	nodeConfig := WunderNodeConfig{
+	nodeConfig := &WunderNodeConfig{
 		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               0,
@@ -627,6 +647,10 @@ func BenchmarkNode(t *testing.B) {
 				Listener: &apihandler.Listener{
 					Host: "localhost",
 					Port: uint16(port),
+				},
+				InternalListener: &apihandler.Listener{
+					Host: "localhost",
+					Port: uint16(internalPort),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 				OpenTelemetry: &apihandler.OpenTelemetry{

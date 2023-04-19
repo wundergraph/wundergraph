@@ -1,0 +1,6 @@
+mutation {
+	users_post_executeRaw(
+		query: "insert or ignore into User (id,name,email) values (?,?,?)"
+		parameters: ["2", "Jannik", "jannik@wundergraph.com"]
+	)
+}

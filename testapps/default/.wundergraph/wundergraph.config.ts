@@ -34,15 +34,19 @@ const federatedApi = introspect.federation({
 	upstreams: [
 		{
 			url: 'https://wg-federation-demo-accounts.fly.dev/graphql',
+			headers: (b) => b.addClientRequestHeader('Authorization', 'Authorization'),
 		},
 		{
 			url: 'https://wg-federation-demo-products.fly.dev/graphql',
+			headers: (b) => b.addClientRequestHeader('Authorization', 'Authorization'),
 		},
 		{
 			url: 'https://wg-federation-demo-reviews.fly.dev/graphql',
+			headers: (b) => b.addClientRequestHeader('Authorization', 'Authorization'),
 		},
 		{
 			url: 'https://wg-federation-demo-inventory.fly.dev/graphql',
+			headers: (b) => b.addClientRequestHeader('Authorization', 'Authorization'),
 		},
 	],
 });

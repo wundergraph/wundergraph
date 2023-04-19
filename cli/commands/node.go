@@ -16,6 +16,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
 	"github.com/wundergraph/wundergraph/pkg/telemetry/otel/trace"
@@ -81,7 +82,9 @@ func NewWunderGraphNode(ctx context.Context) (*node.Node, error) {
 		return nil, err
 	}
 
-	return node.New(ctx, BuildInfo, wunderGraphDir, log), nil
+	nodeLogger := logging.
+		New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevel)
+	return node.New(ctx, BuildInfo, wunderGraphDir, nodeLogger), nil
 }
 
 type options struct {

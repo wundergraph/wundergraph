@@ -1162,6 +1162,10 @@ export interface ListenerOptions {
   port: ConfigurationVariable | undefined;
 }
 
+export interface InternalListenerOptions {
+  port: ConfigurationVariable | undefined;
+}
+
 export interface NodeLogging {
   level: ConfigurationVariable | undefined;
 }
@@ -1180,6 +1184,8 @@ export interface NodeOptions {
   logger: NodeLogging | undefined;
   defaultRequestTimeoutSeconds: number;
   openTelemetry: TelemetryOptions | undefined;
+  listenInternal: InternalListenerOptions | undefined;
+  nodeInternalUrl: ConfigurationVariable | undefined;
 }
 
 export interface ServerLogging {
@@ -3869,6 +3875,30 @@ export const ListenerOptions = {
   },
 };
 
+function createBaseInternalListenerOptions(): InternalListenerOptions {
+  return { port: undefined };
+}
+
+export const InternalListenerOptions = {
+  fromJSON(object: any): InternalListenerOptions {
+    return { port: isSet(object.port) ? ConfigurationVariable.fromJSON(object.port) : undefined };
+  },
+
+  toJSON(message: InternalListenerOptions): unknown {
+    const obj: any = {};
+    message.port !== undefined && (obj.port = message.port ? ConfigurationVariable.toJSON(message.port) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<InternalListenerOptions>, I>>(object: I): InternalListenerOptions {
+    const message = createBaseInternalListenerOptions();
+    message.port = (object.port !== undefined && object.port !== null)
+      ? ConfigurationVariable.fromPartial(object.port)
+      : undefined;
+    return message;
+  },
+};
+
 function createBaseNodeLogging(): NodeLogging {
   return { level: undefined };
 }
@@ -3959,6 +3989,8 @@ function createBaseNodeOptions(): NodeOptions {
     logger: undefined,
     defaultRequestTimeoutSeconds: 0,
     openTelemetry: undefined,
+    listenInternal: undefined,
+    nodeInternalUrl: undefined,
   };
 }
 
@@ -3973,6 +4005,12 @@ export const NodeOptions = {
         ? Number(object.defaultRequestTimeoutSeconds)
         : 0,
       openTelemetry: isSet(object.openTelemetry) ? TelemetryOptions.fromJSON(object.openTelemetry) : undefined,
+      listenInternal: isSet(object.listenInternal)
+        ? InternalListenerOptions.fromJSON(object.listenInternal)
+        : undefined,
+      nodeInternalUrl: isSet(object.nodeInternalUrl)
+        ? ConfigurationVariable.fromJSON(object.nodeInternalUrl)
+        : undefined,
     };
   },
 
@@ -3988,6 +4026,14 @@ export const NodeOptions = {
       (obj.defaultRequestTimeoutSeconds = Math.round(message.defaultRequestTimeoutSeconds));
     message.openTelemetry !== undefined &&
       (obj.openTelemetry = message.openTelemetry ? TelemetryOptions.toJSON(message.openTelemetry) : undefined);
+    message.listenInternal !== undefined &&
+      (obj.listenInternal = message.listenInternal
+        ? InternalListenerOptions.toJSON(message.listenInternal)
+        : undefined);
+    message.nodeInternalUrl !== undefined &&
+      (obj.nodeInternalUrl = message.nodeInternalUrl
+        ? ConfigurationVariable.toJSON(message.nodeInternalUrl)
+        : undefined);
     return obj;
   },
 
@@ -4008,6 +4054,12 @@ export const NodeOptions = {
     message.defaultRequestTimeoutSeconds = object.defaultRequestTimeoutSeconds ?? 0;
     message.openTelemetry = (object.openTelemetry !== undefined && object.openTelemetry !== null)
       ? TelemetryOptions.fromPartial(object.openTelemetry)
+      : undefined;
+    message.listenInternal = (object.listenInternal !== undefined && object.listenInternal !== null)
+      ? InternalListenerOptions.fromPartial(object.listenInternal)
+      : undefined;
+    message.nodeInternalUrl = (object.nodeInternalUrl !== undefined && object.nodeInternalUrl !== null)
+      ? ConfigurationVariable.fromPartial(object.nodeInternalUrl)
       : undefined;
     return message;
   },

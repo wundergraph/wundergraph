@@ -23,7 +23,8 @@
     "packages/create-wundergraph-app",
     "packages/react-query",
     "packages/solid-query",
-    "packages/svelte-query"
+    "packages/svelte-query",
+    "packages/react-relay"
   ],
   "npmClient": "pnpm",
   "version": "independent"
