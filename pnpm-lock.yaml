@@ -160,7 +160,7 @@ importers:
       '@types/node': ^17.0.32
       '@types/object-hash': ^1.3.4
       '@wundergraph/protobuf': workspace:^0.107.0
-      '@wundergraph/sdk': workspace:^0.145.0
+      '@wundergraph/sdk': workspace:^0.145.2
       execa: 5.1.1
       handlebars: ^4.7.7
       json-schema: ^0.4.0
@@ -194,7 +194,7 @@ importers:
       '@types/object-hash': ^1.3.4
       '@types/react': ^18.0.15
       '@wundergraph/protobuf': workspace:^0.107.0
-      '@wundergraph/sdk': workspace:^0.145.0
+      '@wundergraph/sdk': workspace:*
       '@wundergraph/swr': workspace:*
       handlebars: ^4.7.7
       jest: ^29.0.3
@@ -356,7 +356,7 @@ importers:
       '@web-std/fetch': ^4.1.0
       '@whatwg-node/fetch': ^0.8.4
       '@wundergraph/protobuf': workspace:^0.107.0
-      '@wundergraph/wunderctl': workspace:^0.141.0
+      '@wundergraph/wunderctl': workspace:^0.142.0
       axios: ^0.26.1
       axios-retry: ^3.3.1
       chai: ^4.3.4
@@ -3026,16 +3026,6 @@ packages:
       tslib: 2.5.0
     dev: false
 
-  /@graphql-tools/merge/8.3.6_graphql@16.6.0:
-    resolution: {integrity: sha512-uUBokxXi89bj08P+iCvQk3Vew4vcfL5ZM6NTylWi8PIpoq4r5nJ625bRuN8h2uubEdRiH8ntN9M4xkd/j7AybQ==}
-    peerDependencies:
-      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-    dependencies:
-      '@graphql-tools/utils': 8.12.0_graphql@16.6.0
-      graphql: 16.6.0
-      tslib: 2.5.0
-    dev: false
-
   /@graphql-tools/merge/8.4.0_graphql@16.6.0:
     resolution: {integrity: sha512-3XYCWe0d3I4F1azNj1CdShlbHfTIfiDgj00R9uvFH8tHKh7i1IWN3F7QQYovcHKhayaR6zPok3YYMESYQcBoaA==}
     peerDependencies:
@@ -3068,18 +3058,6 @@ packages:
       graphql: 16.6.0
       tslib: 2.5.0
       value-or-promise: 1.0.12
-    dev: false
-
-  /@graphql-tools/schema/9.0.4_graphql@16.6.0:
-    resolution: {integrity: sha512-B/b8ukjs18fq+/s7p97P8L1VMrwapYc3N2KvdG/uNThSazRRn8GsBK0Nr+FH+mVKiUfb4Dno79e3SumZVoHuOQ==}
-    peerDependencies:
-      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-    dependencies:
-      '@graphql-tools/merge': 8.3.6_graphql@16.6.0
-      '@graphql-tools/utils': 8.12.0_graphql@16.6.0
-      graphql: 16.6.0
-      tslib: 2.5.0
-      value-or-promise: 1.0.11
     dev: false
 
   /@graphql-tools/utils/8.12.0_graphql@16.6.0:
@@ -3142,7 +3120,7 @@ packages:
       '@envelop/core': 2.6.0_graphql@16.6.0
       '@envelop/parser-cache': 4.7.0_4hr55tbjlvoppd2sokdhrbpreq
       '@envelop/validation-cache': 4.7.0_4hr55tbjlvoppd2sokdhrbpreq
-      '@graphql-tools/schema': 9.0.4_graphql@16.6.0
+      '@graphql-tools/schema': 9.0.17_graphql@16.6.0
       '@graphql-tools/utils': 8.12.0_graphql@16.6.0
       '@graphql-typed-document-node/core': 3.2.0_graphql@16.6.0
       '@graphql-yoga/subscription': 2.2.3
@@ -7076,7 +7054,7 @@ packages:
   /axios/0.26.1_debug@4.3.4:
     resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.2_debug@4.3.4
     transitivePeerDependencies:
       - debug
     dev: false
@@ -9972,6 +9950,18 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
+
+  /follow-redirects/1.15.2_debug@4.3.4:
+    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dependencies:
+      debug: 4.3.4
+    dev: false
 
   /for-each/0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -19425,7 +19415,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.145.0
+    version: 0.145.2
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.3.0
