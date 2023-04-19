@@ -282,7 +282,18 @@ const introspectGraphQLAPI = async (
 
 	let proxyConfig: AxiosProxyConfig | undefined;
 
-	const httpProxyUrl = introspection.httpProxyUrl !== undefined ? introspection.httpProxyUrl : options.httpProxyUrl;
+	let httpProxyUrl: string | undefined;
+	if (introspection.httpProxyUrl !== undefined) {
+		// introspection.httpProxyUrl might be null to allow disabling the global proxy
+		if (introspection.httpProxyUrl) {
+			try {
+				httpProxyUrl = resolveVariable(introspection.httpProxyUrl);
+			} catch (e: any) {}
+		}
+	}
+	if (httpProxyUrl === undefined) {
+		httpProxyUrl = options.httpProxyUrl ?? '';
+	}
 	if (httpProxyUrl) {
 		const proxyUrlString = resolveVariable(httpProxyUrl);
 		try {

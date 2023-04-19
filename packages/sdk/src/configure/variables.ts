@@ -34,10 +34,10 @@ export const resolveVariable = (variable: string | EnvironmentVariable): string 
 	if (variable instanceof EnvironmentVariable) {
 		const environmentVariable = variable as EnvironmentVariable;
 		const resolved = process.env[environmentVariable.name];
-		if (resolved) {
+		if (resolved !== undefined) {
 			return resolved;
 		}
-		if (environmentVariable.defaultValue != null) {
+		if (environmentVariable.defaultValue !== undefined) {
 			return environmentVariable.defaultValue as string;
 		}
 
