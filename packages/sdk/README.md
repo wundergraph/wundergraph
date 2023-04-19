@@ -189,7 +189,7 @@ npx create-wundergraph-app --init
 # Community
 
 Want to chat about **WunderGraph** with the team and other enthusiastic developers like yourself?
-We're very active on [our Discord server](https://discord.com/invite/Jjmc8TC)
+We're very active on [our Discord server](https://discord.com/invite/Jjmc8TC), [Discourse](https://community.wundergraph.com/)
 and on [our GitHub](https://github.com/wundergraph/wundergraph/), where issues and PRs are very welcome
 (but please read our [contribution readme](https://github.com/wundergraph/wundergraph/blob/main/CONTRIBUTING.md) first).
 
@@ -199,7 +199,7 @@ Now, the only thing our community is missing is you!
 
 **Questions?** 🙋
 
-- We're happy to help you with queries on [our Discord server](https://discord.com/invite/Jjmc8TC).
+- We're happy to help you with queries on [our Discord server](https://discord.com/invite/Jjmc8TC) & [Discourse](https://community.wundergraph.com/).
 
 **Bugs?** 🪳
 
