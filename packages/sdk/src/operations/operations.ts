@@ -32,7 +32,7 @@ interface _HandlerContext<
 	Mutations,
 	Subscriptions
 > extends BaseRequestContext<WunderGraphUser<Role, CustomClaims>, IC> {
-	input: Input extends z.ZodObject<any> ? Input : never;
+	input: Input extends {} ? Input : never;
 	operations: Omit<OperationsClient<Queries, Mutations, Subscriptions>, 'cancelSubscriptions'>;
 }
 
