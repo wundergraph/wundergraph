@@ -80,9 +80,10 @@ export interface NodeOptions {
 	 * @defaultValue 10 seconds
 	 */
 	defaultRequestTimeoutSeconds?: number;
-	/** Default HTTP(S) proxy to use
+	/** Default HTTP(S) proxy to use. Data sources that support proxies might also
+	 * override the default proxy with a more specific one.
 	 *
-	 * @defaultValue undefined (no proxy)
+	 * @defaultValue Use the WG_HTTP_PROXY environment variable
 	 */
 	defaultHttpProxyUrl?: InputVariable;
 }
