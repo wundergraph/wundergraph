@@ -13,7 +13,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@wundergraph/sdk": "^0.145.0",
+    "@wundergraph/sdk": "^0.145.1",
     "graphql": "^16.3.0"
   },
   "devDependencies": {
