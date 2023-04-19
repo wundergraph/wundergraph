@@ -52,7 +52,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 	if rawNodePort != "" {
 		nodePort, err = strconv.ParseUint(rawNodePort, 10, 16)
 		if err != nil {
-			return nil, fmt.Errorf("can't parse node port %q: %w", graphConfig.Api.NodeOptions.Listen.Port, err)
+			return nil, fmt.Errorf("can't parse node port %s: %w", rawNodePort, err)
 		}
 	}
 
@@ -61,7 +61,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 	if rawInternalNodePort != "" {
 		internalNodePort, err = strconv.ParseUint(rawInternalNodePort, 10, 16)
 		if err != nil {
-			return nil, fmt.Errorf("can't parse internal node port %q: %w", graphConfig.Api.NodeOptions.ListenInternal.Port, err)
+			return nil, fmt.Errorf("can't parse node internal port %s: %w", rawInternalNodePort, err)
 		}
 	}
 
