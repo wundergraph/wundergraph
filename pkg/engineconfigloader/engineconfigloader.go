@@ -56,6 +56,7 @@ type DefaultFactoryResolver struct {
 	static           *staticdatasource.Factory
 	database         *database.Factory
 	hooksClient      *hooks.Client
+	log              *zap.Logger
 }
 
 func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport *http.Transport,
@@ -86,6 +87,7 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 			Log:    log,
 		},
 		hooksClient: hooksClient,
+		log:         log,
 	}
 }
 
@@ -172,9 +174,12 @@ func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration,
 	var proxyURL *url.URL
 	proxyURLString, found := loadvariable.LookupString(cfg.HttpProxyUrl)
 	if found {
-		proxyURL, err = url.Parse(proxyURLString)
-		if err != nil {
-			return nil, fmt.Errorf("invalid proxy URL %q: %w", proxyURLString, err)
+		if proxyURLString != "" {
+			proxyURL, err = url.Parse(proxyURLString)
+			if err != nil {
+				return nil, fmt.Errorf("invalid proxy URL %q: %w", proxyURLString, err)
+			}
+			d.log.Debug("using HTTP proxy for data source", zap.String("proxy", proxyURLString), zap.String("url", loadvariable.String(cfg.Url)))
 		}
 	} else {
 		proxyURL = d.transportFactory.DefaultHTTPProxyURL()
@@ -183,6 +188,11 @@ func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration,
 		transport.Proxy = func(r *http.Request) (*url.URL, error) {
 			return proxyURL, nil
 		}
+	} else {
+		if transport.Proxy != nil {
+			d.log.Debug("disabling global HTTP proxy for data source", zap.String("url", loadvariable.String(cfg.Url)))
+		}
+		transport.Proxy = nil
 	}
 
 	return &http.Client{

@@ -422,6 +422,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	}
 
 	if proxyURL := nodeConfig.Api.Options.DefaultHTTPProxyURL; proxyURL != nil {
+		n.log.Debug("using global HTTP proxy", zap.String("proxy", proxyURL.String()))
 		defaultTransport.Proxy = func(r *http.Request) (*url.URL, error) {
 			return proxyURL, nil
 		}
