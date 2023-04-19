@@ -4,12 +4,10 @@
   "license": "Apache-2.0",
   "description": "WunderGraph Relay Integration",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
       "default": "./dist/index.js"
     }
   },
@@ -17,7 +15,7 @@
     "directory": "tests"
   },
   "scripts": {
-    "build": "tsc --noEmit && tsup src/index.ts --dts --format esm,cjs",
+    "build": "tsc --noEmit && tsup src/index.ts --dts --format cjs",
     "test": "jest --passWithNoTests && tsd"
   },
   "publishConfig": {
