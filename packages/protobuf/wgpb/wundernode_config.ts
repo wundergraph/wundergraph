@@ -1177,6 +1177,7 @@ export interface NodeOptions {
   logger: NodeLogging | undefined;
   defaultRequestTimeoutSeconds: number;
   listenInternal: InternalListenerOptions | undefined;
+  nodeInternalUrl: ConfigurationVariable | undefined;
 }
 
 export interface ServerLogging {
@@ -3923,6 +3924,7 @@ function createBaseNodeOptions(): NodeOptions {
     logger: undefined,
     defaultRequestTimeoutSeconds: 0,
     listenInternal: undefined,
+    nodeInternalUrl: undefined,
   };
 }
 
@@ -3938,6 +3940,9 @@ export const NodeOptions = {
         : 0,
       listenInternal: isSet(object.listenInternal)
         ? InternalListenerOptions.fromJSON(object.listenInternal)
+        : undefined,
+      nodeInternalUrl: isSet(object.nodeInternalUrl)
+        ? ConfigurationVariable.fromJSON(object.nodeInternalUrl)
         : undefined,
     };
   },
@@ -3955,6 +3960,10 @@ export const NodeOptions = {
     message.listenInternal !== undefined &&
       (obj.listenInternal = message.listenInternal
         ? InternalListenerOptions.toJSON(message.listenInternal)
+        : undefined);
+    message.nodeInternalUrl !== undefined &&
+      (obj.nodeInternalUrl = message.nodeInternalUrl
+        ? ConfigurationVariable.toJSON(message.nodeInternalUrl)
         : undefined);
     return obj;
   },
@@ -3976,6 +3985,9 @@ export const NodeOptions = {
     message.defaultRequestTimeoutSeconds = object.defaultRequestTimeoutSeconds ?? 0;
     message.listenInternal = (object.listenInternal !== undefined && object.listenInternal !== null)
       ? InternalListenerOptions.fromPartial(object.listenInternal)
+      : undefined;
+    message.nodeInternalUrl = (object.nodeInternalUrl !== undefined && object.nodeInternalUrl !== null)
+      ? ConfigurationVariable.fromPartial(object.nodeInternalUrl)
       : undefined;
     return message;
   },

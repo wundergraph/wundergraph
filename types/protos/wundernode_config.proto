@@ -533,6 +533,7 @@ message NodeOptions {
 	NodeLogging logger = 3;
 	int64 defaultRequestTimeoutSeconds = 5;
 	InternalListenerOptions listenInternal = 6;
+	ConfigurationVariable nodeInternalUrl = 7;
 }
 
 message ServerLogging {

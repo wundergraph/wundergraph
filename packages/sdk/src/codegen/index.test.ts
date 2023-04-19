@@ -48,6 +48,13 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						environmentVariableDefaultValue: '',
 						placeholderVariableName: '',
 					},
+					nodeInternalUrl: {
+						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+						staticVariableContent: 'http://localhost:9993',
+						environmentVariableName: '',
+						environmentVariableDefaultValue: '',
+						placeholderVariableName: '',
+					},
 					publicNodeUrl: {
 						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
 						staticVariableContent: 'http://localhost:9991',

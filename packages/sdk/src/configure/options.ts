@@ -28,6 +28,13 @@ export const defaultNodePort = '9991';
 export const defaultNodeInternalPort = '9993';
 export const defaultServerPort = '9992';
 
+const getDefaultNodeInternalURL = () => {
+	const host = new EnvironmentVariable(WgEnv.NodeHost, defaultHost);
+	const port = new EnvironmentVariable(WgEnv.NodeInternalPort, defaultNodeInternalPort);
+
+	return `http://${resolveVariable(host)}:${resolveVariable(port)}`;
+};
+
 const DefaultNodeOptions = {
 	listen: {
 		host: new EnvironmentVariable(WgEnv.NodeHost, defaultHost),
@@ -37,6 +44,7 @@ const DefaultNodeOptions = {
 		port: new EnvironmentVariable(WgEnv.NodeInternalPort, defaultNodeInternalPort),
 	},
 	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, `http://${defaultHost}:${defaultNodePort}`),
+	nodeInternalUrl: getDefaultNodeInternalURL(),
 	publicNodeUrl: new EnvironmentVariable(WgEnv.PublicNodeUrl, `http://${defaultHost}:${defaultNodePort}`),
 	logger: {
 		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'info'),
@@ -80,6 +88,7 @@ export interface NodeOptions {
 
 export interface ResolvedNodeOptions {
 	nodeUrl: ConfigurationVariable;
+	nodeInternalUrl: ConfigurationVariable;
 	publicNodeUrl: ConfigurationVariable;
 	listen: ResolvedListenOptions;
 	listenInternal: ResolvedListenInternalOptions;
@@ -96,11 +105,19 @@ export const fallbackNodeUrl = (listenOptions: ListenOptions | undefined) => {
 	return `http://${resolveVariable(host)}:${resolveVariable(port)}`;
 };
 
+export const getNodeInternalUrl = (options?: NodeOptions) => {
+	let port = options?.listenInternal?.port || DefaultNodeOptions.listenInternal.port;
+	let host = options?.listen?.host || DefaultNodeOptions.listen.host;
+
+	return `http://${resolveVariable(host)}:${resolveVariable(port)}`;
+};
+
 export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions => {
 	let nodeOptions = isCloud
 		? DefaultNodeOptions
 		: {
 				nodeUrl: options?.nodeUrl || new EnvironmentVariable(WgEnv.NodeUrl, fallbackNodeUrl(options?.listen)),
+				nodeInternalUrl: getNodeInternalUrl(options),
 				publicNodeUrl:
 					options?.publicNodeUrl || new EnvironmentVariable(WgEnv.NodeUrl, fallbackNodeUrl(options?.listen)),
 				listen: {
@@ -119,6 +136,7 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 
 	return {
 		nodeUrl: mapInputVariable(nodeOptions.nodeUrl),
+		nodeInternalUrl: mapInputVariable(nodeOptions.nodeInternalUrl),
 		publicNodeUrl: mapInputVariable(nodeOptions.publicNodeUrl),
 		listen: {
 			host: mapInputVariable(nodeOptions.listen.host),
