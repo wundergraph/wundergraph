@@ -20,6 +20,8 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/astprinter"
 	"github.com/wundergraph/graphql-go-tools/pkg/asttransform"
 	"github.com/wundergraph/graphql-go-tools/pkg/astvisitor"
+
+	"github.com/wundergraph/wundergraph/pkg/relay"
 )
 
 type Loader struct {
@@ -120,6 +122,9 @@ func (l *Loader) readOperations() error {
 			l.readTypescriptOperation(filePath)
 		case ".graphql":
 			l.readGraphQLOperation(filePath)
+		case ".json":
+			r := relay.NewRelay(filepath.Join(l.operationsRootPath, filePath))
+			return r.ExpandOperationsJson()
 		default:
 			l.out.Info = append(l.out.Info, fmt.Sprintf("skipping non .graphql nor .ts file: %s", filePath))
 		}

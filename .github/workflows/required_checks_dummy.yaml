@@ -1,0 +1,33 @@
+# The job "build_test" is required for all pull requests.
+# Due to path filtering, a pull request that changes a file that is not covered by a workflow is blocked from merging.
+# On the pull request, you would see "Waiting for status to be reported." This workflow negotiates all paths of all workflows that are required for a pull request.
+# That means, this workflow will run when no other workflow is triggered to fulfill the required status checks.
+# https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/troubleshooting-required-status-checks
+
+name: ci
+on:
+  pull_request:
+    paths-ignore:
+      # Engine CI
+      - '**/*.go'
+      - 'types/**/*'
+      - 'go.mod'
+      - 'go.sum'
+      - '.github/actions/go/action.yaml'
+      - '.github/actions/node/action.yaml'
+      - '.github/workflows/engine-ci.yaml'
+      # Examples CI
+      - '.github/actions/go/action.yaml'
+      - '.github/actions/node/action.yaml'
+      - '.github/workflows/examples-ci.yaml'
+      - 'examples/**'
+      - 'scripts/test-examples/**'
+      # Packages CI
+      - 'testapps/**/*'
+      - 'packages/**/*'
+      - '.github/workflows/packages-ci.yaml'
+jobs:
+  build_test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "No build required"'

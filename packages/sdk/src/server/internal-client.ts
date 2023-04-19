@@ -93,7 +93,7 @@ export const internalClientFactory = (operations: Operation[], baseNodeUrl: stri
 		extraHeaders?: { [key: string]: string };
 		clientRequest: any;
 	}): Promise<any> => {
-		const url = `${baseNodeUrl}/internal/operations/${options.operationName}`;
+		const url = `${baseNodeUrl}/operations/${options.operationName}`;
 		const headers = Object.assign(
 			{},
 			{

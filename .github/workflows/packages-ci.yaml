@@ -5,15 +5,10 @@ on:
       - main
       - next
     paths:
-      - 'packages/**/*'
       - 'testapps/**/*'
-      - '.github/actions/go/action.yaml'
-      - '.github/actions/node/action.yaml'
+      - 'packages/**/*'
       - '.github/workflows/packages-ci.yaml'
-      - '!packages/*-testapp/**'
-      - 'examples/**/*'
-      - '!*.md'
-      - '!**/*.md'
+
   pull_request:
     branches:
       - main
@@ -21,13 +16,7 @@ on:
     paths:
       - 'testapps/**/*'
       - 'packages/**/*'
-      - '.github/actions/go/action.yaml'
-      - '.github/actions/node/action.yaml'
       - '.github/workflows/packages-ci.yaml'
-      - 'examples/**/*'
-      - '!*.md'
-      - '!**/*.md'
-      - '!docs-website/**/*.md'
 
 concurrency:
   group: ${{github.workflow}}-${{github.head_ref}}

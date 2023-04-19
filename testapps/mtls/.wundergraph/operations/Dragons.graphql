@@ -1,6 +1,0 @@
-query Dragons {
-	spacex_dragons {
-		id
-		name
-	}
-}

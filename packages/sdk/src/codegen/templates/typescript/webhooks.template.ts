@@ -7,7 +7,7 @@ import { createWebhookFactory } from "@wundergraph/sdk/server";
 
 export type WebhooksConfig = {
 {{#each webhooks}}
-	{{name}}?: WebhookConfiguration;
+	'{{name}}'?: WebhookConfiguration;
 {{/each}}
 }
 

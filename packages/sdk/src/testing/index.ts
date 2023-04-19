@@ -35,6 +35,11 @@ export interface ServerOptions<ClientType extends Client = Client> {
 	 * @default false
 	 */
 	debug: boolean;
+
+	/***
+	 * The WunderGraph directory to use.
+	 */
+	dir?: string;
 }
 
 /**
@@ -77,7 +82,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		};
 	}
 
-	private url(rel: string): string {
+	public url(rel?: string): string {
 		return this.nodeUrl + rel;
 	}
 
@@ -109,6 +114,11 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			} else {
 				cmd.push('--cli-log-level', 'error');
 			}
+
+			if (this.options.dir) {
+				cmd.push('--wundergraph-dir', this.options.dir);
+			}
+
 			subprocess = wunderctl({ cmd, env, stdio: 'inherit' });
 		}
 		const health = this.url('/health');
@@ -190,16 +200,23 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 				env: { WG_NODE_URL: url },
 			};
 		}
+
 		// Generate random ports
-		let nodePort = await this.freeport();
-		let serverPort = await this.freeport();
+		const [nodePort, nodeInternalPort, serverPort] = await Promise.all([
+			this.freeport(),
+			this.freeport(),
+			this.freeport(),
+		]);
+
 		return {
 			manageServer: true,
 			env: {
 				WG_CLOUD: 'true',
 				WG_NODE_URL: `http://0.0.0.0:${nodePort}`,
+				WG_NODE_INTERNAL_URL: `http://0.0.0.0:${nodeInternalPort}`,
 				WG_NODE_HOST: '0.0.0.0',
 				WG_NODE_PORT: nodePort.toString(),
+				WG_NODE_INTERNAL_PORT: nodeInternalPort.toString(),
 				WG_SERVER_URL: `http://0.0.0.0:${serverPort}`,
 				WG_SERVER_HOST: '0.0.0.0',
 				WG_SERVER_PORT: serverPort.toString(),

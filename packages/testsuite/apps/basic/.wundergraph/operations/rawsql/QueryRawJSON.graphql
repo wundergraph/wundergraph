@@ -1,0 +1,3 @@
+query {
+	json: users_post_queryRawJSON(query: "select id,email,name from User limit 2")
+}
