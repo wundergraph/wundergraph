@@ -32,7 +32,7 @@ interface _HandlerContext<
 	Mutations,
 	Subscriptions
 > extends BaseRequestContext<WunderGraphUser<Role, CustomClaims>, IC> {
-	input: Input extends {} ? Input : never;
+	input: Input extends z.ZodObject<any> ? Input : never;
 	operations: Omit<OperationsClient<Queries, Mutations, Subscriptions>, 'cancelSubscriptions'>;
 }
 
@@ -66,7 +66,7 @@ export interface LiveQueryConfig {
 
 const createQuery =
 	<IC extends InternalClient, UserRole extends string, CustomClaims extends {}, Queries, Mutations, Subscriptions>() =>
-	<Input extends z.ZodTypeAny, InferredResponse, ZodResponse>({
+	<Input extends z.ZodObject<any>, InferredResponse, ZodResponse>({
 		input,
 		response,
 		handler,
@@ -122,7 +122,7 @@ const createQuery =
 
 const createMutation =
 	<IC extends InternalClient, UserRole extends string, CustomClaims extends {}, Queries, Mutations, Subscriptions>() =>
-	<Input extends z.ZodTypeAny, InferredResponse, ZodResponse>({
+	<Input extends z.ZodObject<any>, InferredResponse, ZodResponse>({
 		input,
 		response,
 		handler,
@@ -176,7 +176,7 @@ const createMutation =
 
 const createSubscription =
 	<IC extends InternalClient, UserRole extends string, CustomClaims extends {}, Queries, Mutations, Subscriptions>() =>
-	<I extends z.ZodTypeAny, InferredResponse, ZodResponse>({
+	<I extends z.ZodObject<any>, InferredResponse, ZodResponse>({
 		input,
 		handler,
 		response,
@@ -258,7 +258,7 @@ export type NodeJSOperation<
 	Subscriptions
 > = {
 	type: OperationType;
-	inputSchema?: z.ZodTypeAny;
+	inputSchema?: z.ZodObject<any>;
 	responseSchema?: ZodResponse;
 	queryHandler?: ZodResponse extends z.ZodObject<any>
 		? (
