@@ -6,6 +6,7 @@ import { ViteLogo } from '@/components/logos/vite';
 import { RemixLogo } from '@/components/logos/remix';
 import { SvelteLogo } from '@/components/logos/svelte';
 import { NuxtLogo } from '@/components/logos/nuxt';
+import { RelayLogo } from '@/components/logos/relay';
 
 export default function GettingStartedPage() {
 	return (
@@ -50,6 +51,13 @@ export default function GettingStartedPage() {
 						description="Learn how to use WunderGraph with Remix."
 						logo={<RemixLogo />}
 						href="/docs/getting-started/remix-quickstart"
+						variant="plain"
+					/>
+					<QuickLink
+						title="Relay"
+						description="Learn how to use WunderGraph with Relay."
+						logo={<RelayLogo />}
+						href="/docs/getting-started/relay-quickstart"
 						variant="plain"
 					/>
 					<QuickLink

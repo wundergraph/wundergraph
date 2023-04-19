@@ -56,6 +56,10 @@ const navigation = [
 						href: '/docs/getting-started/remix-quickstart',
 					},
 					{
+						title: 'Relay',
+						href: '/docs/getting-started/relay-quickstart',
+					},
+					{
 						title: 'SvelteKit',
 						href: '/docs/getting-started/sveltekit-quickstart',
 					},
@@ -98,6 +102,10 @@ const navigation = [
 						href: '/docs/examples/nextjs-react-query',
 					},
 					{
+						title: 'Next.js + Relay',
+						href: '/docs/examples/nextjs-relay',
+					},
+					{
 						title: 'Next.js + Clerk',
 						href: '/docs/examples/nextjs-clerk',
 					},
@@ -116,6 +124,10 @@ const navigation = [
 					{
 						title: 'Vite + Solid.js',
 						href: '/docs/examples/vite-solidjs',
+					},
+					{
+						title: 'Vite + React Relay',
+						href: '/docs/examples/vite-react-relay',
 					},
 					{
 						title: 'Vite + Svelte',
@@ -1009,6 +1021,10 @@ const navigation = [
 			{
 				title: 'React Query',
 				href: '/docs/clients-reference/react-query',
+			},
+			{
+				title: 'React Relay',
+				href: '/docs/clients-reference/react-relay',
 			},
 			{
 				title: 'Solid Query',

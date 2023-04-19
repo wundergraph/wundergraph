@@ -1,5 +1,7 @@
 <div align="center">
 
+![wunderctl](https://img.shields.io/npm/v/@wundergraph/sdk.svg)
+[![Star us on GitHub](https://img.shields.io/github/stars/wundergraph/wundergraph?color=FFD700&label=Stars&logo=Github)](https://github.com/wundergraph/wundergraph)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/wundergraph/wundergraph/blob/main/CONTRIBUTING.md)
 [![License Apache 2](https://img.shields.io/badge/license-Apache%202-blue)](https://github.com/wundergraph/wundergraph/blob/main/LICENSE)
 [![Enterprise support](https://img.shields.io/badge/enterprise-support-indigo.svg)](https://form.typeform.com/to/fuRWxErj?typeform-embed-id=8749569972809419&typeform-embed=popup-blank&typeform-source=wundergraph.com&typeform-medium=embed-sdk&typeform-medium-version=next)
@@ -16,8 +18,11 @@
 
 [<img height="auto" src="./assets/logo2.png">](https://wundergraph.com/)
 
+[![Post on our Discourse forum](https://img.shields.io/discourse/topics?color=fbf5af&label=Discourse&logo=Discourse&server=https%3A%2F%2Fcommunity.wundergraph.com%2F)](https://community.wundergraph.com/)
 [![Join our Discord Server](https://img.shields.io/badge/Discord-chat%20with%20us-%235865F2?style=flat&logo=discord&logoColor=%23fff)](https://discord.com/invite/Jjmc8TC)
 [![Tweet at us on Twitter](https://img.shields.io/badge/Twitter-tweet%20at%20us-1da1f2?style=flat&logo=twitter&logoColor=%23fff)](https://twitter.com/wundergraphcom)
+
+[Love WunderGraph? Give us a ⭐ on GitHub!](https://github.com/wundergraph/wundergraph)
 
 </div>
 
@@ -216,6 +221,7 @@ The best way to try them out is by cloning the mono-repo.
 - [Next.js PostgresSQL Prisma](examples/nextjs-postgres-prisma)
 - [Next.js PostgresQL user filters](examples/nextjs-postgres-user-filters)
 - [Next.js React Query](examples/nextjs-react-query)
+- [Next.js Relay](examples/nextjs-relay)
 - [Next.js Todos](examples/nextjs-todos)
 - [Next.js TypeScript Operations](examples/nextjs-typescript-functions)
 - [Next.js Clerk Authentication](examples/nextjs-clerk)
@@ -231,6 +237,7 @@ The best way to try them out is by cloning the mono-repo.
 - [Vite SolidJS](examples/vite-solidjs)
 - [Vite Svelte](examples/vite-svelte)
 - [Vite swr](examples/vite-swr)
+- [Vite React Relay](examples/vite-react-relay)
 - [Webhooks](examples/webhooks)
 
 ## Advanced Examples:
