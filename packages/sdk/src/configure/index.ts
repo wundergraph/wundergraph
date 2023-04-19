@@ -21,7 +21,6 @@ import {
 	Api,
 	DatabaseApiCustom,
 	DataSource,
-	GraphQLApi,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
 	ApiIntrospectionOptions,
@@ -707,15 +706,10 @@ const resolveApplication = async (
 	s3?: S3Provider,
 	hooks?: HooksConfiguration
 ): Promise<ResolvedApplication> => {
-	const pendingApis: Promise<Api<any>>[] = [];
-
 	// Generate the promises first, then await them all at once
 	// to run them in parallel
 	const generators = await Promise.all(apis);
-	for (const generator of generators) {
-		pendingApis.push(generator(apiIntrospectionOptions));
-	}
-	const resolvedApis = await Promise.all(pendingApis);
+	const resolvedApis = await Promise.all(generators.map((generator) => generator(apiIntrospectionOptions)));
 
 	const merged = mergeApis(roles, customClaims, ...resolvedApis);
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
