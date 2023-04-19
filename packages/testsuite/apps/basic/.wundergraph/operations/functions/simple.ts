@@ -1,7 +1,7 @@
 import { createOperation } from '../../generated/wundergraph.factory';
 
 export default createOperation.query({
-	handler: async ({ operations, input }) => {
+	handler: async ({ operations }) => {
 		return 'hello simple';
 	},
 });
