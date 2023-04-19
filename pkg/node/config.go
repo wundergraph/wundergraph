@@ -71,7 +71,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 	}
 
 	internalListener := &apihandler.Listener{
-		Host: "localhost",
+		Host: nodeHost,
 		Port: uint16(internalNodePort),
 	}
 
