@@ -7,6 +7,9 @@ import {
 	SpanExporter,
 	ConsoleSpanExporter,
 	Tracer,
+	BasicTracerProvider,
+	InMemorySpanExporter,
+	SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
@@ -24,6 +27,21 @@ const defaultJaegerExporterPath = '/api/traces';
 export interface TelemetryTracerProvider {
 	provider: NodeTracerProvider;
 }
+
+export interface TelemetryTestTracerProvider {
+	provider: BasicTracerProvider;
+	exporter: InMemorySpanExporter;
+}
+
+export const getTestTracerProvider = (): TelemetryTestTracerProvider => {
+	const exporter = new InMemorySpanExporter();
+	const provider = new BasicTracerProvider();
+
+	provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+	provider.register();
+
+	return { provider, exporter };
+};
 
 const configureTracerProvider = (config?: TelemetryOptions, logger?: pino.Logger): TelemetryTracerProvider => {
 	const resource = new Resource({
@@ -49,7 +67,7 @@ function getExporter(config?: TelemetryOptions, logger?: pino.Logger): SpanExpor
 		: '';
 
 	if (httpEndpoint !== '' && jaegerEndpoint !== '') {
-		throw new Error('cannot configure both OTLP and Jaeger exporters');
+		throw new Error('cannot configure both OTLP and Jaeger endpoints');
 	}
 
 	if (httpEndpoint !== '') {

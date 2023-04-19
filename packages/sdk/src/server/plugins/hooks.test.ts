@@ -2,9 +2,11 @@ import { internalClientFactory } from '../internal-client';
 import { createServer } from '../server';
 import { OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import { FastifyRequestBody, OnConnectionInitHookRequestBody, WunderGraphHooksAndServerConfig } from '../types';
+import { getTestTracerProvider } from '../trace';
 
 export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) => {
 	const clientFactory = internalClientFactory([], 'http://localhost:9991');
+	const tracerProvider = getTestTracerProvider();
 
 	const fastify = await createServer({
 		wundergraphDir: '',
@@ -48,6 +50,7 @@ export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) 
 		serverConfig,
 		gracefulShutdown: false,
 		clientFactory,
+		tracerProvider,
 	});
 	return fastify;
 };

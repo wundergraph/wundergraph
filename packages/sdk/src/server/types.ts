@@ -7,6 +7,7 @@ import type { WebhooksConfig } from '../webhooks/types';
 import type { InputVariable } from '../configure/variables';
 import type { ListenOptions, LoggerLevel, ResolvedListenOptions } from '../configure/options';
 import { Context, Span } from '@opentelemetry/api';
+import { TelemetryTestTracerProvider, TelemetryTracerProvider } from './trace';
 
 declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
@@ -169,6 +170,7 @@ export interface ServerRunOptions {
 	config: WunderGraphConfiguration;
 	gracefulShutdown: boolean;
 	clientFactory: InternalClientFactory;
+	tracerProvider: TelemetryTracerProvider | TelemetryTestTracerProvider;
 }
 
 export interface WunderGraphServerConfig<

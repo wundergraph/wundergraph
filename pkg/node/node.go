@@ -92,6 +92,7 @@ type options struct {
 	healthCheckTimeout      time.Duration
 	onServerConfigLoad      func(config WunderNodeConfig)
 	onServerError           func(err error)
+	onTracerProviderInit    func(config WunderNodeConfig) (*trace.TracerProvider, error)
 }
 
 type Option func(options *options)
@@ -191,6 +192,12 @@ func WithIdleTimeout(idleTimeout time.Duration, idleHandler func()) Option {
 	}
 }
 
+func WithTracerProviderInit(callback func(config WunderNodeConfig) (*trace.TracerProvider, error)) Option {
+	return func(options *options) {
+		options.onTracerProviderInit = callback
+	}
+}
+
 func (n *Node) StartBlocking(opts ...Option) error {
 	var options options
 	for i := range opts {
@@ -198,6 +205,11 @@ func (n *Node) StartBlocking(opts ...Option) error {
 	}
 
 	n.options = options
+
+	if options.onTracerProviderInit == nil {
+		n.log.Error("no tracer provider init callback provided")
+		return errors.New("could not start node, no tracer provider init callback provided")
+	}
 
 	g := errgroup.Group{}
 
@@ -388,13 +400,7 @@ func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (
 }
 
 func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
-	tracer, err := trace.NewTracerProvider(n.ctx, &trace.TracerProviderConfig{
-		Endpoint:       nodeConfig.Api.Options.OpenTelemetry.ExporterHTTPEndpoint,
-		JaegerEndpoint: nodeConfig.Api.Options.OpenTelemetry.ExporterJaegerEndpoint,
-		ServiceName:    "wundergraph-node",
-		Enabled:        nodeConfig.Api.Options.OpenTelemetry.Enabled,
-		AuthToken:      nodeConfig.Api.Options.OpenTelemetry.AuthToken,
-	})
+	tracer, err := n.options.onTracerProviderInit(nodeConfig)
 	if err != nil {
 		n.log.Error("failed to initialize otel tracer provider", zap.Error(err))
 		return err

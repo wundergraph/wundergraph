@@ -727,6 +727,7 @@ const parseOperationTypeNode = (node: OperationTypeNode): OperationType => {
 		case 'query':
 			return OperationType.QUERY;
 		default:
+			// TODO: seems like this should be a type error
 			return -1;
 	}
 };

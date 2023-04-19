@@ -20,11 +20,16 @@ import (
 	"github.com/phayes/freeport"
 	"github.com/sebdah/goldie/v2"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/telemetry/otel/trace"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -35,6 +40,8 @@ func TestNode(t *testing.T) {
 
 	userService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodPost, r.Method)
+		// the origin receives the traceparent header from the gateway
+		assert.NotEmpty(t, r.Header.Get("traceparent"))
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
 		if bytes.Contains(req, []byte(`{"query":"{me {id username}}"}`)) {
@@ -47,6 +54,8 @@ func TestNode(t *testing.T) {
 
 	reviewService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "67b77eab-d1a5-4cd8-b908-8443f24502b6", r.Header.Get("X-Request-Id"))
+		// the origin receives the traceparent header from the gateway
+		assert.NotEmpty(t, r.Header.Get("traceparent"))
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
 		if bytes.Contains(req, []byte(`{"variables":{"representations":[{"__typename":"User","id":"1234"}]},"query":"query($representations: [_Any!]!){_entities(representations: $representations){__typename ... on User {reviews {body author {id username} product {upc}}}}}"}`)) {
@@ -63,6 +72,8 @@ func TestNode(t *testing.T) {
 
 	productService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "67b77eab-d1a5-4cd8-b908-8443f24502b6", r.Header.Get("X-Request-Id"))
+		// the origin receives the traceparent header from the gateway
+		assert.NotEmpty(t, r.Header.Get("traceparent"))
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
 		if bytes.Contains(req, []byte(`{"variables":{},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
@@ -82,7 +93,7 @@ func TestNode(t *testing.T) {
 	defer productService.Close()
 
 	port, err := freeport.GetFreePort()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -148,7 +159,7 @@ func TestNode(t *testing.T) {
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 				OpenTelemetry: &apihandler.OpenTelemetry{
-					Enabled:                false,
+					Enabled:                true,
 					ExporterHTTPEndpoint:   "",
 					ExporterJaegerEndpoint: "",
 					AuthToken:              "",
@@ -157,9 +168,18 @@ func TestNode(t *testing.T) {
 		},
 	}
 
+	traceTestExporter := tracetest.NewInMemoryExporter()
+
 	go func() {
-		err = node.StartBlocking(WithStaticWunderNodeConfig(nodeConfig))
-		assert.NoError(t, err)
+		opts := []Option{
+			WithStaticWunderNodeConfig(nodeConfig),
+			WithTracerProviderInit(func(config WunderNodeConfig) (*trace.TracerProvider, error) {
+				return trace.NewTestTracerProvider(traceTestExporter), nil
+			}),
+		}
+
+		err = node.StartBlocking(opts...)
+		require.NoError(t, err)
 	}()
 
 	time.Sleep(time.Second)
@@ -174,41 +194,86 @@ func TestNode(t *testing.T) {
 	})
 
 	e.GET("/operations/MyReviews").Expect().Status(http.StatusNotFound)
+	spans := traceTestExporter.GetSpans()
+	assert.Len(t, spans, 1)
+	assert.Equal(t, "GET /operations/MyReviews", spans[0].Name)
+	assert.Equal(t, codes.Ok, spans[0].Status.Code)
+	assert.Len(t, spans[0].Attributes, 10)
+	traceTestExporter.Reset()
 
+	parentTraceID := "84e1afed08e019fc1110464cfa66635c"
+	parentSpanID := "7a085853722dc6d2"
+	traceParent := fmt.Sprintf("00-%s-%s-01", parentTraceID, parentSpanID)
 	withHeaders := e.Builder(func(request *httpexpect.Request) {
 		request.WithHeader("Host", "jens.wundergraph.dev")
 		request.WithHeader("X-Request-Id", "67b77eab-d1a5-4cd8-b908-8443f24502b6")
+		request.WithHeader("traceparent", traceParent)
 	})
 
 	myReviews := withHeaders.GET("/operations/MyReviews").
 		WithQuery("unknown", 123).
 		Expect().Status(http.StatusOK).Body().Raw()
 	g.Assert(t, "get_my_reviews_json_rpc", prettyJSON(myReviews))
+	spans = traceTestExporter.GetSpans()
+	// 4 requests to the origin and 1 to the node
+	assert.Len(t, spans, 5)
+	// the order of spans is LIFO
+	// get the first span
+	assert.Equal(t, "GET /operations/MyReviews", spans[len(spans)-1].Name)
+	assert.Equal(t, codes.Ok, spans[len(spans)-1].Status.Code)
+	assert.Len(t, spans[len(spans)-1].Attributes, 11)
+
+	containsSpanAttribute(t, spans[len(spans)-1].Attributes, "wg.operation.name", "MyReviews")
+	containsSpanAttribute(t, spans[len(spans)-1].Attributes, "wg.operation.type", "QUERY")
+
+	assert.Equal(t, 4, spans[len(spans)-1].ChildSpanCount)
+	assert.Equal(t, parentTraceID, spans[len(spans)-1].Parent.TraceID().String())
+	assert.Equal(t, parentSpanID, spans[len(spans)-1].Parent.SpanID().String())
+	traceTestExporter.Reset()
 
 	topProductsWithoutQuery := withHeaders.GET("/operations/TopProducts").
 		Expect().Status(http.StatusOK).Body().Raw()
 	g.Assert(t, "top_products_without_query", prettyJSON(topProductsWithoutQuery))
+	traceTestExporter.Reset()
 
 	topProductsWithQuery := withHeaders.GET("/operations/TopProducts").
 		WithQuery("first", 1).
 		WithQuery("unknown", 123).
 		Expect().Status(http.StatusOK).Body().Raw()
 	g.Assert(t, "top_products_with_query", prettyJSON(topProductsWithQuery))
+	spans = traceTestExporter.GetSpans()
+	// one request to the origin and one to the node
+	assert.Len(t, spans, 2)
+	assert.Equal(t, "GET /operations/TopProducts", spans[len(spans)-1].Name)
+	assert.Equal(t, codes.Ok, spans[len(spans)-1].Status.Code)
+	assert.Len(t, spans[len(spans)-1].Attributes, 11)
+
+	containsSpanAttribute(t, spans[len(spans)-1].Attributes, "wg.operation.name", "TopProducts")
+	containsSpanAttribute(t, spans[len(spans)-1].Attributes, "wg.operation.type", "QUERY")
+
+	assert.Equal(t, 1, spans[len(spans)-1].ChildSpanCount)
+	assert.Equal(t, parentTraceID, spans[len(spans)-1].Parent.TraceID().String())
+	assert.Equal(t, parentSpanID, spans[len(spans)-1].Parent.SpanID().String())
+	assert.Len(t, spans[0].Attributes, 8)
+	traceTestExporter.Reset()
 
 	topProductsWithInvalidQuery := withHeaders.GET("/operations/TopProducts").
 		WithQuery("first", true).
 		Expect().Status(http.StatusBadRequest).Body().Raw()
 	g.Assert(t, "top_products_with_invalid_query", prettyJSON(topProductsWithInvalidQuery))
+	traceTestExporter.Reset()
 
 	topProductsWithQueryAsWgVariables := withHeaders.GET("/operations/TopProducts").
 		WithQuery("wg_variables", `{"first":1}`).
 		Expect().Status(http.StatusOK).Body().Raw()
 	g.Assert(t, "top_products_with_query_as_wg_variables", prettyJSON(topProductsWithQueryAsWgVariables))
+	traceTestExporter.Reset()
 
 	topProductsWithInvalidQueryAsWgVariables := withHeaders.GET("/operations/TopProducts").
 		WithQuery("wg_variables", `{"first":true}`).
 		Expect().Status(http.StatusBadRequest).Body().Raw()
 	g.Assert(t, "top_products_with_invalid_query_as_wg_variables", prettyJSON(topProductsWithInvalidQueryAsWgVariables))
+	traceTestExporter.Reset()
 
 	request := GraphQLRequest{
 		OperationName: "MyReviews",
@@ -217,6 +282,11 @@ func TestNode(t *testing.T) {
 
 	actual := withHeaders.POST("/graphql").WithJSON(request).Expect().Status(http.StatusOK).Body().Raw()
 	g.Assert(t, "post_my_reviews_graphql", prettyJSON(actual))
+	spans = traceTestExporter.GetSpans()
+	assert.Len(t, spans, 5)
+	assert.Equal(t, "POST /graphql", spans[len(spans)-1].Name)
+	assert.Len(t, spans[len(spans)-1].Attributes, 9)
+	traceTestExporter.Reset()
 
 	withHeaders.GET("/graphql").Expect().Status(http.StatusOK).Text(
 		httpexpect.ContentOpts{MediaType: "text/html"})
@@ -259,7 +329,7 @@ func TestInMemoryCache(t *testing.T) {
 	defer productService.Close()
 
 	port, err := freeport.GetFreePort()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -332,8 +402,15 @@ func TestInMemoryCache(t *testing.T) {
 	}
 
 	go func() {
-		err = node.StartBlocking(WithStaticWunderNodeConfig(nodeConfig))
-		assert.NoError(t, err)
+		opts := []Option{
+			WithStaticWunderNodeConfig(nodeConfig),
+			WithTracerProviderInit(func(config WunderNodeConfig) (*trace.TracerProvider, error) {
+				return trace.NewNoopTracerProvider(), nil
+			}),
+		}
+
+		err = node.StartBlocking(opts...)
+		require.NoError(t, err)
 	}()
 
 	time.Sleep(time.Second)
@@ -369,7 +446,6 @@ func TestInMemoryCache(t *testing.T) {
 }
 
 func TestWebHooks(t *testing.T) {
-
 	var paths []string
 
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -380,7 +456,7 @@ func TestWebHooks(t *testing.T) {
 	defer testServer.Close()
 
 	port, err := freeport.GetFreePort()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -435,7 +511,7 @@ func TestWebHooks(t *testing.T) {
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 				OpenTelemetry: &apihandler.OpenTelemetry{
-					Enabled:                false,
+					Enabled:                true,
 					ExporterJaegerEndpoint: "",
 					ExporterHTTPEndpoint:   "",
 				},
@@ -443,9 +519,18 @@ func TestWebHooks(t *testing.T) {
 		},
 	}
 
+	traceTestExporter := tracetest.NewInMemoryExporter()
+
 	go func() {
-		err = node.StartBlocking(WithStaticWunderNodeConfig(nodeConfig))
-		assert.NoError(t, err)
+		opts := []Option{
+			WithStaticWunderNodeConfig(nodeConfig),
+			WithTracerProviderInit(func(config WunderNodeConfig) (*trace.TracerProvider, error) {
+				return trace.NewTestTracerProvider(traceTestExporter), nil
+			}),
+		}
+
+		err = node.StartBlocking(opts...)
+		require.NoError(t, err)
 	}()
 
 	time.Sleep(time.Second)
@@ -464,11 +549,20 @@ func TestWebHooks(t *testing.T) {
 	signatureString := hex.EncodeToString(hash.Sum(nil))
 
 	e.GET("/webhooks/github").Expect().Status(http.StatusOK)
+	spans := traceTestExporter.GetSpans()
+	assert.Len(t, spans, 1)
+	assert.Equal(t, "GET /webhooks/github", spans[0].Name)
+	assert.Len(t, spans[0].Attributes, 10)
+	assert.Equal(t, codes.Ok, spans[0].Status.Code)
+	traceTestExporter.Reset()
+
 	e.GET("/webhooks/stripe").Expect().Status(http.StatusOK)
 	e.GET("/webhooks/undefined").Expect().Status(http.StatusNotFound)
 	// We can't return 200 otherwise we would accept the delivery of the webhook and the publisher might not redeliver it.
 	e.POST("/webhooks/github-protected").Expect().Status(http.StatusUnauthorized)
 	e.POST("/webhooks/github-protected").WithBytes([]byte("ok")).WithHeader("X-Hub-Signature", fmt.Sprintf("sha256=%s", signatureString)).Expect().Status(http.StatusOK)
+	spans = traceTestExporter.GetSpans()
+	assert.Len(t, spans, 3)
 
 	assert.Equal(t, []string{"/webhooks/github", "/webhooks/stripe", "/webhooks/github-protected"}, paths)
 }
@@ -492,7 +586,7 @@ func BenchmarkNode(t *testing.B) {
 	defer productService.Close()
 
 	port, err := freeport.GetFreePort()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -554,8 +648,15 @@ func BenchmarkNode(t *testing.B) {
 	}
 
 	go func() {
-		err = node.StartBlocking(WithStaticWunderNodeConfig(nodeConfig))
-		assert.NoError(t, err)
+		opts := []Option{
+			WithStaticWunderNodeConfig(nodeConfig),
+			WithTracerProviderInit(func(config WunderNodeConfig) (*trace.TracerProvider, error) {
+				return trace.NewNoopTracerProvider(), nil
+			}),
+		}
+
+		err = node.StartBlocking(opts...)
+		require.NoError(t, err)
 	}()
 
 	time.Sleep(time.Millisecond * 100)
@@ -585,6 +686,14 @@ func BenchmarkNode(t *testing.B) {
 			t.Fatal("status code")
 		}
 	}
+}
+
+func containsSpanAttribute(t *testing.T, attributes []attribute.KeyValue, key, val string) {
+	attributeSet := attribute.NewSet(attributes...)
+
+	value, has := attributeSet.Value(attribute.Key(key))
+	assert.True(t, has)
+	assert.Equal(t, val, value.AsString())
 }
 
 func prettyJSON(in string) []byte {

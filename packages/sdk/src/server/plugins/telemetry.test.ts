@@ -2,15 +2,16 @@ import { createServer } from '../server';
 import { internalClientFactory } from '../internal-client';
 import { OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import { WunderGraphHooksAndServerConfig } from '../types';
-import { TelemetryTracerProvider } from '../trace';
+import { TelemetryTracerProvider, getTestTracerProvider } from '../trace';
 import { NodeTracerProvider, NoopSpanProcessor, Tracer } from '@opentelemetry/sdk-trace-node';
 import Fastify from 'fastify';
 import FastifyTelemetryPlugin from './telemetry';
 import { Span, SpanStatusCode } from '@opentelemetry/api';
+import { FastifyInstance } from 'fastify';
 
 describe('FastifyTelemetryPlugin', () => {
-	describe('register plugins', () => {
-		it('should add telemetry data to request object', async () => {
+	describe('register and instrument plugins', () => {
+		it('should decorate request with span and span context', async () => {
 			const clientFactory = internalClientFactory([], 'http://localhost:9991');
 			const serverConfig: WunderGraphHooksAndServerConfig = {
 				hooks: {
@@ -21,6 +22,9 @@ describe('FastifyTelemetryPlugin', () => {
 					},
 				},
 			};
+
+			const tracerProvider = getTestTracerProvider();
+
 			const fastify = await createServer({
 				wundergraphDir: '',
 				config: {
@@ -54,7 +58,13 @@ describe('FastifyTelemetryPlugin', () => {
 						s3UploadConfiguration: [],
 						allowedHostNames: [],
 						enableGraphqlEndpoint: false,
-						webhooks: [],
+						webhooks: [
+							{
+								name: 'github',
+								filePath: '',
+								verifier: undefined,
+							},
+						],
 					},
 					apiId: '',
 					dangerouslyEnableGraphQLEndpoint: false,
@@ -63,6 +73,12 @@ describe('FastifyTelemetryPlugin', () => {
 				serverConfig,
 				gracefulShutdown: false,
 				clientFactory,
+				tracerProvider,
+			});
+
+			await fastify.inject({
+				method: 'GET',
+				url: '/webhooks/github',
 			});
 
 			const resp = await fastify.inject({
@@ -78,18 +94,49 @@ describe('FastifyTelemetryPlugin', () => {
 
 			expect(fastify.hasRequestDecorator('telemetry')).toBe(true);
 			expect(resp.statusCode).toEqual(200);
+
+			expect(tracerProvider.exporter.getFinishedSpans().length).toEqual(2);
+
+			const [webHookSpan, operationHookSpan] = tracerProvider.exporter.getFinishedSpans();
+
+			// operation hooks
+			expect(operationHookSpan.name).toEqual('POST /operation/Image/preResolve');
+			expect(operationHookSpan.status.code).toEqual(SpanStatusCode.OK);
+
+			expect(operationHookSpan.spanContext().traceId).toBeDefined();
+			expect(operationHookSpan.spanContext().spanId).toBeDefined();
+
+			expect(operationHookSpan.attributes['http.method']).toEqual('POST');
+			expect(operationHookSpan.attributes['http.url']).toEqual('/operation/Image/preResolve');
+			expect(operationHookSpan.attributes['http.status_code']).toEqual(200);
+			expect(operationHookSpan.attributes['wg.hook.name']).toEqual('preResolve');
+			expect(operationHookSpan.attributes['wg.hook.type']).toEqual('operation');
+			expect(operationHookSpan.attributes['wg.operation.name']).toEqual('Image');
+
+			// webhhooks
+			expect(webHookSpan.name).toEqual('GET /webhooks/github');
+			expect(webHookSpan.status.code).toEqual(SpanStatusCode.OK);
+			expect(webHookSpan.instrumentationLibrary.name).toEqual('hook-server');
+			expect(webHookSpan.instrumentationLibrary.version).toEqual('0.0.1');
+			expect(webHookSpan.attributes['http.method']).toEqual('GET');
+			expect(webHookSpan.attributes['http.url']).toEqual('/webhooks/github');
+
+			tracerProvider.exporter.shutdown();
 			await fastify.close();
 		});
 	});
-	describe('telemetry', () => {
-		const app = Fastify();
+
+	describe('telemetry plugin flow', () => {
+		//const app = Fastify();
+		let app: FastifyInstance;
 		let provider: NodeTracerProvider;
 		let tracer: Tracer;
 		let span: Span;
 		let tracerProvider: TelemetryTracerProvider;
 		const ERROR = Error('error');
 
-		beforeAll(() => {
+		beforeEach(() => {
+			app = Fastify();
 			provider = new NodeTracerProvider();
 			provider.addSpanProcessor(new NoopSpanProcessor());
 			tracer = provider.getTracer('hook-server', '0.0.1');
@@ -109,9 +156,6 @@ describe('FastifyTelemetryPlugin', () => {
 
 		afterEach(async () => {
 			jest.clearAllMocks();
-		});
-
-		afterAll(async () => {
 			await app.close();
 		});
 

@@ -118,6 +118,8 @@ const _configureWunderGraphServer = <
 			});
 		}
 
+		const tracerProvider = configureTracerProvider(WG_CONFIG.api?.nodeOptions?.openTelemetry, logger);
+
 		startServer({
 			wundergraphDir: process.env.WG_DIR_ABS!,
 			config: WG_CONFIG,
@@ -125,6 +127,7 @@ const _configureWunderGraphServer = <
 			// only in production because it has no value in development
 			gracefulShutdown: isProduction,
 			clientFactory,
+			tracerProvider,
 		}).catch((err) => {
 			logger.fatal(err, 'Could not start the hook server');
 			process.exit(1);
@@ -157,12 +160,13 @@ export const createServer = async ({
 	config,
 	gracefulShutdown,
 	clientFactory,
+	tracerProvider,
 }: ServerRunOptions): Promise<FastifyInstance> => {
 	if (config.api?.serverOptions?.logger?.level && process.env.WG_DEBUG_MODE !== 'true') {
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
 
-	const tracerProvider = configureTracerProvider(config.api?.nodeOptions?.openTelemetry, logger);
+	//const tracerProvider = configureTracerProvider(config.api?.nodeOptions?.openTelemetry, logger);
 	const nodeURL = WG_CONFIG?.api?.nodeOptions?.nodeUrl
 		? resolveConfigurationVariable(WG_CONFIG?.api?.nodeOptions?.nodeUrl)
 		: '';

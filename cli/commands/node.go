@@ -18,6 +18,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
+	"github.com/wundergraph/wundergraph/pkg/telemetry/otel/trace"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -148,6 +149,20 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 		node.WithStaticWunderNodeConfig(wunderNodeConfig),
 		node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
 		node.WithIntrospection(enableIntrospection),
+		node.WithTracerProviderInit(func(config node.WunderNodeConfig) (*trace.TracerProvider, error) {
+			tracer, err := trace.NewTracerProvider(context.Background(), &trace.TracerProviderConfig{
+				Endpoint:       config.Api.Options.OpenTelemetry.ExporterHTTPEndpoint,
+				JaegerEndpoint: config.Api.Options.OpenTelemetry.ExporterJaegerEndpoint,
+				ServiceName:    "wundergraph-node",
+				Enabled:        config.Api.Options.OpenTelemetry.Enabled,
+				AuthToken:      config.Api.Options.OpenTelemetry.AuthToken,
+			})
+			if err != nil {
+				return nil, err
+			}
+
+			return tracer, nil
+		}),
 	}
 
 	if shutdownAfterIdle > 0 {

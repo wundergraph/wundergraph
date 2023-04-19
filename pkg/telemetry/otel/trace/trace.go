@@ -69,9 +69,18 @@ func NewNoopTracerProvider() *TracerProvider {
 	}
 }
 
+func NewTestTracerProvider(exp sdktrace.SpanExporter) *TracerProvider {
+	sp := sdktrace.NewSimpleSpanProcessor(exp)
+	return &TracerProvider{
+		Provider: sdktrace.NewTracerProvider(
+			sdktrace.WithSpanProcessor(sp),
+		),
+	}
+}
+
 func configureExporter(ctx context.Context, config *TracerProviderConfig) (sdktrace.SpanExporter, error) {
 	if config.Endpoint != "" && config.JaegerEndpoint != "" {
-		return nil, errors.New("cannot configure both OTLP and Jaeger exporters")
+		return nil, errors.New("cannot configure both OTLP and Jaeger endpoints")
 	}
 
 	switch {
