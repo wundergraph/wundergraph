@@ -1,5 +1,7 @@
 <div align="center">
 
+![wunderctl](https://img.shields.io/npm/v/@wundergraph/sdk.svg)
+[![Star us on GitHub](https://img.shields.io/github/stars/wundergraph/wundergraph?color=FFD700&label=Stars&logo=Github)](https://github.com/wundergraph/wundergraph)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/wundergraph/wundergraph/blob/main/CONTRIBUTING.md)
 [![License Apache 2](https://img.shields.io/badge/license-Apache%202-blue)](https://github.com/wundergraph/wundergraph/blob/main/LICENSE)
 [![Enterprise support](https://img.shields.io/badge/enterprise-support-indigo.svg)](https://form.typeform.com/to/fuRWxErj?typeform-embed-id=8749569972809419&typeform-embed=popup-blank&typeform-source=wundergraph.com&typeform-medium=embed-sdk&typeform-medium-version=next)
@@ -16,8 +18,11 @@
 
 [<img height="auto" src="./assets/logo2.png">](https://wundergraph.com/)
 
+[![Post on our Discourse forum](https://img.shields.io/discourse/topics?color=fbf5af&label=Discourse&logo=Discourse&server=https%3A%2F%2Fcommunity.wundergraph.com%2F)](https://community.wundergraph.com/)
 [![Join our Discord Server](https://img.shields.io/badge/Discord-chat%20with%20us-%235865F2?style=flat&logo=discord&logoColor=%23fff)](https://discord.com/invite/Jjmc8TC)
 [![Tweet at us on Twitter](https://img.shields.io/badge/Twitter-tweet%20at%20us-1da1f2?style=flat&logo=twitter&logoColor=%23fff)](https://twitter.com/wundergraphcom)
+
+[Love WunderGraph? Give us a ⭐ on GitHub!](https://github.com/wundergraph/wundergraph)
 
 </div>
 
@@ -43,6 +48,8 @@ Here's how WunderGraph works:
 
 ```typescript
 // .wundergraph/wundergraph.config.ts
+
+import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 
 // introspect a PostgreSQL database
 const pg = introspect.postgresql({
@@ -71,6 +78,17 @@ const shopify = introspect.graphql({
 configureWunderGraphApplication({
   // compose the APIs into a unified WunderGraph API
   apis: [pg, stripe, shopify],
+
+  // generate type-safe clients for your Frontend
+  codeGenerators: [
+    {
+      templates: [...templates.typescript.all],
+    },
+    {
+      templates: [new NextJsTemplate()],
+      path: '../web/components/generated',
+    },
+  ],
 });
 ```
 
@@ -82,10 +100,17 @@ This makes it easy to update an API dependency without a single click.
 By combining the introspected APIs, WunderGraph generates a unified GraphQL Schema across all APIs.
 All we have to do is define an Operation and call it from our Frontend.
 
+<table>
+<tr>
+<td> GraphQL </td> <td> TypeScript</td>
+</tr>
+<tr>
+<td valign="top">
+
 ```graphql
 # .wundergraph/operations/users/ByID.graphql
 query ($id: String!) {
-  user: db_findFirstUser(where: { id: { equals: $id } }) {
+  user: pg_findFirstUser(where: { id: { equals: $id } }) {
     id
     email
     name
@@ -94,25 +119,34 @@ query ($id: String!) {
 }
 ```
 
-Alternatively, you can also define a custom Operation using TypeScript:
+</td><td valign="top">
 
 ```typescript
 // .wundergraph/operations/users/CustomByID.ts
 import { createOperation, z } from '../../generated/wundergraph.factory';
 
 export default createOperation.query({
+  // Input validation
   input: z.object({
     id: z.string(),
   }),
   handler: async ({ input }) => {
+    // Call into your virtual graph, type-safe
+    const { errors, data } = await operations.query({
+      operationName: 'users/ByID',
+      input: {
+        id: input.id,
+      },
+    });
+
     return {
-      id: input.id,
-      name: 'Jens',
-      bio: 'Founder of WunderGraph',
+      ...data,
     };
   },
 });
 ```
+
+</tr></table>
 
 3. **Call the Operation** from your Frontend
 
@@ -120,11 +154,13 @@ As you define Operations, WunderGraph automatically generates a type-safe client
 supporting all major Frontend Frameworks like React, NextJS, Remix, Astro, Svelte, Expo, Vue, etc...
 
 ```typescript jsx
-import { client } from '~/lib/wundergraph';
+// web/pages/profile.ts
+
+import { useQuery } from '../../components/generated/nextjs';
 
 export default async function ProfilePage(props) {
-  const { data, error } = await client.query({
-    operationName: 'users/ByID',
+  const { data } = await useQuery({
+    operationName: 'users/CustomByID', // or 'users/ByID'
     input: {
       id: props.params.id,
     },
@@ -132,8 +168,8 @@ export default async function ProfilePage(props) {
 
   return (
     <div>
-      <h1>{data.user.name}</h1>
-      <p>{data.user.email}</p>
+      <h1>{data.user.id}</h1>
+      <p>{data.user.name}</p>
     </div>
   );
 }
@@ -161,6 +197,7 @@ We've got a comprehensive list of examples to get you started.
 The best way to try them out is by cloning the mono-repo.
 
 - [Apollo Federation](examples/apollo-federation)
+- [Astro](examples/astro)
 - [Auth0 OpenID Connect Authentication](examples/auth0-oidc-authentication)
 - [Caching](examples/caching)
 - [Cross API Joins](examples/cross-api-joins)
@@ -184,6 +221,7 @@ The best way to try them out is by cloning the mono-repo.
 - [Next.js PostgresSQL Prisma](examples/nextjs-postgres-prisma)
 - [Next.js PostgresQL user filters](examples/nextjs-postgres-user-filters)
 - [Next.js React Query](examples/nextjs-react-query)
+- [Next.js Relay](examples/nextjs-relay)
 - [Next.js Todos](examples/nextjs-todos)
 - [Next.js TypeScript Operations](examples/nextjs-typescript-functions)
 - [Next.js Clerk Authentication](examples/nextjs-clerk)
@@ -199,6 +237,7 @@ The best way to try them out is by cloning the mono-repo.
 - [Vite SolidJS](examples/vite-solidjs)
 - [Vite Svelte](examples/vite-svelte)
 - [Vite swr](examples/vite-swr)
+- [Vite React Relay](examples/vite-react-relay)
 - [Webhooks](examples/webhooks)
 
 ## Advanced Examples:

@@ -5,6 +5,7 @@
     "dev": "run-p dev:nuxt dev:wundergraph open",
     "dev:wundergraph": "wunderctl up",
     "dev:nuxt": "nuxt dev",
+    "start": "wunderctl up",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
@@ -27,7 +28,7 @@
   },
   "dependencies": {
     "@tanstack/vue-query": "^4.27.0",
-    "@wundergraph/sdk": "^0.143.1",
+    "@wundergraph/sdk": "^0.145.1",
     "@wundergraph/vue-query": "^0.0.1",
     "unimport": "^3.0.6",
     "vitest": "^0.29.8",

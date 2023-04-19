@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.146.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.145.2...@wundergraph/sdk@0.146.0) (2023-04-19)
+
+### Features
+
+* implement internal graphql handler ([#853](https://github.com/wundergraph/wundergraph/issues/853)) ([ad42f5f](https://github.com/wundergraph/wundergraph/commit/ad42f5f9f23a0e6ec968a1c5fefb226f2b46254a)) (@thisisnithin)
+
+## [0.145.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.145.1...@wundergraph/sdk@0.145.2) (2023-04-19)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.145.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.145.0...@wundergraph/sdk@0.145.1) (2023-04-19)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.145.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.144.5...@wundergraph/sdk@0.145.0) (2023-04-17)
+
+### Features
+
+* sdk testsuite ([#844](https://github.com/wundergraph/wundergraph/issues/844)) ([e3e53a9](https://github.com/wundergraph/wundergraph/commit/e3e53a9c571cb97b65848f1998cce58e1d7b514f)) (@StarpTech)
+
+## [0.144.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.144.4...@wundergraph/sdk@0.144.5) (2023-04-15)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.144.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.144.3...@wundergraph/sdk@0.144.4) (2023-04-14)
+
+### Bug Fixes
+
+* overhaul listener option handling ([#840](https://github.com/wundergraph/wundergraph/issues/840)) ([17563a5](https://github.com/wundergraph/wundergraph/commit/17563a541986b4640c3f2b676a4dbb1f7efe1152)) (@StarpTech)
+
+## [0.144.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.144.2...@wundergraph/sdk@0.144.3) (2023-04-14)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
 ## [0.144.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.144.1...@wundergraph/sdk@0.144.2) (2023-04-13)
 
 ### Bug Fixes

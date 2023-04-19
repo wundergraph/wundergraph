@@ -8,22 +8,23 @@ This section describes how to set configurations options of WunderGraph Server.
 
 ## List of available options:
 
-During development all options are optional and will be set via EnvironmentVariables with default values
+During development all options are optional and will be set via `new EnvironmentVariable` with default values
 
-### `listen.host`
+### `listen.host` (optional)
 
 The host on which the WunderGraph Server should listen.
 
-### `listen.port`
+### `listen.port` (optional)
 
 The port on which the WunderGraph Server should listen.
 
-### `serverUrl`
+### `serverUrl` (optional)
 
 This option allows you to configure the URL where your WunderGraph Server will be deployed.
-This is important for the WunderNode to be able to comminucate with WunderGraph Server.
+This is important for the WunderNode to be able to communicate with WunderGraph Server.
+If no value is provided, `listen.host` and `listen.port` will be used to generate the URL.
 
-### `logger.level`
+### `logger.level` (optional)
 
 This option allows you to configure the logger level of WunderGraph Server.
 
@@ -41,7 +42,7 @@ Each option when unset will get a value from the `Default Environment Variables`
 ## Running in production
 
 {% callout type="warning" %}
-In production, it is mandatory to provide `serverUrl`, because WunderNode needs to know where the WunderGraphServer is deployed.
+If you run the server and node in standalone mode, it is mandatory to provide `serverUrl`, because WunderNode needs to know where the WunderGraph server is deployed.
 {% /callout %}
 
 You could provide it either by setting the Default Environment Variable `WG_SERVER_URL` or as a static value.
