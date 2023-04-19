@@ -424,8 +424,8 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 
 	const apiIntrospectionOptions: ApiIntrospectionOptions = {
 		httpProxyUrl:
-			config.options?.defaultHttpProxyUrl !== undefined
-				? resolveVariable(config.options?.defaultHttpProxyUrl)
+			resolvedNodeOptions.defaultHttpProxyUrl !== undefined
+				? resolveConfigurationVariable(resolvedNodeOptions.defaultHttpProxyUrl)
 				: undefined,
 	};
 
