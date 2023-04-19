@@ -200,17 +200,23 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 				env: { WG_NODE_URL: url },
 			};
 		}
+
 		// Generate random ports
-		let nodePort = await this.freeport();
-		let serverPort = await this.freeport();
+		const [nodePort, nodeInternalPort, serverPort] = await Promise.all([
+			this.freeport(),
+			this.freeport(),
+			this.freeport(),
+		]);
 
 		return {
 			manageServer: true,
 			env: {
 				WG_CLOUD: 'true',
 				WG_NODE_URL: `http://0.0.0.0:${nodePort}`,
+				WG_NODE_INTERNAL_URL: `http://0.0.0.0:${nodeInternalPort}`,
 				WG_NODE_HOST: '0.0.0.0',
 				WG_NODE_PORT: nodePort.toString(),
+				WG_NODE_INTERNAL_PORT: nodeInternalPort.toString(),
 				WG_SERVER_URL: `http://0.0.0.0:${serverPort}`,
 				WG_SERVER_HOST: '0.0.0.0',
 				WG_SERVER_PORT: serverPort.toString(),

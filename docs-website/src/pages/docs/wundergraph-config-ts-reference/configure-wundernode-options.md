@@ -38,13 +38,14 @@ This option allows you to configure the logger level of WunderNode.
 
 Each option when unset will get a value from the `Default Environment Variables` or from the default value of that variable.
 
-| Option          | Default Value           | Default Environment Variable |
-| --------------- | ----------------------- | ---------------------------- |
-| `listen.host`   | `localhost`             | `WG_NODE_HOST`               |
-| `listen.port`   | `9991`                  | `WG_NODE_PORT`               |
-| `nodeUrl`       | `http://localhost:9991` | `WG_NODE_URL`                |
-| `publicNodeUrl` | `http://localhost:9991` | `WG_PUBLIC_NODE_URL`         |
-| `logger.level`  | `info`                  | `WG_LOG_LEVEL`               |
+| Option                | Default Value           | Default Environment Variable |
+| --------------------- | ----------------------- | ---------------------------- |
+| `listen.host`         | `localhost`             | `WG_NODE_HOST`               |
+| `listen.port`         | `9991`                  | `WG_NODE_PORT`               |
+| `listenInternal.port` | `9993`                  | `WG_NODE_INTERNAL_PORT`      |
+| `nodeUrl`             | `http://localhost:9991` | `WG_NODE_URL`                |
+| `publicNodeUrl`       | `http://localhost:9991` | `WG_PUBLIC_NODE_URL`         |
+| `logger.level`        | `info`                  | `WG_LOG_LEVEL`               |
 
 In case in options only `listen.port` is provided, the `nodeUrl` and `publicNodeUrl` will be set to `http://localhost:<port>`
 
@@ -86,6 +87,9 @@ configureWunderGraphApplication({
       host: 'localhost',
       port: '4444',
     },
+    listenInternal: {
+      port: '4445',
+    },
     nodeUrl: 'http://my-internal-network-node:4444/',
     publicNodeUrl: 'http://my-api.example.com/',
     logger: {
@@ -105,6 +109,9 @@ configureWunderGraphApplication({
     listen: {
       host: new EnvironmentVariable('NODE_HOST', 'localhost'),
       port: new EnvironmentVariable('NODE_PORT', '4444'),
+    },
+    listenInternal: {
+      port: new EnvironmentVariable('NODE_INTERNAL_PORT', '4445'),
     },
     nodeUrl: new EnvironmentVariable('NODE_URL', 'http://localhost:4444/'),
     publicNodeUrl: new EnvironmentVariable('PUBLIC_NODE_URL', 'http://my-api.example.com/'),
@@ -131,6 +138,9 @@ configureWunderGraphApplication({
       host: new EnvironmentVariable(WgEnv.NodeHost, 'localhost'),
       port: new EnvironmentVariable(WgEnv.NodePort, '9991'),
     },
+    listenInternal: {
+      port: new EnvironmentVariable(WgEnv.NodeInternalPort, '9993'),
+    },
     nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, 'http://localhost:9991/'),
     publicNodeUrl: new EnvironmentVariable(WgEnv.PublicNodeUrl, 'http://my-api.example.com/'),
     logger: {
@@ -145,6 +155,9 @@ configureWunderGraphApplication({
     listen: {
       host: new EnvironmentVariable('WG_NODE_HOST', 'localhost'),
       port: new EnvironmentVariable('WG_NODE_PORT', '9991'),
+    },
+    listenInternal: {
+      port: new EnvironmentVariable('WG_NODE_INTERNAL_PORT', '9993'),
     },
     nodeUrl: new EnvironmentVariable('WG_NODE_URL', 'http://localhost:9991/'),
     publicNodeUrl: new EnvironmentVariable('WG_PUBLIC_NODE_URL', 'http://my-api.example.com/'),
