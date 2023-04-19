@@ -48,6 +48,13 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						environmentVariableDefaultValue: '',
 						placeholderVariableName: '',
 					},
+					nodeInternalUrl: {
+						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+						staticVariableContent: 'http://localhost:9993',
+						environmentVariableName: '',
+						environmentVariableDefaultValue: '',
+						placeholderVariableName: '',
+					},
 					publicNodeUrl: {
 						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
 						staticVariableContent: 'http://localhost:9991',
@@ -66,6 +73,15 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						port: {
 							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
 							staticVariableContent: '9991',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
+					listenInternal: {
+						port: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '9993',
 							environmentVariableName: '',
 							environmentVariableDefaultValue: '',
 							placeholderVariableName: '',

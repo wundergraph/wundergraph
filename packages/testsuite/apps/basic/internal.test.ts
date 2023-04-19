@@ -48,7 +48,8 @@ describe('Internal', () => {
 		const results = await Promise.all(promises);
 		for (const result of results) {
 			expect(result.error).toBeUndefined();
-			expect(result.data?.data?.chinook_findFirstAlbum?.AlbumId).toBe(1);
+			expect(result.data?.nested?.data?.chinook_findFirstAlbum?.AlbumId).toBe(1);
+			expect(result.data?.root?.data?.hello).toBe('world');
 		}
 	});
 });

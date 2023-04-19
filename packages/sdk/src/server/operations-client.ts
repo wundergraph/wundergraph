@@ -59,7 +59,7 @@ export class OperationsClient<Queries = any, Mutations = any, Subscriptions = an
 	public query = async <T extends keyof Queries>(
 		args: ExtractInput<Queries[T]> extends never ? Omit<OperationArgs<T, never>, 'input'> : OptionalInput<Queries[T], T>
 	): Promise<Queries[T] extends { response: any } ? Queries[T]['response'] : never> => {
-		const url = `${this.options.baseURL}/internal/operations/${String(args.operationName)}`;
+		const url = `${this.options.baseURL}/operations/${String(args.operationName)}`;
 		const headers = Object.assign(
 			{},
 			{

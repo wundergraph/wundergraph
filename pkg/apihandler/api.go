@@ -33,6 +33,7 @@ type Options struct {
 	ServerUrl           string
 	PublicNodeUrl       string
 	Listener            *Listener
+	InternalListener    *Listener
 	Logging             Logging
 	DefaultTimeout      time.Duration
 	DefaultHTTPProxyURL *url.URL
