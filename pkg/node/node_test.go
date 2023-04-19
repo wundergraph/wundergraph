@@ -81,8 +81,10 @@ func TestNode(t *testing.T) {
 	}))
 	defer productService.Close()
 
-	port, err := freeport.GetFreePort()
+	ports, err := freeport.GetFreePorts(2)
 	assert.NoError(t, err)
+	port := ports[0]
+	internalPort := ports[1]
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -145,6 +147,10 @@ func TestNode(t *testing.T) {
 				Listener: &apihandler.Listener{
 					Host: "localhost",
 					Port: uint16(port),
+				},
+				InternalListener: &apihandler.Listener{
+					Host: "localhost",
+					Port: uint16(internalPort),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 			},
@@ -252,8 +258,10 @@ func TestInMemoryCache(t *testing.T) {
 	}))
 	defer productService.Close()
 
-	port, err := freeport.GetFreePort()
+	ports, err := freeport.GetFreePorts(2)
 	assert.NoError(t, err)
+	port := ports[0]
+	internalPort := ports[1]
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -314,6 +322,10 @@ func TestInMemoryCache(t *testing.T) {
 					Host: "localhost",
 					Port: uint16(port),
 				},
+				InternalListener: &apihandler.Listener{
+					Host: "localhost",
+					Port: uint16(internalPort),
+				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 			},
 		},
@@ -367,8 +379,10 @@ func TestWebHooks(t *testing.T) {
 	}))
 	defer testServer.Close()
 
-	port, err := freeport.GetFreePort()
+	ports, err := freeport.GetFreePorts(2)
 	assert.NoError(t, err)
+	port := ports[0]
+	internalPort := ports[1]
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -420,6 +434,10 @@ func TestWebHooks(t *testing.T) {
 				Listener: &apihandler.Listener{
 					Host: "localhost",
 					Port: uint16(port),
+				},
+				InternalListener: &apihandler.Listener{
+					Host: "localhost",
+					Port: uint16(internalPort),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 			},
@@ -474,8 +492,10 @@ func BenchmarkNode(t *testing.B) {
 	}))
 	defer productService.Close()
 
-	port, err := freeport.GetFreePort()
+	ports, err := freeport.GetFreePorts(2)
 	assert.NoError(t, err)
+	port := ports[0]
+	internalPort := ports[1]
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -516,6 +536,10 @@ func BenchmarkNode(t *testing.B) {
 				Listener: &apihandler.Listener{
 					Host: "localhost",
 					Port: uint16(port),
+				},
+				InternalListener: &apihandler.Listener{
+					Host: "localhost",
+					Port: uint16(internalPort),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 			},
