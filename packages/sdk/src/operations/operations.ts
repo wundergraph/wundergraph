@@ -66,7 +66,7 @@ export interface LiveQueryConfig {
 
 const createQuery =
 	<IC extends InternalClient, UserRole extends string, CustomClaims extends {}, Queries, Mutations, Subscriptions>() =>
-	<Input extends z.ZodObject<any>, InferredResponse, ZodResponse>({
+	<Input extends z.ZodTypeAny, InferredResponse, ZodResponse>({
 		input,
 		response,
 		handler,
@@ -122,7 +122,7 @@ const createQuery =
 
 const createMutation =
 	<IC extends InternalClient, UserRole extends string, CustomClaims extends {}, Queries, Mutations, Subscriptions>() =>
-	<Input extends z.ZodObject<any>, InferredResponse, ZodResponse>({
+	<Input extends z.ZodTypeAny, InferredResponse, ZodResponse>({
 		input,
 		response,
 		handler,
@@ -176,7 +176,7 @@ const createMutation =
 
 const createSubscription =
 	<IC extends InternalClient, UserRole extends string, CustomClaims extends {}, Queries, Mutations, Subscriptions>() =>
-	<I extends z.ZodObject<any>, InferredResponse, ZodResponse>({
+	<I extends z.ZodTypeAny, InferredResponse, ZodResponse>({
 		input,
 		handler,
 		response,
@@ -258,7 +258,7 @@ export type NodeJSOperation<
 	Subscriptions
 > = {
 	type: OperationType;
-	inputSchema?: z.ZodObject<any>;
+	inputSchema?: z.ZodTypeAny;
 	responseSchema?: ZodResponse;
 	queryHandler?: ZodResponse extends z.ZodObject<any>
 		? (
