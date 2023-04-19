@@ -13,6 +13,7 @@ export enum WgEnv {
 	LogLevel = 'WG_LOG_LEVEL',
 	NodeUrl = 'WG_NODE_URL',
 	PublicNodeUrl = 'WG_PUBLIC_NODE_URL',
+	NodeInternalUrl = 'WG_NODE_INTERNAL_URL',
 	NodeHost = 'WG_NODE_HOST',
 	NodePort = 'WG_NODE_PORT',
 	NodeInternalPort = 'WG_NODE_INTERNAL_PORT',
@@ -28,13 +29,6 @@ export const defaultNodePort = '9991';
 export const defaultNodeInternalPort = '9993';
 export const defaultServerPort = '9992';
 
-const getDefaultNodeInternalURL = () => {
-	const host = new EnvironmentVariable(WgEnv.NodeHost, defaultHost);
-	const port = new EnvironmentVariable(WgEnv.NodeInternalPort, defaultNodeInternalPort);
-
-	return `http://${resolveVariable(host)}:${resolveVariable(port)}`;
-};
-
 const DefaultNodeOptions = {
 	listen: {
 		host: new EnvironmentVariable(WgEnv.NodeHost, defaultHost),
@@ -44,7 +38,7 @@ const DefaultNodeOptions = {
 		port: new EnvironmentVariable(WgEnv.NodeInternalPort, defaultNodeInternalPort),
 	},
 	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, `http://${defaultHost}:${defaultNodePort}`),
-	nodeInternalUrl: getDefaultNodeInternalURL(),
+	nodeInternalUrl: new EnvironmentVariable(WgEnv.NodeInternalUrl, `http://${defaultHost}:${defaultNodeInternalPort}`),
 	publicNodeUrl: new EnvironmentVariable(WgEnv.PublicNodeUrl, `http://${defaultHost}:${defaultNodePort}`),
 	logger: {
 		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'info'),
@@ -105,7 +99,7 @@ export const fallbackNodeUrl = (listenOptions: ListenOptions | undefined) => {
 	return `http://${resolveVariable(host)}:${resolveVariable(port)}`;
 };
 
-export const getNodeInternalUrl = (options?: NodeOptions) => {
+export const fallbackNodeInternalUrl = (options?: NodeOptions) => {
 	let port = options?.listenInternal?.port || DefaultNodeOptions.listenInternal.port;
 	let host = options?.listen?.host || DefaultNodeOptions.listen.host;
 
@@ -117,7 +111,7 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 		? DefaultNodeOptions
 		: {
 				nodeUrl: options?.nodeUrl || new EnvironmentVariable(WgEnv.NodeUrl, fallbackNodeUrl(options?.listen)),
-				nodeInternalUrl: getNodeInternalUrl(options),
+				nodeInternalUrl: new EnvironmentVariable(WgEnv.NodeInternalUrl, fallbackNodeInternalUrl(options)),
 				publicNodeUrl:
 					options?.publicNodeUrl || new EnvironmentVariable(WgEnv.NodeUrl, fallbackNodeUrl(options?.listen)),
 				listen: {
