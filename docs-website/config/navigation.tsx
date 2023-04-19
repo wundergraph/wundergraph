@@ -56,6 +56,10 @@ const navigation = [
 						href: '/docs/getting-started/remix-quickstart',
 					},
 					{
+						title: 'Relay',
+						href: '/docs/getting-started/relay-quickstart',
+					},
+					{
 						title: 'SvelteKit',
 						href: '/docs/getting-started/sveltekit-quickstart',
 					},
@@ -98,6 +102,10 @@ const navigation = [
 						href: '/docs/examples/nextjs-react-query',
 					},
 					{
+						title: 'Next.js + Relay',
+						href: '/docs/examples/nextjs-relay',
+					},
+					{
 						title: 'Next.js + Clerk',
 						href: '/docs/examples/nextjs-clerk',
 					},
@@ -116,6 +124,10 @@ const navigation = [
 					{
 						title: 'Vite + Solid.js',
 						href: '/docs/examples/vite-solidjs',
+					},
+					{
+						title: 'Vite + React Relay',
+						href: '/docs/examples/vite-react-relay',
 					},
 					{
 						title: 'Vite + Svelte',
@@ -200,6 +212,102 @@ const navigation = [
 					{
 						title: 'Nuxt + Vue Query',
 						href: '/docs/examples/nuxt',
+					},
+				],
+			},
+		],
+	},
+	{
+		title: 'About WunderGraph',
+		href: '/manifesto',
+		icon: <QuestionMarkCircleIcon />,
+		paths: ['/docs/frequently-asked-questions', '/usage-information', '/about', '/docs/use-cases'],
+		links: [
+			{
+				title: 'Manifesto',
+				href: '/manifesto',
+			},
+			{
+				title: 'Usage Information',
+				href: '/usage-information',
+			},
+			{
+				title: 'WunderGraph for',
+				links: [
+					{
+						title: 'Frontend Developers',
+						href: '/about/for-frontend-developers',
+					},
+					{
+						title: 'Fullstack Developers',
+						href: '/about/for-fullstack-developers',
+					},
+					{
+						title: 'Backend Developers',
+						href: '/about/for-backend-developers',
+					},
+				],
+			},
+			{
+				title: 'Use Cases',
+				links: [
+					{
+						title: 'Overview',
+						navTitle: 'Use Cases',
+						href: '/docs/use-cases',
+					},
+					{
+						title: 'Programmable API Gateway',
+						href: '/docs/use-cases/programmable-api-gateway',
+					},
+					{
+						title: 'API Management',
+						href: '/docs/use-cases/api-management',
+					},
+					{
+						title: 'Backend for Frontend',
+						href: '/docs/use-cases/backend-for-frontend',
+					},
+					{
+						title: 'API Composition & Integration',
+						href: '/docs/use-cases/api-composition-and-integration',
+					},
+					{
+						title: 'Versionless APIs: Easily build backwards compatible APIs',
+						href: '/docs/use-cases/versionless-apis-easily-build-backwards-compatible-apis',
+					},
+					{
+						title: 'Multi Database, multi schema ORM',
+						href: '/docs/use-cases/multi-database-multi-schema-orm',
+					},
+					{
+						title: 'Generate SDKs for all your APIs',
+						href: '/docs/use-cases/generate-sdks-for-all-your-apis',
+					},
+					{
+						title: 'Centralized Governance, Monitoring, Access Controls and Logging across your APIs',
+						href: '/docs/use-cases/centralized-governance-monitoring-access-controls-and-logging-across-your-apis',
+					},
+					{
+						title: 'Enabling your Organization to become API first',
+						href: '/docs/use-cases/enabling-your-organization-to-become-api-first',
+					},
+				],
+			},
+			{
+				title: 'Frequently Asked Questions',
+				links: [
+					{
+						title: 'How is WunderGraph faster and more secure than other GraphQL solutions?',
+						href: '/docs/frequently-asked-questions/how-is-wundergraph-faster-and-more-secure-than-other-graphql-solutions',
+					},
+					{
+						title: 'How is the developer experience different from legacy GraphQL?',
+						href: '/docs/frequently-asked-questions/how-is-the-developer-experience-different-from-legacy-graphql',
+					},
+					{
+						title: 'How is server-side only GraphQL different from client-side GraphQL?',
+						href: '/docs/frequently-asked-questions/how-is-server-side-only-graphql-different-from-client-side-graphql',
 					},
 				],
 			},
@@ -710,54 +818,6 @@ const navigation = [
 		],
 	},
 	{
-		title: 'Use Cases',
-		href: '/docs/use-cases',
-		icon: <LightBulbIcon />,
-		links: [
-			{
-				title: 'Overview',
-				navTitle: 'Use Cases',
-				href: '/docs/use-cases',
-			},
-			{
-				title: 'Programmable API Gateway',
-				href: '/docs/use-cases/programmable-api-gateway',
-			},
-			{
-				title: 'API Management',
-				href: '/docs/use-cases/api-management',
-			},
-			{
-				title: 'Backend for Frontend',
-				href: '/docs/use-cases/backend-for-frontend',
-			},
-			{
-				title: 'API Composition & Integration',
-				href: '/docs/use-cases/api-composition-and-integration',
-			},
-			{
-				title: 'Versionless APIs: Easily build backwards compatible APIs',
-				href: '/docs/use-cases/versionless-apis-easily-build-backwards-compatible-apis',
-			},
-			{
-				title: 'Multi Database, multi schema ORM',
-				href: '/docs/use-cases/multi-database-multi-schema-orm',
-			},
-			{
-				title: 'Generate SDKs for all your APIs',
-				href: '/docs/use-cases/generate-sdks-for-all-your-apis',
-			},
-			{
-				title: 'Centralized Governance, Monitoring, Access Controls and Logging across your APIs',
-				href: '/docs/use-cases/centralized-governance-monitoring-access-controls-and-logging-across-your-apis',
-			},
-			{
-				title: 'Enabling your Organization to become API first',
-				href: '/docs/use-cases/enabling-your-organization-to-become-api-first',
-			},
-		],
-	},
-	{
 		title: 'Features',
 		href: '/docs/features',
 		icon: <ListBulletIcon />,
@@ -961,6 +1021,10 @@ const navigation = [
 			{
 				title: 'React Query',
 				href: '/docs/clients-reference/react-query',
+			},
+			{
+				title: 'React Relay',
+				href: '/docs/clients-reference/react-relay',
 			},
 			{
 				title: 'Solid Query',
@@ -1368,38 +1432,6 @@ const navigation = [
 		],
 	},
 	{ type: 'divider' },
-	{
-		title: 'About WunderGraph',
-		href: '/manifesto',
-		icon: <QuestionMarkCircleIcon />,
-		links: [
-			{
-				title: 'Manifesto',
-				href: '/manifesto',
-			},
-			{
-				title: 'Usage Information',
-				href: '/usage-information',
-			},
-			{
-				title: 'Frequently Asked Questions',
-				links: [
-					{
-						title: 'How is WunderGraph faster and more secure than other GraphQL solutions?',
-						href: '/docs/frequently-asked-questions/how-is-wundergraph-faster-and-more-secure-than-other-graphql-solutions',
-					},
-					{
-						title: 'How is the developer experience different from legacy GraphQL?',
-						href: '/docs/frequently-asked-questions/how-is-the-developer-experience-different-from-legacy-graphql',
-					},
-					{
-						title: 'How is server-side only GraphQL different from client-side GraphQL?',
-						href: '/docs/frequently-asked-questions/how-is-server-side-only-graphql-different-from-client-side-graphql',
-					},
-				],
-			},
-		],
-	},
 	// {
 	// 	title: 'Troubleshooting',
 	// 	href: '/docs/troubleshooting',

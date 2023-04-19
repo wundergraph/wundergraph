@@ -1,0 +1,5 @@
+{
+  "7d4c2b289181390ab8737dcef8fd2e27": "query AppDragonsQuery {\n  spacex_dragons {\n    ...Dragons_display_details\n    id\n  }\n}\n\nfragment Dragons_display_details on spacex_Dragon {\n  name\n  active\n}\n",
+  "8a738f93b0d0c6c2856df6a3bd459729": "query pagesDragonsQuery {\n  spacex_dragons {\n    ...Dragons_display_details\n    id\n  }\n}\n\nfragment Dragons_display_details on spacex_Dragon {\n  name\n  active\n}\n",
+  "bf27ed5bedf2fe6119587dd366040fd4": "query AppDragonsQuery {\n  spacex_dragons {\n    name\n    active\n    id\n  }\n}\n"
+}

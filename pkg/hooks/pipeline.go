@@ -130,7 +130,7 @@ func (p *pipeline) updateContextHeaders(ctx *resolve.Context, headers map[string
 		httpHeader.Set(name, headers[name])
 	}
 	ctx.Request.Header = httpHeader
-	clientRequest := ctx.Context.Value(pool.ClientRequestKey)
+	clientRequest := ctx.Value(pool.ClientRequestKey)
 	if clientRequest == nil {
 		return
 	}
