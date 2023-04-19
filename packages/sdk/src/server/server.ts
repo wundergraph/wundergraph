@@ -2,7 +2,6 @@ import closeWithGrace from 'close-with-grace';
 import { Headers } from '@web-std/fetch';
 import process from 'node:process';
 import Fastify, { FastifyInstance } from 'fastify';
-import type { InternalClient } from './internal-client';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
 import { pino } from 'pino';
 import path from 'path';
@@ -80,17 +79,6 @@ function configureWunderGraphServer(configWrapper: () => any): any {
 }
 
 export { configureWunderGraphServer };
-
-// export const configureWunderGraphServer = <
-// 	GeneratedHooksConfig extends HooksConfiguration,
-// 	GeneratedClient extends InternalClient,
-// 	GeneratedWebhooksConfig extends WebhooksConfig = WebhooksConfig,
-// 	GeneratedOperations extends OperationsClient = OperationsClient
-// >(
-// 	configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>
-// ): WunderGraphHooksAndServerConfig => {
-// 	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig>(configWrapper());
-// };
 
 const _configureWunderGraphServer = <
 	GeneratedHooksConfig extends HooksConfiguration,

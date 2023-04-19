@@ -51,9 +51,9 @@ export interface OperationDefinition {
 }
 
 export interface ClientConfig {
-	applicationHash: string;
+	applicationHash?: string;
 	baseURL: string;
-	sdkVersion: string;
+	sdkVersion?: string;
 	customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 	extraHeaders?: Headers;
 	operationMetadata?: OperationMetadata;

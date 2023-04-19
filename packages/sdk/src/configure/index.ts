@@ -63,6 +63,7 @@ import {
 	WebhookConfiguration,
 	WunderGraphConfiguration,
 } from '@wundergraph/protobuf';
+import hash from 'object-hash';
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
 import { findUp } from './findup';
@@ -1524,7 +1525,7 @@ const loadAndApplyNodeJsOperationOverrides = async (
 // this function.
 const applyNodeJsOperationOverrides = (
 	operation: TypeScriptOperation,
-	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any>
+	overrides: NodeJSOperation<any, any, any, any, any, any, any, any>
 ): TypeScriptOperation => {
 	if (overrides.inputSchema) {
 		const schema = zodToJsonSchema(overrides.inputSchema) as any;

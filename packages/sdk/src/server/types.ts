@@ -15,21 +15,21 @@ declare module 'fastify' {
 export type AuthenticationHookRequest<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
-	InternalOperations extends OperationsClient = OperationsClient
-> = BaseRequestContext<User, IC> & AuthenticationRequestContext<User>;
+	InternalOperationsClient extends OperationsClient = OperationsClient
+> = BaseRequestContext<User, IC, InternalOperationsClient> & AuthenticationRequestContext<User>;
 
 export interface FastifyRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
-	InternalOperations extends OperationsClient = OperationsClient
+	InternalOperationsClient extends OperationsClient = OperationsClient
 > {
-	ctx: AuthenticationHookRequest<User, IC, InternalOperations>;
+	ctx: AuthenticationHookRequest<User, IC, InternalOperationsClient>;
 }
 
 export interface BaseRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
-	InternalOperations extends OperationsClient = OperationsClient
+	InternalOperationsClient extends OperationsClient = OperationsClient
 > {
 	/**
 	 * The user that is currently logged in.
@@ -49,7 +49,7 @@ export interface BaseRequestContext<
 	/**
 	 * The operations client that is used to communicate with the server.
 	 */
-	operations: Omit<InternalOperations, 'cancelSubscriptions'>;
+	operations: Omit<InternalOperationsClient, 'cancelSubscriptions'>;
 }
 export interface AuthenticationRequestContext<User extends WunderGraphUser = WunderGraphUser> {
 	/**

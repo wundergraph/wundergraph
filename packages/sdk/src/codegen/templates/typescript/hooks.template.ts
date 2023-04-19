@@ -4,7 +4,7 @@ import { {{ modelImports }} } from "./models"
 import type { BaseRequestContext, WunderGraphRequest, WunderGraphResponse, AuthenticationResponse, AuthenticationHookRequest, HooksConfiguration, WsTransportOnConnectionInitResponse, PreUploadHookRequest, PreUploadHookResponse, PostUploadHookRequest, PostUploadHookResponse } from "@wundergraph/sdk/server";
 import type { InternalClient } from "./wundergraph.internal.client"
 import type { User } from "./wundergraph.server"
-import { InternalOperations } from "./wundergraph.internal.operations.client";
+import { InternalOperationsClient } from "./wundergraph.internal.operations.client";
 
 // use SKIP to skip the hook and continue the request / response chain without modifying the request / response
 export type SKIP = "skip";
@@ -92,7 +92,7 @@ export type JSONValue =
 
 export type JSONObject = { [key: string]: JSONValue };
 										
-export interface HookRequest extends BaseRequestContext<User, InternalClient, InternalOperations> {}
+export interface HookRequest extends BaseRequestContext<User, InternalClient, InternalOperationsClient> {}
 
 export interface HookRequestWithResponse<Response> extends HookRequest {
 		response: Response;
