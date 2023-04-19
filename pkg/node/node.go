@@ -60,6 +60,7 @@ type Node struct {
 	configCh       chan *WunderNodeConfig
 	builder        *apihandler.Builder
 	server         *http.Server
+	internalServer *http.Server
 	pool           *pool.Pool
 	log            *zap.Logger
 	apiClient      *fasthttp.Client
@@ -248,7 +249,14 @@ func (n *Node) StartBlocking(opts ...Option) error {
 
 func (n *Node) Shutdown(ctx context.Context) error {
 	if n.server != nil {
-		return n.server.Shutdown(ctx)
+		if err := n.server.Shutdown(ctx); err != nil {
+			return err
+		}
+	}
+	if n.internalServer != nil {
+		if err := n.internalServer.Shutdown(ctx); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -265,6 +273,12 @@ func (n *Node) Close() error {
 			return err
 		}
 		n.server = nil
+	}
+	if n.internalServer != nil {
+		if err := n.internalServer.Close(); err != nil {
+			return err
+		}
+		n.internalServer = nil
 	}
 	return nil
 }
@@ -374,12 +388,11 @@ func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (
 
 func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	router := mux.NewRouter()
-
-	internalRouter := router.PathPrefix("/internal").Subrouter()
+	internalRouter := mux.NewRouter()
 
 	if n.options.globalRateLimit.enable {
 		limiter := rate.NewLimiter(rate.Every(n.options.globalRateLimit.perDuration), n.options.globalRateLimit.requests)
-		router.Use(func(handler http.Handler) http.Handler {
+		handler := func(handler http.Handler) http.Handler {
 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if !limiter.Allow() {
 					http.Error(w, "too many requests", http.StatusTooManyRequests)
@@ -387,7 +400,9 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 				}
 				handler.ServeHTTP(w, r)
 			})
-		})
+		}
+		router.Use(handler)
+		internalRouter.Use(handler)
 	}
 
 	var streamClosers []chan struct{}
@@ -444,7 +459,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	}
 
 	n.builder = apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
-	internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, hooksClient, loader)
+	internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, hooksClient, loader, n.options.enableIntrospection)
 
 	publicClosers, err := n.builder.BuildAndMountApiHandler(n.ctx, router, nodeConfig.Api)
 	if err != nil {
@@ -499,12 +514,21 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	}))
 
 	handler := n.setupGlobalMiddlewares(router, nodeConfig)
+	internalHandler := http.HandlerFunc(internalRouter.ServeHTTP)
+
+	connContext := func(ctx context.Context, c net.Conn) context.Context {
+		return context.WithValue(ctx, "conn", c)
+	}
 
 	n.server = &http.Server{
-		Handler: handler,
-		ConnContext: func(ctx context.Context, c net.Conn) context.Context {
-			return context.WithValue(ctx, "conn", c)
-		},
+		Handler:     handler,
+		ConnContext: connContext,
+		// ErrorLog: log.New(ioutil.Discard, "", log.LstdFlags),
+	}
+
+	n.internalServer = &http.Server{
+		Handler:     internalHandler,
+		ConnContext: connContext,
 		// ErrorLog: log.New(ioutil.Discard, "", log.LstdFlags),
 	}
 
@@ -516,7 +540,9 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		}
 		timeoutMiddleware := httpidletimeout.New(n.options.idleTimeout, opts...)
 		router.Use(timeoutMiddleware.Handler)
+		internalRouter.Use(timeoutMiddleware.Handler)
 		n.server.RegisterOnShutdown(timeoutMiddleware.Cancel)
+		n.internalServer.RegisterOnShutdown(timeoutMiddleware.Cancel)
 		timeoutMiddleware.Start()
 		go func() {
 			_ = timeoutMiddleware.Wait(n.ctx)
@@ -529,6 +555,11 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		return err
 	}
 
+	internalListeners, err := n.newListeners(nodeConfig.Api.Options.InternalListener)
+	if err != nil {
+		return err
+	}
+
 	g, _ := errgroup.WithContext(n.ctx)
 
 	for _, listener := range listeners {
@@ -537,6 +568,25 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 			n.log.Info(fmt.Sprintf("Node listening at http://%s", l.Addr().String()))
 
 			err := n.server.Serve(l)
+			if err == nil {
+				return nil
+			}
+			if err == http.ErrServerClosed {
+				n.log.Debug("Listener closed",
+					zap.String("addr", l.Addr().String()),
+				)
+				return nil
+			}
+			return err
+		})
+	}
+
+	for _, listener := range internalListeners {
+		l := listener
+		g.Go(func() error {
+			n.log.Debug(fmt.Sprintf("Internal node listening at http://%s", l.Addr().String()))
+
+			err := n.internalServer.Serve(l)
 			if err == nil {
 				return nil
 			}

@@ -21,8 +21,8 @@
   "dependencies": {
     "@heroicons/react": "^2.0.13",
     "@tailwindcss/forms": "^0.5.3",
-    "@wundergraph/nextjs": "^0.10.7",
-    "@wundergraph/sdk": "^0.145.0",
+    "@wundergraph/nextjs": "^0.10.8",
+    "@wundergraph/sdk": "^0.145.1",
     "clsx": "^1.2.1",
     "framer-motion": "^7.6.12",
     "graphql": "^16.3.0",

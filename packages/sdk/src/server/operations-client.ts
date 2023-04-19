@@ -64,7 +64,7 @@ export class OperationsClient<
 	}
 
 	protected operationUrl(operationName: string) {
-		return this.options.baseURL + '/internal/operations/' + operationName;
+		return this.options.baseURL + '/operations/' + operationName;
 	}
 
 	private subscriptions: AsyncGenerator<any>[] = [];

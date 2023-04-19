@@ -3,6 +3,7 @@
 # WunderGraph SDK
 
 ![wunderctl](https://img.shields.io/npm/v/@wundergraph/sdk.svg)
+[![Star us on GitHub](https://img.shields.io/github/stars/wundergraph/wundergraph?color=FFD700&label=Stars&logo=Github)](https://github.com/wundergraph/wundergraph)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/wundergraph/wundergraph/blob/main/CONTRIBUTING.md)
 [![License Apache 2](https://img.shields.io/badge/license-Apache%202-blue)](https://github.com/wundergraph/wundergraph/blob/main/LICENSE)
 [![Enterprise support](https://img.shields.io/badge/enterprise-support-indigo.svg)](https://form.typeform.com/to/fuRWxErj?typeform-embed-id=8749569972809419&typeform-embed=popup-blank&typeform-source=wundergraph.com&typeform-medium=embed-sdk&typeform-medium-version=next)
@@ -19,8 +20,11 @@
 
 [<img height="300" width="300" src="https://user-images.githubusercontent.com/47415099/214915738-fd34d2ab-7549-4a60-bbdb-ab9f30145341.png">](https://wundergraph.com/)
 
+[![Post on our Discourse forum](https://img.shields.io/discourse/topics?color=fbf5af&label=Discourse&logo=Discourse&server=https%3A%2F%2Fcommunity.wundergraph.com%2F)](https://community.wundergraph.com/)
 [![Join our Discord Server](https://img.shields.io/badge/Discord-chat%20with%20us-%235865F2?style=flat&logo=discord&logoColor=%23fff)](https://discord.com/invite/Jjmc8TC)
 [![Tweet at us on Twitter](https://img.shields.io/badge/Twitter-tweet%20at%20us-1da1f2?style=flat&logo=twitter&logoColor=%23fff)](https://twitter.com/wundergraphcom)
+
+[Love WunderGraph? Give us a ⭐ on GitHub!](https://github.com/wundergraph/wundergraph)
 
 </div>
 
@@ -185,7 +189,7 @@ npx create-wundergraph-app --init
 # Community
 
 Want to chat about **WunderGraph** with the team and other enthusiastic developers like yourself?
-We're very active on [our Discord server](https://discord.com/invite/Jjmc8TC)
+We're very active on [our Discord server](https://discord.com/invite/Jjmc8TC), [Discourse](https://community.wundergraph.com/)
 and on [our GitHub](https://github.com/wundergraph/wundergraph/), where issues and PRs are very welcome
 (but please read our [contribution readme](https://github.com/wundergraph/wundergraph/blob/main/CONTRIBUTING.md) first).
 
@@ -195,7 +199,7 @@ Now, the only thing our community is missing is you!
 
 **Questions?** 🙋
 
-- We're happy to help you with queries on [our Discord server](https://discord.com/invite/Jjmc8TC).
+- We're happy to help you with queries on [our Discord server](https://discord.com/invite/Jjmc8TC) & [Discourse](https://community.wundergraph.com/).
 
 **Bugs?** 🪳
 
