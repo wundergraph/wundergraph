@@ -1,4 +1,5 @@
-import http from 'http';
+import execa from 'execa';
+import command_exists from 'command-exists';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Setup } from '../../setup/generate';
 import { createTestServer } from './.wundergraph/generated/testing';
@@ -22,8 +23,6 @@ const expectQuerySuccess = async () => {
 			code: 'ES',
 		},
 	});
-
-	console.log(result);
 
 	expect(result.error).toBeUndefined();
 	expect(result.data).toBeDefined();
@@ -52,9 +51,28 @@ const expectQueryFailure = async () => {
 	await wg.stop();
 };
 
+const proxyFromEnvironment = process.env.HTTP_PROXY;
+const proxyFromSquid = (() => {
+	if (!proxyFromEnvironment && command_exists.sync('docker-compose')) {
+		return 'http://127.0.0.1:3128';
+	}
+})();
+
+beforeAll(async () => {
+	if (proxyFromSquid) {
+		await execa('docker-compose', ['up', '-d'], { cwd: 'apps/generation' });
+	}
+});
+
+afterAll(async () => {
+	if (proxyFromSquid) {
+		await execa('docker-compose', ['down'], { cwd: 'apps/generation' });
+	}
+});
+
 // Invalid proxy used to make generation fail
 const invalidProxy = 'http://this.does.not.exist';
-const validProxy = '';
+const validProxy = proxyFromEnvironment || proxyFromSquid;
 
 const itIfValidProxy = !!validProxy ? it : it.skip;
 

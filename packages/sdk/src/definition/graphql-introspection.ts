@@ -15,6 +15,7 @@ import {
 	printSchema,
 } from 'graphql';
 import { AxiosError, AxiosProxyConfig, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { HttpsProxyAgent, HttpsProxyAgentOptions } from 'https-proxy-agent';
 import { ConfigurationVariableKind, DataSourceKind, HTTPHeader, HTTPMethod } from '@wundergraph/protobuf';
 import { cleanupSchema } from '../graphql/schema';
 import {
@@ -282,42 +283,65 @@ const introspectGraphQLAPI = async (
 
 	let proxyConfig: AxiosProxyConfig | undefined;
 
-	let httpProxyUrl: string | undefined;
+	let httpProxyUrlString: string | undefined;
 	if (introspection.httpProxyUrl !== undefined) {
 		// introspection.httpProxyUrl might be null to allow disabling the global proxy
 		if (introspection.httpProxyUrl) {
 			try {
-				httpProxyUrl = resolveVariable(introspection.httpProxyUrl);
+				httpProxyUrlString = resolveVariable(introspection.httpProxyUrl);
 			} catch (e: any) {}
 		}
 	}
-	if (httpProxyUrl === undefined) {
-		httpProxyUrl = options.httpProxyUrl ?? '';
+	if (httpProxyUrlString === undefined) {
+		httpProxyUrlString = options.httpProxyUrl ?? '';
 	}
-	if (httpProxyUrl) {
-		const proxyUrlString = resolveVariable(httpProxyUrl);
+	let httpsAgent: HttpsProxyAgent | undefined;
+	let httpsAgentOptions: HttpsProxyAgentOptions | undefined;
+	if (httpProxyUrlString) {
 		try {
-			const proxyUrl = new URL(proxyUrlString);
-			const defaultPort = proxyUrl.protocol.toLowerCase() === 'https' ? 443 : 80;
-			proxyConfig = {
-				host: proxyUrl.host,
-				port: proxyUrl.port ? parseInt(proxyUrl.host, 10) : defaultPort,
-				protocol: proxyUrl.protocol,
-			};
-			if (proxyUrl.username || proxyUrl.password) {
-				proxyConfig.auth = {
-					username: proxyUrl.username,
-					password: proxyUrl.password,
+			const proxyUrl = new URL(httpProxyUrlString);
+			let protocol = proxyUrl.protocol.toLocaleLowerCase();
+			while (protocol.endsWith(':')) {
+				protocol = protocol.substring(0, protocol.length - 1);
+			}
+			const defaultPort = protocol === 'https' ? 443 : 80;
+			const proxyHostname = proxyUrl.hostname;
+			const proxyPort = proxyUrl.port ? parseInt(proxyUrl.port, 10) : defaultPort;
+			// XXX: axios doesn't work properly with CONNECT request to proxy HTTPS
+			// over HTTP proxies. Workaround it with HttpsProxyAgent instead
+			// See https://github.com/axios/axios/issues/4531
+			if (protocol === 'http' && url.toLocaleLowerCase().startsWith('https')) {
+				httpsAgentOptions = {
+					host: proxyHostname,
+					port: proxyPort,
+					protocol,
 				};
+				if (proxyUrl.username || proxyUrl.password) {
+					httpsAgentOptions.auth = `${proxyUrl.username}:${proxyUrl.password}`;
+				}
+				httpsAgent = new HttpsProxyAgent(httpsAgentOptions);
+			} else {
+				proxyConfig = {
+					host: proxyHostname,
+					port: proxyPort,
+					protocol,
+				};
+				if (proxyUrl.username || proxyUrl.password) {
+					proxyConfig.auth = {
+						username: proxyUrl.username,
+						password: proxyUrl.password,
+					};
+				}
 			}
 		} catch (e: any) {
-			throw new Error(`invalid HTTP proxy URL '${proxyUrlString} when introspecting ${url}': ${e}`);
+			throw new Error(`invalid HTTP proxy URL '${httpProxyUrlString} when introspecting ${url}': ${e}`);
 		}
 	}
 
 	let opts: AxiosRequestConfig = {
 		headers: headers,
 		proxy: proxyConfig,
+		httpsAgent,
 		// Prevent axios from running JSON.parse() for us
 		transformResponse: (res) => res,
 		'axios-retry': {
@@ -340,11 +364,23 @@ const introspectGraphQLAPI = async (
 		if (!introspection.mTLS.cert) {
 			throw new MissingKeyError('mTLS.cert', introspection);
 		}
-		opts.httpsAgent = new https.Agent({
-			key: resolveVariable(introspection.mTLS.key),
-			cert: resolveVariable(introspection.mTLS.cert),
-			rejectUnauthorized: !introspection.mTLS.insecureSkipVerify,
-		});
+		if (httpsAgentOptions) {
+			// If httpsAgentOptions is truthy, it means we already have a custom
+			// agent for HTTP proxy -> HTTPS connection and we need to use it
+			// instead of https.Agent
+			opts.httpsAgent = new HttpsProxyAgent({
+				...httpsAgentOptions,
+				key: resolveVariable(introspection.mTLS.key),
+				cert: resolveVariable(introspection.mTLS.cert),
+				rejectUnauthorized: !introspection.mTLS.insecureSkipVerify,
+			});
+		} else {
+			opts.httpsAgent = new https.Agent({
+				key: resolveVariable(introspection.mTLS.key),
+				cert: resolveVariable(introspection.mTLS.cert),
+				rejectUnauthorized: !introspection.mTLS.insecureSkipVerify,
+			});
+		}
 	}
 
 	let res: AxiosResponse<string> | undefined;
