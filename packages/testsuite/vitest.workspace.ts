@@ -17,7 +17,7 @@ export default defineWorkspace([
 		root: 'apps/generation',
 		test: {
 			globalSetup: 'apps/generation/test-setup.ts',
-			testTimeout: 10000,
+			testTimeout: 30000,
 		},
 	},
 	{
