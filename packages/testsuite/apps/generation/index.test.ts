@@ -66,6 +66,7 @@ describe('Proxy configurations', () => {
 	});
 
 	it('uses an invalid global proxy for queries and fails', async () => {
+		await regenerate();
 		process.env.WG_HTTP_PROXY = invalidProxy;
 		await expectQueryFailure();
 		delete process.env.WG_HTTP_PROXY;
@@ -98,6 +99,7 @@ describe('Proxy configurations', () => {
 	});
 
 	it('uses and invalid data source proxy for queries and fails', async () => {
+		await regenerate();
 		process.env.COUNTRIES_PROXY = invalidProxy;
 		await expectQueryFailure();
 		delete process.env.COUNTRIES_PROXY;
