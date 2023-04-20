@@ -30,3 +30,6 @@ CHANGELOG.md
 
 # Generated PB files
 packages/protobuf/wgpb
+
+# Relay generated files
+**/operations/relay

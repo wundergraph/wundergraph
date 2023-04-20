@@ -169,6 +169,7 @@ const tags = {
 	WG_PUBLIC_NODE_URL: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
 	WG_NODE_HOST: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
 	WG_NODE_PORT: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_NODE_INTERNAL_PORT: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
 	WG_SERVER_URL: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
 	WG_SERVER_HOST: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
 	WG_SERVER_PORT: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',

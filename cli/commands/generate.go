@@ -173,7 +173,7 @@ var generateCmd = &cobra.Command{
 			}
 
 		} else {
-			log.Info("hooks EntryPoint not found, skipping", zap.String("file", serverEntryPointFilename))
+			log.Debug("wundergraph.server.ts not found, skipping server", zap.String("file", serverEntryPointFilename))
 			onAfterBuild = func(buildErr error, rebuild bool) error {
 				<-configRunner.Run(ctx)
 

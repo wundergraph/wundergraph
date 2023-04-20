@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.108.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.107.0...@wundergraph/protobuf@0.108.0) (2023-04-19)
+
+### Features
+
+* implement internal graphql handler ([#853](https://github.com/wundergraph/wundergraph/issues/853)) ([ad42f5f](https://github.com/wundergraph/wundergraph/commit/ad42f5f9f23a0e6ec968a1c5fefb226f2b46254a)) (@thisisnithin)
+
 ## [0.107.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.106.1...@wundergraph/protobuf@0.107.0) (2023-04-12)
 
 ### Features
