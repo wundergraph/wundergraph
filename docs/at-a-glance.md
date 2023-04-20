@@ -86,12 +86,12 @@ Let's add some business logic to enhance the application.
 ```typescript
 // wundergraph.server.ts
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     authentication: {
       postAuthentication: async ({ user }) => {
         // let's add a custom hook to update the last login field for the user
-        serverContext.internalClient.mutations.SetLastLogin({ email: user.email });
+        serverContext.operations.mutate({ operationName: 'SetLastLogin', email: user.email });
       },
     },
   },
@@ -104,7 +104,9 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 // userinfo.tsx
 
 const UserInfo = () => {
-  const userInfo = useQuery.UserInfo();
+  const userInfo = useQuery({
+    operationName: 'UserInfo',
+  });
   return (
     <div>
       <h1>UserInfo</h1>
