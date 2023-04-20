@@ -326,7 +326,6 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer pool.PutBytesBuffer(bodyBuf)
 	_, err := io.Copy(bodyBuf, r.Body)
 	if err != nil && !errors.Is(err, io.EOF) {
-		requestLogger.Info("error here 1")
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
@@ -341,7 +340,6 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			zap.Error(err),
 			zap.String("url", r.RequestURI),
 		)
-		requestLogger.Info("error here 2")
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
@@ -362,7 +360,6 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer pool.PutBytesBuffer(compactBuf)
 	err = json.Compact(compactBuf, ctx.Variables)
 	if err != nil {
-		requestLogger.Info("error here 3")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -413,7 +410,6 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 	defer pool.PutBytesBuffer(bodyBuf)
 	_, err := io.Copy(bodyBuf, r.Body)
 	if err != nil && !errors.Is(err, io.EOF) {
-		requestLogger.Info("error here 4")
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
@@ -449,7 +445,6 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 	defer pool.PutBytesBuffer(compactBuf)
 	err = json.Compact(compactBuf, ctx.Variables)
 	if err != nil {
-		requestLogger.Info("error here 6")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -466,7 +461,6 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 
 	flushWriter, ok := getHooksFlushWriter(ctx, r, w, h.hooksPipeline, h.log)
 	if !ok {
-		requestLogger.Info("error here 7")
 		http.Error(w, "Connection not flushable", http.StatusBadRequest)
 		return
 	}
