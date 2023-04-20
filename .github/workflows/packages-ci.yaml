@@ -65,22 +65,25 @@ jobs:
       - name: Bootstrap PNPM workspace
         run: ./scripts/pnpm.sh
 
-      - name: Build all libs + apps
-        run: pnpm build
-
-      - name: Get branch name
-        id: branch-name
-        uses: tj-actions/branch-names@v6
-
-      - name: Get the last successful commit for the current branch
-        uses: nrwl/nx-set-shas@v3
-        id: last_successful_commit_push
-        with:
-          main-branch-name: ${{ steps.branch-name.outputs.current_branch }} # Get the last successful commit for the current branch.
+      - name: Determine base and current refs
+        id: refs
+        # For pull requests, use the sha provided in event.pull_request
+        # For pushes, check against the previous commit
+        run: |
+          if ! test -z "${{ github.event.pull_request.base.sha }}" && ! test -z ${{ github.sha }}; then
+            echo "base=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
+            echo "current=${{ github.sha }}" >> $GITHUB_OUTPUT
+          else
+            echo "base=HEAD~1" >> $GITHUB_OUTPUT
+            echo "current=HEAD" >> $GITHUB_OUTPUT
+          fi
 
       - name: Check for formatting errors
         # Use sed and tr instead of xargs to handle filenames with $
-        run: pnpx prettier --check -u $(git diff --name-only --diff-filter=ACMRT -r ${{ steps.last_successful_commit_push.outputs.base }} | sed 's/\$/\\\$/g' | tr '\n' ' ')
+        run: pnpx prettier --check -u $(git diff --name-only --diff-filter=ACMRT -r ${{ steps.refs.base }} ${{ steps.refs.current }} | sed 's/\$/\\\$/g' | tr '\n' ' ')
+
+      - name: Build all libs + apps
+        run: pnpm build
 
       - name: Check if git is not dirty after generating files
         run: git diff --no-ext-diff --exit-code
