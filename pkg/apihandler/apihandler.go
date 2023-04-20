@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -76,8 +75,8 @@ type WgRequestParams struct {
 	SubsribeOnce bool
 }
 
-func NewWgRequestParams(url *url.URL) WgRequestParams {
-	q := url.Query()
+func NewWgRequestParams(r *http.Request) WgRequestParams {
+	q := r.URL.Query()
 	return WgRequestParams{
 		UseJsonPatch: q.Has(WgJsonPatchParam),
 		UseSse:       q.Has(WgSseParam),
@@ -289,7 +288,11 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			},
 		)
 		if err != nil {
-			r.log.Error("registerS3UploadClient", zap.Error(err))
+			r.log.Info("unable to register S3 provider",
+				zap.Error(err),
+				zap.String("provider", s3Provider.Name),
+				zap.String("endpoint", loadvariable.String(s3Provider.Endpoint)),
+			)
 		} else {
 			s3Path := fmt.Sprintf("/s3/%s/upload", s3Provider.Name)
 			r.router.Handle(s3Path, http.HandlerFunc(s3.UploadFile))
@@ -748,7 +751,7 @@ type GraphQLPlaygroundHandler struct {
 }
 
 func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
-	tpl := strings.Replace(h.html, "{{apiURL}}", h.nodeUrl, 1)
+	tpl := strings.Replace(h.html, "{{apiURL}}", h.nodeUrl, -1)
 	resp := []byte(tpl)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -807,10 +810,7 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		RenameTypeNames: h.renameTypeNames,
 	})
 	defer h.pool.PutShared(shared)
-
 	shared.Ctx.Variables = requestVariables
-	shared.Ctx.Context = r.Context()
-	shared.Ctx.Request.Header = r.Header
 	shared.Doc.Input.ResetInputString(requestQuery)
 	shared.Parser.Parse(shared.Doc, shared.Report)
 
@@ -1442,7 +1442,7 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, w http.Respons
 }
 
 func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, ctx *resolve.Context, requestBuf *bytes.Buffer, flusher http.Flusher, requestLogger *zap.Logger) {
-	wgParams := NewWgRequestParams(r.URL)
+	wgParams := NewWgRequestParams(r)
 
 	done := ctx.Context.Done()
 
@@ -1701,6 +1701,14 @@ type SubscriptionHandler struct {
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = setOperationMetaData(r, h.operation)
+
+	// recover from panic if one occured. Set err to nil otherwise.
+	defer func() {
+		if r := recover(); r != nil {
+			requestLogger.Error("panic recovered", zap.Any("panic", r))
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}()
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -2173,6 +2181,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 			enabled:                operation.LiveQueryConfig.Enable,
 			pollingIntervalSeconds: operation.LiveQueryConfig.PollingIntervalSeconds,
 		},
+		internal: false,
 	}
 
 	if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
@@ -2199,6 +2208,7 @@ type FunctionsHandler struct {
 	queryParamsAllowList []string
 	stringInterpolator   *interpolate.StringInterpolator
 	liveQuery            liveQueryConfig
+	internal             bool
 }
 
 func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -2208,8 +2218,6 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
 
 	r = setOperationMetaData(r, h.operation)
-
-	isInternal := strings.HasPrefix(r.URL.Path, "/internal/")
 
 	ctx := pool.GetCtx(r, r, pool.Config{})
 	defer pool.PutCtx(ctx)
@@ -2234,7 +2242,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		if isInternal {
+		if h.internal {
 			ctx.Variables, _, _, _ = jsonparser.Get(variablesBuf.Bytes(), "input")
 		} else {
 			ctx.Variables = variablesBuf.Bytes()
@@ -2358,7 +2366,7 @@ func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWri
 }
 
 func (h *FunctionsHandler) handleSubscriptionRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
-	wgParams := NewWgRequestParams(r.URL)
+	wgParams := NewWgRequestParams(r)
 
 	setSubscriptionHeaders(w)
 	buf := pool.GetBytesBuffer()
@@ -2430,6 +2438,13 @@ func setOperationMetaData(r *http.Request, operation *wgpb.Operation) *http.Requ
 }
 
 func getOperationMetaData(r *http.Request) *OperationMetaData {
+	if r == nil {
+		return nil
+	}
+	ctx := r.Context()
+	if ctx == nil {
+		return nil
+	}
 	maybeMetaData := r.Context().Value("operationMetaData")
 	if maybeMetaData == nil {
 		return nil
@@ -2462,7 +2477,7 @@ func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseW
 }
 
 func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w http.ResponseWriter) (context.Context, *httpFlushWriter, bool) {
-	wgParams := NewWgRequestParams(r.URL)
+	wgParams := NewWgRequestParams(r)
 
 	flusher, ok := w.(http.Flusher)
 	if !ok {

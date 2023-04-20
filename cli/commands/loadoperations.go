@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -38,7 +37,7 @@ var loadoperationsCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		return ioutil.WriteFile(outFile, []byte(out), os.ModePerm)
+		return os.WriteFile(outFile, []byte(out), os.ModePerm)
 	},
 	Args: cobra.ExactArgs(3),
 }

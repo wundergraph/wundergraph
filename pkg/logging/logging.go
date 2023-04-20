@@ -106,6 +106,9 @@ func FindLogLevel(logLevel string) (zapcore.Level, error) {
 }
 
 func RequestIDFromContext(ctx context.Context) string {
+	if ctx == nil {
+		return ""
+	}
 	requestID, ok := ctx.Value(RequestIDKey{}).(string)
 	if !ok {
 		return ""

@@ -7,20 +7,24 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 
 	"github.com/buger/jsonparser"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
+	"golang.org/x/sync/singleflight"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
 	"github.com/wundergraph/graphql-go-tools/pkg/asttransform"
 	"github.com/wundergraph/graphql-go-tools/pkg/astvalidation"
+	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/introspection_datasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
+	"github.com/wundergraph/wundergraph/pkg/graphiql"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
@@ -31,24 +35,26 @@ import (
 )
 
 type InternalBuilder struct {
-	pool             *pool.Pool
-	log              *zap.Logger
-	loader           *engineconfigloader.EngineConfigLoader
-	api              *Api
-	planConfig       plan.Configuration
-	resolver         *resolve.Resolver
-	definition       *ast.Document
-	router           *mux.Router
-	renameTypeNames  []resolve.RenameTypeName
-	middlewareClient *hooks.Client
+	pool                *pool.Pool
+	log                 *zap.Logger
+	loader              *engineconfigloader.EngineConfigLoader
+	api                 *Api
+	planConfig          plan.Configuration
+	resolver            *resolve.Resolver
+	definition          *ast.Document
+	router              *mux.Router
+	renameTypeNames     []resolve.RenameTypeName
+	middlewareClient    *hooks.Client
+	enableIntrospection bool
 }
 
-func NewInternalBuilder(pool *pool.Pool, log *zap.Logger, hooksClient *hooks.Client, loader *engineconfigloader.EngineConfigLoader) *InternalBuilder {
+func NewInternalBuilder(pool *pool.Pool, log *zap.Logger, hooksClient *hooks.Client, loader *engineconfigloader.EngineConfigLoader, enableIntrospection bool) *InternalBuilder {
 	return &InternalBuilder{
-		pool:             pool,
-		log:              log,
-		loader:           loader,
-		middlewareClient: hooksClient,
+		pool:                pool,
+		log:                 log,
+		loader:              loader,
+		middlewareClient:    hooksClient,
+		enableIntrospection: enableIntrospection,
 	}
 }
 
@@ -82,6 +88,17 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 		return streamClosers, err
 	}
 
+	if i.enableIntrospection {
+		introspectionFactory, err := introspection_datasource.NewIntrospectionConfigFactory(i.definition)
+		if err != nil {
+			return streamClosers, err
+		}
+		fieldConfigs := introspectionFactory.BuildFieldConfigurations()
+		i.planConfig.Fields = append(i.planConfig.Fields, fieldConfigs...)
+		dataSource := introspectionFactory.BuildDataSourceConfiguration()
+		i.planConfig.DataSources = append(i.planConfig.DataSources, dataSource)
+	}
+
 	i.log.Debug("configuring API",
 		zap.Int("numOfOperations", len(api.Operations)),
 	)
@@ -104,6 +121,37 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 		if err != nil {
 			i.log.Error("registerOperation", zap.Error(err))
 		}
+	}
+
+	if api.EnableGraphqlEndpoint {
+		graphqlHandler := &GraphQLHandler{
+			planConfig:      i.planConfig,
+			definition:      i.definition,
+			resolver:        i.resolver,
+			log:             i.log,
+			pool:            i.pool,
+			sf:              &singleflight.Group{},
+			prepared:        map[uint64]planWithExtractedVariables{},
+			preparedMux:     &sync.RWMutex{},
+			renameTypeNames: i.renameTypeNames,
+		}
+		apiPath := "/graphql"
+		i.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath).Handler(graphqlHandler)
+		i.log.Debug("registered internal GraphQLHandler",
+			zap.String("method", http.MethodPost),
+			zap.String("path", apiPath),
+		)
+
+		graphqlPlaygroundHandler := &GraphQLPlaygroundHandler{
+			log:     i.log,
+			html:    graphiql.GetGraphiqlPlaygroundHTML(),
+			nodeUrl: fmt.Sprintf("http://%s:%d", api.Options.InternalListener.Host, api.Options.InternalListener.Port),
+		}
+		i.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath).Handler(graphqlPlaygroundHandler)
+		i.log.Debug("registered internal GraphQLPlaygroundHandler",
+			zap.String("method", http.MethodGet),
+			zap.String("path", apiPath),
+		)
 	}
 
 	return streamClosers, err
@@ -178,6 +226,14 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		}
 
 		i.router.Methods(http.MethodPost).Path(apiPath).Handler(handler)
+		// Don't log for every operation because public ones are
+		// registered twice in the public and the internal router
+		if operation.Internal {
+			i.log.Debug("registered internal operation handler",
+				zap.String("method", http.MethodPost),
+				zap.String("path", apiPath),
+			)
+		}
 	case wgpb.OperationType_SUBSCRIPTION:
 		p, ok := preparedPlan.(*plan.SubscriptionResponsePlan)
 		if !ok {
@@ -205,6 +261,13 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		}
 
 		i.router.Methods(http.MethodPost).Path(apiPath).Handler(handler)
+		// See comment checking operation.Internal above
+		if operation.Internal {
+			i.log.Debug("registered internal subscription handler",
+				zap.String("method", http.MethodPost),
+				zap.String("path", apiPath),
+			)
+		}
 	}
 
 	return nil
@@ -235,6 +298,7 @@ func (i *InternalBuilder) registerNodeJsOperation(operation *wgpb.Operation, api
 			enabled:                operation.LiveQueryConfig.Enable,
 			pollingIntervalSeconds: operation.LiveQueryConfig.PollingIntervalSeconds,
 		},
+		internal: true,
 	}
 
 	route.Handler(handler)

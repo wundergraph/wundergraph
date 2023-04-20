@@ -66,7 +66,7 @@ export interface LiveQueryConfig {
 
 const createQuery =
 	<IC extends InternalClient, UserRole extends string, CustomClaims extends {}, Queries, Mutations, Subscriptions>() =>
-	<Input extends z.ZodObject<any>, InferredResponse, ZodResponse>({
+	<Input extends z.ZodObject<any> = any, InferredResponse = any, ZodResponse = any>({
 		input,
 		response,
 		handler,
@@ -122,7 +122,7 @@ const createQuery =
 
 const createMutation =
 	<IC extends InternalClient, UserRole extends string, CustomClaims extends {}, Queries, Mutations, Subscriptions>() =>
-	<Input extends z.ZodObject<any>, InferredResponse, ZodResponse>({
+	<Input extends z.ZodObject<any> = any, InferredResponse = any, ZodResponse = any>({
 		input,
 		response,
 		handler,
@@ -176,7 +176,7 @@ const createMutation =
 
 const createSubscription =
 	<IC extends InternalClient, UserRole extends string, CustomClaims extends {}, Queries, Mutations, Subscriptions>() =>
-	<I extends z.ZodObject<any>, InferredResponse, ZodResponse>({
+	<Input extends z.ZodObject<any> = any, InferredResponse = any, ZodResponse = any>({
 		input,
 		handler,
 		response,
@@ -185,11 +185,11 @@ const createSubscription =
 		rbac,
 		errors = [],
 	}: {
-		input?: I;
+		input?: Input;
 		errors?: { new (): OperationError }[];
 		response?: ZodResponse;
 		handler: SubscriptionHandler<
-			I,
+			Input,
 			InferredResponse,
 			ZodResponse,
 			IC,
@@ -200,7 +200,7 @@ const createSubscription =
 			Subscriptions
 		>;
 	} & BaseOperationConfiguration<UserRole>): NodeJSOperation<
-		z.infer<I>,
+		z.infer<Input>,
 		InferredResponse,
 		ZodResponse,
 		'subscription',

@@ -1,0 +1,5 @@
+subscription pages_countdownSubscription {
+  ws_countdown(from: 100) {
+    countdown
+  }
+}
