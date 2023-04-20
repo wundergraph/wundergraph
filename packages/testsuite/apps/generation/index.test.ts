@@ -6,13 +6,14 @@ import { createTestServer } from './.wundergraph/generated/testing';
 
 // XXX: This test runs code generation, so we can't run multiple test files in parallel
 
-const regenerate = async () => {
-	await Setup('apps/generation');
+const regenerate = async (env: Record<string, string>) => {
+	await Setup('apps/generation', { env });
 };
 
-const expectQuerySuccess = async () => {
+const expectQuerySuccess = async (env: Record<string, string>) => {
 	const wg = createTestServer({
 		dir: __dirname,
+		env,
 	});
 	await wg.start();
 
@@ -31,9 +32,10 @@ const expectQuerySuccess = async () => {
 	await wg.stop();
 };
 
-const expectQueryFailure = async () => {
+const expectQueryFailure = async (env: Record<string, string>) => {
 	const wg = createTestServer({
 		dir: __dirname,
+		env,
 	});
 	await wg.start();
 
@@ -78,60 +80,52 @@ const itIfValidProxy = !!validProxy ? it : it.skip;
 
 describe('Proxy configurations', () => {
 	it('uses an invalid global proxy for generation and fails', async () => {
-		process.env.WG_HTTP_PROXY = invalidProxy;
-		await expect(regenerate).rejects.toThrow();
-		delete process.env.WG_HTTP_PROXY;
+		await expect(async () => regenerate({ WG_HTTP_PROXY: invalidProxy })).rejects.toThrow();
 	});
 
 	it('uses an invalid global proxy for queries and fails', async () => {
-		await regenerate();
-		process.env.WG_HTTP_PROXY = invalidProxy;
-		await expectQueryFailure();
-		delete process.env.WG_HTTP_PROXY;
+		await regenerate({});
+		await expectQueryFailure({
+			WG_HTTP_PROXY: invalidProxy,
+		});
 	});
 
 	it('uses data source proxy to override invalid global proxy and generates', async () => {
-		process.env.WG_HTTP_PROXY = invalidProxy;
-		process.env.COUNTRIES_PROXY = '';
-		process.env.WEATHER_PROXY = '';
-		await regenerate();
-		delete process.env.WG_HTTP_PROXY;
-		delete process.env.COUNTRIES_PROXY;
-		delete process.env.WEATHER_PROXY;
+		await regenerate({
+			WG_HTTP_PROXY: invalidProxy,
+			COUNTRIES_PROXY: '',
+			WEATHER_PROXY: '',
+		});
 	});
 
 	it('uses data source proxy to override invalid global proxy and runs queries', async () => {
-		process.env.WG_HTTP_PROXY = invalidProxy;
-		process.env.COUNTRIES_PROXY = '';
-		process.env.WEATHER_PROXY = '';
-		await expectQuerySuccess();
-		delete process.env.WG_HTTP_PROXY;
-		delete process.env.COUNTRIES_PROXY;
-		delete process.env.WEATHER_PROXY;
+		await expectQuerySuccess({
+			WG_HTTP_PROXY: invalidProxy,
+			COUNTRIES_PROXY: '',
+			WEATHER_PROXY: '',
+		});
 	});
 
 	it('uses an invalid data source proxy for generation and fails', async () => {
-		process.env.COUNTRIES_PROXY = invalidProxy;
-		await expect(regenerate).rejects.toThrow();
-		delete process.env.COUNTRIES_PROXY;
+		await expect(async () => regenerate({ COUNTRIES_PROXY: invalidProxy })).rejects.toThrow();
 	});
 
 	it('uses and invalid data source proxy for queries and fails', async () => {
-		await regenerate();
-		process.env.COUNTRIES_PROXY = invalidProxy;
-		await expectQueryFailure();
-		delete process.env.COUNTRIES_PROXY;
+		await regenerate({});
+		await expectQueryFailure({
+			COUNTRIES_PROXY: invalidProxy,
+		});
 	});
 
 	itIfValidProxy('uses valid proxy for introspection', async () => {
-		process.env.WG_HTTP_PROXY = validProxy;
-		await regenerate();
-		delete process.env.WG_HTTP_PROXY;
+		await regenerate({
+			WG_HTTP_PROXY: validProxy!,
+		});
 	});
 
 	itIfValidProxy('uses valid proxy for queries', async () => {
-		process.env.WG_HTTP_PROXY = validProxy;
-		await expectQuerySuccess();
-		delete process.env.WG_HTTP_PROXY;
+		await expectQuerySuccess({
+			WG_HTTP_PROXY: validProxy!,
+		});
 	});
 });
