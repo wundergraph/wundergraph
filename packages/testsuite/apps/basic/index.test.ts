@@ -75,17 +75,14 @@ describe('Operations', () => {
 		expect(data?.embedded_clientRequestHeader).toBe('test123');
 	});
 
-	it('Should call operations with input vars within functions', async () => {
+	it('Function to function call with input vars', async () => {
 		const client = wg.client();
 
-		await client.subscribe(
-			{
-				operationName: 'incremental/data',
-			},
-			(c) => {
-				expect(c.error).toBeUndefined();
-				expect(c.data.fast).toBeDefined();
-			}
-		);
-	}, 8000);
+		const result = await client.query({
+			operationName: 'functions/user',
+		});
+
+		expect(result.error).toBeUndefined();
+		expect(result.data.greeting).toBeDefined();
+	});
 });
