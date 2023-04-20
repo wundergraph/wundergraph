@@ -69,10 +69,8 @@ jobs:
         run: pnpm build
 
       - name: Check for formatting errors
-        uses: creyD/prettier_action@v4.3
-        with:
-          prettier_options: --check --ignore-unknown
-          only_changed: True
+        # Use sed and tr instead of xargs to handle filenames with $
+        run: pnpx prettier --check -u $(git diff --name-only --diff-filter=ACMRT -r HEAD^..HEAD | sed 's/\$/\\\$/g' | tr '\n' ' ')
 
       - name: Check if git is not dirty after generating files
         run: git diff --no-ext-diff --exit-code
