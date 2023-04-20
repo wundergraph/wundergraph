@@ -27,4 +27,6 @@ Here's an overview of all the available guides.
 
 {% quick-link title="TypeSafe API Integrations" icon="core" href="/docs/guides/typesafe_api_integrations_with_typescript_operations_and_graphql" description="Easily integrate APIs with TypeScript Operations & GraphQL" /%}
 
+{% quick-link title="Using HTTP proxies" icon="core" href="/docs/guides/using-http-proxies" description="Use HTTP proxies when communicating with your upstream APIs" /%}
+
 {% /quick-links %}
