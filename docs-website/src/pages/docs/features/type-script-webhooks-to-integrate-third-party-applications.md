@@ -71,7 +71,7 @@ export default webhook;
 
 ## Call internal operations
 
-You can call internal operations from webhooks. Ensure to import the generated client to get a type-safe api.
+You can call internal operations from webhooks.
 
 ```typescript
 // .wundergraph/webhooks/github.ts
@@ -81,7 +81,7 @@ import { createWebhook } from '../generated/wundergraph.webhooks';
 
 export default createWebhook({
   handler: async (event, context) => {
-    const data = await context.operations.query({
+    const { data, error } = await context.operations.query({
       operationName: 'Dragons'
     })
 
