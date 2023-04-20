@@ -1027,11 +1027,6 @@ export interface FetchConfiguration {
   mTLS: MTLSConfiguration | undefined;
   baseUrl: ConfigurationVariable | undefined;
   path: ConfigurationVariable | undefined;
-  /** HTTP(S) proxy to use, overriding the default one. To disable a global proxy
-   * set its value to null.
-	 *
-	 * @defaultValue undefined, which uses the global proxy defined in configureWunderGraphApplication()
-	 */
   httpProxyUrl?: ConfigurationVariable | undefined;
 }
 

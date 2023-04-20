@@ -309,6 +309,11 @@ export interface HTTPUpstream extends IntrospectionConfiguration {
 	headers?: (builder: IHeadersBuilder) => IHeadersBuilder;
 	authentication?: HTTPUpstreamAuthentication;
 	mTLS?: HTTPmTlsConfiguration;
+	/** HTTP(S) proxy to use, overriding the default one. To disable a global proxy
+	 * set its value to null.
+	 *
+	 * @defaultValue undefined, which uses the global proxy defined in configureWunderGraphApplication()
+	 */
 	httpProxyUrl?: InputVariable | null;
 }
 
