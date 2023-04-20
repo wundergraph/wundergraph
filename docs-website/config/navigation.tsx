@@ -1019,20 +1019,20 @@ const navigation = [
 				href: '/docs/clients-reference/swr',
 			},
 			{
-				title: 'React Query',
-				href: '/docs/clients-reference/react-query',
+				title: 'Next.js',
+				href: '/docs/clients-reference/nextjs',
 			},
 			{
 				title: 'React Relay',
 				href: '/docs/clients-reference/react-relay',
 			},
 			{
-				title: 'Solid Query',
-				href: '/docs/clients-reference/solid-query',
+				title: 'React Query',
+				href: '/docs/clients-reference/react-query',
 			},
 			{
-				title: 'Next.js',
-				href: '/docs/clients-reference/nextjs',
+				title: 'Solid Query',
+				href: '/docs/clients-reference/solid-query',
 			},
 			{
 				title: 'Svelte Query',
@@ -1453,6 +1453,10 @@ const navigation = [
 					{
 						title: 'Simplified URL structure',
 						href: '/docs/upgrade-guides/simplifying-the-wundergraph-url-structure',
+					},
+					{
+						title: 'Internal Client deprecated',
+						href: '/docs/upgrade-guides/internal-client-deprecated',
 					},
 				],
 			},
