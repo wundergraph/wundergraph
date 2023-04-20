@@ -15,6 +15,10 @@ export const withWunderGraphConfig = (config: MetroConfig) => {
 					return context.resolveRequest(context, '@wundergraph/sdk/dist/internal', platform);
 				}
 
+				if (config.resolver?.resolveRequest) {
+					return config.resolver.resolveRequest(context, moduleName, platform);
+				}
+
 				return context.resolveRequest(context, moduleName, platform);
 			},
 		},
