@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "npm run dev",
-    "dev": "concurrently \"npm run wundergraph\" \"npm run relay\" \"vite --port 3000\"",
+    "dev": "npm run build:wundergraph && concurrently \"npm run wundergraph\" \"npm run relay\" \"vite --port 3000\"",
     "build": "npm run build:wundergraph && relay-compiler && tsc && vite build",
     "preview": "vite preview",
     "relay": "relay-compiler --watch",

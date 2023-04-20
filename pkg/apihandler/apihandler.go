@@ -810,10 +810,7 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		RenameTypeNames: h.renameTypeNames,
 	})
 	defer h.pool.PutShared(shared)
-
 	shared.Ctx.Variables = requestVariables
-	shared.Ctx.Context = r.Context()
-	shared.Ctx.Request.Header = r.Header
 	shared.Doc.Input.ResetInputString(requestQuery)
 	shared.Parser.Parse(shared.Doc, shared.Report)
 
