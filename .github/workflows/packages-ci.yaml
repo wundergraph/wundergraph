@@ -44,6 +44,9 @@ jobs:
           working-directory: ${{ env.WORKING_DIRECTORY }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Show changed files
+        run: git diff --name-only --diff-filter=ACMRT -r HEAD^..HEAD
+
       - uses: ./.github/actions/wunderctl
 
       - name: Cache Nextjs builds
@@ -67,9 +70,6 @@ jobs:
 
       - name: Build all libs + apps
         run: pnpm build
-
-      - name: Show changed files
-        run: git diff --name-only --diff-filter=ACMRT -r HEAD^..HEAD
 
       - name: Check for formatting errors
         # Use sed and tr instead of xargs to handle filenames with $
