@@ -1,0 +1,3 @@
+query ($header: String!) {
+	embedded_clientRequestHeader(header: $header)
+}
