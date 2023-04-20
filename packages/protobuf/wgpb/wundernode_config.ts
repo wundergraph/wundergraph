@@ -1031,7 +1031,6 @@ export interface FetchConfiguration {
 
 export interface FetchConfiguration_HeaderEntry {
   /* Just making a random change DO NOT MERGE */
-  /* Just making a random change */
   key: string;
   value: HTTPHeader | undefined;
 }
