@@ -52,7 +52,7 @@
 	"dependencies": {
 		"@prisma/client": "^4.13.0",
 		"@tanstack/svelte-query": "^4.29.1",
-		"@wundergraph/sdk": "^0.146.0",
+		"@wundergraph/sdk": "^0.146.1",
 		"@wundergraph/svelte-query": "^0.2.9"
 	}
 }

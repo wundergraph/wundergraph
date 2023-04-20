@@ -1,15 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { getAuth, createQuery } from '$lib/svelte-query';
+	import { getAuth, createQuery, queryKey } from '$lib/svelte-query';
 
 	const query = createQuery({
 		operationName: 'user/Me',
-		networkMode: 'offlineFirst'
+		retry: false
 	});
 	const { logout, login } = getAuth();
 	$: user = $query.data?.db_findUniqueUser;
 	$: path = $page.url.pathname;
+
+	$: console.log('user: ', user);
 </script>
 
 <nav class="border-b border-gray-200 bg-white">
@@ -53,7 +55,9 @@
 							class="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
 							on:click={async () => {
 								await logout();
+								$query.refetch();
 								goto('/');
+								user = undefined;
 							}}>Signout</button
 						>
 					</div>

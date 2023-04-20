@@ -3,7 +3,7 @@
 
 	const query = createQuery({
 		operationName: 'user/Me',
-		networkMode: 'offlineFirst'
+		retry: false
 	});
 
 	$: user = $query.data?.db_findUniqueUser;
