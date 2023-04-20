@@ -2181,6 +2181,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 			enabled:                operation.LiveQueryConfig.Enable,
 			pollingIntervalSeconds: operation.LiveQueryConfig.PollingIntervalSeconds,
 		},
+		internal: false,
 	}
 
 	if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
@@ -2207,6 +2208,7 @@ type FunctionsHandler struct {
 	queryParamsAllowList []string
 	stringInterpolator   *interpolate.StringInterpolator
 	liveQuery            liveQueryConfig
+	internal             bool
 }
 
 func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -2240,7 +2242,11 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		ctx.Variables = variablesBuf.Bytes()
+		if h.internal {
+			ctx.Variables, _, _, _ = jsonparser.Get(variablesBuf.Bytes(), "input")
+		} else {
+			ctx.Variables = variablesBuf.Bytes()
+		}
 	}
 
 	if len(ctx.Variables) == 0 {
