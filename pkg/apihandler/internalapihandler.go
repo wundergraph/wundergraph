@@ -424,7 +424,6 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 			zap.Error(err),
 			zap.String("url", r.RequestURI),
 		)
-		requestLogger.Info("error here 5")
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
