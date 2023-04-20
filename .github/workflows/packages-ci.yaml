@@ -47,6 +47,9 @@ jobs:
       - name: Show changed files
         run: git diff --name-only --diff-filter=ACMRT -r HEAD^..HEAD
 
+      - name: Show changed files in PR
+        run: git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }}
+
       - uses: ./.github/actions/wunderctl
 
       - name: Cache Nextjs builds

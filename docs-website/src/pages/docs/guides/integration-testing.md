@@ -16,6 +16,8 @@ these examples, but they should be easily adaptable to any testing framework.
 
 ### Initial setup
 
+A change here and there
+
 Make sure your `wundergraph.config.ts` is set up to generate the WunderGraph testing library:
 
 ```typescript
