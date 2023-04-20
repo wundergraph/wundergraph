@@ -75,54 +75,60 @@ const validProxy = proxyFromEnvironment || localProxy;
 
 const itIfValidProxy = !!validProxy ? it : it.skip;
 
-describe('Proxy configurations', () => {
-	it('uses an invalid global proxy for generation and fails', async () => {
-		await expect(async () => regenerate({ WG_HTTP_PROXY: invalidProxy })).rejects.toThrow();
-	});
-
-	it('uses an invalid global proxy for queries and fails', async () => {
-		await regenerate({});
-		await expectQueryFailure({
-			WG_HTTP_PROXY: invalidProxy,
+describe(
+	'Proxy configurations',
+	() => {
+		it('uses an invalid global proxy for generation and fails', async () => {
+			await expect(async () => regenerate({ WG_HTTP_PROXY: invalidProxy })).rejects.toThrow();
 		});
-	});
 
-	it('uses data source proxy to override invalid global proxy and generates', async () => {
-		await regenerate({
-			WG_HTTP_PROXY: invalidProxy,
-			COUNTRIES_PROXY: '',
-			WEATHER_PROXY: '',
+		it('uses an invalid global proxy for queries and fails', async () => {
+			await regenerate({});
+			await expectQueryFailure({
+				WG_HTTP_PROXY: invalidProxy,
+			});
 		});
-	});
 
-	it('uses data source proxy to override invalid global proxy and runs queries', async () => {
-		await expectQuerySuccess({
-			WG_HTTP_PROXY: invalidProxy,
-			COUNTRIES_PROXY: '',
-			WEATHER_PROXY: '',
+		it('uses data source proxy to override invalid global proxy and generates', async () => {
+			await regenerate({
+				WG_HTTP_PROXY: invalidProxy,
+				COUNTRIES_PROXY: '',
+				WEATHER_PROXY: '',
+			});
 		});
-	});
 
-	it('uses an invalid data source proxy for generation and fails', async () => {
-		await expect(async () => regenerate({ COUNTRIES_PROXY: invalidProxy })).rejects.toThrow();
-	});
-
-	it('uses and invalid data source proxy for queries and fails', async () => {
-		await regenerate({});
-		await expectQueryFailure({
-			COUNTRIES_PROXY: invalidProxy,
+		it('uses data source proxy to override invalid global proxy and runs queries', async () => {
+			await expectQuerySuccess({
+				WG_HTTP_PROXY: invalidProxy,
+				COUNTRIES_PROXY: '',
+				WEATHER_PROXY: '',
+			});
 		});
-	});
 
-	itIfValidProxy('uses valid proxy for introspection', async () => {
-		await regenerate({
-			WG_HTTP_PROXY: validProxy!,
+		it('uses an invalid data source proxy for generation and fails', async () => {
+			await expect(async () => regenerate({ COUNTRIES_PROXY: invalidProxy })).rejects.toThrow();
 		});
-	});
 
-	itIfValidProxy('uses valid proxy for queries', async () => {
-		await expectQuerySuccess({
-			WG_HTTP_PROXY: validProxy!,
+		it('uses and invalid data source proxy for queries and fails', async () => {
+			await regenerate({});
+			await expectQueryFailure({
+				COUNTRIES_PROXY: invalidProxy,
+			});
 		});
-	});
-});
+
+		itIfValidProxy('uses valid proxy for introspection', async () => {
+			await regenerate({
+				WG_HTTP_PROXY: validProxy!,
+			});
+		});
+
+		itIfValidProxy('uses valid proxy for queries', async () => {
+			await expectQuerySuccess({
+				WG_HTTP_PROXY: validProxy!,
+			});
+		});
+	},
+	{
+		timeout: 10000,
+	}
+);
