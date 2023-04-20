@@ -74,4 +74,15 @@ describe('Operations', () => {
 		expect(error).toBeUndefined();
 		expect(data?.embedded_clientRequestHeader).toBe('test123');
 	});
+
+	it('Function to function call with input vars', async () => {
+		const client = wg.client();
+
+		const result = await client.query({
+			operationName: 'functions/user',
+		});
+
+		expect(result.error).toBeUndefined();
+		expect(result.data.greeting).toBeDefined();
+	});
 });
