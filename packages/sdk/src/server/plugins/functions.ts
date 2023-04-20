@@ -1,5 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import path from 'path';
+import type { Namespace } from '@wundergraph/orm';
+
 import { InternalClientFactory } from '../internal-client';
 import type { TypeScriptOperationFile } from '../../graphql/operations';
 import type { NodeJSOperation } from '../../operations/operations';
@@ -11,6 +13,7 @@ import { InternalError, OperationError } from '../../client/errors';
 interface FastifyFunctionsOptions {
 	operations: TypeScriptOperationFile[];
 	internalClientFactory: InternalClientFactory;
+	orm: Namespace<any>;
 	nodeURL: string;
 	globalContext: any;
 	createContext: (globalContext: any) => Promise<any>;
@@ -49,7 +52,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							baseURL: config.nodeURL,
 							clientRequest,
 						});
-						const ctx: HandlerContext<any, any, any, any, any, any> = {
+						const ctx: HandlerContext<any, any, any, any, any, any, any> = {
 							log: fastify.log,
 							user: (request.body as any)?.__wg.user!,
 							internalClient: config.internalClientFactory(undefined, clientRequest),
@@ -57,6 +60,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							input: (request.body as any)?.input,
 							operations: operationClient,
 							context: requestContext,
+							graph: config.orm,
 						};
 
 						switch (implementation.type) {

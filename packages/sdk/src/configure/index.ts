@@ -237,6 +237,7 @@ export interface CodeGen {
 export type S3Provider = S3UploadConfiguration[];
 
 export interface ResolvedApplication {
+	Apis: Api<any>[];
 	EnableSingleFlight: boolean;
 	EngineConfiguration: Api<any>;
 	Operations: GraphQLOperation[];
@@ -726,6 +727,7 @@ const resolveApplication = async (
 	const merged = mergeApis(roles, customClaims, ...resolvedApis);
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
 	return {
+		Apis: resolvedApis,
 		EngineConfiguration: merged,
 		EnableSingleFlight: true,
 		Operations: [],

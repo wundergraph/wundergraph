@@ -399,9 +399,13 @@ export const createServer = async ({
 
 	const operationsFilePath = path.join(wundergraphDir, 'generated', 'wundergraph.operations.json');
 	const operationsFileExists = fs.existsSync(operationsFilePath);
+
 	if (operationsFileExists) {
 		const operationsConfigFile = fs.readFileSync(operationsFilePath, 'utf-8');
 		const operationsConfig = JSON.parse(operationsConfigFile) as LoadOperationsOutput;
+
+		const ormModulePath = path.join(wundergraphDir, 'generated', 'bundle', 'orm.cjs');
+		const ormModule = await import(ormModulePath);
 
 		if (
 			operationsConfig &&
@@ -415,6 +419,7 @@ export const createServer = async ({
 				globalContext,
 				createContext,
 				releaseContext,
+				orm: ormModule ? ormModule.orm : null,
 			});
 			fastify.log.debug('Functions plugin registered');
 		}

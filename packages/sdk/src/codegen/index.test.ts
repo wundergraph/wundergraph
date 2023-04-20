@@ -140,6 +140,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 					},
 				},
 				application: {
+					Apis: [],
 					EngineConfiguration: new Api<any>('', '', [], [], [], []),
 					EnableSingleFlight: true,
 					S3UploadProvider: [],
