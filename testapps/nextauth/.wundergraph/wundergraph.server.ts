@@ -1,8 +1,6 @@
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
-import type { HooksConfig } from './generated/wundergraph.hooks';
-import type { InternalClient } from './generated/wundergraph.internal.client';
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
 	hooks: {
 		authentication: {
 			postAuthentication: async (hook) => {
@@ -28,5 +26,4 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 			},
 		},
 	},
-	graphqlServers: [],
 }));
