@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "npm run dev",
-    "dev": "concurrently \"npm run wundergraph\" \"npm run relay\" \"next dev --port 3000\"",
+    "dev": "npm run build:wundergraph && concurrently \"npm run wundergraph\" \"npm run relay\" \"next dev --port 3000\"",
     "build": "npm run build:wundergraph && relay-compiler && next build",
     "lint": "next lint",
     "relay": "relay-compiler --watch",
