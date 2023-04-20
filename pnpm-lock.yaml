@@ -596,13 +596,12 @@ importers:
 
   packages/testsuite:
     specifiers:
-      '@types/command-exists': ^1.2.0
       '@wundergraph/sdk': workspace:*
       '@wundergraph/wunderctl': workspace:*
-      command-exists: ^1.2.9
       execa: 5.1.1
       graphql: ^16.3.0
       jose: ^4.11.1
+      straightforward: ^4.2.2
       typescript: ^4.8.2
       vitest: ^0.30.1
     dependencies:
@@ -610,10 +609,9 @@ importers:
       '@wundergraph/wunderctl': link:../wunderctl
       graphql: 16.6.0
     devDependencies:
-      '@types/command-exists': 1.2.0
-      command-exists: 1.2.9
       execa: 5.1.1
       jose: 4.11.2
+      straightforward: 4.2.2
       typescript: 4.9.4
       vitest: 0.30.1
 
@@ -5961,10 +5959,6 @@ packages:
     resolution: {integrity: sha512-KnRanxnpfpjUTqTCXslZSEdLfXExwgNxYPdiO2WGUj8+HDjFi8R3k5RVKPeSCzLjCcshCAtVO2QBbVuAV4kTnw==}
     dev: true
 
-  /@types/command-exists/1.2.0:
-    resolution: {integrity: sha512-ugsxEJfsCuqMLSuCD4PIJkp5Uk2z6TCMRCgYVuhRo5cYQY3+1xXTQkSlPtkpGHuvWMjS2KTeVQXxkXRACMbM6A==}
-    dev: true
-
   /@types/cors/2.8.12:
     resolution: {integrity: sha512-vt+kDhq/M2ayberEtJcIN/hxXy1Pk+59g2FV/ZQceeaTyCtCucjL2Q7FXlFjtWn4n15KCr1NE2lNNFhp0lEThw==}
     dev: true
@@ -7989,10 +7983,6 @@ packages:
     engines: {node: '>= 0.8'}
     dependencies:
       delayed-stream: 1.0.0
-    dev: true
-
-  /command-exists/1.2.9:
-    resolution: {integrity: sha512-LTQ/SGc+s0Xc0Fu5WaKnR0YiygZkm9eKFvyS+fRsU7/ZWFF8ykFM6Pc9aCVf1+xasOOZpO3BAVgVrKvsqKHV7w==}
     dev: true
 
   /commander/2.20.3:
@@ -17342,6 +17332,17 @@ packages:
 
   /std-env/3.3.2:
     resolution: {integrity: sha512-uUZI65yrV2Qva5gqE0+A7uVAvO40iPo6jGhs7s8keRfHCmtg+uB2X6EiLGCI9IgL1J17xGhvoOqSz79lzICPTA==}
+    dev: true
+
+  /straightforward/4.2.2:
+    resolution: {integrity: sha512-MxfuNnyTP4RPjadI3DkYIcNIp0DMXeDmAXY4/6QivU8lLIPGUqaS5VsEkaQ2QC+FICzc7QTb/lJPRIhGRKVuMA==}
+    engines: {node: '>=16'}
+    hasBin: true
+    dependencies:
+      debug: 4.3.4
+      yargs: 17.6.2
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /stream-combiner/0.0.4:

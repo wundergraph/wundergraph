@@ -1,8 +1,0 @@
-version: '3'
-services:
-  proxy:
-    image: 'ubuntu/squid:5.2-22.04_beta'
-    ports:
-      - '3128:3128'
-    environment:
-      - TZ=UTC
