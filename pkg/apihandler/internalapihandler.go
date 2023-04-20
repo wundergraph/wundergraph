@@ -298,6 +298,7 @@ func (i *InternalBuilder) registerNodeJsOperation(operation *wgpb.Operation, api
 			enabled:                operation.LiveQueryConfig.Enable,
 			pollingIntervalSeconds: operation.LiveQueryConfig.PollingIntervalSeconds,
 		},
+		internal: true,
 	}
 
 	route.Handler(handler)
