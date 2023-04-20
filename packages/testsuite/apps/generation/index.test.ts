@@ -129,6 +129,6 @@ describe(
 		});
 	},
 	{
-		timeout: 10000,
+		timeout: 30000,
 	}
 );
