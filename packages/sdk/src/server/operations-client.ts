@@ -73,6 +73,14 @@ export class OperationsClient<
 		this.subscriptions.forEach((sub) => sub.return(0));
 	}
 
+	public withHeaders = (headers: { [key: string]: string }) => {
+		return new OperationsClient<Operations>({
+			...this.options,
+			extraHeaders: headers,
+			clientRequest: this.clientRequest,
+		});
+	};
+
 	public query = async <
 		OperationName extends Extract<keyof Operations['queries'], string>,
 		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input'],

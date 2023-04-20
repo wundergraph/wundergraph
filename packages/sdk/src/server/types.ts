@@ -44,6 +44,7 @@ export interface BaseRequestContext<
 	/**
 	 * The internal client that is used to communicate with the server.
 	 * @deprecated Use `operations` instead.
+	 * @see https://wundergraph.com/docs/upgrade-guides/internal-client-deprecated
 	 */
 	internalClient: IC;
 	/**

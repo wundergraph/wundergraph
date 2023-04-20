@@ -25,6 +25,7 @@ export interface WebhookRequestContext<
 	/**
 	 * The internal client is used to make requests to the WunderGraph API.
 	 * @deprecated Superseded by the operations client.
+	 * @see https://wundergraph.com/docs/upgrade-guides/internal-client-deprecated
 	 */
 	internalClient: TInternalClient;
 	/**
