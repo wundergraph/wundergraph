@@ -72,7 +72,7 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 	}
 }
 
-function configureWunderGraphServer(configWrapper: () => WunderGraphServerConfig): WunderGraphServerConfig;
+function configureWunderGraphServer(configWrapper: () => WunderGraphServerConfig): WunderGraphHooksAndServerConfig;
 
 function configureWunderGraphServer(configWrapper: () => any): any {
 	return _configureWunderGraphServer(configWrapper());
@@ -241,7 +241,7 @@ export const createServer = async ({
 				},
 				internalClient: clientFactory({ 'x-request-id': req.id }, req.body.__wg.clientRequest),
 				operations: new OperationsClient({
-					baseURL: nodeURL,
+					baseURL: nodeInternalURL,
 					clientRequest: req.body.__wg.clientRequest,
 					extraHeaders: {
 						'x-request-id': req.id,
