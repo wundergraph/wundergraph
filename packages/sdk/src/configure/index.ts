@@ -370,7 +370,9 @@ const resolvePublicClaims = (config: WunderGraphConfigApplicationConfig) => {
 	return publicClaims;
 };
 
-const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promise<ResolvedWunderGraphConfig> => {
+const resolveConfig = async (
+	config: WunderGraphConfigApplicationConfig
+): Promise<{ config: ResolvedWunderGraphConfig; apis: Api<any>[] }> => {
 	const api = {
 		id: '',
 	};
@@ -429,10 +431,15 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 				: undefined,
 	};
 
+	// Generate the promises first, then await them all at once
+	// to run them in parallel
+	const generators = await Promise.all(config.apis);
+	const resolvedApis = await Promise.all(generators.map((generator) => generator(apiIntrospectionOptions)));
+
 	const resolved = await resolveApplication(
 		roles,
 		customClaims,
-		config.apis,
+		resolvedApis,
 		apiIntrospectionOptions,
 		cors,
 		config.s3UploadProvider || [],
@@ -506,11 +513,8 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 		serverOptions: resolvedServerOptions,
 	};
 
-	if (config.links) {
-		return addLinks(resolvedConfig, config.links);
-	}
-
-	return resolvedConfig;
+	const appConfig = config.links ? addLinks(resolvedConfig, config.links) : resolvedConfig;
+	return { config: appConfig, apis: resolvedApis };
 };
 
 const addLinks = (config: ResolvedWunderGraphConfig, links: LinkDefinition[]): ResolvedWunderGraphConfig => {
@@ -700,17 +704,12 @@ const resolveUploadConfiguration = (
 const resolveApplication = async (
 	roles: string[],
 	customClaims: string[],
-	apis: AsyncApiIntrospector<any>[],
+	resolvedApis: Api<any>[],
 	apiIntrospectionOptions: ApiIntrospectionOptions,
 	cors: CorsConfiguration,
 	s3?: S3Provider,
 	hooks?: HooksConfiguration
 ): Promise<ResolvedApplication> => {
-	// Generate the promises first, then await them all at once
-	// to run them in parallel
-	const generators = await Promise.all(apis);
-	const resolvedApis = await Promise.all(generators.map((generator) => generator(apiIntrospectionOptions)));
-
 	const merged = mergeApis(roles, customClaims, ...resolvedApis);
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
 	return {
@@ -779,7 +778,7 @@ export const configureWunderGraphApplication = <
 	};
 
 	resolveConfig(config)
-		.then(async (resolved) => {
+		.then(async ({ config: resolved, apis }) => {
 			Logger.info('Building ...');
 
 			const app = resolved.application;
@@ -831,7 +830,6 @@ export const configureWunderGraphApplication = <
 			}
 
 			if (config.generate?.operationsGeneration) {
-				const apis = await Promise.all(config.apis);
 				const operationGenerationConfig = new OperationsGenerationConfig({ resolved, app: config, apis });
 				config.generate.operationsGeneration(operationGenerationConfig);
 				await generateOperations({
