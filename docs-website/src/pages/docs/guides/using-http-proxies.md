@@ -4,12 +4,12 @@ pageTitle: WunderGraph - HTTP Proxies
 description: This guide explains how to configure WunderGraph to use HTTP proxies
 ---
 
-WunderGraph supports using HTTP or HTTPS proxies both when introspecting remote APIs as
-well as when performing operations. This affects APIs that are transported through HTTP,
+WunderGraph supports using HTTP or HTTPS proxies for both introspection and to make HTTP
+requests at runtime. This affects APIs that are transported through HTTP,
 namely GraphQL (either directly or via federation) and OpenAPI based data sources.
 
 Both HTTP and HTTPS proxies are supported. When talking to an HTTPS API through an HTTP
-server, WunderGraph will open an socket using and HTTP CONNECT request.
+server, WunderGraph will open a socket using and HTTP CONNECT request.
 
 ## Configuring a global proxy server
 
@@ -33,7 +33,7 @@ This global proxy definition can be overridden on every data source.
 
 ## Configuring a proxy for a single data source
 
-All data sources that use HTTP a transport have an `httpProxyUrl` field that can be set when
+All data sources that use a HTTP transport have an `httpProxyUrl` field that can be set when
 defining them:
 
 ```ts
