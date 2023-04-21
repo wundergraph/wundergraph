@@ -417,6 +417,10 @@ const navigation = [
 						title: 'Signing Origin Requests',
 						href: '/docs/guides/signing-origin-requests',
 					},
+					{
+						title: 'Using HTTP proxies',
+						href: '/docs/guides/using-http-proxies',
+					},
 				],
 			},
 		],

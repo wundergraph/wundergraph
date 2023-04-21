@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -418,6 +419,8 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		return errors.New("API config invalid")
 	}
 
+	hooksClient := hooks.NewClient(nodeConfig.Api.Options.ServerUrl, n.log)
+
 	dialer := &net.Dialer{
 		Timeout:   10 * time.Second,
 		KeepAlive: 90 * time.Second,
@@ -433,10 +436,14 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		TLSHandshakeTimeout: 10 * time.Second,
 	}
 
-	hooksClient := hooks.NewClient(nodeConfig.Api.Options.ServerUrl, n.log)
+	if proxyURL := nodeConfig.Api.Options.DefaultHTTPProxyURL; proxyURL != nil {
+		n.log.Debug("using global HTTP proxy", zap.String("proxy", proxyURL.String()))
+		defaultTransport.Proxy = func(r *http.Request) (*url.URL, error) {
+			return proxyURL, nil
+		}
+	}
 
 	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableRequestLogging)
-
 	n.log.Debug("http.Client.Transport",
 		zap.Bool("enableRequestLogging", n.options.enableRequestLogging),
 	)

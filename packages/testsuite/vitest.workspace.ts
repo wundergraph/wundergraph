@@ -14,6 +14,12 @@ export default defineWorkspace([
 		},
 	},
 	{
+		root: 'apps/generation',
+		test: {
+			globalSetup: 'apps/generation/test-setup.ts',
+		},
+	},
+	{
 		root: 'apps/hooks',
 		test: {
 			globalSetup: 'apps/hooks/test-setup.ts',

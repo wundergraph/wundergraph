@@ -368,6 +368,7 @@ importers:
       graphql: ^16.6.0
       graphql-helix: ^1.13.0
       handlebars: ^4.7.7
+      https-proxy-agent: ^5.0.1
       jest: ^29.0.3
       js-yaml: ^4.1.0
       json-schema: ^0.4.0
@@ -420,6 +421,7 @@ importers:
       graphql: 16.6.0
       graphql-helix: 1.13.0_graphql@16.6.0
       handlebars: 4.7.7
+      https-proxy-agent: 5.0.1
       js-yaml: 4.1.0
       json-schema: 0.4.0
       json-schema-to-typescript: 11.0.3
@@ -599,6 +601,7 @@ importers:
       execa: 5.1.1
       graphql: ^16.3.0
       jose: ^4.11.1
+      straightforward: ^4.2.2
       typescript: ^4.8.2
       vitest: ^0.30.1
     dependencies:
@@ -608,6 +611,7 @@ importers:
     devDependencies:
       execa: 5.1.1
       jose: 4.11.2
+      straightforward: 4.2.2
       typescript: 4.9.4
       vitest: 0.30.1
 
@@ -6643,7 +6647,6 @@ packages:
       debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
-    dev: true
 
   /agentkeepalive/4.2.1:
     resolution: {integrity: sha512-Zn4cw2NEqd+9fiSVWMscnjyQ1a8Yfoc5oBajLeo5w+YBHgDUcEBY2hS4YpTz6iN5f/2zQiktcuM6tS8x1p9dpA==}
@@ -10551,7 +10554,6 @@ packages:
       debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
-    dev: true
 
   /human-signals/2.1.0:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
@@ -16994,6 +16996,17 @@ packages:
 
   /std-env/3.3.2:
     resolution: {integrity: sha512-uUZI65yrV2Qva5gqE0+A7uVAvO40iPo6jGhs7s8keRfHCmtg+uB2X6EiLGCI9IgL1J17xGhvoOqSz79lzICPTA==}
+    dev: true
+
+  /straightforward/4.2.2:
+    resolution: {integrity: sha512-MxfuNnyTP4RPjadI3DkYIcNIp0DMXeDmAXY4/6QivU8lLIPGUqaS5VsEkaQ2QC+FICzc7QTb/lJPRIhGRKVuMA==}
+    engines: {node: '>=16'}
+    hasBin: true
+    dependencies:
+      debug: 4.3.4
+      yargs: 17.6.2
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /stream-combiner/0.0.4:
