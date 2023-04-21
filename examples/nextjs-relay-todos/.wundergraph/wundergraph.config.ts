@@ -2,14 +2,44 @@ import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect,
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
-const countries = introspect.graphql({
-	apiNamespace: 'countries',
-	url: 'https://countries.trevorblades.com/',
+const todos = introspect.graphql({
+	apiNamespace: 'todos',
+	url: 'http://localhost:3000/api/graphql',
+	loadSchemaFromString: /* GraphQL */ `
+		type Todo {
+			id: Int!
+			text: String!
+			isCompleted: Boolean!
+		}
+
+		input TodoInput {
+			id: Int!
+			text: String!
+			isCompleted: Boolean!
+		}
+
+		input NewTodoInput {
+			text: String!
+		}
+
+		type Query {
+			todos: [Todo]
+		}
+
+		type Mutation {
+			updateTodo(todo: TodoInput): Todo
+			addTodo(todo: NewTodoInput): Todo
+		}
+
+		type Subscription {
+			TodoChanges: [Todo]
+		}
+	`,
 });
 
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [countries],
+	apis: [todos],
 	server,
 	operations,
 	codeGenerators: [
