@@ -25,9 +25,6 @@ SKIP="${SKIP} nextjs-todos remix"
 # XXX: This breaks only in CI (fastify issue?)
 SKIP="${SKIP} graphql-ws-subscriptions"
 
-# Nuxt uses ESNEXT so skip temporarily
-SKIP="${SKIP} nuxt"
-
 # Move to repo root
 cd `dirname ${0}`/../..
 

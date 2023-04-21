@@ -46,6 +46,7 @@ GraphQLApi {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {

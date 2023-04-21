@@ -46,6 +46,7 @@ type User @key(fields: "id") {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -197,6 +198,7 @@ type Product @extends @key(fields: "upc") {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -355,6 +357,7 @@ type Mutation @extends {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -505,6 +508,7 @@ type Subscription {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -1360,6 +1364,7 @@ type User @key(fields: "id") {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -1509,6 +1514,7 @@ type Product @extends @key(fields: "upc") {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -1663,6 +1669,7 @@ type Mutation @extends {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -1809,6 +1816,7 @@ type Subscription {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {

@@ -94,7 +94,7 @@ test('introspection via http', async () => {
 		.reply(200, inventoryIntrospection)
 		.persist();
 
-	const federatedApi = await introspect.federation({
+	const generator = await introspect.federation({
 		apiNamespace: 'federated',
 		upstreams: [
 			{
@@ -115,6 +115,7 @@ test('introspection via http', async () => {
 		},
 	});
 
+	const federatedApi = await generator({});
 	expect(federatedApi).toMatchSnapshot();
 });
 
@@ -122,7 +123,7 @@ test('introspection via string', async () => {
 	const data = await fs.readFile(path.join(__dirname, 'testdata', 'introspection.json'), { encoding: 'utf8' });
 	const { accountsSDL, productsSDL, reviewsSDL, inventorySDL } = JSON.parse(data);
 
-	const federatedApiFromString = await introspect.federation({
+	const generator = await introspect.federation({
 		apiNamespace: 'federated',
 		upstreams: [
 			{
@@ -147,6 +148,7 @@ test('introspection via string', async () => {
 		},
 	});
 
+	const federatedApiFromString = await generator({});
 	expect(federatedApiFromString).toMatchSnapshot();
 });
 

@@ -19,7 +19,7 @@ import {
 } from '@wundergraph/protobuf';
 import { applyNameSpaceToGraphQLSchema } from './namespacing';
 import { InputVariable, mapInputVariable } from '../configure/variables';
-import { introspectGraphqlWithCache } from './graphql-introspection';
+import { introspectGraphql, introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
 import { openApi, OpenAPIIntrospectionNew, openApiV2 } from './openapi-introspection';
@@ -46,6 +46,17 @@ export const WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS = (() => {
 	const seconds = parseInt(process.env['WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS'] ?? '', 10);
 	return isNaN(seconds) ? 0 : seconds;
 })();
+
+/**
+ * ApiIntrospectionOptions contains options that are passed to
+ * all ApiIntrospector<T> functions
+ */
+export interface ApiIntrospectionOptions {
+	/**
+	 * Global proxy URL, which might be overridden at the data source level
+	 */
+	httpProxyUrl?: string;
+}
 
 export interface RenameType {
 	from: string;
@@ -301,6 +312,12 @@ export interface HTTPUpstream extends IntrospectionConfiguration {
 	headers?: (builder: IHeadersBuilder) => IHeadersBuilder;
 	authentication?: HTTPUpstreamAuthentication;
 	mTLS?: HTTPmTlsConfiguration;
+	/** HTTP(S) proxy to use, overriding the default one. To disable a global proxy
+	 * set its value to null.
+	 *
+	 * @defaultValue undefined, which uses the global proxy defined in configureWunderGraphApplication()
+	 */
+	httpProxyUrl?: InputVariable | null;
 }
 
 export type HTTPmTlsConfiguration = {
@@ -430,7 +447,7 @@ export interface GraphQLServerConfiguration extends Omit<GraphQLIntrospection, '
 	schema: GraphQLSchema | Promise<GraphQLSchema>;
 }
 
-export const introspectGraphqlServer = async (introspection: GraphQLServerConfiguration): Promise<GraphQLApi> => {
+export const introspectGraphqlServer = async (introspection: GraphQLServerConfiguration) => {
 	const { schema, ...rest } = introspection;
 	const resolvedSchema = (await schema) as GraphQLSchema;
 
@@ -442,7 +459,7 @@ export const introspectGraphqlServer = async (introspection: GraphQLServerConfig
 };
 
 export const introspect = {
-	graphql: (introspection: Omit<GraphQLIntrospection, 'isFederation'>): Promise<GraphQLApi> => {
+	graphql: (introspection: Omit<GraphQLIntrospection, 'isFederation'>) => {
 		return introspectGraphqlWithCache(introspection);
 	},
 	postgresql: introspectPostgresql,
@@ -453,12 +470,8 @@ export const introspect = {
 	mongodb: introspectMongoDB,
 	prisma: introspectPrisma,
 	federation: introspectFederation,
-	openApi: (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
-		return openApi(introspection);
-	},
-	openApiV2: (introspection: OpenAPIIntrospectionNew): Promise<GraphQLApi> => {
-		return openApiV2(introspection);
-	},
+	openApi: openApi,
+	openApiV2: openApiV2,
 };
 
 export const buildUpstreamAuthentication = (upstream: HTTPUpstream): UpstreamAuthentication | undefined => {

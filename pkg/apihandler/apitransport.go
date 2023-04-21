@@ -24,26 +24,29 @@ import (
 )
 
 type ApiTransportFactory interface {
-	RoundTripper(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper
+	RoundTripper(transport *http.Transport, enableStreamingMode bool) http.RoundTripper
 	DefaultTransportTimeout() time.Duration
+	DefaultHTTPProxyURL() *url.URL
 }
 
 type apiTransportFactory struct {
-	api                  *Api
-	hooksClient          *hooks.Client
-	enableRequestLogging bool
+	opts ApiTransportOptions
 }
 
-func (f *apiTransportFactory) RoundTripper(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper {
-	return NewApiTransport(tripper, f.api, f.hooksClient, f.enableRequestLogging, enableStreamingMode)
+func (f *apiTransportFactory) RoundTripper(transport *http.Transport, enableStreamingMode bool) http.RoundTripper {
+	return NewApiTransport(transport, enableStreamingMode, f.opts)
 }
 
 func (f *apiTransportFactory) DefaultTransportTimeout() time.Duration {
-	return f.api.Options.DefaultTimeout
+	return f.opts.API.Options.DefaultTimeout
+}
+
+func (f *apiTransportFactory) DefaultHTTPProxyURL() *url.URL {
+	return f.opts.API.Options.DefaultHTTPProxyURL
 }
 
 type ApiTransport struct {
-	roundTripper               http.RoundTripper
+	httpTransport              *http.Transport
 	api                        *Api
 	enableRequestLogging       bool
 	upstreamAuthConfigurations map[string]*wgpb.UpstreamAuthentication
@@ -55,26 +58,34 @@ type ApiTransport struct {
 
 func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, enableRequestLogging bool) ApiTransportFactory {
 	return &apiTransportFactory{
-		api:                  api,
-		hooksClient:          hooksClient,
-		enableRequestLogging: enableRequestLogging,
+		opts: ApiTransportOptions{
+			API:                  api,
+			HooksClient:          hooksClient,
+			EnableRequestLogging: enableRequestLogging,
+		},
 	}
 }
 
-func NewApiTransport(tripper http.RoundTripper, api *Api, hooksClient *hooks.Client, enableRequestLogging bool, enableStreamingMode bool) http.RoundTripper {
+type ApiTransportOptions struct {
+	API                  *Api
+	HooksClient          *hooks.Client
+	EnableRequestLogging bool
+}
+
+func NewApiTransport(httpTransport *http.Transport, enableStreamingMode bool, opts ApiTransportOptions) http.RoundTripper {
 	transport := &ApiTransport{
-		roundTripper:               tripper,
-		enableRequestLogging:       enableRequestLogging,
-		api:                        api,
+		httpTransport:              httpTransport,
+		enableRequestLogging:       opts.EnableRequestLogging,
+		api:                        opts.API,
 		upstreamAuthConfigurations: map[string]*wgpb.UpstreamAuthentication{},
 		onResponseHook:             map[string]struct{}{},
 		onRequestHook:              map[string]struct{}{},
-		hooksClient:                hooksClient,
+		hooksClient:                opts.HooksClient,
 		enableStreamingMode:        enableStreamingMode,
 	}
 
-	if api.EngineConfiguration != nil && api.EngineConfiguration.DatasourceConfigurations != nil {
-		for _, configuration := range api.EngineConfiguration.DatasourceConfigurations {
+	if dataSourceConfigurations := opts.API.EngineConfiguration.GetDatasourceConfigurations(); dataSourceConfigurations != nil {
+		for _, configuration := range dataSourceConfigurations {
 			switch configuration.Kind {
 			case wgpb.DataSourceKind_GRAPHQL:
 				if configuration.CustomGraphql != nil && configuration.CustomGraphql.Fetch != nil && configuration.CustomGraphql.Fetch.UpstreamAuthentication != nil {
@@ -96,12 +107,12 @@ func NewApiTransport(tripper http.RoundTripper, api *Api, hooksClient *hooks.Cli
 		}
 	}
 
-	for i := range api.Operations {
-		name := api.Operations[i].Name
-		if api.Operations[i].HooksConfiguration.HttpTransportOnRequest {
+	for _, op := range opts.API.Operations {
+		name := op.Name
+		if op.HooksConfiguration.HttpTransportOnRequest {
 			transport.onRequestHook[name] = struct{}{}
 		}
-		if api.Operations[i].HooksConfiguration.HttpTransportOnResponse {
+		if op.HooksConfiguration.HttpTransportOnResponse {
 			transport.onResponseHook[name] = struct{}{}
 		}
 	}
@@ -164,7 +175,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 	}
 
 	start := time.Now()
-	res, err = t.roundTripper.RoundTrip(request)
+	res, err = t.httpTransport.RoundTrip(request)
 	duration := time.Since(start).Milliseconds()
 	if err != nil {
 		return nil, err
@@ -259,7 +270,7 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 
 	req.Header = request.Header.Clone()
 
-	return t.roundTripper.RoundTrip(req)
+	return t.httpTransport.RoundTrip(req)
 }
 
 func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationMetaData, buf *bytes.Buffer) (*http.Request, error) {

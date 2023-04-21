@@ -2,6 +2,7 @@ import { IntrospectionCacheConfiguration, introspectWithCache } from './introspe
 import { DatabaseSchema, mongodb, mysql, planetscale, postgresql, prisma, sqlite, sqlserver } from '../db/types';
 import {
 	Api,
+	ApiIntrospectionOptions,
 	ApiType,
 	DatabaseApiCustom,
 	DatabaseIntrospection,
@@ -161,8 +162,8 @@ type DbApi = Api<DatabaseApiCustom>;
 function introspectDatabaseWithCache<TApi extends Api<ApiType>>(
 	ctor: databaseConstructor<TApi>,
 	databaseUrlSchema: DatabaseSchema
-): (introspection: DatabaseIntrospection) => Promise<Api<ApiType>> {
-	const generator = async (introspection: DatabaseIntrospection) => {
+) {
+	const generator = async (introspection: DatabaseIntrospection, _: ApiIntrospectionOptions) => {
 		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
 			introspection,
 			databaseUrlSchema,
@@ -178,7 +179,7 @@ function introspectDatabaseWithCache<TApi extends Api<ApiType>>(
 		);
 	};
 
-	return async (introspection: DatabaseIntrospection): Promise<Api<ApiType>> => {
+	return async (introspection: DatabaseIntrospection) => {
 		const url = resolveVariable(introspection.databaseURL);
 		const hash = await urlHash(url);
 		// Introspecting a database might be expensive, even if it's a local network URL.
@@ -307,7 +308,7 @@ export const introspectMongoDB = introspectDatabaseWithCache(
 	mongodb
 );
 
-export const introspectPrisma = async (introspection: PrismaIntrospection): Promise<PrismaApi> => {
+export const introspectPrisma = async (introspection: PrismaIntrospection) => {
 	const cacheConfig: IntrospectionCacheConfiguration = {
 		keyInput: await fileHash(introspection.prismaFilePath),
 		dataSource: 'localFilesystem',
@@ -315,7 +316,7 @@ export const introspectPrisma = async (introspection: PrismaIntrospection): Prom
 	return introspectWithCache(
 		introspection,
 		cacheConfig,
-		async (introspection: PrismaIntrospection): Promise<PrismaApi> => {
+		async (introspection: PrismaIntrospection, _: ApiIntrospectionOptions): Promise<PrismaApi> => {
 			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
 				{ ...introspection, databaseURL: introspection.prismaFilePath },
 				prisma,
