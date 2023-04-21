@@ -1,55 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Straightforward } from 'straightforward';
 import { Setup } from '../../setup/generate';
-import { createTestServer } from './.wundergraph/generated/testing';
+import { expectQueryFailure, expectQuerySuccess } from './queries';
 
 // XXX: This test runs code generation, so we can't run multiple test files in parallel
 
 const regenerate = async (env: Record<string, string>) => {
 	await Setup('apps/generation', { env });
-};
-
-const expectQuerySuccess = async (env: Record<string, string>) => {
-	const wg = createTestServer({
-		dir: __dirname,
-		env,
-	});
-	await wg.start();
-
-	const client = wg.client();
-	const result = await client.query({
-		operationName: 'CountryByCode',
-		input: {
-			code: 'ES',
-		},
-	});
-
-	expect(result.error).toBeUndefined();
-	expect(result.data).toBeDefined();
-	expect(result.data?.countries_countries?.[0].capital).toBe('Madrid');
-
-	await wg.stop();
-};
-
-const expectQueryFailure = async (env: Record<string, string>) => {
-	const wg = createTestServer({
-		dir: __dirname,
-		env,
-	});
-	await wg.start();
-
-	const client = wg.client();
-	const result = await client.query({
-		operationName: 'CountryByCode',
-		input: {
-			code: 'ES',
-		},
-	});
-
-	expect(result.error).toBeDefined();
-	expect(result.data).toBeUndefined();
-
-	await wg.stop();
 };
 
 const proxyFromEnvironment = process.env.HTTP_PROXY;
