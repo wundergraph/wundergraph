@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@graphql-yoga/node": "^2.13.13",
     "@types/node": "18.15.13",
     "@types/react": "18.0.37",
     "@types/react-dom": "18.0.11",
