@@ -32,7 +32,7 @@ export const TodoList = ({ todos }: { todos: pagesAllTodosQuery$data }) => {
 	return (
 		<div>
 			<h1>Todo List</h1>
-			{todos.todos_todos?.map((todo) => (todo ? <Todo todo={todo} /> : null))}
+			{todos.todos_todos?.map((todo, index) => (todo ? <Todo key={index.toString()} todo={todo} /> : null))}
 			<div>
 				<input
 					type="text"

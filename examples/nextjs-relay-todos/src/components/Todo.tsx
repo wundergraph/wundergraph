@@ -14,7 +14,7 @@ const UpdateTodoMutation = graphql`
 
 const TodoFragment = graphql`
 	fragment Todo_todo on todos_Todo {
-		id
+		todoID: id
 		text
 		isCompleted
 	}
@@ -37,8 +37,12 @@ export const Todo = ({ todo }: { todo: Todo }) => {
 	};
 
 	return (
-		<div key={data.id}>
-			<input type="checkbox" checked={data.isCompleted} onChange={() => handleUpdateTodo(data.id, !data.isCompleted)} />
+		<div key={data.todoID}>
+			<input
+				type="checkbox"
+				checked={data.isCompleted}
+				onChange={() => handleUpdateTodo(data.todoID, !data.isCompleted)}
+			/>
 			{data.text}
 		</div>
 	);
