@@ -207,6 +207,8 @@ class RESTApiBuilder {
 					mTLS: buildMTLSConfiguration(this.introspection),
 					upstreamAuthentication: buildUpstreamAuthentication(this.introspection),
 					urlEncodeBody: false,
+					httpProxyUrl:
+						this.introspection.httpProxyUrl != null ? mapInputVariable(this.introspection.httpProxyUrl) : undefined,
 				},
 				Subscription: {
 					Enabled: false,

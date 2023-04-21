@@ -147,6 +147,7 @@
     "graphql": "^16.6.0",
     "graphql-helix": "^1.13.0",
     "handlebars": "^4.7.7",
+    "https-proxy-agent": "^5.0.1",
     "js-yaml": "^4.1.0",
     "json-schema": "^0.4.0",
     "json-schema-to-typescript": "^11.0.3",
