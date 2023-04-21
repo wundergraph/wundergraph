@@ -71,6 +71,7 @@ export type ApiType = GraphQLApiCustom | RESTApiCustom | DatabaseApiCustom;
 export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	constructor(
 		schema: string,
+		namespace: string,
 		dataSources: DataSource<T>[],
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
@@ -78,6 +79,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		customJsonScalars?: string[]
 	) {
 		this.Schema = schema;
+		this.Namespace = namespace;
 		this.DataSources = dataSources;
 		this.Fields = fields;
 		this.Types = types;
@@ -92,6 +94,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	Types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
 	CustomJsonScalars?: string[];
+	Namespace: string;
 
 	renameTypes(rename: RenameType[]): void {
 		this.Schema = renameTypes(this.Schema, rename);
@@ -186,7 +189,7 @@ const typeFieldsRenameTypeField = (fields: TypeField[], rename: RenameTypeField[
 
 export const createMockApi = async (sdl: string, apiNamespace?: string): Promise<Api<any>> => {
 	const schema = print(parse(sdl));
-	return new GraphQLApi(applyNameSpaceToGraphQLSchema(schema, [], apiNamespace), [], [], [], []);
+	return new GraphQLApi(applyNameSpaceToGraphQLSchema(schema, [], apiNamespace), apiNamespace || '', [], [], [], []);
 };
 
 export class GraphQLApi extends Api<GraphQLApiCustom> {}

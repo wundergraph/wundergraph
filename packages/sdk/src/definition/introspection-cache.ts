@@ -74,6 +74,7 @@ import { onParentProcessExit } from '../utils/process';
 interface IntrospectionCacheFile<A extends ApiType> {
 	version: '1.0.0';
 	schema: string;
+	namespace: string;
 	dataSources: DataSource<A>[];
 	fields: FieldConfiguration[];
 	types: TypeConfiguration[];
@@ -85,6 +86,7 @@ function toCacheEntry<T extends ApiType>(api: Api<T>): IntrospectionCacheFile<T>
 	return {
 		version: '1.0.0',
 		schema: api.Schema,
+		namespace: api.Namespace,
 		dataSources: api.DataSources,
 		fields: api.Fields,
 		types: api.Types,
@@ -96,6 +98,7 @@ function toCacheEntry<T extends ApiType>(api: Api<T>): IntrospectionCacheFile<T>
 function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<A>): Api<A> {
 	return new Api<A>(
 		cache.schema,
+		cache.namespace,
 		cache.dataSources,
 		cache.fields,
 		cache.types,

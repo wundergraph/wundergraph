@@ -167,6 +167,7 @@ class RESTApiBuilder {
 		}
 		return new RESTApi(
 			applyNameSpaceToGraphQLSchema(schemaString, [], this.apiNamespace),
+			this.apiNamespace || '',
 			dataSources,
 			applyNamespaceToExistingRootFieldConfigurations(this.fields, schema, this.apiNamespace),
 			[],
@@ -522,6 +523,7 @@ class RESTApiBuilder {
 				return;
 			case 'object':
 				if (!schema.properties) {
+					// @ts-ignore
 					if (schema?.additionalProperties && schema.additionalProperties !== false) {
 						this.ensureType('scalar', 'JSON');
 						this.addField(parentTypeName, objectKind, fieldName, 'JSON', enclosingTypes);

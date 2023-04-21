@@ -79,6 +79,8 @@ import logger, { FatalLogger, Logger } from '../logger';
 import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
+import { GenerateConfig, OperationsGenerationConfig } from './codegeneration';
+import { generateOperations } from '../codegen/generateoperations';
 
 const utf8 = 'utf8';
 const generated = 'generated';
@@ -99,7 +101,11 @@ export interface WunderGraphConfigApplicationConfig<
 	TPublicClaim extends TCustomClaim | WellKnownClaim = TCustomClaim | WellKnownClaim
 > {
 	apis: Promise<Api<any>>[];
+	/**
+	 * @deprecated use `generate` instead
+	 */
 	codeGenerators?: CodeGen[];
+	generate?: GenerateConfig;
 	options?: NodeOptions;
 	server?: WunderGraphHooksAndServerConfig;
 	cors?: WunderGraphCorsConfiguration;
@@ -797,6 +803,20 @@ export const configureWunderGraphApplication = <
 				buildInfo.stats.totalWebhooks = resolved.webhooks?.length ?? 0;
 			}
 
+			if (config.generate?.operationsGeneration) {
+				const apis = await Promise.all(config.apis);
+				const operationGenerationConfig = new OperationsGenerationConfig({ resolved, app: config, apis });
+				config.generate.operationsGeneration(operationGenerationConfig);
+				await generateOperations({
+					wgDirAbs,
+					operationGenerationConfig,
+					resolved,
+					app,
+					basePath: operationGenerationConfig.basePath,
+					fields: operationGenerationConfig.rootFields,
+				});
+			}
+
 			const loadedOperations = await loadOperations(schemaFileName);
 
 			const operations = await resolveOperationsConfigurations(
@@ -984,15 +1004,14 @@ export const configureWunderGraphApplication = <
 				}
 			}
 
-			if (config.codeGenerators) {
-				for (let i = 0; i < config.codeGenerators.length; i++) {
-					const gen = config.codeGenerators[i];
-					await GenerateCode({
-						wunderGraphConfig: resolved,
-						templates: gen.templates,
-						basePath: gen.path || generated,
-					});
-				}
+			const combined = [...(config.generate?.codeGenerators || []), ...(config.codeGenerators || [])];
+			for (let i = 0; i < combined.length; i++) {
+				const gen = combined[i];
+				await GenerateCode({
+					wunderGraphConfig: resolved,
+					templates: gen.templates,
+					basePath: gen.path || generated,
+				});
 			}
 
 			// Update response types for TS operations. Do this only after code generation completes,

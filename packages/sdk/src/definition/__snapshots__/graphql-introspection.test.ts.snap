@@ -922,6 +922,7 @@ type Query",
       "unescapeResponseJson": false,
     },
   ],
+  "Namespace": "",
   "Schema": """"
 The @removeNullVariables directive allows you to remove variables with null value from your GraphQL Query or Mutation Operations.
 
@@ -2223,6 +2224,7 @@ type Query",
       "unescapeResponseJson": false,
     },
   ],
+  "Namespace": "",
   "Schema": """"
 The @removeNullVariables directive allows you to remove variables with null value from your GraphQL Query or Mutation Operations.
 
