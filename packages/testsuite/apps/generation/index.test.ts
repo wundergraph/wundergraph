@@ -10,7 +10,7 @@ const regenerate = async (env: Record<string, string>) => {
 };
 
 const proxyFromEnvironment = process.env.HTTP_PROXY;
-const localProxyPort = 3138;
+const localProxyPort = 3128;
 const localProxy = `http://127.0.0.1:${localProxyPort}`;
 const sf = new Straightforward();
 
