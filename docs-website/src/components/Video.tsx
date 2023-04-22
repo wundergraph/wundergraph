@@ -1,5 +1,5 @@
-import clsx from 'clsx'
-import { HTMLProps } from 'react'
+import clsx from 'clsx';
+import { HTMLProps } from 'react';
 
 const Video = ({
 	className,
@@ -20,7 +20,7 @@ const Video = ({
 			controls={controls}
 			className={clsx('rounded-md', className)}
 		/>
-	)
-}
+	);
+};
 
-export default Video
+export default Video;

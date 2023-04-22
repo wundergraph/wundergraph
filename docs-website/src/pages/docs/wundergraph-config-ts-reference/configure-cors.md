@@ -26,7 +26,7 @@ configureWunderGraphApplication({
   cors: {
     ...cors.allowAll,
   },
-})
+});
 ```
 
 ## Configuration with allowed origin
@@ -41,7 +41,7 @@ configureWunderGraphApplication({
     ...cors.allowAll,
     allowedOrigins: ['http://localhost:3000'],
   },
-})
+});
 ```
 
 ## Custom Configuration
@@ -60,7 +60,7 @@ configureWunderGraphApplication({
     allowCredentials: true,
     allowedOrigins: ['http://localhost:3000'],
   },
-})
+});
 ```
 
 ## Using wildcards
@@ -74,5 +74,5 @@ configureWunderGraphApplication({
     ...cors.allowAll,
     allowedOrigins: ['https://*.wundergraph.com'],
   },
-})
+});
 ```

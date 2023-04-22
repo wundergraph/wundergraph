@@ -75,10 +75,10 @@
     "@lerna-lite/cli": "1.12.0",
     "@milahu/patch-package-with-pnpm-support": "6.4.10",
     "@release-it/bumper": "^4.0.0",
+    "del-cli": "^5.0.0",
     "husky": "^8.0.1",
     "lint-staged": "^12.4.2",
-    "prettier": "^2.6.2",
-    "release-it": "^15.4.1",
-    "del-cli": "^5.0.0"
+    "prettier": "^2.8.7",
+    "release-it": "^15.4.1"
   }
 }

@@ -28,7 +28,7 @@ configureWunderGraphApplication({
       path: '../generated',
     },
   ],
-})
+});
 ```
 
 ## Create the hooks
@@ -38,14 +38,13 @@ Here we are creating fully typed SWR hooks based on the operations of our Wunder
 
 ```ts
 // lib/wundergraph.ts
-import { createClient, Operations } from '../generated/client'
+import { createClient, Operations } from '../generated/client';
 
-import { createHooks } from '@wundergraph/swr'
+import { createHooks } from '@wundergraph/swr';
 
-export const client = createClient()
+export const client = createClient();
 
-export const { useQuery, useMutation, useSubscription, useUser, useAuth } =
-  createHooks<Operations>(client)
+export const { useQuery, useMutation, useSubscription, useUser, useAuth } = createHooks<Operations>(client);
 ```
 
 ## Hooks
@@ -61,7 +60,7 @@ const { data, error, isValidating, isLoading, mutate } = useQuery({
     forCity: 'Berlin',
   },
   enabled: true,
-})
+});
 ```
 
 Calling `mutate` will invalidate and refetch the query.
@@ -72,9 +71,9 @@ const { data, mutate } = useQuery({
   input: {
     forCity: 'Berlin',
   },
-})
+});
 
-mutate()
+mutate();
 ```
 
 ### useQuery (Live query)
@@ -88,7 +87,7 @@ const { data, error, isLoading, isSubscribed, mutate } = useQuery({
     forCity: 'Berlin',
   },
   liveQuery: true,
-})
+});
 ```
 
 ### useMutation
@@ -98,11 +97,11 @@ This hook accepts most [useSWRMutation Options](https://swr.vercel.app/docs/opti
 ```typescript
 const { data, error, trigger } = useMutation({
   operationName: 'SetName',
-})
+});
 
 await trigger({
   name: 'test',
-})
+});
 
 trigger(
   {
@@ -111,7 +110,7 @@ trigger(
   {
     throwOnError: false,
   }
-)
+);
 ```
 
 ### useSubscription
@@ -129,17 +128,17 @@ const { data, error, isLoading, isSubscribed } = useSubscription({
   onError(data, key, config) {
     // called when the subscription failed to establish.
   },
-})
+});
 ```
 
 ### useAuth
 
 ```typescript
-const { login, logout } = useAuth()
+const { login, logout } = useAuth();
 
-login('github')
+login('github');
 
-logout({ logoutOpenidConnectProvider: true })
+logout({ logoutOpenidConnectProvider: true });
 ```
 
 ### useUser
@@ -147,7 +146,7 @@ logout({ logoutOpenidConnectProvider: true })
 This hook accepts most [useSWR Options](https://swr.vercel.app/docs/options) except for key and fetcher.
 
 ```typescript
-const { data, error, isLoading } = useUser()
+const { data, error, isLoading } = useUser();
 ```
 
 ## File upload
@@ -155,7 +154,7 @@ const { data, error, isLoading } = useUser()
 This hook accepts most [useSWRMutation Options](https://swr.vercel.app/docs/options) except for key and fetcher.
 
 ```typescript
-const { upload, data, error } = useFileUpload()
+const { upload, data, error } = useFileUpload();
 
 upload(
   {
@@ -165,5 +164,5 @@ upload(
   {
     throwOnError: false,
   }
-)
+);
 ```

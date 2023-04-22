@@ -15,7 +15,7 @@ importers:
       del-cli: ^5.0.0
       husky: ^8.0.1
       lint-staged: ^12.4.2
-      prettier: ^2.6.2
+      prettier: ^2.8.7
       release-it: ^15.4.1
     devDependencies:
       '@commitlint/cli': 17.2.0
@@ -26,7 +26,7 @@ importers:
       del-cli: 5.0.0
       husky: 8.0.1
       lint-staged: 12.5.0
-      prettier: 2.7.1
+      prettier: 2.8.7
       release-it: 15.5.0
 
   docs-website:
@@ -382,7 +382,6 @@ importers:
       pino: ^8.11.0
       pino-pretty: ^10.0.0
       postman-collection: ^4.1.1
-      prettier: ^2.7.1
       protobufjs: ^6.11.2
       swagger2openapi: ^7.0.8
       terminate: ^2.5.0
@@ -432,7 +431,6 @@ importers:
       pino: 8.11.0
       pino-pretty: 10.0.0
       postman-collection: 4.1.5
-      prettier: 2.7.1
       protobufjs: 6.11.3
       swagger2openapi: 7.0.8
       terminate: 2.5.0
@@ -16016,6 +16014,12 @@ packages:
     resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
     engines: {node: '>=10.13.0'}
     hasBin: true
+
+  /prettier/2.8.7:
+    resolution: {integrity: sha512-yPngTo3aXUUmyuTjeTUT75txrf+aMh9FiD7q9ZE/i6r0bPb22g4FsE6Y338PQX1bmfy08i9QQCB7/rcUAVntfw==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
+    dev: true
 
   /pretty-format/27.5.1:
     resolution: {integrity: sha512-Qb1gy5OrP5+zDf2Bvnzdl3jsTf1qXVMazbvCoKhtKqVs4/YK4ozX4gKQJJVyNe+cajNPn0KoC0MC3FUmaHWEmQ==}

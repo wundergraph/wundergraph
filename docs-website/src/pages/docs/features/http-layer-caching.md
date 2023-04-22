@@ -35,7 +35,7 @@ export default configureWunderGraphOperations<OperationsConfiguration>({
           enable: false,
           pollingIntervalSeconds: 5,
         },
-      }
+      };
     },
     custom: {
       Countries: enableCaching,
@@ -56,7 +56,7 @@ export default configureWunderGraphOperations<OperationsConfiguration>({
       }),
     },
   },
-})
+});
 ```
 
 By default, caching is disabled for all Queries (enable: false), but we set a few other defaults.

@@ -30,17 +30,11 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
   hooks: {
     queries: {
       Dragons: {
-        preResolve: async ({
-          input,
-          user,
-          log,
-          internalClient,
-          clientRequest,
-        }) => {
-          log.info(`Pre-resolve hook called for Dragons with ${input}`)
+        preResolve: async ({ input, user, log, internalClient, clientRequest }) => {
+          log.info(`Pre-resolve hook called for Dragons with ${input}`);
         },
       },
     },
   },
-}))
+}));
 ```

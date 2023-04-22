@@ -34,7 +34,7 @@ Here is an example of a TypeScript Query:
 
 ```typescript
 // .wundergraph/operations/users/get.ts
-import { createOperation, z } from '../../generated/wundergraph.factory'
+import { createOperation, z } from '../../generated/wundergraph.factory';
 
 export default createOperation.query({
   // by specifying the input schema, we're automatically creating a JSON Schema for input validation
@@ -47,16 +47,16 @@ export default createOperation.query({
       id: input.id,
       name: 'Jens',
       bio: 'Founder of WunderGraph',
-    }
+    };
   },
-})
+});
 ```
 
 You can then call this operation from your generated clients:
 
 ```typescript jsx
 // pages/users/index.tsx
-import { useQuery, withWunderGraph } from '../../components/generated/nextjs'
+import { useQuery, withWunderGraph } from '../../components/generated/nextjs';
 
 const Users = () => {
   const { data } = useQuery({
@@ -64,17 +64,17 @@ const Users = () => {
     input: {
       id: '1',
     },
-  })
+  });
   return (
     <div style={{ color: 'white' }}>
       <div>{data?.id}</div>
       <div>{data?.name}</div>
       <div>{data?.bio}</div>
     </div>
-  )
-}
+  );
+};
 
-export default withWunderGraph(Users)
+export default withWunderGraph(Users);
 ```
 
 ## Isomorphic TypeScript Operations: End-to-End type-safe APIs between Client and Server

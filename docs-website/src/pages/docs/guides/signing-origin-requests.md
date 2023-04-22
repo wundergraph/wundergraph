@@ -27,9 +27,9 @@ Here's an example of how the AWS request signing could be implemented:
 ```typescript
 // wundergraph.server.ts
 
-import { configureWunderGraphServer } from '@wundergraph/sdk/server'
-import type { HooksConfig } from './generated/wundergraph.hooks'
-import type { InternalClient } from './generated/wundergraph.internal.client'
+import { configureWunderGraphServer } from '@wundergraph/sdk/server';
+import type { HooksConfig } from './generated/wundergraph.hooks';
+import type { InternalClient } from './generated/wundergraph.internal.client';
 
 export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
   hooks: {
@@ -38,7 +38,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
         onOriginRequest: {
           hook: async ({ request }) => {
             if (request.headers.Authorization) {
-              return 'skip' // no signing required, skip hook and send original request
+              return 'skip'; // no signing required, skip hook and send original request
             }
             return {
               ...request,
@@ -46,17 +46,17 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
                 ...request.headers,
                 Authorization: `${generateSignature(request)}`,
               },
-            }
+            };
           },
           enableForOperations: ['AWS_OPERATION'],
         },
       },
     },
   },
-}))
+}));
 
 const generateSignature = (request: WunderGraphRequest): string => {
   // your algorithm here
-  return 'foo'
-}
+  return 'foo';
+};
 ```
