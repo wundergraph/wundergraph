@@ -1,4 +1,5 @@
 {
+  "private": "true",
   "name": "testsuite",
   "version": "0.0.1",
   "description": "Integration tests for WunderGraph SDK",
