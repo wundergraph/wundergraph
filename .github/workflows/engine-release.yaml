@@ -193,9 +193,9 @@ jobs:
 
       - run: npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
         env:
-          # https://github.blog/2023-04-19-introducing-npm-package-provenance
-          NPM_CONFIG_PROVENANCE: true
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - run: pnpm publish --access public --tag latest --no-git-checks
+        # https://github.blog/2023-04-19-introducing-npm-package-provenance
+        NPM_CONFIG_PROVENANCE: true
         working-directory: packages/wunderctl
