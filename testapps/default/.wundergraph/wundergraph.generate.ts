@@ -1,4 +1,4 @@
-import { configureWunderGraphGeneration } from '@wundergraph/sdk/dist/configure/codegeneration';
+import { configureWunderGraphGeneration } from '@wundergraph/sdk';
 import { templates } from '@wundergraph/sdk';
 import { golangClient } from '@wundergraph/golang-client';
 
