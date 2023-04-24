@@ -10,9 +10,10 @@ export interface GenerateConfig {
 export type OperationsGeneration = (config: OperationsGenerationConfig) => void;
 
 export class OperationsGenerationConfig {
-	public rootFields: FieldConfig[] = [];
-	public basePath: string = '';
+	private rootFields: FieldConfig[] = [];
+	private basePath: string = '';
 	private namespaces: string[];
+	private pristine: boolean = true;
 
 	constructor(config: {
 		app: WunderGraphConfigApplicationConfig<any, any>;
@@ -57,35 +58,55 @@ export class OperationsGenerationConfig {
 	public includeNamespaces(...namespaces: string[]) {
 		namespaces = namespaces.filter((namespace) => this.namespaces.includes(namespace));
 		this.rootFields = this.rootFields.filter((field) => namespaces.includes(field.namespace));
+		this.pristine = false;
 	}
 
 	public excludeNamespaces(...namespaces: string[]) {
 		namespaces = namespaces.filter((namespace) => this.namespaces.includes(namespace));
 		this.rootFields = this.rootFields.filter((field) => !namespaces.includes(field.namespace));
+		this.pristine = false;
 	}
 
 	public filterRootFields(filter: (field: FieldConfig) => boolean) {
 		this.rootFields = this.rootFields.filter(filter);
+		this.pristine = false;
 	}
 
 	public excludeQueryFields() {
 		this.rootFields = this.rootFields.filter((field) => field.operationType !== 'query');
+		this.pristine = false;
 	}
 
 	public excludeMutationFields() {
 		this.rootFields = this.rootFields.filter((field) => field.operationType !== 'mutation');
+		this.pristine = false;
 	}
 
 	public excludeSubscriptionFields() {
 		this.rootFields = this.rootFields.filter((field) => field.operationType !== 'subscription');
+		this.pristine = false;
 	}
 
 	public setBasePath(basePath: string) {
 		this.basePath = basePath;
+		this.pristine = false;
 	}
 
 	public configureOperations(map: (field: FieldConfig) => FieldConfig) {
 		this.rootFields = this.rootFields.map(map);
+		this.pristine = false;
+	}
+
+	public getBasePath(): string {
+		return this.basePath;
+	}
+
+	public getRootFields(): FieldConfig[] {
+		if (this.pristine) {
+			// in case no filter was applied, return no fields as we don't want to generate any operations
+			return [];
+		}
+		return this.rootFields;
 	}
 }
 

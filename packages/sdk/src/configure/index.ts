@@ -837,8 +837,8 @@ export const configureWunderGraphApplication = <
 					operationGenerationConfig,
 					resolved,
 					app,
-					basePath: operationGenerationConfig.basePath,
-					fields: operationGenerationConfig.rootFields,
+					basePath: operationGenerationConfig.getBasePath(),
+					fields: operationGenerationConfig.getRootFields(),
 				});
 			}
 

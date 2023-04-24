@@ -16,43 +16,12 @@ export interface GenerateConfig {
 
 export const generateOperations = async (config: GenerateConfig) => {
 	const generateOperationsFilePath = path.join(config.wgDirAbs, 'generated', 'generate.operations.json');
-	const remove: FieldConfig[] = [];
-	const upsert: FieldConfig[] = [];
-	const update = JSON.stringify(config.operationGenerationConfig.rootFields);
-	if (fs.existsSync(generateOperationsFilePath)) {
-		const data = fs.readFileSync(generateOperationsFilePath, 'utf-8');
-		const existingFields = JSON.parse(data) as FieldConfig[];
-		for (const field of existingFields) {
-			if (
-				!config.operationGenerationConfig.rootFields.find(
-					(f) => f.rootFieldName === field.rootFieldName && f.namespace === field.namespace
-				)
-			) {
-				remove.push(field);
-				continue;
-			}
-			upsert.push(field);
-		}
-	} else {
-		upsert.push(...config.operationGenerationConfig.rootFields);
-	}
-	fs.writeFileSync(generateOperationsFilePath, update, 'utf-8');
-	for (const field of remove) {
-		const fieldPath = buildFieldPath(config, field);
-		if (fs.existsSync(fieldPath)) {
-			const fileContents = fs.readFileSync(fieldPath, 'utf-8');
-			if (!fileContents.startsWith(operationsHeader)) {
-				// skip deleting customized files
-				continue;
-			}
-			fs.rmSync(fieldPath, { force: true });
-		}
-	}
+	const generatedFiles: string[] = [];
 	const schema = buildSchema(config.resolved.application.EngineConfiguration.Schema, {
 		assumeValid: true,
 		assumeValidSDL: true,
 	});
-	for (const field of upsert) {
+	for (const field of config.fields) {
 		const operationDir = path.join(config.wgDirAbs, 'operations', config.basePath, field.namespace);
 		if (!fs.existsSync(operationDir)) {
 			fs.mkdirSync(operationDir, { recursive: true });
@@ -64,6 +33,7 @@ export const generateOperations = async (config: GenerateConfig) => {
 		});
 		const operationContent = operationsHeader + print(operationNode);
 		const operationFilePath = buildFieldPath(config, field);
+		generatedFiles.push(operationFilePath);
 		if (fs.existsSync(operationFilePath)) {
 			const existing = fs.readFileSync(operationFilePath, 'utf-8');
 			if (existing === operationContent) {
@@ -76,6 +46,37 @@ export const generateOperations = async (config: GenerateConfig) => {
 			}
 		}
 		fs.writeFileSync(operationFilePath, operationContent, { encoding: 'utf-8' });
+	}
+	if (!fs.existsSync(generateOperationsFilePath)) {
+		fs.writeFileSync(generateOperationsFilePath, JSON.stringify(generatedFiles, null, 2));
+		return;
+	}
+	const oldFiles = JSON.parse(fs.readFileSync(generateOperationsFilePath, 'utf-8')) as string[];
+	fs.writeFileSync(generateOperationsFilePath, JSON.stringify(generatedFiles, null, 2));
+	const directories = new Set<string>();
+	for (const file of oldFiles) {
+		if (generatedFiles.includes(file)) {
+			// don't delete files that are still generated
+			continue;
+		}
+		if (!fs.existsSync(file)) {
+			// file was deleted manually
+			continue;
+		}
+		const content = fs.readFileSync(file, 'utf-8');
+		if (!content.startsWith(operationsHeader)) {
+			// file was customized
+			continue;
+		}
+		fs.rmSync(file, { force: true });
+		directories.add(path.dirname(file));
+	}
+	for (const dir of directories) {
+		// check if the directory is empty
+		if (fs.readdirSync(dir).length !== 0) {
+			continue;
+		}
+		fs.rmdirSync(dir);
 	}
 };
 
