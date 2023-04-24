@@ -81,5 +81,10 @@
     "lint-staged": "^12.4.2",
     "prettier": "^2.8.7",
     "release-it": "^15.4.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "@tanstack/query-core": "^4.29.1"
+    }
   }
 }
