@@ -380,7 +380,7 @@ export class Client {
 			return result;
 		}
 
-		if (cb && 'EventSource' in globalThis && options.sse !== false) {
+		if (cb && 'EventSource' in globalThis && options.disableSSE !== true) {
 			return this.subscribeWithSSE<Data, Error>(options, cb);
 		}
 

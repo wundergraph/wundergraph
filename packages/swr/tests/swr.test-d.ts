@@ -92,6 +92,18 @@ const { data: subData, error: subError } = useSubscription({
 expectType<Operations['subscriptions']['Weather']['response']['data']>(subData);
 expectType<ResponseError | undefined>(subError);
 
+const withoutSSE = useSubscription({
+	enabled: true,
+	disableSSE: true,
+	operationName: 'Weather',
+	input: {
+		forCity: 'Berlin',
+	},
+});
+
+expectType<Operations['subscriptions']['Weather']['response']['data']>(withoutSSE.data);
+expectType<ResponseError | undefined>(withoutSSE.error);
+
 const {
 	data: mutData,
 	error: mutError,

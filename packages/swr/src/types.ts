@@ -81,6 +81,7 @@ export type UseSubscriptionOptions<
 	{
 		operationName: OperationName;
 		subscribeOnce?: boolean;
+		disableSSE?: boolean;
 		resetOnMount?: boolean;
 		enabled?: boolean;
 		input?: Input;

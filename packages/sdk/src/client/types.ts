@@ -111,9 +111,10 @@ export type SubscriptionRequestOptions<
 	 */
 	subscribeOnce?: Boolean;
 	/**
-	 * Set to false to use fetch streaming instead of EventSource (SSE)
+	 * Set to true to use fetch streaming instead of EventSource (SSE)
+	 * This is required if you use subscriptions with token based authentication
 	 */
-	sse?: Boolean;
+	disableSSE?: Boolean;
 };
 
 export interface SubscriptionResult {
