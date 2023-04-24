@@ -27,17 +27,11 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
   hooks: {
     queries: {
       Dragons: {
-        mutatingPreResolve: async ({
-          user,
-          clientRequest,
-          log,
-          input,
-          internalClient,
-        }) => {
-          return input
+        mutatingPreResolve: async ({ user, clientRequest, log, input, internalClient }) => {
+          return input;
         },
       },
     },
   },
-}))
+}));
 ```

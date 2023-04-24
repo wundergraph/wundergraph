@@ -29,7 +29,7 @@ const chat = introspect.graphql({
   id: 'chatId',
   apiNamespace: 'chat',
   url: 'http://localhost:8085/query',
-})
+});
 
 // wundergraph.server.ts
 export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
@@ -39,19 +39,19 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
         onConnectionInit: {
           enableForDataSources: ['chatId'],
           hook: async ({ clientRequest, dataSourceId }) => {
-            let token = clientRequest.headers.get('Authorization') || ''
+            let token = clientRequest.headers.get('Authorization') || '';
             if (dataSourceId === 'chatId') {
-              token = 'secret'
+              token = 'secret';
             }
             return {
               payload: {
                 Authorization: token,
               },
-            }
+            };
           },
         },
       },
     },
   },
-}))
+}));
 ```

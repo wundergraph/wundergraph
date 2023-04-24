@@ -41,10 +41,10 @@ you're able to call these from the GraphQL resolvers.
 
 ```typescript
 // wundergraph.server.ts
-import { configureWunderGraphServer } from '@wundergraph/sdk/server'
-import type { HooksConfig } from './generated/wundergraph.hooks'
-import type { InternalClient } from './generated/wundergraph.internal.client'
-import type { GraphQLExecutionContext } from './generated/wundergraph.server'
+import { configureWunderGraphServer } from '@wundergraph/sdk/server';
+import type { HooksConfig } from './generated/wundergraph.hooks';
+import type { InternalClient } from './generated/wundergraph.internal.client';
+import type { GraphQLExecutionContext } from './generated/wundergraph.server';
 import {
   buildSchema,
   GraphQLBoolean,
@@ -56,7 +56,7 @@ import {
   GraphQLSchema,
   GraphQLString,
   GraphQLUnionType,
-} from 'graphql'
+} from 'graphql';
 
 export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
   graphqlServers: [
@@ -71,23 +71,23 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
       customResolverFactory: async () => {
         return {
           hello: (args: any, ctx: GraphQLExecutionContext) => {
-            return `Hello ${ctx.wundergraph.user?.name || 'World'}`
+            return `Hello ${ctx.wundergraph.user?.name || 'World'}`;
           },
-        }
+        };
       },
     },
   ],
-}))
+}));
 ```
 
 ## Code-first Example
 
 ```typescript
 // wundergraph.server.ts
-import { configureWunderGraphServer } from '@wundergraph/sdk/server'
-import type { HooksConfig } from './generated/wundergraph.hooks'
-import type { InternalClient } from './generated/wundergraph.internal.client'
-import type { GraphQLExecutionContext } from './generated/wundergraph.server'
+import { configureWunderGraphServer } from '@wundergraph/sdk/server';
+import type { HooksConfig } from './generated/wundergraph.hooks';
+import type { InternalClient } from './generated/wundergraph.internal.client';
+import type { GraphQLExecutionContext } from './generated/wundergraph.server';
 import {
   buildSchema,
   GraphQLBoolean,
@@ -99,7 +99,7 @@ import {
   GraphQLSchema,
   GraphQLString,
   GraphQLUnionType,
-} from 'graphql'
+} from 'graphql';
 
 export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
   graphqlServers: [
@@ -114,7 +114,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
             hello: {
               type: GraphQLString,
               resolve: (args: any, ctx: GraphQLExecutionContext) => {
-                return `Hello ${ctx.wundergraph.user?.name || 'World'}`
+                return `Hello ${ctx.wundergraph.user?.name || 'World'}`;
               },
             },
           },
@@ -122,7 +122,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
       }),
     },
   ],
-}))
+}));
 ```
 
 ## Namespacing

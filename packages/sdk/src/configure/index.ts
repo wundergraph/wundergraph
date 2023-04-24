@@ -23,6 +23,7 @@ import {
 	DataSource,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
+	ApiIntrospectionOptions,
 	RESTApiCustom,
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
@@ -74,7 +75,13 @@ import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsCon
 import { HooksConfiguration, ResolvedServerOptions, WunderGraphHooksAndServerConfig } from '../server/types';
 import { getWebhooks } from '../webhooks';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
-import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
+import {
+	EnvironmentVariable,
+	InputVariable,
+	mapInputVariable,
+	resolveConfigurationVariable,
+	resolveVariable,
+} from './variables';
 import logger, { FatalLogger, Logger } from '../logger';
 import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
@@ -94,11 +101,24 @@ export interface WunderGraphCorsConfiguration {
 	allowCredentials?: boolean;
 }
 
+/**
+ * ApiIntrospector<T> is a function type which the API generators must conform to.
+ * Given an ApiIntrospectionOptions, they should return a Promise that resolves
+ * to an Api<T>
+ */
+export type ApiIntrospector<T> = (options: ApiIntrospectionOptions) => Promise<Api<T>>;
+/**
+ * AsyncApiIntrospector<T> is the type returned by all functions that generate something
+ * "introspectable" (e.g. an API). These get awaited in parallel while resolving the
+ * application configuration.
+ */
+export type AsyncApiIntrospector<T> = Promise<ApiIntrospector<T>>;
+
 export interface WunderGraphConfigApplicationConfig<
 	TCustomClaim extends string = string,
 	TPublicClaim extends TCustomClaim | WellKnownClaim = TCustomClaim | WellKnownClaim
 > {
-	apis: Promise<Api<any>>[];
+	apis: AsyncApiIntrospector<any>[];
 	codeGenerators?: CodeGen[];
 	options?: NodeOptions;
 	server?: WunderGraphHooksAndServerConfig;
@@ -402,10 +422,18 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	const roles = config.authorization?.roles || ['admin', 'user'];
 	const customClaims = Object.keys(config.authentication?.customClaims ?? {});
 
+	const apiIntrospectionOptions: ApiIntrospectionOptions = {
+		httpProxyUrl:
+			resolvedNodeOptions.defaultHttpProxyUrl !== undefined
+				? resolveConfigurationVariable(resolvedNodeOptions.defaultHttpProxyUrl)
+				: undefined,
+	};
+
 	const resolved = await resolveApplication(
 		roles,
 		customClaims,
 		config.apis,
+		apiIntrospectionOptions,
 		cors,
 		config.s3UploadProvider || [],
 		config.server?.hooks
@@ -672,12 +700,17 @@ const resolveUploadConfiguration = (
 const resolveApplication = async (
 	roles: string[],
 	customClaims: string[],
-	apis: Promise<Api<any>>[],
+	apis: AsyncApiIntrospector<any>[],
+	apiIntrospectionOptions: ApiIntrospectionOptions,
 	cors: CorsConfiguration,
 	s3?: S3Provider,
 	hooks?: HooksConfiguration
 ): Promise<ResolvedApplication> => {
-	const resolvedApis = await Promise.all(apis);
+	// Generate the promises first, then await them all at once
+	// to run them in parallel
+	const generators = await Promise.all(apis);
+	const resolvedApis = await Promise.all(generators.map((generator) => generator(apiIntrospectionOptions)));
+
 	const merged = mergeApis(roles, customClaims, ...resolvedApis);
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
 	return {
