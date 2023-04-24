@@ -37,7 +37,7 @@ export const mergeApis = <T extends {} = {}>(roles: string[], customClaims: stri
 	const types = mergeTypeConfigurations(apis);
 	const schema = mergeApiSchemas(roles, customClaims, apis, dataSources, fields);
 	const interpolateVariableDefinitionAsJSON = apis.flatMap((api) => api.interpolateVariableDefinitionAsJSON);
-	return new Api(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON, jsonScalars);
+	return new Api(schema, '', dataSources, fields, types, interpolateVariableDefinitionAsJSON, jsonScalars);
 };
 
 const mergeApiFields = <T extends {} = {}>(apis: Api<T>[]): FieldConfiguration[] => {

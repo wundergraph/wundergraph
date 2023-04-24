@@ -172,6 +172,7 @@ export const introspectGraphql = async (
 	const skipRenameRootFields = introspection.skipRenameRootFields || [];
 	return new GraphQLApi(
 		applyNameSpaceToGraphQLSchema(schemaSDL, skipRenameRootFields, introspection.apiNamespace),
+		introspection.apiNamespace || '',
 		[
 			{
 				Id: introspection.id,
