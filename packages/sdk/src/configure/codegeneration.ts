@@ -48,8 +48,8 @@ export class OperationsGenerationConfig {
 				const namespaceIndex = node.name.value.indexOf('_');
 				this.rootFields.push({
 					operationType: currentOperationType,
-					rootFieldName: node.name.value,
-					namespace: namespaceIndex === -1 ? '' : node.name.value.substring(0, namespaceIndex),
+					name: node.name.value,
+					apiNamespace: namespaceIndex === -1 ? '' : node.name.value.substring(0, namespaceIndex),
 				});
 			},
 		});
@@ -57,13 +57,13 @@ export class OperationsGenerationConfig {
 
 	public includeNamespaces(...namespaces: string[]) {
 		namespaces = namespaces.filter((namespace) => this.namespaces.includes(namespace));
-		this.rootFields = this.rootFields.filter((field) => namespaces.includes(field.namespace));
+		this.rootFields = this.rootFields.filter((field) => namespaces.includes(field.apiNamespace));
 		this.pristine = false;
 	}
 
 	public excludeNamespaces(...namespaces: string[]) {
 		namespaces = namespaces.filter((namespace) => this.namespaces.includes(namespace));
-		this.rootFields = this.rootFields.filter((field) => !namespaces.includes(field.namespace));
+		this.rootFields = this.rootFields.filter((field) => !namespaces.includes(field.apiNamespace));
 		this.pristine = false;
 	}
 
@@ -112,8 +112,8 @@ export class OperationsGenerationConfig {
 
 export interface FieldConfig {
 	operationType: 'query' | 'mutation' | 'subscription';
-	rootFieldName: string;
-	namespace: string;
+	name: string;
+	apiNamespace: string;
 }
 
 export const configureWunderGraphGeneration = (config: GenerateConfig): GenerateConfig => {

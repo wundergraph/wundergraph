@@ -22,12 +22,12 @@ export const generateOperations = async (config: GenerateConfig) => {
 		assumeValidSDL: true,
 	});
 	for (const field of config.fields) {
-		const operationDir = path.join(config.wgDirAbs, 'operations', config.basePath, field.namespace);
+		const operationDir = path.join(config.wgDirAbs, 'operations', config.basePath, field.apiNamespace);
 		if (!fs.existsSync(operationDir)) {
 			fs.mkdirSync(operationDir, { recursive: true });
 		}
 		const operationNode = buildOperationNodeForField({
-			field: field.rootFieldName,
+			field: field.name,
 			schema,
 			kind: field.operationType as OperationTypeNode,
 		});
@@ -84,12 +84,12 @@ const operationsHeader =
 	'# This file is auto generated.\n# Remove/modify this header if you want to customize the operation.\n';
 
 const buildFieldPath = (config: GenerateConfig, field: FieldConfig) => {
-	const fileName = field.rootFieldName.substring(field.namespace.length + 1) + '.graphql';
+	const fileName = field.name.substring(field.apiNamespace.length + 1) + '.graphql';
 	return path.join(
 		config.wgDirAbs,
 		'operations',
 		config.basePath,
-		field.namespace,
+		field.apiNamespace,
 		fileName[0].toUpperCase() + fileName.substring(1)
 	);
 };
