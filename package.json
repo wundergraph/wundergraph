@@ -21,6 +21,7 @@
     "test": "pnpm run -r test",
     "format": "prettier --write --loglevel warn '**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}'",
     "format:examples": "prettier --write --loglevel warn 'examples/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}'",
+    "format:testapps": "prettier --write --loglevel warn 'testapps/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}'",
     "codegen": "pnpm run --filter='./packages/protobuf' build",
     "preview:version:packages": "lerna version --dry-run",
     "preview:version:packages-next": "lerna version prerelease --dry-run",
