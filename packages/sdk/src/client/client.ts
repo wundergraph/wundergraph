@@ -241,6 +241,10 @@ export class Client {
 		};
 	}
 
+	public hasExtraHeaders() {
+		return Object.keys(this.extraHeaders).length > 0;
+	}
+
 	/**
 	 * setAuthorizationToken is a shorthand method for setting up the
 	 * required headers for token authentication.
@@ -356,6 +360,9 @@ export class Client {
 
 	/**
 	 * Set up subscriptions over SSE with fallback to web streams.
+	 *
+	 * Falls back to web streams if extraHeaders are set or EventSource is not supported.
+	 *
 	 * When called with subscribeOnce it will return the response directly
 	 * without setting up a subscription.
 	 * @see https://docs.wundergraph.com/docs/architecture/wundergraph-rpc-protocol-explained#subscriptions
@@ -380,7 +387,8 @@ export class Client {
 			return result;
 		}
 
-		if (cb && 'EventSource' in globalThis && options.disableSSE !== true) {
+		const shouldUseSSE = this.options.forceSSE || !this.hasExtraHeaders();
+		if (cb && 'EventSource' in globalThis && shouldUseSSE) {
 			return this.subscribeWithSSE<Data, Error>(options, cb);
 		}
 

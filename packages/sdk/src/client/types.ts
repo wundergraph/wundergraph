@@ -58,6 +58,13 @@ export interface ClientConfig {
 	extraHeaders?: Headers;
 	operationMetadata?: OperationMetadata;
 	csrfEnabled?: boolean;
+	/**
+	 * Force SSE for subscriptions if extraHeaders are set.
+	 * Subscriptions fall back to fetch streaming by default
+	 * if extraHeaders are set, because EventSource does not
+	 * supported headers.
+	 */
+	forceSSE?: boolean;
 }
 
 type PrivateConfigProperties = 'applicationHash' | 'sdkVersion' | 'operationMetadata' | 'operationErrorTypes';
@@ -110,11 +117,6 @@ export type SubscriptionRequestOptions<
 	 * Receive the initial response and then stop the subscription
 	 */
 	subscribeOnce?: Boolean;
-	/**
-	 * Set to true to use fetch streaming instead of EventSource (SSE)
-	 * This is required if you use subscriptions with token based authentication
-	 */
-	disableSSE?: Boolean;
 };
 
 export interface SubscriptionResult {
