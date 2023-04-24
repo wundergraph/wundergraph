@@ -63,7 +63,6 @@ import {
 	WebhookConfiguration,
 	WunderGraphConfiguration,
 } from '@wundergraph/protobuf';
-import hash from 'object-hash';
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
 import { findUp } from './findup';
