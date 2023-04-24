@@ -1,21 +1,21 @@
 # This file is auto generated.
 # Remove/modify this header if you want to customize the operation.
 query federated_topProducts_query($first: Int, $random: Boolean) {
-	federated_topProducts(first: $first, random: $random) {
-		name
-		price
-		upc
-		weight
-		reviews {
-			author {
-				id
-				name
-				username
-			}
-			body
-			id
-		}
-		inStock
-		shippingEstimate
-	}
+  federated_topProducts(first: $first, random: $random) {
+    name
+    price
+    upc
+    weight
+    reviews {
+      author {
+        id
+        name
+        username
+      }
+      body
+      id
+    }
+    inStock
+    shippingEstimate
+  }
 }
