@@ -502,7 +502,7 @@ export const applyNamespaceToApi = (api: Api<unknown>, apiNamespace: string, ski
 	const interpolateVariableDefinitionAsJSON = api.interpolateVariableDefinitionAsJSON.map(
 		(type) => `${apiNamespace}_${type}`
 	);
-	return new Api(appliedSchema, datasources, fields, types, interpolateVariableDefinitionAsJSON);
+	return new Api(appliedSchema, apiNamespace, datasources, fields, types, interpolateVariableDefinitionAsJSON);
 };
 
 const applyNamespaceToDataSourceCustom = (datasource: DataSource, namespace?: string): any => {

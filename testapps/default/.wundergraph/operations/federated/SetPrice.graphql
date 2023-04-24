@@ -1,0 +1,21 @@
+# This file is auto generated.
+# Remove/modify this header if you want to customize the operation.
+mutation federated_setPrice_mutation($price: Int!, $upc: String!) {
+  federated_setPrice(price: $price, upc: $upc) {
+    name
+    price
+    upc
+    weight
+    reviews {
+      author {
+        id
+        name
+        username
+      }
+      body
+      id
+    }
+    inStock
+    shippingEstimate
+  }
+}
