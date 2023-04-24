@@ -3,7 +3,7 @@ import { CodeGen, ResolvedWunderGraphConfig, WunderGraphConfigApplicationConfig 
 import { Api } from '../definition';
 
 export interface GenerateConfig {
-	operationsGeneration?: OperationsGeneration;
+	operationsGenerator?: OperationsGeneration;
 	codeGenerators?: CodeGen[];
 }
 

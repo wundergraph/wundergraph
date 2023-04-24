@@ -18,7 +18,7 @@ export default configureWunderGraphGeneration({
 			path: './generated/golang/client',
 		},
 	],
-	operationsGeneration: (config) => {
+	operationsGenerator: (config) => {
 		config.includeNamespaces('weather', 'federated');
 	},
 });

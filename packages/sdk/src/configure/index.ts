@@ -829,9 +829,9 @@ export const configureWunderGraphApplication = <
 				buildInfo.stats.totalWebhooks = resolved.webhooks?.length ?? 0;
 			}
 
-			if (config.generate?.operationsGeneration) {
+			if (config.generate?.operationsGenerator) {
 				const operationGenerationConfig = new OperationsGenerationConfig({ resolved, app: config, apis });
-				config.generate.operationsGeneration(operationGenerationConfig);
+				config.generate.operationsGenerator(operationGenerationConfig);
 				await generateOperations({
 					wgDirAbs,
 					operationGenerationConfig,
