@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.16](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.15...@wundergraph/solid-query@0.4.16) (2023-04-24)
+
+### Bug Fixes
+
+* update tanstack query ([#884](https://github.com/wundergraph/wundergraph/issues/884)) ([c8dcc42](https://github.com/wundergraph/wundergraph/commit/c8dcc42526af696df2636b7e861c227feb03a872)) (@Pagebakers)
+
 ## [0.4.15](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.14...@wundergraph/solid-query@0.4.15) (2023-04-20)
 
 **Note:** Version bump only for package @wundergraph/solid-query
