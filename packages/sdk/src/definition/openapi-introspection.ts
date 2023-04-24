@@ -2,7 +2,13 @@ import path from 'path';
 import process from 'node:process';
 import fs from 'fs/promises';
 
-import { GraphQLApi, OpenAPIIntrospection, OpenAPIIntrospectionSource, RESTApi } from './index';
+import {
+	ApiIntrospectionOptions,
+	GraphQLApi,
+	OpenAPIIntrospection,
+	OpenAPIIntrospectionSource,
+	RESTApi,
+} from './index';
 import { openApiSpecificationToRESTApiObject } from '../v2openapi';
 import { introspectWithCache } from './introspection-cache';
 import { openApiSpecificationToGraphQLApi } from '../v2openapi/omnigraph';
@@ -21,13 +27,13 @@ const loadOpenApi = async (source: OpenAPIIntrospectionSource) => {
 	}
 };
 
-export const openApi = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+export const openApi = async (introspection: OpenAPIIntrospection) => {
 	const spec = await loadOpenApi(introspection.source);
 	const configuration = { keyInput: spec, source: 'localFilesystem' };
 	return introspectWithCache(
 		introspection,
 		configuration,
-		async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+		async (introspection: OpenAPIIntrospection, _: ApiIntrospectionOptions): Promise<RESTApi> => {
 			return await openApiSpecificationToRESTApiObject(spec, introspection);
 		}
 	);
@@ -38,13 +44,13 @@ export interface OpenAPIIntrospectionNew
 	id: string;
 }
 
-export const openApiV2 = async (introspection: OpenAPIIntrospectionNew): Promise<GraphQLApi> => {
+export const openApiV2 = async (introspection: OpenAPIIntrospectionNew) => {
 	const spec = await loadOpenApi(introspection.source);
 	const configuration = { keyInput: spec, source: 'localFilesystem' };
 	return introspectWithCache(
 		introspection,
 		configuration,
-		async (introspection: OpenAPIIntrospection): Promise<GraphQLApi> => {
+		async (introspection: OpenAPIIntrospection, _: ApiIntrospectionOptions): Promise<GraphQLApi> => {
 			return await openApiSpecificationToGraphQLApi(spec, introspection);
 		}
 	);

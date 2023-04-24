@@ -32,11 +32,11 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
   hooks: {
     authentication: {
       postLogout: async (hook) => {
-        console.log('postLogout', JSON.stringify(hook.user))
+        console.log('postLogout', JSON.stringify(hook.user));
       },
     },
   },
-}))
+}));
 ```
 
 ## How to logout users if there is no back channel API to the OIDC Provider

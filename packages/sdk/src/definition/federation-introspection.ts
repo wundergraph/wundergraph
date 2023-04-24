@@ -1,6 +1,6 @@
 import { DocumentNode, parse } from 'graphql';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { GraphQLApi, GraphQLFederationIntrospection, GraphQLIntrospection } from './index';
+import { GraphQLApi, GraphQLFederationIntrospection, GraphQLIntrospection, ApiIntrospectionOptions } from './index';
 import { loadFile } from '../codegen/templates/typescript';
 import { resolveVariable } from '../configure/variables';
 import { mergeApis } from './merge';
@@ -65,7 +65,7 @@ export interface ServiceDefinition {
 	name: string;
 }
 
-export const introspectFederation = async (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> => {
+export const introspectFederation = async (introspection: GraphQLFederationIntrospection) => {
 	const keyInputs: string[] = [];
 	introspection.upstreams.forEach(async (upstream) => {
 		keyInputs.push(await (await graphqlIntrospectionCacheConfiguration(upstream)).keyInput);
@@ -74,7 +74,7 @@ export const introspectFederation = async (introspection: GraphQLFederationIntro
 	return introspectWithCache(
 		introspection,
 		cacheConfig,
-		async (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> => {
+		async (introspection: GraphQLFederationIntrospection, options: ApiIntrospectionOptions): Promise<GraphQLApi> => {
 			const upstreams = introspection.upstreams.map(async (upstream, i) => {
 				let schema = upstream.loadSchemaFromString ? loadFile(upstream.loadSchemaFromString) : '';
 
@@ -116,7 +116,7 @@ export const introspectFederation = async (introspection: GraphQLFederationIntro
 				id: upstream.id ?? introspection.id,
 			}));
 
-			const apis = await Promise.all(graphQLIntrospections.map((i) => introspectGraphql(i)));
+			const apis = await Promise.all(graphQLIntrospections.map((i) => introspectGraphql(i, options)));
 			return mergeApis([], [], ...apis) as GraphQLApi;
 		}
 	);

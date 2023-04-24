@@ -1,19 +1,11 @@
-import { DarkMode, Gradient, LightMode } from '@/components/Icon'
+import { DarkMode, Gradient, LightMode } from '@/components/Icon';
 
 export function ThemingIcon({ id, color }) {
 	return (
 		<>
 			<defs>
-				<Gradient
-					id={`${id}-gradient`}
-					color={color}
-					gradientTransform="matrix(0 21 -21 0 12 11)"
-				/>
-				<Gradient
-					id={`${id}-gradient-dark`}
-					color={color}
-					gradientTransform="matrix(0 24.5 -24.5 0 16 5.5)"
-				/>
+				<Gradient id={`${id}-gradient`} color={color} gradientTransform="matrix(0 21 -21 0 12 11)" />
+				<Gradient id={`${id}-gradient-dark`} color={color} gradientTransform="matrix(0 24.5 -24.5 0 16 5.5)" />
 			</defs>
 			<LightMode>
 				<circle cx={12} cy={20} r={12} fill={`url(#${id}-gradient)`} />
@@ -55,5 +47,5 @@ export function ThemingIcon({ id, color }) {
 				/>
 			</DarkMode>
 		</>
-	)
+	);
 }

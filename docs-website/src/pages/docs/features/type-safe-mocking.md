@@ -25,8 +25,7 @@ Here's an example:
 ```typescript
 // wundergraph.server.ts
 
-const randomInt = (max: number) =>
-  Math.floor(Math.random() * Math.floor(max)) + 1
+const randomInt = (max: number) => Math.floor(Math.random() * Math.floor(max)) + 1;
 
 export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
   hooks: {
@@ -48,7 +47,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
                 },
               ],
             },
-          }
+          };
         },
       },
       OasUsers: {
@@ -63,13 +62,13 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
                 },
               ],
             },
-          }
+          };
         },
       },
     },
     mutations: {},
   },
-}))
+}));
 ```
 
 ## How to

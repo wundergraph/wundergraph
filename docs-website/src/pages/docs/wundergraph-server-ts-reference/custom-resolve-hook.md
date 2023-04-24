@@ -33,13 +33,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
   hooks: {
     queries: {
       Dragons: {
-        customResolve: async ({
-          user,
-          clientRequest,
-          log,
-          input,
-          internalClient,
-        }) => {
+        customResolve: async ({ user, clientRequest, log, input, internalClient }) => {
           return {
             data: {
               dragons: [
@@ -48,10 +42,10 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
                 },
               ],
             },
-          }
+          };
         },
       },
     },
   },
-}))
+}));
 ```

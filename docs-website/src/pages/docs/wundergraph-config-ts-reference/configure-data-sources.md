@@ -68,6 +68,7 @@ const countries = introspect.graphql({
 | `skipRenameRootFields`          | An array of root fields to skip renaming.                                                              |
 | `schemaExtension`               | A string that is appended to the schema. Useful for adding custom scalars.                             |
 | `replaceCustomScalarTypeFields` | An array of custom scalar type fields to replace.                                                      |
+| `httpProxyUrl`                  | HTTP(S) proxy to use, overriding the default one (if any). Set to `null` to disable.                   |
 
 ## Databases
 
@@ -157,13 +158,14 @@ configureWunderGraphApplication({
 
 ### Properties
 
-| Property                        | Description                                                                |
-| ------------------------------- | -------------------------------------------------------------------------- |
-| `source`                        | The source of the OpenAPI schema. Either a file or a URL.                  |
-| `apiNamespace`                  | The namespace of the OpenAPI API                                           |
-| `introspection`                 | The introspection configuration                                            |
-| `schemaExtension`               | A string that is appended to the schema. Useful for adding custom scalars. |
-| `replaceCustomScalarTypeFields` | An array of custom scalar type fields to replace.                          |
+| Property                        | Description                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------------ |
+| `source`                        | The source of the OpenAPI schema. Either a file or a URL.                            |
+| `apiNamespace`                  | The namespace of the OpenAPI API                                                     |
+| `introspection`                 | The introspection configuration                                                      |
+| `schemaExtension`               | A string that is appended to the schema. Useful for adding custom scalars.           |
+| `replaceCustomScalarTypeFields` | An array of custom scalar type fields to replace.                                    |
+| `httpProxyUrl`                  | HTTP(S) proxy to use, overriding the default one (if any). Set to `null` to disable. |
 
 ## GraphQL Federation
 
@@ -191,10 +193,11 @@ configureWunderGraphApplication({
 
 ### Properties
 
-| Property                        | Description                                                                |
-| ------------------------------- | -------------------------------------------------------------------------- |
-| `upstreams`                     | An array of upstreams to use for the federation.                           |
-| `apiNamespace`                  | The namespace of the GraphQL Federation API                                |
-| `introspection`                 | The introspection configuration                                            |
-| `schemaExtension`               | A string that is appended to the schema. Useful for adding custom scalars. |
-| `replaceCustomScalarTypeFields` | An array of custom scalar type fields to replace.                          |
+| Property                        | Description                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------------ |
+| `upstreams`                     | An array of upstreams to use for the federation.                                     |
+| `apiNamespace`                  | The namespace of the GraphQL Federation API                                          |
+| `introspection`                 | The introspection configuration                                                      |
+| `schemaExtension`               | A string that is appended to the schema. Useful for adding custom scalars.           |
+| `replaceCustomScalarTypeFields` | An array of custom scalar type fields to replace.                                    |
+| `httpProxyUrl`                  | HTTP(S) proxy to use, overriding the default one (if any). Set to `null` to disable. |
