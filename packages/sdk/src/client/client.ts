@@ -361,7 +361,8 @@ export class Client {
 	/**
 	 * Set up subscriptions over SSE with fallback to web streams.
 	 *
-	 * Falls back to web streams if extraHeaders are set or EventSource is not supported.
+	 * Falls back to web streams if extraHeaders are set,
+	 * no callback is supplied or EventSource is not supported.
 	 *
 	 * When called with subscribeOnce it will return the response directly
 	 * without setting up a subscription.
