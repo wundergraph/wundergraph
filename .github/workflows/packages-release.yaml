@@ -18,9 +18,14 @@ concurrency:
 
 env:
   CI: true
+  # https://github.blog/2023-04-19-introducing-npm-package-provenance
+  NPM_CONFIG_PROVENANCE: true
 
 jobs:
   stable-version:
+    # https://docs.npmjs.com/generating-provenance-statements#publishing-packages-with-provenance-via-github-actions
+    permissions:
+      id-token: write
     timeout-minutes: 20
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.type == 'stable' }}
@@ -56,6 +61,9 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   next-version:
+    # https://docs.npmjs.com/generating-provenance-statements#publishing-packages-with-provenance-via-github-actions
+    permissions:
+      id-token: write
     timeout-minutes: 10
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.type == 'next' }}
