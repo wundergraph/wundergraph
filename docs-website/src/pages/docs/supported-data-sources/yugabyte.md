@@ -29,20 +29,11 @@ Keeping Queries on the backend gives WunderGraph superpowers.
 If you look at the following Query, you'll see a custom `@fromClaim` directive.
 
 ```graphql
-mutation AddMessage(
-  $email: String! @fromClaim(name: EMAIL)
-  $name: String! @fromClaim(name: NAME)
-  $message: String!
-) {
+mutation AddMessage($email: String! @fromClaim(name: EMAIL), $name: String! @fromClaim(name: NAME), $message: String!) {
   createOnemessages(
     data: {
       message: $message
-      users: {
-        connectOrCreate: {
-          create: { name: $name, email: $email }
-          where: { email: $email }
-        }
-      }
+      users: { connectOrCreate: { create: { name: $name, email: $email }, where: { email: $email } } }
     }
   ) {
     id
