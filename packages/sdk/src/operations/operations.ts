@@ -65,7 +65,7 @@ const createQuery =
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient
 	>() =>
-	<Input extends z.ZodObject<any>, InferredResponse, ZodResponse>({
+	<Input extends z.ZodObject<any> = any, InferredResponse = any, ZodResponse = any>({
 		input,
 		response,
 		handler,
@@ -122,7 +122,7 @@ const createMutation =
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient
 	>() =>
-	<Input extends z.ZodObject<any>, InferredResponse, ZodResponse>({
+	<Input extends z.ZodObject<any> = any, InferredResponse = any, ZodResponse = any>({
 		input,
 		response,
 		handler,
@@ -177,7 +177,7 @@ const createSubscription =
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient
 	>() =>
-	<I extends z.ZodObject<any>, InferredResponse, ZodResponse>({
+	<Input extends z.ZodObject<any> = any, InferredResponse = any, ZodResponse = any>({
 		input,
 		handler,
 		response,
@@ -186,11 +186,11 @@ const createSubscription =
 		rbac,
 		errors = [],
 	}: {
-		input?: I;
+		input?: Input;
 		errors?: { new (): OperationError }[];
 		response?: ZodResponse;
 		handler: SubscriptionHandler<
-			I,
+			Input,
 			InferredResponse,
 			ZodResponse,
 			IC,
@@ -199,7 +199,7 @@ const createSubscription =
 			InternalOperationsClient
 		>;
 	} & BaseOperationConfiguration<UserRole>): NodeJSOperation<
-		z.infer<I>,
+		z.infer<Input>,
 		InferredResponse,
 		ZodResponse,
 		'subscription',
