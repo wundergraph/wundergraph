@@ -166,6 +166,9 @@ jobs:
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
 
   release-wunderctl:
+    # https://docs.npmjs.com/generating-provenance-statements#publishing-packages-with-provenance-via-github-actions
+    permissions:
+      id-token: write
     name: Release wunderctl wrapper
     needs:
       - goreleaser-linux
@@ -193,4 +196,6 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - run: pnpm publish --access public --tag latest --no-git-checks
+        # https://github.blog/2023-04-19-introducing-npm-package-provenance
+        NPM_CONFIG_PROVENANCE: true
         working-directory: packages/wunderctl
