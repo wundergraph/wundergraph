@@ -52,7 +52,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
       customResolverFactory: async (ctx) => {
         return {
           hello: () => 'World',
-        }
+        };
       },
     },
     {
@@ -66,8 +66,8 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
             hello: {
               type: GraphQLString,
               resolve: (obj, args, context, info) => {
-                console.log(context.wundergraph.user.name)
-                return 'World'
+                console.log(context.wundergraph.user.name);
+                return 'World';
               },
             },
           },
@@ -75,5 +75,5 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
       }),
     },
   ],
-}))
+}));
 ```

@@ -21,12 +21,7 @@ Here's an example operation using the `@jsonSchema` directive:
 
 ```graphql
 mutation (
-  $message: String!
-    @jsonSchema(
-      title: "Message"
-      description: "Write something meaningful"
-      pattern: "^[a-zA-Z 0-9]+$"
-    )
+  $message: String! @jsonSchema(title: "Message", description: "Write something meaningful", pattern: "^[a-zA-Z 0-9]+$")
 ) {
   createPost(message: $message) {
     id

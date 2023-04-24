@@ -19,11 +19,11 @@ const spaceX = introspect.graphql({
     cert: new EnvironmentVariable('CERT'),
     insecureSkipVerify: true,
   },
-})
+});
 
 configureWunderGraphApplication({
   apis: [spaceX],
-})
+});
 ```
 
 To enable mTLS,

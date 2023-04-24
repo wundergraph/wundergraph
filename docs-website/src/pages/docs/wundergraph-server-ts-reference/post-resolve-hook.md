@@ -31,18 +31,11 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
   hooks: {
     queries: {
       Dragons: {
-        postResolve: async ({
-          input,
-          user,
-          log,
-          internalClient,
-          clientRequest,
-          response,
-        }) => {
-          log.info(`Resolved Dragons with input: ${input.name}`)
+        postResolve: async ({ input, user, log, internalClient, clientRequest, response }) => {
+          log.info(`Resolved Dragons with input: ${input.name}`);
         },
       },
     },
   },
-}))
+}));
 ```

@@ -37,29 +37,21 @@ Here's how it looks like for the Operation above:
 ```typescript
 // all of this is generated
 export interface HooksConfig {
-  global?: GlobalHooksConfig
+  global?: GlobalHooksConfig;
   authentication?: {
-    postAuthentication?: (hook: AuthenticationHookRequest) => Promise<void>
-    mutatingPostAuthentication?: (
-      hook: AuthenticationHookRequest
-    ) => Promise<AuthenticationResponse>
-    revalidate?: (
-      hook: AuthenticationHookRequest
-    ) => Promise<AuthenticationResponse>
-  }
+    postAuthentication?: (hook: AuthenticationHookRequest) => Promise<void>;
+    mutatingPostAuthentication?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse>;
+    revalidate?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse>;
+  };
   queries?: {
     Dragons?: {
-      mockResolve?: (hook: HookRequest) => Promise<DragonsResponse>
-      preResolve?: (hook: HookRequest) => Promise<void>
-      postResolve?: (
-        hook: HookRequest & HookRequestWithResponse<DragonsResponse>
-      ) => Promise<void>
-      customResolve?: (hook: HookRequest) => Promise<void | DragonsResponse>
-      mutatingPostResolve?: (
-        hook: HookRequest & HookRequestWithResponse<DragonsResponse>
-      ) => Promise<DragonsResponse>
-    }
-  }
+      mockResolve?: (hook: HookRequest) => Promise<DragonsResponse>;
+      preResolve?: (hook: HookRequest) => Promise<void>;
+      postResolve?: (hook: HookRequest & HookRequestWithResponse<DragonsResponse>) => Promise<void>;
+      customResolve?: (hook: HookRequest) => Promise<void | DragonsResponse>;
+      mutatingPostResolve?: (hook: HookRequest & HookRequestWithResponse<DragonsResponse>) => Promise<DragonsResponse>;
+    };
+  };
 }
 ```
 
@@ -102,12 +94,12 @@ const wunderGraphHooks = ConfigureWunderGraphHooks({
               ...input.find,
               name: 'Telstar',
             },
-          }
+          };
         },
       },
     },
   },
-})
+});
 ```
 
 In this case, we're hard-coding the `find` variable before the execution starts.
@@ -132,17 +124,15 @@ const wunderGraphHooks = ConfigureWunderGraphHooks({
               ...response.data,
               TowerDetail: response.data?.TowerDetail?.map((detail) => ({
                 ...detail,
-                conductorSetHooks: detail.conductorSetHooks?.filter(
-                  (csh) => csh.conductorSetHookId?.id !== '456'
-                ),
+                conductorSetHooks: detail.conductorSetHooks?.filter((csh) => csh.conductorSetHookId?.id !== '456'),
               })),
             },
-          }
+          };
         },
       },
     },
   },
-})
+});
 ```
 
 What's best about all of this?
@@ -160,16 +150,16 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
     authentication: {
       postAuthentication: async ({ user, internalClient }) => {
         if (!user.email || !user.name) {
-          return
+          return;
         }
         await internalClient.mutations.UpsertLastLogin({
           email: user.email,
           name: user.name,
-        })
+        });
       },
     },
   },
-}))
+}));
 ```
 
 After the authentication is successful (postAuthentication),

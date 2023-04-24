@@ -158,7 +158,6 @@
     "pino": "^8.11.0",
     "pino-pretty": "^10.0.0",
     "postman-collection": "^4.1.1",
-    "prettier": "^2.7.1",
     "protobufjs": "^6.11.2",
     "swagger2openapi": "^7.0.8",
     "terminate": "^2.5.0",
