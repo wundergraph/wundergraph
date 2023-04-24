@@ -74,12 +74,12 @@
     "@commitlint/cli": "^17.0.1",
     "@commitlint/config-conventional": "^17.0.0",
     "@lerna-lite/cli": "1.12.0",
-    "@milahu/patch-package-with-pnpm-support": "6.4.10",
+    "@milahu/patch-package": "^6.4.14",
     "@release-it/bumper": "^4.0.0",
+    "del-cli": "^5.0.0",
     "husky": "^8.0.1",
     "lint-staged": "^12.4.2",
     "prettier": "^2.6.2",
-    "release-it": "^15.4.1",
-    "del-cli": "^5.0.0"
+    "release-it": "^15.4.1"
   }
 }
