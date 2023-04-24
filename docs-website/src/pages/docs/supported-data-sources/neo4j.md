@@ -31,16 +31,13 @@ const db = introspect.graphql({
   apiNamespace: 'db',
   url: new EnvironmentVariable('NEO4J_GRAPHQL_URL'),
   headers: (builder) => {
-    builder.addStaticHeader(
-      'Authorization',
-      new EnvironmentVariable('NEO4J_TOKEN')
-    )
-    return builder
+    builder.addStaticHeader('Authorization', new EnvironmentVariable('NEO4J_TOKEN'));
+    return builder;
   },
-})
+});
 
 configureWunderGraphApplication({
   apis: [db],
   server,
-})
+});
 ```

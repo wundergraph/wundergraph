@@ -91,12 +91,12 @@ export default configureWunderGraphServer(() => ({
               ...input.find,
               name: 'Telstar',
             },
-          }
+          };
         },
       },
     },
   },
-})
+});
 ```
 
 In this case, we're hard-coding the `find` variable before the execution starts.
@@ -119,17 +119,15 @@ export default configureWunderGraphServer(() => ({
               ...response.data,
               TowerDetail: response.data?.TowerDetail?.map((detail) => ({
                 ...detail,
-                conductorSetHooks: detail.conductorSetHooks?.filter(
-                  (csh) => csh.conductorSetHookId?.id !== '456'
-                ),
+                conductorSetHooks: detail.conductorSetHooks?.filter((csh) => csh.conductorSetHookId?.id !== '456'),
               })),
             },
-          }
+          };
         },
       },
     },
   },
-})
+});
 ```
 
 What's best about all of this?
