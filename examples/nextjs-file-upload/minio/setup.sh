@@ -11,7 +11,7 @@ function setupMinio () {
     docker-compose exec -T minio mc admin policy attach minio readwrite -u test
     docker-compose exec -T minio mc admin user info minio test
     docker-compose exec -T minio mc mb --ignore-existing minio/uploads
-    docker-compose exec -T minio mc policy set public minio/uploads
+    docker-compose exec -T minio mc anonymous set public minio/uploads
     return $?
 }
 
