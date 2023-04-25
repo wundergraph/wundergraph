@@ -1,0 +1,26 @@
+name: 'Determine changed files'
+description: 'This action determines the changed files for pull requests and push events'
+outputs:
+  changed:
+    description: 'Files that had changes and are still present in the repository (i.e. excluding deletes)'
+    value: ${{ steps.changed.outputs.changed }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Build wunderctl with race detection enabled and make it available in $PATH
+      id: changed
+      shell: bash
+      run: |
+        if ! test -z "${{ github.event.pull_request.base.sha }}" && ! test -z ${{ github.sha }}; then
+          # Pull request, compare against base branch
+          base=${{ github.event.pull_request.base.sha }}
+          current==${{ github.sha }}
+        else
+          # Push, compare against parent commit
+          base=HEAD~1
+          current=HEAD
+        fi
+        # Use sed and tr instead of xargs to handle filenames with $
+        changed=$(git diff --name-only --diff-filter=ACMRT -r ${base}..${current} | sed 's/\$/\\\$/g' | tr '\n' ' ')
+        echo "changed=${changed}" >> $GITHUB_OUTPUT
+        echo Changed files: ${changed}

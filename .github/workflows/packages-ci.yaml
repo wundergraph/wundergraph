@@ -44,23 +44,6 @@ jobs:
           working-directory: ${{ env.WORKING_DIRECTORY }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Determine refs
-        id: changed_refs
-        run: |
-          if ! test -z "${{ github.event.pull_request.base.sha }}" && ! test -z ${{ github.sha }}; then
-            echo "base=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
-            echo "current=${{ github.sha }}" >> $GITHUB_OUTPUT
-          else
-            echo "base=HEAD~1" >> $GITHUB_OUTPUT
-            echo "current=HEAD" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Show changed files based on refs
-        run: git diff --name-only --diff-filter=ACMRT ${{ steps.changed_refs.base }} ${{ steps.changed_refs.current }}
-
-      - name: Show changed files in PR
-        run: git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }}
-
       - uses: ./.github/actions/wunderctl
 
       - name: Cache Nextjs builds
@@ -85,12 +68,15 @@ jobs:
       - name: Build all libs + apps
         run: pnpm build
 
-      - name: Check for formatting errors
-        # Use sed and tr instead of xargs to handle filenames with $
-        run: pnpx prettier --check -u $(git diff --name-only --diff-filter=ACMRT -r HEAD^..HEAD | sed 's/\$/\\\$/g' | tr '\n' ' ')
-
       - name: Check if git is not dirty after generating files
         run: git diff --no-ext-diff --exit-code
+
+      - name: Determine changed files
+        id: changed
+        uses: ./.github/actions/changed
+
+      - name: Check for formatting errors in changed files
+        run: pnpm exec -- prettier --check --ignore-unknown ${{ steps.changed.outputs.changed }}
 
       - name: Run all NPM tests
         run: pnpm test
