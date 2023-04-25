@@ -48,7 +48,7 @@ describe('Mock external api', () => {
 		);
 
 		const result = await ts.testServer.client().query({
-			operationName: 'simple',
+			operationName: 'search',
 		});
 
 		expect(result.error).toBeUndefined();
