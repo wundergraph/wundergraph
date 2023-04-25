@@ -316,28 +316,7 @@ export interface HooksConfiguration<
 	IC extends InternalClient = InternalClient<any, any>,
 	GlobalConfig extends GlobalHooksConfig = GlobalHooksConfig
 > {
-	// global?: {
-	// 	httpTransport?: {
-	// 		onOriginRequest?: {
-	// 			hook: OperationHookFunction;
-	// 			enableForOperations?: Extract<keyof Queries | keyof Mutations | keyof Subscriptions, string>[];
-	// 			enableForAllOperations?: boolean;
-	// 		};
-	// 		onOriginResponse?: {
-	// 			hook: OperationHookFunction;
-	// 			enableForOperations?: Extract<keyof Queries | keyof Mutations | keyof Subscriptions, string>[];
-	// 			enableForAllOperations?: boolean;
-	// 		};
-	// 	};
-	// 	wsTransport?: {
-	// 		onConnectionInit?: {
-	// 			hook: OperationHookFunction;
-	// 			enableForDataSources: DataSources[];
-	// 		};
-	// 	};
-	// };
 	global?: GlobalConfig;
-	// global?: GlobalHooksConfig<Operations, DataSources>;
 	authentication?: {
 		postAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<void>;
 		mutatingPostAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<AuthenticationResponse<User>>;
