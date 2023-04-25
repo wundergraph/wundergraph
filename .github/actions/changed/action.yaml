@@ -7,7 +7,7 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Build wunderctl with race detection enabled and make it available in $PATH
+    - name: Find changed files
       id: changed
       shell: bash
       run: |
