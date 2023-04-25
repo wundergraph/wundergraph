@@ -126,6 +126,7 @@ interface User {
       "unescapeResponseJson": false,
     },
   ],
+  "Namespace": "api",
   "Schema": "type Query {
   api_user: api_User
 }

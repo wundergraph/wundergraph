@@ -18,6 +18,18 @@ export default configureWunderGraphServer(() => ({
 		},
 	},
 	hooks: {
+		global: {
+			httpTransport: {
+				onOriginRequest: {
+					hook: async ({ request }) => {
+						request.headers.set('X-WunderGraph-Test', 'Hello Signature');
+						console.log('onOriginRequest', request);
+						return request;
+					},
+					enableForOperations: ['CountryWeather'],
+				},
+			},
+		},
 		authentication: {
 			postAuthentication: async ({ user }) => {},
 			mutatingPostAuthentication: async ({ user }) => {
@@ -88,6 +100,7 @@ export default configureWunderGraphServer(() => ({
                 }
             `),
 			customResolverFactory: async (ctx) => {
+				console.log(`ctx->>> ${JSON.stringify(ctx, null, 2)}`);
 				return {
 					sdlField: (args: any) => 'Hello, ' + args.sdl,
 					setSdlField: (args: any) => 'Hello, ' + args.sdl,
@@ -148,6 +161,13 @@ export default configureWunderGraphServer(() => ({
 								],
 							}),
 							resolve: (obj, args, context, info) => {
+								console.log(
+									`ctx->>> ${JSON.stringify(
+										context.wundergraph.clientRequest.headers.get('X-WunderGraph-Test'),
+										null,
+										2
+									)}`
+								);
 								switch (args.which) {
 									case 'a':
 										return {

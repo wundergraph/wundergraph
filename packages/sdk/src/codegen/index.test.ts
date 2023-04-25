@@ -140,7 +140,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 					},
 				},
 				application: {
-					EngineConfiguration: new Api<any>('', [], [], [], []),
+					EngineConfiguration: new Api<any>('', '', [], [], [], []),
 					EnableSingleFlight: true,
 					S3UploadProvider: [],
 					Operations: [
@@ -524,6 +524,7 @@ test('should collect all template dependencies recursively and dedupe based on t
 				},
 			]);
 		}
+
 		dependencies(): Template[] {
 			return [new Template2()];
 		}
@@ -576,6 +577,7 @@ test('should collect templates up to maxTemplateDepth', () => {
 				},
 			]);
 		}
+
 		dependencies(): Template[] {
 			return [new Template2()];
 		}

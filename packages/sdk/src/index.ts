@@ -34,3 +34,4 @@ export {
 export { TypeScriptClient } from './codegen/templates/typescript/client';
 export { PlaceHolder } from './configure/variables';
 export { EnvironmentVariable } from './configure/variables';
+export { configureWunderGraphGeneration } from './configure/codegeneration';
