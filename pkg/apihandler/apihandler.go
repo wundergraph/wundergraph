@@ -288,7 +288,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			},
 		)
 		if err != nil {
-			r.log.Info("unable to register S3 provider",
+			r.log.Error("unable to register S3 provider",
 				zap.Error(err),
 				zap.String("provider", s3Provider.Name),
 				zap.String("endpoint", loadvariable.String(s3Provider.Endpoint)),
