@@ -1,0 +1,8 @@
+query Todo($id: Int!) {
+	todo: db_findFirstTodo(where: { id: { equals: $id } }) {
+		id
+		title
+		completed
+		order
+	}
+}
