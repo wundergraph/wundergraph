@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 overrides:
-  react: 18.2.0
+  '@tanstack/query-core': ^4.29.1
 
 importers:
 
@@ -159,8 +159,8 @@ importers:
       '@types/lodash': ^4.14.178
       '@types/node': ^17.0.32
       '@types/object-hash': ^1.3.4
-      '@wundergraph/protobuf': workspace:^0.108.0
-      '@wundergraph/sdk': workspace:^0.146.1
+      '@wundergraph/protobuf': workspace:^0.109.0
+      '@wundergraph/sdk': workspace:^0.147.1
       execa: 5.1.1
       handlebars: ^4.7.7
       json-schema: ^0.4.0
@@ -193,7 +193,7 @@ importers:
       '@types/node-fetch': 2.6.2
       '@types/object-hash': ^1.3.4
       '@types/react': ^18.0.15
-      '@wundergraph/protobuf': workspace:^0.108.0
+      '@wundergraph/protobuf': workspace:^0.109.0
       '@wundergraph/sdk': workspace:*
       '@wundergraph/swr': workspace:*
       handlebars: ^4.7.7
@@ -203,7 +203,7 @@ importers:
       nock: ^13.2.9
       node-fetch: 2.6.7
       object-hash: ^2.2.0
-      react: 18.2.0
+      react: ^18.1.0
       react-dom: ^18.1.0
       react-ssr-prepass: ^1.5.0
       swr: ^2.0.0
@@ -254,7 +254,7 @@ importers:
     specifiers:
       '@swc/core': ^1.3.14
       '@swc/jest': ^0.2.23
-      '@tanstack/react-query': ^4.16.1
+      '@tanstack/react-query': ^4.29.3
       '@testing-library/jest-dom': ^5.16.5
       '@testing-library/react': ^13.4.0
       '@types/jest': ^28.1.1
@@ -266,7 +266,7 @@ importers:
       jest-environment-jsdom: ^29.3.0
       nock: ^13.2.9
       node-fetch: 2.6.7
-      react: 18.2.0
+      react: ^18.1.0
       react-dom: ^18.1.0
       tsd: ^0.24.1
       tsup: ^6.5.0
@@ -274,7 +274,7 @@ importers:
     devDependencies:
       '@swc/core': 1.3.14
       '@swc/jest': 0.2.23_@swc+core@1.3.14
-      '@tanstack/react-query': 4.16.1_biqbaboplfbrettd7655fr4n2y
+      '@tanstack/react-query': 4.29.3_biqbaboplfbrettd7655fr4n2y
       '@testing-library/jest-dom': 5.16.5
       '@testing-library/react': 13.4.0_biqbaboplfbrettd7655fr4n2y
       '@types/jest': 28.1.8
@@ -354,8 +354,8 @@ importers:
       '@types/write-file-atomic': ^4.0.0
       '@web-std/fetch': ^4.1.0
       '@whatwg-node/fetch': ^0.8.4
-      '@wundergraph/protobuf': workspace:^0.108.0
-      '@wundergraph/wunderctl': workspace:^0.143.1
+      '@wundergraph/protobuf': workspace:^0.109.0
+      '@wundergraph/wunderctl': workspace:^0.144.1
       axios: ^0.26.1
       axios-retry: ^3.3.1
       chai: ^4.3.4
@@ -469,7 +469,7 @@ importers:
       '@babel/preset-typescript': ^7.18.6
       '@jest/globals': ^29.3.1
       '@solidjs/testing-library': ^0.6.1
-      '@tanstack/solid-query': ^4.24.6
+      '@tanstack/solid-query': ^4.29.1
       '@testing-library/jest-dom': ^5.16.5
       '@types/jest': ^28.1.1
       '@types/node-fetch': 2.6.2
@@ -493,7 +493,7 @@ importers:
       '@babel/preset-typescript': 7.18.6_@babel+core@7.20.12
       '@jest/globals': 29.4.2
       '@solidjs/testing-library': 0.6.1_solid-js@1.6.11
-      '@tanstack/solid-query': 4.24.6_solid-js@1.6.11
+      '@tanstack/solid-query': 4.29.1_solid-js@1.6.11
       '@testing-library/jest-dom': 5.16.5
       '@types/jest': 28.1.8
       '@types/node-fetch': 2.6.2
@@ -516,7 +516,7 @@ importers:
       '@sveltejs/package': ^2.0.2
       '@swc/core': ^1.3.14
       '@swc/jest': ^0.2.23
-      '@tanstack/svelte-query': ^4.24.6
+      '@tanstack/svelte-query': ^4.29.1
       '@testing-library/jest-dom': ^5.16.5
       '@testing-library/svelte': ^3.2.2
       '@types/jest': ^28.1.1
@@ -534,7 +534,7 @@ importers:
       '@sveltejs/package': 2.0.2_atrrhq7vg4ekua4nnyrpuardle
       '@swc/core': 1.3.14
       '@swc/jest': 0.2.23_@swc+core@1.3.14
-      '@tanstack/svelte-query': 4.24.9_svelte@3.55.1
+      '@tanstack/svelte-query': 4.29.1_svelte@3.55.1
       '@testing-library/jest-dom': 5.16.5
       '@testing-library/svelte': 3.2.2_svelte@3.55.1
       '@types/jest': 28.1.8
@@ -564,7 +564,7 @@ importers:
       jest-environment-jsdom: ^29.3.0
       nock: ^13.2.9
       node-fetch: 2.6.7
-      react: 18.2.0
+      react: ^18.1.0
       react-dom: ^18.1.0
       react-ssr-prepass: ^1.5.0
       swr: ^2.0.0
@@ -617,8 +617,8 @@ importers:
     specifiers:
       '@swc/core': ^1.3.14
       '@swc/jest': ^0.2.23
-      '@tanstack/query-core': ^4.27.0
-      '@tanstack/vue-query': ^4.27.0
+      '@tanstack/query-core': ^4.29.1
+      '@tanstack/vue-query': ^4.29.1
       '@testing-library/jest-dom': ^5.16.5
       '@testing-library/vue': ^7.0.0
       '@types/jest': ^28.1.1
@@ -635,8 +635,8 @@ importers:
     devDependencies:
       '@swc/core': 1.3.14
       '@swc/jest': 0.2.23_@swc+core@1.3.14
-      '@tanstack/query-core': 4.27.0
-      '@tanstack/vue-query': 4.27.0_vue@3.2.47
+      '@tanstack/query-core': 4.29.1
+      '@tanstack/vue-query': 4.29.1_vue@3.2.47
       '@testing-library/jest-dom': 5.16.5
       '@testing-library/vue': 7.0.0_vue@3.2.47
       '@types/jest': 28.1.8
@@ -711,7 +711,7 @@ importers:
       node-fetch: ^2.6.7
       npm-run-all: ^4.1.5
       open-cli: ^7.0.1
-      react: 18.2.0
+      react: ^18.0.0
       react-dom: ^18.0.0
       swr: ^2.0.0-rc.3
       ts-node: ^10.8.0
@@ -751,7 +751,7 @@ importers:
       graphql: ^16.3.0
       next: ^13.1.1
       open-cli: ^7.0.1
-      react: 18.2.0
+      react: ^18.2.0
       react-dom: ^18.2.0
       stripe: ^11.12.0
       swr: ^2.0.0
@@ -798,7 +798,7 @@ importers:
       graphql: ^16.6.0
       next: ^13.1.1
       open-cli: ^7.0.1
-      react: 18.2.0
+      react: ^18.2.0
       react-dom: ^18.2.0
       react-relay: ^15.0.0
       relay-compiler: ^15.0.0
@@ -874,7 +874,7 @@ importers:
       concurrently: ^6.0.0
       graphql: ^16.3.0
       open-cli: ^7.0.1
-      react: 18.2.0
+      react: ^18.1.0
       react-dom: ^18.1.0
       react-router-dom: ^6.4.3
       swr: ^2.0.0
@@ -5657,43 +5657,8 @@ packages:
       remove-accents: 0.4.2
     dev: true
 
-  /@tanstack/query-core/4.15.1:
-    resolution: {integrity: sha512-+UfqJsNbPIVo0a9ANW0ZxtjiMfGLaaoIaL9vZeVycvmBuWywJGtSi7fgPVMCPdZQFOzMsaXaOsDtSKQD5xLRVQ==}
-    dev: true
-
-  /@tanstack/query-core/4.20.4:
-    resolution: {integrity: sha512-lhLtGVNJDsJ/DyZXrLzekDEywQqRVykgBqTmkv0La32a/RleILXy6JMLBb7UmS3QCatg/F/0N9/5b0i5j6IKcA==}
-    dev: false
-
-  /@tanstack/query-core/4.24.6:
-    resolution: {integrity: sha512-Tfru6YTDTCpX7dKVwHp/sosw/dNjEdzrncduUjIkQxn7n7u+74HT2ZrGtwwrU6Orws4x7zp3FKRqBPWVVhpx9w==}
-    dev: true
-
-  /@tanstack/query-core/4.24.9:
-    resolution: {integrity: sha512-pZQ2NpdaHzx8gPPkAPh06d6zRkjfonUzILSYBXrdHDapP2eaBbGsx5L4/dMF+fyAglFzQZdDDzZgAykbM20QVw==}
-    dev: true
-
-  /@tanstack/query-core/4.27.0:
-    resolution: {integrity: sha512-sm+QncWaPmM73IPwFlmWSKPqjdTXZeFf/7aEmWh00z7yl2FjqophPt0dE1EHW9P1giMC5rMviv7OUbSDmWzXXA==}
-    dev: true
-
-  /@tanstack/react-query/4.16.1_biqbaboplfbrettd7655fr4n2y:
-    resolution: {integrity: sha512-PDE9u49wSDykPazlCoLFevUpceLjQ0Mm8i6038HgtTEKb/aoVnUZdlUP7C392ds3Cd75+EGlHU7qpEX06R7d9Q==}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-native: '*'
-    peerDependenciesMeta:
-      react-dom:
-        optional: true
-      react-native:
-        optional: true
-    dependencies:
-      '@tanstack/query-core': 4.15.1
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
-      use-sync-external-store: 1.2.0_react@18.2.0
-    dev: true
+  /@tanstack/query-core/4.29.1:
+    resolution: {integrity: sha512-vkPewLEG8ua0efo3SsVT0BcBtkq5RZX8oPhDAyKL+k/rdOYSQTEocfGEXSaBwIwsXeOGBUpfKqI+UmHvNqdWXg==}
 
   /@tanstack/react-query/4.20.4_biqbaboplfbrettd7655fr4n2y:
     resolution: {integrity: sha512-SJRxx13k/csb9lXAJfycgVA1N/yU/h3bvRNWP0+aHMfMjmbyX82FdoAcckDBbOdEyAupvb0byelNHNeypCFSyA==}
@@ -5707,32 +5672,50 @@ packages:
       react-native:
         optional: true
     dependencies:
-      '@tanstack/query-core': 4.20.4
+      '@tanstack/query-core': 4.29.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       use-sync-external-store: 1.2.0_react@18.2.0
     dev: false
 
-  /@tanstack/solid-query/4.24.6_solid-js@1.6.11:
-    resolution: {integrity: sha512-ksUfW4Lwwl85kogQuP46oyqPGBqbSfNMRTu9Ey3FDPjfYzObW4j9opI3TjRoSkOapqVg5KOaobhzu8N2Wp0JBg==}
+  /@tanstack/react-query/4.29.3_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-FPQrMu7PbCgBcVzoRJm7WmQnAFv+LUgZM9KBZ7Vk/+yERH2BDLvQRuAgczQd5Tb1s3HbOktECRDaOkUxdyBAjw==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-native: '*'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+    dependencies:
+      '@tanstack/query-core': 4.29.1
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      use-sync-external-store: 1.2.0_react@18.2.0
+    dev: true
+
+  /@tanstack/solid-query/4.29.1_solid-js@1.6.11:
+    resolution: {integrity: sha512-XvRfk7Epi0gh5p+sgaMrrFu2yLY0nIq1wYbcBExehiNgyIfOw032xyZLNk5LJTAy5bLwMqL7hYR92j+ThtZ8mA==}
     peerDependencies:
       solid-js: ^1.5.7
     dependencies:
-      '@tanstack/query-core': 4.24.6
+      '@tanstack/query-core': 4.29.1
       solid-js: 1.6.11
     dev: true
 
-  /@tanstack/svelte-query/4.24.9_svelte@3.55.1:
-    resolution: {integrity: sha512-sKZgyrHbCVWxbGPNOwRG3py7b/si2lXCMP0jCLHIK6ncHrrxhZXhYDQgbIy75D44wKRDV7jjP2GJ7CIktWxNrA==}
+  /@tanstack/svelte-query/4.29.1_svelte@3.55.1:
+    resolution: {integrity: sha512-V+Ueq8fWHx6W9kBlVfrdFJbSUodJknOdgGKV90lNYM1WFeoOzqihXDOgeJHUaT+JKs96sRBQJAVN7NIbBR0iMw==}
     peerDependencies:
       svelte: ^3.54.0
     dependencies:
-      '@tanstack/query-core': 4.24.9
+      '@tanstack/query-core': 4.29.1
       svelte: 3.55.1
     dev: true
 
-  /@tanstack/vue-query/4.27.0_vue@3.2.47:
-    resolution: {integrity: sha512-C2XRSiJ9YmLNckJnAIjv7hX/3Z/c4eZQUbCBSQwlSusN3bN1NJ9T34DsOYfC2bsyCtvcrX/tXJhY3kaoqLytSw==}
+  /@tanstack/vue-query/4.29.1_vue@3.2.47:
+    resolution: {integrity: sha512-2/F12lOHQw3YQbHVKGZUTEuwxrws6UR3VEXNX/Obw2NLupmCYR7+dcBwwHQ75zUQngxLFQwHCJKX7Ne1Wyk/HA==}
     peerDependencies:
       '@vue/composition-api': ^1.1.2
       vue: ^2.5.0 || ^3.0.0
@@ -5741,7 +5724,7 @@ packages:
         optional: true
     dependencies:
       '@tanstack/match-sorter-utils': 8.8.4
-      '@tanstack/query-core': 4.27.0
+      '@tanstack/query-core': 4.29.1
       '@vue/devtools-api': 6.5.0
       vue: 3.2.47
       vue-demi: 0.13.11_vue@3.2.47
@@ -16400,7 +16383,7 @@ packages:
     dev: true
 
   /remove-accents/0.4.2:
-    resolution: {integrity: sha1-CkPTqq4egNuRngeuJUsoXZ4ce7U=}
+    resolution: {integrity: sha512-7pXIJqJOq5tFgG1A2Zxti3Ht8jJF337m4sowbuHsW30ZnkQFnDzy9qBNhgzX8ZLW4+UBcXiiR7SwR6pokHsxiA==}
     dev: true
 
   /require-directory/2.1.1:
@@ -19060,7 +19043,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.146.1
+    version: 0.147.1
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.3.0
@@ -19089,6 +19072,7 @@ packages:
       graphql: 16.6.0
       graphql-helix: 1.13.0_graphql@16.6.0
       handlebars: 4.7.7
+      https-proxy-agent: 5.0.1
       js-yaml: 4.1.0
       json-schema: 0.4.0
       json-schema-to-typescript: 11.0.3

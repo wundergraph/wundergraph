@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.143.1",
+  "version": "0.144.1",
   "name": "wundergraph",
   "license": "Apache-2.0",
   "author": {
@@ -81,5 +81,10 @@
     "lint-staged": "^12.4.2",
     "prettier": "^2.8.7",
     "release-it": "^15.4.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "@tanstack/query-core": "^4.29.1"
+    }
   }
 }

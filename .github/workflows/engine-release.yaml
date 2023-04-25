@@ -197,5 +197,6 @@ jobs:
 
       - run: pnpm publish --access public --tag latest --no-git-checks
         # https://github.blog/2023-04-19-introducing-npm-package-provenance
-        NPM_CONFIG_PROVENANCE: true
+        env:
+          NPM_CONFIG_PROVENANCE: true
         working-directory: packages/wunderctl
