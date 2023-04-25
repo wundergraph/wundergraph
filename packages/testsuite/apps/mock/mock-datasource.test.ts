@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, it } from 'vitest';
+import { expect, beforeEach, describe, it } from 'vitest';
 import { createTestAndMockServer } from './.wundergraph/generated/testing';
 import { getJSONBody } from '@wundergraph/sdk/testing';
 import { TestContext } from './types';
@@ -17,8 +17,8 @@ beforeEach<TestContext>(async (ctx) => {
 	});
 });
 
-describe.concurrent('Mock http datasource', () => {
-	it<TestContext>('Should mock countries origin API', async ({ ts, expect }) => {
+describe('Mock http datasource', () => {
+	it<TestContext>('Should mock countries origin API', async ({ ts }) => {
 		expect.assertions(5);
 
 		// Mock the countries origin API
@@ -66,7 +66,7 @@ describe.concurrent('Mock http datasource', () => {
 		expect(result.data?.countries_countries?.[0].capital).toBe('Madrid');
 	});
 
-	it<TestContext>('Should not be called because does not match', async ({ ts, expect }) => {
+	it<TestContext>('Should not be called because does not match', async ({ ts }) => {
 		expect.assertions(2);
 
 		ts.mockServer.mock(
