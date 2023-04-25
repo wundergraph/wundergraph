@@ -2,7 +2,7 @@ import closeWithGrace from 'close-with-grace';
 import { Headers } from '@web-std/fetch';
 import process from 'node:process';
 import Fastify, { FastifyInstance } from 'fastify';
-import { InternalClientFactory, internalClientFactory } from './internal-client';
+import { InternalClient, InternalClientFactory, internalClientFactory } from './internal-client';
 import { pino } from 'pino';
 import path from 'path';
 import fs from 'fs';
@@ -72,13 +72,13 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 	}
 }
 
-function configureWunderGraphServer(configWrapper: () => WunderGraphServerConfig): WunderGraphHooksAndServerConfig;
-
-function configureWunderGraphServer(configWrapper: () => any): any {
-	return _configureWunderGraphServer(configWrapper());
+export function configureWunderGraphServer<
+	GeneratedHooksConfig extends HooksConfiguration,
+	GeneratedInternalClient extends InternalClient,
+	GeneratedWebhooksConfig extends WebhooksConfig
+>(configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>) {
+	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig>(configWrapper());
 }
-
-export { configureWunderGraphServer };
 
 const _configureWunderGraphServer = <
 	GeneratedHooksConfig extends HooksConfiguration,

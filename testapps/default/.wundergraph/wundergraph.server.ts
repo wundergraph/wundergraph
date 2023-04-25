@@ -26,7 +26,23 @@ export default configureWunderGraphServer(() => ({
 						console.log('onOriginRequest', request);
 						return request;
 					},
-					enableForOperations: ['CountryWeather'],
+					enableForOperations: ['Weather', 'Albums'],
+				},
+			},
+			wsTransport: {
+				onConnectionInit: {
+					hook: async ({ clientRequest, dataSourceId }) => {
+						let token = clientRequest.headers.get('Authorization') || '';
+						if (dataSourceId === 'weather') {
+							token = 'secret';
+						}
+						return {
+							payload: {
+								Authorization: token,
+							},
+						};
+					},
+					enableForDataSources: ['weather'],
 				},
 			},
 		},

@@ -257,6 +257,54 @@ export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
 export type OperationHooks = Record<string, any>;
 export type UploadHooks = Record<string, any>;
 
+export interface GlobalHooksConfig<Operations extends string = string, DataSources extends string = string> {
+	httpTransport?: {
+		// onRequest is called right before the request is sent to the origin
+		// it can be used to modify the request
+		// you can return SKIP to skip the hook and continue the request chain without modifying the request
+		// you can return CANCEL to cancel the request chain and return a 500 error
+		onOriginRequest?: {
+			hook: OperationHookFunction;
+			// calling the httpTransport hooks has a case, because the custom httpTransport hooks have to be called for each request
+			// for this reason, you have to explicitly enable the hook for each Operation
+			enableForOperations?: Operations[];
+			// enableForAllOperations will disregard the enableForOperations property and enable the hook for all operations
+			enableForAllOperations?: boolean;
+		};
+		// onResponse is called right after the response is received from the origin
+		// it can be used to modify the response
+		// you can return SKIP to skip the hook and continue the response chain without modifying the response
+		// you can return CANCEL to cancel the response chain and return a 500 error
+		onOriginResponse?: {
+			hook: OperationHookFunction;
+			// calling the httpTransport hooks has a case, because the custom httpTransport hooks have to be called for each request
+			// for this reason, you have to explicitly enable the hook for each Operation
+			enableForOperations?: Operations[];
+			// enableForAllOperations will disregard the enableForOperations property and enable the hook for all operations
+			enableForAllOperations?: boolean;
+		};
+	};
+	wsTransport?: {
+		// onConnectionInit is used to populate 'connection_init' message payload with custom data
+		// it can be used to authenticate the websocket connection
+		onConnectionInit?: {
+			hook: OperationHookFunction;
+			/**
+			 * enableForDataSources will enable the hook for specific data sources.
+			 * you should provide a list of data sources ids
+			 * an id is the identifier of the data source in the wundergraph.config.ts file
+			 * @example
+			 *const chat = introspect.graphql({
+			 *	id: 'chatId',
+			 *	apiNamespace: 'chat',
+			 *	url: 'http://localhost:8085/query',
+			 *});
+			 */
+			enableForDataSources: DataSources[];
+		};
+	};
+}
+
 export interface HooksConfiguration<
 	Queries extends OperationHooks = OperationHooks,
 	Mutations extends OperationHooks = OperationHooks,
@@ -265,28 +313,31 @@ export interface HooksConfiguration<
 	User extends WunderGraphUser = WunderGraphUser,
 	// Any is used here because the exact type of the base client is not known at compile time
 	// We could work with an index signature + base type, but that would allow to add arbitrary data to the client
-	IC extends InternalClient = InternalClient<any, any>
+	IC extends InternalClient = InternalClient<any, any>,
+	GlobalConfig extends GlobalHooksConfig = GlobalHooksConfig
 > {
-	global?: {
-		httpTransport?: {
-			onOriginRequest?: {
-				hook: OperationHookFunction;
-				enableForOperations?: string[];
-				enableForAllOperations?: boolean;
-			};
-			onOriginResponse?: {
-				hook: OperationHookFunction;
-				enableForOperations?: string[];
-				enableForAllOperations?: boolean;
-			};
-		};
-		wsTransport?: {
-			onConnectionInit?: {
-				hook: OperationHookFunction;
-				enableForDataSources: string[];
-			};
-		};
-	};
+	// global?: {
+	// 	httpTransport?: {
+	// 		onOriginRequest?: {
+	// 			hook: OperationHookFunction;
+	// 			enableForOperations?: Extract<keyof Queries | keyof Mutations | keyof Subscriptions, string>[];
+	// 			enableForAllOperations?: boolean;
+	// 		};
+	// 		onOriginResponse?: {
+	// 			hook: OperationHookFunction;
+	// 			enableForOperations?: Extract<keyof Queries | keyof Mutations | keyof Subscriptions, string>[];
+	// 			enableForAllOperations?: boolean;
+	// 		};
+	// 	};
+	// 	wsTransport?: {
+	// 		onConnectionInit?: {
+	// 			hook: OperationHookFunction;
+	// 			enableForDataSources: DataSources[];
+	// 		};
+	// 	};
+	// };
+	global?: GlobalConfig;
+	// global?: GlobalHooksConfig<Operations, DataSources>;
 	authentication?: {
 		postAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<void>;
 		mutatingPostAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<AuthenticationResponse<User>>;

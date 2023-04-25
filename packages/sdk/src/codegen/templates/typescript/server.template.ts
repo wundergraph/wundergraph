@@ -26,7 +26,13 @@ export interface GraphQLExecutionContext {
 }
 
 declare module "@wundergraph/sdk/server" {
-    export function configureWunderGraphServer<GeneratedHooksConfig = HooksConfig, GeneratedInternalClient = InternalClient, GeneratedWebhooksConfig = WebhooksConfig>(configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>) : WunderGraphHooksAndServerConfig
+	export function configureWunderGraphServer<
+		GeneratedHooksConfig = HooksConfig,
+		GeneratedInternalClient = InternalClient,
+		GeneratedWebhooksConfig = WebhooksConfig
+	>(
+		configWrapper: () => WunderGraphServerConfig<HooksConfig, WebhooksConfig>
+	): WunderGraphHooksAndServerConfig;
 }
 
 `;
