@@ -39,7 +39,7 @@ The `projects` field is optional. It contains a list of projects. Each project h
 
 - `name` field is required. It contains the name of the project. The name is used to identify the project in the WunderGraph Cloud CI.
 - `workspace` field is required. It contains the path to the workspace directory. The path is absolute to the root of the repository.
-- `build_command` field is optional. It will override the detected build command. For monorepo it is executed at the root of the repo. Any other case it will be executed wherever the wundergraph directory is present. This will take precedence over the build command in your `package.json` file.
+- `build_command` field is optional. It will override the detected build command. For a monorepo, it will be executed at the root of the repository. In any other case, it will be executed wherever the WunderGraph directory is present. This will take precedence over the build command specified in your package.json file.
 
 ## Demo Project
 
