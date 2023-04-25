@@ -1,7 +1,6 @@
 import { expect, beforeEach, describe, it } from 'vitest';
 import { join } from 'path';
 import { createTestAndMockServer } from '../.wundergraph/generated/testing';
-import { getJSONBody } from '@wundergraph/sdk/testing';
 import { TestContext } from '../types';
 import { mockSearchResponse } from './mocks/mockSearchResponse';
 
@@ -21,14 +20,10 @@ beforeEach<TestContext>(async (ctx) => {
 
 describe('Mock external api', () => {
 	it<TestContext>('Should mock search call to OpenSearch', async ({ ts }) => {
-		expect.assertions(4);
-
 		// Mock the search endpoint of OpenSearch
-		ts.mockServer.mock<Record<string, any>>(
-			async (req) => {
-				const body = await getJSONBody(req);
-
-				expect(body).toEqual({
+		const scope = ts.mockServer.mock<Record<string, any>>(
+			async ({ json }) => {
+				expect(await json()).toEqual({
 					query: {
 						match: {
 							title: {
@@ -37,8 +32,6 @@ describe('Mock external api', () => {
 						},
 					},
 				});
-
-				return true;
 			},
 			async (req) => {
 				return {
@@ -50,6 +43,8 @@ describe('Mock external api', () => {
 		const result = await ts.testServer.client().query({
 			operationName: 'search',
 		});
+
+		scope.done();
 
 		expect(result.error).toBeUndefined();
 		expect(result.data).toBeDefined();

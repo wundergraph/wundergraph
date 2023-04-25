@@ -3,11 +3,11 @@ import { WunderGraphTestServer } from './test-server';
 
 export interface ServerStartOptions {
 	/**
-	 * List of APIs to mock.
+	 * Environment variables that should be set to the mock server url.
 	 */
 	mockedAPIs?: Array<string>;
 	/**
-	 * Environment variables to set. Overrides the default values.
+	 * Additional environment variables to set.
 	 */
 	env?: Record<string, string>;
 }

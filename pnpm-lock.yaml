@@ -355,6 +355,7 @@ importers:
       '@web-std/fetch': ^4.1.0
       '@whatwg-node/fetch': ^0.8.4
       '@wundergraph/protobuf': workspace:^0.109.0
+      '@wundergraph/straightforward': ^4.2.5
       '@wundergraph/wunderctl': workspace:^0.144.1
       axios: ^0.26.1
       axios-retry: ^3.3.1
@@ -385,7 +386,6 @@ importers:
       postman-collection: ^4.1.1
       protobufjs: ^6.11.2
       raw-body: ^2.5.2
-      straightforward: ^4.2.2
       swagger2openapi: ^7.0.8
       terminate: ^2.5.0
       ts-jest: ^29.0.1
@@ -411,6 +411,7 @@ importers:
       '@web-std/fetch': 4.1.0
       '@whatwg-node/fetch': 0.8.4
       '@wundergraph/protobuf': link:../protobuf
+      '@wundergraph/straightforward': 4.2.5
       '@wundergraph/wunderctl': link:../wunderctl
       axios: 0.26.1_debug@4.3.4
       axios-retry: 3.3.1
@@ -437,7 +438,6 @@ importers:
       postman-collection: 4.1.5
       protobufjs: 6.11.3
       raw-body: 2.5.2
-      straightforward: 4.2.2
       swagger2openapi: 7.0.8
       terminate: 2.5.0
       ts-retry-promise: 0.7.0
@@ -6553,6 +6553,17 @@ packages:
       tslib: 2.5.0
     dev: false
 
+  /@wundergraph/straightforward/4.2.5:
+    resolution: {integrity: sha512-wiOsrjPYoD6i6pdQgwfYhguAd8scmU9Jyxb/0+cOMUUzgALZyn6sRJAYOx1r57aDNPmO3OdFUnQHs9LLCti5Lg==}
+    engines: {node: '>=16'}
+    hasBin: true
+    dependencies:
+      debug: 4.3.4
+      yargs: 17.7.1
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /@yarnpkg/lockfile/1.1.0:
     resolution: {integrity: sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==}
     dev: true
@@ -11271,7 +11282,7 @@ packages:
       jest-util: 29.5.0
       jest-validate: 29.2.2
       prompts: 2.4.2
-      yargs: 17.6.2
+      yargs: 17.7.1
     transitivePeerDependencies:
       - '@types/node'
       - supports-color
@@ -11299,7 +11310,7 @@ packages:
       jest-util: 29.5.0
       jest-validate: 29.2.2
       prompts: 2.4.2
-      yargs: 17.6.2
+      yargs: 17.7.1
     transitivePeerDependencies:
       - '@types/node'
       - supports-color
@@ -11327,7 +11338,7 @@ packages:
       jest-util: 29.4.2
       jest-validate: 29.3.1
       prompts: 2.4.2
-      yargs: 17.6.2
+      yargs: 17.7.1
     transitivePeerDependencies:
       - '@types/node'
       - supports-color
@@ -11355,7 +11366,7 @@ packages:
       jest-util: 29.4.2
       jest-validate: 29.3.1
       prompts: 2.4.2
-      yargs: 17.6.2
+      yargs: 17.7.1
     transitivePeerDependencies:
       - '@types/node'
       - supports-color
@@ -11383,7 +11394,7 @@ packages:
       jest-util: 29.4.2
       jest-validate: 29.3.1
       prompts: 2.4.2
-      yargs: 17.6.2
+      yargs: 17.7.1
     transitivePeerDependencies:
       - '@types/node'
       - supports-color
@@ -11411,7 +11422,7 @@ packages:
       jest-util: 29.5.0
       jest-validate: 29.4.2
       prompts: 2.4.2
-      yargs: 17.6.2
+      yargs: 17.7.1
     transitivePeerDependencies:
       - '@types/node'
       - supports-color
@@ -11439,7 +11450,7 @@ packages:
       jest-util: 29.5.0
       jest-validate: 29.5.0
       prompts: 2.4.2
-      yargs: 17.6.2
+      yargs: 17.7.1
     transitivePeerDependencies:
       - '@types/node'
       - supports-color
@@ -14695,7 +14706,7 @@ packages:
       oas-kit-common: 1.0.8
       reftools: 1.1.9
       yaml: 1.10.2
-      yargs: 17.6.2
+      yargs: 17.7.1
     dev: false
 
   /oas-schema-walker/1.1.5:
@@ -19027,6 +19038,18 @@ packages:
       y18n: 5.0.8
       yargs-parser: 21.1.1
 
+  /yargs/17.7.1:
+    resolution: {integrity: sha512-cwiTb08Xuv5fqF4AovYacTFNxk62th7LKJ6BL9IGUpTJrWoU7/7WdQGTP2SjKf1dUNBGzDd28p/Yfs/GI6JrLw==}
+    engines: {node: '>=12'}
+    dependencies:
+      cliui: 8.0.1
+      escalade: 3.1.1
+      get-caller-file: 2.0.5
+      require-directory: 2.1.1
+      string-width: 4.2.3
+      y18n: 5.0.8
+      yargs-parser: 21.1.1
+
   /yn/3.1.1:
     resolution: {integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==}
     engines: {node: '>=6'}
@@ -19071,6 +19094,7 @@ packages:
       '@web-std/fetch': 4.1.0
       '@whatwg-node/fetch': 0.8.4
       '@wundergraph/protobuf': link:packages/protobuf
+      '@wundergraph/straightforward': 4.2.5
       '@wundergraph/wunderctl': link:packages/wunderctl
       axios: 0.26.1_debug@4.3.4
       axios-retry: 3.3.1

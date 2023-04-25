@@ -1,7 +1,6 @@
 import { expect, beforeEach, describe, it } from 'vitest';
 import { join } from 'path';
 import { createTestAndMockServer } from '../.wundergraph/generated/testing';
-import { getJSONBody } from '@wundergraph/sdk/testing';
 import { TestContext } from '../types';
 
 beforeEach<TestContext>(async (ctx) => {
@@ -20,19 +19,14 @@ beforeEach<TestContext>(async (ctx) => {
 
 describe('Mock http datasource', () => {
 	it<TestContext>('Should mock countries origin API', async ({ ts }) => {
-		expect.assertions(5);
-
 		// Mock the countries origin API
-		ts.mockServer.mock(
-			async (req) => {
-				const body = await getJSONBody(req);
-
+		const scope = ts.mockServer.mock(
+			async ({ json }) => {
+				const body = await json();
 				expect(body.variables.code).toEqual('ES');
 				expect(body.query).toEqual(
 					'query($code: String){countries_countries: countries(filter: {code: {eq: $code}}){code name capital}}'
 				);
-
-				return true;
 			},
 			async (req) => {
 				return {
@@ -62,17 +56,17 @@ describe('Mock http datasource', () => {
 			},
 		});
 
+		scope.done();
+
 		expect(result.error).toBeUndefined();
 		expect(result.data).toBeDefined();
 		expect(result.data?.countries_countries?.[0].capital).toBe('Madrid');
 	});
 
 	it<TestContext>('Should not be called because does not match', async ({ ts }) => {
-		expect.assertions(2);
-
-		ts.mockServer.mock(
-			async (req) => {
-				return false;
+		const scope = ts.mockServer.mock(
+			async ({ url }) => {
+				throw new Error(`Unexpected call to ${url}`);
 			},
 			async (req) => {
 				expect.fail('This should not be called');
@@ -88,6 +82,8 @@ describe('Mock http datasource', () => {
 			},
 		});
 
+		expect(scope.error).toBeDefined();
+		expect(scope.isDone).toBe(false);
 		expect(result.error).toBeDefined();
 		expect(result.data).toBeUndefined();
 	});
