@@ -5,7 +5,6 @@ import operations from './wundergraph.operations';
 const countries = introspect.graphql({
 	apiNamespace: 'countries',
 	url: new EnvironmentVariable('COUNTRIES_URL', 'https://countries.trevorblades.com/'),
-	httpProxyUrl: new EnvironmentVariable('COUNTRIES_PROXY'),
 });
 
 configureWunderGraphApplication({

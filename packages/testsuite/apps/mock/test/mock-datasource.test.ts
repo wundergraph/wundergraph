@@ -1,19 +1,20 @@
 import { expect, beforeEach, describe, it } from 'vitest';
-import { createTestAndMockServer } from './.wundergraph/generated/testing';
+import { join } from 'path';
+import { createTestAndMockServer } from '../.wundergraph/generated/testing';
 import { getJSONBody } from '@wundergraph/sdk/testing';
-import { TestContext } from './types';
+import { TestContext } from '../types';
 
 beforeEach<TestContext>(async (ctx) => {
 	const ts = createTestAndMockServer({
 		// The directory where your wundergraph directory is located
-		dir: __dirname,
+		dir: join(__dirname, '..'),
 	});
 
 	ctx.ts = ts;
 
 	return ts.start({
 		// Environment variables replaced by the test mock server URL
-		mockedAPIs: ['COUNTRIES_URL'],
+		mockedAPIs: ['COUNTRIES_URL', 'OS_NODE_URL'],
 	});
 });
 

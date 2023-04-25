@@ -604,6 +604,7 @@ importers:
 
   packages/testsuite:
     specifiers:
+      '@opensearch-project/opensearch': ^2.2.1
       '@wundergraph/sdk': workspace:*
       '@wundergraph/wunderctl': workspace:*
       execa: 5.1.1
@@ -613,6 +614,7 @@ importers:
       typescript: ^4.8.2
       vitest: ^0.30.1
     dependencies:
+      '@opensearch-project/opensearch': 2.2.1
       '@wundergraph/sdk': link:../sdk
       '@wundergraph/wunderctl': link:../wunderctl
       graphql: 16.6.0
@@ -4969,6 +4971,19 @@ packages:
       - '@graphql-tools/utils'
     dev: false
 
+  /@opensearch-project/opensearch/2.2.1:
+    resolution: {integrity: sha512-8zfQX1acL9eWG+ohIc9nJVT9LSqXCdbVEJs0rCPRtji3XF6ahzsiKmGNTeWLxCPDxWCjAIWq9t95xP3Y5Egi6Q==}
+    engines: {node: '>=10', yarn: ^1.22.10}
+    dependencies:
+      aws4: 1.12.0
+      debug: 4.3.4
+      hpagent: 1.2.0
+      ms: 2.1.3
+      secure-json-parse: 2.5.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /@panva/hkdf/1.0.2:
     resolution: {integrity: sha512-MSAs9t3Go7GUkMhpKC44T58DJ5KGk2vBo+h1cqQeqlMfdGkxaVB78ZWpv9gYi/g2fa4sopag9gJsNvS8XGgWJA==}
     dev: false
@@ -6987,6 +7002,10 @@ packages:
       fastq: 1.13.0
     transitivePeerDependencies:
       - supports-color
+    dev: false
+
+  /aws4/1.12.0:
+    resolution: {integrity: sha512-NmWvPnx0F1SfrQbYwOi7OeaNGokp9XhzNioJ/CSBs8Qa4vxug81mhJEAVZwxXuBmYB5KDRfMq/F3RR0BIU7sWg==}
     dev: false
 
   /axe-core/4.5.1:
@@ -10500,6 +10519,11 @@ packages:
     dependencies:
       lru-cache: 7.14.1
     dev: true
+
+  /hpagent/1.2.0:
+    resolution: {integrity: sha512-A91dYTeIB6NoXG+PxTQpCCDDnfHsW9kc06Lvpu1TEe9gnd6ZFeiBoRO9JvzEv6xK7EX97/dUE8g/vBMTqTS3CA==}
+    engines: {node: '>=14'}
+    dev: false
 
   /html-encoding-sniffer/3.0.0:
     resolution: {integrity: sha512-oWv4T4yJ52iKrufjnyZPkrN0CH3QnrUqdB6In1g5Fe1mia8GmF36gnfNySxoZtxD5+NmYw1EElVXiBk93UeskA==}
@@ -14152,7 +14176,6 @@ packages:
 
   /ms/2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
-    dev: true
 
   /mute-stream/0.0.8:
     resolution: {integrity: sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==}
