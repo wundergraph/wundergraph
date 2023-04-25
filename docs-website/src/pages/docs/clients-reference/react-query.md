@@ -28,26 +28,19 @@ configureWunderGraphApplication({
       path: '../src/components/generated',
     },
   ],
-})
+});
 ```
 
 Now you can configure the hooks. Create a new file, for example `lib/wundergraph.ts` and add the following code:
 
 ```ts
-import { createHooks } from '@wundergraph/react-query'
-import { createClient, Operations } from './components/generated/client'
+import { createHooks } from '@wundergraph/react-query';
+import { createClient, Operations } from './components/generated/client';
 
-const client = createClient() // Typesafe WunderGraph client
+const client = createClient(); // Typesafe WunderGraph client
 
-export const {
-  useQuery,
-  useMutation,
-  useSubscription,
-  useUser,
-  useFileUpload,
-  useAuth,
-  queryKey,
-} = createHooks<Operations>(client)
+export const { useQuery, useMutation, useSubscription, useUser, useFileUpload, useAuth, queryKey } =
+  createHooks<Operations>(client);
 ```
 
 In your `App.tsx` add QueryClientProvider:
@@ -76,7 +69,7 @@ Now you can use the hooks in your components:
 const { data, error, isLoading } = useQuery({
   operationName: 'Weather',
   input: { forCity: city },
-})
+});
 ```
 
 ### useQuery (Live query)
@@ -86,7 +79,7 @@ const { data, error, isLoading, isSubscribed } = useQuery({
   operationName: 'Weather',
   input: { forCity: city },
   liveQuery: true,
-})
+});
 ```
 
 ### useSubscription
@@ -97,7 +90,7 @@ const { data, error, isLoading, isSubscribed } = useSubscription({
   input: {
     forCity: 'Berlin',
   },
-})
+});
 ```
 
 ### useMutation
@@ -105,38 +98,38 @@ const { data, error, isLoading, isSubscribed } = useSubscription({
 ```ts
 const { data, mutate, mutateAsync } = useMutation({
   operationName: 'SetName',
-})
+});
 
-mutate({ name: 'WunderGraph' })
+mutate({ name: 'WunderGraph' });
 
-await mutateAsync({ name: 'WunderGraph' })
+await mutateAsync({ name: 'WunderGraph' });
 ```
 
 ### useFileUpload
 
 ```ts
-const { upload, data: fileKeys, error } = useFileUpload()
+const { upload, data: fileKeys, error } = useFileUpload();
 
 upload({
   provider: 'minio',
   files: new FileList(),
-})
+});
 ```
 
 ### useAuth
 
 ```ts
-const { login, logout } = useAuth()
+const { login, logout } = useAuth();
 
-login('github')
+login('github');
 
-logout({ logoutOpenidConnectProvider: true })
+logout({ logoutOpenidConnectProvider: true });
 ```
 
 ### useUser
 
 ```ts
-const { data: user, error } = useUser()
+const { data: user, error } = useUser();
 ```
 
 ### queryKey
@@ -144,16 +137,16 @@ const { data: user, error } = useUser()
 You can use the `queryKey` helper function to create a unique key for the query in a typesafe way. This is useful if you want to invalidate the query after mutating.
 
 ```ts
-const queryClient = useQueryClient()
+const queryClient = useQueryClient();
 
 const { mutate, mutateAsync } = useMutation({
   operationName: 'SetName',
   onSuccess() {
-    queryClient.invalidateQueries(queryKey({ operationName: 'Profile' }))
+    queryClient.invalidateQueries(queryKey({ operationName: 'Profile' }));
   },
-})
+});
 
-mutate({ name: 'WunderGraph' })
+mutate({ name: 'WunderGraph' });
 ```
 
 ## Options

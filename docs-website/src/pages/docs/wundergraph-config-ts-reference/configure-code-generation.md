@@ -19,7 +19,7 @@ configureWunderGraphApplication({
       templates: [...templates.typescript.all],
     },
   ],
-})
+});
 ```
 
 This is the default configuration.
@@ -36,7 +36,7 @@ Here's how you can do this:
 ```typescript
 // wundergraph.config.ts
 
-import { NextJsTemplate } from '@wundergraph/nextjs/dist/template'
+import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 
 configureWunderGraphApplication({
   application: myApplication,
@@ -51,7 +51,7 @@ configureWunderGraphApplication({
       path: '../components/generated',
     },
   ],
-})
+});
 ```
 
 As you can see, we're importing a custom template and initialize it.

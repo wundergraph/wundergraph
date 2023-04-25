@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.12](https://github.com/wundergraph/wundergraph/compare/@wundergraph/svelte-query@0.2.11...@wundergraph/svelte-query@0.2.12) (2023-04-25)
+
+**Note:** Version bump only for package @wundergraph/svelte-query
+
+## [0.2.11](https://github.com/wundergraph/wundergraph/compare/@wundergraph/svelte-query@0.2.10...@wundergraph/svelte-query@0.2.11) (2023-04-24)
+
+### Bug Fixes
+
+* update tanstack query ([#884](https://github.com/wundergraph/wundergraph/issues/884)) ([c8dcc42](https://github.com/wundergraph/wundergraph/commit/c8dcc42526af696df2636b7e861c227feb03a872)) (@Pagebakers)
+
 ## [0.2.10](https://github.com/wundergraph/wundergraph/compare/@wundergraph/svelte-query@0.2.9...@wundergraph/svelte-query@0.2.10) (2023-04-20)
 
 **Note:** Version bump only for package @wundergraph/svelte-query

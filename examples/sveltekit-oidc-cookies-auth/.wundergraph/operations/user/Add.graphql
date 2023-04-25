@@ -1,0 +1,50 @@
+mutation (
+    $id: String! @injectGeneratedUUID,
+    $email: String!,
+    $createdAt: DateTime! @injectCurrentDateTime,
+    $firstName: String,
+    $lastName: String,
+    $name: String,
+    $picture: String
+) {
+    db_upsertOneUser(create: {
+        id: $id,
+        email: $email,
+        firstName: $firstName,
+        lastName: $lastName,
+        name: $name,
+        picture: $picture,
+        updatedAt: $createdAt,
+        createdAt: $createdAt
+    }, update: {        
+        email: {
+            set: $email
+        },
+        firstName: {
+            set: $firstName
+        },
+        lastName: {
+            set: $lastName
+        },
+        name: {
+            set: $name
+        },
+        picture: {
+            set: $picture
+        },
+        updatedAt: {
+            set: $createdAt
+        }
+    }, where: {
+        email: $email
+    }) {
+        id
+        firstName
+        lastName
+        name
+        picture
+        email
+        createdAt
+        updatedAt
+    }
+}

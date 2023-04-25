@@ -31,9 +31,9 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
   hooks: {
     authentication: {
       postAuthentication: async ({ user, log }) => {
-        log.info(`User ${user.id} has been authenticated`)
+        log.info(`User ${user.id} has been authenticated`);
       },
     },
   },
-}))
+}));
 ```

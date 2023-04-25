@@ -6,6 +6,7 @@ import { mapInputVariable } from '../configure/variables';
 test('Should be merged', () => {
 	const userApi: GraphQLApi = new GraphQLApi(
 		'type Query @extends {   me: User } type User @key(fields: "id") {   id: ID!   name: String   username: String }',
+		'',
 		[
 			{
 				Kind: DataSourceKind.GRAPHQL,
@@ -61,6 +62,7 @@ test('Should be merged', () => {
 
 	const productApi: GraphQLApi = new GraphQLApi(
 		'type Query @extends {   topProducts(first: Int = 5): [Product] }  type Product @key(fields: "upc") {   upc: String!   name: String   price: Int   weight: Int }',
+		'',
 		[
 			{
 				Kind: DataSourceKind.GRAPHQL,
@@ -134,6 +136,7 @@ test('Should be merged', () => {
 
 	const reviewsApi: GraphQLApi = new GraphQLApi(
 		'type Review @key(fields: "id") {   id: ID!   body: String   author: User @provides(fields: "username")   product: Product }  type User @extends @key(fields: "id") {   id: ID! @external   username: String @external   reviews: [Review] }  type Product @extends @key(fields: "upc") {   upc: String! @external   reviews: [Review] } ',
+		'',
 		[
 			{
 				Kind: DataSourceKind.GRAPHQL,
@@ -220,6 +223,7 @@ test('Should be merged', () => {
 
 	const inventoryApi: GraphQLApi = new GraphQLApi(
 		'type Product @extends @key(fields: "upc") {     upc: String! @external     weight: Int @external     price: Int @external     inStock: Boolean     shippingEstimate: Int @requires(fields: "price weight") } ',
+		'',
 		[
 			{
 				Kind: DataSourceKind.GRAPHQL,
@@ -297,6 +301,7 @@ test('Should be merged', () => {
 
 	const expected: Api<GraphQLApiCustom> = new Api<GraphQLApiCustom>(
 		expectedSchema,
+		'',
 		[...userApi.DataSources, ...productApi.DataSources, ...reviewsApi.DataSources, ...inventoryApi.DataSources],
 		[
 			{

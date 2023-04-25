@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.109.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.108.0...@wundergraph/protobuf@0.109.0) (2023-04-24)
+
+### Features
+
+* add support for using proxies in data sources ([#854](https://github.com/wundergraph/wundergraph/issues/854)) ([a472c46](https://github.com/wundergraph/wundergraph/commit/a472c463d6dbcb20b48444fdd4ce9c797c16feb2)) (@fiam)
+
 ## [0.108.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.107.0...@wundergraph/protobuf@0.108.0) (2023-04-19)
 
 ### Features
