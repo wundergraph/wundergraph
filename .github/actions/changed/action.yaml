@@ -14,7 +14,7 @@ runs:
         if ! test -z "${{ github.event.pull_request.base.sha }}" && ! test -z ${{ github.sha }}; then
           # Pull request, compare against base branch
           base=${{ github.event.pull_request.base.sha }}
-          current==${{ github.sha }}
+          current=${{ github.sha }}
         else
           # Push, compare against parent commit
           base=HEAD~1
