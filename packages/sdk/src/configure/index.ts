@@ -861,8 +861,8 @@ export const configureWunderGraphApplication = <
 					switch (op.OperationType) {
 						case OperationType.MUTATION:
 							let mutationConfig = cfg.mutations(base);
-							if (customize as CustomizeMutation) {
-								mutationConfig = customize(mutationConfig);
+							if (customize) {
+								mutationConfig = (customize as CustomizeMutation)(mutationConfig);
 							}
 							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
@@ -873,8 +873,8 @@ export const configureWunderGraphApplication = <
 							});
 						case OperationType.QUERY:
 							let queryConfig = cfg.queries(base);
-							if (customize as CustomizeQuery) {
-								queryConfig = customize(queryConfig);
+							if (customize) {
+								queryConfig = (customize as CustomizeQuery)(queryConfig);
 							}
 							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
@@ -892,8 +892,8 @@ export const configureWunderGraphApplication = <
 							});
 						case OperationType.SUBSCRIPTION:
 							let subscriptionConfig = cfg.subscriptions(base);
-							if (customize as CustomizeSubscription) {
-								subscriptionConfig = customize(subscriptionConfig);
+							if (customize) {
+								subscriptionConfig = (customize as CustomizeSubscription)(subscriptionConfig);
 							}
 							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
