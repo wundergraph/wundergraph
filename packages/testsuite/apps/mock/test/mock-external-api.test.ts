@@ -23,7 +23,7 @@ describe('Mock external api', () => {
 	it<TestContext>('Should mock search call to OpenSearch', async ({ ts }) => {
 		expect.assertions(4);
 
-		// Mock the countries origin API
+		// Mock the search endpoint of OpenSearch
 		ts.mockServer.mock<Record<string, any>>(
 			async (req) => {
 				const body = await getJSONBody(req);
