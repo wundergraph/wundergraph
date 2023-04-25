@@ -41,10 +41,10 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
                 },
               ],
             },
-          }
+          };
         },
       },
     },
   },
-}))
+}));
 ```

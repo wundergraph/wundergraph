@@ -14,7 +14,7 @@ configureWunderGraphApplication({
   authorization: {
     roles: ['admin', 'user'],
   },
-})
+});
 ```
 
 WunderGraph has out of the box support for Role Based Access Control (RBAC).

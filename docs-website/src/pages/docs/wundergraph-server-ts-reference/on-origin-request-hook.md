@@ -33,13 +33,13 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
         onOriginRequest: {
           enableForAllOperations: true,
           hook: async ({ request }) => {
-            request.headers.set('X-Wundergraph-Test', 'test')
-            console.log('onOriginRequest', request.headers)
-            return request
+            request.headers.set('X-Wundergraph-Test', 'test');
+            console.log('onOriginRequest', request.headers);
+            return request;
           },
         },
       },
     },
   },
-}))
+}));
 ```

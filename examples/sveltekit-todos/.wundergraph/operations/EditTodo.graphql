@@ -1,0 +1,5 @@
+mutation ($id: Int, $title: String!) {
+	db_updateOneTodo(where: { id: $id }, data: { title: { set: $title } }) {
+		id
+	}
+}

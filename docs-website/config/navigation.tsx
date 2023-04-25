@@ -417,6 +417,10 @@ const navigation = [
 						title: 'Signing Origin Requests',
 						href: '/docs/guides/signing-origin-requests',
 					},
+					{
+						title: 'Using HTTP proxies',
+						href: '/docs/guides/using-http-proxies',
+					},
 				],
 			},
 		],
@@ -1274,7 +1278,11 @@ const navigation = [
 		title: 'Operations reference',
 		href: '/docs/operations-reference',
 		icon: <CogIcon />,
-		paths: ['/docs/typescript-operations-reference', '/docs/directives-reference'],
+		paths: [
+			'/docs/typescript-operations-reference',
+			'/docs/directives-reference',
+			'/docs/auto-generated-operations-reference',
+		],
 		links: [
 			{
 				title: 'Overview',
@@ -1370,6 +1378,15 @@ const navigation = [
 					{
 						title: 'Security',
 						href: '/docs/typescript-operations-reference/security',
+					},
+				],
+			},
+			{
+				title: 'Auto-generated Operations',
+				links: [
+					{
+						title: 'Overview',
+						href: '/docs/auto-generated-operations-reference',
 					},
 				],
 			},

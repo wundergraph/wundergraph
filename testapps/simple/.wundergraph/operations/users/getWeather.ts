@@ -3,7 +3,7 @@ import { NotFoundErr, RateLimitErr } from '../../../errors/errors';
 
 export default createOperation.query({
 	errors: [NotFoundErr, RateLimitErr],
-	handler: async ({ operations, input }) => {
+	handler: async ({ operations }) => {
 		// GraphQL operation
 		const { errors, data } = await operations.query({
 			operationName: 'Weather',
@@ -20,6 +20,8 @@ export default createOperation.query({
 			},
 		});
 
-		return input.throw;
+		const name = data?.getCityByName?.name;
+
+		return {};
 	},
 });

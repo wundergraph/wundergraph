@@ -14,7 +14,8 @@ import {
 	print,
 	printSchema,
 } from 'graphql';
-import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosError, AxiosProxyConfig, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { HttpsProxyAgent, HttpsProxyAgentOptions } from 'https-proxy-agent';
 import { ConfigurationVariableKind, DataSourceKind, HTTPHeader, HTTPMethod } from '@wundergraph/protobuf';
 import { cleanupSchema } from '../graphql/schema';
 import {
@@ -29,7 +30,13 @@ import { loadFile } from '../codegen/templates/typescript';
 import * as https from 'https';
 import { IntrospectionCacheConfiguration, introspectWithCache } from './introspection-cache';
 import { mapInputVariable, resolveVariable } from '../configure/variables';
-import { buildMTLSConfiguration, buildUpstreamAuthentication, GraphQLApi, GraphQLIntrospection } from './index';
+import {
+	buildMTLSConfiguration,
+	buildUpstreamAuthentication,
+	GraphQLApi,
+	GraphQLIntrospection,
+	ApiIntrospectionOptions,
+} from './index';
 import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
 import { urlHash, urlIsLocalNetwork } from '../localcache';
@@ -92,7 +99,8 @@ export const graphqlIntrospectionCacheConfiguration = async (
 
 export const introspectGraphql = async (
 	introspection: GraphQLIntrospection,
-	openAPI?: boolean
+	options: ApiIntrospectionOptions,
+	generatedFromOpenApi?: boolean
 ): Promise<GraphQLApi> => {
 	const headersBuilder = new HeadersBuilder();
 	const introspectionHeadersBuilder = new HeadersBuilder();
@@ -108,10 +116,12 @@ export const introspectGraphql = async (
 	const headers = mapHeaders(headersBuilder);
 	const introspectionHeaders = resolveGraphqlIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
 
-	let upstreamSchema = await introspectGraphQLSchema(introspection, introspectionHeaders);
+	let upstreamSchema = await introspectGraphQLSchema(introspection, options, introspectionHeaders);
 	upstreamSchema = lexicographicSortSchema(upstreamSchema);
 	const federationEnabled = introspection.isFederation || false;
-	const cleanUpstreamSchema = openAPI ? printSchemaWithDirectives(upstreamSchema) : cleanupSchema(upstreamSchema);
+	const cleanUpstreamSchema = generatedFromOpenApi
+		? printSchemaWithDirectives(upstreamSchema)
+		: cleanupSchema(upstreamSchema);
 
 	const { schemaSDL: schemaSDLWithCustomScalars, customScalarTypeFields } = transformSchema.replaceCustomScalars(
 		cleanUpstreamSchema,
@@ -162,6 +172,7 @@ export const introspectGraphql = async (
 	const skipRenameRootFields = introspection.skipRenameRootFields || [];
 	return new GraphQLApi(
 		applyNameSpaceToGraphQLSchema(schemaSDL, skipRenameRootFields, introspection.apiNamespace),
+		introspection.apiNamespace || '',
 		[
 			{
 				Id: introspection.id,
@@ -180,6 +191,7 @@ export const introspectGraphql = async (
 						upstreamAuthentication: buildUpstreamAuthentication(introspection),
 						mTLS: buildMTLSConfiguration(introspection),
 						urlEncodeBody: false,
+						httpProxyUrl: introspection.httpProxyUrl != null ? mapInputVariable(introspection.httpProxyUrl) : undefined,
 					},
 					Subscription: {
 						Enabled: subscriptionsEnabled,
@@ -216,12 +228,16 @@ export const introspectGraphql = async (
 	);
 };
 
-export const introspectGraphqlWithCache = async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
+export const introspectGraphqlWithCache = async (introspection: GraphQLIntrospection) => {
 	const cacheConfig = await graphqlIntrospectionCacheConfiguration(introspection);
 	return introspectWithCache(introspection, cacheConfig, introspectGraphql);
 };
 
-const introspectGraphQLSchema = async (introspection: GraphQLIntrospection, headers?: Record<string, string>) => {
+const introspectGraphQLSchema = async (
+	introspection: GraphQLIntrospection,
+	options: ApiIntrospectionOptions,
+	headers?: Record<string, string>
+) => {
 	if (introspection.loadSchemaFromString) {
 		try {
 			if (introspection.isFederation) {
@@ -236,7 +252,7 @@ const introspectGraphQLSchema = async (introspection: GraphQLIntrospection, head
 		}
 	}
 	try {
-		return introspectGraphQLAPI(introspection, headers);
+		return introspectGraphQLAPI(introspection, options, headers);
 	} catch (e: any) {
 		throw new Error(`Introspecting GraphQL API failed for apiNamespace '${introspection.apiNamespace}': ${e}`);
 	}
@@ -253,6 +269,7 @@ interface GraphQLIntrospectionResponse {
 
 const introspectGraphQLAPI = async (
 	introspection: GraphQLIntrospection,
+	options: ApiIntrospectionOptions,
 	headers?: Record<string, string>
 ): Promise<GraphQLSchema> => {
 	const data = JSON.stringify({
@@ -260,8 +277,72 @@ const introspectGraphQLAPI = async (
 		operationName: 'IntrospectionQuery',
 	});
 
+	if (!introspection.url) {
+		throw new MissingKeyError('url', introspection);
+	}
+	const url = resolveVariable(introspection.url);
+
+	let proxyConfig: AxiosProxyConfig | undefined;
+
+	let httpProxyUrlString: string | undefined;
+	if (introspection.httpProxyUrl !== undefined) {
+		// introspection.httpProxyUrl might be null to allow disabling the global proxy
+		if (introspection.httpProxyUrl) {
+			try {
+				httpProxyUrlString = resolveVariable(introspection.httpProxyUrl);
+			} catch (e: any) {}
+		}
+	}
+	if (httpProxyUrlString === undefined) {
+		httpProxyUrlString = options.httpProxyUrl ?? '';
+	}
+	let httpsAgent: HttpsProxyAgent | undefined;
+	let httpsAgentOptions: HttpsProxyAgentOptions | undefined;
+	if (httpProxyUrlString) {
+		try {
+			const proxyUrl = new URL(httpProxyUrlString);
+			let protocol = proxyUrl.protocol.toLocaleLowerCase();
+			while (protocol.endsWith(':')) {
+				protocol = protocol.substring(0, protocol.length - 1);
+			}
+			const defaultPort = protocol === 'https' ? 443 : 80;
+			const proxyHostname = proxyUrl.hostname;
+			const proxyPort = proxyUrl.port ? parseInt(proxyUrl.port, 10) : defaultPort;
+			// XXX: axios doesn't work properly with CONNECT request to proxy HTTPS
+			// over HTTP proxies. Workaround it with HttpsProxyAgent instead
+			// See https://github.com/axios/axios/issues/4531
+			if (protocol === 'http' && url.toLocaleLowerCase().startsWith('https')) {
+				httpsAgentOptions = {
+					host: proxyHostname,
+					port: proxyPort,
+					protocol,
+				};
+				if (proxyUrl.username || proxyUrl.password) {
+					httpsAgentOptions.auth = `${proxyUrl.username}:${proxyUrl.password}`;
+				}
+				httpsAgent = new HttpsProxyAgent(httpsAgentOptions);
+			} else {
+				proxyConfig = {
+					host: proxyHostname,
+					port: proxyPort,
+					protocol,
+				};
+				if (proxyUrl.username || proxyUrl.password) {
+					proxyConfig.auth = {
+						username: proxyUrl.username,
+						password: proxyUrl.password,
+					};
+				}
+			}
+		} catch (e: any) {
+			throw new Error(`invalid HTTP proxy URL '${httpProxyUrlString} when introspecting ${url}': ${e}`);
+		}
+	}
+
 	let opts: AxiosRequestConfig = {
 		headers: headers,
+		proxy: proxyConfig,
+		httpsAgent,
 		// Prevent axios from running JSON.parse() for us
 		transformResponse: (res) => res,
 		'axios-retry': {
@@ -284,18 +365,26 @@ const introspectGraphQLAPI = async (
 		if (!introspection.mTLS.cert) {
 			throw new MissingKeyError('mTLS.cert', introspection);
 		}
-		opts.httpsAgent = new https.Agent({
-			key: resolveVariable(introspection.mTLS.key),
-			cert: resolveVariable(introspection.mTLS.cert),
-			rejectUnauthorized: !introspection.mTLS.insecureSkipVerify,
-		});
+		if (httpsAgentOptions) {
+			// If httpsAgentOptions is truthy, it means we already have a custom
+			// agent for HTTP proxy -> HTTPS connection and we need to use it
+			// instead of https.Agent
+			opts.httpsAgent = new HttpsProxyAgent({
+				...httpsAgentOptions,
+				key: resolveVariable(introspection.mTLS.key),
+				cert: resolveVariable(introspection.mTLS.cert),
+				rejectUnauthorized: !introspection.mTLS.insecureSkipVerify,
+			});
+		} else {
+			opts.httpsAgent = new https.Agent({
+				key: resolveVariable(introspection.mTLS.key),
+				cert: resolveVariable(introspection.mTLS.cert),
+				rejectUnauthorized: !introspection.mTLS.insecureSkipVerify,
+			});
+		}
 	}
 
 	let res: AxiosResponse<string> | undefined;
-	if (!introspection.url) {
-		throw new MissingKeyError('url', introspection);
-	}
-	const url = resolveVariable(introspection.url);
 	try {
 		res = await Fetcher().post(url, data, opts);
 	} catch (e: any) {

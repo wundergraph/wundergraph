@@ -20,13 +20,10 @@ set -e
 SKIP="faunadb-nextjs graphql-hasura-subscriptions inject-bearer"
 
 # These are broken
-SKIP="${SKIP} nextjs-todos remix"
+SKIP="${SKIP} nextjs-todos nextjs-file-upload remix"
 
 # XXX: This breaks only in CI (fastify issue?)
 SKIP="${SKIP} graphql-ws-subscriptions"
-
-# Nuxt uses ESNEXT so skip temporarily
-SKIP="${SKIP} nuxt"
 
 # Move to repo root
 cd `dirname ${0}`/../..

@@ -40,9 +40,9 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
             name: 'John Doe',
           },
           status: 'ok',
-        }
+        };
       },
     },
   },
-}))
+}));
 ```

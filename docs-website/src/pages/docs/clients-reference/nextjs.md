@@ -17,7 +17,7 @@ npm i @wundergraph/nextjs swr
 Add `NextJsTemplate` to your WunderGraph configuration:
 
 ```typescript
-import { NextJsTemplate } from '@wundergraph/nextjs/dist/template'
+import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 
 // wundergraph.config.ts
 configureWunderGraphApplication({
@@ -31,7 +31,7 @@ configureWunderGraphApplication({
       path: '../components/generated',
     },
   ],
-})
+});
 ```
 
 ## Hooks
@@ -47,7 +47,7 @@ const { data, error, isValidating, isLoading, mutate } = useQuery({
     forCity: 'Berlin',
   },
   enabled: true,
-})
+});
 ```
 
 Calling `mutate` will invalidate and refetch the query.
@@ -58,9 +58,9 @@ const { data, mutate } = useQuery({
   input: {
     forCity: 'Berlin',
   },
-})
+});
 
-mutate()
+mutate();
 ```
 
 ### useQuery (Live query)
@@ -74,7 +74,7 @@ const { data, error, isLoading, isSubscribed, mutate } = useQuery({
     forCity: 'Berlin',
   },
   liveQuery: true,
-})
+});
 ```
 
 ### useMutation
@@ -84,11 +84,11 @@ This hook accepts most [useSWRMutation Options](https://swr.vercel.app/docs/opti
 ```typescript
 const { data, error, trigger } = useMutation({
   operationName: 'SetName',
-})
+});
 
 await trigger({
   name: 'test',
-})
+});
 
 trigger(
   {
@@ -97,7 +97,7 @@ trigger(
   {
     throwOnError: false,
   }
-)
+);
 ```
 
 ### useSubscription
@@ -115,17 +115,17 @@ const { data, error, isLoading, isSubscribed } = useSubscription({
   onError(data, key, config) {
     // called when the subscription failed to establish.
   },
-})
+});
 ```
 
 ### useAuth
 
 ```typescript
-const { login, logout } = useAuth()
+const { login, logout } = useAuth();
 
-login('github')
+login('github');
 
-logout({ logoutOpenidConnectProvider: true })
+logout({ logoutOpenidConnectProvider: true });
 ```
 
 ### useUser
@@ -133,7 +133,7 @@ logout({ logoutOpenidConnectProvider: true })
 This hook accepts most [useSWR Options](https://swr.vercel.app/docs/options) except for key and fetcher.
 
 ```typescript
-const { data, error, isLoading } = useUser()
+const { data, error, isLoading } = useUser();
 ```
 
 ## File upload
@@ -141,7 +141,7 @@ const { data, error, isLoading } = useUser()
 This hook accepts most [useSWRMutation Options](https://swr.vercel.app/docs/options) except for key and fetcher.
 
 ```typescript
-const { upload, data, error } = useFileUpload()
+const { upload, data, error } = useFileUpload();
 
 upload(
   {
@@ -151,7 +151,7 @@ upload(
   {
     throwOnError: false,
   }
-)
+);
 ```
 
 ## SSR
@@ -160,14 +160,14 @@ Wrapping the App or Page in `withWunderGraph` will make sure that Server Side Re
 that's it.
 
 ```typescript
-import { NextPage } from 'next'
-import { useQuery, withWunderGraph } from '../components/generated/nextjs'
+import { NextPage } from 'next';
+import { useQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const Home: NextPage = () => {
-  const dragons = useQuery({ operationName: 'Dragons' })
-  return <div>{JSON.stringify(dragons)}</div>
-}
-export default withWunderGraph(Home)
+  const dragons = useQuery({ operationName: 'Dragons' });
+  return <div>{JSON.stringify(dragons)}</div>;
+};
+export default withWunderGraph(Home);
 ```
 
 ## Global Configuration
@@ -178,5 +178,5 @@ In case the context configuration isn't working, it's likely due to multiple ver
 To resolve this you can import SWR directly from `@wundergraph/nextjs` to make sure the same instance is used.
 
 ```ts
-import { SWRConfig, useSWRConfig } from '@wundergraph/nextjs'
+import { SWRConfig, useSWRConfig } from '@wundergraph/nextjs';
 ```
