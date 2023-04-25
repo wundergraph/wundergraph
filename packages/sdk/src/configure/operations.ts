@@ -3,7 +3,7 @@ export interface OperationsConfiguration {
 	queries: ConfigureQuery;
 	mutations: ConfigureMutation;
 	subscriptions: ConfigureSubscription;
-	custom?: any;
+	custom?: Record<string, CustomizeQuery | CustomizeMutation | CustomizeSubscription>;
 }
 
 export interface BaseOperationConfiguration {
@@ -49,8 +49,7 @@ export interface WunderGraphOperationsConfig<T extends OperationsConfiguration> 
 
 export function configureWunderGraphOperations<GeneratedOperationConfiguration extends OperationsConfiguration>(
 	config: WunderGraphOperationsConfig<GeneratedOperationConfiguration>
-): WunderGraphOperationsConfig<GeneratedOperationConfiguration>['operations'];
-export function configureWunderGraphOperations(config: any): WunderGraphOperationsConfig<any>['operations'] {
+): WunderGraphOperationsConfig<GeneratedOperationConfiguration>['operations'] {
 	return config.operations;
 }
 
