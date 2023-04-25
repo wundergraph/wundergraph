@@ -14,9 +14,16 @@ export default defineWorkspace([
 		},
 	},
 	{
-		root: 'apps/generation',
+		root: 'apps/http-proxy',
 		test: {
-			globalSetup: 'apps/generation/test-setup.ts',
+			globalSetup: 'apps/http-proxy/test-setup.ts',
+			testTimeout: 60000,
+		},
+	},
+	{
+		root: 'apps/mock',
+		test: {
+			globalSetup: 'apps/mock/test-setup.ts',
 		},
 	},
 	{

@@ -4,26 +4,22 @@ import operations from './wundergraph.operations';
 
 const countries = introspect.graphql({
 	apiNamespace: 'countries',
-	url: 'https://countries.trevorblades.com/',
+	url: new EnvironmentVariable('COUNTRIES_URL', 'https://countries.trevorblades.com/'),
 	httpProxyUrl: new EnvironmentVariable('COUNTRIES_PROXY'),
 });
 
-const weather = introspect.graphql({
-	apiNamespace: 'weather',
-	url: 'https://weather-api.wundergraph.com/',
-	introspection: {
-		pollingIntervalSeconds: 5,
-	},
-	httpProxyUrl: new EnvironmentVariable('WEATHER_PROXY'),
-});
-
 configureWunderGraphApplication({
-	apis: [countries, weather],
+	apis: [countries],
 	server,
 	operations,
-	codeGenerators: [
-		{
-			templates: [...templates.typescript.all],
-		},
-	],
+	options: {
+		defaultRequestTimeoutSeconds: 2,
+	},
+	generate: {
+		codeGenerators: [
+			{
+				templates: [...templates.typescript.all],
+			},
+		],
+	},
 });

@@ -44,14 +44,16 @@ configureWunderGraphApplication({
 	authorization: {
 		roles: ['admin', 'user'],
 	},
-	codeGenerators: [
-		{
-			templates: [
-				// use all the typescript react templates to generate a client
-				...templates.typescript.all,
-			],
-		},
-	],
+	generate: {
+		codeGenerators: [
+			{
+				templates: [
+					// use all the typescript react templates to generate a client
+					...templates.typescript.all,
+				],
+			},
+		],
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins:
@@ -61,6 +63,9 @@ configureWunderGraphApplication({
 						'http://localhost:3000',
 				  ]
 				: ['http://localhost:3000'],
+	},
+	options: {
+		defaultRequestTimeoutSeconds: 2,
 	},
 	authentication: {
 		cookieBased: {
