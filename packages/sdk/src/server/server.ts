@@ -2,8 +2,7 @@ import closeWithGrace from 'close-with-grace';
 import { Headers } from '@web-std/fetch';
 import process from 'node:process';
 import Fastify, { FastifyInstance } from 'fastify';
-import type { InternalClient } from './internal-client';
-import { InternalClientFactory, internalClientFactory } from './internal-client';
+import { InternalClient, InternalClientFactory, internalClientFactory } from './internal-client';
 import { pino } from 'pino';
 import path from 'path';
 import fs from 'fs';
@@ -28,6 +27,7 @@ import type { LoadOperationsOutput } from '../graphql/operations';
 import FastifyFunctionsPlugin from './plugins/functions';
 import { WgEnv } from '../configure/options';
 import { OpenApiServerConfig } from './plugins/omnigraph';
+import { OperationsClient } from './operations-client';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -72,15 +72,13 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 	}
 }
 
-export const configureWunderGraphServer = <
+export function configureWunderGraphServer<
 	GeneratedHooksConfig extends HooksConfiguration,
-	GeneratedClient extends InternalClient,
-	GeneratedWebhooksConfig extends WebhooksConfig = WebhooksConfig
->(
-	configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>
-): WunderGraphHooksAndServerConfig => {
+	GeneratedInternalClient extends InternalClient,
+	GeneratedWebhooksConfig extends WebhooksConfig
+>(configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>) {
 	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig>(configWrapper());
-};
+}
 
 const _configureWunderGraphServer = <
 	GeneratedHooksConfig extends HooksConfiguration,
@@ -242,6 +240,13 @@ export const createServer = async ({
 					method: req.body.__wg.clientRequest?.method || 'GET',
 				},
 				internalClient: clientFactory({ 'x-request-id': req.id }, req.body.__wg.clientRequest),
+				operations: new OperationsClient({
+					baseURL: nodeInternalURL,
+					clientRequest: req.body.__wg.clientRequest,
+					extraHeaders: {
+						'x-request-id': req.id,
+					},
+				}),
 			};
 		});
 

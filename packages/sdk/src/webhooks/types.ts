@@ -22,8 +22,19 @@ export interface WebhookRequestContext<
 	TInternalClient extends InternalClient = InternalClient,
 	TOperationsClient extends OperationsClient = OperationsClient
 > {
+	/**
+	 * The internal client is used to make requests to the WunderGraph API.
+	 * @deprecated Superseded by the operations client.
+	 * @see https://wundergraph.com/docs/upgrade-guides/internal-client-deprecated
+	 */
 	internalClient: TInternalClient;
+	/**
+	 * The logger is used to log messages.
+	 */
 	log: WebhookLogger;
+	/**
+	 * The operations client is used to make requests to the WunderGraph API.
+	 */
 	operations: TOperationsClient;
 }
 interface LogFn {

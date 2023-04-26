@@ -8,6 +8,7 @@ import type {
     CustomizeQuery,
     CustomizeMutation,
     CustomizeSubscription,
+    WunderGraphOperationsConfig
 } from "@wundergraph/sdk"
 
 export interface OperationsConfiguration {
@@ -29,5 +30,13 @@ export interface OperationsConfiguration {
         "{{name}}"?: {{#if isQuery}}CustomizeQuery{{/if}}{{#if isMutation}}CustomizeMutation{{/if}}{{#if isSubscription}}CustomizeSubscription{{/if}};
         {{/each}}
     }
+}
+
+declare module "@wundergraph/sdk" {
+	export function configureWunderGraphOperations<
+		GeneratedOperationConfiguration extends OperationsConfiguration
+	>(
+		config: WunderGraphOperationsConfig<GeneratedOperationConfiguration>
+	): WunderGraphOperationsConfig<GeneratedOperationConfiguration>['operations']
 }
 `;
