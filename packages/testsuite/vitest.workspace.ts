@@ -19,7 +19,7 @@ export default defineWorkspace([
 		root: 'apps/http-proxy',
 		test: {
 			globalSetup: 'apps/http-proxy/test-setup.ts',
-			testTimeout: 60000,
+			testTimeout: 15000,
 		},
 	},
 	{
