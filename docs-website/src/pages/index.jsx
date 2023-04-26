@@ -110,6 +110,13 @@ export default function HomePage() {
 						variant="plain"
 					/>
 					<QuickLink
+						title="Relay"
+						description="Learn how to use WunderGraph with Relay."
+						logo={<RelayLogo />}
+						href="/docs/getting-started/relay-quickstart"
+						variant="plain"
+					/>
+					<QuickLink
 						title="SvelteKit"
 						description="Learn how to use WunderGraph with SvelteKit."
 						logo={<SvelteLogo />}
