@@ -1,4 +1,4 @@
-import { Straightforward, Request, RequestContext, ConnectContext } from '@wundergraph/straightforward';
+import { Straightforward, Request, RequestContext, ConnectContext, Next } from '@wundergraph/straightforward';
 import getRawBody from 'raw-body';
 import debug from 'debug';
 import { freeport } from './util';
@@ -90,9 +90,15 @@ export class WunderGraphMockServer {
 		this.port = await freeport();
 		await this.proxy.listen(this.port);
 
-		this.proxy.onRequest.use(async (ctx, next) => {
-			await this.handleRequest(ctx);
-		});
+		this.proxy.onRequest.use(
+			async (ctx, next) => {
+				await this.handleRequest(ctx, next);
+			},
+			async (ctx, next) => {
+				ctx.res.writeHead(404);
+				ctx.res.end();
+			}
+		);
 
 		this.proxy.onConnect.use(async (ctx, next) => {
 			await this.handleConnect(ctx);
@@ -109,7 +115,7 @@ export class WunderGraphMockServer {
 		return this.connectInterceptors;
 	}
 
-	private async handleRequest(ctx: RequestContext) {
+	private async handleRequest(ctx: RequestContext, next: Next) {
 		let req: Request = ctx.req;
 		let res = ctx.res;
 
@@ -138,11 +144,11 @@ export class WunderGraphMockServer {
 					continue;
 				}
 
-				matched = true;
-
 				log('request matched with interceptor: %s %s', req.method, req.url);
 
 				const mockRes = await interceptor.handler(mockReq);
+
+				matched = true;
 
 				let headers: Record<string, string> = { ...(mockRes.headers || {}) };
 
@@ -184,6 +190,7 @@ export class WunderGraphMockServer {
 			if (scope) {
 				scope.error = new Error(`no interceptor matched for request ${req.method} ${req.url}`);
 			}
+			await next();
 		}
 	}
 
