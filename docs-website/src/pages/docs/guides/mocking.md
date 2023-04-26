@@ -68,7 +68,7 @@ beforeAll(async () => {
 
 ### Writing tests
 
-We recommended creating as few testing server instances as possible. These minimizes the number of times the server, starts and stops, making your tests faster.
+We recommended creating as few testing server instances as possible. These minimizes the number of times the server starts and stops, making your tests faster.
 
 {% callout type="warning" %}
 Due to the nature of the mock server, it is not possible right now to run multiple tests `it` concurrently.
