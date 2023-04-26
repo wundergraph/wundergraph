@@ -57,12 +57,13 @@ describe('Invalid proxy configurations', () => {
 		});
 	});
 
-	it('uses data source proxy to override invalid global proxy and runs queries', async () => {
+	it('uses data source proxy to override invalid global proxy and runs queries', async ({ onTestFailed }) => {
 		const ts = createTestAndMockServer({
 			dir: __dirname,
 			env: { WG_HTTP_PROXY: invalidProxy, COUNTRIES_PROXY: '', WEATHER_PROXY: '' },
 		});
 		const cleanup = await ts.start();
+		onTestFailed(() => cleanup());
 
 		const client = ts.testServer.client();
 		const result = await client.query({
@@ -76,14 +77,14 @@ describe('Invalid proxy configurations', () => {
 		expect(result.data).toBeDefined();
 		expect(result.data?.countries_countries?.[0].capital).toBe('Madrid');
 
-		return cleanup;
+		await cleanup();
 	});
 
 	it('uses an invalid data source proxy for generation and fails', async () => {
 		await expect(async () => regenerate({ COUNTRIES_PROXY: invalidProxy })).rejects.toThrow();
 	});
 
-	it('uses and invalid data source proxy for queries and fails', async () => {
+	it('uses and invalid data source proxy for queries and fails', async ({ onTestFailed }) => {
 		await regenerate();
 
 		const ts = createTestAndMockServer({
@@ -91,6 +92,7 @@ describe('Invalid proxy configurations', () => {
 			env: { COUNTRIES_PROXY: invalidProxy },
 		});
 		const cleanup = await ts.start();
+		onTestFailed(() => cleanup());
 
 		const client = ts.testServer.client();
 		const result = await client.query({
@@ -103,19 +105,18 @@ describe('Invalid proxy configurations', () => {
 		expect(result.error).toBeDefined();
 		expect(result.data).toBeUndefined();
 
-		return cleanup;
+		await cleanup();
 	});
 
-	it('uses valid proxy for queries', async () => {
-		expect.assertions(4);
-
+	it('uses valid proxy for queries', async ({ onTestFailed }) => {
 		const ts = createTestAndMockServer({
 			dir: __dirname,
 		});
 		const cleanup = await ts.start();
+		onTestFailed(() => cleanup());
 
-		ts.mockServer.assertConnect((req) => {
-			expect(req.url).toBe('countries.trevorblades.com:443');
+		const scope = ts.mockServer.assertHTTPConnect(async ({ url }) => {
+			return url === 'countries.trevorblades.com:443';
 		});
 
 		const result = await ts.testServer.client().query({
@@ -125,10 +126,12 @@ describe('Invalid proxy configurations', () => {
 			},
 		});
 
+		scope.done();
+
 		expect(result.error).toBeUndefined();
 		expect(result.data).toBeDefined();
 		expect(result.data?.countries_countries?.[0].capital).toBe('Madrid');
 
-		return cleanup;
+		await cleanup();
 	});
 });

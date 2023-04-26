@@ -4,14 +4,12 @@ import { createTestAndMockServer } from '../.wundergraph/generated/testing';
 import { TestContext } from '../types';
 
 beforeEach<TestContext>(async (ctx) => {
-	const ts = createTestAndMockServer({
+	ctx.ts = createTestAndMockServer({
 		// The directory where your wundergraph directory is located
 		dir: join(__dirname, '..'),
 	});
 
-	ctx.ts = ts;
-
-	return ts.start({
+	return ctx.ts.start({
 		// Environment variables replaced by the test mock server URL
 		mockedAPIs: ['COUNTRIES_URL', 'OS_NODE_URL'],
 	});
@@ -21,14 +19,16 @@ describe('Mock http datasource', () => {
 	it<TestContext>('Should mock countries origin API', async ({ ts }) => {
 		// Mock the countries origin API
 		const scope = ts.mockServer.mock(
+			async ({ url, method }) => {
+				return url.path === '/' && method === 'POST';
+			},
 			async ({ json }) => {
 				const body = await json();
 				expect(body.variables.code).toEqual('ES');
 				expect(body.query).toEqual(
 					'query($code: String){countries_countries: countries(filter: {code: {eq: $code}}){code name capital}}'
 				);
-			},
-			async (req) => {
+
 				return {
 					status: 200,
 					headers: {

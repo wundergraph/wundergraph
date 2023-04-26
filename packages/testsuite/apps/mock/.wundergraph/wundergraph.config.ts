@@ -1,4 +1,10 @@
-import { EnvironmentVariable, configureWunderGraphApplication, introspect, templates } from '@wundergraph/sdk';
+import {
+	EnvironmentVariable,
+	configureWunderGraphApplication,
+	introspect,
+	templates,
+	configureWunderGraphGeneration,
+} from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
@@ -14,11 +20,11 @@ configureWunderGraphApplication({
 	options: {
 		defaultRequestTimeoutSeconds: 2,
 	},
-	generate: {
+	generate: configureWunderGraphGeneration({
 		codeGenerators: [
 			{
 				templates: [...templates.typescript.all],
 			},
 		],
-	},
+	}),
 });

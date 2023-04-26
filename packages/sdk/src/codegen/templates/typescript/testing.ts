@@ -7,10 +7,9 @@ import templates from '../index';
 
 export class TypeScriptTesting implements Template {
 	constructor() {}
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+	generate(_: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(handlebarTemplate);
 		const content = tmpl({});
-
 		return Promise.resolve([
 			{
 				path: 'testing.ts',
