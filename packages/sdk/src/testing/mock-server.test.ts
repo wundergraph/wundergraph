@@ -8,7 +8,7 @@ describe('Mock server', () => {
 
 		const scope = server.mock(
 			async ({ url, method }) => {
-				return url.path === '/test' && method === 'GET';
+				return url.path === '/test?a=b' && method === 'GET';
 			},
 			async () => {
 				return {
@@ -25,7 +25,7 @@ describe('Mock server', () => {
 			}
 		);
 
-		const resp = await fetch(`${server.url()}/test`);
+		const resp = await fetch(`${server.url()}/test?a=b`);
 		const data = await resp.json();
 
 		scope.done();
@@ -39,7 +39,7 @@ describe('Mock server', () => {
 		});
 	});
 
-	test('Should be able to multiple requests', async () => {
+	test('Should be able to mock the same request multiple times', async () => {
 		const server = new WunderGraphMockServer();
 
 		await server.start();
