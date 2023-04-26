@@ -1,11 +1,16 @@
 import { WunderGraphMockServer } from './mock-server';
 
 describe('Mock server', () => {
-	test('Should be able to mock an endpoint', async () => {
-		const server = new WunderGraphMockServer();
-
+	let server: WunderGraphMockServer;
+	beforeEach(async () => {
+		server = new WunderGraphMockServer();
 		await server.start();
+	});
+	afterEach(async () => {
+		await server.stop();
+	});
 
+	test('Should be able to mock an endpoint', async () => {
 		const scope = server.mock(
 			async ({ url, method }) => {
 				return url.path === '/test?a=b' && method === 'GET';
@@ -40,10 +45,6 @@ describe('Mock server', () => {
 	});
 
 	test('Should be able to mock the same request multiple times', async () => {
-		const server = new WunderGraphMockServer();
-
-		await server.start();
-
 		let scope = server.mock(
 			async ({ url, method }) => {
 				return url.path === '/test' && method === 'GET';
@@ -100,10 +101,6 @@ describe('Mock server', () => {
 	});
 
 	test('Should throw an error when mock interceptor could not be found', async () => {
-		const server = new WunderGraphMockServer();
-
-		await server.start();
-
 		const scope = server.mock(
 			async ({ url, method }) => {
 				return url.path === '/does_not_exist';
@@ -129,10 +126,6 @@ describe('Mock server', () => {
 	});
 
 	test('Should return 404 when handler does not match with any interceptor', async () => {
-		const server = new WunderGraphMockServer();
-
-		await server.start();
-
 		let scope = server.mock(
 			async ({ url, method }) => {
 				return url.path === '/test' && method === 'GET';
@@ -153,10 +146,6 @@ describe('Mock server', () => {
 	});
 
 	test('Should try the next interceptor when the previous does not match or throws an error', async () => {
-		const server = new WunderGraphMockServer();
-
-		await server.start();
-
 		let scope = server.mock(
 			async ({ url, method }) => {
 				return url.path === '/test' && method === 'GET';
