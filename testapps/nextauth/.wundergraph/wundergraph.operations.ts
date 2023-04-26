@@ -1,7 +1,6 @@
 import { configureWunderGraphOperations } from '@wundergraph/sdk';
-import type { OperationsConfiguration } from './generated/wundergraph.operations';
 
-export default configureWunderGraphOperations<OperationsConfiguration>({
+export default configureWunderGraphOperations({
 	operations: {
 		defaultConfig: {
 			authentication: {

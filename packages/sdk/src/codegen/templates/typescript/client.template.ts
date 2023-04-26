@@ -126,16 +126,16 @@ export class WunderGraphClient extends Client {
 		return super.mutate<OperationRequestOptions, Response['data'], Response['error']>(options);
 	}
 	subscribe<
-		OperationName extends Extract<keyof Operations['subscriptions'], string>,
-		Input extends Operations['subscriptions'][OperationName]['input'] = Operations['subscriptions'][OperationName]['input'],
-    Response extends Operations['subscriptions'][OperationName]['response'] = Operations['subscriptions'][OperationName]['response']
+		OperationName extends Extract<keyof Operations["subscriptions"], string>,
+		Input extends Operations["subscriptions"][OperationName]["input"] = Operations["subscriptions"][OperationName]["input"],
+		Response extends Operations["subscriptions"][OperationName]["response"] = Operations["subscriptions"][OperationName]["response"],
 	>(
 		options: OperationName extends string
 			? SubscriptionRequestOptions<OperationName, Input>
 			: SubscriptionRequestOptions,
-		cb: SubscriptionEventHandler<Response['data'], Response['error']>
+		cb?: SubscriptionEventHandler<Response["data"], Response["error"]>
 	) {
-		return super.subscribe(options, cb);
+		return super.subscribe<OperationRequestOptions, Response["data"], Response["error"]>(options, cb)
 	}
 	{{#if hasS3Providers}}
 	public async uploadFiles<

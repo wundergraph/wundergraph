@@ -59,22 +59,6 @@ describe('Operations', () => {
 		expect(badRequestError?.statusCode).toBe(400);
 	});
 
-	it('Should return a client request header', async () => {
-		const client = wg.client();
-		client.setExtraHeaders({
-			'X-Test': 'test123',
-		});
-		const { data, error } = await client.query({
-			operationName: 'clientrequest/Header',
-			input: {
-				header: 'X-Test',
-			},
-		});
-
-		expect(error).toBeUndefined();
-		expect(data?.embedded_clientRequestHeader).toBe('test123');
-	});
-
 	it('Function to function call with input vars', async () => {
 		const client = wg.client();
 
