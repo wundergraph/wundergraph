@@ -141,4 +141,5 @@ For a full example please check the example in the [WunderGraph repository](http
 
 ## Summary
 
-Done! This guide showed how to mock easily a HTTP datasources to ensure that your API behaves correctly. You can apply the same principles to mock any HTTP API in your TypeScript functions.
+This guide showed how easy it is to mock HTTP datasources. It gives you power to write integration tests fast and reliable.
+You can apply the same principles to mock any HTTP API in your TypeScript functions.
