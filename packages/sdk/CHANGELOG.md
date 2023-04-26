@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.148.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.147.1...@wundergraph/sdk@0.148.0) (2023-04-26)
+
+### Features
+
+* inconsistencies in ts clients api ([#857](https://github.com/wundergraph/wundergraph/issues/857)) ([9f31b17](https://github.com/wundergraph/wundergraph/commit/9f31b1744e97d9e5358c5e5eed011eebfa6938cc)) (@Pagebakers)
+
+### Bug Fixes
+
+* incorrect env read for public node url ([#897](https://github.com/wundergraph/wundergraph/issues/897)) ([100a88f](https://github.com/wundergraph/wundergraph/commit/100a88ff37d0a5e98db67bdda7adad26a3e5872e)) (@thisisnithin)
+
 ## [0.147.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.147.0...@wundergraph/sdk@0.147.1) (2023-04-25)
 
 **Note:** Version bump only for package @wundergraph/sdk
