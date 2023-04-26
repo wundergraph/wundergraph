@@ -43,6 +43,11 @@ Within a test, you can import `createTestAndMockServer()` to create the test and
 Note that depending on your project's settings, the path might be slightly different depending on where you generate your templates.
 We use `beforeAll` to start the test and mock server instances. The `ts.start()` method returns a cleanup function to shutdown all servers. In vitest you can return an async function to do a cleanup. We also use `mockedAPIs` to replace the environment variables with the mock server URL.
 
+{% callout type="note" %}
+Before you run the tests and import the `createTestAndMockServer` function, you must first run `wundergraph generate` to generate the testing library.
+Some testing frameworks like Vitest or Jest provides a `globalSetup` hook that allows you to run a script before running the tests. In that way, you can automate it.
+{% /callout %}
+
 ```ts
 import { createTestAndMockServer, TestServers } from '../.wundergraph/generated/testing';
 
@@ -63,7 +68,7 @@ beforeAll(async () => {
 
 ### Writing tests
 
-We recommended creating as few testing server instances as possible. These minimizes the number of times the server generates, starts and stops, making your tests faster.
+We recommended creating as few testing server instances as possible. These minimizes the number of times the server, starts and stops, making your tests faster.
 
 {% callout type="warning" %}
 Due to the nature of the mock server, it is not possible right now to run multiple tests `it` concurrently.
