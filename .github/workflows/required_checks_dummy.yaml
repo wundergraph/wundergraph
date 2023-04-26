@@ -16,14 +16,12 @@ on:
       - '.github/actions/go/action.yaml'
       - '.github/actions/node/action.yaml'
       - '.github/workflows/engine-ci.yaml'
-      # Examples CI - GH is not assuming these to match build_test anymore because they
-      # use a matrix to split the jobs and the matrix data now becomes part of the job_id.
-      # Revisit this at a later time.
-      # - '.github/actions/go/action.yaml'
-      # - '.github/actions/node/action.yaml'
-      # - '.github/workflows/examples-ci.yaml'
-      # - 'examples/**'
-      # - 'scripts/test-examples/**'
+      # Examples CI
+      - '.github/actions/go/action.yaml'
+      - '.github/actions/node/action.yaml'
+      - '.github/workflows/examples-ci.yaml'
+      - 'examples/**'
+      - 'scripts/test-examples/**'
       # Packages CI
       - 'testapps/**/*'
       - 'packages/**/*'
