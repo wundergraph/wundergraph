@@ -1,16 +1,25 @@
 import { expectType } from 'tsd';
-import { InternalClient, OperationsClientType, Webhook, WebhookHttpEvent, WebhookHttpResponse } from '../src/server';
+import {
+	InternalClient,
+	InternalOperationsDefinition,
+	OperationsClient,
+	Webhook,
+	WebhookHttpEvent,
+	WebhookHttpResponse,
+} from '../src/server';
 
 import { createWebhookFactory } from '../src/webhooks/factory';
 
-type InternalOperations = OperationsClientType<{
+type InternalOperations = InternalOperationsDefinition<{
 	Weather: {
 		input: { city: string };
-		response: { temp: string };
+		response: { data: { temp: string }; error: { message: string } };
 	};
 }>;
 
-const createWebhook = createWebhookFactory<InternalOperations>();
+type InternalOperationsClient = OperationsClient<InternalOperations>;
+
+const createWebhook = createWebhookFactory<InternalOperationsClient>();
 
 // allow any event and response
 expectType<Webhook>(
@@ -30,7 +39,7 @@ expectType<Webhook>(
 expectType<Webhook>(
 	createWebhook({
 		handler: async (event, ctx) => {
-			const result = await ctx.operations.query({
+			const { data, error } = await ctx.operations.query({
 				operationName: 'Weather',
 				input: {
 					city: 'Berlin',
@@ -38,7 +47,7 @@ expectType<Webhook>(
 			});
 			return {
 				statusCode: 200,
-				body: result,
+				body: { data, error },
 			};
 		},
 	})
@@ -58,7 +67,7 @@ expectType<Webhook<InternalClient, WebhookHttpEvent<{ city: string }>, WebhookHt
 			return {
 				statusCode: 200,
 				body: {
-					temp: result.temp,
+					temp: result.data?.temp || '0',
 				},
 			};
 		},

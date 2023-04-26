@@ -19,6 +19,7 @@ import { NextLogo } from '@/components/logos/next';
 import { SvelteLogo } from '@/components/logos/svelte';
 import { ViteLogo } from '@/components/logos/vite';
 import { RemixLogo } from '@/components/logos/remix';
+import { RelayLogo } from '@/components/logos/relay';
 import { NuxtLogo } from '@/components/logos/nuxt';
 import clsx from 'clsx';
 import { DiscordIcon } from '../components/logos/discord';
@@ -107,6 +108,13 @@ export default function HomePage() {
 						description="Learn how to use WunderGraph with Remix."
 						logo={<RemixLogo />}
 						href="/docs/getting-started/remix-quickstart"
+						variant="plain"
+					/>
+					<QuickLink
+						title="Relay"
+						description="Learn how to use WunderGraph with Relay."
+						logo={<RelayLogo />}
+						href="/docs/getting-started/relay-quickstart"
 						variant="plain"
 					/>
 					<QuickLink

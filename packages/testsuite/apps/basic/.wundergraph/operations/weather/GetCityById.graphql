@@ -1,0 +1,36 @@
+# This file is auto generated.
+# Remove/modify this header if you want to customize the operation.
+query weather_getCityById_query($config: weather_ConfigInput, $id: [String!]) {
+	weather_getCityById(config: $config, id: $id) {
+		coord {
+			lat
+			lon
+		}
+		country
+		id
+		name
+		weather {
+			clouds {
+				all
+				humidity
+				visibility
+			}
+			summary {
+				description
+				icon
+				title
+			}
+			temperature {
+				actual
+				feelsLike
+				max
+				min
+			}
+			timestamp
+			wind {
+				deg
+				speed
+			}
+		}
+	}
+}

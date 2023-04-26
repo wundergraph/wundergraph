@@ -1,6 +1,7 @@
 import { authProviders, configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
+import generate from './wundergraph.generate';
 
 const countries = introspect.graphql({
 	apiNamespace: 'countries',
@@ -41,18 +42,9 @@ configureWunderGraphApplication({
 	apis: [weather, countries, chinook, usersPost, geojson],
 	server,
 	operations,
+	generate,
 	authorization: {
 		roles: ['admin', 'user'],
-	},
-	generate: {
-		codeGenerators: [
-			{
-				templates: [
-					// use all the typescript react templates to generate a client
-					...templates.typescript.all,
-				],
-			},
-		],
 	},
 	cors: {
 		...cors.allowAll,
