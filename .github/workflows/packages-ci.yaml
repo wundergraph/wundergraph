@@ -76,6 +76,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Run testsuite
+        run: pnpm test:suite
+
       - name: Determine changed files
         id: changed
         uses: ./.github/actions/changed
