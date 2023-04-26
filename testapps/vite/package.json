@@ -11,6 +11,7 @@
     "browser": "wait-on \"http-get://localhost:5173\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:5173",
     "dev:vite": "vite",
     "build": "npm run generate && tsc && vite build",
+    "build:vite": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {

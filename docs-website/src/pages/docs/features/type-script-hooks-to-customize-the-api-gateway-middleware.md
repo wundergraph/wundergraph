@@ -77,11 +77,8 @@ Finally, have a look at an example hook implementation.
 Hooks need to be implemented in the `wundergraph.server.ts` file.
 
 ```typescript
-// generated
-const wunderGraphHooks = ConfigureWunderGraphHooks({
-  // generated
+export default configureWunderGraphServer(() => ({
   hooks: {
-    // generated
     queries: {
       // generated
       Dragons: {
@@ -108,9 +105,7 @@ Other examples would be to use the user object from the Context (ctx) to manipul
 Here's another example of how to use a `mutatingPostResolve` hook to rewrite a response:
 
 ```typescript
-// generated
-const wunderGraphHooks = ConfigureWunderGraphHooks({
-  // generated
+export default configureWunderGraphServer(() => ({
   hooks: {
     queries: {
       // generated
@@ -145,16 +140,19 @@ This is useful, e.g. when you want to implement side effects after a successful 
 Here's an example:
 
 ```typescript
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     authentication: {
-      postAuthentication: async ({ user, internalClient }) => {
+      postAuthentication: async ({ user, operations }) => {
         if (!user.email || !user.name) {
           return;
         }
-        await internalClient.mutations.UpsertLastLogin({
-          email: user.email,
-          name: user.name,
+        await operations.mutate({
+          operationName: 'UpsertLastLogin',
+          input: {
+            email: user.email,
+            name: user.name,
+          },
         });
       },
     },

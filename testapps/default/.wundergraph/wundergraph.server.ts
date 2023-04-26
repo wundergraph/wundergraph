@@ -1,7 +1,4 @@
 import { configureWunderGraphServer, GithubWebhookVerifier, EnvironmentVariable } from '@wundergraph/sdk/server';
-import type { HooksConfig } from './generated/wundergraph.hooks';
-import type { WebhooksConfig } from './generated/wundergraph.webhooks';
-import type { InternalClient } from './generated/wundergraph.internal.client';
 import type { GraphQLExecutionContext } from './generated/wundergraph.server';
 import {
 	buildSchema,
@@ -14,7 +11,7 @@ import {
 } from 'graphql';
 import type { SDLResponse } from './generated/models';
 
-export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
+export default configureWunderGraphServer(() => ({
 	webhooks: {
 		github: {
 			verifier: GithubWebhookVerifier(new EnvironmentVariable('GITHUB_SECRET')),
@@ -29,7 +26,23 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 						console.log('onOriginRequest', request);
 						return request;
 					},
-					enableForOperations: ['CountryWeather'],
+					enableForOperations: ['Weather', 'Albums'],
+				},
+			},
+			wsTransport: {
+				onConnectionInit: {
+					hook: async ({ clientRequest, dataSourceId }) => {
+						let token = clientRequest.headers.get('Authorization') || '';
+						if (dataSourceId === 'weather') {
+							token = 'secret';
+						}
+						return {
+							payload: {
+								Authorization: token,
+							},
+						};
+					},
+					enableForDataSources: ['weather'],
 				},
 			},
 		},

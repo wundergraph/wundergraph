@@ -247,6 +247,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				throw new Error(errorMessage);
 			}
 			req.ctx.internalClient = req.ctx.internalClient.withHeaders({ 'Wg-Cycle-Counter': body.cycleCounter });
+			req.ctx.operations = req.ctx.operations.withHeaders({ 'Wg-Cycle-Counter': body.cycleCounter });
 		}
 		return req.ctx;
 	};
