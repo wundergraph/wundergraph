@@ -1,8 +1,9 @@
 import { createOperation, z } from '../../generated/wundergraph.factory';
-import { ExtractResponse } from '@wundergraph/sdk/dist/operations';
+import { AuthorizationError, ExtractResponse } from '@wundergraph/sdk/operations';
 import { ZodType } from 'zod';
 
 const query = createOperation.query({
+	errors: [AuthorizationError],
 	input: z.object({
 		id: z.number(),
 	}),

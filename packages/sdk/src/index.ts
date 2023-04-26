@@ -1,5 +1,6 @@
 export type { CodeGenerationConfig, ResolvedWunderGraphConfig } from './configure';
 export type {
+	WunderGraphOperationsConfig,
 	BaseOperationConfiguration,
 	QueryConfiguration,
 	MutationConfiguration,

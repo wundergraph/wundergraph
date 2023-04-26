@@ -90,8 +90,8 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
           }
         }
       },
-      postUpload({user, file, fileKey, meta, internalClient, error}) {
-        internalClient.mutate({
+      postUpload({user, file, fileKey, meta, operations, error}) {
+        operations.mutate({
           operationName: 'fileMeta',
           input: {
             key: fileKey

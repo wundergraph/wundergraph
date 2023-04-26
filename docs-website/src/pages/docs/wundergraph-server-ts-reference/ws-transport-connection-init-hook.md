@@ -20,7 +20,8 @@ the `onConnectionInit` hook is called with the following parameters:
 - `user`: The user object when the user is authenticated
 - `clientRequest`: The original client request object, including Headers
 - `log`: The logger object
-- `internalClient`: The internal client object
+- `operations`: The operations client, used to call other (internal) operations
+- `internalClient`: The internal client object, _deprecated_
 - `datasourceId`: The id of the data-source
 
 ```typescript
@@ -32,7 +33,7 @@ const chat = introspect.graphql({
 });
 
 // wundergraph.server.ts
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     global: {
       wsTransport: {
