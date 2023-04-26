@@ -1,7 +1,4 @@
 import { configureWunderGraphServer, GithubWebhookVerifier, EnvironmentVariable } from '@wundergraph/sdk/server';
-import type { HooksConfig } from './generated/wundergraph.hooks';
-import type { WebhooksConfig } from './generated/wundergraph.webhooks';
-import type { InternalClient } from './generated/wundergraph.internal.client';
 import type { GraphQLExecutionContext } from './generated/wundergraph.server';
 import {
 	buildSchema,
@@ -14,13 +11,41 @@ import {
 } from 'graphql';
 import type { SDLResponse } from './generated/models';
 
-export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
+export default configureWunderGraphServer(() => ({
 	webhooks: {
 		github: {
 			verifier: GithubWebhookVerifier(new EnvironmentVariable('GITHUB_SECRET')),
 		},
 	},
 	hooks: {
+		global: {
+			httpTransport: {
+				onOriginRequest: {
+					hook: async ({ request }) => {
+						request.headers.set('X-WunderGraph-Test', 'Hello Signature');
+						console.log('onOriginRequest', request);
+						return request;
+					},
+					enableForOperations: ['Weather', 'Albums'],
+				},
+			},
+			wsTransport: {
+				onConnectionInit: {
+					hook: async ({ clientRequest, dataSourceId }) => {
+						let token = clientRequest.headers.get('Authorization') || '';
+						if (dataSourceId === 'weather') {
+							token = 'secret';
+						}
+						return {
+							payload: {
+								Authorization: token,
+							},
+						};
+					},
+					enableForDataSources: ['weather'],
+				},
+			},
+		},
 		authentication: {
 			postAuthentication: async ({ user }) => {},
 			mutatingPostAuthentication: async ({ user }) => {
@@ -91,6 +116,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
                 }
             `),
 			customResolverFactory: async (ctx) => {
+				console.log(`ctx->>> ${JSON.stringify(ctx, null, 2)}`);
 				return {
 					sdlField: (args: any) => 'Hello, ' + args.sdl,
 					setSdlField: (args: any) => 'Hello, ' + args.sdl,
@@ -151,6 +177,13 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 								],
 							}),
 							resolve: (obj, args, context, info) => {
+								console.log(
+									`ctx->>> ${JSON.stringify(
+										context.wundergraph.clientRequest.headers.get('X-WunderGraph-Test'),
+										null,
+										2
+									)}`
+								);
 								switch (args.which) {
 									case 'a':
 										return {

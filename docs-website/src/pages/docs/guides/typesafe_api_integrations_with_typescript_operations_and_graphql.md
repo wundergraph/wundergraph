@@ -89,6 +89,8 @@ Now, we'll combine the two GraphQL Operations using a TypeScript Operations.
 
 ```typescript
 // operations/combined/weather.ts
+import { createOperation, z } from '../generated/wundergraph.factory';
+
 export default createOperation.query({
   input: z.object({
     // we define the input of the operation
@@ -97,21 +99,23 @@ export default createOperation.query({
   handler: async (ctx) => {
     // using ctx.internalClient, we can call the previously defined GraphQL Operations
     // both input and response of the GraphQL Operations are fully typed
-    const country = await ctx.internalClient.queries.Country({
+    const country = await ctx.operations.query({
+      operationName: 'Country',
       input: {
         code: ctx.input.code,
       },
     });
-    const weather = await ctx.internalClient.queries.Weather({
+    const weather = await ctx.operations.query({
+      operationName: 'Weather',
       input: {
-        city: country.data?.countries_country?.capital || '',
+        forCity: country.data?.countries_country?.name || '',
       },
     });
     return {
       // finally, we return the combined data
       // as you can see, we can easily map the data as it's type-safe
       country: country.data?.countries_country,
-      weather: weather.data?.weather_getCityByName?.weather,
+      weather: weather.data?.getCityByName?.weather,
     };
   },
 });
@@ -129,7 +133,7 @@ import { useQuery } from '../components/generated/nextjs';
 const Weather = () => {
   const [countryCode, setCountryCode] = useState('DE');
   const { data } = useQuery({
-    operationName: 'combine/weather',
+    operationName: 'combined/weather',
     input: {
       code: countryCode, // type-safe input inferred from the input definition of the TypeScript Operation
     },
@@ -226,7 +230,8 @@ We can leverage this to create an Operation that returns the weather for the use
 export default createOperation.query({
   requireAuthentication: true, // this operation requires authentication
   handler: async (ctx) => {
-    const weather = await ctx.internalClient.queries.Weather({
+    const weather = await ctx.operations.query({
+      operationName: 'Weather',
       input: {
         city: ctx.user.location || '',
       },

@@ -15,11 +15,11 @@ const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
   requestTimeoutSeconds: 10, // optional
-})
+});
 
 configureWunderGraphApplication({
   apis: [countries],
-})
+});
 ```
 
 First, define the `url` which will be used to introspect the GraphQL service.

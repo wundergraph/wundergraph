@@ -26,7 +26,7 @@ configureWunderGraphApplication({
   security: {
     enableGraphQLEndpoint: true,
   },
-})
+});
 ```
 
 Your GraphQL Endpoint will be available at `http://localhost:9991/graphql`.

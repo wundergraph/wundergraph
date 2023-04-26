@@ -51,13 +51,20 @@ export interface OperationDefinition {
 }
 
 export interface ClientConfig {
-	applicationHash: string;
+	applicationHash?: string;
 	baseURL: string;
-	sdkVersion: string;
+	sdkVersion?: string;
 	customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 	extraHeaders?: Headers;
 	operationMetadata?: OperationMetadata;
 	csrfEnabled?: boolean;
+	/**
+	 * Force SSE for subscriptions if extraHeaders are set.
+	 * Subscriptions fall back to fetch streaming by default
+	 * if extraHeaders are set, because EventSource does not
+	 * supported headers.
+	 */
+	forceSSE?: boolean;
 }
 
 type PrivateConfigProperties = 'applicationHash' | 'sdkVersion' | 'operationMetadata' | 'operationErrorTypes';
@@ -102,7 +109,13 @@ export type SubscriptionRequestOptions<
 	OperationName extends string = any,
 	Input extends object | undefined = object | undefined
 > = WithInput<Input, OperationRequestOptions<OperationName, Input>> & {
+	/**
+	 * Subscribe to a live query
+	 */
 	liveQuery?: Boolean;
+	/**
+	 * Receive the initial response and then stop the subscription
+	 */
 	subscribeOnce?: Boolean;
 };
 

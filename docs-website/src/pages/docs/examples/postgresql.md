@@ -24,11 +24,11 @@ Simply point WunderGraph to your database using the connection string.
 const db = introspect.postgresql({
   apiNamespace: 'db',
   databaseURL: 'postgresql://admin:admin@localhost:54322/example?schema=public',
-})
+});
 
 configureWunderGraphApplication({
   apis: [db],
-})
+});
 ```
 
 ## Define an Operation

@@ -5,7 +5,8 @@ export default createOperation.query({
 		id: z.string(),
 	}),
 	handler: async (ctx) => {
-		return ctx.internalClient.queries.UsersGet({
+		return ctx.operations.query({
+			operationName: 'users/get',
 			input: {
 				id: parseInt(ctx.input.id, 10),
 			},

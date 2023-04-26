@@ -20,6 +20,7 @@ export enum WgEnv {
 	ServerUrl = 'WG_SERVER_URL',
 	ServerHost = 'WG_SERVER_HOST',
 	ServerPort = 'WG_SERVER_PORT',
+	HttpProxyUrl = 'WG_HTTP_PROXY',
 }
 
 export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'debug';
@@ -44,6 +45,7 @@ const DefaultNodeOptions = {
 		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'info'),
 	},
 	defaultRequestTimeoutSeconds: 0,
+	defaultHttpProxyUrl: new EnvironmentVariable(WgEnv.HttpProxyUrl, ''),
 };
 
 export interface ListenOptions {
@@ -78,6 +80,12 @@ export interface NodeOptions {
 	 * @defaultValue 10 seconds
 	 */
 	defaultRequestTimeoutSeconds?: number;
+	/** Default HTTP(S) proxy to use. Data sources that support proxies might also
+	 * override the default proxy with a more specific one.
+	 *
+	 * @defaultValue Use the WG_HTTP_PROXY environment variable
+	 */
+	defaultHttpProxyUrl?: InputVariable;
 }
 
 export interface ResolvedNodeOptions {
@@ -90,6 +98,7 @@ export interface ResolvedNodeOptions {
 		level: ConfigurationVariable;
 	};
 	defaultRequestTimeoutSeconds: number;
+	defaultHttpProxyUrl: ConfigurationVariable;
 }
 
 export const fallbackNodeUrl = (listenOptions: ListenOptions | undefined) => {
@@ -125,7 +134,8 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 					level: options?.logger?.level || DefaultNodeOptions.logger.level,
 				},
 				defaultRequestTimeoutSeconds:
-					options?.defaultRequestTimeoutSeconds || DefaultNodeOptions?.defaultRequestTimeoutSeconds,
+					options?.defaultRequestTimeoutSeconds || DefaultNodeOptions.defaultRequestTimeoutSeconds,
+				defaultHttpProxyUrl: options?.defaultHttpProxyUrl || DefaultNodeOptions.defaultHttpProxyUrl,
 		  };
 
 	return {
@@ -143,5 +153,6 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 			level: mapInputVariable(nodeOptions.logger.level),
 		},
 		defaultRequestTimeoutSeconds: nodeOptions.defaultRequestTimeoutSeconds,
+		defaultHttpProxyUrl: mapInputVariable(nodeOptions.defaultHttpProxyUrl),
 	};
 };

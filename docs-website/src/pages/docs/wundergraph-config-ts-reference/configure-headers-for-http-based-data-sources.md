@@ -31,7 +31,7 @@ const jsp = introspect.openApi({
     filePath: '../json_placeholder.json',
   },
   headers: (builder) => builder.addStaticHeader('X-API-KEY', '123'),
-})
+});
 ```
 
 On this origin, we will always send the header `X-API-KEY` with the value `123`.
@@ -47,9 +47,8 @@ const jsp = introspect.openApi({
     kind: 'file',
     filePath: '../json_placeholder.json',
   },
-  headers: (builder) =>
-    builder.addClientRequestHeader('X-Authorization', 'Authorization'),
-})
+  headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
+});
 ```
 
 The first parameter is the name of the header to add.
