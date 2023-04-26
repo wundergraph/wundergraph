@@ -127,7 +127,7 @@ const result = await ts.testServer.client().query({
 });
 
 /**
- * Make sure to call scope.done() to verify that all requests have been made
+ * Make sure to call scope.done() to verify that the request have been made
  * If the request was not made, the test will fail
  */
 scope.done();
