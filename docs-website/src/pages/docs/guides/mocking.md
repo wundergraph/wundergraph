@@ -114,7 +114,7 @@ const scope = ts.mockServer.mock(
 );
 ```
 
-### Make a request
+### Make a request and validate the mock
 
 The `createTestAndMockServer` returns a `WunderGraphTestServer` object that wraps the test server and the auto-generated type-safe client.
 
