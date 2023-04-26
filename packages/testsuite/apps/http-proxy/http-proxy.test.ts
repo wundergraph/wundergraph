@@ -10,7 +10,7 @@ const regenerate = async (env?: Record<string, string>) => {
 const invalidProxy = 'http://this.does.not.exist';
 
 describe('Invalid proxy configurations', () => {
-	it('uses valid proxy for introspection', async () => {
+	it('uses valid proxy for introspection', async ({ onTestFailed }) => {
 		const ts = createTestAndMockServer({
 			dir: __dirname,
 			env: { WG_HTTP_PROXY: invalidProxy },
@@ -20,6 +20,7 @@ describe('Invalid proxy configurations', () => {
 		await regenerate({
 			WG_HTTP_PROXY: ts.mockServer.url(),
 		});
+		await cleanup();
 	});
 
 	it('uses an invalid global proxy for generation and fails', async () => {
@@ -46,7 +47,7 @@ describe('Invalid proxy configurations', () => {
 		expect(result.error).toBeDefined();
 		expect(result.data).toBeUndefined();
 
-		return cleanup;
+		await cleanup();
 	});
 
 	it('uses data source proxy to override invalid global proxy and generates', async () => {
