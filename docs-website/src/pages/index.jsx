@@ -19,6 +19,7 @@ import { NextLogo } from '@/components/logos/next';
 import { SvelteLogo } from '@/components/logos/svelte';
 import { ViteLogo } from '@/components/logos/vite';
 import { RemixLogo } from '@/components/logos/remix';
+import { RelayLogo } from '@/components/logos/relay';
 import { NuxtLogo } from '@/components/logos/nuxt';
 import clsx from 'clsx';
 import { DiscordIcon } from '../components/logos/discord';
