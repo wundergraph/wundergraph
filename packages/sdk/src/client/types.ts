@@ -96,7 +96,7 @@ export interface OperationRequestOptions<
 	operationName: OperationName;
 	/**
 	 * If you pass an AbortSignal, the request will be aborted when the signal is aborted.
-	 * You are responsible for a timeout if you want to abort the request after a certain time.
+	 * You are responsible of handling the request timeout if you want to pass a custom AbortSignal.
 	 * @see https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal
 	 */
 	abortSignal?: AbortSignal;
