@@ -1,23 +1,15 @@
 {
-  "name": "@wundergraph/expo",
+  "name": "@wundergraph/react-native",
   "version": "0.0.1",
   "license": "Apache-2.0",
-  "description": "WunderGraph Expo Integration",
+  "description": "WunderGraph React Native integration",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "default": "./dist/index.js"
-    }
-  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --dts --format esm,cjs",
+    "build": "tsup src/index.ts --dts --format cjs",
     "test": "jest && tsd"
   },
   "tsd": {
@@ -73,7 +65,6 @@
   "keywords": [
     "expo",
     "wundergraph",
-    "react-native",
-    "swr"
+    "react-native"
   ]
 }
