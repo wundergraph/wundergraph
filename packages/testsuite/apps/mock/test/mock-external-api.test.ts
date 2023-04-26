@@ -1,12 +1,15 @@
-import { expect, beforeEach, describe, it } from 'vitest';
+import { expect, beforeAll, describe, it } from 'vitest';
 import { join } from 'path';
 import { createTestAndMockServer } from '../.wundergraph/generated/testing';
 import { createClient } from '../.wundergraph/generated/client';
 import { TestContext } from '../types';
 import { mockSearchResponse } from './mocks/mockSearchResponse';
+import { TestServers } from '@wundergraph/sdk/dist/testing';
 
-beforeEach<TestContext>(async (ctx) => {
-	ctx.ts = createTestAndMockServer({
+let ts: TestServers;
+
+beforeAll(async (ctx) => {
+	ts = createTestAndMockServer({
 		// The directory where your wundergraph directory is located
 		dir: join(__dirname, '..'),
 		createClient: (cfg) => {
@@ -17,14 +20,14 @@ beforeEach<TestContext>(async (ctx) => {
 		},
 	});
 
-	return ctx.ts.start({
+	return ts.start({
 		// Environment variables replaced by the test mock server URL
 		mockedAPIs: ['COUNTRIES_URL', 'OS_NODE_URL'],
 	});
 });
 
 describe('Mock external api', () => {
-	it<TestContext>('Should mock search call to OpenSearch', async ({ ts }) => {
+	it<TestContext>('Should mock search call to OpenSearch', async () => {
 		// Mock the search endpoint of OpenSearch
 		const scope = ts.mockServer.mock<Record<string, any>>(
 			async ({ url, method }) => {
@@ -58,7 +61,7 @@ describe('Mock external api', () => {
 		expect(result.data).toEqual(mockSearchResponse);
 	});
 
-	it<TestContext>('Should handle mocks per request.', async ({ ts }) => {
+	it<TestContext>('Should handle mocks per request.', async () => {
 		const scope1 = ts.mockServer.mock<Record<string, any>>(
 			async ({ url, method }) => {
 				return url.path === '/books/_search' && method === 'POST';
@@ -126,7 +129,7 @@ describe('Mock external api', () => {
 		expect(result.data.a).toEqual(2);
 	});
 
-	it<TestContext>('Should try next handlers when the first does not match or throws', async ({ ts }) => {
+	it<TestContext>('Should try next handlers when the first does not match or throws', async () => {
 		const scope1 = ts.mockServer.mock<Record<string, any>>(
 			async ({ url, method }) => {
 				expect.fail('Should not be called');
@@ -173,7 +176,7 @@ describe('Mock external api', () => {
 		expect(result.data.a).toEqual(2);
 	});
 
-	it<TestContext>('Should error because handler does not match', async ({ ts }) => {
+	it<TestContext>('Should error because handler does not match', async () => {
 		// Mock the search endpoint of OpenSearch
 		const scope = ts.mockServer.mock(
 			async ({ url, method }) => {

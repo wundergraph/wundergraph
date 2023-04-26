@@ -1,22 +1,24 @@
-import { expect, beforeEach, describe, it } from 'vitest';
+import { expect, describe, it, beforeAll } from 'vitest';
 import { join } from 'path';
 import { createTestAndMockServer } from '../.wundergraph/generated/testing';
-import { TestContext } from '../types';
+import { TestServers } from '@wundergraph/sdk/dist/testing';
 
-beforeEach<TestContext>(async (ctx) => {
-	ctx.ts = createTestAndMockServer({
+let ts: TestServers;
+
+beforeAll(async () => {
+	ts = createTestAndMockServer({
 		// The directory where your wundergraph directory is located
 		dir: join(__dirname, '..'),
 	});
 
-	return ctx.ts.start({
+	return ts.start({
 		// Environment variables replaced by the test mock server URL
 		mockedAPIs: ['COUNTRIES_URL', 'OS_NODE_URL'],
 	});
 });
 
 describe('Mock http datasource', () => {
-	it<TestContext>('Should mock countries origin API', async ({ ts }) => {
+	it('Should mock countries origin API', async () => {
 		// Mock the countries origin API
 		const scope = ts.mockServer.mock(
 			async ({ url, method }) => {
@@ -63,7 +65,7 @@ describe('Mock http datasource', () => {
 		expect(result.data?.countries_countries?.[0].capital).toBe('Madrid');
 	});
 
-	it<TestContext>('Should not be called because does not match', async ({ ts }) => {
+	it('Should not be called because does not match', async () => {
 		const scope = ts.mockServer.mock(
 			async ({ url }) => {
 				throw new Error(`Unexpected call to ${url}`);

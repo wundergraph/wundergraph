@@ -6,6 +6,7 @@ export default defineWorkspace([
 		test: {
 			globalSetup: 'apps/basic/test-setup.ts',
 			testTimeout: 10000,
+			hookTimeout: 20000,
 		},
 	},
 	{
@@ -13,6 +14,7 @@ export default defineWorkspace([
 		test: {
 			globalSetup: 'apps/auth/test-setup.ts',
 			testTimeout: 10000,
+			hookTimeout: 20000,
 		},
 	},
 	{
@@ -20,6 +22,7 @@ export default defineWorkspace([
 		test: {
 			globalSetup: 'apps/http-proxy/test-setup.ts',
 			testTimeout: 15000,
+			hookTimeout: 20000,
 		},
 	},
 	{
@@ -27,6 +30,7 @@ export default defineWorkspace([
 		test: {
 			globalSetup: 'apps/mock/test-setup.ts',
 			testTimeout: 10000,
+			hookTimeout: 20000,
 		},
 	},
 	{
@@ -34,6 +38,7 @@ export default defineWorkspace([
 		test: {
 			globalSetup: 'apps/hooks/test-setup.ts',
 			testTimeout: 10000,
+			hookTimeout: 20000,
 		},
 	},
 ]);
