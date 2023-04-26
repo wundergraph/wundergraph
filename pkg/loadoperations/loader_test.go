@@ -17,13 +17,38 @@ func newTestLoader(testdataName string) *Loader {
 }
 
 func TestIsValidOperationName(t *testing.T) {
-	assert.True(t, isValidOperationName("Foo"))
-	assert.True(t, isValidOperationName("Foo2"))
-	assert.True(t, isValidOperationName("foo"))
+	validOperationNames := []string{
+		"Foo",
+		"Foo2",
+		"foo",
+		"__foo__",
+		"__foo__/bar",
+		"__foo/42",
+		"foo/-42",
+		"Foo-",
+		"Foo_",
+	}
 
-	assert.False(t, isValidOperationName("2Foo"))
-	assert.False(t, isValidOperationName("-Foo"))
-	assert.False(t, isValidOperationName("Foo-"))
+	invalidOperationNames := []string{
+		"2Foo",
+		"-Foo",
+		".Foo",
+		"!Bar",
+	}
+
+	for _, name := range validOperationNames {
+		name := name
+		t.Run("valid "+name, func(t *testing.T) {
+			assert.NoError(t, validateOperationName(name))
+		})
+	}
+
+	for _, name := range invalidOperationNames {
+		name := name
+		t.Run("invalid "+name, func(t *testing.T) {
+			assert.Error(t, validateOperationName(name))
+		})
+	}
 }
 
 func TestLoader_Load(t *testing.T) {
