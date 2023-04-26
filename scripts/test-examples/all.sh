@@ -20,7 +20,7 @@ set -e
 SKIP="faunadb-nextjs graphql-hasura-subscriptions inject-bearer"
 
 # These are broken
-SKIP="${SKIP} nextjs-todos nextjs-file-upload remix"
+SKIP="${SKIP} nextjs-todos remix"
 
 # XXX: This breaks only in CI (fastify issue?)
 SKIP="${SKIP} graphql-ws-subscriptions"
