@@ -157,8 +157,8 @@ func (l *Loader) operationMountPath(relativeFilePath string) string {
 	relativeFilePathNonExt := relativeFilePath[:len(relativeFilePath)-len(ext)]
 	unixLikeRelativeFilePathNonExt := filepath.ToSlash(relativeFilePathNonExt)
 
-	if !isValidOperationName(unixLikeRelativeFilePathNonExt) {
-		l.out.Info = append(l.out.Info, fmt.Sprintf("operation names must be alphanumeric only, skipping file: %s", relativeFilePath))
+	if err := validateOperationName(unixLikeRelativeFilePathNonExt); err != nil {
+		l.out.Errors = append(l.out.Info, fmt.Sprintf("%s - skipping file: %s", err.Error(), relativeFilePath))
 		return ""
 	}
 
@@ -333,19 +333,36 @@ func (l *Loader) loadFragments(schemaDocument *ast.Document) (string, error) {
 	return fragments, err
 }
 
-func isValidOperationName(s string) bool {
+func validateInitialOperationCharacter(r rune) error {
+	if unicode.IsLetter(r) || r == '_' {
+		return nil
+	}
+	return errors.New("operation names must start with a letter or an underscore")
+}
+
+func validateMiddleOperationCharacter(r rune) error {
+	if unicode.IsLetter(r) || unicode.IsDigit(r) || r == '/' || r == '_' || r == '-' {
+		return nil
+	}
+	return errors.New("operations can only contain letters, numbers or _-")
+}
+
+func validateOperationName(s string) error {
 	if len(s) == 0 {
-		return false
+		return errors.New("operation name is empty")
 	}
 	for i, r := range s {
-		if i == 0 && !unicode.IsLetter(r) {
-			return false
+		var err error
+		if i == 0 {
+			err = validateInitialOperationCharacter(r)
+		} else {
+			err = validateMiddleOperationCharacter(r)
 		}
-		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '/' && r != '_' && r != '-' {
-			return false
+		if err != nil {
+			return fmt.Errorf("%q is not a valid operation name: %w", s, err)
 		}
 	}
-	return true
+	return nil
 }
 
 func normalizeOperationName(s string) string {

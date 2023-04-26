@@ -85,4 +85,20 @@ describe('Operations', () => {
 		expect(result.error).toBeUndefined();
 		expect(result.data?.data?.countries_countries?.[0].capital).toBe('Berlin');
 	});
+
+	it('should allow using operations starting and ending in underscore', async () => {
+		const result = await wg.client().query({
+			operationName: '__underscores__/__more_underscores__',
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data?.countries_countries?.[0].capital).toBe('Madrid');
+	});
+
+	it('should allow using operations with numbers in the middle', async () => {
+		const result = await wg.client().query({
+			operationName: '__underscores__/42_as_a_string',
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data).toBe('42');
+	});
 });
