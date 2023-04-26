@@ -137,17 +137,18 @@ export class Client {
 			init.signal = controller.signal;
 		}
 
-		const resp = await fetchImpl(input, {
-			credentials: 'include',
-			mode: 'cors',
-			...init,
-		});
-
-		if (timeout) {
-			clearTimeout(timeout);
+		try {
+			const resp = await fetchImpl(input, {
+				credentials: 'include',
+				mode: 'cors',
+				...init,
+			});
+			return resp;
+		} finally {
+			if (timeout) {
+				clearTimeout(timeout);
+			}
 		}
-
-		return resp;
 	}
 
 	private convertGraphQLResponse(resp: GraphQLResponse, statusCode: number = 200): ClientResponse {
