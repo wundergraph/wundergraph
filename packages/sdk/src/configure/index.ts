@@ -1076,7 +1076,7 @@ export const configureWunderGraphApplication = <
 
 			writeWunderGraphFileSync('openapi', openApiSpec);
 
-			Logger.info({ sdk: buildInfo.sdk?.version, wunderctl: buildInfo.wunderctl?.version }, 'Build completed.');
+			Logger.info('Build completed.');
 		})
 		.then(() => {
 			buildInfo.success = true;
