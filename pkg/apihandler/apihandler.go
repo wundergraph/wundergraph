@@ -860,7 +860,8 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if len(prepared.variables) != 0 {
 		// we have to merge query variables into extracted variables to been able to override default values
-		shared.Ctx.Variables = MergeJsonRightIntoLeft(prepared.variables, shared.Ctx.Variables)
+		// we make a copy of the extracted variables to not override h.extractedVariables
+		shared.Ctx.Variables = MergeJsonRightIntoLeft([]byte(string(prepared.variables)), shared.Ctx.Variables)
 	}
 
 	switch p := prepared.preparedPlan.(type) {
@@ -1308,7 +1309,8 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx.Variables = h.jsonStringInterpolator.Interpolate(ctx.Variables)
 
 	if len(h.extractedVariables) != 0 {
-		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
+		// we make a copy of the extracted variables to not override h.extractedVariables
+		ctx.Variables = MergeJsonRightIntoLeft([]byte(string(h.extractedVariables)), ctx.Variables)
 	}
 
 	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
@@ -1652,7 +1654,8 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx.Variables = h.jsonStringInterpolator.Interpolate(ctx.Variables)
 
 	if len(h.extractedVariables) != 0 {
-		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
+		// we make a copy of the extracted variables to not override h.extractedVariables
+		ctx.Variables = MergeJsonRightIntoLeft([]byte(string(h.extractedVariables)), ctx.Variables)
 	}
 
 	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
@@ -1740,7 +1743,8 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	ctx.Variables = h.jsonStringInterpolator.Interpolate(ctx.Variables)
 
 	if len(h.extractedVariables) != 0 {
-		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
+		// we make a copy of the extracted variables to not override h.extractedVariables
+		ctx.Variables = MergeJsonRightIntoLeft([]byte(string(h.extractedVariables)), ctx.Variables)
 	}
 
 	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
