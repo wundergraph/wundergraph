@@ -2,11 +2,15 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useQuery } from './lib/wundergraph';
 
+import { init } from '@wundergraph/react-native';
+
+init();
+
 export default function App() {
 	const { data, isLoading, error } = useQuery({
 		operationName: 'Dragons',
 	});
-
+	console.log(data, error);
 	return (
 		<View style={styles.container}>
 			{isLoading && <Text>Loading...</Text>}
