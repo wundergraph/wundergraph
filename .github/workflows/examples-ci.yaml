@@ -61,10 +61,6 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           node-version: '18'
 
-      - name: Setup Docker image cache
-        uses: satackey/action-docker-layer-caching@v0.0.11
-        continue-on-error: true
-
       - name: Filter tests to run
         run: |
           echo '${{ toJson(matrix.test) }}' > tmp.json
