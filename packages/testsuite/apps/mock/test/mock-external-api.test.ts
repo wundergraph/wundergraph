@@ -6,7 +6,7 @@ import { TestContext } from '../types';
 import { mockSearchResponse } from './mocks/mockSearchResponse';
 
 beforeEach<TestContext>(async (ctx) => {
-	const ts = createTestAndMockServer({
+	ctx.ts = createTestAndMockServer({
 		// The directory where your wundergraph directory is located
 		dir: join(__dirname, '..'),
 		createClient: (cfg) => {
@@ -17,9 +17,7 @@ beforeEach<TestContext>(async (ctx) => {
 		},
 	});
 
-	ctx.ts = ts;
-
-	return ts.start({
+	return ctx.ts.start({
 		// Environment variables replaced by the test mock server URL
 		mockedAPIs: ['COUNTRIES_URL', 'OS_NODE_URL'],
 	});
@@ -192,8 +190,8 @@ describe('Mock external api', () => {
 			await ts.testServer.client().query({
 				operationName: 'search',
 			});
-		} catch (e) {
-			expect(e.message).toEqual('This operation was aborted');
+		} catch (err: any) {
+			expect(err.message).toEqual('This operation was aborted');
 		}
 
 		expect(() => scope.done()).toThrow('no interceptor matched for request POST /books/_search');
