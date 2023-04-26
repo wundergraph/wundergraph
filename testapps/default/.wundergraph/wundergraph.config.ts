@@ -62,6 +62,7 @@ const countries = introspect.graphql({
 });
 
 const weather = introspect.graphql({
+	id: 'weather',
 	apiNamespace: 'weather',
 	url: 'https://weather-api.wundergraph.com/',
 	introspection: {

@@ -77,6 +77,19 @@ expectType<Promise<void | ClientResponse<unknown>>>(
 	)
 );
 
+expectType<Promise<void | ClientResponse<unknown>>>(
+	client.subscribe(
+		{
+			operationName: 'Weather',
+			input: { lat: 1 },
+			sse: false,
+		},
+		(resp) => {
+			expectType<unknown>(resp.data);
+		}
+	)
+);
+
 // Get user
 
 expectType<Promise<User>>(client.fetchUser());

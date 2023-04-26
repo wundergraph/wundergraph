@@ -20,15 +20,15 @@ export default createOperation.query({
     id: z.string(),
   }),
   handler: async ({ input, operations }) => {
-    const user = await operations.query({
+    const { data, error } = await operations.query({
       operationName: 'users/get',
       input: {
         id: input.id,
       },
     });
     return {
-      userID: user.id,
-      userName: user.name,
+      userID: data?.id,
+      userName: data?.name,
     };
   },
 });

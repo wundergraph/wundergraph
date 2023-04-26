@@ -1,9 +1,11 @@
 //language=handlebars
 export const template = `
 import type { HooksConfig } from "./wundergraph.hooks";
+import type { WebhooksConfig } from "./wundergraph.webhooks";
 import type { InternalClient } from "./wundergraph.internal.client"
+import type { InternalOperationsClient } from "./wundergraph.internal.operations.client";
 import type { CustomClaims } from "./claims";
-import type { GraphQLServerConfig, BaseRequestContext, WunderGraphUser } from "@wundergraph/sdk/server";
+import type { GraphQLServerConfig, BaseRequestContext, WunderGraphUser, WunderGraphServerConfig, WunderGraphHooksAndServerConfig } from "@wundergraph/sdk/server";
 
 export type Role = {{{ roleDefinitions }}};
 
@@ -20,6 +22,17 @@ export interface OutputConfig {
 }
 
 export interface GraphQLExecutionContext {
-    wundergraph: BaseRequestContext<User, InternalClient>;
+    wundergraph: BaseRequestContext<User, InternalClient, InternalOperationsClient>;
 }
+
+declare module "@wundergraph/sdk/server" {
+	export function configureWunderGraphServer<
+		GeneratedHooksConfig = HooksConfig,
+		GeneratedInternalClient = InternalClient,
+		GeneratedWebhooksConfig = WebhooksConfig
+	>(
+		configWrapper: () => WunderGraphServerConfig<HooksConfig, WebhooksConfig>
+	): WunderGraphHooksAndServerConfig;
+}
+
 `;
