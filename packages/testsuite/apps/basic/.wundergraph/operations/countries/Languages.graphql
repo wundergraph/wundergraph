@@ -1,0 +1,10 @@
+# This file is auto generated.
+# Remove/modify this header if you want to customize the operation.
+query countries_languages_query($filter: countries_LanguageFilterInput) {
+	countries_languages(filter: $filter) {
+		code
+		name
+		native
+		rtl
+	}
+}

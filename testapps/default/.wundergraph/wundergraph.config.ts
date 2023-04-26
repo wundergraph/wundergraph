@@ -9,7 +9,6 @@ import {
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 import generate from './wundergraph.generate';
-import { golangClient } from '@wundergraph/golang-client';
 
 const jsp = introspect.openApiV2({
 	id: 'jsp',
