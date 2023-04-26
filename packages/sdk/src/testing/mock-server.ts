@@ -1,4 +1,4 @@
-import { Straightforward, Request, Response, RequestContext } from '@wundergraph/straightforward';
+import { Straightforward, Request, RequestContext, ConnectContext } from '@wundergraph/straightforward';
 import getRawBody from 'raw-body';
 import debug from 'debug';
 import { freeport } from './util';
@@ -12,9 +12,14 @@ export interface MockScope {
 	done(): void;
 }
 
-export interface Interceptor {
+export interface RequestInterceptor {
 	match: (req: MockRequest) => Promise<boolean>;
 	handler: (req: MockRequest) => Promise<MockResponse>;
+	scope: MockScope;
+}
+
+export interface ConnectInterceptor {
+	match: (req: Request) => Promise<boolean>;
 	scope: MockScope;
 }
 
@@ -68,12 +73,14 @@ export interface MockRequest {
 export class WunderGraphMockServer {
 	private proxy: Straightforward;
 	private port: number;
-	private interceptors: Array<Interceptor>;
+	private requestInterceptors: Array<RequestInterceptor>;
+	private connectInterceptors: Array<ConnectInterceptor>;
 
 	constructor() {
 		this.proxy = new Straightforward();
 		this.port = 0;
-		this.interceptors = [];
+		this.requestInterceptors = [];
+		this.connectInterceptors = [];
 	}
 
 	/**
@@ -84,14 +91,22 @@ export class WunderGraphMockServer {
 		await this.proxy.listen(this.port);
 
 		this.proxy.onRequest.use(async (ctx, next) => {
-			let req: Request = ctx.req;
-
 			await this.handleRequest(ctx);
+		});
+
+		this.proxy.onConnect.use(async (ctx, next) => {
+			await this.handleConnect(ctx);
+
+			next();
 		});
 	}
 
-	public pendingInterceptors(): Array<Interceptor> {
-		return this.interceptors;
+	public pendingRequestInterceptors(): Array<RequestInterceptor> {
+		return this.requestInterceptors;
+	}
+
+	public pendingConnectInterceptors(): Array<ConnectInterceptor> {
+		return this.connectInterceptors;
 	}
 
 	private async handleRequest(ctx: RequestContext) {
@@ -101,7 +116,7 @@ export class WunderGraphMockServer {
 		let scope: MockScope | undefined = undefined;
 		let matched = false;
 
-		for (let interceptor of this.interceptors) {
+		for (let interceptor of this.requestInterceptors) {
 			scope = interceptor.scope;
 
 			try {
@@ -118,7 +133,7 @@ export class WunderGraphMockServer {
 				};
 
 				// Skip if the request does not match, try the next interceptor
-				if ((await interceptor.match(mockReq)) === false) {
+				if (!(await interceptor.match(mockReq))) {
 					log('request did not match interceptor: %s %s', req.method, req.url);
 					continue;
 				}
@@ -148,7 +163,7 @@ export class WunderGraphMockServer {
 				res.end(body);
 
 				// Remove the interceptor from the list after it was called
-				this.interceptors = this.interceptors.filter((ic) => ic !== interceptor);
+				this.requestInterceptors = this.requestInterceptors.filter((ic) => ic !== interceptor);
 
 				scope.isDone = true;
 
@@ -172,11 +187,57 @@ export class WunderGraphMockServer {
 		}
 	}
 
+	private async handleConnect(ctx: ConnectContext) {
+		let req: Request = ctx.req;
+
+		let scope: MockScope | undefined = undefined;
+		let matched = false;
+
+		for (let interceptor of this.connectInterceptors) {
+			scope = interceptor.scope;
+
+			try {
+				// If the request does not match or throws, pass to the next handler.
+				if (!(await interceptor.match(req))) {
+					log('connect request did not match interceptor: %s %s', req.method, req.url);
+					continue;
+				}
+
+				matched = true;
+
+				log('connect request matched with interceptor: %s %s', req.method, req.url);
+
+				// Remove the interceptor from the list after it was called
+				this.connectInterceptors = this.connectInterceptors.filter((ic) => ic !== interceptor);
+
+				scope.isDone = true;
+
+				// An interceptor can only be called once for now
+				break;
+			} catch (err: any) {
+				log('error in connect matcher, continue with the next interceptor, %s, %s error: %s', req.method, req.url, err);
+
+				if (scope) {
+					scope.error = err;
+					scope.isDone = false;
+				}
+			}
+		}
+
+		if (matched === false) {
+			log('no mock handler matched, continue with the next handler, %s, %s', req.method, req.url);
+			if (scope) {
+				scope.error = new Error(`no connect interceptor matched for request ${req.method} ${req.url}`);
+			}
+		}
+	}
+
 	/**
 	 * Stop the server.
 	 */
 	async stop(): Promise<void> {
-		this.interceptors = [];
+		this.requestInterceptors = [];
+		this.connectInterceptors = [];
 		this.port = 0;
 
 		process.nextTick(() => this.proxy.close());
@@ -237,7 +298,7 @@ export class WunderGraphMockServer {
 	) {
 		const scope = this.createScope();
 
-		this.interceptors.push({
+		this.requestInterceptors.push({
 			scope,
 			match,
 			handler,
@@ -255,17 +316,9 @@ export class WunderGraphMockServer {
 	assertHTTPConnect(match: (req: Request) => Promise<boolean>) {
 		const scope = this.createScope();
 
-		this.proxy.onConnect.use(async ({ req }, next) => {
-			try {
-				// If the request does not match or throws, pass to the next handler.
-				if (!(await match(req))) {
-					return next();
-				}
-				scope.isDone = true;
-			} catch (err: any) {
-				scope.error = err;
-				return next();
-			}
+		this.connectInterceptors.push({
+			scope,
+			match,
 		});
 
 		return scope;

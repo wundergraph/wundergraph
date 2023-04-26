@@ -166,7 +166,7 @@ describe('Mock external api', () => {
 			operationName: 'search',
 		});
 
-		expect(ts.mockServer.pendingInterceptors().length).greaterThan(0);
+		expect(ts.mockServer.pendingRequestInterceptors().length).greaterThan(0);
 		expect(scope1.isDone).toEqual(false);
 
 		scope2.done();
