@@ -1,0 +1,12 @@
+query {
+    db_findManyUser {
+        id
+        firstName
+        lastName
+        name
+        picture
+        email
+        createdAt
+        updatedAt
+    }
+}

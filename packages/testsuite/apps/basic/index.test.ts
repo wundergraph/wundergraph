@@ -58,4 +58,15 @@ describe('Operations', () => {
 		expect(badRequestError?.code).toBe('BadRequest');
 		expect(badRequestError?.statusCode).toBe(400);
 	});
+
+	it('Function to function call with input vars', async () => {
+		const client = wg.client();
+
+		const result = await client.query({
+			operationName: 'functions/user',
+		});
+
+		expect(result.error).toBeUndefined();
+		expect(result.data.greeting).toBeDefined();
+	});
 });

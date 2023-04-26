@@ -33,9 +33,14 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 				config: { webhookName: hook.name, kind: 'webhook' },
 				handler: async (request, reply) => {
 					try {
+						const clientRequest = {
+							headers: new Headers(request.headers as Record<string, string>),
+							method: request.method as RequestMethod,
+							requestURI: request.url,
+						};
 						const operationClient = new OperationsClient({
 							baseURL: config.nodeURL,
-							clientRequest: null,
+							clientRequest,
 						});
 						const eventResponse = await webhook.handler(
 							{
@@ -47,14 +52,7 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 							},
 							{
 								log: request.log.child({ webhook: hook.name }),
-								internalClient: config.internalClientFactory(
-									{},
-									{
-										headers: new Headers(request.headers as Record<string, string>),
-										method: request.method as RequestMethod,
-										requestURI: request.url,
-									}
-								),
+								internalClient: config.internalClientFactory({}, clientRequest),
 								operations: operationClient,
 							}
 						);

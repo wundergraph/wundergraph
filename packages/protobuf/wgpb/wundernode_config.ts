@@ -1027,6 +1027,7 @@ export interface FetchConfiguration {
   mTLS: MTLSConfiguration | undefined;
   baseUrl: ConfigurationVariable | undefined;
   path: ConfigurationVariable | undefined;
+  httpProxyUrl?: ConfigurationVariable | undefined;
 }
 
 export interface FetchConfiguration_HeaderEntry {
@@ -1162,6 +1163,10 @@ export interface ListenerOptions {
   port: ConfigurationVariable | undefined;
 }
 
+export interface InternalListenerOptions {
+  port: ConfigurationVariable | undefined;
+}
+
 export interface NodeLogging {
   level: ConfigurationVariable | undefined;
 }
@@ -1172,6 +1177,9 @@ export interface NodeOptions {
   listen: ListenerOptions | undefined;
   logger: NodeLogging | undefined;
   defaultRequestTimeoutSeconds: number;
+  listenInternal: InternalListenerOptions | undefined;
+  nodeInternalUrl: ConfigurationVariable | undefined;
+  defaultHttpProxyUrl: ConfigurationVariable | undefined;
 }
 
 export interface ServerLogging {
@@ -2890,6 +2898,7 @@ function createBaseFetchConfiguration(): FetchConfiguration {
     mTLS: undefined,
     baseUrl: undefined,
     path: undefined,
+    httpProxyUrl: undefined,
   };
 }
 
@@ -2915,6 +2924,7 @@ export const FetchConfiguration = {
       mTLS: isSet(object.mTLS) ? MTLSConfiguration.fromJSON(object.mTLS) : undefined,
       baseUrl: isSet(object.baseUrl) ? ConfigurationVariable.fromJSON(object.baseUrl) : undefined,
       path: isSet(object.path) ? ConfigurationVariable.fromJSON(object.path) : undefined,
+      httpProxyUrl: isSet(object.httpProxyUrl) ? ConfigurationVariable.fromJSON(object.httpProxyUrl) : undefined,
     };
   },
 
@@ -2942,6 +2952,8 @@ export const FetchConfiguration = {
     message.baseUrl !== undefined &&
       (obj.baseUrl = message.baseUrl ? ConfigurationVariable.toJSON(message.baseUrl) : undefined);
     message.path !== undefined && (obj.path = message.path ? ConfigurationVariable.toJSON(message.path) : undefined);
+    message.httpProxyUrl !== undefined &&
+      (obj.httpProxyUrl = message.httpProxyUrl ? ConfigurationVariable.toJSON(message.httpProxyUrl) : undefined);
     return obj;
   },
 
@@ -2974,6 +2986,9 @@ export const FetchConfiguration = {
       : undefined;
     message.path = (object.path !== undefined && object.path !== null)
       ? ConfigurationVariable.fromPartial(object.path)
+      : undefined;
+    message.httpProxyUrl = (object.httpProxyUrl !== undefined && object.httpProxyUrl !== null)
+      ? ConfigurationVariable.fromPartial(object.httpProxyUrl)
       : undefined;
     return message;
   },
@@ -3861,6 +3876,30 @@ export const ListenerOptions = {
   },
 };
 
+function createBaseInternalListenerOptions(): InternalListenerOptions {
+  return { port: undefined };
+}
+
+export const InternalListenerOptions = {
+  fromJSON(object: any): InternalListenerOptions {
+    return { port: isSet(object.port) ? ConfigurationVariable.fromJSON(object.port) : undefined };
+  },
+
+  toJSON(message: InternalListenerOptions): unknown {
+    const obj: any = {};
+    message.port !== undefined && (obj.port = message.port ? ConfigurationVariable.toJSON(message.port) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<InternalListenerOptions>, I>>(object: I): InternalListenerOptions {
+    const message = createBaseInternalListenerOptions();
+    message.port = (object.port !== undefined && object.port !== null)
+      ? ConfigurationVariable.fromPartial(object.port)
+      : undefined;
+    return message;
+  },
+};
+
 function createBaseNodeLogging(): NodeLogging {
   return { level: undefined };
 }
@@ -3893,6 +3932,9 @@ function createBaseNodeOptions(): NodeOptions {
     listen: undefined,
     logger: undefined,
     defaultRequestTimeoutSeconds: 0,
+    listenInternal: undefined,
+    nodeInternalUrl: undefined,
+    defaultHttpProxyUrl: undefined,
   };
 }
 
@@ -3906,6 +3948,15 @@ export const NodeOptions = {
       defaultRequestTimeoutSeconds: isSet(object.defaultRequestTimeoutSeconds)
         ? Number(object.defaultRequestTimeoutSeconds)
         : 0,
+      listenInternal: isSet(object.listenInternal)
+        ? InternalListenerOptions.fromJSON(object.listenInternal)
+        : undefined,
+      nodeInternalUrl: isSet(object.nodeInternalUrl)
+        ? ConfigurationVariable.fromJSON(object.nodeInternalUrl)
+        : undefined,
+      defaultHttpProxyUrl: isSet(object.defaultHttpProxyUrl)
+        ? ConfigurationVariable.fromJSON(object.defaultHttpProxyUrl)
+        : undefined,
     };
   },
 
@@ -3919,6 +3970,17 @@ export const NodeOptions = {
     message.logger !== undefined && (obj.logger = message.logger ? NodeLogging.toJSON(message.logger) : undefined);
     message.defaultRequestTimeoutSeconds !== undefined &&
       (obj.defaultRequestTimeoutSeconds = Math.round(message.defaultRequestTimeoutSeconds));
+    message.listenInternal !== undefined &&
+      (obj.listenInternal = message.listenInternal
+        ? InternalListenerOptions.toJSON(message.listenInternal)
+        : undefined);
+    message.nodeInternalUrl !== undefined &&
+      (obj.nodeInternalUrl = message.nodeInternalUrl
+        ? ConfigurationVariable.toJSON(message.nodeInternalUrl)
+        : undefined);
+    message.defaultHttpProxyUrl !== undefined && (obj.defaultHttpProxyUrl = message.defaultHttpProxyUrl
+      ? ConfigurationVariable.toJSON(message.defaultHttpProxyUrl)
+      : undefined);
     return obj;
   },
 
@@ -3937,6 +3999,15 @@ export const NodeOptions = {
       ? NodeLogging.fromPartial(object.logger)
       : undefined;
     message.defaultRequestTimeoutSeconds = object.defaultRequestTimeoutSeconds ?? 0;
+    message.listenInternal = (object.listenInternal !== undefined && object.listenInternal !== null)
+      ? InternalListenerOptions.fromPartial(object.listenInternal)
+      : undefined;
+    message.nodeInternalUrl = (object.nodeInternalUrl !== undefined && object.nodeInternalUrl !== null)
+      ? ConfigurationVariable.fromPartial(object.nodeInternalUrl)
+      : undefined;
+    message.defaultHttpProxyUrl = (object.defaultHttpProxyUrl !== undefined && object.defaultHttpProxyUrl !== null)
+      ? ConfigurationVariable.fromPartial(object.defaultHttpProxyUrl)
+      : undefined;
     return message;
   },
 };

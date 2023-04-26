@@ -23,6 +23,9 @@ describe('test recursive operation calls hooks', () => {
 			operationName: 'RecursiveContinents',
 		});
 
+		expect(directResult.error).toBeUndefined();
+		expect(recursiveResult.error).toBeUndefined();
+
 		// RecursiveContinents should end up calling Continents' mockResolve hook
 		const directData = directResult.data!.countries_continents;
 		const recursiveData = recursiveResult.data!.countries_continents;

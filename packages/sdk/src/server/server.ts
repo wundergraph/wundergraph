@@ -2,8 +2,7 @@ import closeWithGrace from 'close-with-grace';
 import { Headers } from '@web-std/fetch';
 import process from 'node:process';
 import Fastify, { FastifyInstance } from 'fastify';
-import type { InternalClient } from './internal-client';
-import { InternalClientFactory, internalClientFactory } from './internal-client';
+import { InternalClient, InternalClientFactory, internalClientFactory } from './internal-client';
 import { pino } from 'pino';
 import path from 'path';
 import fs from 'fs';
@@ -28,6 +27,7 @@ import type { LoadOperationsOutput } from '../graphql/operations';
 import FastifyFunctionsPlugin from './plugins/functions';
 import { WgEnv } from '../configure/options';
 import { OpenApiServerConfig } from './plugins/omnigraph';
+import { OperationsClient } from './operations-client';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -60,9 +60,9 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 		});
 		WG_CONFIG = JSON.parse(configContent);
 
-		if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.nodeUrl) {
-			const nodeUrl = resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.nodeUrl);
-			clientFactory = internalClientFactory(WG_CONFIG.api.operations, nodeUrl);
+		if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.nodeInternalUrl) {
+			const nodeInternalURL = resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.nodeInternalUrl);
+			clientFactory = internalClientFactory(WG_CONFIG.api.operations, nodeInternalURL);
 		} else {
 			throw new Error('User defined api is not set.');
 		}
@@ -72,15 +72,13 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 	}
 }
 
-export const configureWunderGraphServer = <
+export function configureWunderGraphServer<
 	GeneratedHooksConfig extends HooksConfiguration,
-	GeneratedClient extends InternalClient,
-	GeneratedWebhooksConfig extends WebhooksConfig = WebhooksConfig
->(
-	configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>
-): WunderGraphHooksAndServerConfig => {
+	GeneratedInternalClient extends InternalClient,
+	GeneratedWebhooksConfig extends WebhooksConfig
+>(configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>) {
 	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig>(configWrapper());
-};
+}
 
 const _configureWunderGraphServer = <
 	GeneratedHooksConfig extends HooksConfiguration,
@@ -163,8 +161,8 @@ export const createServer = async ({
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
 
-	const nodeURL = WG_CONFIG?.api?.nodeOptions?.nodeUrl
-		? resolveConfigurationVariable(WG_CONFIG?.api?.nodeOptions?.nodeUrl)
+	const nodeInternalURL = config?.api?.nodeOptions?.nodeInternalUrl
+		? resolveConfigurationVariable(config.api.nodeOptions.nodeInternalUrl)
 		: '';
 
 	let id = 0;
@@ -242,6 +240,13 @@ export const createServer = async ({
 					method: req.body.__wg.clientRequest?.method || 'GET',
 				},
 				internalClient: clientFactory({ 'x-request-id': req.id }, req.body.__wg.clientRequest),
+				operations: new OperationsClient({
+					baseURL: nodeInternalURL,
+					clientRequest: req.body.__wg.clientRequest,
+					extraHeaders: {
+						'x-request-id': req.id,
+					},
+				}),
 			};
 		});
 
@@ -310,7 +315,7 @@ export const createServer = async ({
 			wundergraphDir,
 			webhooks: config.api.webhooks,
 			internalClientFactory: clientFactory,
-			nodeURL,
+			nodeURL: nodeInternalURL,
 		});
 		fastify.log.debug('Webhooks plugin registered');
 	}
@@ -329,7 +334,7 @@ export const createServer = async ({
 			await fastify.register(FastifyFunctionsPlugin, {
 				operations: operationsConfig.typescript_operation_files,
 				internalClientFactory: clientFactory,
-				nodeURL,
+				nodeURL: nodeInternalURL,
 			});
 			fastify.log.debug('Functions plugin registered');
 		}

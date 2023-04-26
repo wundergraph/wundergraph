@@ -167,6 +167,7 @@ class RESTApiBuilder {
 		}
 		return new RESTApi(
 			applyNameSpaceToGraphQLSchema(schemaString, [], this.apiNamespace),
+			this.apiNamespace || '',
 			dataSources,
 			applyNamespaceToExistingRootFieldConfigurations(this.fields, schema, this.apiNamespace),
 			[],
@@ -207,6 +208,8 @@ class RESTApiBuilder {
 					mTLS: buildMTLSConfiguration(this.introspection),
 					upstreamAuthentication: buildUpstreamAuthentication(this.introspection),
 					urlEncodeBody: false,
+					httpProxyUrl:
+						this.introspection.httpProxyUrl != null ? mapInputVariable(this.introspection.httpProxyUrl) : undefined,
 				},
 				Subscription: {
 					Enabled: false,
@@ -522,6 +525,7 @@ class RESTApiBuilder {
 				return;
 			case 'object':
 				if (!schema.properties) {
+					// @ts-ignore
 					if (schema?.additionalProperties && schema.additionalProperties !== false) {
 						this.ensureType('scalar', 'JSON');
 						this.addField(parentTypeName, objectKind, fieldName, 'JSON', enclosingTypes);

@@ -1,0 +1,11 @@
+query AppDragonsQuery {
+  spacex_dragons {
+    ...Dragons_display_details
+    id
+  }
+}
+
+fragment Dragons_display_details on spacex_Dragon {
+  name
+  active
+}

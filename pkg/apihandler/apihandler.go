@@ -288,7 +288,11 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			},
 		)
 		if err != nil {
-			r.log.Error("registerS3UploadClient", zap.Error(err))
+			r.log.Error("unable to register S3 provider",
+				zap.Error(err),
+				zap.String("provider", s3Provider.Name),
+				zap.String("endpoint", loadvariable.String(s3Provider.Endpoint)),
+			)
 		} else {
 			s3Path := fmt.Sprintf("/s3/%s/upload", s3Provider.Name)
 			r.router.Handle(s3Path, http.HandlerFunc(s3.UploadFile))
@@ -806,10 +810,7 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		RenameTypeNames: h.renameTypeNames,
 	})
 	defer h.pool.PutShared(shared)
-
 	shared.Ctx.Variables = requestVariables
-	shared.Ctx.Context = r.Context()
-	shared.Ctx.Request.Header = r.Header
 	shared.Doc.Input.ResetInputString(requestQuery)
 	shared.Parser.Parse(shared.Doc, shared.Report)
 
@@ -1701,6 +1702,14 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = setOperationMetaData(r, h.operation)
 
+	// recover from panic if one occured. Set err to nil otherwise.
+	defer func() {
+		if r := recover(); r != nil {
+			requestLogger.Error("panic recovered", zap.Any("panic", r))
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}()
+
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -2172,6 +2181,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 			enabled:                operation.LiveQueryConfig.Enable,
 			pollingIntervalSeconds: operation.LiveQueryConfig.PollingIntervalSeconds,
 		},
+		internal: false,
 	}
 
 	if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
@@ -2198,6 +2208,7 @@ type FunctionsHandler struct {
 	queryParamsAllowList []string
 	stringInterpolator   *interpolate.StringInterpolator
 	liveQuery            liveQueryConfig
+	internal             bool
 }
 
 func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -2207,8 +2218,6 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
 
 	r = setOperationMetaData(r, h.operation)
-
-	isInternal := strings.HasPrefix(r.URL.Path, "/internal/")
 
 	ctx := pool.GetCtx(r, r, pool.Config{})
 	defer pool.PutCtx(ctx)
@@ -2233,7 +2242,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		if isInternal {
+		if h.internal {
 			ctx.Variables, _, _, _ = jsonparser.Get(variablesBuf.Bytes(), "input")
 		} else {
 			ctx.Variables = variablesBuf.Bytes()
@@ -2429,6 +2438,13 @@ func setOperationMetaData(r *http.Request, operation *wgpb.Operation) *http.Requ
 }
 
 func getOperationMetaData(r *http.Request) *OperationMetaData {
+	if r == nil {
+		return nil
+	}
+	ctx := r.Context()
+	if ctx == nil {
+		return nil
+	}
 	maybeMetaData := r.Context().Value("operationMetaData")
 	if maybeMetaData == nil {
 		return nil

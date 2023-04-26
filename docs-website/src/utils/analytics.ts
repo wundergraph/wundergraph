@@ -1,22 +1,22 @@
-import Plausible from 'plausible-tracker'
-import React from 'react'
+import Plausible from 'plausible-tracker';
+import React from 'react';
 
 export const plausible = Plausible({
 	domain: 'docs.wundergraph.com',
 	trackLocalhost: false,
-})
+});
 
 export const trackOutboundLinkClick = (url: string) => {
-	plausible.trackEvent('Outbound Link: Click', { props: { url } })
-}
+	plausible.trackEvent('Outbound Link: Click', { props: { url } });
+};
 
 interface ActionProps {
-	[key: string]: any
+	[key: string]: any;
 }
 
 export interface AnalyticsProps {
-	['data-event']?: string
-	['data-event-props']?: string
+	['data-event']?: string;
+	['data-event-props']?: string;
 }
 
 export enum Events {
@@ -32,19 +32,19 @@ export enum Events {
 export const trackEvent = (event: string, props: ActionProps = {}) => {
 	plausible.trackEvent(event, {
 		props,
-	})
-}
+	});
+};
 
 const parseProps = (props: string) => {
 	try {
-		return JSON.parse(props)
+		return JSON.parse(props);
 	} catch (e) {
-		console.log(e)
+		console.log(e);
 	}
-}
+};
 
 export interface UseTrackActionProps extends AnalyticsProps {
-	[key: string]: any
+	[key: string]: any;
 }
 
 /**
@@ -52,20 +52,19 @@ export interface UseTrackActionProps extends AnalyticsProps {
  * It
  */
 export const useTrackEvent = (props: UseTrackActionProps) => {
-	let event = props['data-event']
-	const data =
-		props['data-event-props'] && parseProps(props['data-event-props'])
+	let event = props['data-event'];
+	const data = props['data-event-props'] && parseProps(props['data-event-props']);
 
 	if (!event) {
-		return props
+		return props;
 	}
 
 	return {
 		...props,
 		onClick: (e: React.MouseEvent) => {
-			event && trackEvent(event, data)
+			event && trackEvent(event, data);
 
-			props.onClick?.(e)
+			props.onClick?.(e);
 		},
-	}
-}
+	};
+};

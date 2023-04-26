@@ -24,18 +24,15 @@ const db = introspect.graphql({
   apiNamespace: 'db',
   url: new EnvironmentVariable('FAUNADB_GRAPHQL_URL'),
   headers: (builder) => {
-    builder.addStaticHeader(
-      'Authorization',
-      new EnvironmentVariable('FAUNADB_TOKEN')
-    )
-    return builder
+    builder.addStaticHeader('Authorization', new EnvironmentVariable('FAUNADB_TOKEN'));
+    return builder;
   },
-})
+});
 
 configureWunderGraphApplication({
   apis: [db],
   server,
-})
+});
 ```
 
 This wires up the FaunaDB API to your virtual Graph and configures the Authorization header with the `FAUNADB_TOKEN` environment variable.

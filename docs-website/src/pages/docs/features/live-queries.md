@@ -37,7 +37,7 @@ export default configureWunderGraphOperations<OperationsConfiguration>({
       }),
     },
   },
-})
+});
 ```
 
 On the WunderNode we would keep polling the origin every two seconds.
@@ -46,9 +46,9 @@ Calling this Live-Query from the clients looks very similar to a regular Query:
 
 ```typescript jsx
 const IndexPage = () => {
-  const response = useQuery({ operationName: 'TopProducts', liveQuery: true })
-  return <div>{JSON.stringify(response)}</div>
-}
+  const response = useQuery({ operationName: 'TopProducts', liveQuery: true });
+  return <div>{JSON.stringify(response)}</div>;
+};
 ```
 
 Add `liveQuery: true` and you're done.

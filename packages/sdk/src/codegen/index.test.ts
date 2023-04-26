@@ -48,6 +48,13 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						environmentVariableDefaultValue: '',
 						placeholderVariableName: '',
 					},
+					nodeInternalUrl: {
+						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+						staticVariableContent: 'http://localhost:9993',
+						environmentVariableName: '',
+						environmentVariableDefaultValue: '',
+						placeholderVariableName: '',
+					},
 					publicNodeUrl: {
 						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
 						staticVariableContent: 'http://localhost:9991',
@@ -71,6 +78,15 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							placeholderVariableName: '',
 						},
 					},
+					listenInternal: {
+						port: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '9993',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
 					logger: {
 						level: {
 							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
@@ -81,6 +97,13 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						},
 					},
 					defaultRequestTimeoutSeconds: 0,
+					defaultHttpProxyUrl: {
+						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+						staticVariableContent: '',
+						environmentVariableName: '',
+						environmentVariableDefaultValue: '',
+						placeholderVariableName: '',
+					},
 				},
 				serverOptions: {
 					serverUrl: {
@@ -117,7 +140,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 					},
 				},
 				application: {
-					EngineConfiguration: new Api<any>('', [], [], [], []),
+					EngineConfiguration: new Api<any>('', '', [], [], [], []),
 					EnableSingleFlight: true,
 					S3UploadProvider: [],
 					Operations: [
@@ -501,6 +524,7 @@ test('should collect all template dependencies recursively and dedupe based on t
 				},
 			]);
 		}
+
 		dependencies(): Template[] {
 			return [new Template2()];
 		}
@@ -553,6 +577,7 @@ test('should collect templates up to maxTemplateDepth', () => {
 				},
 			]);
 		}
+
 		dependencies(): Template[] {
 			return [new Template2()];
 		}

@@ -30,3 +30,11 @@ CHANGELOG.md
 
 # Generated PB files
 packages/protobuf/wgpb
+
+# Relay generated files
+**/operations/relay
+
+# These operations are generated, ignore them during formatting
+testapps/default/.wundergraph/operations/federated/*.graphql
+testapps/default/.wundergraph/operations/weather/GetCityById.graphql
+testapps/default/.wundergraph/operations/weather/GetCityByName.graphql

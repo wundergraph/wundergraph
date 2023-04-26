@@ -40,6 +40,14 @@ export interface ServerOptions<ClientType extends Client = Client> {
 	 * The WunderGraph directory to use.
 	 */
 	dir?: string;
+
+	/**
+	 * Additional environment variables to pass to the test server.
+	 * Existing environment variables are always inherited.
+	 *
+	 * @default None
+	 */
+	env?: Record<string, string>;
 }
 
 /**
@@ -109,6 +117,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		let subprocess: Subprocess | undefined;
 		if (manageServer) {
 			let cmd = ['start'];
+			env = { ...env, ...(this.options.env ?? {}) };
 			if (this.options.debug || process.env.WG_TEST_DEBUG) {
 				cmd.push('--debug', '--pretty-logging');
 			} else {
@@ -120,6 +129,13 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			}
 
 			subprocess = wunderctl({ cmd, env, stdio: 'inherit' });
+		} else {
+			// Make sure we show a warning about the ignored environment
+			// variables, otherwise this could be complicated to debug
+			const environmentKeys = Object.keys(this.options.env ?? {});
+			if (environmentKeys.length > 0) {
+				console.warn(`ignoring environment variables ${environmentKeys.join(', ')}, server is already running`);
+			}
 		}
 		const health = this.url('/health');
 		const checkHealth = async () => {
@@ -200,17 +216,23 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 				env: { WG_NODE_URL: url },
 			};
 		}
+
 		// Generate random ports
-		let nodePort = await this.freeport();
-		let serverPort = await this.freeport();
+		const [nodePort, nodeInternalPort, serverPort] = await Promise.all([
+			this.freeport(),
+			this.freeport(),
+			this.freeport(),
+		]);
 
 		return {
 			manageServer: true,
 			env: {
 				WG_CLOUD: 'true',
 				WG_NODE_URL: `http://0.0.0.0:${nodePort}`,
+				WG_NODE_INTERNAL_URL: `http://0.0.0.0:${nodeInternalPort}`,
 				WG_NODE_HOST: '0.0.0.0',
 				WG_NODE_PORT: nodePort.toString(),
+				WG_NODE_INTERNAL_PORT: nodeInternalPort.toString(),
 				WG_SERVER_URL: `http://0.0.0.0:${serverPort}`,
 				WG_SERVER_HOST: '0.0.0.0',
 				WG_SERVER_PORT: serverPort.toString(),

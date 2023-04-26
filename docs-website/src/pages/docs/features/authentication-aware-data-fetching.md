@@ -39,7 +39,7 @@ const operations: ConfigureOperations = {
         enable: false,
         pollingIntervalSeconds: 5,
       },
-    }
+    };
   },
   subscriptions: (config) => ({
     ...config,
@@ -57,7 +57,7 @@ const operations: ConfigureOperations = {
       },
     }),
   },
-}
+};
 ```
 
 By default, authentication is not required.
@@ -70,9 +70,9 @@ All it does is fetching the data.
 
 ```typescript jsx
 const IndexPage = () => {
-  const priceUpdate = useSubscription.PriceUpdates()
-  return <p>{JSON.stringify(priceUpdate)}</p>
-}
+  const priceUpdate = useSubscription.PriceUpdates();
+  return <p>{JSON.stringify(priceUpdate)}</p>;
+};
 ```
 
 If the user is authenticated, the PriceUpdates Subscription would fire and continuously update the UI.
