@@ -122,7 +122,7 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 				nodeUrl: options?.nodeUrl || new EnvironmentVariable(WgEnv.NodeUrl, fallbackNodeUrl(options?.listen)),
 				nodeInternalUrl: new EnvironmentVariable(WgEnv.NodeInternalUrl, fallbackNodeInternalUrl(options)),
 				publicNodeUrl:
-					options?.publicNodeUrl || new EnvironmentVariable(WgEnv.NodeUrl, fallbackNodeUrl(options?.listen)),
+					options?.publicNodeUrl || new EnvironmentVariable(WgEnv.PublicNodeUrl, fallbackNodeUrl(options?.listen)),
 				listen: {
 					host: options?.listen?.host || DefaultNodeOptions.listen.host,
 					port: options?.listen?.port || DefaultNodeOptions.listen.port,
