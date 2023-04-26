@@ -3,15 +3,15 @@
   "version": "0.3.3",
   "license": "Apache-2.0",
   "description": "Create Wundergraph App CLI command",
-  "main": "dist/index.js",
-  "exports": "./dist/index.js",
+  "main": "dist/src/index.js",
+  "exports": "./dist/src/index.js",
   "scripts": {
-    "start": "pnpm run build && node ./dist/index.js",
+    "start": "pnpm run build && node ./dist/src/index.js",
     "build": "tsc",
     "test": "jest"
   },
   "bin": {
-    "create-wundergraph-app": "./dist/index.js"
+    "create-wundergraph-app": "./dist/src/index.js"
   },
   "repository": {
     "type": "git",
