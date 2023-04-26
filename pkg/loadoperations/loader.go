@@ -341,7 +341,7 @@ func isValidOperationName(s string) bool {
 		if i == 0 && !unicode.IsLetter(r) {
 			return false
 		}
-		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '/' && r != '_' {
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '/' && r != '_' && r != '-' {
 			return false
 		}
 	}
@@ -349,7 +349,8 @@ func isValidOperationName(s string) bool {
 }
 
 func normalizeOperationName(s string) string {
-	parts := strings.Split(s, "/")
+	cleanedUp := strings.ReplaceAll(s, "-", "_")
+	parts := strings.Split(cleanedUp, "/")
 	caser := cases.Title(language.English, cases.NoLower)
 
 	var out []string

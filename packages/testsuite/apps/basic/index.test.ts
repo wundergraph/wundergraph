@@ -69,4 +69,20 @@ describe('Operations', () => {
 		expect(result.error).toBeUndefined();
 		expect(result.data.greeting).toBeDefined();
 	});
+
+	it('should allow operation names with hyphens', async () => {
+		const result = await wg.client().query({
+			operationName: 'with-hyphen/country-code-with-hyphen',
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data?.countries_countries?.[0].capital).toBe('Berlin');
+	});
+
+	it('should allow calling operation names with hyphens', async () => {
+		const result = await wg.client().query({
+			operationName: 'with-hyphen/call-country-code-with-hyphen-from-ts',
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data?.data?.countries_countries?.[0].capital).toBe('Berlin');
+	});
 });
