@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFailed } from 'vitest';
 import { Setup } from '../../setup/generate';
 import { createTestAndMockServer } from './.wundergraph/generated/testing';
 
@@ -10,12 +10,13 @@ const regenerate = async (env?: Record<string, string>) => {
 const invalidProxy = 'http://this.does.not.exist';
 
 describe('Invalid proxy configurations', () => {
-	it('uses valid proxy for introspection', async ({ onTestFailed }) => {
+	it('uses valid proxy for introspection', async () => {
 		const ts = createTestAndMockServer({
 			dir: __dirname,
 			env: { WG_HTTP_PROXY: invalidProxy },
 		});
 		const cleanup = await ts.start();
+		onTestFailed(() => cleanup());
 
 		await regenerate({
 			WG_HTTP_PROXY: ts.mockServer.url(),
@@ -35,6 +36,7 @@ describe('Invalid proxy configurations', () => {
 		const cleanup = await ts.start({
 			env: { WG_HTTP_PROXY: invalidProxy },
 		});
+		onTestFailed(() => cleanup());
 
 		const client = ts.testServer.client();
 		const result = await client.query({
@@ -58,7 +60,7 @@ describe('Invalid proxy configurations', () => {
 		});
 	});
 
-	it('uses data source proxy to override invalid global proxy and runs queries', async ({ onTestFailed }) => {
+	it('uses data source proxy to override invalid global proxy and runs queries', async () => {
 		const ts = createTestAndMockServer({
 			dir: __dirname,
 			env: { WG_HTTP_PROXY: invalidProxy, COUNTRIES_PROXY: '', WEATHER_PROXY: '' },
@@ -109,7 +111,7 @@ describe('Invalid proxy configurations', () => {
 		await cleanup();
 	});
 
-	it('uses valid proxy for queries', async ({ onTestFailed }) => {
+	it('uses valid proxy for queries', async () => {
 		const ts = createTestAndMockServer({
 			dir: __dirname,
 		});

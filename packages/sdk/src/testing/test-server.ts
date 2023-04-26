@@ -57,6 +57,7 @@ export interface ServerOptions<ClientType extends Client = Client> {
 export class WunderGraphTestServer<ClientType extends Client = Client> {
 	private readonly options: ServerOptions<ClientType>;
 	private nodeUrl: string = '';
+	private stopped = false;
 	private subprocess?: Subprocess;
 
 	/**
@@ -167,7 +168,16 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 	 * it does nothing.
 	 */
 	async stop(): Promise<void> {
+		if (this.stopped) {
+			// Already stopped
+			return;
+		}
+
+		this.stopped = true;
+
 		await this.stopSubprocess(this.subprocess);
+
+		this.stopped = false;
 		this.subprocess = undefined;
 	}
 	/**
