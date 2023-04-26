@@ -73,7 +73,7 @@ If you have a demanding test suite, you can create multiple test files and vites
 #### Mocking HTTP datasources
 
 When you setup a mock with `mock` and the request match, the interceptor is removed internally from the list. This means that you can intercept **2** or more calls to the same URL and return different things on each of them. It also means that you must setup one interceptor for each request you are going to have otherwise it will throw an error because that URL was not present in the interceptor list.
-The first argument of the `mock` function is a predicate that is used to match the request. The second argument is the function that returns the response. You can use test assertions inside the response function to verify that the request is correct. If an error is thrown the mock is considered as not matched. The error is propagated to the `scope.done()` call.
+The first argument of the `mock` function is a predicate that is used to match the request. The second argument is the function that returns the response. You can use test assertions inside the response function to verify that the request is correct. If an error is thrown the mock is considered as failed. The error is propagated to the `scope.done()` call.
 
 ```ts
 const scope = ts.mockServer.mock(
@@ -132,7 +132,7 @@ expect(result.data).toBeDefined();
 expect(result.data?.countries_countries?.[0].capital).toBe('Madrid');
 ```
 
-For a full example please check the example in the [WunderGraph repository](https://github.com/wundergraph/wundergraph/packages/testsuite/apps/mock/test/mock-datasource.test.ts)
+For a full example please check the example in the [WunderGraph repository](https://github.com/wundergraph/wundergraph/tree/main/packages/testsuite/apps/mock/test/mock-datasource.test.ts)
 
 ## Summary
 
