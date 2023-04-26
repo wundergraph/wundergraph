@@ -198,7 +198,14 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 
 	private async stopSubprocess(proc?: Subprocess): Promise<void> {
 		if (proc?.pid) {
-			await terminate(proc.pid);
+			try {
+				await terminate(proc.pid);
+			} catch (e: any) {
+				// Ignore if the process is already gone
+				if (e.code !== 'ESRCH') {
+					throw e;
+				}
+			}
 		}
 	}
 
