@@ -186,7 +186,7 @@ func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration,
 		}
 	}
 
-	if proxyURL != nil {
+	if proxyURL == nil {
 		proxyURL = d.transportFactory.DefaultHTTPProxyURL()
 	}
 
