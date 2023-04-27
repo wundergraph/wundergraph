@@ -23,6 +23,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  WG_TELEMETRY_DISABLED: 1
   WORKING_DIRECTORY: '.'
   CI: true
 
@@ -75,6 +76,9 @@ jobs:
         run: pnpm test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run testsuite
+        run: pnpm test:suite
 
       - name: Determine changed files
         id: changed

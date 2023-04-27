@@ -387,6 +387,10 @@ const navigation = [
 						title: 'End to end testing',
 						href: '/docs/guides/end-to-end-testing',
 					},
+					{
+						title: 'Mocking',
+						href: '/docs/guides/mocking',
+					},
 				],
 			},
 			{
