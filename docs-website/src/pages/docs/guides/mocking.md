@@ -57,6 +57,8 @@ let ts: TestServers;
 beforeAll(async () => {
   ts = createTestAndMockServer({
     // The directory where your wundergraph directory is located
+    // This is only needed if you run the tests from a different directory than your wundergraph directory
+    // __dirname is the directory of the current file.
     dir: join(__dirname, '..'),
   });
 
