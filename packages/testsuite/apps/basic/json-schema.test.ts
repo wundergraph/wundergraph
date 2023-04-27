@@ -47,7 +47,7 @@ describe('jsonSchema directive', () => {
 			},
 		});
 
-		// Lookup country by code with empty code, should return no resultss
+		// Lookup country by code with empty code, should return no results
 		expect(withoutCode.error).toBeUndefined();
 		expect(withoutCode.data?.countries_countries?.length).toBe(0);
 	});

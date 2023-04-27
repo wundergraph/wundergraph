@@ -116,6 +116,7 @@ export class Client {
 
 	protected async fetchJson(url: string, init: RequestInit = {}) {
 		init.headers = { ...init.headers, Accept: 'application/json', 'Content-Type': 'application/json' };
+
 		return this.fetch(url, init);
 	}
 
@@ -128,11 +129,26 @@ export class Client {
 			...init.headers,
 		};
 
-		return fetchImpl(input, {
-			credentials: 'include',
-			mode: 'cors',
-			...init,
-		});
+		let timeout: NodeJS.Timeout | undefined;
+
+		if (!init.signal && this.options.requestTimeoutMs && this.options.requestTimeoutMs > 0) {
+			const controller = new AbortController();
+			timeout = setTimeout(() => controller.abort(), this.options.requestTimeoutMs);
+			init.signal = controller.signal;
+		}
+
+		try {
+			const resp = await fetchImpl(input, {
+				credentials: 'include',
+				mode: 'cors',
+				...init,
+			});
+			return resp;
+		} finally {
+			if (timeout) {
+				clearTimeout(timeout);
+			}
+		}
 	}
 
 	private convertGraphQLResponse(resp: GraphQLResponse, statusCode: number = 200): ClientResponse {

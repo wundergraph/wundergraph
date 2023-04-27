@@ -1,9 +1,6 @@
-import { configureWunderGraphOperations, enableCaching } from '@wundergraph/sdk';
-import type { OperationsConfiguration } from './generated/wundergraph.operations';
-import type { InternalClient } from './generated/wundergraph.internal.client';
-import type { UserRole } from './generated/client';
+import { configureWunderGraphOperations } from '@wundergraph/sdk';
 
-export default configureWunderGraphOperations<OperationsConfiguration>({
+export default configureWunderGraphOperations({
 	operations: {
 		defaultConfig: {
 			authentication: {
