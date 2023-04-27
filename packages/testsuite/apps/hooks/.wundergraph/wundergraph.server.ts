@@ -2,24 +2,11 @@ import { GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLInt, GraphQLFlo
 
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
 
-const logPreResolve = async (hook: any) => {
-	console.log(`preResolve: ${JSON.stringify(hook)}`);
-};
-
-const logMutatingPreResolve = async (hook: any) => {
-	console.log(`mutatingPreResolve: ${JSON.stringify(hook)}`);
-};
-
-const logCustomResolve = async (hook: any) => {
-	console.log(`customResolve: ${JSON.stringify(hook)}`);
-};
-
 export default configureWunderGraphServer(() => ({
 	hooks: {
 		queries: {
 			Infinite: {
 				preResolve: async (hook) => {
-					logPreResolve(hook);
 					const result = await hook.internalClient.queries.Infinite({
 						input: hook.input,
 					});
@@ -32,7 +19,6 @@ export default configureWunderGraphServer(() => ({
 			},
 			PreResolveFailure: {
 				preResolve: async (hook) => {
-					logPreResolve(hook);
 					throw new Error('stop');
 				},
 			},
@@ -62,16 +48,14 @@ export default configureWunderGraphServer(() => ({
 				},
 			},
 			MutatingPreResolveFailure: {
-				preResolve: logPreResolve,
+				preResolve: () => {},
 				mutatingPreResolve: async (hook) => {
-					logMutatingPreResolve(hook);
 					throw new Error('stop');
 				},
 			},
 			CustomResolveFailure: {
-				preResolve: logPreResolve,
+				preResolve: () => {},
 				customResolve: async (hook) => {
-					logCustomResolve(hook);
 					throw new Error('stop');
 				},
 			},
@@ -90,9 +74,8 @@ export default configureWunderGraphServer(() => ({
 				},
 			},
 			PreResolveChain: {
-				preResolve: logPreResolve,
+				preResolve: () => {},
 				mutatingPreResolve: async (hook) => {
-					logMutatingPreResolve(hook);
 					return {
 						s: hook.input.s + '.mutatingPreResolve',
 					};
