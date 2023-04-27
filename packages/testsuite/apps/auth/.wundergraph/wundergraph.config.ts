@@ -43,6 +43,11 @@ configureWunderGraphApplication({
 			currency: {
 				jsonPath: 'currency',
 			},
+			aTestValue: {
+				jsonPath: 'aTestValue',
+				type: 'any',
+				required: false,
+			},
 		},
 		publicClaims: ['SUBJECT', 'GIVEN_NAME', 'FAMILY_NAME', 'shopID'],
 	},

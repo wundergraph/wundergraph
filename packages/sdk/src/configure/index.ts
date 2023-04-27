@@ -208,7 +208,7 @@ export interface CustomClaim {
 	 *
 	 * @default 'string'
 	 */
-	type?: 'string' | 'int' | 'float' | 'boolean';
+	type?: 'string' | 'int' | 'float' | 'boolean' | 'any';
 
 	/** If required is true, users without this claim will
 	 * fail to authenticate
@@ -1493,6 +1493,9 @@ const resolveOperationsConfigurations = async (
 				break;
 			case 'boolean':
 				claimType = ValueType.FLOAT;
+				break;
+			case 'any':
+				claimType = ValueType.ANY;
 				break;
 			case undefined:
 				claimType = ValueType.STRING;

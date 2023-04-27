@@ -236,6 +236,7 @@ enum ValueType {
 	INT = 1;
 	FLOAT = 2;
 	BOOLEAN = 3;
+	ANY = 4;
 }
 
 message OperationLiveQueryConfig {
