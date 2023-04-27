@@ -79,7 +79,7 @@ If you have a demanding test suite, you can create multiple test files and vites
 #### Mocking HTTP datasources
 
 When you setup a mock with `mock()` and the request match, the mock server will return the response. If the request does not match, the mock server will return a 404 response and the call to `scope.done()` will fail the test.
-You have also the ability to throw an error inside the response function to fail the mock. This is useful if you want to verify with test assertion that the request is correct. A thrown error is handled as an unmatched request and the next mock will be checked unless all mocks have been checked.
+You have also the ability to throw an error inside the response function to fail the mock. This is useful if you want to verify with test assertion that the request is correct. A thrown error is handled as an unmatched request and the next mock will be checked.
 
 The first argument of the `mock` function is a predicate that is used to match the request. The second argument is the function that returns the response.
 
