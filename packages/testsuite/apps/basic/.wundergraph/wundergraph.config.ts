@@ -27,6 +27,9 @@ const geojson = introspect.openApi({
 const chinook = introspect.sqlite({
 	apiNamespace: 'chinook',
 	databaseURL: 'file:./Chinook.sqlite',
+	// Ensure the data sources without fetch configuration don't make wunderctl
+	// crash when specifying a custom request timeout. See https://github.com/wundergraph/wundergraph/pull/904
+	requestTimeoutSeconds: 5,
 });
 
 const usersPost = introspect.prisma({
