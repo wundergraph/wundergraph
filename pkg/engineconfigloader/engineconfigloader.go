@@ -172,18 +172,24 @@ func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration,
 	}
 	// Proxy
 	var proxyURL *url.URL
-	proxyURLString, found := loadvariable.LookupString(cfg.HttpProxyUrl)
-	if found {
-		if proxyURLString != "" {
-			proxyURL, err = url.Parse(proxyURLString)
-			if err != nil {
-				return nil, fmt.Errorf("invalid proxy URL %q: %w", proxyURLString, err)
+
+	if cfg != nil {
+		proxyURLString, found := loadvariable.LookupString(cfg.HttpProxyUrl)
+		if found {
+			if proxyURLString != "" {
+				proxyURL, err = url.Parse(proxyURLString)
+				if err != nil {
+					return nil, fmt.Errorf("invalid proxy URL %q: %w", proxyURLString, err)
+				}
+				d.log.Debug("using HTTP proxy for data source", zap.String("proxy", proxyURLString), zap.String("url", loadvariable.String(cfg.Url)))
 			}
-			d.log.Debug("using HTTP proxy for data source", zap.String("proxy", proxyURLString), zap.String("url", loadvariable.String(cfg.Url)))
 		}
-	} else {
+	}
+
+	if proxyURL != nil {
 		proxyURL = d.transportFactory.DefaultHTTPProxyURL()
 	}
+
 	if proxyURL != nil {
 		transport.Proxy = func(r *http.Request) (*url.URL, error) {
 			return proxyURL, nil
