@@ -787,7 +787,7 @@ export const configureWunderGraphApplication = <
 
 	resolveConfig(config)
 		.then(async ({ config: resolved, apis }) => {
-			Logger.info('Building ...');
+			Logger.info({ sdk: buildInfo.sdk?.version, wunderctl: buildInfo.wunderctl?.version }, 'Building ...');
 
 			const app = resolved.application;
 			const schemaFileName = `wundergraph.schema.graphql`;
@@ -1087,7 +1087,7 @@ export const configureWunderGraphApplication = <
 
 			writeWunderGraphFileSync('openapi', openApiSpec);
 
-			Logger.info(`Build completed.`);
+			Logger.info('Build completed.');
 		})
 		.then(() => {
 			buildInfo.success = true;

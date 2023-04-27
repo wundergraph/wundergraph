@@ -38,3 +38,8 @@ packages/protobuf/wgpb
 testapps/default/.wundergraph/operations/federated/*.graphql
 testapps/default/.wundergraph/operations/weather/GetCityById.graphql
 testapps/default/.wundergraph/operations/weather/GetCityByName.graphql
+packages/testsuite/apps/basic/.wundergraph/operations/weather/GetCityById.graphql
+packages/testsuite/apps/basic/.wundergraph/operations/weather/GetCityByName.graphql
+
+examples/sveltekit-oidc-cookies-auth
+examples/sveltekit-todos

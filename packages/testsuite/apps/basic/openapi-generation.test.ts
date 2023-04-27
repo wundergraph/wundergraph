@@ -1,19 +1,6 @@
-import { beforeAll, describe, expect, it } from 'vitest';
-import { createTestServer } from './.wundergraph/generated/testing';
+import { describe, expect, it } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-
-const wg = createTestServer({
-	dir: __dirname,
-});
-
-beforeAll(async () => {
-	await wg.start();
-
-	return async () => {
-		await wg.stop();
-	};
-});
 
 describe('OpenAPI spec generation', () => {
 	it('OpenAPI includes TypeScript operation response schema', async () => {

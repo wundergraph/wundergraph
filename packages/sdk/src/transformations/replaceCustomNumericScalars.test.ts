@@ -1,5 +1,4 @@
 import { GraphQLIntrospection } from '../definition';
-import { describe } from 'node:test';
 import { replaceCustomNumericScalars } from './replaceCustomNumericScalars';
 
 interface TestCase {

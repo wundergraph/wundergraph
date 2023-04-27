@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.20](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.19...@wundergraph/react-query@0.8.20) (2023-04-27)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
 ## [0.8.19](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.18...@wundergraph/react-query@0.8.19) (2023-04-26)
 
 **Note:** Version bump only for package @wundergraph/react-query

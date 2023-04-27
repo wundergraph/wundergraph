@@ -15,11 +15,8 @@ export default configureWunderGraphServer(() => ({
 		queries: {},
 		mutations: {},
 		authentication: {
-			postAuthentication: async (hook) => {
-				console.log(`postAuthentication: ${JSON.stringify(hook.user)}`);
-			},
+			postAuthentication: async (hook) => {},
 			mutatingPostAuthentication: async (hook) => {
-				console.log(`mutatingPostAuthentication: ${JSON.stringify(hook.user)}`);
 				if (hook.user.userId === 'notAllowedByPostAuthentication') {
 					return {
 						status: 'deny',
@@ -35,7 +32,6 @@ export default configureWunderGraphServer(() => ({
 				};
 			},
 			revalidate: async (hook) => {
-				console.log(`revalidate: ${JSON.stringify(hook.user)}`);
 				if (hook.user.userId === 'notAllowedByRevalidation') {
 					return {
 						status: 'deny',
@@ -50,9 +46,7 @@ export default configureWunderGraphServer(() => ({
 					},
 				};
 			},
-			postLogout: async (hook) => {
-				console.log(`postLogout: ${JSON.stringify(hook.user)}`);
-			},
+			postLogout: async (hook) => {},
 		},
 	},
 	graphqlServers: [
