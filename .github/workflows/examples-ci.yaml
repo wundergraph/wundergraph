@@ -27,6 +27,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  WG_TELEMETRY_DISABLED: 1
   WORKING_DIRECTORY: '.'
   CI: true
 
