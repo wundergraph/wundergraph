@@ -822,46 +822,23 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, _ = shared.Hash.Write(requestOperationName)
-
-	err = shared.Printer.Print(shared.Doc, h.definition, shared.Hash)
+	prepared, err := h.preparePlan(requestOperationName, shared)
 	if err != nil {
-		requestLogger.Error("shared printer print failed", zap.Error(err))
-		http.Error(w, "bad request", http.StatusBadRequest)
-		return
-	}
-	if shared.Report.HasErrors() {
-		h.logInternalErrors(shared.Report, requestLogger)
-		h.writeRequestErrors(shared.Report, w, requestLogger)
-
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	operationHash := shared.Hash.Sum64()
-
-	h.preparedMux.RLock()
-	prepared, exists := h.prepared[operationHash]
-	h.preparedMux.RUnlock()
-	if !exists {
-		prepared, err = h.preparePlan(operationHash, requestOperationName, shared)
-		if err != nil {
-			if shared.Report.HasErrors() {
-				h.logInternalErrors(shared.Report, requestLogger)
-				h.writeRequestErrors(shared.Report, w, requestLogger)
-			} else {
-				requestLogger.Error("prepare plan failed", zap.Error(err))
-				w.WriteHeader(http.StatusBadRequest)
-			}
-
-			return
+		if shared.Report.HasErrors() {
+			h.logInternalErrors(shared.Report, requestLogger)
+			h.writeRequestErrors(shared.Report, w, requestLogger)
+		} else {
+			requestLogger.Error("prepare plan failed", zap.Error(err))
+			w.WriteHeader(http.StatusBadRequest)
 		}
+
+		return
 	}
 
 	if len(prepared.variables) != 0 {
 		// we have to merge query variables into extracted variables to been able to override default values
 		// we make a copy of the extracted variables to not override h.extractedVariables
-		shared.Ctx.Variables = MergeJsonRightIntoLeft([]byte(string(prepared.variables)), shared.Ctx.Variables)
+		shared.Ctx.Variables = MergeJsonRightIntoLeft(shared.Ctx.Variables, prepared.variables)
 	}
 
 	switch p := prepared.preparedPlan.(type) {
@@ -953,42 +930,29 @@ func (h *GraphQLHandler) writeRequestErrors(report *operationreport.Report, w ht
 	}
 }
 
-func (h *GraphQLHandler) preparePlan(operationHash uint64, requestOperationName []byte, shared *pool.Shared) (planWithExtractedVariables, error) {
-	preparedPlan, err, _ := h.sf.Do(strconv.Itoa(int(operationHash)), func() (interface{}, error) {
-		if len(requestOperationName) == 0 {
-			shared.Normalizer.NormalizeOperation(shared.Doc, h.definition, shared.Report)
-		} else {
-			shared.Normalizer.NormalizeNamedOperation(shared.Doc, h.definition, requestOperationName, shared.Report)
-		}
-		if shared.Report.HasErrors() {
-			return nil, fmt.Errorf(ErrMsgOperationNormalizationFailed, shared.Report)
-		}
-
-		state := shared.Validation.Validate(shared.Doc, h.definition, shared.Report)
-		if state != astvalidation.Valid {
-			return nil, errInvalid
-		}
-
-		preparedPlan := shared.Planner.Plan(shared.Doc, h.definition, unsafebytes.BytesToString(requestOperationName), shared.Report)
-		shared.Postprocess.Process(preparedPlan)
-
-		prepared := planWithExtractedVariables{
-			preparedPlan: preparedPlan,
-			variables:    make([]byte, len(shared.Doc.Input.Variables)),
-		}
-
-		copy(prepared.variables, shared.Doc.Input.Variables)
-
-		h.preparedMux.Lock()
-		h.prepared[operationHash] = prepared
-		h.preparedMux.Unlock()
-
-		return prepared, nil
-	})
-	if err != nil {
-		return planWithExtractedVariables{}, err
+func (h *GraphQLHandler) preparePlan(requestOperationName []byte, shared *pool.Shared) (planWithExtractedVariables, error) {
+	if len(requestOperationName) == 0 {
+		shared.Normalizer.NormalizeOperation(shared.Doc, h.definition, shared.Report)
+	} else {
+		shared.Normalizer.NormalizeNamedOperation(shared.Doc, h.definition, requestOperationName, shared.Report)
 	}
-	return preparedPlan.(planWithExtractedVariables), nil
+	if shared.Report.HasErrors() {
+		return planWithExtractedVariables{}, fmt.Errorf(ErrMsgOperationNormalizationFailed, shared.Report)
+	}
+
+	state := shared.Validation.Validate(shared.Doc, h.definition, shared.Report)
+	if state != astvalidation.Valid {
+		return planWithExtractedVariables{}, errInvalid
+	}
+
+	preparedPlan := shared.Planner.Plan(shared.Doc, h.definition, unsafebytes.BytesToString(requestOperationName), shared.Report)
+	shared.Postprocess.Process(preparedPlan)
+
+	prepared := planWithExtractedVariables{
+		preparedPlan: preparedPlan,
+		variables:    shared.Doc.Input.Variables,
+	}
+	return prepared, nil
 }
 
 func postProcessVariables(operation *wgpb.Operation, r *http.Request, variables []byte) ([]byte, error) {
@@ -1310,7 +1274,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if len(h.extractedVariables) != 0 {
 		// we make a copy of the extracted variables to not override h.extractedVariables
-		ctx.Variables = MergeJsonRightIntoLeft([]byte(string(h.extractedVariables)), ctx.Variables)
+		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
 	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
@@ -1655,7 +1619,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if len(h.extractedVariables) != 0 {
 		// we make a copy of the extracted variables to not override h.extractedVariables
-		ctx.Variables = MergeJsonRightIntoLeft([]byte(string(h.extractedVariables)), ctx.Variables)
+		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
 	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
@@ -1744,7 +1708,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	if len(h.extractedVariables) != 0 {
 		// we make a copy of the extracted variables to not override h.extractedVariables
-		ctx.Variables = MergeJsonRightIntoLeft([]byte(string(h.extractedVariables)), ctx.Variables)
+		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
 	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
@@ -1905,10 +1869,10 @@ func (f *httpFlushWriter) Flush() {
 
 // MergeJsonRightIntoLeft merges the right JSON into the left JSON while overriding the left side
 func MergeJsonRightIntoLeft(left, right []byte) []byte {
-	if left == nil {
+	if len(left) == 0 {
 		return right
 	}
-	if right == nil {
+	if len(right) == 0 {
 		return left
 	}
 	result := gjson.ParseBytes(right)

@@ -367,7 +367,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if len(h.extractedVariables) != 0 {
 		// we make a copy of the extracted variables to not override h.extractedVariables
-		ctx.Variables = MergeJsonRightIntoLeft([]byte(string(h.extractedVariables)), ctx.Variables)
+		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
 	ctx.Variables = injectVariables(h.operation, r, ctx.Variables)
@@ -452,7 +452,7 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 
 	if len(h.extractedVariables) != 0 {
 		// we make a copy of the extracted variables to not override h.extractedVariables
-		ctx.Variables = MergeJsonRightIntoLeft([]byte(string(h.extractedVariables)), ctx.Variables)
+		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
 	ctx.Variables = injectVariables(h.operation, r, ctx.Variables)
