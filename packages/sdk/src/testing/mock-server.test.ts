@@ -187,4 +187,45 @@ describe('Mock server', () => {
 		expect(scope.error).toBeUndefined();
 		expect(resp.status).toBe(200);
 	});
+
+	test('Should be possible to consume the payload twice', async () => {
+		const scope = server.mock(
+			async ({ url, method, json }) => {
+				const body = await json();
+
+				expect(body).toEqual({ a: 'b' });
+
+				return url.path === '/test?a=b' && method === 'POST';
+			},
+			async ({ json }) => {
+				const body = await json();
+
+				expect(body).toEqual({ a: 'b' });
+
+				return {
+					status: 200,
+					headers: {
+						'X-Foo': 'Bar',
+					},
+					body,
+				};
+			}
+		);
+
+		const resp = await fetch(`${server.url()}/test?a=b`, {
+			method: 'POST',
+			headers: {
+				Accept: 'application.json',
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ a: 'b' }),
+		});
+		const data = await resp.json();
+
+		scope.done();
+
+		expect(resp.status).toBe(200);
+		expect(resp.headers.get('x-foo')).toEqual('Bar');
+		expect(data).toEqual({ a: 'b' });
+	});
 });

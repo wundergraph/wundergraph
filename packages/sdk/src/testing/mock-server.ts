@@ -13,8 +13,8 @@ export interface MockScope {
 }
 
 export interface RequestInterceptor {
-	match: (req: MockRequest) => Promise<boolean> | boolean;
-	handler: (req: MockRequest) => Promise<MockResponse> | MockResponse;
+	match: (req: Omit<MockRequest, '_body'>) => Promise<boolean> | boolean;
+	handler: (req: Omit<MockRequest, '_body'>) => Promise<MockResponse> | MockResponse;
 	scope: MockScope;
 }
 
@@ -68,6 +68,11 @@ export interface MockRequest {
 	 * Parse the request body as text.
 	 */
 	text(): Promise<string>;
+
+	/**
+	 * The parsed request body.
+	 */
+	_body?: any;
 }
 
 export class WunderGraphMockServer {
@@ -126,27 +131,42 @@ export class WunderGraphMockServer {
 			scope = interceptor.scope;
 
 			try {
-				const mockReq: MockRequest = {
+				const mockReq: Omit<MockRequest, 'json' | 'text'> = {
 					headers: req.headers,
 					url: req.locals.urlParts,
 					method: req.method as HTTPMethod,
-					json<Body = any>(): Promise<Body> {
-						return getJSONBody(req);
-					},
-					text(): Promise<string> {
-						return getTextBody(req);
-					},
+				};
+
+				const json = async <Body = any>(): Promise<Body> => {
+					if (mockReq._body) {
+						return mockReq._body;
+					}
+					mockReq._body = await getJSONBody(req);
+					return mockReq._body;
+				};
+				const text = async (): Promise<string> => {
+					if (mockReq._body) {
+						return mockReq._body;
+					}
+					mockReq._body = await getJSONBody(req);
+					return mockReq._body;
+				};
+
+				const userMockReq: MockRequest = {
+					...mockReq,
+					json,
+					text,
 				};
 
 				// Skip if the request does not match, try the next interceptor
-				if (!(await interceptor.match(mockReq))) {
+				if (!(await interceptor.match(userMockReq))) {
 					log('request did not match interceptor: %s %s', req.method, req.url);
 					continue;
 				}
 
 				log('request matched with interceptor: %s %s', req.method, req.url);
 
-				const mockRes = await interceptor.handler(mockReq);
+				const mockRes = await interceptor.handler(userMockReq);
 
 				matched = true;
 
@@ -294,14 +314,14 @@ export class WunderGraphMockServer {
 		/**
 		 * The matcher function.
 		 */
-		match: (req: MockRequest) => Promise<boolean> | boolean,
+		match: (req: Omit<MockRequest, '_body'>) => Promise<boolean> | boolean,
 		/**
 		 * The handler function. Return the mocked response.
 		 * If error is thrown the handler is skipped and the next handler is called.
 		 * You can use test assertions in the handler to verify the request.
 		 * If error is thrown the handler is skipped and the next handler is called.
 		 */
-		handler: (req: MockRequest) => Promise<MockResponse<Response>> | MockResponse<Response>
+		handler: (req: Omit<MockRequest, '_body'>) => Promise<MockResponse<Response>> | MockResponse<Response>
 	) {
 		const scope = this.createScope();
 
