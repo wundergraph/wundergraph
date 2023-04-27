@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.149.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.149.0...@wundergraph/sdk@0.149.1) (2023-04-27)
+
+### Bug Fixes
+
+* fixes issue where returning data from another ts operation would result in a type error ([#906](https://github.com/wundergraph/wundergraph/issues/906)) ([ca66195](https://github.com/wundergraph/wundergraph/commit/ca66195ac369f4b1d501c2a146be4a707e86292b)) (@Pagebakers)
+
+## [0.149.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.148.2...@wundergraph/sdk@0.149.0) (2023-04-27)
+
+### Features
+
+* implement mocking capabilities ([#893](https://github.com/wundergraph/wundergraph/issues/893)) ([609c213](https://github.com/wundergraph/wundergraph/commit/609c213de78de918b95a6ab796d18843dc7a74c9)) (@StarpTech)
+
 ## [0.148.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.148.1...@wundergraph/sdk@0.148.2) (2023-04-27)
 
 **Note:** Version bump only for package @wundergraph/sdk
