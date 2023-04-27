@@ -41,7 +41,8 @@ configureWunderGraphApplication({
 
 Within a test, you can import `createTestAndMockServer()` to create the test and mock server instances.
 Note that depending on your project's settings, the path might be slightly different depending on where you generate your templates.
-We use `beforeAll` to start the test and mock server instances. The `ts.start()` method returns a cleanup function to shutdown all servers. In vitest you can return an async function to do a cleanup. We also use `mockedAPIs` to replace the environment variables with the mock server URL.
+We use `beforeAll` to start the test and mock server instances. The `ts.start()` method returns a cleanup function to shutdown all servers.
+In vitest you can return an async function to do a cleanup. We also use `mockedAPIs` to replace the environment variables with the mock server URL.
 
 {% callout type="note" %}
 Before you run the tests and import the `createTestAndMockServer` function, you must first run `wundergraph generate` to generate the testing library.
@@ -77,8 +78,10 @@ If you have a demanding test suite, you can create multiple test files and vites
 
 #### Mocking HTTP datasources
 
-When you setup a mock with `mock` and the request match, the interceptor is removed internally from the list. This means that you can intercept **2** or more calls to the same URL and return different things on each of them. It also means that you must setup one interceptor for each request you are going to have otherwise it will throw an error because that URL was not present in the interceptor list.
-The first argument of the `mock` function is a predicate that is used to match the request. The second argument is the function that returns the response. You can use test assertions inside the response function to verify that the request is correct. If an error is thrown the mock is considered as failed. The error is propagated to the `scope.done()` call.
+When you setup a mock with `mock()` and the request match, the mock server will return the response. If the request does not match, the mock server will return a 404 response and the call to `scope.done()` will fail the test.
+You have also the ability to throw an error inside the response function to fail the mock. This is useful if you want to verify with test assertion that the request is correct. A thrown error is handled as an unmatched request and the next mock will be checked unless all mocks have been checked.
+
+The first argument of the `mock` function is a predicate that is used to match the request. The second argument is the function that returns the response.
 
 ```ts
 const scope = ts.mockServer.mock(
