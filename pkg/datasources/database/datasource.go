@@ -1088,12 +1088,12 @@ func max(start1 int, start2 int, start3 int, start4 int) int {
 	return start4
 }
 
-func (s *Source) Load(ctx context.Context, input []byte, w io.Writer) (err error) {
+func (s *Source) Load(resolveCtx *resolve.Context, input []byte, w io.Writer) (err error) {
 	request, _ := jsonparser.Set(input, []byte("{}"), "variables")
 	request = s.unNullRequest(request)
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
-	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	ctx, cancel := context.WithTimeout(resolveCtx.Context(), time.Second*5)
 	defer cancel()
 	for {
 		s.log.Debug("database.Source.Execute",

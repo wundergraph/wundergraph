@@ -130,7 +130,7 @@ func (p *pipeline) updateContextHeaders(ctx *resolve.Context, headers map[string
 		httpHeader.Set(name, headers[name])
 	}
 	ctx.Request.Header = httpHeader
-	clientRequest := ctx.Value(pool.ClientRequestKey)
+	clientRequest := ctx.Context().Value(pool.ClientRequestKey)
 	if clientRequest == nil {
 		return
 	}
@@ -173,7 +173,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 		if err != nil {
 			return nil, err
 		}
-		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, PreResolve, hookData, payloadBuf)
+		resp, err = p.client.DoOperationRequest(ctx.Context(), p.operation.Name, PreResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -189,7 +189,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 		if err != nil {
 			return nil, err
 		}
-		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, MutatingPreResolve, hookData, payloadBuf)
+		resp, err = p.client.DoOperationRequest(ctx.Context(), p.operation.Name, MutatingPreResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -208,7 +208,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 		if err != nil {
 			return nil, err
 		}
-		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, MockResolve, hookData, payloadBuf)
+		resp, err := p.client.DoOperationRequest(ctx.Context(), p.operation.Name, MockResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -229,7 +229,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 		if err != nil {
 			return nil, err
 		}
-		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, CustomResolve, hookData, payloadBuf)
+		resp, err = p.client.DoOperationRequest(ctx.Context(), p.operation.Name, CustomResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -267,7 +267,7 @@ func (p *pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 		if err != nil {
 			return nil, err
 		}
-		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, PostResolve, postResolveData, payloadBuf)
+		resp, err := p.client.DoOperationRequest(ctx.Context(), p.operation.Name, PostResolve, postResolveData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -283,7 +283,7 @@ func (p *pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 		if err != nil {
 			return nil, err
 		}
-		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, MutatingPostResolve, mutatingPostData, payloadBuf)
+		resp, err := p.client.DoOperationRequest(ctx.Context(), p.operation.Name, MutatingPostResolve, mutatingPostData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
