@@ -13,13 +13,13 @@ export interface MockScope {
 }
 
 export interface RequestInterceptor {
-	match: (req: MockRequest) => Promise<boolean>;
-	handler: (req: MockRequest) => Promise<MockResponse>;
+	match: (req: MockRequest) => Promise<boolean> | boolean;
+	handler: (req: MockRequest) => Promise<MockResponse> | MockResponse;
 	scope: MockScope;
 }
 
 export interface ConnectInterceptor {
-	match: (req: Request) => Promise<boolean>;
+	match: (req: Request) => Promise<boolean> | boolean;
 	scope: MockScope;
 }
 
@@ -294,14 +294,14 @@ export class WunderGraphMockServer {
 		/**
 		 * The matcher function.
 		 */
-		match: (req: MockRequest) => Promise<boolean>,
+		match: (req: MockRequest) => Promise<boolean> | boolean,
 		/**
 		 * The handler function. Return the mocked response.
 		 * If error is thrown the handler is skipped and the next handler is called.
 		 * You can use test assertions in the handler to verify the request.
 		 * If error is thrown the handler is skipped and the next handler is called.
 		 */
-		handler: (req: MockRequest) => Promise<MockResponse<Response>>
+		handler: (req: MockRequest) => Promise<MockResponse<Response>> | MockResponse<Response>
 	) {
 		const scope = this.createScope();
 
@@ -320,7 +320,7 @@ export class WunderGraphMockServer {
 	 * You can use test assertions in the handler to verify the request.
 	 * If error is thrown the handler is skipped and the next handler is called.
 	 */
-	assertHTTPConnect(match: (req: Request) => Promise<boolean>) {
+	assertHTTPConnect(match: (req: Request) => Promise<boolean> | boolean) {
 		const scope = this.createScope();
 
 		this.connectInterceptors.push({

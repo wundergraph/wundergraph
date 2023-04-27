@@ -4,8 +4,9 @@ import { WunderGraphTestServer } from './test-server';
 export interface ServerStartOptions {
 	/**
 	 * Environment variables that should be set to the mock server url.
+	 * This assumes that you use `process.env` or `new EnvironmentVariable()` to access environment variables.
 	 */
-	mockedAPIs?: Array<string>;
+	mockURLEnvs?: Array<string>;
 	/**
 	 * Additional environment variables to set.
 	 */
@@ -21,8 +22,8 @@ export class TestServers {
 		const msUrl = this.mockServer.url();
 		const env: Record<string, string> = { WG_HTTP_PROXY: this.mockServer.url(), ...options?.env };
 
-		if (options?.mockedAPIs) {
-			for (const envVar of options.mockedAPIs) {
+		if (options?.mockURLEnvs) {
+			for (const envVar of options.mockURLEnvs) {
 				env[envVar] = msUrl;
 			}
 		}

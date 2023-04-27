@@ -22,7 +22,7 @@ beforeAll(async (ctx) => {
 
 	return ts.start({
 		// Environment variables replaced by the test mock server URL
-		mockedAPIs: ['COUNTRIES_URL', 'OS_NODE_URL'],
+		mockURLEnvs: ['COUNTRIES_URL', 'OS_NODE_URL'],
 	});
 });
 
@@ -30,7 +30,7 @@ describe('Mock external api', () => {
 	it<TestContext>('Should mock search call to OpenSearch', async () => {
 		// Mock the search endpoint of OpenSearch
 		const scope = ts.mockServer.mock<Record<string, any>>(
-			async ({ url, method }) => {
+			({ url, method }) => {
 				return url.path === '/books/_search' && method === 'POST';
 			},
 			async ({ json }) => {
@@ -63,7 +63,7 @@ describe('Mock external api', () => {
 
 	it<TestContext>('Should handle mocks per request.', async () => {
 		const scope1 = ts.mockServer.mock<Record<string, any>>(
-			async ({ url, method }) => {
+			({ url, method }) => {
 				return url.path === '/books/_search' && method === 'POST';
 			},
 			async ({ json }) => {
@@ -86,7 +86,7 @@ describe('Mock external api', () => {
 		);
 
 		const scope2 = ts.mockServer.mock<Record<string, any>>(
-			async ({ url, method }) => {
+			({ url, method }) => {
 				return url.path === '/books/_search' && method === 'POST';
 			},
 			async ({ json }) => {
@@ -131,16 +131,16 @@ describe('Mock external api', () => {
 
 	it<TestContext>('Should try next handlers when the first does not match or throws', async () => {
 		const scope1 = ts.mockServer.mock<Record<string, any>>(
-			async ({ url, method }) => {
+			({ url, method }) => {
 				expect.fail('Should not be called');
 			},
-			async ({ json }) => {
+			({ json }) => {
 				expect.fail('Should not be called');
 			}
 		);
 
 		const scope2 = ts.mockServer.mock<Record<string, any>>(
-			async ({ url, method }) => {
+			({ url, method }) => {
 				return url.path === '/books/_search' && method === 'POST';
 			},
 			async ({ json }) => {
@@ -179,10 +179,10 @@ describe('Mock external api', () => {
 	it<TestContext>('Should error because handler does not match', async () => {
 		// Mock the search endpoint of OpenSearch
 		const scope = ts.mockServer.mock(
-			async ({ url, method }) => {
+			({ url, method }) => {
 				return url.path === '/does_not_match';
 			},
-			async () => {
+			() => {
 				return {
 					body: 'This should not be returned',
 				};

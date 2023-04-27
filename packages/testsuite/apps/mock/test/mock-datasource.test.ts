@@ -13,7 +13,7 @@ beforeAll(async () => {
 
 	return ts.start({
 		// Environment variables replaced by the test mock server URL
-		mockedAPIs: ['COUNTRIES_URL', 'OS_NODE_URL'],
+		mockURLEnvs: ['COUNTRIES_URL', 'OS_NODE_URL'],
 	});
 });
 
@@ -21,7 +21,7 @@ describe('Mock http datasource', () => {
 	it('Should mock countries origin API', async () => {
 		// Mock the countries origin API
 		const scope = ts.mockServer.mock(
-			async ({ url, method }) => {
+			({ url, method }) => {
 				return url.path === '/' && method === 'POST';
 			},
 			async ({ json }) => {

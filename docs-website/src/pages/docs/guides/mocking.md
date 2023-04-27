@@ -42,7 +42,7 @@ configureWunderGraphApplication({
 Within a test, you can import `createTestAndMockServer()` to create the test and mock server instances.
 Note that depending on your project's settings, the path might be slightly different depending on where you generate your templates.
 We use `beforeAll` to start the test and mock server instances. The `ts.start()` method returns a cleanup function to shutdown all servers.
-In vitest you can return an async function to do a cleanup. We also use `mockedAPIs` to replace the environment variables with the mock server URL.
+In vitest you can return an async function to do a cleanup. We also use `mockURLEnvs` to replace the environment variables with the mock server URL.
 
 {% callout type="note" %}
 Before you run the tests and import the `createTestAndMockServer` function, you must first run `wundergraph generate` to generate the testing library.
@@ -62,7 +62,7 @@ beforeAll(async () => {
 
   return ts.start({
     // Environment variables replaced by the test mock server URL
-    mockedAPIs: ['COUNTRIES_URL'],
+    mockURLEnvs: ['COUNTRIES_URL'],
   });
 });
 ```
@@ -78,7 +78,7 @@ If you have a demanding test suite, you can create multiple test files and vites
 
 #### Mocking HTTP datasources
 
-When you setup a mock with `mock()` and the request match, the mock server will return the response. If the request does not match, the mock server will return a 404 response and the call to `scope.done()` will fail the test.
+When you setup a mock with `mock()` and the request matches, the mock server will return the response. If the request does not match, the mock server will return a 404 response and the call to `scope.done()` will fail the test.
 You have also the ability to throw an error inside the response function to fail the mock. This is useful if you want to verify with test assertion that the request is correct. A thrown error is handled as an unmatched request and the next mock will be checked.
 
 The first argument of the `mock` function is a predicate that is used to match the request. The second argument is the function that returns the response.

@@ -87,7 +87,7 @@ describe('Invalid proxy configurations', () => {
 		await expect(async () => regenerate({ COUNTRIES_PROXY: invalidProxy })).rejects.toThrow();
 	});
 
-	it('uses and invalid data source proxy for queries and fails', async ({ onTestFailed }) => {
+	it('uses and invalid data source proxy for queries and fails', async () => {
 		await regenerate();
 
 		const ts = createTestAndMockServer({

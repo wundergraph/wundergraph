@@ -229,6 +229,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 				WG_CLOUD: 'true',
 				WG_NODE_URL: `http://0.0.0.0:${nodePort}`,
 				WG_NODE_INTERNAL_URL: `http://0.0.0.0:${nodeInternalPort}`,
+				WG_PUBLIC_NODE_URL: `http://0.0.0.0:${nodePort}`,
 				WG_NODE_HOST: '0.0.0.0',
 				WG_NODE_PORT: nodePort.toString(),
 				WG_NODE_INTERNAL_PORT: nodeInternalPort.toString(),

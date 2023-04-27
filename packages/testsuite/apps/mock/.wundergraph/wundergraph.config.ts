@@ -17,9 +17,6 @@ configureWunderGraphApplication({
 	apis: [countries],
 	server,
 	operations,
-	options: {
-		defaultRequestTimeoutSeconds: 2,
-	},
 	generate: configureWunderGraphGeneration({
 		codeGenerators: [
 			{
