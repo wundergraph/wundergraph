@@ -183,11 +183,11 @@ func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration,
 				}
 				d.log.Debug("using HTTP proxy for data source", zap.String("proxy", proxyURLString), zap.String("url", loadvariable.String(cfg.Url)))
 			}
+		} else {
+			if dataSourceUsesHTTPProxy(ds) {
+				proxyURL = d.transportFactory.DefaultHTTPProxyURL()
+			}
 		}
-	}
-
-	if proxyURL == nil {
-		proxyURL = d.transportFactory.DefaultHTTPProxyURL()
 	}
 
 	if proxyURL != nil {
@@ -195,7 +195,7 @@ func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration,
 			return proxyURL, nil
 		}
 	} else {
-		if transport.Proxy != nil {
+		if transport.Proxy != nil && dataSourceUsesHTTPProxy(ds) {
 			d.log.Debug("disabling global HTTP proxy for data source", zap.String("url", loadvariable.String(cfg.Url)))
 		}
 		transport.Proxy = nil
