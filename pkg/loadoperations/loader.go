@@ -333,20 +333,6 @@ func (l *Loader) loadFragments(schemaDocument *ast.Document) (string, error) {
 	return fragments, err
 }
 
-func validateInitialOperationCharacter(r rune) error {
-	if unicode.IsLetter(r) || r == '_' {
-		return nil
-	}
-	return errors.New("operation names must start with a letter or an underscore")
-}
-
-func validateMiddleOperationCharacter(r rune) error {
-	if unicode.IsLetter(r) || unicode.IsDigit(r) || r == '/' || r == '_' || r == '-' {
-		return nil
-	}
-	return errors.New("operations can only contain letters, numbers or _-")
-}
-
 func validateOperationName(s string) error {
 	if len(s) == 0 {
 		return errors.New("operation name is empty")
@@ -354,9 +340,15 @@ func validateOperationName(s string) error {
 	for i, r := range s {
 		var err error
 		if i == 0 {
-			err = validateInitialOperationCharacter(r)
+			if !unicode.IsLetter(r) && r != '_' {
+				err = errors.New("operation names must start with a letter or an underscore")
+			}
 		} else {
-			err = validateMiddleOperationCharacter(r)
+			// Operations in subdirectories end up with names using / as the separator
+			// both on Unix and Windows
+			if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '/' && r != '_' && r != '-' {
+				err = errors.New("operations names can only contain letters, numbers or _-")
+			}
 		}
 		if err != nil {
 			return fmt.Errorf("%q is not a valid operation name: %w", s, err)
