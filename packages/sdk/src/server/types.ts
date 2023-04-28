@@ -15,21 +15,24 @@ declare module 'fastify' {
 export type AuthenticationHookRequest<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
-	InternalOperationsClient extends OperationsClient = OperationsClient
-> = BaseRequestContext<User, IC, InternalOperationsClient> & AuthenticationRequestContext<User>;
+	InternalOperationsClient extends OperationsClient = OperationsClient,
+	CustomContext = any
+> = BaseRequestContext<User, IC, InternalOperationsClient, CustomContext> & AuthenticationRequestContext<User>;
 
 export interface FastifyRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
-	InternalOperationsClient extends OperationsClient = OperationsClient
+	InternalOperationsClient extends OperationsClient = OperationsClient,
+	CustomContext = any
 > {
-	ctx: AuthenticationHookRequest<User, IC, InternalOperationsClient>;
+	ctx: AuthenticationHookRequest<User, IC, InternalOperationsClient, CustomContext>;
 }
 
 export interface BaseRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
-	InternalOperationsClient extends OperationsClient = OperationsClient
+	InternalOperationsClient extends OperationsClient = OperationsClient,
+	CustomContext = any
 > {
 	/**
 	 * The user that is currently logged in.
@@ -51,6 +54,10 @@ export interface BaseRequestContext<
 	 * The operations client that is used to communicate with the server.
 	 */
 	operations: Omit<InternalOperationsClient, 'cancelSubscriptions'>;
+	/**
+	 * Custom context
+	 */
+	context: CustomContext;
 }
 export interface AuthenticationRequestContext<User extends WunderGraphUser = WunderGraphUser> {
 	/**
@@ -175,20 +182,23 @@ export interface ServerRunOptions {
 
 export interface WunderGraphServerConfig<
 	GeneratedHooksConfig = HooksConfiguration,
-	GeneratedWebhooksConfig = WebhooksConfig
+	GeneratedWebhooksConfig = WebhooksConfig,
+	HandlerContext = any
 > {
 	webhooks?: GeneratedWebhooksConfig;
 	hooks?: GeneratedHooksConfig;
 	// routeUrl is set internally
 	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
 	options?: ServerOptions;
+	context?: () => Promise<HandlerContext>;
 }
 
 // internal representation of the fully resolved server config
 export interface WunderGraphHooksAndServerConfig<
 	GeneratedHooksConfig = HooksConfiguration,
-	GeneratedWebhooksConfig = WebhooksConfig
-> extends WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig> {
+	GeneratedWebhooksConfig = WebhooksConfig,
+	HandlerContext = any
+> extends WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, HandlerContext> {
 	webhooks?: GeneratedWebhooksConfig;
 	hooks?: GeneratedHooksConfig;
 	graphqlServers?: GraphQLServerConfig[];

@@ -75,18 +75,24 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 export function configureWunderGraphServer<
 	GeneratedHooksConfig extends HooksConfiguration,
 	GeneratedInternalClient extends InternalClient,
-	GeneratedWebhooksConfig extends WebhooksConfig
->(configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>) {
-	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig>(configWrapper());
+	GeneratedWebhooksConfig extends WebhooksConfig,
+	CustomContext = any
+>(configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, CustomContext>) {
+	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig, CustomContext>(configWrapper());
 }
 
 const _configureWunderGraphServer = <
 	GeneratedHooksConfig extends HooksConfiguration,
-	GeneratedWebhooksConfig extends WebhooksConfig
+	GeneratedWebhooksConfig extends WebhooksConfig,
+	CustomContext
 >(
-	config: WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>
-): WunderGraphHooksAndServerConfig => {
-	const serverConfig = config as WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>;
+	config: WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, CustomContext>
+): WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, CustomContext> => {
+	const serverConfig = config as WunderGraphHooksAndServerConfig<
+		GeneratedHooksConfig,
+		GeneratedWebhooksConfig,
+		CustomContext
+	>;
 
 	/**
 	 * Configure the custom GraphQL servers
@@ -201,6 +207,17 @@ export const createServer = async ({
 		},
 	});
 
+	const makeContext = async () => {
+		if (typeof serverConfig.context === 'function') {
+			const result = await serverConfig.context();
+			if (result === undefined) {
+				throw new Error('could not instantiate custom handler context');
+			}
+			return result;
+		}
+		return serverConfig.context;
+	};
+
 	/**
 	 * Calls per event registration. We use it for debugging only.
 	 */
@@ -247,6 +264,7 @@ export const createServer = async ({
 						'x-request-id': req.id,
 					},
 				}),
+				context: await makeContext(),
 			};
 		});
 
@@ -335,6 +353,7 @@ export const createServer = async ({
 				operations: operationsConfig.typescript_operation_files,
 				internalClientFactory: clientFactory,
 				nodeURL: nodeInternalURL,
+				makeContext,
 			});
 			fastify.log.debug('Functions plugin registered');
 		}

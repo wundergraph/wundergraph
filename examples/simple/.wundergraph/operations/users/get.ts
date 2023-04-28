@@ -4,7 +4,8 @@ export default createOperation.query({
 	input: z.object({
 		id: z.string(),
 	}),
-	handler: async ({ input }) => {
+	handler: async ({ input, context }) => {
+		context.greet();
 		return {
 			id: input.id,
 			name: 'Jens',

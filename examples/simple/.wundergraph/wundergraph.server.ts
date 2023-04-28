@@ -1,11 +1,24 @@
 import { GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
-import type { HooksConfig } from './generated/wundergraph.hooks';
-import type { InternalClient } from './generated/wundergraph.internal.client';
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export class MyContext {
+	greet() {
+		console.log('say hello');
+	}
+}
+
+export const makeContext = async () => {
+	return new MyContext();
+};
+
+export default configureWunderGraphServer(() => ({
 	hooks: {
-		queries: {},
+		queries: {
+			Countries: {
+				preResolve: async ({ operations, context }) => {},
+			},
+		},
 		mutations: {},
 	},
+	context: makeContext,
 }));

@@ -6,6 +6,12 @@ import type { InternalClient } from "./wundergraph.internal.client"
 import type { User } from "./wundergraph.server"
 import { InternalOperationsClient } from "./wundergraph.internal.operations.client";
 
+// TODO: Make this conditional
+import {makeContext} from '../wundergraph.server';
+
+type ContextField = typeof makeContext;
+type ContextType = ContextField extends (...args: any) => any ? Awaited<ReturnType<ContextField>> : ContextField;
+
 // use SKIP to skip the hook and continue the request / response chain without modifying the request / response
 export type SKIP = "skip";
 
@@ -17,21 +23,21 @@ export type WUNDERGRAPH_OPERATION = {{{operationNamesUnion}}};
 
 export type DATA_SOURCES = {{{dataSourcesUnion}}};
 
-export interface HttpTransportHookRequest extends BaseRequestContext<User, InternalClient> {
+export interface HttpTransportHookRequest extends BaseRequestContext<User, InternalClient, InternalOperationsClient, ContextType> {
 		request: WunderGraphRequest;
 		operation: {
 				name: WUNDERGRAPH_OPERATION;
 				type: 'mutation' | 'query' | 'subscription';
 		}
 }
-export interface HttpTransportHookRequestWithResponse extends BaseRequestContext<User, InternalClient> {
+export interface HttpTransportHookRequestWithResponse extends BaseRequestContext<User, InternalClient, InternalOperationsClient, ContextType> {
 		response: WunderGraphResponse;
     operation: {
         name: string;
         type: string;
     }
 }
-export interface WsTransportHookRequest extends BaseRequestContext<User, InternalClient> {
+export interface WsTransportHookRequest extends BaseRequestContext<User, InternalClient, InternalOperationsClient, ContextType> {
 	  dataSourceId: DATA_SOURCES;
 		request: WunderGraphRequest;
 }
@@ -92,7 +98,7 @@ export type JSONValue =
 
 export type JSONObject = { [key: string]: JSONValue };
 										
-export interface HookRequest extends BaseRequestContext<User, InternalClient, InternalOperationsClient> {}
+export interface HookRequest extends BaseRequestContext<User, InternalClient, InternalOperationsClient, ContextType> {}
 
 export interface HookRequestWithResponse<Response> extends HookRequest {
 		response: Response;

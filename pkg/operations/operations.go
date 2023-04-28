@@ -111,8 +111,12 @@ import { InternalOperationsClient } from "./wundergraph.internal.operations.clie
 import type { Role } from "./wundergraph.server";
 import type { CustomClaims } from "./claims";
 import { createOperationFactory } from "@wundergraph/sdk/operations";
+// TODO: Make this conditional
+import server from '../wundergraph.server';
+
+type ContextField = Required<typeof server>['context'];
+type ContextType = ContextField extends (...args: any) => any ? Awaited<ReturnType<ContextField>> : ContextField;
 
 export {z, AuthorizationError} from "@wundergraph/sdk/operations";
-export const createOperation = createOperationFactory<InternalClient, Role, CustomClaims, InternalOperationsClient>();
-`
+export const createOperation = createOperationFactory<InternalClient, Role, CustomClaims, InternalOperationsClient, ContextType>();`
 )
