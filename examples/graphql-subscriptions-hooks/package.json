@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "start": "run-p start:services wundergraph",
-    "wundergraph": "wait-on tcp:4000 && wunderctl up",
+    "wundergraph": "wait-on http-get://localhost:4000/health && wunderctl up",
     "build:wundergraph": "wunderctl generate",
     "build": "npm run build:wundergraph",
     "start:services": "ts-node graphql-ws/server.ts",
