@@ -23,6 +23,11 @@ export class TypeScriptClaims implements Template {
 				case 'boolean':
 					claimType = 'boolean';
 					break;
+				case 'any':
+					claimType = 'any';
+					break;
+				default:
+					throw new Error(`unhandled custom claim type ${claim.type}`);
 			}
 			return {
 				name: key,

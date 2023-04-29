@@ -31,6 +31,7 @@ import {
 import { mergeApis } from '../definition/merge';
 import {
 	GraphQLOperation,
+	GraphQLOperationFile,
 	isInternalOperationByAPIMountPath,
 	isWellKnownClaim,
 	loadOperations,
@@ -208,7 +209,7 @@ export interface CustomClaim {
 	 *
 	 * @default 'string'
 	 */
-	type?: 'string' | 'int' | 'float' | 'boolean';
+	type?: 'string' | 'int' | 'float' | 'boolean' | 'any';
 
 	/** If required is true, users without this claim will
 	 * fail to authenticate
@@ -722,6 +723,13 @@ const resolveApplication = async (
 	};
 };
 
+const logLoadedOperations = (files: GraphQLOperationFile[] | TypeScriptOperationFile[] | undefined, suffix: string) => {
+	if (files) {
+		Logger.info(`found ${files.length ?? 0} ${suffix} operations`);
+		Logger.debug(files.map((op) => op.operation_name).join(', '));
+	}
+};
+
 // configureWunderGraphApplication generates the file "generated/wundergraph.config.json" and runs the configured code generators
 // the wundergraph.config.json file will be picked up by "wunderctl up" to configure your development environment
 export const configureWunderGraphApplication = <
@@ -843,6 +851,9 @@ export const configureWunderGraphApplication = <
 			}
 
 			const loadedOperations = await loadOperations(schemaFileName);
+
+			logLoadedOperations(loadedOperations.graphql_operation_files, 'GraphQL');
+			logLoadedOperations(loadedOperations.typescript_operation_files, 'TypeScript');
 
 			const operations = await resolveOperationsConfigurations(
 				wgDirAbs,
@@ -1493,6 +1504,9 @@ const resolveOperationsConfigurations = async (
 				break;
 			case 'boolean':
 				claimType = ValueType.FLOAT;
+				break;
+			case 'any':
+				claimType = ValueType.ANY;
 				break;
 			case undefined:
 				claimType = ValueType.STRING;

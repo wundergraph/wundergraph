@@ -1039,7 +1039,7 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 		}
 		return variables, nil
 	case string:
-		if custom.Type != wgpb.ValueType_STRING {
+		if custom.Type != wgpb.ValueType_STRING && custom.Type != wgpb.ValueType_ANY {
 			return nil, inputvariables.NewValidationError(
 				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
 				nil,
@@ -1048,7 +1048,7 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 		}
 		replacement = []byte("\"" + string(x) + "\"")
 	case bool:
-		if custom.Type != wgpb.ValueType_BOOLEAN {
+		if custom.Type != wgpb.ValueType_BOOLEAN && custom.Type != wgpb.ValueType_ANY {
 			return nil, inputvariables.NewValidationError(
 				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
 				nil,
@@ -1072,7 +1072,7 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 				)
 			}
 			replacement = []byte(strconv.FormatInt(int64(x), 10))
-		case wgpb.ValueType_FLOAT:
+		case wgpb.ValueType_FLOAT, wgpb.ValueType_ANY:
 			// JSON number is always a valid float
 			replacement = []byte(strconv.FormatFloat(x, 'f', -1, 64))
 		default:
@@ -1083,7 +1083,18 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 			)
 		}
 	default:
-		return nil, fmt.Errorf("unhandled custom claim type %T", x)
+		if custom.Type != wgpb.ValueType_ANY {
+			return nil, inputvariables.NewValidationError(
+				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+				nil,
+				nil,
+			)
+		}
+		var err error
+		replacement, err = json.Marshal(value)
+		if err != nil {
+			return nil, fmt.Errorf("error serializing data %v for custom claim %s: %w", value, custom.Name, err)
+		}
 	}
 	var err error
 	variables, err = jsonparser.Set(variables, replacement, claim.VariablePathComponents...)
