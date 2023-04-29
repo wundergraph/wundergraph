@@ -15,7 +15,6 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/httpclient"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
-	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
 	"github.com/wundergraph/graphql-go-tools/pkg/pool"
 
@@ -198,10 +197,10 @@ type Source struct {
 	defaultTypeName    []byte
 }
 
-func (s *Source) Load(ctx *resolve.Context, input []byte, w io.Writer) (err error) {
+func (s *Source) Load(ctx context.Context, input []byte, w io.Writer) (err error) {
 	buf := pool.FastBuffer.Get()
 	defer pool.FastBuffer.Put(buf)
-	status, err := customhttpclient.DoWithStatus(s.client, ctx.Context(), input, buf)
+	status, err := customhttpclient.DoWithStatus(s.client, ctx, input, buf)
 	if err != nil {
 		return err
 	}
