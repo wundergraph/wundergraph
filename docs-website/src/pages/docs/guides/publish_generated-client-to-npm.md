@@ -118,6 +118,7 @@ After building the client, it's ready to be published to NPM, Google Packages or
 
 - [Client reference](https://docs.wundergraph.com/docs/clients-reference/typescript-client)
 - [TSUP](https://tsup.egoist.dev/)
+- [Example repository](https://github.com/wundergraph/publish-client).
 
 ## Deploy to WunderGraph Cloud
 
