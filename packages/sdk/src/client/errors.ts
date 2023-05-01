@@ -6,11 +6,61 @@ export interface GraphQLErrorLocation {
 	column: number;
 }
 
+export interface GraphQLErrorExtensionHTTP {
+	/**
+	 * status contains the response status code
+	 */
+	status?: number;
+	/**
+	 * statusText contains the text associated with the status code.
+	 * e.g. For a 404 it will be "Not Found"
+	 * */
+	statusText?: string;
+	/**
+	 * headers contains the response headers sent by the OpenAPI upstream
+	 */
+	headers?: Record<string, string>;
+}
+
+export interface GraphQLErrorExtensionHTTPRequest {
+	/**
+	 * OpenAPI request URL sent by the gateway
+	 */
+	url?: string;
+	/**
+	 * OpenAPI request method sent by the gateway
+	 */
+	method?: string;
+}
+
+/**
+ * GraphQLErrorExtensions includes extended information added to
+ * GraphQL errors.
+ */
+export interface GraphQLErrorExtensions {
+	/**
+	 * http information, only included in OpenAPI responses
+	 */
+	http?: GraphQLErrorExtensionHTTP;
+	/**
+	 * request sent by the gateway to the OpenAPI upstream
+	 */
+	request?: GraphQLErrorExtensionHTTPRequest;
+	/**
+	 * response text sent by the OpenAPI upstream
+	 */
+	responseText?: string;
+}
+
 export interface GraphQLError {
 	message: string;
 	code?: string;
 	location?: ReadonlyArray<GraphQLErrorLocation>;
 	path?: ReadonlyArray<string | number>;
+	/**
+	 * extensions contains non-standard extensions added to GraphQL errors
+	 */
+	extensions?: GraphQLErrorExtensions;
 }
 
 export type OperationErrorBaseFields = {
@@ -75,12 +125,35 @@ export class InternalError extends OperationError<'InternalError'> {
 }
 
 /**
+ * ResponseErrorHTTP contains additional error information from OpenAPI requests
+ */
+export interface ResponseErrorHTTP {
+	/**
+	 * statusCode contains the response status code sent by the OpenAPI upstream
+	 */
+	statusCode?: number;
+	/**
+	 * headers contains the response headers sent by the OpenAPI upstream. All header
+	 * names are normalized to lowercase.
+	 */
+	headers?: Record<string, string>;
+	/**
+	 * text represents the raw body text of the response sent by the OpenAPI upstream
+	 */
+	text?: string;
+}
+
+/**
  * The base error class for all client operation errors.
  * This error is thrown when the client receives a response that is not ok.
  * This error should only be used on the client
  */
 export class ResponseError<Code extends ClientOperationErrorCodes | string = string> extends OperationError<Code> {
 	public readonly errors?: GraphQLError[];
+	/**
+	 * http contains HTTP specific fields used in errors returned by OpenAPI upstreams
+	 */
+	public readonly http?: ResponseErrorHTTP;
 	constructor(opts: { code?: Code; message?: string; cause?: Error; statusCode: number; errors?: GraphQLError[] }) {
 		super({
 			message: opts.message ?? 'Response is not OK',
@@ -89,6 +162,14 @@ export class ResponseError<Code extends ClientOperationErrorCodes | string = str
 			statusCode: opts.statusCode,
 		});
 		this.errors = opts.errors;
+		const extensions = opts.errors?.[0].extensions;
+		if (extensions) {
+			this.http = {
+				statusCode: extensions?.http?.status,
+				headers: extensions?.http?.headers,
+				text: extensions?.responseText,
+			};
+		}
 	}
 }
 
