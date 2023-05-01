@@ -24,7 +24,7 @@ The WunderNode communicates with the WunderGraph server over HTTP/1.1. The hooks
 
 - `/functions/{Name*}` - A TypeScript function. The name of the function is the full directory path of the function file relative to the `operations` directory.
 - `/webhooks/{Name}` - A webhook. The name of the webhook is the name of the file in the `webhooks` directory without the file extension.
-- `/operation/{Name*}/{Hook}` - Hook for a specific operation. The name is the full directory path of the operation file relative to the `operations` directory. The `Hook` is a placeholder for the name of the hook that should be executed.
+- `/operation/{Name*}/{Hook}` - Hook for a specific operation. The name is the full directory path of the operation file relative to the `operations` directory. The `Hook` is one of the following hooks: `preResolve`, `mutatingPreResolve`, `mockResolve`, `customResolve`, `postResolve`, `mutatingPostResolve`.
 - `/global/httpTransport/{Hook}` - Global Hooks for HTTP origins. The `Hook` is one of the following hooks: `onOriginRequest`, `onOriginResponse`.
 - `/global/wsTransport/{Hook}` - Global Hooks for WebSocket origins. The `Hook` is one of the following hooks: `onConnectionInit`.
 - `/authentication/{Hook}` - Global Hooks for authentication. The `Hook` is one of the following hooks: `revalidateAuthentication`, `postLogout`, `postAuthentication`, `mutatingPostAuthentication`.
