@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 import { createTestServer } from './.wundergraph/generated/testing';
-import { createOpenAPITestServer } from './testserver';
+import { createOpenAPITestServer } from './test-server';
 import { ResponseError } from '@wundergraph/sdk/client';
 
 const wg = createTestServer({
@@ -9,7 +9,7 @@ const wg = createTestServer({
 });
 
 beforeAll(async () => {
-	createOpenAPITestServer(8091);
+	createOpenAPITestServer(8090);
 	await wg.start();
 });
 
