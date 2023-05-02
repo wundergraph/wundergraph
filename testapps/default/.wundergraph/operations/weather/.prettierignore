@@ -1,0 +1,3 @@
+# These files are generated, ignore them during formatting
+GetCityById.graphql
+GetCityByName.graphql

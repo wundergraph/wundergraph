@@ -1,35 +1,24 @@
 import { GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLInt, GraphQLFloat, GraphQLBoolean } from 'graphql';
 
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
-import type { HooksConfig } from './generated/wundergraph.hooks';
-import type { InternalClient } from './generated/wundergraph.internal.client';
 
-const logPreResolve = async (hook: any) => {
-	console.log(`preResolve: ${JSON.stringify(hook)}`);
-};
-
-const logMutatingPreResolve = async (hook: any) => {
-	console.log(`mutatingPreResolve: ${JSON.stringify(hook)}`);
-};
-
-const logCustomResolve = async (hook: any) => {
-	console.log(`customResolve: ${JSON.stringify(hook)}`);
-};
-
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
 	hooks: {
 		queries: {
 			Infinite: {
 				preResolve: async (hook) => {
-					logPreResolve(hook);
 					const result = await hook.internalClient.queries.Infinite({
+						input: hook.input,
+					});
+
+					const result2 = await hook.operations.query({
+						operationName: 'Infinite',
 						input: hook.input,
 					});
 				},
 			},
 			PreResolveFailure: {
 				preResolve: async (hook) => {
-					logPreResolve(hook);
 					throw new Error('stop');
 				},
 			},
@@ -59,16 +48,14 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 				},
 			},
 			MutatingPreResolveFailure: {
-				preResolve: logPreResolve,
+				preResolve: () => {},
 				mutatingPreResolve: async (hook) => {
-					logMutatingPreResolve(hook);
 					throw new Error('stop');
 				},
 			},
 			CustomResolveFailure: {
-				preResolve: logPreResolve,
+				preResolve: () => {},
 				customResolve: async (hook) => {
-					logCustomResolve(hook);
 					throw new Error('stop');
 				},
 			},
@@ -87,9 +74,8 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 				},
 			},
 			PreResolveChain: {
-				preResolve: logPreResolve,
+				preResolve: () => {},
 				mutatingPreResolve: async (hook) => {
-					logMutatingPreResolve(hook);
 					return {
 						s: hook.input.s + '.mutatingPreResolve',
 					};
@@ -105,7 +91,9 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 			},
 			RecursiveContinents: {
 				customResolve: async (hook) => {
-					return hook.internalClient.queries.Continents();
+					return hook.operations.query({
+						operationName: 'Continents',
+					});
 				},
 			},
 			Continents: {

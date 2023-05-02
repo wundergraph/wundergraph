@@ -32,6 +32,7 @@ import (
 func init() {
 	gob.Register(User{})
 	gob.Register(map[string]interface{}(nil))
+	gob.Register([]interface{}(nil))
 }
 
 type UserLoader struct {
@@ -930,7 +931,7 @@ func postAuthentication(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return err
 	}
 	if err := user.Save(cookie, w, r, r.Host, insecureCookies); err != nil {
-		return err
+		return fmt.Errorf("could not encode user data: %w", err)
 	}
 	return nil
 }

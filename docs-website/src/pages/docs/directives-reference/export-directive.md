@@ -24,12 +24,12 @@ To achieve this, we could use the following two APIs:
 const weather = introspect.graphql({
   apiNamespace: 'weather',
   url: 'https://weather-api.wundergraph.com/',
-})
+});
 
 const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
-})
+});
 ```
 
 Using these two APIs,

@@ -29,12 +29,7 @@ mutation (
   createOnepost(
     data: {
       message: $message
-      user: {
-        connectOrCreate: {
-          where: { email: $email }
-          create: { email: $email, name: $name }
-        }
-      }
+      user: { connectOrCreate: { where: { email: $email }, create: { email: $email, name: $name } } }
     }
   ) {
     id

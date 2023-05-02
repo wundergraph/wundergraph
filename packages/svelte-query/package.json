@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/svelte-query",
-  "version": "0.2.10",
+  "version": "0.2.17",
   "license": "Apache-2.0",
   "description": "WunderGraph Svelte Query Integration",
   "module": "./dist/index.js",
@@ -30,7 +30,7 @@
     "url": "git+https://github.com/wundergraph/wundergraph.git"
   },
   "peerDependencies": {
-    "@tanstack/svelte-query": "^4.24.6",
+    "@tanstack/svelte-query": "^4.29.1",
     "@wundergraph/sdk": ">=0.143.0",
     "svelte": "^3.54.0"
   },
@@ -38,7 +38,7 @@
     "@sveltejs/package": "^2.0.2",
     "@swc/core": "^1.3.14",
     "@swc/jest": "^0.2.23",
-    "@tanstack/svelte-query": "^4.24.6",
+    "@tanstack/svelte-query": "^4.29.1",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/svelte": "^3.2.2",
     "@types/jest": "^28.1.1",

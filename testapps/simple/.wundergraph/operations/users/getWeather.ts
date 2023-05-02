@@ -5,7 +5,7 @@ export default createOperation.query({
 	errors: [NotFoundErr, RateLimitErr],
 	handler: async ({ operations }) => {
 		// GraphQL operation
-		const { errors, data } = await operations.query({
+		const { error, data } = await operations.query({
 			operationName: 'Weather',
 			input: {
 				forCity: 'Berlin',
@@ -13,7 +13,7 @@ export default createOperation.query({
 		});
 
 		// TypeScript operation
-		const { errors: errors2, data: data2 } = await operations.query({
+		const { error: error2, data: data2 } = await operations.query({
 			operationName: 'users/throw',
 			input: {
 				throw: 'NotFound',

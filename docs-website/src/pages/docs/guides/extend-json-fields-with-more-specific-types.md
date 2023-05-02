@@ -33,7 +33,7 @@ Let's have a look at an example, a simple chat application where we use a JSON c
 const db = introspect.postgresql({
   apiNamespace: 'db',
   databaseURL: 'postgresql://admin:admin@localhost:54322/example?schema=public',
-})
+});
 ```
 
 We're simply pointing WunderGraph to the database we're using.
@@ -54,12 +54,7 @@ mutation (
     data: {
       message: $message
       payload: $payload
-      users: {
-        connectOrCreate: {
-          create: { name: $name, email: $email }
-          where: { email: $email }
-        }
-      }
+      users: { connectOrCreate: { create: { name: $name, email: $email }, where: { email: $email } } }
     }
   ) {
     id
@@ -124,7 +119,7 @@ const db = introspect.postgresql({
       inputTypeReplacement: 'MessagePayloadInput',
     },
   ],
-})
+});
 ```
 
 First, we're adding a "schema extension" to our GraphQL schema.
@@ -158,12 +153,7 @@ mutation (
     data: {
       message: $message
       payload: $payload
-      users: {
-        connectOrCreate: {
-          create: { name: $name, email: $email }
-          where: { email: $email }
-        }
-      }
+      users: { connectOrCreate: { create: { name: $name, email: $email }, where: { email: $email } } }
     }
   ) {
     id
@@ -215,7 +205,7 @@ Here's an example snipped how a client can access the `extra` field:
               extra: {message.payload.extra}
             </p>
           </div>
-        )
+        );
       })}
     </div>
   )}

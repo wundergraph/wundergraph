@@ -51,13 +51,25 @@ export interface OperationDefinition {
 }
 
 export interface ClientConfig {
-	applicationHash: string;
+	applicationHash?: string;
 	baseURL: string;
-	sdkVersion: string;
+	sdkVersion?: string;
 	customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 	extraHeaders?: Headers;
 	operationMetadata?: OperationMetadata;
+	/**
+	 * Specifies the number of milliseconds before the request times out.
+	 * default is `0` (no timeout)
+	 */
+	requestTimeoutMs?: number;
 	csrfEnabled?: boolean;
+	/**
+	 * Force SSE for subscriptions if extraHeaders are set.
+	 * Subscriptions fall back to fetch streaming by default
+	 * if extraHeaders are set, because EventSource does not
+	 * supported headers.
+	 */
+	forceSSE?: boolean;
 }
 
 type PrivateConfigProperties = 'applicationHash' | 'sdkVersion' | 'operationMetadata' | 'operationErrorTypes';
@@ -82,6 +94,11 @@ export interface OperationRequestOptions<
 	Input extends object | undefined = object | undefined
 > {
 	operationName: OperationName;
+	/**
+	 * If you pass an AbortSignal, the request will be aborted when the signal is aborted.
+	 * You are responsible of handling the request timeout if you want to pass a custom AbortSignal.
+	 * @see https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal
+	 */
 	abortSignal?: AbortSignal;
 	input?: Input;
 }
@@ -102,7 +119,13 @@ export type SubscriptionRequestOptions<
 	OperationName extends string = any,
 	Input extends object | undefined = object | undefined
 > = WithInput<Input, OperationRequestOptions<OperationName, Input>> & {
+	/**
+	 * Subscribe to a live query
+	 */
 	liveQuery?: Boolean;
+	/**
+	 * Receive the initial response and then stop the subscription
+	 */
 	subscribeOnce?: Boolean;
 };
 

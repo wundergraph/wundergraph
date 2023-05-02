@@ -23,6 +23,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  WG_TELEMETRY_DISABLED: 1
   WORKING_DIRECTORY: '.'
   CI: true
 
@@ -68,20 +69,6 @@ jobs:
       - name: Build all libs + apps
         run: pnpm build
 
-      - name: Get branch name
-        id: branch-name
-        uses: tj-actions/branch-names@v6
-
-      - name: Get the last successful commit for the current branch
-        uses: nrwl/nx-set-shas@v3
-        id: last_successful_commit_push
-        with:
-          main-branch-name: ${{ steps.branch-name.outputs.current_branch }} # Get the last successful commit for the current branch.
-
-      - name: Check for formatting errors
-        # Use sed and tr instead of xargs to handle filenames with $
-        run: pnpx prettier --check -u $(git diff --name-only --diff-filter=ACMRT -r ${{ steps.last_successful_commit_push.outputs.base }} | sed 's/\$/\\\$/g' | tr '\n' ' ')
-
       - name: Check if git is not dirty after generating files
         run: git diff --no-ext-diff --exit-code
 
@@ -89,3 +76,13 @@ jobs:
         run: pnpm test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run testsuite
+        run: pnpm test:suite
+
+      - name: Determine changed files
+        id: changed
+        uses: ./.github/actions/changed
+
+      - name: Check for formatting errors in changed files
+        run: pnpm exec -- prettier --check --ignore-unknown ${{ steps.changed.outputs.changed }}

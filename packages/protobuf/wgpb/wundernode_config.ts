@@ -380,6 +380,7 @@ export enum ValueType {
   INT = 1,
   FLOAT = 2,
   BOOLEAN = 3,
+  ANY = 4,
 }
 
 export function valueTypeFromJSON(object: any): ValueType {
@@ -396,6 +397,9 @@ export function valueTypeFromJSON(object: any): ValueType {
     case 3:
     case "BOOLEAN":
       return ValueType.BOOLEAN;
+    case 4:
+    case "ANY":
+      return ValueType.ANY;
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum ValueType");
   }
@@ -411,6 +415,8 @@ export function valueTypeToJSON(object: ValueType): string {
       return "FLOAT";
     case ValueType.BOOLEAN:
       return "BOOLEAN";
+    case ValueType.ANY:
+      return "ANY";
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum ValueType");
   }
@@ -1027,6 +1033,7 @@ export interface FetchConfiguration {
   mTLS: MTLSConfiguration | undefined;
   baseUrl: ConfigurationVariable | undefined;
   path: ConfigurationVariable | undefined;
+  httpProxyUrl?: ConfigurationVariable | undefined;
 }
 
 export interface FetchConfiguration_HeaderEntry {
@@ -1178,6 +1185,7 @@ export interface NodeOptions {
   defaultRequestTimeoutSeconds: number;
   listenInternal: InternalListenerOptions | undefined;
   nodeInternalUrl: ConfigurationVariable | undefined;
+  defaultHttpProxyUrl: ConfigurationVariable | undefined;
 }
 
 export interface ServerLogging {
@@ -2896,6 +2904,7 @@ function createBaseFetchConfiguration(): FetchConfiguration {
     mTLS: undefined,
     baseUrl: undefined,
     path: undefined,
+    httpProxyUrl: undefined,
   };
 }
 
@@ -2921,6 +2930,7 @@ export const FetchConfiguration = {
       mTLS: isSet(object.mTLS) ? MTLSConfiguration.fromJSON(object.mTLS) : undefined,
       baseUrl: isSet(object.baseUrl) ? ConfigurationVariable.fromJSON(object.baseUrl) : undefined,
       path: isSet(object.path) ? ConfigurationVariable.fromJSON(object.path) : undefined,
+      httpProxyUrl: isSet(object.httpProxyUrl) ? ConfigurationVariable.fromJSON(object.httpProxyUrl) : undefined,
     };
   },
 
@@ -2948,6 +2958,8 @@ export const FetchConfiguration = {
     message.baseUrl !== undefined &&
       (obj.baseUrl = message.baseUrl ? ConfigurationVariable.toJSON(message.baseUrl) : undefined);
     message.path !== undefined && (obj.path = message.path ? ConfigurationVariable.toJSON(message.path) : undefined);
+    message.httpProxyUrl !== undefined &&
+      (obj.httpProxyUrl = message.httpProxyUrl ? ConfigurationVariable.toJSON(message.httpProxyUrl) : undefined);
     return obj;
   },
 
@@ -2980,6 +2992,9 @@ export const FetchConfiguration = {
       : undefined;
     message.path = (object.path !== undefined && object.path !== null)
       ? ConfigurationVariable.fromPartial(object.path)
+      : undefined;
+    message.httpProxyUrl = (object.httpProxyUrl !== undefined && object.httpProxyUrl !== null)
+      ? ConfigurationVariable.fromPartial(object.httpProxyUrl)
       : undefined;
     return message;
   },
@@ -3925,6 +3940,7 @@ function createBaseNodeOptions(): NodeOptions {
     defaultRequestTimeoutSeconds: 0,
     listenInternal: undefined,
     nodeInternalUrl: undefined,
+    defaultHttpProxyUrl: undefined,
   };
 }
 
@@ -3943,6 +3959,9 @@ export const NodeOptions = {
         : undefined,
       nodeInternalUrl: isSet(object.nodeInternalUrl)
         ? ConfigurationVariable.fromJSON(object.nodeInternalUrl)
+        : undefined,
+      defaultHttpProxyUrl: isSet(object.defaultHttpProxyUrl)
+        ? ConfigurationVariable.fromJSON(object.defaultHttpProxyUrl)
         : undefined,
     };
   },
@@ -3965,6 +3984,9 @@ export const NodeOptions = {
       (obj.nodeInternalUrl = message.nodeInternalUrl
         ? ConfigurationVariable.toJSON(message.nodeInternalUrl)
         : undefined);
+    message.defaultHttpProxyUrl !== undefined && (obj.defaultHttpProxyUrl = message.defaultHttpProxyUrl
+      ? ConfigurationVariable.toJSON(message.defaultHttpProxyUrl)
+      : undefined);
     return obj;
   },
 
@@ -3988,6 +4010,9 @@ export const NodeOptions = {
       : undefined;
     message.nodeInternalUrl = (object.nodeInternalUrl !== undefined && object.nodeInternalUrl !== null)
       ? ConfigurationVariable.fromPartial(object.nodeInternalUrl)
+      : undefined;
+    message.defaultHttpProxyUrl = (object.defaultHttpProxyUrl !== undefined && object.defaultHttpProxyUrl !== null)
+      ? ConfigurationVariable.fromPartial(object.defaultHttpProxyUrl)
       : undefined;
     return message;
   },

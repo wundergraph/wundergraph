@@ -27,6 +27,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  WG_TELEMETRY_DISABLED: 1
   WORKING_DIRECTORY: '.'
   CI: true
 
@@ -41,7 +42,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
-  build_test:
+  build_test_examples:
     needs: collect
     strategy:
       matrix:
@@ -60,10 +61,6 @@ jobs:
           working-directory: ${{ env.WORKING_DIRECTORY }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           node-version: '18'
-
-      - name: Setup Docker image cache
-        uses: satackey/action-docker-layer-caching@v0.0.11
-        continue-on-error: true
 
       - name: Filter tests to run
         run: |
@@ -84,3 +81,17 @@ jobs:
 
       - name: Check if git is not dirty after generating files
         run: git diff --no-ext-diff --exit-code
+
+  # See https://github.com/orgs/community/discussions/26822
+  build_test:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    name: build_test
+    needs: build_test_examples
+    steps:
+      - run: exit 1
+        if: >-
+          ${{
+               contains(needs.*.result, 'failure')
+            || contains(needs.*.result, 'cancelled')
+          }}

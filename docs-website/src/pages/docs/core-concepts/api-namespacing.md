@@ -31,7 +31,7 @@ Here's a simple example:
 const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
   url: 'https://spacex-api.fly.dev/graphql/',
-})
+});
 ```
 
 When introspecting the SpaceX API,

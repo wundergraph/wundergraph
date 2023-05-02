@@ -21,8 +21,8 @@
     "test": "jest --detectOpenHandles"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.10.11",
-    "@wundergraph/sdk": "^0.146.1",
+    "@wundergraph/nextjs": "^0.10.18",
+    "@wundergraph/sdk": "^0.149.1",
     "graphql": "^16.3.0",
     "next": "^13.1.1",
     "react": "^18.0.0",

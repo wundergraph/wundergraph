@@ -3,6 +3,52 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.149.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.149.0...@wundergraph/sdk@0.149.1) (2023-04-27)
+
+### Bug Fixes
+
+* fixes issue where returning data from another ts operation would result in a type error ([#906](https://github.com/wundergraph/wundergraph/issues/906)) ([ca66195](https://github.com/wundergraph/wundergraph/commit/ca66195ac369f4b1d501c2a146be4a707e86292b)) (@Pagebakers)
+
+## [0.149.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.148.2...@wundergraph/sdk@0.149.0) (2023-04-27)
+
+### Features
+
+* implement mocking capabilities ([#893](https://github.com/wundergraph/wundergraph/issues/893)) ([609c213](https://github.com/wundergraph/wundergraph/commit/609c213de78de918b95a6ab796d18843dc7a74c9)) (@StarpTech)
+
+## [0.148.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.148.1...@wundergraph/sdk@0.148.2) (2023-04-27)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.148.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.148.0...@wundergraph/sdk@0.148.1) (2023-04-26)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.148.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.147.1...@wundergraph/sdk@0.148.0) (2023-04-26)
+
+### Features
+
+* inconsistencies in ts clients api ([#857](https://github.com/wundergraph/wundergraph/issues/857)) ([9f31b17](https://github.com/wundergraph/wundergraph/commit/9f31b1744e97d9e5358c5e5eed011eebfa6938cc)) (@Pagebakers)
+
+### Bug Fixes
+
+* incorrect env read for public node url ([#897](https://github.com/wundergraph/wundergraph/issues/897)) ([100a88f](https://github.com/wundergraph/wundergraph/commit/100a88ff37d0a5e98db67bdda7adad26a3e5872e)) (@thisisnithin)
+
+## [0.147.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.147.0...@wundergraph/sdk@0.147.1) (2023-04-25)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.147.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.146.1...@wundergraph/sdk@0.147.0) (2023-04-24)
+
+### Features
+
+* add support for using proxies in data sources ([#854](https://github.com/wundergraph/wundergraph/issues/854)) ([a472c46](https://github.com/wundergraph/wundergraph/commit/a472c463d6dbcb20b48444fdd4ce9c797c16feb2)) (@fiam)
+* initial implementation for the operations code generation ([#877](https://github.com/wundergraph/wundergraph/issues/877)) ([aab4c60](https://github.com/wundergraph/wundergraph/commit/aab4c604a39bebc0dc3219964ae887be64f25f02)) (@jensneuse)
+
+### Bug Fixes
+
+* ensure input is undefined when not defined as schema ([#864](https://github.com/wundergraph/wundergraph/issues/864)) ([ba68d06](https://github.com/wundergraph/wundergraph/commit/ba68d0681b04d62c3a12b68a423f783d2380a594)) (@StarpTech)
+* internal router ([#872](https://github.com/wundergraph/wundergraph/issues/872)) ([37fa469](https://github.com/wundergraph/wundergraph/commit/37fa469493196a2fdcdc975a9ce29a9be0147a0d)) (@thisisnithin)
+
 ## [0.146.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.146.0...@wundergraph/sdk@0.146.1) (2023-04-20)
 
 **Note:** Version bump only for package @wundergraph/sdk

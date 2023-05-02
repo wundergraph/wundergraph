@@ -1,0 +1,5 @@
+mutation ($newOrder: Int, $oldOrder: Int) @internalOperation {
+	db_updateManyTodo(where: { order: { gte: $newOrder, lt: $oldOrder } }, data: { order: { increment: 1 } }) {
+		count
+	}
+}

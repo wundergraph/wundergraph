@@ -10,6 +10,11 @@ import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 
+const countries = introspect.graphql({
+	apiNamespace: 'countries',
+	url: 'https://countries.trevorblades.com/graphql',
+});
+
 const weather = introspect.graphql({
 	apiNamespace: 'weather',
 	url: 'https://weather-api.wundergraph.com/',
@@ -119,6 +124,7 @@ const counter = introspect.graphql({
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
 	apis: [
+		countries,
 		weather,
 		spaceX,
 		counter,

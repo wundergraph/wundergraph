@@ -37,29 +37,21 @@ Here's how it looks like for the Operation above:
 ```typescript
 // all of this is generated
 export interface HooksConfig {
-  global?: GlobalHooksConfig
+  global?: GlobalHooksConfig;
   authentication?: {
-    postAuthentication?: (hook: AuthenticationHookRequest) => Promise<void>
-    mutatingPostAuthentication?: (
-      hook: AuthenticationHookRequest
-    ) => Promise<AuthenticationResponse>
-    revalidate?: (
-      hook: AuthenticationHookRequest
-    ) => Promise<AuthenticationResponse>
-  }
+    postAuthentication?: (hook: AuthenticationHookRequest) => Promise<void>;
+    mutatingPostAuthentication?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse>;
+    revalidate?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse>;
+  };
   queries?: {
     Dragons?: {
-      mockResolve?: (hook: HookRequest) => Promise<DragonsResponse>
-      preResolve?: (hook: HookRequest) => Promise<void>
-      postResolve?: (
-        hook: HookRequest & HookRequestWithResponse<DragonsResponse>
-      ) => Promise<void>
-      customResolve?: (hook: HookRequest) => Promise<void | DragonsResponse>
-      mutatingPostResolve?: (
-        hook: HookRequest & HookRequestWithResponse<DragonsResponse>
-      ) => Promise<DragonsResponse>
-    }
-  }
+      mockResolve?: (hook: HookRequest) => Promise<DragonsResponse>;
+      preResolve?: (hook: HookRequest) => Promise<void>;
+      postResolve?: (hook: HookRequest & HookRequestWithResponse<DragonsResponse>) => Promise<void>;
+      customResolve?: (hook: HookRequest) => Promise<void | DragonsResponse>;
+      mutatingPostResolve?: (hook: HookRequest & HookRequestWithResponse<DragonsResponse>) => Promise<DragonsResponse>;
+    };
+  };
 }
 ```
 
@@ -85,11 +77,8 @@ Finally, have a look at an example hook implementation.
 Hooks need to be implemented in the `wundergraph.server.ts` file.
 
 ```typescript
-// generated
-const wunderGraphHooks = ConfigureWunderGraphHooks({
-  // generated
+export default configureWunderGraphServer(() => ({
   hooks: {
-    // generated
     queries: {
       // generated
       Dragons: {
@@ -102,12 +91,12 @@ const wunderGraphHooks = ConfigureWunderGraphHooks({
               ...input.find,
               name: 'Telstar',
             },
-          }
+          };
         },
       },
     },
   },
-})
+});
 ```
 
 In this case, we're hard-coding the `find` variable before the execution starts.
@@ -116,9 +105,7 @@ Other examples would be to use the user object from the Context (ctx) to manipul
 Here's another example of how to use a `mutatingPostResolve` hook to rewrite a response:
 
 ```typescript
-// generated
-const wunderGraphHooks = ConfigureWunderGraphHooks({
-  // generated
+export default configureWunderGraphServer(() => ({
   hooks: {
     queries: {
       // generated
@@ -132,17 +119,15 @@ const wunderGraphHooks = ConfigureWunderGraphHooks({
               ...response.data,
               TowerDetail: response.data?.TowerDetail?.map((detail) => ({
                 ...detail,
-                conductorSetHooks: detail.conductorSetHooks?.filter(
-                  (csh) => csh.conductorSetHookId?.id !== '456'
-                ),
+                conductorSetHooks: detail.conductorSetHooks?.filter((csh) => csh.conductorSetHookId?.id !== '456'),
               })),
             },
-          }
+          };
         },
       },
     },
   },
-})
+});
 ```
 
 What's best about all of this?
@@ -155,21 +140,24 @@ This is useful, e.g. when you want to implement side effects after a successful 
 Here's an example:
 
 ```typescript
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     authentication: {
-      postAuthentication: async ({ user, internalClient }) => {
+      postAuthentication: async ({ user, operations }) => {
         if (!user.email || !user.name) {
-          return
+          return;
         }
-        await internalClient.mutations.UpsertLastLogin({
-          email: user.email,
-          name: user.name,
-        })
+        await operations.mutate({
+          operationName: 'UpsertLastLogin',
+          input: {
+            email: user.email,
+            name: user.name,
+          },
+        });
       },
     },
   },
-}))
+}));
 ```
 
 After the authentication is successful (postAuthentication),

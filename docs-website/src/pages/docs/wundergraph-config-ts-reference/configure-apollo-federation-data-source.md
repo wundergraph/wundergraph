@@ -33,11 +33,11 @@ const federatedApi = introspect.federation({
       url: 'http://localhost:4004/graphql',
     },
   ],
-})
+});
 
 configureWunderGraphApplication({
   apis: [federatedApi],
-})
+});
 ```
 
 Simply add all the URLs of your SubGraphs to the `upstreams` array.

@@ -9,35 +9,32 @@ import {
 	GraphQLNonNull,
 } from 'graphql';
 import { AuthenticationResponse, configureWunderGraphServer } from '@wundergraph/sdk/server';
-import type { HooksConfig } from './generated/wundergraph.hooks';
-import type { InternalClient } from './generated/wundergraph.internal.client';
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
 	hooks: {
 		queries: {},
 		mutations: {},
 		authentication: {
-			postAuthentication: async (hook) => {
-				console.log(`postAuthentication: ${JSON.stringify(hook.user)}`);
-			},
+			postAuthentication: async (hook) => {},
 			mutatingPostAuthentication: async (hook) => {
-				console.log(`mutatingPostAuthentication: ${JSON.stringify(hook.user)}`);
 				if (hook.user.userId === 'notAllowedByPostAuthentication') {
 					return {
 						status: 'deny',
 						message: 'denied by mutatingPostAuthentication',
 					};
 				}
+				const customClaims = hook.user.customClaims ?? {};
+				customClaims.aTestValue = ['anArray'];
 				return {
 					status: 'ok',
 					user: {
 						...hook.user,
+						customClaims,
 						firstName: hook.user.firstName ?? 'mutatingPostAuthentication',
 					},
 				};
 			},
 			revalidate: async (hook) => {
-				console.log(`revalidate: ${JSON.stringify(hook.user)}`);
 				if (hook.user.userId === 'notAllowedByRevalidation') {
 					return {
 						status: 'deny',
@@ -52,9 +49,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 					},
 				};
 			},
-			postLogout: async (hook) => {
-				console.log(`postLogout: ${JSON.stringify(hook.user)}`);
-			},
+			postLogout: async (hook) => {},
 		},
 	},
 	graphqlServers: [

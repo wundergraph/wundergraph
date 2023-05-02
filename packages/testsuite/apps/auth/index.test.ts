@@ -314,6 +314,7 @@ describe('test @fromClaim with nested injection', () => {
 			operationName: 'claims/NestedInjectedClaim',
 		});
 
+		expect(result.error).toBeUndefined();
 		const countries = result.data!.countries_countries;
 		expect(countries.length).toBe(1);
 		expect(countries[0].capital).toBe('Lisbon');
@@ -326,6 +327,7 @@ describe('test @fromClaim with nested injection', () => {
 			operationName: 'claims/NestedInjectedClaims',
 		});
 
+		expect(result.error).toBeUndefined();
 		const countries = result.data!.countries_countries;
 		expect(countries.length).toBe(1);
 		expect(countries[0].capital).toBe('Lisbon');
@@ -339,6 +341,7 @@ describe('test @fromClaim with nested injection', () => {
 		});
 
 		// There should be no results if both claims are injected
+		expect(result.error).toBeUndefined();
 		expect(result.data!.countries_countries.length).toBe(0);
 	});
 

@@ -1,6 +1,7 @@
-import { authProviders, configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
+import { authProviders, configureWunderGraphApplication, cors, introspect } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
+import generate from './wundergraph.generate';
 
 const countries = introspect.graphql({
 	apiNamespace: 'countries',
@@ -26,6 +27,9 @@ const geojson = introspect.openApi({
 const chinook = introspect.sqlite({
 	apiNamespace: 'chinook',
 	databaseURL: 'file:./Chinook.sqlite',
+	// Ensure the data sources without fetch configuration don't make wunderctl
+	// crash when specifying a custom request timeout. See https://github.com/wundergraph/wundergraph/pull/904
+	requestTimeoutSeconds: 5,
 });
 
 const usersPost = introspect.prisma({
@@ -41,17 +45,10 @@ configureWunderGraphApplication({
 	apis: [weather, countries, chinook, usersPost, geojson],
 	server,
 	operations,
+	generate,
 	authorization: {
 		roles: ['admin', 'user'],
 	},
-	codeGenerators: [
-		{
-			templates: [
-				// use all the typescript react templates to generate a client
-				...templates.typescript.all,
-			],
-		},
-	],
 	cors: {
 		...cors.allowAll,
 		allowedOrigins:

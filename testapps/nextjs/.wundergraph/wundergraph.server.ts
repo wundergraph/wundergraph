@@ -1,7 +1,5 @@
-import { GraphQLEnumType, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
-import type { HooksConfig } from './generated/wundergraph.hooks';
-import type { InternalClient } from './generated/wundergraph.internal.client';
+import { GraphQLEnumType, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
 
 const testEnum = new GraphQLEnumType({
 	name: 'TestEnum',
@@ -15,7 +13,7 @@ const testEnum = new GraphQLEnumType({
 	},
 });
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
 	hooks: {
 		authentication: {
 			mutatingPostAuthentication: async (hook) => {
@@ -46,7 +44,31 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 				},
 				mutatingPostResolve: async (hook) => {
 					console.log('###mutatingPostResolve', hook);
-					return hook.response;
+
+					hook.response?.errors;
+
+					const fakeWeather = await hook.internalClient.queries.FakeWeather();
+
+					const { data, error } = await hook.operations.query({
+						operationName: 'Hello',
+						input: {
+							hello: '1',
+						},
+					});
+
+					const weather = await hook.operations.query({
+						operationName: 'users/get',
+						input: {
+							id: 1,
+						},
+					});
+					console.log(weather);
+					return {
+						data: {
+							gql_hello: weather.data,
+						},
+						errors: [weather.error],
+					};
 				},
 			},
 			FakeWeather: {
