@@ -18,7 +18,7 @@ export interface SoapIntrospection {
 	source: SoapIntrospectionSource;
 }
 
-export const soap = async (introspection: SoapIntrospection): Promise<GraphQLApi> => {
+export const introspectSoap = async (introspection: SoapIntrospection) => {
 	const spec = await readFile(introspection.source.filePath);
 	const configuration = { keyInput: spec, source: 'localFilesystem' };
 	return introspectWithCache(

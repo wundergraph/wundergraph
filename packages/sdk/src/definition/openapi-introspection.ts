@@ -31,7 +31,7 @@ export const readFile = async (filePath: string) => {
 	return fs.readFile(fullPath, { encoding: 'utf-8' });
 };
 
-export const openApi = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+export const introspectOpenApi = async (introspection: OpenAPIIntrospection) => {
 	const spec = await loadOpenApi(introspection.source);
 	const configuration = { keyInput: spec, source: 'localFilesystem' };
 	return introspectWithCache(
@@ -48,7 +48,7 @@ export interface OpenAPIIntrospectionV2
 	id: string;
 }
 
-export const openApiV2 = async (introspection: OpenAPIIntrospectionV2): Promise<GraphQLApi> => {
+export const introspectOpenApiV2 = async (introspection: OpenAPIIntrospectionV2) => {
 	const spec = await loadOpenApi(introspection.source);
 	const configuration = { keyInput: spec, source: 'localFilesystem' };
 	return introspectWithCache(

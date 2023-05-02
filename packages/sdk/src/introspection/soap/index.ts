@@ -4,6 +4,8 @@ import { introspectGraphql } from '../../definition/graphql-introspection';
 import { WgEnv } from '../../configure/options';
 import { validateIntrospectionId } from '../../v2openapi/omnigraph';
 import { SoapIntrospection } from '../../definition/soap-introspection';
+import { SOAPLoader } from '@omnigraph/soap';
+import { fetch } from '@whatwg-node/fetch';
 
 export const soapToGraphQLApi = async (wsdl: string, introspection: SoapIntrospection): Promise<GraphQLApi> => {
 	const apiID: string = await validateIntrospectionId(introspection.id);
@@ -12,8 +14,10 @@ export const soapToGraphQLApi = async (wsdl: string, introspection: SoapIntrospe
 		fetch,
 	});
 
-	// const graphQLSchema =
-	const schema = ''; //printSchemaWithDirectives(graphQLSchema);
+	await soapLoader.loadWSDL(wsdl);
+	const graphQLSchema = soapLoader.buildSchema();
+
+	const schema = printSchemaWithDirectives(graphQLSchema);
 
 	return introspectGraphql(
 		{
@@ -26,6 +30,7 @@ export const soapToGraphQLApi = async (wsdl: string, introspection: SoapIntrospe
 			headers: introspection.headers,
 			customIntScalars: ['BigInt'],
 		},
+		{},
 		true
 	);
 };

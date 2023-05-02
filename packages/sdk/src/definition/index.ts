@@ -19,10 +19,10 @@ import {
 } from '@wundergraph/protobuf';
 import { applyNameSpaceToGraphQLSchema } from './namespacing';
 import { InputVariable, mapInputVariable } from '../configure/variables';
-import { introspectGraphql, introspectGraphqlWithCache } from './graphql-introspection';
+import { introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
-import { openApi, OpenAPIIntrospectionV2, openApiV2 } from './openapi-introspection';
+import { introspectOpenApi, introspectOpenApiV2 } from './openapi-introspection';
 import {
 	introspectMongoDB,
 	introspectMySQL,
@@ -32,6 +32,7 @@ import {
 	introspectSQLite,
 	introspectSQLServer,
 } from './database-introspection';
+import { introspectSoap } from './soap-introspection';
 
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
@@ -470,8 +471,9 @@ export const introspect = {
 	mongodb: introspectMongoDB,
 	prisma: introspectPrisma,
 	federation: introspectFederation,
-	openApi: openApi,
-	openApiV2: openApiV2,
+	openApi: introspectOpenApi,
+	openApiV2: introspectOpenApiV2,
+	soap: introspectSoap,
 };
 
 export const buildUpstreamAuthentication = (upstream: HTTPUpstream): UpstreamAuthentication | undefined => {
