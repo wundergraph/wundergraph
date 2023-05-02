@@ -184,7 +184,7 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 | operationType        | String | The type of the operation. Can only be `"query"`, `"mutation"`, `"subscription"` |
 | \_\_wg               | Object | Reserved WunderGraph field.                                                      |
 | \_\_wg.clientRequest | Object | The original client request.                                                     |
-| \_\_wg.user          | Object | Information about the authenthicated user.                                       |
+| \_\_wg.user          | Object | (Optional) Information about the authenthicated user.                            |
 
 ### JSON response
 
@@ -286,7 +286,7 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 | operationType        | String | The type of the operation. Can only be `"query"`, `"mutation"`, `"subscription"` |
 | \_\_wg               | Object | Reserved WunderGraph field.                                                      |
 | \_\_wg.clientRequest | Object | The original client request.                                                     |
-| \_\_wg.user          | Object | Information about the authenthicated user.                                       |
+| \_\_wg.user          | Object | (Optional) Information about the authenthicated user.                            |
 
 ### JSON response
 
@@ -392,16 +392,16 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 }
 ```
 
-| Key                  | Type   | Description                                                 |
-| -------------------- | ------ | ----------------------------------------------------------- |
-| dataSourceId         | String | The ID of the datasource. Define in `wundergraph.config.ts` |
-| request              | Object | The original client request.                                |
-| request.method       | String | The request method.                                         |
-| request.requestURI   | String | The request URI.                                            |
-| request.headers      | Object | The request headers.                                        |
-| \_\_wg               | Object | Reserved WunderGraph field.                                 |
-| \_\_wg.clientRequest | Object | The original client request.                                |
-| \_\_wg.user          | Object | Information about the authenthicated user.                  |
+| Key                  | Type   | Description                                                  |
+| -------------------- | ------ | ------------------------------------------------------------ |
+| dataSourceId         | String | The ID of the datasource. Defined in `wundergraph.config.ts` |
+| request              | Object | The original client request.                                 |
+| request.method       | String | The request method.                                          |
+| request.requestURI   | String | The request URI.                                             |
+| request.headers      | Object | The request headers.                                         |
+| \_\_wg               | Object | Reserved WunderGraph field.                                  |
+| \_\_wg.clientRequest | Object | The original client request.                                 |
+| \_\_wg.user          | Object | (Optional) Information about the authenthicated user.        |
 
 ### JSON response
 
@@ -680,7 +680,7 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 | meta                 | String | Additional metadata about the upload. Set by the uploader with the `X-Metadata` header. |
 | \_\_wg               | Object | Reserved WunderGraph field.                                                             |
 | \_\_wg.clientRequest | Object | The original client request.                                                            |
-| \_\_wg.user          | Object | The full user object.                                                                   |
+| \_\_wg.user          | Object | (Optional) The full user object.                                                        |
 
 ### JSON response
 
@@ -750,7 +750,7 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 | meta                 | String | Additional metadata about the upload. Set by the uploader with the `X-Metadata` request header. |
 | \_\_wg               | Object | Reserved WunderGraph field.                                                                     |
 | \_\_wg.clientRequest | Object | The original client request.                                                                    |
-| \_\_wg.user          | Object | The full user object.                                                                           |
+| \_\_wg.user          | Object | (Optional) The full user object.                                                                |
 
 ### JSON response
 
@@ -803,7 +803,7 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 | -------------------- | ------ | ----------------------------------- |
 | \_\_wg               | Object | Reserved WunderGraph field.         |
 | \_\_wg.clientRequest | Object | The original client request.        |
-| \_\_wg.user          | Object | The full user object.               |
+| \_\_wg.user          | Object | (Optional) The full user object.    |
 | input                | Object | The input variables of the request. |
 
 ### JSON response
@@ -863,12 +863,12 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 }
 ```
 
-| Key                  | Type   | Description                         |
-| -------------------- | ------ | ----------------------------------- |
-| \_\_wg               | Object | Reserved WunderGraph field.         |
-| \_\_wg.clientRequest | Object | The original client request.        |
-| \_\_wg.user          | Object | The full user object.               |
-| input                | Object | The input variables of the request. |
+| Key                  | Type   | Description                                    |
+| -------------------- | ------ | ---------------------------------------------- |
+| \_\_wg               | Object | Reserved WunderGraph field.                    |
+| \_\_wg.clientRequest | Object | The original client request.                   |
+| \_\_wg.user          | Object | (Optional) The full user object.               |
+| input                | Object | (Optional) The input variables of the request. |
 
 ### JSON response
 
@@ -880,11 +880,11 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 }
 ```
 
-| Key   | Type   | Description                  |
-| ----- | ------ | ---------------------------- |
-| op    | String | The name of the operation.   |
-| hook  | String | The name of the hook.        |
-| input | Object | The altered input variables. |
+| Key   | Type   | Description                             |
+| ----- | ------ | --------------------------------------- |
+| op    | String | The name of the operation.              |
+| hook  | String | The name of the hook.                   |
+| input | Object | (Optional) The altered input variables. |
 
 ## mockResolve
 
@@ -929,12 +929,12 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 }
 ```
 
-| Key                  | Type   | Description                         |
-| -------------------- | ------ | ----------------------------------- |
-| \_\_wg               | Object | Reserved WunderGraph field.         |
-| \_\_wg.clientRequest | Object | The original client request.        |
-| \_\_wg.user          | Object | The full user object.               |
-| input                | Object | The input variables of the request. |
+| Key                  | Type   | Description                                    |
+| -------------------- | ------ | ---------------------------------------------- |
+| \_\_wg               | Object | Reserved WunderGraph field.                    |
+| \_\_wg.clientRequest | Object | The original client request.                   |
+| \_\_wg.user          | Object | (Optional) The full user object.               |
+| input                | Object | (Optional) The input variables of the request. |
 
 ### JSON response
 
@@ -1002,12 +1002,12 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 }
 ```
 
-| Key                  | Type   | Description                         |
-| -------------------- | ------ | ----------------------------------- |
-| \_\_wg               | Object | Reserved WunderGraph field.         |
-| \_\_wg.clientRequest | Object | The original client request.        |
-| \_\_wg.user          | Object | The full user object.               |
-| input                | Object | The input variables of the request. |
+| Key                  | Type   | Description                                    |
+| -------------------- | ------ | ---------------------------------------------- |
+| \_\_wg               | Object | Reserved WunderGraph field.                    |
+| \_\_wg.clientRequest | Object | The original client request.                   |
+| \_\_wg.user          | Object | (Optional) The full user object.               |
+| input                | Object | (Optional) The input variables of the request. |
 
 ### JSON response
 
@@ -1026,11 +1026,11 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 }
 ```
 
-| Key      | Type   | Description                                                                                     |
-| -------- | ------ | ----------------------------------------------------------------------------------------------- |
-| op       | String | The name of the operation.                                                                      |
-| hook     | String | The name of the hook.                                                                           |
-| response | Object | The response returned to the client. If `null` the resolver is skipped and the default is used. |
+| Key      | Type   | Description                                                                                                |
+| -------- | ------ | ---------------------------------------------------------------------------------------------------------- |
+| op       | String | The name of the operation.                                                                                 |
+| hook     | String | The name of the hook.                                                                                      |
+| response | Object | (Optional) The response returned to the client. If `null` the resolver is skipped and the default is used. |
 
 ## postResolve
 
@@ -1075,12 +1075,12 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 }
 ```
 
-| Key                  | Type   | Description                         |
-| -------------------- | ------ | ----------------------------------- |
-| \_\_wg               | Object | Reserved WunderGraph field.         |
-| \_\_wg.clientRequest | Object | The original client request.        |
-| \_\_wg.user          | Object | The full user object.               |
-| input                | Object | The input variables of the request. |
+| Key                  | Type   | Description                                    |
+| -------------------- | ------ | ---------------------------------------------- |
+| \_\_wg               | Object | Reserved WunderGraph field.                    |
+| \_\_wg.clientRequest | Object | The original client request.                   |
+| \_\_wg.user          | Object | (Optional) The full user object.               |
+| input                | Object | (Optional) The input variables of the request. |
 
 ### JSON response
 
@@ -1147,13 +1147,13 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 }
 ```
 
-| Key                  | Type   | Description                         |
-| -------------------- | ------ | ----------------------------------- |
-| \_\_wg               | Object | Reserved WunderGraph field.         |
-| \_\_wg.clientRequest | Object | The original client request.        |
-| \_\_wg.user          | Object | The full user object.               |
-| input                | Object | The input variables of the request. |
-| response             | Object | The resolved data.                  |
+| Key                  | Type   | Description                                    |
+| -------------------- | ------ | ---------------------------------------------- |
+| \_\_wg               | Object | Reserved WunderGraph field.                    |
+| \_\_wg.clientRequest | Object | The original client request.                   |
+| \_\_wg.user          | Object | (Optional) The full user object.               |
+| input                | Object | (Optional) The input variables of the request. |
+| response             | Object | The resolved data.                             |
 
 ### JSON response
 
