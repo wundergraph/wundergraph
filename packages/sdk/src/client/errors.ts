@@ -177,9 +177,6 @@ export const getHttpResponseError = (error?: ResponseError | GraphQLError) => {
  */
 export class ResponseError<Code extends ClientOperationErrorCodes | string = string> extends OperationError<Code> {
 	public readonly errors?: GraphQLError[];
-	/**
-	 * http contains HTTP specific fields used in errors returned by OpenAPI upstreams
-	 */
 	constructor(opts: { code?: Code; message?: string; cause?: Error; statusCode: number; errors?: GraphQLError[] }) {
 		super({
 			message: opts.message ?? 'Response is not OK',
