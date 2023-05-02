@@ -6,7 +6,7 @@ export interface GraphQLErrorLocation {
 	column: number;
 }
 
-export interface GraphQLErrorExtensionHTTP {
+interface GraphQLErrorExtensionHTTP {
 	/**
 	 * status contains the response status code
 	 */
@@ -22,7 +22,7 @@ export interface GraphQLErrorExtensionHTTP {
 	headers?: Record<string, string>;
 }
 
-export interface GraphQLErrorExtensionHTTPRequest {
+interface GraphQLErrorExtensionRequest {
 	/**
 	 * OpenAPI request URL sent by the gateway
 	 */
@@ -37,7 +37,7 @@ export interface GraphQLErrorExtensionHTTPRequest {
  * GraphQLErrorExtensions includes extended information added to
  * GraphQL errors.
  */
-export interface GraphQLErrorExtensions {
+interface GraphQLErrorExtensions {
 	/**
 	 * http information, only included in OpenAPI responses
 	 */
@@ -45,11 +45,18 @@ export interface GraphQLErrorExtensions {
 	/**
 	 * request sent by the gateway to the OpenAPI upstream
 	 */
-	request?: GraphQLErrorExtensionHTTPRequest;
+	request?: GraphQLErrorExtensionRequest;
 	/**
 	 * response text sent by the OpenAPI upstream
 	 */
 	responseText?: string;
+}
+
+interface GraphQLErrorExtensions {
+	/**
+	 * extensions contains non-standard extensions added to GraphQL errors
+	 */
+	extensions?: GraphQLErrorExtensions;
 }
 
 export interface GraphQLError {
@@ -57,10 +64,6 @@ export interface GraphQLError {
 	code?: string;
 	location?: ReadonlyArray<GraphQLErrorLocation>;
 	path?: ReadonlyArray<string | number>;
-	/**
-	 * extensions contains non-standard extensions added to GraphQL errors
-	 */
-	extensions?: GraphQLErrorExtensions;
 }
 
 export type OperationErrorBaseFields = {
@@ -125,9 +128,9 @@ export class InternalError extends OperationError<'InternalError'> {
 }
 
 /**
- * ResponseErrorHTTP contains additional error information from OpenAPI requests
+ * HttpResponseError contains additional error information from OpenAPI requests
  */
-export interface ResponseErrorHTTP {
+export interface HttpResponseError {
 	/**
 	 * statusCode contains the response status code sent by the OpenAPI upstream
 	 */
@@ -143,6 +146,30 @@ export interface ResponseErrorHTTP {
 	text?: string;
 }
 
+const getHttpResponseErrorFromGraphQLError = (error?: GraphQLError): HttpResponseError | undefined => {
+	const extensions = (error as GraphQLErrorExtensions)?.extensions;
+	if (extensions) {
+		return {
+			statusCode: extensions.http?.status,
+			headers: extensions.http?.headers,
+			text: extensions.responseText,
+		};
+	}
+};
+
+export const getHttpResponseError = (error?: ResponseError | GraphQLError) => {
+	if (error instanceof ResponseError) {
+		for (const graphQLError of error.errors ?? []) {
+			const httpError = getHttpResponseErrorFromGraphQLError(graphQLError);
+			if (httpError) {
+				return httpError;
+			}
+		}
+		return undefined;
+	}
+	return getHttpResponseErrorFromGraphQLError(error);
+};
+
 /**
  * The base error class for all client operation errors.
  * This error is thrown when the client receives a response that is not ok.
@@ -153,7 +180,6 @@ export class ResponseError<Code extends ClientOperationErrorCodes | string = str
 	/**
 	 * http contains HTTP specific fields used in errors returned by OpenAPI upstreams
 	 */
-	public readonly http?: ResponseErrorHTTP;
 	constructor(opts: { code?: Code; message?: string; cause?: Error; statusCode: number; errors?: GraphQLError[] }) {
 		super({
 			message: opts.message ?? 'Response is not OK',
@@ -162,14 +188,6 @@ export class ResponseError<Code extends ClientOperationErrorCodes | string = str
 			statusCode: opts.statusCode,
 		});
 		this.errors = opts.errors;
-		const extensions = opts.errors?.[0].extensions;
-		if (extensions) {
-			this.http = {
-				statusCode: extensions?.http?.status,
-				headers: extensions?.http?.headers,
-				text: extensions?.responseText,
-			};
-		}
 	}
 }
 

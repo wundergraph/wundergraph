@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 import { createTestServer } from './.wundergraph/generated/testing';
 import { createOpenAPITestServer } from './test-server';
-import { ResponseError } from '@wundergraph/sdk/client';
+import { ResponseError, getHttpResponseError } from '@wundergraph/sdk/client';
 
 const wg = createTestServer({
 	dir: __dirname,
@@ -26,8 +26,10 @@ const expectHttpStatusCodeInQuery = async (statusCode: number) => {
 	expect(result.error).toBeDefined();
 	expect(result.error).toBeInstanceOf(ResponseError);
 	const error = result.error! as ResponseError;
-	expect(error.http?.statusCode).toBe(statusCode);
-	expect(error.http?.text).toBe(`you wanted a ${statusCode}`);
+	const httpError = getHttpResponseError(error);
+	expect(httpError).toBeDefined();
+	expect(httpError?.statusCode).toBe(statusCode);
+	expect(httpError?.text).toBe(`you wanted a ${statusCode}`);
 };
 
 const expectHttpStatusCodeInMutation = async (statusCode: number) => {
@@ -41,8 +43,10 @@ const expectHttpStatusCodeInMutation = async (statusCode: number) => {
 	expect(result.error).toBeDefined();
 	expect(result.error).toBeInstanceOf(ResponseError);
 	const error = result.error! as ResponseError;
-	expect(error.http?.statusCode).toBe(statusCode);
-	expect(error.http?.text).toBe(`you wanted a ${statusCode}`);
+	const httpError = getHttpResponseError(error);
+	expect(httpError).toBeDefined();
+	expect(httpError?.statusCode).toBe(statusCode);
+	expect(httpError?.text).toBe(`you wanted a ${statusCode}`);
 };
 
 describe('Test correct responses', () => {
@@ -94,9 +98,11 @@ describe('Test error responses', () => {
 		expect(result.error).toBeDefined();
 		expect(result.error).toBeInstanceOf(ResponseError);
 		const error = result.error! as ResponseError;
-		expect(error.http?.statusCode).toBe(404);
-		expect(error.http?.text).toBe(`noteID ${id} not found`);
-		expect(error.http?.headers?.['x-note-id']).toBe(id.toString());
+		const httpError = getHttpResponseError(error);
+		expect(httpError).toBeDefined();
+		expect(httpError?.statusCode).toBe(404);
+		expect(httpError?.text).toBe(`noteID ${id} not found`);
+		expect(httpError?.headers?.['x-note-id']).toBe(id.toString());
 	});
 
 	test('handle declared 400', async () => await expectHttpStatusCodeInQuery(400));

@@ -32,4 +32,10 @@ export type { UploadValidationOptions } from './client';
 export { Client } from './client';
 
 export type { GraphQLError, GraphQLErrorLocation, ClientOperationErrors } from './errors';
-export { OperationError, ResponseError, AuthorizationError, InputValidationError } from './errors';
+export {
+	OperationError,
+	ResponseError,
+	AuthorizationError,
+	InputValidationError,
+	getHttpResponseError,
+} from './errors';
