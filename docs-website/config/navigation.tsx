@@ -425,6 +425,10 @@ const navigation = [
 						title: 'Using HTTP proxies',
 						href: '/docs/guides/using-http-proxies',
 					},
+					{
+						title: 'Publish generated client to NPM',
+						href: '/docs/guides/publish-generated-client-to-npm',
+					},
 				],
 			},
 		],
