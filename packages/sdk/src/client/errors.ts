@@ -52,7 +52,7 @@ interface GraphQLErrorExtensions {
 	responseText?: string;
 }
 
-interface GraphQLErrorExtensions {
+interface GraphQLErrorWithExtensions {
 	/**
 	 * extensions contains non-standard extensions added to GraphQL errors
 	 */
@@ -147,7 +147,7 @@ export interface HttpResponseError {
 }
 
 const getHttpResponseErrorFromGraphQLError = (error?: GraphQLError): HttpResponseError | undefined => {
-	const extensions = (error as GraphQLErrorExtensions)?.extensions;
+	const extensions = (error as GraphQLErrorWithExtensions)?.extensions;
 	if (extensions) {
 		return {
 			statusCode: extensions.http?.status,
