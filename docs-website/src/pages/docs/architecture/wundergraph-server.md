@@ -455,8 +455,8 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 | \_\_wg                   | Object | Reserved WunderGraph field.                |
 | \_\_wg.clientRequest     | Object | The original client request.               |
 | \_\_wg.user              | Object | Information about the authenthicated user. |
-| \_\_wg.user.access_token | Object | The access token.                          |
-| \_\_wg.user.id_token     | Object | The id token.                              |
+| \_\_wg.user.access_token | String | The access token.                          |
+| \_\_wg.user.id_token     | String | The id token.                              |
 
 ### JSON response
 
@@ -501,8 +501,8 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 | \_\_wg                   | Object | Reserved WunderGraph field.                |
 | \_\_wg.clientRequest     | Object | The original client request.               |
 | \_\_wg.user              | Object | Information about the authenthicated user. |
-| \_\_wg.user.access_token | Object | The access token.                          |
-| \_\_wg.user.id_token     | Object | The id token.                              |
+| \_\_wg.user.access_token | String | The access token.                          |
+| \_\_wg.user.id_token     | String | The id token.                              |
 
 ### JSON response
 
@@ -522,7 +522,7 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 | --------------- | ------ | ----------------------------------------------------------------- |
 | hook            | String | The name of the hook.                                             |
 | response        | Object | The hook response.                                                |
-| response.status | Object | The result of the authentication. Can only be `"ok"` or `"deny"`. |
+| response.status | String | The result of the authentication. Can only be `"ok"` or `"deny"`. |
 | response.user   | Object | The full user object.                                             |
 
 ## postAuthentication
@@ -563,8 +563,8 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 | \_\_wg                   | Object | Reserved WunderGraph field.                |
 | \_\_wg.clientRequest     | Object | The original client request.               |
 | \_\_wg.user              | Object | Information about the authenthicated user. |
-| \_\_wg.user.access_token | Object | The access token.                          |
-| \_\_wg.user.id_token     | Object | The id token.                              |
+| \_\_wg.user.access_token | String | The access token.                          |
+| \_\_wg.user.id_token     | String | The id token.                              |
 
 ### JSON response
 
@@ -609,8 +609,8 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 | \_\_wg                   | Object | Reserved WunderGraph field.                |
 | \_\_wg.clientRequest     | Object | The original client request.               |
 | \_\_wg.user              | Object | Information about the authenthicated user. |
-| \_\_wg.user.access_token | Object | The access token.                          |
-| \_\_wg.user.id_token     | Object | The id token.                              |
+| \_\_wg.user.access_token | String | The access token.                          |
+| \_\_wg.user.id_token     | String | The id token.                              |
 
 ### JSON response
 
@@ -630,7 +630,7 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 | --------------- | ------ | ----------------------------------------------------------------- |
 | hook            | String | The name of the hook.                                             |
 | response        | Object | The hook response.                                                |
-| response.status | Object | The result of the authentication. Can only be `"ok"` or `"deny"`. |
+| response.status | String | The result of the authentication. Can only be `"ok"` or `"deny"`. |
 | response.user   | Object | The full user object.                                             |
 
 ## preUpload
@@ -799,12 +799,12 @@ X-Request-Id: "83850325-9638-e5af-f27d-234624aa1824"
 }
 ```
 
-| Key                  | Type   | Description                         |
-| -------------------- | ------ | ----------------------------------- |
-| \_\_wg               | Object | Reserved WunderGraph field.         |
-| \_\_wg.clientRequest | Object | The original client request.        |
-| \_\_wg.user          | Object | (Optional) The full user object.    |
-| input                | Object | The input variables of the request. |
+| Key                  | Type   | Description                                    |
+| -------------------- | ------ | ---------------------------------------------- |
+| \_\_wg               | Object | Reserved WunderGraph field.                    |
+| \_\_wg.clientRequest | Object | The original client request.                   |
+| \_\_wg.user          | Object | (Optional) The full user object.               |
+| input                | Object | (Optional) The input variables of the request. |
 
 ### JSON response
 
