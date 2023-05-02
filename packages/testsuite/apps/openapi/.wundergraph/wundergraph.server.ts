@@ -6,9 +6,8 @@ export default configureWunderGraphServer(() => ({
 		queries: {
 			NoteByID: {
 				postResolve: async ({ response }) => {
-					const error = response?.errors?.[0];
-					if (error) {
-						const httpError = getHttpResponseError(error);
+					if (response.errors) {
+						const httpError = getHttpResponseError(response.errors);
 						if (httpError) {
 							console.log('HTTP status code', httpError.statusCode);
 							console.log('HTTP response headers', httpError.headers);

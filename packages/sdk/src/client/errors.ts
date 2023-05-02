@@ -157,9 +157,14 @@ const getHttpResponseErrorFromGraphQLError = (error: GraphQLError): HttpResponse
 	}
 };
 
-export const getHttpResponseError = (error: ResponseError | GraphQLError) => {
+export const getHttpResponseError = (
+	error: ResponseError | GraphQLError | GraphQLError[]
+): HttpResponseError | undefined => {
 	if (error instanceof ResponseError) {
-		for (const graphQLError of error.errors ?? []) {
+		return getHttpResponseError(error.errors ?? []);
+	}
+	if (Array.isArray(error)) {
+		for (const graphQLError of error) {
 			const httpError = getHttpResponseErrorFromGraphQLError(graphQLError);
 			if (httpError) {
 				return httpError;
