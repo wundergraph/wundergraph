@@ -146,7 +146,7 @@ export interface HttpResponseError {
 	text?: string;
 }
 
-const getHttpResponseErrorFromGraphQLError = (error?: GraphQLError): HttpResponseError | undefined => {
+const getHttpResponseErrorFromGraphQLError = (error: GraphQLError): HttpResponseError | undefined => {
 	const extensions = (error as GraphQLErrorWithExtensions)?.extensions;
 	if (extensions) {
 		return {
@@ -157,7 +157,7 @@ const getHttpResponseErrorFromGraphQLError = (error?: GraphQLError): HttpRespons
 	}
 };
 
-export const getHttpResponseError = (error?: ResponseError | GraphQLError) => {
+export const getHttpResponseError = (error: ResponseError | GraphQLError) => {
 	if (error instanceof ResponseError) {
 		for (const graphQLError of error.errors ?? []) {
 			const httpError = getHttpResponseErrorFromGraphQLError(graphQLError);
