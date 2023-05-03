@@ -26,8 +26,9 @@ import type {
 import type { LoadOperationsOutput } from '../graphql/operations';
 import FastifyFunctionsPlugin from './plugins/functions';
 import { WgEnv } from '../configure/options';
-import { OpenApiServerConfig } from './plugins/omnigraph';
 import { OperationsClient } from './operations-client';
+import { OpenApiServerConfig } from './plugins/omnigraphOAS';
+import { SoapServerConfig } from './plugins/omnigraphSOAP';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -255,44 +256,78 @@ export const createServer = async ({
 			fastify.log.debug('Hooks plugin registered');
 		}
 
+		// TODO: refactor into a separate mount class
+		// e.g. OmnigraphMount
+		// mount := new OmnigraphMount(config)
+		// mount.register(fastify)
+
 		let openApiServers: Set<OpenApiServerConfig> = new Set();
+		let soapServers: Set<SoapServerConfig> = new Set();
+
+		const serverUrlPlaceholder = WgEnv.ServerUrl + '-';
 
 		config.api?.engineConfiguration?.datasourceConfigurations?.forEach((ds) => {
-			if (
+			const isOmnigraph =
 				ds.kind == DataSourceKind.GRAPHQL &&
 				ds.customGraphql?.fetch?.url?.kind === ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE &&
-				ds.customGraphql?.fetch?.url?.staticVariableContent === WgEnv.ServerUrl
-			) {
-				const schema = ds.customGraphql.upstreamSchema;
-				let serverName, mountPath, upstreamURL;
+				ds.customGraphql?.fetch?.url?.staticVariableContent.startsWith(serverUrlPlaceholder);
 
-				if (ds.customGraphql?.fetch?.baseUrl) {
-					upstreamURL = resolveConfigurationVariable(ds.customGraphql?.fetch?.baseUrl);
-				}
+			if (!isOmnigraph) {
+				return;
+			}
 
-				if (ds.customGraphql?.fetch?.path?.staticVariableContent) {
-					mountPath = ds.customGraphql?.fetch?.path?.staticVariableContent;
-					serverName = mountPath.split('/').pop()!;
-				}
+			const schema = ds.customGraphql?.upstreamSchema;
+			let serverName, mountPath;
 
-				openApiServers.add(<OpenApiServerConfig>{
-					serverName,
-					mountPath,
-					upstreamURL,
-					schema,
-				});
+			if (ds.customGraphql?.fetch?.path?.staticVariableContent) {
+				mountPath = ds.customGraphql?.fetch?.path?.staticVariableContent;
+				serverName = mountPath.split('/').pop()!;
+			}
+
+			switch (ds.customGraphql?.fetch?.url?.staticVariableContent.slice(serverUrlPlaceholder.length)) {
+				case 'openapi':
+					let upstreamURL;
+					if (ds.customGraphql?.fetch?.baseUrl) {
+						upstreamURL = resolveConfigurationVariable(ds.customGraphql?.fetch?.baseUrl);
+					}
+
+					openApiServers.add(<OpenApiServerConfig>{
+						serverName,
+						mountPath,
+						upstreamURL,
+						schema,
+					});
+					break;
+				case 'soap':
+					soapServers.add(<SoapServerConfig>{
+						serverName,
+						mountPath,
+						schema,
+					});
+					break;
 			}
 		});
 
 		const hasOpenApiServers = openApiServers.size > 0;
 
 		if (hasOpenApiServers) {
-			const omnigraphPlugin = await require('./plugins/omnigraph');
+			const omnigraphPlugin = await require('./plugins/omnigraphOAS');
 
 			for (const server of openApiServers) {
 				await fastify.register(omnigraphPlugin, server);
 				fastify.log.debug('OpenAPI plugin registered');
 				fastify.log.info(`OpenAPI GraphQL server '${server.serverName}' listening at ${server.mountPath}`);
+			}
+		}
+
+		const hasSoapServers = soapServers.size > 0;
+		if (hasSoapServers) {
+			const soapPlugin = await require('./plugins/omnigraphSOAP');
+
+			for (const server of soapServers) {
+				await fastify.register(soapPlugin, server);
+				fastify.log.debug('SOAP plugin registered');
+				fastify.log.info(`SOAP GraphQL server '${server.serverName}' listening at ${server.mountPath}`);
 			}
 		}
 
