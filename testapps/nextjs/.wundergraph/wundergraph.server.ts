@@ -45,29 +45,10 @@ export default configureWunderGraphServer(() => ({
 				mutatingPostResolve: async (hook) => {
 					console.log('###mutatingPostResolve', hook);
 
-					hook.response?.errors;
-
-					const fakeWeather = await hook.internalClient.queries.FakeWeather();
-
-					const { data, error } = await hook.operations.query({
-						operationName: 'Hello',
-						input: {
-							hello: '1',
-						},
-					});
-
-					const weather = await hook.operations.query({
-						operationName: 'users/get',
-						input: {
-							id: 1,
-						},
-					});
-					console.log(weather);
 					return {
 						data: {
-							gql_hello: weather.data,
+							gql_hello: hook.input.hello,
 						},
-						errors: [weather.error],
 					};
 				},
 			},
