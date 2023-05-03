@@ -1,0 +1,8 @@
+{
+	spacex_capsule(id: "C205") {
+		id
+		type
+		status
+		myCustomField
+	}
+}

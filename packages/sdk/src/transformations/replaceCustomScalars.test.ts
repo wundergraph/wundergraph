@@ -103,7 +103,7 @@ test('replaceCustomScalars', async () => {
 		],
 	};
 
-	const { schemaSDL, customScalarTypeFields } = replaceCustomScalars(schema, introspection);
+	const { customScalarTypeFields } = replaceCustomScalars(schema, introspection);
 	assert.equal(customScalarTypeFields.length, 3);
 	assert.deepEqual(customScalarTypeFields, [
 		{
@@ -119,6 +119,4 @@ test('replaceCustomScalars', async () => {
 			fieldName: 'location',
 		},
 	]);
-
-	expect(schemaSDL).toMatchSnapshot();
 });

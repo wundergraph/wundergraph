@@ -429,6 +429,10 @@ const navigation = [
 						title: 'Publish generated client to NPM',
 						href: '/docs/guides/publish-generated-client-to-npm',
 					},
+					{
+						title: 'Extend third party GraphQL APIs',
+						href: '/docs/guides/extend-third-party-graphql-apis',
+					},
 				],
 			},
 		],

@@ -83,6 +83,21 @@ export default configureWunderGraphServer(() => ({
 					hook.log.info('customResolver hook for Albums');
 				},
 			},
+			Schema_extensionsExtensionWithHook: {
+				mutatingPostResolve: async ({ response }) => {
+					console.log('mutatingPostResolve hook for Schema_extensionsExtensionWithHook');
+					return {
+						...response,
+						data: {
+							...response.data,
+							spacex_capsule: {
+								...response.data?.spacex_capsule,
+								myCustomField: 'resolved by mutatingPostResolve hook',
+							},
+						},
+					};
+				},
+			},
 		},
 		mutations: {
 			SDL: {
