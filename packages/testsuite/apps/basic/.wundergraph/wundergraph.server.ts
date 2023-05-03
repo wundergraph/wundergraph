@@ -4,7 +4,22 @@ import { GraphQLExecutionContext } from './generated/wundergraph.server';
 
 export default configureWunderGraphServer(() => ({
 	hooks: {
-		queries: {},
+		queries: {
+			Schema_extensionsExtensionWithHook: {
+				mutatingPostResolve: async ({ response }) => {
+					return {
+						...response,
+						data: {
+							...response.data,
+							spacex_capsule: {
+								...response.data?.spacex_capsule,
+								myCustomField: 'resolved by mutatingPostResolve hook',
+							},
+						},
+					};
+				},
+			},
+		},
 		mutations: {},
 	},
 	graphqlServers: [
