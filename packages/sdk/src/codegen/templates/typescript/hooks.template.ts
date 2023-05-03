@@ -3,12 +3,7 @@ export const template = `
 import { {{ modelImports }} } from "./models"
 import type { 
 	BaseRequestContext,
-	WunderGraphRequest,
-	WunderGraphResponse,
-	AuthenticationResponse,
-	AuthenticationHookRequest,
 	HooksConfiguration,
-	WsTransportOnConnectionInitResponse,
 	PreUploadHookRequest,
 	PreUploadHookResponse,
 	PostUploadHookRequest,
