@@ -73,19 +73,19 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 }
 
 export function configureWunderGraphServer<
-	GeneratedHooksConfig extends HooksConfiguration = HooksConfiguration,
-	GeneratedInternalClient extends InternalClient = InternalClient,
-	GeneratedWebhooksConfig extends WebhooksConfig = WebhooksConfig
+	GeneratedHooksConfig = HooksConfiguration,
+	GeneratedInternalClient = InternalClient,
+	GeneratedWebhooksConfig = WebhooksConfig
 >(configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>) {
 	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig>(configWrapper());
 }
 
 const _configureWunderGraphServer = <
-	GeneratedHooksConfig extends HooksConfiguration,
-	GeneratedWebhooksConfig extends WebhooksConfig
+	GeneratedHooksConfig = HooksConfiguration,
+	GeneratedWebhooksConfig = WebhooksConfig
 >(
 	config: WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>
-): WunderGraphHooksAndServerConfig => {
+): WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig> => {
 	const serverConfig = config as WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>;
 
 	/**

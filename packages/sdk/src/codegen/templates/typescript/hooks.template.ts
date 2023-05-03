@@ -20,15 +20,6 @@ import type { User } from "./wundergraph.server"
 import { InternalOperationsClient } from "./wundergraph.internal.operations.client";
 
 export type DATA_SOURCES = {{{dataSourcesUnion}}};
-        
-export type JSONValue =
-    | string
-    | number
-    | boolean
-    | JSONObject
-    | Array<JSONValue>;
-
-export type JSONObject = { [key: string]: JSONValue };
 										
 export interface HookContext extends BaseRequestContext<User, InternalClient, InternalOperationsClient> {}
 

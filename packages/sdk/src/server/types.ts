@@ -13,6 +13,41 @@ declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
 }
 
+export interface FastifyRequestBody {
+	__wg: { user?: WunderGraphUser; clientRequest?: ClientRequest };
+}
+
+export interface ServerOptions {
+	serverUrl?: InputVariable;
+	listen?: ListenOptions;
+	logger?: ServerLogger;
+}
+
+export interface MandatoryServerOptions {
+	serverUrl: InputVariable;
+	listen: {
+		host: InputVariable;
+		port: InputVariable;
+	};
+	logger: {
+		level: InputVariable<LoggerLevel>;
+	};
+}
+
+export interface ResolvedServerOptions {
+	serverUrl: ConfigurationVariable;
+	listen: ResolvedListenOptions;
+	logger: ResolvedServerLogger;
+}
+
+export interface ServerLogger {
+	level?: InputVariable<LoggerLevel>;
+}
+
+export interface ResolvedServerLogger {
+	level: ConfigurationVariable;
+}
+
 export type AuthenticationHookRequest<Context extends BaseRequestContext = BaseRequestContext> = Context &
 	(Context extends BaseRequestContext<infer User> ? AuthenticationRequestContext<User> : never);
 
@@ -165,7 +200,7 @@ export interface WunderGraphUser<Role extends string = any, CustomClaims extends
 
 export interface ServerRunOptions {
 	wundergraphDir: string;
-	serverConfig: WunderGraphHooksAndServerConfig;
+	serverConfig: WunderGraphHooksAndServerConfig<any, any>;
 	config: WunderGraphConfiguration;
 	gracefulShutdown: boolean;
 	clientFactory: InternalClientFactory;
@@ -184,17 +219,13 @@ export interface WunderGraphServerConfig<
 
 // internal representation of the fully resolved server config
 export interface WunderGraphHooksAndServerConfig<
-	GeneratedHooksConfig extends HooksConfiguration = HooksConfiguration,
-	GeneratedWebhooksConfig extends WebhooksConfig = WebhooksConfig
+	GeneratedHooksConfig = HooksConfiguration,
+	GeneratedWebhooksConfig = WebhooksConfig
 > extends WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig> {
 	webhooks?: GeneratedWebhooksConfig;
 	hooks?: GeneratedHooksConfig;
 	graphqlServers?: GraphQLServerConfig[];
 	options?: ServerOptions;
-}
-
-export interface FastifyRequestBody {
-	__wg: { user?: WunderGraphUser; clientRequest?: ClientRequest };
 }
 
 export interface OnConnectionInitHookRequestBody extends FastifyRequestBody {
@@ -237,20 +268,13 @@ export enum HooksConfigurationOperationType {
 	Uploads = 'uploads',
 }
 
-export interface OperationHookFunction {
-	(...args: any[]): Promise<any>;
-}
-
 export type SKIP = 'skip';
 
 // use CANCEL to skip the hook and cancel the request / response chain
 // this is semantically equal to throwing an error (500)
 export type CANCEL = 'cancel';
 
-export type HttpTransportHookRequest<
-	Operations extends string = string,
-	Context extends BaseRequestContext = BaseRequestContext
-> = {
+export type HttpTransportHookRequest<Operations = string, Context extends BaseRequestContext = BaseRequestContext> = {
 	request: WunderGraphRequest;
 	operation: {
 		name: Operations;
@@ -259,7 +283,7 @@ export type HttpTransportHookRequest<
 } & Context;
 
 export type HttpTransportHookRequestWithResponse<
-	Operations extends string = string,
+	Operations = string,
 	Context extends BaseRequestContext = BaseRequestContext
 > = {
 	response: WunderGraphResponse;
@@ -276,15 +300,6 @@ export type WsTransportHookRequest<
 	dataSourceId: DataSources;
 	request: WunderGraphRequest;
 } & Context;
-
-export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
-	mockResolve?: AsyncFn;
-	preResolve?: AsyncFn;
-	postResolve?: AsyncFn;
-	mutatingPreResolve?: AsyncFn;
-	mutatingPostResolve?: AsyncFn;
-	customResolve?: AsyncFn;
-}
 
 // Any is used here because the exact type of the hooks is not known at compile time
 // We could work with an index signature + base type, but that would allow to add arbitrary data to the hooks
@@ -364,7 +379,7 @@ export interface SubscriptionHooks<Context extends BaseRequestContext = BaseRequ
 }
 
 export interface GlobalHooksConfig<
-	Operations extends string = string,
+	Operations = string,
 	DataSources extends string = string,
 	Context extends BaseRequestContext = BaseRequestContext
 > {
@@ -447,35 +462,4 @@ export interface HooksConfiguration<
 	[HooksConfigurationOperationType.Mutations]?: Mutations;
 	[HooksConfigurationOperationType.Subscriptions]?: Subscriptions;
 	[HooksConfigurationOperationType.Uploads]?: Uploads;
-}
-
-export interface ServerOptions {
-	serverUrl?: InputVariable;
-	listen?: ListenOptions;
-	logger?: ServerLogger;
-}
-
-export interface MandatoryServerOptions {
-	serverUrl: InputVariable;
-	listen: {
-		host: InputVariable;
-		port: InputVariable;
-	};
-	logger: {
-		level: InputVariable<LoggerLevel>;
-	};
-}
-
-export interface ResolvedServerOptions {
-	serverUrl: ConfigurationVariable;
-	listen: ResolvedListenOptions;
-	logger: ResolvedServerLogger;
-}
-
-export interface ServerLogger {
-	level?: InputVariable<LoggerLevel>;
-}
-
-export interface ResolvedServerLogger {
-	level: ConfigurationVariable;
 }
