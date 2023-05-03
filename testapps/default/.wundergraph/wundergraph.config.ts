@@ -54,6 +54,14 @@ const federatedApi = introspect.federation({
 const spacex = introspect.graphql({
 	apiNamespace: 'spacex',
 	url: 'https://spacex-api.fly.dev/graphql/',
+	schemaExtension: `
+	extend type Capsule {
+		myCustomField: String
+	}
+	`,
+	introspection: {
+		disableCache: true,
+	},
 });
 
 const countries = introspect.graphql({
