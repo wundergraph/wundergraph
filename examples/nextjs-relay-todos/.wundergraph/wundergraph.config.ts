@@ -5,6 +5,7 @@ import operations from './wundergraph.operations';
 const todos = introspect.graphql({
 	apiNamespace: 'todos',
 	url: 'http://localhost:3000/api/graphql',
+	subscriptionsUseSSE: true,
 	loadSchemaFromString: /* GraphQL */ `
 		type Todo {
 			id: Int!
