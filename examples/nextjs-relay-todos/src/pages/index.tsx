@@ -1,8 +1,9 @@
 import { pagesAllTodosQuery } from '@/__relay__generated__/pagesAllTodosQuery.graphql';
 import { pagesOnTodoChangesSubscription } from '@/__relay__generated__/pagesOnTodoChangesSubscription.graphql';
 import { TodoList } from '@/components/TodoList';
-import { Suspense, useEffect } from 'react';
-import { PreloadedQuery, graphql, usePreloadedQuery, useQueryLoader, useSubscription } from 'react-relay';
+import { getEnvironment } from '@/lib/wundergraph';
+import { graphql, usePreloadedQuery, useSubscription } from 'react-relay';
+import { loadQuery } from 'react-relay/hooks';
 
 const allTodosQuery = graphql`
 	query pagesAllTodosQuery {
@@ -22,20 +23,14 @@ const todoChangesSubscription = graphql`
 	}
 `;
 
-const App = ({ queryReference }: { queryReference: PreloadedQuery<pagesAllTodosQuery, Record<string, unknown>> }) => {
+const loadTodosReference = loadQuery<pagesAllTodosQuery>(getEnvironment(), allTodosQuery, {});
+
+const App = () => {
 	useSubscription<pagesOnTodoChangesSubscription>({ subscription: todoChangesSubscription, variables: {} });
 
-	const data = usePreloadedQuery(allTodosQuery, queryReference);
+	const data = usePreloadedQuery(allTodosQuery, loadTodosReference);
 
 	return <TodoList todos={data} />;
 };
 
-export default function Home() {
-	const [queryReference, loadQuery] = useQueryLoader<pagesAllTodosQuery>(allTodosQuery);
-
-	useEffect(() => {
-		loadQuery({});
-	}, []);
-
-	return <Suspense fallback="loading...">{queryReference && <App queryReference={queryReference} />}</Suspense>;
-}
+export default App;

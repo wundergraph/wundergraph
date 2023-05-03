@@ -3,6 +3,7 @@ import { createClient } from '../../../.wundergraph/generated/client';
 
 const client = createClient();
 
-export const { WunderGraphRelayProvider, useLiveQuery, fetchWunderGraphSSRQuery } = createWunderGraphRelayApp({
-	client,
-});
+export const { WunderGraphRelayProvider, useLiveQuery, fetchWunderGraphSSRQuery, getEnvironment } =
+	createWunderGraphRelayApp({
+		client,
+	});
