@@ -296,53 +296,71 @@ type HookResponse = {
 	errors?: GraphQLError[];
 };
 
+type WithInput<Input = unknown, Context extends BaseRequestContext = BaseRequestContext> = Context &
+	(Input extends undefined ? {} : { input: Input });
+
 export type QueryHook<
-	Input = any,
-	Response extends HookResponse = any,
+	Input = unknown,
+	Response extends HookResponse = HookResponse,
 	Context extends BaseRequestContext = BaseRequestContext
 > = {
-	mockResolve?: (hook: Context & { input: Input }) => Promise<Response>;
-	preResolve?: (hook: Context & { input: Input }) => Promise<void>;
-	mutatingPreResolve?: (hook: Context & { input: Input }) => Promise<Input>;
-	postResolve?: (hook: Context & { input: Input } & { response: Response }) => Promise<void>;
-	customResolve?: (hook: Context & { input: Input }) => Promise<void | unknown | null>;
-	mutatingPostResolve?: (hook: Context & { input: Input } & { response: Response }) => Promise<Response>;
+	mockResolve?: (hook: WithInput<Input, Context>) => Promise<Response>;
+	preResolve?: (hook: WithInput<Input, Context>) => Promise<void>;
+	mutatingPreResolve?: Input extends undefined ? never : (hook: Context & { input: Input }) => Promise<Input>;
+	postResolve?: (hook: WithInput<Input, Context> & { response: Response }) => Promise<void>;
+	customResolve?: (hook: WithInput<Input, Context>) => Promise<void | unknown | null>;
+	mutatingPostResolve?: (hook: WithInput<Input, Context> & { response: Response }) => Promise<Response>;
 };
+
+export type QueryHookWithoutInput<
+	Response extends HookResponse = HookResponse,
+	Context extends BaseRequestContext = BaseRequestContext
+> = Omit<QueryHook<undefined, Response, Context>, 'mutatingPreResolve'>;
 
 export type MutationHook<
 	Input = unknown,
 	Response extends HookResponse = HookResponse,
 	Context extends BaseRequestContext = BaseRequestContext
 > = {
-	mockResolve?: (hook: Context & { input: Input }) => Promise<Response>;
-	preResolve?: (hook: Context & { input: Input }) => Promise<void>;
-	mutatingPreResolve?: (hook: Context & { input: Input }) => Promise<Input>;
-	postResolve?: (hook: Context & { input: Input } & { response: Response }) => Promise<void>;
-	customResolve?: (hook: Context & { input: Input }) => Promise<void | Response | null>;
-	mutatingPostResolve?: (hook: Context & { input: Input } & { response: Response }) => Promise<Response>;
+	mockResolve?: (hook: WithInput<Input, Context>) => Promise<Response>;
+	preResolve?: (hook: WithInput<Input, Context>) => Promise<void>;
+	mutatingPreResolve?: Input extends undefined ? never : (hook: Context & { input: Input }) => Promise<Input>;
+	postResolve?: (hook: WithInput<Input, Context> & { response: Response }) => Promise<void>;
+	customResolve?: (hook: WithInput<Input, Context>) => Promise<void | Response | null>;
+	mutatingPostResolve?: (hook: WithInput<Input, Context> & { response: Response }) => Promise<Response>;
 };
+
+export type MutationHookWithoutInput<
+	Response extends HookResponse = HookResponse,
+	Context extends BaseRequestContext = BaseRequestContext
+> = Omit<QueryHook<undefined, Response, Context>, 'mutatingPreResolve'>;
 
 export type SubscriptionHook<
 	Input = unknown,
 	Response extends HookResponse = HookResponse,
 	Context extends BaseRequestContext = BaseRequestContext
 > = {
-	preResolve?: (hook: Context & { input: Input }) => Promise<void>;
-	mutatingPreResolve?: (hook: Context & { input: Input }) => Promise<Input>;
-	postResolve?: (hook: Context & { input: Input } & { response: Response }) => Promise<void>;
-	mutatingPostResolve?: (hook: Context & { input: Input } & { response: Response }) => Promise<Response>;
+	preResolve?: (hook: WithInput<Input, Context>) => Promise<void>;
+	mutatingPreResolve?: Input extends undefined ? never : (hook: Context & { input: Input }) => Promise<Input>;
+	postResolve?: (hook: WithInput<Input, Context> & { response: Response }) => Promise<void>;
+	mutatingPostResolve?: (hook: WithInput<Input, Context> & { response: Response }) => Promise<Response>;
 };
 
+export type SubscriptionHookWithoutInput<
+	Response extends HookResponse = HookResponse,
+	Context extends BaseRequestContext = BaseRequestContext
+> = Omit<QueryHook<undefined, Response, Context>, 'mutatingPreResolve'>;
+
 export interface QueryHooks<Context extends BaseRequestContext = BaseRequestContext> {
-	[operationName: string]: QueryHook<any, any, Context>;
+	[operationName: string]: QueryHook<any, any, Context> | QueryHookWithoutInput<any, any>;
 }
 
 export interface MutationHooks<Context extends BaseRequestContext = BaseRequestContext> {
-	[operationName: string]: MutationHook<any, any, Context>;
+	[operationName: string]: MutationHook<any, any, Context> | MutationHookWithoutInput<any, any>;
 }
 
 export interface SubscriptionHooks<Context extends BaseRequestContext = BaseRequestContext> {
-	[operationName: string]: SubscriptionHook<any, any, Context>;
+	[operationName: string]: SubscriptionHook<any, any, Context> | SubscriptionHookWithoutInput<any, any>;
 }
 
 export interface GlobalHooksConfig<

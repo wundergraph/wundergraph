@@ -20,8 +20,11 @@ export type {
 	WunderGraphServerConfig,
 	WunderGraphUser,
 	QueryHook,
+	QueryHookWithoutInput,
 	MutationHook,
+	MutationHookWithoutInput,
 	SubscriptionHook,
+	SubscriptionHookWithoutInput,
 } from './types';
 export type {
 	SubscriptionRequestOptions,

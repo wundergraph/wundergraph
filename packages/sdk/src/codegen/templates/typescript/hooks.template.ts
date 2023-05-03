@@ -9,8 +9,11 @@ import type {
 	PostUploadHookRequest,
 	PostUploadHookResponse,
 	QueryHook,
+	QueryHookWithoutInput,
 	MutationHook,
-	SubscriptionHook
+	MutationHookWithoutInput,
+	SubscriptionHook,
+	SubscriptionHookWithoutInput,
 } from "@wundergraph/sdk/server";
 import type { InternalClient } from "./wundergraph.internal.client"
 import type { User } from "./wundergraph.server"
@@ -41,7 +44,7 @@ export type HooksConfig = HooksConfiguration<
 export type QueryHooks = {
 {{#if hasQueries}}
 	{{#each queries}}
-		{{operationName}}?: QueryHook<{{#if hasInternalInput}}Injected{{operationName}}Input{{else}}undefined{{/if}}, {{operationName}}Response, HookContext>,
+		{{operationName}}?: QueryHook{{#if hasInternalInput}}<Injected{{operationName}}Input, {{else}}WithoutInput<{{/if}}{{operationName}}Response, HookContext>,
 	{{/each}}
 {{/if}}
 }
