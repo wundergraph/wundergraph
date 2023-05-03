@@ -48,6 +48,19 @@ export interface ResolvedServerLogger {
 	level: ConfigurationVariable;
 }
 
+export interface OperationHookFunction {
+	(...args: any[]): Promise<any>;
+}
+
+export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
+	mockResolve?: AsyncFn;
+	preResolve?: AsyncFn;
+	postResolve?: AsyncFn;
+	mutatingPreResolve?: AsyncFn;
+	mutatingPostResolve?: AsyncFn;
+	customResolve?: AsyncFn;
+}
+
 export type AuthenticationHookRequest<Context extends BaseRequestContext = BaseRequestContext> = Context &
 	(Context extends BaseRequestContext<infer User> ? AuthenticationRequestContext<User> : never);
 
