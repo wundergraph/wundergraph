@@ -37,13 +37,16 @@ export const Todo = ({ todo }: { todo: Todo }) => {
 	};
 
 	return (
-		<div key={data.todoID}>
-			<input
-				type="checkbox"
-				checked={data.isCompleted}
-				onChange={() => handleUpdateTodo(data.todoID, !data.isCompleted)}
-			/>
-			{data.text}
+		<div className="mb-4" key={data.todoID}>
+			<label className="inline-flex items-center">
+				<input
+					type="checkbox"
+					checked={data.isCompleted}
+					onChange={() => handleUpdateTodo(data.todoID, !data.isCompleted)}
+					className="form-checkbox rounded text-indigo-600"
+				/>
+				<span className="ml-2 text-gray-800">{data.text}</span>
+			</label>
 		</div>
 	);
 };

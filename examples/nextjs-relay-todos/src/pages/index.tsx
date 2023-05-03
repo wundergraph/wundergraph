@@ -30,7 +30,14 @@ const App = () => {
 
 	const data = usePreloadedQuery(allTodosQuery, loadTodosReference);
 
-	return <TodoList todos={data} />;
+	return (
+		<div className="bg-gray-100 min-h-screen py-6">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<h1 className="text-4xl font-bold text-center mb-6 text-gray-800">WunderGraph TodoList</h1>
+				<TodoList todos={data} />
+			</div>
+		</div>
+	);
 };
 
 export default App;

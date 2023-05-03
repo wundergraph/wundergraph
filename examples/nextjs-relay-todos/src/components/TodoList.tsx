@@ -30,17 +30,23 @@ export const TodoList = ({ todos }: { todos: pagesAllTodosQuery$data }) => {
 	};
 
 	return (
-		<div>
-			<h1>Todo List</h1>
+		<div className="bg-white rounded-lg shadow p-6">
+			<h1 className="text-2xl font-semibold mb-4 text-gray-700">Todo List</h1>
 			{todos.todos_todos?.map((todo, index) => (todo ? <Todo key={index.toString()} todo={todo} /> : null))}
-			<div>
+			<div className="flex items-center">
 				<input
 					type="text"
 					value={newTodoText}
 					onChange={(e) => setNewTodoText(e.target.value)}
 					placeholder="New todo text"
+					className="form-input flex-grow rounded-l-lg border-r-0 focus:ring-0 focus:border-indigo-300"
 				/>
-				<button onClick={handleAddTodo}>Add Todo</button>
+				<button
+					className="bg-indigo-600 text-white font-bold py-2 px-4 rounded-r-lg hover:bg-indigo-500 focus:outline-none"
+					onClick={handleAddTodo}
+				>
+					Add Todo
+				</button>
 			</div>
 		</div>
 	);
