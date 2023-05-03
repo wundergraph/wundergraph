@@ -157,6 +157,10 @@ const getHttpResponseErrorFromGraphQLError = (error: GraphQLError): HttpResponse
 	}
 };
 
+/**
+ * getHttpResponseError returns additional error returned by upstream HTTP servers (for e.g. OpenAPI).
+ * If there's no additional error information, it returns undefined.
+ */
 export const getHttpResponseError = (
 	error: ResponseError | GraphQLError | GraphQLError[]
 ): HttpResponseError | undefined => {
