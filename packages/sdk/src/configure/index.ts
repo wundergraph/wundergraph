@@ -1003,7 +1003,8 @@ export const configureWunderGraphApplication = <
 						subscriptionPollingIntervalMillis: 0,
 					};
 					op.HooksConfiguration.postResolve = hooks.postResolve !== undefined;
-					op.HooksConfiguration.mutatingPreResolve = hooks.mutatingPreResolve !== undefined;
+					op.HooksConfiguration.mutatingPreResolve =
+						'mutatingPreResolve' in hooks && hooks.mutatingPreResolve !== undefined;
 					op.HooksConfiguration.mutatingPostResolve = hooks.mutatingPostResolve !== undefined;
 					op.HooksConfiguration.customResolve = hooks.customResolve !== undefined;
 				}
@@ -1021,7 +1022,8 @@ export const configureWunderGraphApplication = <
 						subscriptionPollingIntervalMillis: 0,
 					};
 					op.HooksConfiguration.postResolve = hooks.postResolve !== undefined;
-					op.HooksConfiguration.mutatingPreResolve = hooks.mutatingPreResolve !== undefined;
+					op.HooksConfiguration.mutatingPreResolve =
+						'mutatingPreResolve' in hooks && hooks.mutatingPreResolve !== undefined;
 					op.HooksConfiguration.mutatingPostResolve = hooks.mutatingPostResolve !== undefined;
 					op.HooksConfiguration.customResolve = hooks.customResolve !== undefined;
 				}
@@ -1035,7 +1037,8 @@ export const configureWunderGraphApplication = <
 				if (op !== undefined && hooks !== undefined) {
 					op.HooksConfiguration.preResolve = hooks.preResolve !== undefined;
 					op.HooksConfiguration.postResolve = hooks.postResolve !== undefined;
-					op.HooksConfiguration.mutatingPreResolve = hooks.mutatingPreResolve !== undefined;
+					op.HooksConfiguration.mutatingPreResolve =
+						'mutatingPreResolve' in hooks && hooks.mutatingPreResolve !== undefined;
 					op.HooksConfiguration.mutatingPostResolve = hooks.mutatingPostResolve !== undefined;
 				}
 			}
