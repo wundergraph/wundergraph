@@ -19,6 +19,9 @@ export type {
 	WunderGraphResponse,
 	WunderGraphServerConfig,
 	WunderGraphUser,
+	QueryHook,
+	MutationHook,
+	SubscriptionHook,
 } from './types';
 export type {
 	SubscriptionRequestOptions,
