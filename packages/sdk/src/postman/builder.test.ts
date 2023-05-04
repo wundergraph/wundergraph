@@ -144,7 +144,7 @@ const countPostmanOperations = (obj: any) => {
 	return count;
 };
 
-test.only('PostmanBuilder', async () => {
+test('PostmanBuilder', async () => {
 	const result = PostmanBuilder(operations, { baseURL: 'http://localhost:9991' });
 
 	const internalOperationsCount = 1;
