@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import { PostmanBuilder } from './builder';
+import { GraphQLOperation } from '../graphql/operations';
 
 const operations = [
 	{
@@ -124,7 +125,7 @@ const operations = [
 			definitions: {},
 		},
 	},
-] as any;
+] as GraphQLOperation[];
 
 const countPostmanOperations = (obj: any) => {
 	let count = 0;
@@ -147,7 +148,7 @@ const countPostmanOperations = (obj: any) => {
 test('PostmanBuilder', async () => {
 	const result = PostmanBuilder(operations, { baseURL: 'http://localhost:9991' });
 
-	const internalOperationsCount = 1;
+	const internalOperationsCount = operations.filter((op) => op.Internal).length;
 	const c = countPostmanOperations(result.toJSON());
 	expect(c).toBe(operations.length - internalOperationsCount);
 
