@@ -19,13 +19,13 @@ interface AddTodoInput {
 
 let nextId = 0;
 let todos: Todo[] = [{ id: nextId++, text: 'Todo #1', isCompleted: false }];
-let listeners: Array<() => any> = [];
+let listeners: Array<(updatedTodo: Todo) => any> = [];
 
 export const todosStore = {
 	addTodo({ text }: AddTodoInput) {
 		const newTodo = { id: nextId++, text, isCompleted: false };
 		todos = [...todos, newTodo];
-		emitChange();
+		emitChange(newTodo);
 		return newTodo;
 	},
 	updateTodo(input: UpdateTodoInput) {
@@ -37,13 +37,13 @@ export const todosStore = {
 				isCompleted: input.isCompleted,
 			};
 			todos = [...todos.slice(0, todoIndex), newTodo, ...todos.slice(todoIndex + 1)];
-			emitChange();
+			emitChange(newTodo);
 			return newTodo;
 		} else {
 			throw new Error('Todo not found');
 		}
 	},
-	subscribe(listener: () => any) {
+	subscribe(listener: (updatedTodo: Todo) => any) {
 		listeners = [...listeners, listener];
 		return () => {
 			listeners = listeners.filter((l) => l !== listener);
@@ -54,9 +54,9 @@ export const todosStore = {
 	},
 };
 
-function emitChange() {
+function emitChange(updatedTodo: Todo) {
 	for (let listener of listeners) {
-		listener();
+		listener(updatedTodo);
 	}
 }
 
@@ -87,7 +87,7 @@ const typeDefs = /* GraphQL */ `
 	}
 
 	type Subscription {
-		TodoChanges: [Todo]
+		TodoChanges: Todo
 	}
 `;
 
@@ -107,15 +107,15 @@ const resolvers = {
 		TodoChanges: {
 			subscribe: async function* () {
 				while (true) {
-					const onNextChange = new Promise<void>((resolve) => {
-						const unsubscribe = todosStore.subscribe(() => {
+					const onNextChange = new Promise<Todo>((resolve) => {
+						const unsubscribe = todosStore.subscribe((updatedTodo) => {
 							unsubscribe();
-							resolve();
+							resolve(updatedTodo);
 						});
 					});
-					await onNextChange;
+					const updatedTodo = await onNextChange;
 					yield {
-						TodoChanges: todosStore.getSnapshot(),
+						TodoChanges: updatedTodo,
 					};
 				}
 			},

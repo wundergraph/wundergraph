@@ -4,7 +4,7 @@ import operations from './wundergraph.operations';
 
 const todos = introspect.graphql({
 	apiNamespace: 'todos',
-	url: 'http://localhost:3000/api/graphql',
+	url: 'http://127.0.0.1:3000/api/graphql',
 	subscriptionsUseSSE: true,
 	loadSchemaFromString: /* GraphQL */ `
 		type Todo {
@@ -33,7 +33,7 @@ const todos = introspect.graphql({
 		}
 
 		type Subscription {
-			TodoChanges: [Todo]
+			TodoChanges: Todo
 		}
 	`,
 });

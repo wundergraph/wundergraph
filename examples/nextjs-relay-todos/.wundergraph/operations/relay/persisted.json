@@ -1,5 +1,6 @@
 {
   "2f7a7ed13c67c406b6adaacf8aea2780": "query pagesAllTodosQuery {\n  todos_todos {\n    ...TodoList_todo\n  }\n}\n\nfragment TodoList_todo on todos_Todo {\n  id\n  text\n  isCompleted\n}\n",
+  "3ece2b70448e57683ea10290c6a68b8b": "subscription pagesOnTodoChangesSubscription {\n  todos_TodoChanges {\n    todoID: id\n    text\n    isCompleted\n  }\n}\n",
   "6dc98b91e0f73f84e44e58184ee19888": "mutation TodoListUpdateTodoMutation(\n  $todo: todos_TodoInput!\n) {\n  todos_updateTodo(todo: $todo) {\n    id\n    text\n    isCompleted\n  }\n}\n",
   "a5cecd8875e6f3a3e5c3b863fcc36307": "query pagesAllTodosQuery {\n  todos_todos {\n    ...Todo_todo\n  }\n}\n\nfragment Todo_todo on todos_Todo {\n  id\n  text\n  isCompleted\n}\n",
   "af225b2bbacefc886c76d7f5f8246f2a": "mutation TodoListUpdateTodoMutation(\n  $todo: todos_TodoInput!\n) {\n  todos_updateTodo(todo: $todo) {\n    todoId: id\n    text\n    isCompleted\n  }\n}\n",
