@@ -256,22 +256,19 @@ export const createServer = async ({
 			fastify.log.debug('Hooks plugin registered');
 		}
 
-		// TODO: refactor into a separate mount class
-		// e.g. OmnigraphMount
-		// mount := new OmnigraphMount(config)
-		// mount.register(fastify)
-
 		let openApiServers: Set<OpenApiServerConfig> = new Set();
 		let soapServers: Set<SoapServerConfig> = new Set();
 
-		const serverUrlPlaceholder = WgEnv.ServerUrl + '-';
+		const serverUrlPlaceholderPrefix = WgEnv.ServerUrl + '-';
 
 		config.api?.engineConfiguration?.datasourceConfigurations?.forEach((ds) => {
+			// we could identify omnigraph proxy when url contains `WG_SERVER_URL-` prefix
+			// example openapi server placeholder: `WG_SERVER_URL-openapi`
+			// example soap server placeholder: `WG_SERVER_URL-soap`
 			const isOmnigraph =
 				ds.kind == DataSourceKind.GRAPHQL &&
 				ds.customGraphql?.fetch?.url?.kind === ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE &&
-				ds.customGraphql?.fetch?.url?.staticVariableContent.startsWith(serverUrlPlaceholder);
-
+				ds.customGraphql?.fetch?.url?.staticVariableContent.startsWith(serverUrlPlaceholderPrefix);
 			if (!isOmnigraph) {
 				return;
 			}
@@ -284,7 +281,7 @@ export const createServer = async ({
 				serverName = mountPath.split('/').pop()!;
 			}
 
-			switch (ds.customGraphql?.fetch?.url?.staticVariableContent.slice(serverUrlPlaceholder.length)) {
+			switch (ds.customGraphql?.fetch?.url?.staticVariableContent.slice(serverUrlPlaceholderPrefix.length)) {
 				case 'openapi':
 					let upstreamURL;
 					if (ds.customGraphql?.fetch?.baseUrl) {
@@ -308,9 +305,8 @@ export const createServer = async ({
 			}
 		});
 
-		const hasOpenApiServers = openApiServers.size > 0;
-
-		if (hasOpenApiServers) {
+		// mount omnigraph open-api proxies
+		if (openApiServers.size > 0) {
 			const omnigraphPlugin = await require('./plugins/omnigraphOAS');
 
 			for (const server of openApiServers) {
@@ -320,8 +316,8 @@ export const createServer = async ({
 			}
 		}
 
-		const hasSoapServers = soapServers.size > 0;
-		if (hasSoapServers) {
+		// mount omnigraph soap proxies
+		if (soapServers.size > 0) {
 			const soapPlugin = await require('./plugins/omnigraphSOAP');
 
 			for (const server of soapServers) {

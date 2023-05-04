@@ -11,7 +11,15 @@ import {
 } from './index';
 import { openApiSpecificationToRESTApiObject } from '../v2openapi';
 import { introspectWithCache } from './introspection-cache';
-import { openApiSpecificationToGraphQLApi } from '../v2openapi/omnigraph';
+import { OpenAPIV2, OpenAPIV3 } from 'openapi-types';
+import yaml from 'js-yaml';
+import { z as zod } from 'zod';
+import { HeadersBuilder } from './headers-builder';
+import { getJSONSchemaOptionsFromOpenAPIOptions } from '@omnigraph/openapi';
+import { loadNonExecutableGraphQLSchemaFromJSONSchemas } from '@omnigraph/json-schema';
+import { printSchemaWithDirectives } from '@graphql-tools/utils';
+import { introspectGraphql } from './graphql-introspection';
+import { WgEnv } from '../configure/options';
 
 const loadOpenApi = async (source: OpenAPIIntrospectionSource) => {
 	switch (source.kind) {
@@ -58,4 +66,143 @@ export const introspectOpenApiV2 = async (introspection: OpenAPIIntrospectionV2)
 			return await openApiSpecificationToGraphQLApi(spec, introspection);
 		}
 	);
+};
+
+const apiIDRegexp = /^[_\-0-9a-z]+$/;
+
+const apiIDSchema = zod
+	.string({
+		required_error: 'id is required',
+		invalid_type_error: 'id must be a string',
+	})
+	.regex(apiIDRegexp, {
+		message: 'id must contain only lowercase letters, numbers, dashes and underscores',
+	})
+	.min(2, {
+		message: 'id must be at least 2 characters long',
+	})
+	.max(20, {
+		message: 'id must be at most 20 characters long',
+	});
+
+// validateIntrospectionId returns valid id otherwise throws an error.
+export const validateIntrospectionId = async (id: string): Promise<string> => {
+	const validationResult = await apiIDSchema.safeParseAsync(id);
+	if (!validationResult.success) {
+		const err = validationResult.error.format()._errors.join(', ');
+		throw new Error(`invalid id: ${err}`);
+	}
+
+	return validationResult.data;
+};
+
+type OasOrSwagger = OpenAPIV3.Document | OpenAPIV2.Document;
+
+interface OpenApiOptions {
+	source: OasOrSwagger;
+	endpoint?: string;
+	name: string;
+	operationHeaders: Record<string, string>;
+}
+
+export const openApiSpecificationToGraphQLApi = async (
+	oas: string,
+	introspection: OpenAPIIntrospectionV2
+): Promise<GraphQLApi> => {
+	const apiID: string = await validateIntrospectionId(introspection.id);
+	// we need to remove open api extensions from the spec because they could be a first key in the spec
+	// instead of params expected by omnigraph for the path
+	const spec = removeExtensions(readSpec(oas, introspection.source));
+
+	const headersBuilder = new HeadersBuilder();
+	if (introspection.headers !== undefined) {
+		introspection.headers(headersBuilder);
+	}
+	const headersConfiguration = headersBuilder.build();
+
+	// we are collecting headers names to supply them as operation headers to the omnigraph
+	// to been able to pass them on the execution time
+	// we need only headers names, because we will get values from the context populated by wundernode
+	let operationHeaders: Record<string, string> = {};
+	for (const { key } of headersConfiguration) {
+		operationHeaders[key] = `{context.headers['${key.toLowerCase()}']}`;
+	}
+
+	const options: OpenApiOptions = {
+		source: spec,
+		name: introspection.apiNamespace || 'api',
+		operationHeaders: operationHeaders,
+	};
+
+	// get json schema options describing each path in the spec
+	const extraJSONSchemaOptions = await getJSONSchemaOptionsFromOpenAPIOptions(options.name, options);
+	// build json schema from the json schema options with the directives attached to fields
+	const graphQLSchema = await loadNonExecutableGraphQLSchemaFromJSONSchemas(options.name, {
+		...options,
+		...extraJSONSchemaOptions,
+	});
+
+	// as logic of translating api calls stored in the directives we need print schema with directives
+	const schema = printSchemaWithDirectives(graphQLSchema);
+
+	return introspectGraphql(
+		{
+			url: `${WgEnv.ServerUrl}-openapi`, // workaround to been able to identify openapi proxy
+			baseUrl: introspection.baseURL || '',
+			path: `/openapis/${apiID}`,
+			apiNamespace: introspection.apiNamespace,
+			internal: true,
+			loadSchemaFromString: () => schema,
+			headers: introspection.headers,
+			customIntScalars: ['BigInt'],
+		},
+		{},
+		true
+	);
+};
+
+// removeExtensions - removes all fields that starts with 'x-' from the spec
+const removeExtensions = (spec: OasOrSwagger): OasOrSwagger => {
+	const specJson = JSON.stringify(spec);
+
+	return JSON.parse(specJson, (key, value) => {
+		if (key.startsWith('x-')) {
+			// remove field
+			return undefined;
+		}
+		return value;
+	});
+};
+
+// readSpec - tries to read spec as json, if it fails, tries to read it as yaml
+const readSpec = (spec: string, source: OpenAPIIntrospectionSource): OasOrSwagger => {
+	if (source.kind === 'file') {
+		switch (path.extname(source.filePath)) {
+			case '.yaml':
+			case '.yml':
+				const obj = yaml.load(spec);
+				if (obj) {
+					return obj as any;
+				}
+				throw new Error('cannot read OAS');
+			case '.json':
+				return JSON.parse(spec);
+			default:
+				return tryReadSpec(spec);
+		}
+	}
+
+	return tryReadSpec(spec);
+};
+
+const tryReadSpec = (spec: string): OasOrSwagger => {
+	try {
+		return JSON.parse(spec);
+	} catch (e) {
+		const obj = yaml.load(spec);
+		if (obj) {
+			return obj as any;
+		}
+		throw new Error('cannot read OAS: ${e}');
+	}
 };

@@ -12,7 +12,13 @@ export interface SoapServerConfig {
 	mountPath: string;
 }
 
+// fetchWithHeaders - wraps fetch function to pass headers from context to fetch options
 const fetchWithHeaders = (url: string, options?: RequestInit, context?: any, info?: GraphQLResolveInfo) => {
+	/*
+	 * temporary workaround to pass headers to fetch
+	 * current drawback is that it will pass all headers from the wundernode request to the wundergraph server
+	 * */
+
 	const headers = {
 		...context?.headers,
 		...options?.headers,
@@ -22,8 +28,12 @@ const fetchWithHeaders = (url: string, options?: RequestInit, context?: any, inf
 };
 
 const FastifySoapGraphQLPlugin: FastifyPluginAsync<SoapServerConfig> = async (fastify, config) => {
-	const schema = executableSchema(config.schema);
+	const schema = buildSchema(config.schema, {
+		assumeValidSDL: true,
+		assumeValid: true,
+	});
 
+	// prepare queries executor from schema with soap directives
 	const executor = createExecutorFromSchemaAST(schema, fetchWithHeaders);
 
 	fastify.route({
@@ -41,8 +51,6 @@ const FastifySoapGraphQLPlugin: FastifyPluginAsync<SoapServerConfig> = async (fa
 
 			const { operationName, query, variables } = getGraphQLParameters(request);
 
-			console.log('operationName', operationName, 'query', query, 'variables', variables);
-
 			const result = await processRequest({
 				operationName,
 				query,
@@ -54,8 +62,6 @@ const FastifySoapGraphQLPlugin: FastifyPluginAsync<SoapServerConfig> = async (fa
 				}),
 
 				execute: ({ document, contextValue, variableValues }) => {
-					console.log('document', document, 'contextValue', contextValue, 'variableValues', variableValues);
-
 					return executor({
 						document: document,
 						context: contextValue,
@@ -64,18 +70,8 @@ const FastifySoapGraphQLPlugin: FastifyPluginAsync<SoapServerConfig> = async (fa
 				},
 			});
 
-			console.log('\n\n\n\n\n\n\n\n HAHAHAHA \n\n\n\n\n\n\n\n');
-			console.log(result);
-
 			await sendResult(result, reply.raw);
 		},
-	});
-};
-
-const executableSchema = (schemaStr: string): GraphQLSchema => {
-	return buildSchema(schemaStr, {
-		assumeValidSDL: true,
-		assumeValid: true,
 	});
 };
 
