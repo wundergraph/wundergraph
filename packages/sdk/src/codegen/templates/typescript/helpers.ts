@@ -83,11 +83,11 @@ export const liveQueries = (application: ResolvedApplication, includeInternal: b
 			};
 		});
 
-export const operationInputTypename = (op: GraphQLOperation) => `${op.Name}$Input`;
-export const operationInternalInputTypename = (op: GraphQLOperation) => `${op.Name}$InternalInput`;
-export const operationInjectedInputTypename = (op: GraphQLOperation) => `${op.Name}$InjectedInput`;
-export const operationResponseTypename = (op: GraphQLOperation) => `${op.Name}$Response`;
-export const operationResponseDataTypename = (op: GraphQLOperation) => `${op.Name}$ResponseData`;
+export const operationInputTypename = (op: GraphQLOperation) => `${op.Name}Input`;
+export const operationInternalInputTypename = (op: GraphQLOperation) => `${op.Name}InputInternal`;
+export const operationInjectedInputTypename = (op: GraphQLOperation) => `${op.Name}InputInjected`;
+export const operationResponseTypename = (op: GraphQLOperation) => `${op.Name}Response`;
+export const operationResponseDataTypename = (op: GraphQLOperation) => `${op.Name}ResponseData`;
 
 export const modelImports = (
 	application: ResolvedApplication,
