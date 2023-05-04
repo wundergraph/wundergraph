@@ -151,7 +151,7 @@ export const introspectGraphql = async (
 	const graphQLSchema = buildSchema(schemaSDL);
 	const { RootNodes, ChildNodes, Fields } = configuration(
 		schemaDocumentNode,
-		introspection.customJSONScalars,
+		introspection,
 		serviceDocumentNode,
 		argumentReplacements
 	);
@@ -242,9 +242,12 @@ const introspectGraphQLSchema = async (
 		try {
 			if (introspection.isFederation) {
 				const parsedSchema = parse(loadFile(introspection.loadSchemaFromString));
-				return buildSubgraphSchema(parsedSchema);
+				return mergeSchemaExtension(buildSubgraphSchema(parsedSchema), introspection.schemaExtension);
 			}
-			return buildSchema(loadFile(introspection.loadSchemaFromString));
+			return mergeSchemaExtension(
+				buildSchema(loadFile(introspection.loadSchemaFromString)),
+				introspection.schemaExtension
+			);
 		} catch (e: any) {
 			throw new Error(
 				`Loading schema from string failed for apiNamespace '${introspection.apiNamespace}'. Make sure the schema is valid and try again: ${e}`
@@ -252,10 +255,18 @@ const introspectGraphQLSchema = async (
 		}
 	}
 	try {
-		return introspectGraphQLAPI(introspection, options, headers);
+		const schema = await introspectGraphQLAPI(introspection, options, headers);
+		return mergeSchemaExtension(schema, introspection.schemaExtension);
 	} catch (e: any) {
 		throw new Error(`Introspecting GraphQL API failed for apiNamespace '${introspection.apiNamespace}': ${e}`);
 	}
+};
+
+const mergeSchemaExtension = (schema: GraphQLSchema, schemaExtension?: string): GraphQLSchema => {
+	if (schemaExtension === undefined) {
+		return schema;
+	}
+	return buildSchema(printSchema(schema) + '\n' + schemaExtension.trim());
 };
 
 interface GraphQLErrorMessage {

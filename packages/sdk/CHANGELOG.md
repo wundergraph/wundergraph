@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.151.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.150.0...@wundergraph/sdk@0.151.0) (2023-05-03)
+
+### Features
+
+* add support for reading OpenAPI error responses ([#916](https://github.com/wundergraph/wundergraph/issues/916)) ([6e9961d](https://github.com/wundergraph/wundergraph/commit/6e9961d011a65ba83ed16da058c97a03cc9b7436)), closes [#822](https://github.com/wundergraph/wundergraph/issues/822) (@fiam)
+
+### Bug Fixes
+
+* improve hook server types ([#919](https://github.com/wundergraph/wundergraph/issues/919)) ([4ecd7ee](https://github.com/wundergraph/wundergraph/commit/4ecd7ee21406166a8146de111da88f6b52cdc7c4)) (@Pagebakers)
+
+## [0.150.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.149.1...@wundergraph/sdk@0.150.0) (2023-05-03)
+
+### Features
+
+* add support for custom claims of any type ([#911](https://github.com/wundergraph/wundergraph/issues/911)) ([c6f14f8](https://github.com/wundergraph/wundergraph/commit/c6f14f8d91db8bc908a85b20c6ef8f8561698078)) (@fiam)
+* allow with hyphens and leading underscores in operation names ([#901](https://github.com/wundergraph/wundergraph/issues/901)) ([6abfbf6](https://github.com/wundergraph/wundergraph/commit/6abfbf6b5766b8840a39f6f96593ee6e8efc05dd)) (@fiam)
+
+### Bug Fixes
+
+* graphql schema extensions ([#920](https://github.com/wundergraph/wundergraph/issues/920)) ([bd4defc](https://github.com/wundergraph/wundergraph/commit/bd4defcd287119f9f63afaca9b3b55580ee36c6e)) (@jensneuse)
+
 ## [0.149.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.149.0...@wundergraph/sdk@0.149.1) (2023-04-27)
 
 ### Bug Fixes

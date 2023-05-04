@@ -6,6 +6,59 @@ export interface GraphQLErrorLocation {
 	column: number;
 }
 
+interface GraphQLErrorExtensionHTTP {
+	/**
+	 * status contains the response status code
+	 */
+	status?: number;
+	/**
+	 * statusText contains the text associated with the status code.
+	 * e.g. For a 404 it will be "Not Found"
+	 * */
+	statusText?: string;
+	/**
+	 * headers contains the response headers sent by the OpenAPI upstream
+	 */
+	headers?: Record<string, string>;
+}
+
+interface GraphQLErrorExtensionRequest {
+	/**
+	 * OpenAPI request URL sent by the gateway
+	 */
+	url?: string;
+	/**
+	 * OpenAPI request method sent by the gateway
+	 */
+	method?: string;
+}
+
+/**
+ * GraphQLErrorExtensions includes extended information added to
+ * GraphQL errors.
+ */
+interface GraphQLErrorExtensions {
+	/**
+	 * http information, only included in OpenAPI responses
+	 */
+	http?: GraphQLErrorExtensionHTTP;
+	/**
+	 * request sent by the gateway to the OpenAPI upstream
+	 */
+	request?: GraphQLErrorExtensionRequest;
+	/**
+	 * response text sent by the OpenAPI upstream
+	 */
+	responseText?: string;
+}
+
+interface GraphQLErrorWithExtensions {
+	/**
+	 * extensions contains non-standard extensions added to GraphQL errors
+	 */
+	extensions?: GraphQLErrorExtensions;
+}
+
 export interface GraphQLError {
 	message: string;
 	code?: string;
@@ -73,6 +126,58 @@ export class InternalError extends OperationError<'InternalError'> {
 		super({ message: opts?.message, code: 'InternalError', statusCode: 500, cause: opts?.cause });
 	}
 }
+
+/**
+ * HttpResponseError contains additional error information from OpenAPI requests
+ */
+export interface HttpResponseError {
+	/**
+	 * statusCode contains the response status code sent by the OpenAPI upstream
+	 */
+	statusCode?: number;
+	/**
+	 * headers contains the response headers sent by the OpenAPI upstream. All header
+	 * names are normalized to lowercase.
+	 */
+	headers?: Record<string, string>;
+	/**
+	 * text represents the raw body text of the response sent by the OpenAPI upstream
+	 */
+	text?: string;
+}
+
+const getHttpResponseErrorFromGraphQLError = (error: GraphQLError): HttpResponseError | undefined => {
+	const extensions = (error as GraphQLErrorWithExtensions)?.extensions;
+	if (extensions) {
+		return {
+			statusCode: extensions.http?.status,
+			headers: extensions.http?.headers,
+			text: extensions.responseText,
+		};
+	}
+};
+
+/**
+ * getHttpResponseError returns additional error returned by upstream HTTP servers (for e.g. OpenAPI).
+ * If there's no additional error information, it returns undefined.
+ */
+export const getHttpResponseError = (
+	error: ResponseError | GraphQLError | GraphQLError[]
+): HttpResponseError | undefined => {
+	if (error instanceof ResponseError) {
+		return getHttpResponseError(error.errors ?? []);
+	}
+	if (Array.isArray(error)) {
+		for (const graphQLError of error) {
+			const httpError = getHttpResponseErrorFromGraphQLError(graphQLError);
+			if (httpError) {
+				return httpError;
+			}
+		}
+		return undefined;
+	}
+	return getHttpResponseErrorFromGraphQLError(error);
+};
 
 /**
  * The base error class for all client operation errors.

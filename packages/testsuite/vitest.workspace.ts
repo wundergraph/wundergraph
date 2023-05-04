@@ -18,6 +18,14 @@ export default defineWorkspace([
 		},
 	},
 	{
+		root: 'apps/hooks',
+		test: {
+			globalSetup: 'apps/hooks/test-setup.ts',
+			testTimeout: 15000,
+			hookTimeout: 20000,
+		},
+	},
+	{
 		root: 'apps/http-proxy',
 		test: {
 			globalSetup: 'apps/http-proxy/test-setup.ts',
@@ -34,9 +42,9 @@ export default defineWorkspace([
 		},
 	},
 	{
-		root: 'apps/hooks',
+		root: 'apps/openapi',
 		test: {
-			globalSetup: 'apps/hooks/test-setup.ts',
+			globalSetup: 'apps/openapi/test-setup.ts',
 			testTimeout: 15000,
 			hookTimeout: 20000,
 		},
