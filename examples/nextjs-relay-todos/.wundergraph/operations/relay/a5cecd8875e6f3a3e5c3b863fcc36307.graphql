@@ -1,0 +1,11 @@
+query pagesAllTodosQuery {
+  todos_todos {
+    ...Todo_todo
+  }
+}
+
+fragment Todo_todo on todos_Todo {
+  id
+  text
+  isCompleted
+}
