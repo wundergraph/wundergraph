@@ -118,41 +118,71 @@ describe('Mock server', () => {
 
 		const resp = await fetch(`${server.url()}/test`);
 
-		expect(() => scope.done()).toThrow('no interceptor matched for request GET /test');
+		expect(() => scope.done()).toThrow('No interceptor matched for request GET /test');
 
 		expect(resp.status).toBe(404);
 		expect(scope.isDone).toBe(false);
 		expect(scope.error).toBeDefined();
 	});
 
-	test('Should return 404 when handler does not match with any interceptor', async () => {
+	test('Should return 404 and throw with original error when handler does not match with any interceptor / handler', async () => {
 		let scope = server.mock(
 			async ({ url, method }) => {
 				return url.path === '/test' && method === 'GET';
 			},
 			async () => {
-				throw new Error('This should not be called');
-
-				return {};
+				throw new Error('Request does not match');
 			}
 		);
 
-		const resp = await fetch(`${server.url()}/test`);
+		let resp = await fetch(`${server.url()}/test`);
 
 		expect(resp.status).toBe(404);
 		expect(scope.isDone).toBe(false);
 		expect(scope.error).toBeDefined();
-		expect(() => scope.done()).toThrow('no interceptor matched for request GET /test');
-	});
+		// @ts-expect-error
+		expect(scope.error.cause).toBeDefined();
+		expect(() => scope.done()).toThrow(
+			'Request does not match\n' + 'Caused by: No interceptor matched for request GET /test'
+		);
 
-	test('Should try the next interceptor when the previous does not match or throws an error', async () => {
-		let scope = server.mock(
+		// Let's test if the interceptor was reset
+
+		scope = server.mock(
 			async ({ url, method }) => {
 				return url.path === '/test' && method === 'GET';
 			},
 			async () => {
-				throw new Error('This should not be called');
+				return {
+					body: {
+						getUser: {
+							id: '123',
+						},
+					},
+				};
+			}
+		);
 
+		resp = await fetch(`${server.url()}/test`);
+
+		scope.done();
+
+		expect(scope.isDone).toBe(true);
+		expect(scope.error).toBeUndefined();
+		expect(resp.status).toBe(200);
+		expect(await resp.json()).toEqual({
+			getUser: {
+				id: '123',
+			},
+		});
+	});
+
+	test('Should return 404 and throw with original error when handler does not match with any interceptor / match', async () => {
+		let scope = server.mock(
+			async ({ url, method }) => {
+				throw new Error('Request does not match');
+			},
+			async () => {
 				return {};
 			}
 		);
@@ -162,7 +192,63 @@ describe('Mock server', () => {
 		expect(resp.status).toBe(404);
 		expect(scope.isDone).toBe(false);
 		expect(scope.error).toBeDefined();
-		expect(() => scope.done()).toThrow('no interceptor matched for request GET /test');
+		// @ts-expect-error
+		expect(scope.error.cause).toBeDefined();
+		expect(() => scope.done()).toThrow(
+			'Request does not match\n' + 'Caused by: No interceptor matched for request GET /test'
+		);
+
+		// Let's test if the interceptor was reset
+
+		scope = server.mock(
+			async ({ url, method }) => {
+				return url.path === '/test' && method === 'GET';
+			},
+			async () => {
+				return {
+					body: {
+						getUser: {
+							id: '123',
+						},
+					},
+				};
+			}
+		);
+
+		resp = await fetch(`${server.url()}/test`);
+
+		scope.done();
+
+		expect(scope.isDone).toBe(true);
+		expect(scope.error).toBeUndefined();
+		expect(resp.status).toBe(200);
+		expect(await resp.json()).toEqual({
+			getUser: {
+				id: '123',
+			},
+		});
+	});
+
+	test('Should return 404 and throw with not found error when handler does not match with any interceptor', async () => {
+		let scope = server.mock(
+			async ({ url, method }) => {
+				return url.path === '/no_match' && method === 'GET';
+			},
+			async () => {
+				return {};
+			}
+		);
+
+		let resp = await fetch(`${server.url()}/test`);
+
+		expect(resp.status).toBe(404);
+		expect(scope.isDone).toBe(false);
+		expect(scope.error).toBeDefined();
+		// @ts-expect-error
+		expect(scope.error.cause).toBeUndefined();
+		expect(() => scope.done()).toThrow('No interceptor matched for request GET /test');
+
+		// Let's test if the interceptor was reset
 
 		scope = server.mock(
 			async ({ url, method }) => {

@@ -1,10 +1,9 @@
 import { expect, beforeAll, describe, it } from 'vitest';
 import { join } from 'path';
-import { createTestAndMockServer } from '../.wundergraph/generated/testing';
+import { TestServers, createTestAndMockServer } from '../.wundergraph/generated/testing';
 import { createClient } from '../.wundergraph/generated/client';
 import { TestContext } from '../types';
 import { mockSearchResponse } from './mocks/mockSearchResponse';
-import { TestServers } from '@wundergraph/sdk/dist/testing';
 
 let ts: TestServers;
 
@@ -116,7 +115,7 @@ describe('Mock external api', () => {
 
 		expect(result.error).toBeUndefined();
 		expect(result.data).toBeDefined();
-		expect(result.data.a).toEqual(1);
+		expect(result.data).toEqual({ a: 1 });
 
 		result = await ts.testServer.client().query({
 			operationName: 'search',
@@ -126,7 +125,7 @@ describe('Mock external api', () => {
 
 		expect(result.error).toBeUndefined();
 		expect(result.data).toBeDefined();
-		expect(result.data.a).toEqual(2);
+		expect(result.data).toEqual({ a: 2 });
 	});
 
 	it<TestContext>('Should try next handlers when the first does not match or throws', async () => {
@@ -168,12 +167,15 @@ describe('Mock external api', () => {
 
 		expect(ts.mockServer.pendingRequestInterceptors().length).greaterThan(0);
 		expect(scope1.isDone).toEqual(false);
+		expect(scope1.error).toBeDefined();
 
 		scope2.done();
+		expect(scope2.isDone).toEqual(true);
+		expect(scope2.error).toBeUndefined();
 
 		expect(result.error).toBeUndefined();
 		expect(result.data).toBeDefined();
-		expect(result.data.a).toEqual(2);
+		expect(result.data).toEqual({ a: 2 });
 	});
 
 	it<TestContext>('Should error because handler does not match', async () => {
@@ -197,6 +199,6 @@ describe('Mock external api', () => {
 			expect(err.message).toEqual('This operation was aborted');
 		}
 
-		expect(() => scope.done()).toThrow('no interceptor matched for request POST /books/_search');
+		expect(() => scope.done()).toThrow('No interceptor matched for request POST /books/_search');
 	});
 });
