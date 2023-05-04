@@ -1,0 +1,11 @@
+query pagesAllTodosQuery {
+  todos_todos {
+    ...TodoList_todo
+  }
+}
+
+fragment TodoList_todo on todos_Todo {
+  id
+  text
+  isCompleted
+}
