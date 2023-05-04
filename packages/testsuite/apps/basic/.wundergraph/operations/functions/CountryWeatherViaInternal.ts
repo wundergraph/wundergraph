@@ -6,7 +6,7 @@ export default createOperation.query({
 	}),
 	handler: async ({ input, operations }) => {
 		return operations.query({
-			operationName: 'CountryWeatherInternal',
+			operationName: 'internal/CountryWeather',
 			input: {
 				countryCode: input.countryCode,
 				// TODO: Remove this once we fix the bug that causes

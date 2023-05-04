@@ -2,7 +2,15 @@ import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { CodeGenerationConfig } from '../../../configure';
 import prettier from 'prettier';
 import { JSONSchema7, JSONSchema7 as JSONSchema } from 'json-schema';
-import { hasInjectedInput, hasInput, hasInternalInput } from './helpers';
+import {
+	hasInjectedInput,
+	hasInput,
+	hasInternalInput,
+	operationInjectedInputTypename,
+	operationInputTypename,
+	operationInternalInputTypename,
+	operationResponseDataTypename,
+} from './helpers';
 import fs from 'fs';
 import path from 'path';
 import { visitJSONSchema } from '../../jsonschema';
@@ -25,7 +33,7 @@ export class TypeScriptInputModels implements Template {
 			.map((op) =>
 				JSONSchemaToTypescriptInterface(
 					op.VariablesSchema,
-					op.Name + 'Input',
+					operationInputTypename(op),
 					false,
 					op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined,
 					op.TypeScriptOperationImport
@@ -57,7 +65,7 @@ export class TypeScriptInternalInputModels implements Template {
 			.map((op) =>
 				JSONSchemaToTypescriptInterface(
 					op.InternalVariablesSchema,
-					'Internal' + op.Name + 'Input',
+					operationInternalInputTypename(op),
 					false,
 					op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined
 				)
@@ -83,7 +91,7 @@ export class TypeScriptInjectedInputModels implements Template {
 			.map((op) =>
 				JSONSchemaToTypescriptInterface(
 					op.InjectedVariablesSchema,
-					'Injected' + op.Name + 'Input',
+					operationInjectedInputTypename(op),
 					false,
 					op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined
 				)
@@ -107,7 +115,7 @@ export class TypeScriptInjectedInputModels implements Template {
 export class TypeScriptResponseModels implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const content = generationConfig.config.application.Operations.map((op) => {
-			const dataName = '#/definitions/' + op.Name + 'ResponseData';
+			const dataName = '#/definitions/' + operationResponseDataTypename(op);
 			const responseSchema = JSON.parse(JSON.stringify(op.ResponseSchema)) as JSONSchema7;
 			if (responseSchema.properties) {
 				responseSchema.properties['data'] = {
@@ -143,7 +151,7 @@ export class TypeScriptResponseDataModels implements Template {
 			.map((op) =>
 				JSONSchemaToTypescriptInterface(
 					op.ResponseSchema.properties!['data'] as JSONSchema7,
-					op.Name + 'ResponseData',
+					operationResponseDataTypename(op),
 					false,
 					op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined,
 					op.TypeScriptOperationImport

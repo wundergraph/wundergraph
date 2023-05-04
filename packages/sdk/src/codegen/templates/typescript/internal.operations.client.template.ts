@@ -11,8 +11,8 @@ export type Queries = {
 {{#if hasInternalQueries}}
     {{#each internalQueries}}
         '{{operationPath}}': {
-					input: {{#if hasInternalInput}}Internal{{operationName}}Input{{ else }}undefined{{/if}},
-          response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{operationName}}Response['data'], error?: ClientOperationErrors }{{/if}}
+					input: {{#if hasInternalInput}}{{internalInputTypename}}{{ else }}undefined{{/if}},
+          response: {{#if isTypeScriptOperation}}{ data?: {{responseDataTypename}}, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{responseTypename}}['data'], error?: ClientOperationErrors }{{/if}}
 				};
     {{/each}}
 {{/if}}
@@ -22,8 +22,8 @@ export type Mutations = {
 {{#if hasInternalMutations}}
     {{#each internalMutations}}
 			'{{operationPath}}': {
-				input: {{#if hasInternalInput}}Internal{{operationName}}Input{{ else }}undefined{{/if}},
-      	response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{operationName}}Response['data'], error?: ClientOperationErrors }{{/if}}
+				input: {{#if hasInternalInput}}{{internalInputTypename}}{{ else }}undefined{{/if}},
+      	response: {{#if isTypeScriptOperation}}{ data?: {{responseDataTypename}}, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{responseTypename}}['data'], error?: ClientOperationErrors }{{/if}}
 			};
     {{/each}}
 {{/if}}
@@ -34,7 +34,7 @@ export type Subscriptions = {
 		{{#each internalSubscriptions}}
 			'{{operationPath}}': {
 				input: {{#if hasInternalInput}}Internal{{operationName}}Input{{ else }}undefined{{/if}},
-      	response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{operationName}}Response['data'], error?: ClientOperationErrors }{{/if}}
+      	response: {{#if isTypeScriptOperation}}{ data?: {{responseDataTypename}}, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{responseTypename}}['data'], error?: ClientOperationErrors }{{/if}}
 			};
 		{{/each}}
 {{/if}}
