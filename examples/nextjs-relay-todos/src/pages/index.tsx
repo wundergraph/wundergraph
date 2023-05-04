@@ -4,7 +4,7 @@ import { TodoList } from '@/components/TodoList';
 import { RecordSourceSelectorProxy } from 'relay-runtime';
 import { getEnvironment } from '@/lib/wundergraph';
 import { graphql, usePreloadedQuery, useSubscription } from 'react-relay';
-import { loadQuery } from 'react-relay/hooks';
+import { PreloadedQuery, loadQuery } from 'react-relay/hooks';
 
 const allTodosQuery = graphql`
 	query pagesAllTodosQuery {
@@ -17,14 +17,14 @@ const allTodosQuery = graphql`
 const todoChangesSubscription = graphql`
 	subscription pagesOnTodoChangesSubscription {
 		todos_TodoChanges {
-			todoID: id
-			text
-			isCompleted
+			...Todo_todo
 		}
 	}
 `;
 
-const loadTodosReference = loadQuery<pagesAllTodosQuery>(getEnvironment(), allTodosQuery, {});
+const isServer = typeof window === 'undefined';
+
+const loadTodosReference = isServer ? null : loadQuery<pagesAllTodosQuery>(getEnvironment(), allTodosQuery, {});
 
 const todoUpdater = (store: RecordSourceSelectorProxy<pagesOnTodoChangesSubscription['response']>) => {
 	const newTodoRecord = store.getRootField('todos_TodoChanges');
@@ -46,14 +46,14 @@ const todoUpdater = (store: RecordSourceSelectorProxy<pagesOnTodoChangesSubscrip
 	}
 };
 
-const App = () => {
+const TodoListComponent = ({ queryReference }: { queryReference: PreloadedQuery<pagesAllTodosQuery, {}> }) => {
 	useSubscription<pagesOnTodoChangesSubscription>({
 		subscription: todoChangesSubscription,
 		variables: {},
 		updater: todoUpdater,
 	});
 
-	const data = usePreloadedQuery(allTodosQuery, loadTodosReference);
+	const data = usePreloadedQuery(allTodosQuery, queryReference);
 
 	return (
 		<div className="bg-gray-100 min-h-screen py-6">
@@ -63,6 +63,14 @@ const App = () => {
 			</div>
 		</div>
 	);
+};
+
+const App = () => {
+	if (loadTodosReference) {
+		return <TodoListComponent queryReference={loadTodosReference} />;
+	}
+
+	return <>Loading...</>;
 };
 
 export default App;
