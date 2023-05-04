@@ -1,7 +1,8 @@
 import { WunderGraphMockServer } from './mock-server';
 import { WunderGraphTestServer } from './test-server';
+import { Client } from '../client';
 
-export interface ServerStartOptions {
+export interface TestServersStartOptions {
 	/**
 	 * Environment variables that should be set to the mock server url.
 	 * This assumes that you use `process.env` or `new EnvironmentVariable()` to access environment variables.
@@ -13,10 +14,16 @@ export interface ServerStartOptions {
 	env?: Record<string, string>;
 }
 
-export class TestServers {
-	constructor(public mockServer: WunderGraphMockServer, public testServer: WunderGraphTestServer) {}
+export class WunderGraphTestServers<ClientType extends Client = Client> {
+	constructor(
+		public readonly mockServer: WunderGraphMockServer,
+		public readonly testServer: WunderGraphTestServer<ClientType>
+	) {}
 
-	public async start(options?: ServerStartOptions) {
+	/**
+	 * Start all servers.
+	 */
+	public async start(options?: TestServersStartOptions) {
 		await this.mockServer.start();
 
 		const msUrl = this.mockServer.url();
@@ -32,15 +39,13 @@ export class TestServers {
 			env,
 		});
 
-		return async () => {
-			const shutdown = [];
-			if (this.mockServer) {
-				shutdown.push(this.mockServer.stop());
-			}
-			if (this.testServer) {
-				shutdown.push(this.testServer.stop());
-			}
-			await Promise.all(shutdown);
-		};
+		return () => this.stop();
+	}
+
+	/**
+	 * Stop all servers.
+	 */
+	public async stop() {
+		return Promise.all([this.mockServer.stop(), this.testServer.stop()]);
 	}
 }
