@@ -1,0 +1,7 @@
+subscription pages_onTodoChangesSubscription {
+  todos_TodoChanges {
+    id
+    text
+    isCompleted
+  }
+}
