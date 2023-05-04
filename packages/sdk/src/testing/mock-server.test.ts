@@ -125,7 +125,7 @@ describe('Mock server', () => {
 		expect(scope.error).toBeDefined();
 	});
 
-	test('Should return 404 and throw with original error when handler does not match with any interceptor', async () => {
+	test('Should return 404 and throw with original error when handler does not match with any interceptor / handler', async () => {
 		let scope = server.mock(
 			async ({ url, method }) => {
 				return url.path === '/test' && method === 'GET';
@@ -156,7 +156,7 @@ describe('Mock server', () => {
 				return {
 					body: {
 						getUser: {
-							id: '456',
+							id: '123',
 						},
 					},
 				};
@@ -170,6 +170,63 @@ describe('Mock server', () => {
 		expect(scope.isDone).toBe(true);
 		expect(scope.error).toBeUndefined();
 		expect(resp.status).toBe(200);
+		expect(await resp.json()).toEqual({
+			getUser: {
+				id: '123',
+			},
+		});
+	});
+
+	test('Should return 404 and throw with original error when handler does not match with any interceptor / match', async () => {
+		let scope = server.mock(
+			async ({ url, method }) => {
+				throw new Error('Request does not match');
+			},
+			async () => {
+				return {};
+			}
+		);
+
+		let resp = await fetch(`${server.url()}/test`);
+
+		expect(resp.status).toBe(404);
+		expect(scope.isDone).toBe(false);
+		expect(scope.error).toBeDefined();
+		// @ts-expect-error
+		expect(scope.error.cause).toBeDefined();
+		expect(() => scope.done()).toThrow(
+			'Request does not match\n' + 'Caused by: No interceptor matched for request GET /test'
+		);
+
+		// Let's test if the interceptor was reset
+
+		scope = server.mock(
+			async ({ url, method }) => {
+				return url.path === '/test' && method === 'GET';
+			},
+			async () => {
+				return {
+					body: {
+						getUser: {
+							id: '123',
+						},
+					},
+				};
+			}
+		);
+
+		resp = await fetch(`${server.url()}/test`);
+
+		scope.done();
+
+		expect(scope.isDone).toBe(true);
+		expect(scope.error).toBeUndefined();
+		expect(resp.status).toBe(200);
+		expect(await resp.json()).toEqual({
+			getUser: {
+				id: '123',
+			},
+		});
 	});
 
 	test('Should return 404 and throw with not found error when handler does not match with any interceptor', async () => {
