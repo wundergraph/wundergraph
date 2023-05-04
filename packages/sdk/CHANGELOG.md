@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.152.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.151.0...@wundergraph/sdk@0.152.0) (2023-05-04)
+
+### Features
+
+* mocking error handling improvements ([#926](https://github.com/wundergraph/wundergraph/issues/926)) ([10c3018](https://github.com/wundergraph/wundergraph/commit/10c30181f8be203f4bb69c229c034f1e22dbdeba)) (@StarpTech)
+
 ## [0.151.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.150.0...@wundergraph/sdk@0.151.0) (2023-05-03)
 
 ### Features
