@@ -41,7 +41,7 @@ configureWunderGraphApplication({
 
 Within a test, you can import `createTestAndMockServer()` to create the test and mock server instances.
 Note that depending on your project's settings, the path might be slightly different depending on where you generate your templates.
-We use `beforeAll` to start the test and mock server instances. The `ts.start()` method returns a cleanup function to shutdown all servers.
+We use `beforeAll` to start the test and mock server instances. The `ts.start()` method returns a cleanup function to shutdown all servers. Alternatively, you can call `ts.stop()`.
 In vitest you can return an async function to do a cleanup. We also use `mockURLEnvs` to replace the environment variables with the mock server URL.
 
 {% callout type="note" %}
