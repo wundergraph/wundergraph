@@ -10,6 +10,7 @@ import {
 	operationInputTypename,
 	operationInternalInputTypename,
 	operationResponseDataTypename,
+	operationResponseTypename,
 } from './helpers';
 import fs from 'fs';
 import path from 'path';
@@ -124,7 +125,7 @@ export class TypeScriptResponseModels implements Template {
 			}
 			return JSONSchemaToTypescriptInterface(
 				responseSchema,
-				op.Name + 'Response',
+				operationResponseTypename(op),
 				true,
 				op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined
 			);

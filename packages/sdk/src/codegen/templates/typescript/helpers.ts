@@ -35,6 +35,7 @@ export const operations = (application: ResolvedApplication, operationType: Oper
 				hasInput: hasInput(op),
 				hasInternalInput: hasInternalInput(op),
 				injectedInputTypename: operationInjectedInputTypename(op),
+				inputTypename: operationInputTypename(op),
 				internalInputTypename: operationInternalInputTypename(op),
 				liveQuery: !!op.LiveQuery?.enable,
 				requiresAuthentication: op.AuthenticationConfig.required,
@@ -53,6 +54,7 @@ export const queries = (application: ResolvedApplication, includeInternal: boole
 			hasInput: hasInput(op),
 			hasInternalInput: hasInternalInput(op),
 			injectedInputTypename: operationInjectedInputTypename(op),
+			inputTypename: operationInputTypename(op),
 			internalInputTypename: operationInternalInputTypename(op),
 			requiresAuthentication: op.AuthenticationConfig.required,
 			responseDataTypename: operationResponseDataTypename(op),
@@ -72,6 +74,7 @@ export const liveQueries = (application: ResolvedApplication, includeInternal: b
 				hasInput: hasInput(op),
 				hasInternalInput: hasInternalInput(op),
 				injectedInputTypename: operationInjectedInputTypename(op),
+				inputTypename: operationInputTypename(op),
 				internalInputTypename: operationInternalInputTypename(op),
 				liveQuery: true,
 				requiresAuthentication: op.AuthenticationConfig.required,
@@ -80,11 +83,11 @@ export const liveQueries = (application: ResolvedApplication, includeInternal: b
 			};
 		});
 
-export const operationInputTypename = (op: GraphQLOperation) => `${op.Name}Input`;
-export const operationInternalInputTypename = (op: GraphQLOperation) => `${op.Name}InternalInput`;
-export const operationInjectedInputTypename = (op: GraphQLOperation) => `${op.Name}InjectedInput`;
-export const operationResponseTypename = (op: GraphQLOperation) => `${op.Name}Response`;
-export const operationResponseDataTypename = (op: GraphQLOperation) => `${op.Name}ResponseData`;
+export const operationInputTypename = (op: GraphQLOperation) => `${op.Name}$Input`;
+export const operationInternalInputTypename = (op: GraphQLOperation) => `${op.Name}$InternalInput`;
+export const operationInjectedInputTypename = (op: GraphQLOperation) => `${op.Name}$InjectedInput`;
+export const operationResponseTypename = (op: GraphQLOperation) => `${op.Name}$Response`;
+export const operationResponseDataTypename = (op: GraphQLOperation) => `${op.Name}$ResponseData`;
 
 export const modelImports = (
 	application: ResolvedApplication,
@@ -93,7 +96,7 @@ export const modelImports = (
 ): string => {
 	return filteredOperations(application, includeInternal)
 		.map((op) => {
-			let out = `${op.Name}Response`;
+			let out = operationResponseTypename(op);
 			if (hasInput(op)) {
 				out += `,${operationInputTypename(op)}`;
 			}
