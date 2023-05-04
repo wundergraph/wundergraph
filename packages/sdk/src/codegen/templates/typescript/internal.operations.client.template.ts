@@ -33,7 +33,7 @@ export type Subscriptions = {
 {{#if hasInternalSubscriptions}}
 		{{#each internalSubscriptions}}
 			'{{operationPath}}': {
-				input: {{#if hasInternalInput}}Internal{{operationName}}Input{{ else }}undefined{{/if}},
+				input: {{#if hasInternalInput}}{{internalInputTypename}}{{ else }}undefined{{/if}},
       	response: {{#if isTypeScriptOperation}}{ data?: {{responseDataTypename}}, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{responseTypename}}['data'], error?: ClientOperationErrors }{{/if}}
 			};
 		{{/each}}
