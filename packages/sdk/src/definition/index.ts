@@ -57,6 +57,7 @@ export interface ApiIntrospectionOptions {
 	 * Global proxy URL, which might be overridden at the data source level
 	 */
 	httpProxyUrl?: string;
+	apiID?: string;
 }
 
 export interface RenameType {

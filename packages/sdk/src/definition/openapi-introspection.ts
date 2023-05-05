@@ -13,7 +13,6 @@ import { openApiSpecificationToRESTApiObject } from '../v2openapi';
 import { introspectWithCache } from './introspection-cache';
 import { OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 import yaml from 'js-yaml';
-import { z as zod } from 'zod';
 import { HeadersBuilder } from './headers-builder';
 import { getJSONSchemaOptionsFromOpenAPIOptions } from '@omnigraph/openapi';
 import { loadNonExecutableGraphQLSchemaFromJSONSchemas } from '@omnigraph/json-schema';
@@ -52,9 +51,7 @@ export const introspectOpenApi = async (introspection: OpenAPIIntrospection) => 
 };
 
 export interface OpenAPIIntrospectionV2
-	extends Omit<OpenAPIIntrospection, 'statusCodeUnions' | 'authentication' | 'mTLS' | 'requestTimeoutSeconds'> {
-	id: string;
-}
+	extends Omit<OpenAPIIntrospection, 'statusCodeUnions' | 'authentication' | 'mTLS' | 'requestTimeoutSeconds'> {}
 
 export const introspectOpenApiV2 = async (introspection: OpenAPIIntrospectionV2) => {
 	const spec = await loadOpenApi(introspection.source);
@@ -62,38 +59,10 @@ export const introspectOpenApiV2 = async (introspection: OpenAPIIntrospectionV2)
 	return introspectWithCache(
 		introspection,
 		configuration,
-		async (introspection: OpenAPIIntrospectionV2, _: ApiIntrospectionOptions): Promise<GraphQLApi> => {
-			return await openApiSpecificationToGraphQLApi(spec, introspection);
+		async (introspection: OpenAPIIntrospectionV2, options: ApiIntrospectionOptions): Promise<GraphQLApi> => {
+			return await openApiSpecificationToGraphQLApi(spec, introspection, options.apiID!);
 		}
 	);
-};
-
-const apiIDRegexp = /^[_\-0-9a-z]+$/;
-
-const apiIDSchema = zod
-	.string({
-		required_error: 'id is required',
-		invalid_type_error: 'id must be a string',
-	})
-	.regex(apiIDRegexp, {
-		message: 'id must contain only lowercase letters, numbers, dashes and underscores',
-	})
-	.min(2, {
-		message: 'id must be at least 2 characters long',
-	})
-	.max(20, {
-		message: 'id must be at most 20 characters long',
-	});
-
-// validateIntrospectionId returns valid id otherwise throws an error.
-export const validateIntrospectionId = async (id: string): Promise<string> => {
-	const validationResult = await apiIDSchema.safeParseAsync(id);
-	if (!validationResult.success) {
-		const err = validationResult.error.format()._errors.join(', ');
-		throw new Error(`invalid id: ${err}`);
-	}
-
-	return validationResult.data;
 };
 
 type OasOrSwagger = OpenAPIV3.Document | OpenAPIV2.Document;
@@ -107,9 +76,9 @@ interface OpenApiOptions {
 
 export const openApiSpecificationToGraphQLApi = async (
 	oas: string,
-	introspection: OpenAPIIntrospectionV2
+	introspection: OpenAPIIntrospectionV2,
+	apiID: string
 ): Promise<GraphQLApi> => {
-	const apiID: string = await validateIntrospectionId(introspection.id);
 	// we need to remove open api extensions from the spec because they could be a first key in the spec
 	// instead of params expected by omnigraph for the path
 	const spec = removeExtensions(readSpec(oas, introspection.source));

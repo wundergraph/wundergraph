@@ -1,7 +1,7 @@
-import { GraphQLApi } from './index';
+import { ApiIntrospectionOptions, GraphQLApi } from './index';
 import { introspectWithCache } from './introspection-cache';
 import { IHeadersBuilder } from './headers-builder';
-import { readFile, validateIntrospectionId } from './openapi-introspection';
+import { readFile } from './openapi-introspection';
 import { SOAPLoader } from '@omnigraph/soap';
 import { fetch } from '@whatwg-node/fetch';
 import { printSchemaWithDirectives } from '@graphql-tools/utils';
@@ -16,7 +16,7 @@ export interface SoapIntrospectionFile {
 export type SoapIntrospectionSource = SoapIntrospectionFile;
 
 export interface SoapIntrospection {
-	id: string;
+	id?: string;
 	apiNamespace?: string;
 	headers?: (builder: IHeadersBuilder) => IHeadersBuilder;
 	source: SoapIntrospectionSource;
@@ -28,15 +28,13 @@ export const introspectSoap = async (introspection: SoapIntrospection) => {
 	return introspectWithCache(
 		introspection,
 		configuration,
-		async (introspection: SoapIntrospection): Promise<GraphQLApi> => {
-			return await soapToGraphQLApi(spec, introspection);
+		async (introspection: SoapIntrospection, options: ApiIntrospectionOptions): Promise<GraphQLApi> => {
+			return await soapToGraphQLApi(spec, introspection, options.apiID!);
 		}
 	);
 };
 
-const soapToGraphQLApi = async (wsdl: string, introspection: SoapIntrospection): Promise<GraphQLApi> => {
-	const apiID: string = await validateIntrospectionId(introspection.id);
-
+const soapToGraphQLApi = async (wsdl: string, introspection: SoapIntrospection, apiID: string): Promise<GraphQLApi> => {
 	const soapLoader = new SOAPLoader({
 		fetch,
 	});
@@ -49,7 +47,6 @@ const soapToGraphQLApi = async (wsdl: string, introspection: SoapIntrospection):
 	return introspectGraphql(
 		{
 			url: `${WgEnv.ServerUrl}-soap`,
-			// baseUrl: introspection.baseURL || '',
 			path: `/soap/${apiID}`,
 			apiNamespace: introspection.apiNamespace,
 			internal: true,
