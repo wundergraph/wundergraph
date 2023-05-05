@@ -74,7 +74,10 @@ export const openApiSpecificationToGraphQLApi = async (
 		...extraJSONSchemaOptions,
 	});
 
-	const schema = printSchemaWithDirectives(graphQLSchema);
+	const schema = printSchemaWithDirectives(graphQLSchema).replace(
+		'directive @oneOf on OBJECT | INTERFACE',
+		'directive @oneOf on OBJECT | INTERFACE | INPUT_OBJECT'
+	);
 
 	return introspectGraphql(
 		{

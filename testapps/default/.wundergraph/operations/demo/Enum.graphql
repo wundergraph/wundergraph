@@ -1,0 +1,20 @@
+mutation ($input: test_TestType_Input!) {
+	test_test_endpoint(input: $input) {
+		__typename
+		... on test_A_const_container {
+			A_const
+		}
+		... on test_mutation_test_endpoint_oneOf_1 {
+			B
+		}
+		... on test_mutation_test_endpoint_oneOf_2 {
+			C
+		}
+		... on test_mutation_test_endpoint_oneOf_3 {
+			D {
+				first
+				second
+			}
+		}
+	}
+}

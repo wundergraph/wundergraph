@@ -83,6 +83,43 @@
         }
       }
     },
+    "/users/{id}/posts": {
+      "get": {
+        "description": "Returns posts for a user by id",
+        "tags": ["Users", "Posts"],
+        "operationId": "userPosts",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The user id.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Post"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
     "/posts/{id}": {
       "get": {
         "description": "Returns a post by id",
@@ -143,6 +180,9 @@
             "type": "integer"
           },
           "title": {
+            "type": "string"
+          },
+          "body": {
             "type": "string"
           }
         }

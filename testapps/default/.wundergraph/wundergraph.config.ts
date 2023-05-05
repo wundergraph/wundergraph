@@ -25,8 +25,6 @@ const jsp2 = introspect.openApi({
 		kind: 'file',
 		filePath: '../json_placeholder.json',
 	},
-	baseURL: new EnvironmentVariable('JSP_BASE_URL'),
-	headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
 });
 
 const federatedApi = introspect.federation({
@@ -34,19 +32,15 @@ const federatedApi = introspect.federation({
 	upstreams: [
 		{
 			url: 'https://wg-federation-demo-accounts.fly.dev/graphql',
-			headers: (b) => b.addClientRequestHeader('Authorization', 'Authorization'),
 		},
 		{
 			url: 'https://wg-federation-demo-products.fly.dev/graphql',
-			headers: (b) => b.addClientRequestHeader('Authorization', 'Authorization'),
 		},
 		{
 			url: 'https://wg-federation-demo-reviews.fly.dev/graphql',
-			headers: (b) => b.addClientRequestHeader('Authorization', 'Authorization'),
 		},
 		{
 			url: 'https://wg-federation-demo-inventory.fly.dev/graphql',
-			headers: (b) => b.addClientRequestHeader('Authorization', 'Authorization'),
 		},
 	],
 });
@@ -96,9 +90,19 @@ const usersPost = introspect.prisma({
 	},
 });
 
+const unionTest = introspect.openApiV2({
+	id: 'uniontest',
+	apiNamespace: 'test',
+	source: {
+		kind: 'file',
+		filePath: '../union_types_test_01.yaml',
+	},
+	baseURL: 'http://localhost:8080',
+});
+
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [jsp, weather, countries, spacex, chinook, db, jsp2, usersPost, federatedApi],
+	apis: [jsp, weather, countries, spacex, chinook, db, jsp2, usersPost, federatedApi, unionTest],
 	server,
 	operations,
 	generate,
