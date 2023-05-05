@@ -1,7 +1,7 @@
 import { expect, describe, it, beforeAll } from 'vitest';
 import { join } from 'path';
 import { createTestAndMockServer } from '../.wundergraph/generated/testing';
-import { TestServers } from '@wundergraph/sdk/dist/testing';
+import type { TestServers } from '../.wundergraph/generated/testing';
 
 let ts: TestServers;
 

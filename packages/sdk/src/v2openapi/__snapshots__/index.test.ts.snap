@@ -16498,12 +16498,19 @@ type api_MutationPostPasswordlessLoginOK {
 
 type api_MutationPostPasswordlessLoginOkUser {
   username: String
+  usernameStatus: api_MutationPostPasswordlessLoginOkUser_usernameStatus
   verified: Boolean
   firstName: String
   lastName: String
   email: String
   mobilePhone: String
   timezone: String
+}
+
+enum api_MutationPostPasswordlessLoginOkUser_usernameStatus {
+  ACTIVE
+  PENDING
+  REJECTED
 }
 
 type api_MutationPostPasswordlessLoginNotRegisteredForApp {
@@ -16547,6 +16554,19 @@ input api_PostPasswordlessLoginInputMetaDataInput {
 
 input api_PostPasswordlessLoginInputMetaDataInputDeviceInput {
   name: String
+  type: api_PostPasswordlessLoginInputMetaDataInputDeviceInput_type
+}
+
+enum api_PostPasswordlessLoginInputMetaDataInputDeviceInput_type {
+  BROWSER
+  DESKTOP
+  LAPTOP
+  MOBILE
+  OTHER
+  SERVER
+  TABLET
+  TV
+  UNKNOWN
 }
 
 union api_PostJwtRefreshResponse = UnspecifiedHttpResponse | api_MutationPostJwtRefreshOK | api_MutationPostJwtRefreshBadRequest | api_MutationPostJwtRefreshNoAuthProvided | api_MutationPostJwtRefreshTokenNotFound | api_MutationPostJwtRefreshInternalError
@@ -16790,12 +16810,19 @@ type api_MutationPostPasswordlessLoginOK {
 
 type api_MutationPostPasswordlessLoginOkUser {
   username: String
+  usernameStatus: api_MutationPostPasswordlessLoginOkUser_usernameStatus
   verified: Boolean
   firstName: String
   lastName: String
   email: String
   mobilePhone: String
   timezone: String
+}
+
+enum api_MutationPostPasswordlessLoginOkUser_usernameStatus {
+  ACTIVE
+  PENDING
+  REJECTED
 }
 
 input api_postPasswordlessLoginInput {
@@ -16810,6 +16837,19 @@ input api_PostPasswordlessLoginInputMetaDataInput {
 
 input api_PostPasswordlessLoginInputMetaDataInputDeviceInput {
   name: String
+  type: api_PostPasswordlessLoginInputMetaDataInputDeviceInput_type
+}
+
+enum api_PostPasswordlessLoginInputMetaDataInputDeviceInput_type {
+  BROWSER
+  DESKTOP
+  LAPTOP
+  MOBILE
+  OTHER
+  SERVER
+  TABLET
+  TV
+  UNKNOWN
 }"
 `;
 
@@ -16996,12 +17036,19 @@ type api_MutationPostPasswordlessLogin {
 
 type api_MutationPostPasswordlessLoginUser {
   username: String
+  usernameStatus: api_MutationPostPasswordlessLoginUser_usernameStatus
   verified: Boolean
   firstName: String
   lastName: String
   email: String
   mobilePhone: String
   timezone: String
+}
+
+enum api_MutationPostPasswordlessLoginUser_usernameStatus {
+  ACTIVE
+  PENDING
+  REJECTED
 }
 
 input api_postPasswordlessLoginInput {
@@ -17016,6 +17063,19 @@ input api_PostPasswordlessLoginInputMetaDataInput {
 
 input api_PostPasswordlessLoginInputMetaDataInputDeviceInput {
   name: String
+  type: api_PostPasswordlessLoginInputMetaDataInputDeviceInput_type
+}
+
+enum api_PostPasswordlessLoginInputMetaDataInputDeviceInput_type {
+  BROWSER
+  DESKTOP
+  LAPTOP
+  MOBILE
+  OTHER
+  SERVER
+  TABLET
+  TV
+  UNKNOWN
 }"
 `;
 
@@ -20529,6 +20589,7 @@ type api_Pet {
   category: api_Category
   photoUrls: [String]!
   tags: [api_Tag]
+  status: api_Pet_status
 }
 
 type api_Category {
@@ -20541,12 +20602,19 @@ type api_Tag {
   name: String
 }
 
+enum api_Pet_status {
+  available
+  pending
+  sold
+}
+
 input api_PetInput {
   id: Int
   name: String!
   category: api_CategoryInput
   photoUrls: [String]!
   tags: [api_TagInput]
+  status: api_PetInput_status
 }
 
 input api_CategoryInput {
@@ -20557,6 +20625,12 @@ input api_CategoryInput {
 input api_TagInput {
   id: Int
   name: String
+}
+
+enum api_PetInput_status {
+  available
+  pending
+  sold
 }
 
 enum api_findPetsByStatus_status {
@@ -20578,7 +20652,14 @@ type api_Order {
   petId: Int
   quantity: Int
   shipDate: String
+  status: api_Order_status
   complete: Boolean
+}
+
+enum api_Order_status {
+  placed
+  approved
+  delivered
 }
 
 input api_OrderInput {
@@ -20586,7 +20667,14 @@ input api_OrderInput {
   petId: Int
   quantity: Int
   shipDate: String
+  status: api_OrderInput_status
   complete: Boolean
+}
+
+enum api_OrderInput_status {
+  placed
+  approved
+  delivered
 }
 
 input api_UserInput {
@@ -20826,8 +20914,16 @@ type Mutation {
 
 type api_Pet {
   name: String!
+  type: api_Pet_type
   birthdate: String
   owner: api_PetOwner
+}
+
+enum api_Pet_type {
+  cat
+  dog
+  fish
+  bird
 }
 
 type api_PetOwner {
@@ -20850,8 +20946,16 @@ type api_Address {
 
 input api_PetInput {
   name: String!
+  type: api_PetInput_type
   birthdate: String
   owner: api_PetOwnerInput
+}
+
+enum api_PetInput_type {
+  cat
+  dog
+  fish
+  bird
 }
 
 input api_PetOwnerInput {
@@ -21801,12 +21905,19 @@ type api_MutationPostPasswordlessLogin {
 
 type api_MutationPostPasswordlessLoginUser {
   username: String
+  usernameStatus: api_MutationPostPasswordlessLoginUser_usernameStatus
   verified: Boolean
   firstName: String
   lastName: String
   email: String
   mobilePhone: String
   timezone: String
+}
+
+enum api_MutationPostPasswordlessLoginUser_usernameStatus {
+  ACTIVE
+  PENDING
+  REJECTED
 }
 
 input api_postPasswordlessLoginInput {
@@ -21821,6 +21932,19 @@ input api_PostPasswordlessLoginInputMetaDataInput {
 
 input api_PostPasswordlessLoginInputMetaDataInputDeviceInput {
   name: String
+  type: api_PostPasswordlessLoginInputMetaDataInputDeviceInput_type
+}
+
+enum api_PostPasswordlessLoginInputMetaDataInputDeviceInput_type {
+  BROWSER
+  DESKTOP
+  LAPTOP
+  MOBILE
+  OTHER
+  SERVER
+  TABLET
+  TV
+  UNKNOWN
 }
 
 type api_MutationPostJwtRefreshToken {

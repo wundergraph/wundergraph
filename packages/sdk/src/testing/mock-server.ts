@@ -148,7 +148,7 @@ export class WunderGraphMockServer {
 					if (mockReq._body) {
 						return mockReq._body;
 					}
-					mockReq._body = await getJSONBody(req);
+					mockReq._body = await getTextBody(req);
 					return mockReq._body;
 				};
 
@@ -198,6 +198,15 @@ export class WunderGraphMockServer {
 			} catch (err: any) {
 				log('error in mock handler, continue with the next interceptor, %s, %s error: %s', req.method, req.url, err);
 
+				if (err instanceof Error) {
+					const cause = new Error(`No interceptor matched for request ${req.method} ${req.url}`);
+					// Add more context to the error message. Can be replaced by setting `cause`
+					// when all popular test runners support it for printing the error message
+					err.message = err.message + '\nCaused by: ' + cause.message;
+					// @ts-expect-error - That allows modern test runners to print the cause
+					err.cause = cause;
+				}
+
 				if (scope) {
 					scope.error = err;
 					scope.isDone = false;
@@ -207,9 +216,11 @@ export class WunderGraphMockServer {
 
 		if (matched === false) {
 			log('no mock handler matched, continue with the next handler, %s, %s', req.method, req.url);
-			if (scope) {
-				scope.error = new Error(`no interceptor matched for request ${req.method} ${req.url}`);
+
+			if (scope && !scope.error) {
+				scope.error = new Error(`No interceptor matched for request ${req.method} ${req.url}`);
 			}
+
 			await next();
 		}
 	}
@@ -254,7 +265,7 @@ export class WunderGraphMockServer {
 		if (matched === false) {
 			log('no mock handler matched, continue with the next handler, %s, %s', req.method, req.url);
 			if (scope) {
-				scope.error = new Error(`no connect interceptor matched for request ${req.method} ${req.url}`);
+				scope.error = new Error(`No connect interceptor matched for request ${req.method} ${req.url}`);
 			}
 		}
 	}
@@ -305,10 +316,11 @@ export class WunderGraphMockServer {
 	}
 
 	/**
-	 * When you setup an interceptor for a URL and that interceptor is used, it is removed from the interceptor list.
-	 * This means that you can intercept 2 or more calls to the same URL and return different things on each of them.
-	 * It also means that you must setup one interceptor for each request you are going to have
-	 * otherwise it will throw an error because that URL was not present in the interceptor list.
+	 *	When you setup a mock with mock() and the request matches, the mock server will return the response.
+	 *	If the request does not match, the mock server will return a 404 response and the call to scope.done() will fail the test.
+	 *	You have also the ability to throw an error inside the response function to fail the mock.
+	 *	This is useful if you want to verify with test assertion that the request is correct.
+	 *	A thrown error is handled as an unmatched request and the next mock will be checked.
 	 */
 	mock<Response = any>(
 		/**
@@ -317,7 +329,6 @@ export class WunderGraphMockServer {
 		match: (req: Omit<MockRequest, '_body'>) => Promise<boolean> | boolean,
 		/**
 		 * The handler function. Return the mocked response.
-		 * If error is thrown the handler is skipped and the next handler is called.
 		 * You can use test assertions in the handler to verify the request.
 		 * If error is thrown the handler is skipped and the next handler is called.
 		 */

@@ -9,7 +9,6 @@ import {
 	GraphQLString,
 	GraphQLUnionType,
 } from 'graphql';
-import type { SDLResponse } from './generated/models';
 
 export default configureWunderGraphServer(() => ({
 	webhooks: {
@@ -83,13 +82,28 @@ export default configureWunderGraphServer(() => ({
 					hook.log.info('customResolver hook for Albums');
 				},
 			},
+			Schema_extensionsExtensionWithHook: {
+				mutatingPostResolve: async ({ response }) => {
+					console.log('mutatingPostResolve hook for Schema_extensionsExtensionWithHook');
+					return {
+						...response,
+						data: {
+							...response.data,
+							spacex_capsule: {
+								...response.data?.spacex_capsule,
+								myCustomField: 'resolved by mutatingPostResolve hook',
+							},
+						},
+					};
+				},
+			},
 		},
 		mutations: {
 			SDL: {
 				mutatingPreResolve: async (hook) => {
 					return hook.input;
 				},
-				mockResolve: async (hook): Promise<SDLResponse> => {
+				mockResolve: async (hook) => {
 					return {
 						data: null as any,
 					};
