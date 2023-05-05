@@ -1,0 +1,9 @@
+mutation TodoListAddTodoMutation(
+  $todo: todos_NewTodoInput!
+) {
+  todos_addTodo(todo: $todo) {
+    id
+    text
+    isCompleted
+  }
+}

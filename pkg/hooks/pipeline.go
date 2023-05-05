@@ -27,20 +27,20 @@ type QueryResolver interface {
 }
 
 type ResolveConfiguration struct {
-	// Pre indicates wheter the PreResolve hook should be run
+	// Pre indicates whether the PreResolve hook should be run
 	Pre bool
-	// MutatingPre indicates wheter the MutatingPreResolve hook should be run
+	// MutatingPre indicates whether the MutatingPreResolve hook should be run
 	MutatingPre bool
-	// Custom indicates wheter the CustomResolve hook should be run
+	// Custom indicates whether the CustomResolve hook should be run
 	Custom bool
-	// Mock indicates wether the MockResolve hook should be run
+	// Mock indicates whether the MockResolve hook should be run
 	Mock bool
 }
 
 type PostResolveConfiguration struct {
-	// Post indicates wether the PostResolve hook should be run
+	// Post indicates whether the PostResolve hook should be run
 	Post bool
-	// MutatingPost indicates wether the MutatingPostResolve hook should be run
+	// MutatingPost indicates whether the MutatingPostResolve hook should be run
 	MutatingPost bool
 }
 

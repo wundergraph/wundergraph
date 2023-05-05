@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.150.0",
+  "version": "0.152.0",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -136,7 +136,7 @@
     "@whatwg-node/fetch": "^0.8.4",
     "@wundergraph/protobuf": "workspace:^0.110.0",
     "@wundergraph/straightforward": "^4.2.5",
-    "@wundergraph/wunderctl": "workspace:^0.146.1",
+    "@wundergraph/wunderctl": "workspace:^0.147.0",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",
