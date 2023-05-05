@@ -7,16 +7,21 @@ description:
 ## Introduction
 
 {% callout type="warning" %}
-We highly recommend to use our Hooks Server instead of writing your own hooks server. The protocol is not stable yet and might change in the future.
+We highly recommend to use the Hooks Server that comes out of the box with each WunderGraph project.
 {% /callout %}
 
-The WunderGraph server is a central component in the architecture of Wundergraph. It's responsible for executing custom hooks, webhooks and TypeScript operations.
-The server is written in Node.js. It's a standalone and stateless component that is intended to deploy in the same network as the WunderNode.
+The WunderGraph server is a central component in the architecture of WunderGraph. It's responsible for executing custom hooks, webhooks and TypeScript operations.
+Some people might call it a Co-Processor or a Sidecar component to the WunderNode, our central Gateway component.
+
+The server is written in Node.js. It's a standalone and stateless component that is intended to be deployed in the same network as the WunderNode.
 The server must not be exposed to the public internet and is only be accessed by the WunderNode.
 The WunderNode acts as a reverse proxy for the server. The server can be deployed in two different modes:
 
 1. **Sidecar mode:** The server is started with `wunderctl start` and runs as child process of the WunderNode. This is the default mode and is useful for low traffic applications or for development.
 2. **Standalone mode:** The server is started independently with `wunderctl server start` in combination with `wunderctl node start`. This is useful if you want to run the hooks server on a different machine or if you want to run multiple hooks servers for load balancing.
+
+That being said, by implementing the Server API, you can implement your own server in any language you like.
+The WunderNode is agnostic to the server implementation as long as it implements the Server API.
 
 ## Server Endpoints
 
@@ -96,7 +101,7 @@ Incoming Client Request
                 │
                 └─▶ (Internal) WunderGraph Engine - Resolve operation
                     │
-            *exit ◀─┴─▶ onOriginRequest (Only for external HTTP data-source call)
+            *exit ◀─┴─▶ onOriginRequest (Only for external HTTP data-source calls)
                         │
                 *exit ◀─┴─▶ onOriginResponse (Companion to onOriginRequest)
                         │
