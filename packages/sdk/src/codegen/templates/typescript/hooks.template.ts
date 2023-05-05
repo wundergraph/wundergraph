@@ -35,7 +35,7 @@ export type HooksConfig = HooksConfiguration<
 export type QueryHooks = {
 {{#if hasQueries}}
 	{{#each queries}}
-		{{operationName}}?: QueryHook{{#if hasInternalInput}}<Injected{{operationName}}Input, {{else}}WithoutInput<{{/if}}{{operationName}}Response, HookContext>,
+		{{operationName}}?: QueryHook{{#if hasInternalInput}}<{{injectedInputTypename}}, {{else}}WithoutInput<{{/if}}{{responseTypename}}, HookContext>,
 	{{/each}}
 {{/if}}
 }
@@ -43,7 +43,7 @@ export type QueryHooks = {
 export type MutationHooks ={
 {{#if hasMutations}}
 	{{#each mutations}}
-		{{operationName}}?: MutationHook<{{#if hasInternalInput}}Injected{{operationName}}Input{{else}}undefined{{/if}}, {{operationName}}Response, HookContext>,
+		{{operationName}}?: MutationHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext>,
 	{{/each}}
 {{/if}}
 }
@@ -51,7 +51,7 @@ export type MutationHooks ={
 export type SubscriptionHooks = {
 {{#if hasSubscriptions}}
 	{{#each subscriptions}}
-		{{operationName}}?: SubscriptionHook<{{#if hasInternalInput}}Injected{{operationName}}Input{{else}}undefined{{/if}}, {{operationName}}Response, HookContext>,
+		{{operationName}}?: SubscriptionHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext>,
 	{{/each}}
 {{/if}}
 }
