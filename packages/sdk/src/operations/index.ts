@@ -1,6 +1,15 @@
 export { createOperationFactory } from './operations';
 export { z } from 'zod';
-export type { ExtractInput, ExtractResponse } from './operations';
+export type {
+	ExtractInput,
+	ExtractResponse,
+	LiveQueryConfig,
+	SubscriptionHandler,
+	BaseOperationConfiguration,
+	HandlerContext,
+	NodeJSOperation,
+	OperationTypes,
+} from './operations';
 export type {
 	GraphQLError,
 	GraphQLErrorLocation,

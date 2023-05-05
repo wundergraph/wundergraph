@@ -43,19 +43,27 @@ configureWunderGraphApplication({
 			currency: {
 				jsonPath: 'currency',
 			},
+			aTestValue: {
+				jsonPath: 'aTestValue',
+				type: 'any',
+				required: false,
+			},
 		},
 		publicClaims: ['SUBJECT', 'GIVEN_NAME', 'FAMILY_NAME', 'shopID'],
 	},
-	codeGenerators: [
-		{
-			templates: [
-				// use all the typescript react templates to generate a client
-				...templates.typescript.all,
-			],
-			// create-react-app expects all code to be inside /src
-			// path: "../frontend/src/generated",
-		},
-	],
+	options: {
+		defaultRequestTimeoutSeconds: 2,
+	},
+	generate: {
+		codeGenerators: [
+			{
+				templates: [
+					// use all the typescript react templates to generate a client
+					...templates.typescript.all,
+				],
+			},
+		],
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins: ['http://localhost:9991', 'http://127.0.0.1:9991'],

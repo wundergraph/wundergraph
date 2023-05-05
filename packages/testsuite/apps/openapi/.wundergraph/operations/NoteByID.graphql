@@ -1,0 +1,6 @@
+query ($id: Int!) {
+	notes_noteByID(noteID: $id) {
+		id
+		text
+	}
+}
