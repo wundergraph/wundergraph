@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.152.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.152.0...@wundergraph/sdk@0.152.1) (2023-05-05)
+
+### Bug Fixes
+
+* add enum fields from OAS to WG Graph ([#929](https://github.com/wundergraph/wundergraph/issues/929)) ([77c1b2a](https://github.com/wundergraph/wundergraph/commit/77c1b2ab6666724aefb22cebcea38845ed0e03b8)) (@uroslates)
+* avoid generated typenames conflicts between <opName> and <opName>Internal ([#925](https://github.com/wundergraph/wundergraph/issues/925)) ([804f804](https://github.com/wundergraph/wundergraph/commit/804f804a6862003e7044c2841a57845f6ed732a8)) (@fiam)
+
 ## [0.152.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.151.0...@wundergraph/sdk@0.152.0) (2023-05-04)
 
 ### Features
