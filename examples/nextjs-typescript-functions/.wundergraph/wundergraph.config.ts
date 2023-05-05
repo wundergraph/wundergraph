@@ -23,15 +23,14 @@ configureWunderGraphApplication({
 	apis: [spaceX, countries, weather],
 	server,
 	operations,
-	codeGenerators: [
-		{
-			templates: [...templates.typescript.all],
-		},
-		{
-			templates: [new NextJsTemplate()],
-			path: '../components/generated',
-		},
-	],
+	generate: {
+		codeGenerators: [
+			{
+				templates: [new NextJsTemplate()],
+				path: '../components/generated',
+			},
+		],
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins: process.env.NODE_ENV === 'production' ? ['http://localhost:3000'] : ['http://localhost:3000'],

@@ -16,15 +16,17 @@ configureWunderGraphApplication({
 	apis: [db],
 	server,
 	operations,
-	codeGenerators: [
-		{
-			templates: [...templates.typescript.all, templates.typescript.operations, templates.typescript.linkBuilder],
-		},
-		{
-			templates: [templates.typescript.client, new NextJsTemplate()],
-			path: '../components/generated',
-		},
-	],
+	generate: {
+		codeGenerators: [
+			{
+				templates: [templates.typescript.operations, templates.typescript.linkBuilder],
+			},
+			{
+				templates: [templates.typescript.client, new NextJsTemplate()],
+				path: '../components/generated',
+			},
+		],
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins: process.env.NODE_ENV === 'production' ? ['http://localhost:3000'] : ['http://localhost:3000'],
