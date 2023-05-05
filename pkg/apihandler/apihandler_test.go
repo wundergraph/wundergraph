@@ -938,13 +938,12 @@ func TestQueryHandler_Caching(t *testing.T) {
 			Response: &resolve.GraphQLResponse{},
 		},
 		pool: pool.New(),
-		cacheConfig: cacheConfig{
-			enable:               true,
-			maxAge:               2,
-			public:               true,
-			staleWhileRevalidate: 0,
-		},
-		cache:                  cache,
+		cache: newCacheHandler(cache, &wgpb.OperationCacheConfig{
+			Enable:               true,
+			MaxAge:               2,
+			Public:               true,
+			StaleWhileRevalidate: 0,
+		}, ""),
 		operation:              operation,
 		rbacEnforcer:           &authentication.RBACEnforcer{},
 		stringInterpolator:     interpolateNothing,
@@ -973,7 +972,7 @@ func TestQueryHandler_Caching(t *testing.T) {
 	res.Headers().ValueEqual(WgCacheHeader, []string{"MISS"})
 	res.Body().Equal(`{"data":{"me":{"name":"Jens"}}}`)
 
-	handler.cacheConfig.public = false
+	handler.cache.config.Public = false
 
 	time.Sleep(time.Second)
 

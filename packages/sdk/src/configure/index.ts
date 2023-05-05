@@ -1598,6 +1598,11 @@ const applyNodeJsOperationOverrides = (
 			pollingIntervalSeconds: overrides.liveQuery.pollingIntervalSeconds,
 		};
 	}
+	if (overrides.cache) {
+		operation.CacheConfig = {
+			...overrides.cache,
+		};
+	}
 	if (overrides.requireAuthentication) {
 		operation.AuthenticationConfig = {
 			required: overrides.requireAuthentication,

@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
-	"github.com/cespare/xxhash"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/hashicorp/go-multierror"
@@ -535,8 +534,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			preparedPlan:           synchronousPlan,
 			pool:                   r.pool,
 			extractedVariables:     make([]byte, len(shared.Doc.Input.Variables)),
-			cache:                  r.cache,
-			configHash:             []byte(r.api.ApiConfigHash),
+			cache:                  newCacheHandler(r.cache, operation.CacheConfig, r.api.ApiConfigHash),
 			operation:              operation,
 			variablesValidator:     variablesValidator,
 			rbacEnforcer:           authentication.NewRBACEnforcer(operation),
@@ -555,15 +553,6 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			}
 		}
 
-		if operation.CacheConfig != nil && operation.CacheConfig.Enable {
-			handler.cacheConfig = cacheConfig{
-				enable:               operation.CacheConfig.Enable,
-				maxAge:               operation.CacheConfig.MaxAge,
-				public:               operation.CacheConfig.Public,
-				staleWhileRevalidate: operation.CacheConfig.StaleWhileRevalidate,
-			}
-		}
-
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
 
 		route := r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
@@ -579,10 +568,10 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			zap.String("method", http.MethodGet),
 			zap.String("path", apiPath),
 			zap.Bool("mock", operation.HooksConfiguration.MockResolve.Enable),
-			zap.Bool("cacheEnabled", handler.cacheConfig.enable),
-			zap.Int("cacheMaxAge", int(handler.cacheConfig.maxAge)),
-			zap.Int("cacheStaleWhileRevalidate", int(handler.cacheConfig.staleWhileRevalidate)),
-			zap.Bool("cachePublic", handler.cacheConfig.public),
+			zap.Bool("cacheEnabled", handler.cache.config.Enable),
+			zap.Int("cacheMaxAge", int(handler.cache.config.MaxAge)),
+			zap.Int("cacheStaleWhileRevalidate", int(handler.cache.config.StaleWhileRevalidate)),
+			zap.Bool("cachePublic", handler.cache.config.Public),
 			zap.Bool("authRequired", operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired),
 		)
 	case wgpb.OperationType_MUTATION:
@@ -1155,13 +1144,6 @@ func injectVariables(operation *wgpb.Operation, _ *http.Request, variables []byt
 	return variables
 }
 
-type cacheConfig struct {
-	enable               bool
-	maxAge               int64
-	public               bool
-	staleWhileRevalidate int64
-}
-
 type QueryResolver interface {
 	ResolveGraphQLResponse(ctx *resolve.Context, response *resolve.GraphQLResponse, data []byte, writer io.Writer) (err error)
 }
@@ -1211,9 +1193,7 @@ type QueryHandler struct {
 	preparedPlan           *plan.SynchronousResponsePlan
 	extractedVariables     []byte
 	pool                   *pool.Pool
-	cacheConfig            cacheConfig
-	cache                  apicache.Cache
-	configHash             []byte
+	cache                  *cacheHandler
 	liveQuery              liveQueryConfig
 	operation              *wgpb.Operation
 	variablesValidator     *inputvariables.Validator
@@ -1235,34 +1215,26 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var (
-		cacheKey     string
-		cacheIsStale = false
-	)
-
 	isLive := h.liveQuery.enabled && r.URL.Query().Has(WgLiveParam)
 
 	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+
 	ctx := pool.GetCtx(r, r, pool.Config{
 		RenameTypeNames: h.renameTypeNames,
 	})
+	defer pool.PutCtx(ctx)
+	cache := h.cache.RequestHandler(r, w)
 
-	defer func() {
-		if cacheIsStale {
-			buf.Reset()
-			ctx = ctx.WithContext(context.WithValue(context.Background(), "user", authentication.UserFromContext(r.Context())))
-			err := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
-			if err == nil {
-				bufferedData := buf.Bytes()
-				cacheData := make([]byte, len(bufferedData))
-				copy(cacheData, bufferedData)
-				h.cache.SetWithTTL(cacheKey, cacheData, time.Second*time.Duration(h.cacheConfig.maxAge+h.cacheConfig.staleWhileRevalidate))
-			}
+	defer cache.IfStale(func() ([]byte, error) {
+		buf.Reset()
+		ctx = ctx.WithContext(context.WithValue(context.Background(), "user", authentication.UserFromContext(r.Context())))
+		resp, err := h.hooksPipeline.Run(ctx, nil, r, buf)
+		if err != nil {
+			return nil, err
 		}
-
-		pool.PutCtx(ctx)
-		pool.PutBytesBuffer(buf)
-	}()
+		return resp.Data, nil
+	})
 
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
@@ -1313,46 +1285,12 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if h.cacheConfig.enable {
-		cacheKey = string(h.configHash) + r.RequestURI
-		item, hit := h.cache.Get(ctx.Context(), cacheKey)
-		if hit {
-
-			w.Header().Set(WgCacheHeader, "HIT")
-
-			_, _ = buf.Write(item.Data)
-
-			hash := xxhash.New()
-			_, _ = hash.Write(h.configHash)
-			_, _ = hash.Write(buf.Bytes())
-			ETag := fmt.Sprintf("W/\"%d\"", hash.Sum64())
-
-			w.Header()["ETag"] = []string{ETag}
-
-			if h.cacheConfig.public {
-				w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d, stale-while-revalidate=%d", h.cacheConfig.maxAge, h.cacheConfig.staleWhileRevalidate))
-			} else {
-				w.Header().Set("Cache-Control", fmt.Sprintf("private, max-age=%d, stale-while-revalidate=%d", h.cacheConfig.maxAge, h.cacheConfig.staleWhileRevalidate))
-			}
-
-			age := item.Age()
-			w.Header().Set("Age", fmt.Sprintf("%d", age))
-
-			if age > h.cacheConfig.maxAge {
-				cacheIsStale = true
-			}
-
-			ifNoneMatch := r.Header.Get("If-None-Match")
-			if ifNoneMatch == ETag {
-				w.WriteHeader(http.StatusNotModified)
-				return
-			}
-
-			w.WriteHeader(http.StatusOK)
-			_, _ = buf.WriteTo(w)
-			return
-		}
-		w.Header().Set(WgCacheHeader, "MISS")
+	served, err := cache.Serve(r.Context())
+	if done := handleOperationErr(requestLogger, err, w, "request cache failed", h.operation); done {
+		return
+	}
+	if served {
+		return
 	}
 
 	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
@@ -1364,38 +1302,17 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transformed := resp.Data
-
-	hash := xxhash.New()
-	_, _ = hash.Write(h.configHash)
-	_, _ = hash.Write(transformed)
-	ETag := fmt.Sprintf("W/\"%d\"", hash.Sum64())
-
-	w.Header()["ETag"] = []string{ETag}
-
-	if h.cacheConfig.enable {
-		if h.cacheConfig.public {
-			w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d, stale-while-revalidate=%d", h.cacheConfig.maxAge, h.cacheConfig.staleWhileRevalidate))
-		} else {
-			w.Header().Set("Cache-Control", fmt.Sprintf("private, max-age=%d, stale-while-revalidate=%d", h.cacheConfig.maxAge, h.cacheConfig.staleWhileRevalidate))
-		}
-
-		w.Header().Set("Age", "0")
-
-		cacheData := make([]byte, len(transformed))
-		copy(cacheData, transformed)
-
-		h.cache.SetWithTTL(cacheKey, cacheData, time.Second*time.Duration(h.cacheConfig.maxAge+h.cacheConfig.staleWhileRevalidate))
-	}
+	etag := cache.SetETag(resp.Data)
+	cache.SetHeaders(0)
+	cache.Store(resp.Data)
 
 	ifNoneMatch := r.Header.Get("If-None-Match")
-	if ifNoneMatch == ETag {
+	if ifNoneMatch == etag {
 		w.WriteHeader(http.StatusNotModified)
 		return
 	}
 
-	reader := bytes.NewReader(transformed)
-	_, err = reader.WriteTo(w)
+	_, err = w.Write(resp.Data)
 	if done := handleOperationErr(requestLogger, err, w, "writing response failed", h.operation); done {
 		return
 	}
@@ -2151,6 +2068,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 	handler := &FunctionsHandler{
 		operation:            operation,
 		log:                  r.log,
+		cache:                newCacheHandler(r.cache, operation.CacheConfig, r.api.ApiConfigHash),
 		variablesValidator:   variablesValidator,
 		rbacEnforcer:         authentication.NewRBACEnforcer(operation),
 		hooksClient:          r.middlewareClient,
@@ -2181,6 +2099,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 type FunctionsHandler struct {
 	operation            *wgpb.Operation
 	log                  *zap.Logger
+	cache                *cacheHandler
 	variablesValidator   *inputvariables.Validator
 	rbacEnforcer         *authentication.RBACEnforcer
 	hooksClient          *hooks.Client
@@ -2198,16 +2117,19 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	r = setOperationMetaData(r, h.operation)
 
-	ctx := pool.GetCtx(r, r, pool.Config{})
-	defer pool.PutCtx(ctx)
-
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
+	ctx := pool.GetCtx(r, r, pool.Config{})
+	defer pool.PutCtx(ctx)
+
 	variablesBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(variablesBuf)
+
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
 
 	ct := r.Header.Get("Content-Type")
 	if r.Method == http.MethodGet {
@@ -2249,9 +2171,6 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	isLive := h.liveQuery.enabled && r.URL.Query().Has(WgLiveParam)
 
-	buf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(buf)
-
 	input, err := hooks.EncodeData(r, buf, ctx.Variables, nil)
 	if done := handleOperationErr(requestLogger, err, w, "encoding hook data failed", h.operation); done {
 		return
@@ -2263,7 +2182,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case h.operation.OperationType == wgpb.OperationType_SUBSCRIPTION:
 		h.handleSubscriptionRequest(ctx, w, r, input, requestLogger)
 	default:
-		h.handleRequest(ctx, w, input, requestLogger)
+		h.handleRequest(ctx, r, w, input, requestLogger)
 	}
 }
 
@@ -2322,12 +2241,32 @@ func (h *FunctionsHandler) handleLiveQuery(resolveCtx *resolve.Context, w http.R
 	}
 }
 
-func (h *FunctionsHandler) handleRequest(resolveCtx *resolve.Context, w http.ResponseWriter, input []byte, requestLogger *zap.Logger) {
+func (h *FunctionsHandler) handleRequest(resolveCtx *resolve.Context, r *http.Request, w http.ResponseWriter, input []byte, requestLogger *zap.Logger) {
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
 	ctx := resolveCtx.Context()
+
+	cache := h.cache.RequestHandler(r, w)
+
+	served, err := cache.Serve(r.Context())
+	if done := handleOperationErr(requestLogger, err, w, "request cache failed", h.operation); done {
+		return
+	}
+	if served {
+		return
+	}
+
+	defer cache.IfStale(func() ([]byte, error) {
+		buf.Reset()
+		out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input, buf)
+		if err != nil {
+			return nil, err
+		}
+		return out.Response, nil
+	})
+
 	out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input, buf)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -2336,6 +2275,16 @@ func (h *FunctionsHandler) handleRequest(resolveCtx *resolve.Context, w http.Res
 		}
 		requestLogger.Error("failed to call function", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	etag := cache.SetETag(out.Response)
+	cache.SetHeaders(0)
+	cache.Store(out.Response)
+
+	ifNoneMatch := r.Header.Get("If-None-Match")
+	if ifNoneMatch == etag {
+		w.WriteHeader(http.StatusNotModified)
 		return
 	}
 
