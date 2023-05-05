@@ -9,7 +9,6 @@ import {
 	GraphQLString,
 	GraphQLUnionType,
 } from 'graphql';
-import type { SDLResponse } from './generated/models';
 
 export default configureWunderGraphServer(() => ({
 	webhooks: {
@@ -104,7 +103,7 @@ export default configureWunderGraphServer(() => ({
 				mutatingPreResolve: async (hook) => {
 					return hook.input;
 				},
-				mockResolve: async (hook): Promise<SDLResponse> => {
+				mockResolve: async (hook) => {
 					return {
 						data: null as any,
 					};
