@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/cespare/xxhash"
+
 	"github.com/wundergraph/wundergraph/pkg/apicache"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
