@@ -687,41 +687,13 @@ func cleanupJsonSchema(schema string) string {
 	return schema
 }
 
-func (r *Builder) configureCache(api *Api) (err error) {
-	config := api.CacheConfig
-	switch config.Kind {
-	case wgpb.ApiCacheKind_IN_MEMORY_CACHE:
-		r.log.Debug("configureCache",
-			zap.String("primaryHost", api.PrimaryHost),
-			zap.String("deploymentID", api.DeploymentId),
-			zap.String("cacheKind", config.Kind.String()),
-			zap.Int("cacheSize", int(config.InMemoryConfig.MaxSize)),
-		)
-		r.cache, err = apicache.NewInMemory(config.InMemoryConfig.MaxSize)
-		return
-	case wgpb.ApiCacheKind_REDIS_CACHE:
-
-		redisAddr := os.Getenv(config.RedisConfig.RedisUrlEnvVar)
-
-		r.log.Debug("configureCache",
-			zap.String("primaryHost", api.PrimaryHost),
-			zap.String("deploymentID", api.DeploymentId),
-			zap.String("cacheKind", config.Kind.String()),
-			zap.String("envVar", config.RedisConfig.RedisUrlEnvVar),
-			zap.String("redisAddr", redisAddr),
-		)
-
-		r.cache, err = apicache.NewRedis(redisAddr, r.log)
-		return
-	default:
-		r.log.Debug("configureCache",
-			zap.String("primaryHost", api.PrimaryHost),
-			zap.String("deploymentID", api.DeploymentId),
-			zap.String("cacheKind", config.Kind.String()),
-		)
-		r.cache = &apicache.NoOpCache{}
-		return
+func (r *Builder) configureCache(api *Api) error {
+	cache, err := newAPICache(r.api, r.log)
+	if err != nil {
+		return err
 	}
+	r.cache = cache
+	return nil
 }
 
 func (r *Builder) Close() error {

@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/cespare/xxhash"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/apicache"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -19,7 +21,9 @@ type cacheConfig struct {
 	StaleWhileRevalidate int64
 }
 
-// cacheHandler holds the cache configuration and data structures for an operation handler.
+// cacheHandler holds the cache configuration and data structures for an operation handler,
+// handling both HTTP headers for caching as well as the data storage.
+//
 // To create a cacheHandler, use newCacheHandler()
 type cacheHandler struct {
 	config cacheConfig
@@ -32,6 +36,11 @@ type cacheHandler struct {
 // newCacheHandler returns a new cacheHandler from an apicache.Cache, an wgpb.OperationCacheConfig representing
 // the cache configuration for an operation and the API configuration hash (typically from Api.ApiConfigHash)
 func newCacheHandler(cache apicache.Cache, config *wgpb.OperationCacheConfig, configHash string) *cacheHandler {
+	if config == nil {
+		// XXX: Lots of tests have a nil OperationCacheConfig. For now, patch this
+		// up here.
+		config = &wgpb.OperationCacheConfig{}
+	}
 	return &cacheHandler{
 		config: cacheConfig{
 			Enable:               config.Enable,
@@ -49,13 +58,23 @@ func newCacheHandler(cache apicache.Cache, config *wgpb.OperationCacheConfig, co
 // disabled based on the cacheHandler's config. A disabled requestCacheHandler will not append
 // Cache-Control/Age headers, will never lookup items in its cache and won't store them either.
 //
+// In order to make the API more ergonomic, specially for tests, this method handles a nil receiver
+// gracefully, returning a disabled requestCacheHandler.
+//
 // See also requestCacheHandler.
 func (c *cacheHandler) RequestHandler(r *http.Request, w http.ResponseWriter) *requestCacheHandler {
+	var configHash []byte
+	if c != nil {
+		configHash = c.configHash
+	} else {
+		configHash = []byte{}
+	}
 	return &requestCacheHandler{
-		handler: c,
-		r:       r,
-		w:       w,
-		key:     string(c.configHash) + r.RequestURI,
+		handler:    c,
+		r:          r,
+		w:          w,
+		configHash: configHash,
+		key:        string(configHash) + r.RequestURI,
 	}
 }
 
@@ -68,21 +87,22 @@ func (c *cacheHandler) RequestHandler(r *http.Request, w http.ResponseWriter) *r
 // will result in a no-op. This voids moving some checks from the handlers into requestCacheHandler's
 // method, making the operation handling logic more straightforward.
 type requestCacheHandler struct {
-	handler *cacheHandler
-	r       *http.Request
-	w       http.ResponseWriter
-	key     string
-	isStale bool
+	handler    *cacheHandler
+	r          *http.Request
+	w          http.ResponseWriter
+	configHash []byte
+	key        string
+	isStale    bool
 }
 
 func (c *requestCacheHandler) isEnabled() bool {
-	return c != nil && c.handler.config.Enable
+	return c != nil && c.handler != nil && c.handler.config.Enable
 }
 
 // ETag returns a en ETag derived from the config hash and the received data
 func (c *requestCacheHandler) ETag(data []byte) string {
 	hash := xxhash.New()
-	_, _ = hash.Write(c.handler.configHash)
+	_, _ = hash.Write(c.configHash)
 	_, _ = hash.Write(data)
 	return fmt.Sprintf("W/\"%d\"", hash.Sum64())
 }
@@ -173,4 +193,39 @@ func (c *requestCacheHandler) IfStale(generator func() ([]byte, error)) error {
 	}
 	c.Store(data)
 	return nil
+}
+
+func newAPICache(api *Api, log *zap.Logger) (apicache.Cache, error) {
+	config := api.CacheConfig
+	kind := config.GetKind()
+	switch kind {
+	case wgpb.ApiCacheKind_IN_MEMORY_CACHE:
+		log.Debug("configureCache",
+			zap.String("primaryHost", api.PrimaryHost),
+			zap.String("deploymentID", api.DeploymentId),
+			zap.String("cacheKind", config.Kind.String()),
+			zap.Int("cacheSize", int(config.InMemoryConfig.MaxSize)),
+		)
+		return apicache.NewInMemory(config.InMemoryConfig.MaxSize)
+	case wgpb.ApiCacheKind_REDIS_CACHE:
+
+		redisAddr := os.Getenv(config.RedisConfig.RedisUrlEnvVar)
+
+		log.Debug("configureCache",
+			zap.String("primaryHost", api.PrimaryHost),
+			zap.String("deploymentID", api.DeploymentId),
+			zap.String("cacheKind", config.Kind.String()),
+			zap.String("envVar", config.RedisConfig.RedisUrlEnvVar),
+			zap.String("redisAddr", redisAddr),
+		)
+		return apicache.NewRedis(redisAddr, log)
+	default:
+		log.Debug("configureCache",
+			zap.String("primaryHost", api.PrimaryHost),
+			zap.String("deploymentID", api.DeploymentId),
+			zap.String("cacheKind", kind.String()),
+		)
+		return &apicache.NoOpCache{}, nil
+	}
+	return nil, fmt.Errorf("unhandled wgpb.ApiCacheKind %d", int(config.Kind))
 }

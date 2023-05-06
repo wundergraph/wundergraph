@@ -28,7 +28,7 @@ describe('API Cache', () => {
 		expect(resp.headers.get('cache-control')).toBeNull();
 	});
 
-	it('should have cache headers in handlers cache', async () => {
+	it('should have cache headers in function handlers with cache', async () => {
 		const resp = await fetchOperationUrl('functions/greeting?name=Pepe');
 		expect(resp.status).toBe(200);
 		const cacheControl = resp.headers.get('cache-control');

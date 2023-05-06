@@ -22,6 +22,7 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 
+	"github.com/wundergraph/wundergraph/pkg/apicache"
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/graphiql"
@@ -37,6 +38,7 @@ import (
 type InternalBuilder struct {
 	pool                *pool.Pool
 	log                 *zap.Logger
+	cache               apicache.Cache
 	loader              *engineconfigloader.EngineConfigLoader
 	api                 *Api
 	planConfig          plan.Configuration
@@ -77,6 +79,12 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 	i.api = api
 	i.planConfig = *planConfig
 	i.resolver = resolve.New(ctx, resolve.NewFetcher(true), true)
+
+	cache, err := newAPICache(i.api, i.log)
+	if err != nil {
+		return nil, fmt.Errorf("creating API cache: %w", err)
+	}
+	i.cache = cache
 
 	definition, report := astparser.ParseGraphqlDocumentString(api.EngineConfiguration.GraphqlSchema)
 	if report.HasErrors() {
@@ -286,9 +294,13 @@ func (i *InternalBuilder) registerNodeJsOperation(operation *wgpb.Operation, api
 
 	route := i.router.Methods(http.MethodPost).Path(apiPath)
 
+	// Internal operations don't use the cache. Create a wgpb.OperationCacheConfig
+	// with all fields set to false/zero.
+	internalOperationCacheConfig := &wgpb.OperationCacheConfig{}
 	handler := &FunctionsHandler{
 		operation:            operation,
 		log:                  i.log,
+		cache:                newCacheHandler(i.cache, internalOperationCacheConfig, i.api.ApiConfigHash),
 		variablesValidator:   variablesValidator,
 		rbacEnforcer:         authentication.NewRBACEnforcer(operation),
 		hooksClient:          i.middlewareClient,
