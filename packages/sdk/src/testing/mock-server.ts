@@ -296,6 +296,14 @@ export class WunderGraphMockServer {
 	}
 
 	/**
+	 * Removes all registered mocks, even if they has not been called.
+	 * This is useful for tests that require a clean state between persistent mocked requests.
+	 */
+	reset() {
+		this.mocks = [];
+	}
+
+	/**
 	 * Stop the server.
 	 */
 	async stop(): Promise<void> {

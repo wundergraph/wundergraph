@@ -148,6 +148,8 @@ describe('Mock server', () => {
 				id: '123',
 			},
 		});
+
+		server.reset();
 	});
 
 	test('Should be able to use mock for N requests', async () => {

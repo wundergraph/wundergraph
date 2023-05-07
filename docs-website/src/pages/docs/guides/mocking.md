@@ -88,7 +88,7 @@ The first argument of the `mock` function is an object that accepts the followin
 - `match` - A function that returns true if the request matches
 - `handler` - A function that returns the response or throws an error
 - `times` - The number of times the mock should be called. Defaults to 1.
-- `persist` - If true, the mock will not be removed after the test. Defaults to false.
+- `persist` - If true, the mock will not be removed after any number of calls. Be careful with this option, as it can lead to unexpected results if you forget to remove the mock with `ts.mockServer.reset()` after the test. Defaults to false.
 
 ```ts
 const scope = ts.mockServer.mock({
