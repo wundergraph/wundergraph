@@ -183,7 +183,6 @@ export class WunderGraphMockServer {
 				const mockRes = await mock.handler(userMockReq);
 
 				scope.state.matched = true;
-
 				scope.state.pending++;
 
 				let headers: Record<string, string> = { ...(mockRes.headers || {}) };
@@ -266,6 +265,7 @@ export class WunderGraphMockServer {
 				}
 
 				scope.state.matched = true;
+				scope.state.pending++;
 
 				log('connect request matched with mock: %s %s', req.method, req.url);
 
@@ -286,6 +286,8 @@ export class WunderGraphMockServer {
 				if (scope) {
 					scope.state.error = err;
 				}
+			} finally {
+				scope.state.pending--;
 			}
 		}
 

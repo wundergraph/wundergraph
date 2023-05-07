@@ -152,7 +152,7 @@ describe('Mock server', () => {
 		server.reset();
 	});
 
-	test('Persistent mocks are only done when at least one request has matched', async () => {
+	test('Persistent mocks are done when at least one request has matched', async () => {
 		let scope = server.mock({
 			persist: true,
 			match: async ({ url, method }) => {
