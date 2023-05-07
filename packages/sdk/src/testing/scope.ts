@@ -20,7 +20,7 @@ export interface PublicScope {
 
 export interface ScopeState {
 	/**
-	 * Counter stores the pending times that the current mock should be active.
+	 * Counter stores the pending times that the current mock should be called.
 	 */
 	counter: number;
 	/**
