@@ -1,7 +1,6 @@
 import { Straightforward, Request, RequestContext, ConnectContext, Next } from '@wundergraph/straightforward';
-import getRawBody from 'raw-body';
 import debug from 'debug';
-import { freeport } from './util';
+import { freeport, getJSONBody, getTextBody } from './util';
 import { IncomingHttpHeaders } from 'http';
 import { PublicScope, Scope } from './scope';
 
@@ -374,28 +373,4 @@ export class WunderGraphMockServer {
 
 		return scope as PublicScope;
 	}
-}
-
-function getJSONBody<Body = any>(req: Request): Promise<Body> {
-	return new Promise((resolve, reject) => {
-		getRawBody(req, (err, body) => {
-			if (err) {
-				reject(err);
-			} else {
-				resolve(JSON.parse(body.toString()));
-			}
-		});
-	});
-}
-
-function getTextBody(req: Request): Promise<string> {
-	return new Promise((resolve, reject) => {
-		getRawBody(req, (err, body) => {
-			if (err) {
-				reject(err);
-			} else {
-				resolve(body.toString());
-			}
-		});
-	});
 }
