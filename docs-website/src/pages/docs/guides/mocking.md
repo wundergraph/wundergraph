@@ -151,7 +151,7 @@ If an assertion fails or any error is thrown inside the handlers, the test will 
 
 ```bash
 AssertionError: expected 'ES' to deeply equal 'DE'
-Caused by: No interceptor matched for request POST http://0.0.0.0:36331/
+Caused by: No mock matched for request POST http://0.0.0.0:36331/
 Expected :DE
 Actual   :ES
 <Click to see difference>

@@ -120,15 +120,8 @@ describe('Mock server', () => {
 		let resp = await fetch(`${server.url()}/test`);
 		let data = await resp.json();
 
-		expect(resp.status).toBe(200);
-		expect(data).toEqual({
-			getUser: {
-				id: '123',
-			},
-		});
-
-		resp = await fetch(`${server.url()}/test`);
-		data = await resp.json();
+		// Does not throw, because the mock matched
+		scope.done();
 
 		expect(resp.status).toBe(200);
 		expect(data).toEqual({
@@ -140,6 +133,7 @@ describe('Mock server', () => {
 		resp = await fetch(`${server.url()}/test`);
 		data = await resp.json();
 
+		// Does not throw, because the mock matched again
 		scope.done();
 
 		expect(resp.status).toBe(200);
