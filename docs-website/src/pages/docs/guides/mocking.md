@@ -147,7 +147,7 @@ expect(result.data).toBeDefined();
 expect(result.data?.countries_countries?.[0].capital).toBe('Madrid');
 ```
 
-If an assertion fails or any error is thrown inside those handlers, the test will fail and the error will be rethrown when calling `scope.done()`. This ensure that the `Test runner` can handle the error correctly e.g. by printing a stack trace or showing a diff.
+If an assertion fails or any error is thrown inside the handlers, the test will fail and the error will be rethrown when calling `scope.done()`. This ensure that the test runner can handle the error correctly e.g. by printing a stack trace or showing a diff.
 
 ```bash
 AssertionError: expected 'ES' to deeply equal 'DE'
