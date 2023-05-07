@@ -152,6 +152,40 @@ describe('Mock server', () => {
 		server.reset();
 	});
 
+	test('Persistent mocks are only done when at least one request has matched', async () => {
+		let scope = server.mock({
+			persist: true,
+			match: async ({ url, method }) => {
+				return url.path === '/test' && method === 'GET';
+			},
+			handler: async () => {
+				return {
+					body: {
+						getUser: {
+							id: '123',
+						},
+					},
+				};
+			},
+		});
+
+		expect(() => scope.done()).toThrow('No request matched.');
+
+		let resp = await fetch(`${server.url()}/test`);
+		let data = await resp.json();
+
+		expect(resp.status).toBe(200);
+		expect(data).toEqual({
+			getUser: {
+				id: '123',
+			},
+		});
+
+		scope.done();
+
+		server.reset();
+	});
+
 	test('Should be able to use mock for N requests', async () => {
 		let scope = server.mock({
 			times: 2,
@@ -172,7 +206,7 @@ describe('Mock server', () => {
 		let resp = await fetch(`${server.url()}/test`);
 		let data = await resp.json();
 
-		expect(() => scope.done()).toThrow('Mock is not done. Expect 1 more call.');
+		expect(() => scope.done()).toThrow('Mock is not done. Expect 1 more calls.');
 
 		expect(resp.status).toBe(200);
 		expect(data).toEqual({

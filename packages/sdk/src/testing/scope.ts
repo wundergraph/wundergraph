@@ -1,63 +1,74 @@
-interface ScopeOptions {
+export interface ScopeOptions {
 	counter?: number;
 	persist?: boolean;
 }
 
-export class Scope {
+export interface PublicScope {
 	/**
 	 * The error thrown by the matcher or handler.
 	 */
-	public error?: Error;
-
-	/**
-	 * Counter stores the pending times that the current mock should be active.
-	 */
-	public counter: number;
-
-	/**
-	 *  Persisted stores if the current mock should be always active.
-	 */
-	private readonly persisted: boolean = false;
-
-	/**
-	 * Pending stores the number of pending calls.
-	 */
-	public pending: number = 0;
-
-	constructor(options?: ScopeOptions) {
-		this.counter = options?.counter ?? 1;
-		this.persisted = options?.persist ?? false;
-	}
-
-	/**
-	 * Is true, if the scope is persisted.
-	 */
-	get isPersisted() {
-		return this.persisted;
-	}
-
+	error?: Error;
 	/**
 	 * Is true, no outstanding calls are left.
 	 */
-	get isDone() {
-		if (this.persisted) {
-			return this.pending === 0;
-		}
-		return this.counter === 0;
-	}
-
+	isDone: boolean;
 	/**
 	 * Throw an error if the scope is not done or an error was thrown.
 	 */
-	done(): void {
-		if (this.error) {
-			throw this.error;
+	done(): void;
+}
+
+export interface ScopeState {
+	/**
+	 * Counter stores the pending times that the current mock should be active.
+	 */
+	counter: number;
+	/**
+	 * Matched stores if the current mock was matched at least once.
+	 */
+	matched: boolean;
+	/**
+	 * The error thrown by the matcher or handler.
+	 */
+	error?: Error;
+	/**
+	 * Pending stores the number of pending calls.
+	 */
+	pending: number;
+}
+
+export class Scope {
+	public state: ScopeState = { counter: 1, matched: false, pending: 0 };
+
+	constructor(public options?: ScopeOptions) {
+		this.state.counter = options?.counter ?? 1;
+	}
+
+	get error() {
+		return this.state.error;
+	}
+
+	get isDone() {
+		if (this.options?.persist) {
+			return this.state.pending === 0 && this.state.matched;
 		}
+		return this.state.counter === 0 && this.state.matched;
+	}
+
+	done(): void {
+		if (this.state.error) {
+			throw this.state.error;
+		}
+
+		if (this.state.matched === false) {
+			throw new Error('No request matched.');
+		}
+
 		if (!this.isDone) {
-			if (this.persisted) {
-				throw new Error(`Mock is not done. Processing ${this.pending > 1 ? 'calls' : 'call'}: ${this.pending}`);
+			if (this.options?.persist) {
+				throw new Error(`Mock is not done. Processing ${this.state.pending} requests.`);
 			}
-			throw new Error(`Mock is not done. Expect ${this.counter} more ${this.counter > 1 ? 'calls' : 'call'}.`);
+			throw new Error(`Mock is not done. Expect ${this.state.counter} more calls.`);
 		}
 	}
 }
