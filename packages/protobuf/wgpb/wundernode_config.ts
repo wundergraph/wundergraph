@@ -1068,6 +1068,7 @@ export interface WunderGraphConfiguration {
   apiId: string;
   environmentIds: string[];
   dangerouslyEnableGraphQLEndpoint: boolean;
+  configHash: string;
 }
 
 export interface S3UploadProfileHooksConfiguration {
@@ -3343,7 +3344,7 @@ export const ArgumentConfiguration = {
 };
 
 function createBaseWunderGraphConfiguration(): WunderGraphConfiguration {
-  return { api: undefined, apiId: "", environmentIds: [], dangerouslyEnableGraphQLEndpoint: false };
+  return { api: undefined, apiId: "", environmentIds: [], dangerouslyEnableGraphQLEndpoint: false, configHash: "" };
 }
 
 export const WunderGraphConfiguration = {
@@ -3355,6 +3356,7 @@ export const WunderGraphConfiguration = {
       dangerouslyEnableGraphQLEndpoint: isSet(object.dangerouslyEnableGraphQLEndpoint)
         ? Boolean(object.dangerouslyEnableGraphQLEndpoint)
         : false,
+      configHash: isSet(object.configHash) ? String(object.configHash) : "",
     };
   },
 
@@ -3369,6 +3371,7 @@ export const WunderGraphConfiguration = {
     }
     message.dangerouslyEnableGraphQLEndpoint !== undefined &&
       (obj.dangerouslyEnableGraphQLEndpoint = message.dangerouslyEnableGraphQLEndpoint);
+    message.configHash !== undefined && (obj.configHash = message.configHash);
     return obj;
   },
 
@@ -3380,6 +3383,7 @@ export const WunderGraphConfiguration = {
     message.apiId = object.apiId ?? "";
     message.environmentIds = object.environmentIds?.map((e) => e) || [];
     message.dangerouslyEnableGraphQLEndpoint = object.dangerouslyEnableGraphQLEndpoint ?? false;
+    message.configHash = object.configHash ?? "";
     return message;
   },
 };

@@ -453,6 +453,7 @@ message WunderGraphConfiguration {
 	string apiId = 2;
 	repeated string environmentIds = 3;
 	bool dangerouslyEnableGraphQLEndpoint = 4;
+	string configHash = 5;
 }
 
 message S3UploadProfileHooksConfiguration {

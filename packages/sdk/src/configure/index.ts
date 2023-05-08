@@ -83,6 +83,7 @@ import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations
 import zodToJsonSchema from 'zod-to-json-schema';
 import { GenerateConfig, OperationsGenerationConfig } from './codegeneration';
 import { generateOperations } from '../codegen/generateoperations';
+import { configurationHash } from '../codegen/templates/typescript/helpers';
 
 const utf8 = 'utf8';
 const generated = 'generated';
@@ -1239,6 +1240,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 			serverOptions: config.serverOptions,
 		},
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
+		configHash: configurationHash(config),
 	};
 
 	return JSON.stringify(out, null, 2);

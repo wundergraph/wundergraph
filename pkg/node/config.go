@@ -98,6 +98,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 			Operations:            graphConfig.Api.Operations,
 			InvalidOperationNames: graphConfig.Api.InvalidOperationNames,
 			CorsConfiguration:     graphConfig.Api.CorsConfiguration,
+			ApiConfigHash:         graphConfig.ConfigHash,
 			S3UploadConfiguration: graphConfig.Api.S3UploadConfiguration,
 			AuthenticationConfig:  graphConfig.Api.AuthenticationConfig,
 			Webhooks:              graphConfig.Api.Webhooks,
