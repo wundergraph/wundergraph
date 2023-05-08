@@ -1,33 +1,51 @@
 import { Straightforward, Request, RequestContext, ConnectContext, Next } from '@wundergraph/straightforward';
-import getRawBody from 'raw-body';
 import debug from 'debug';
-import { freeport } from './util';
+import { freeport, getJSONBody, getTextBody } from './util';
 import { IncomingHttpHeaders } from 'http';
+import { PublicScope, Scope } from './scope';
 
 const log = debug('wunderctl:mock-server');
 
-export interface MockScope {
-	isDone: boolean;
-	error?: Error;
-	done(): void;
+export interface RequestMock<Response = any> {
+	type: 'request';
+	scope: Scope;
+	/**
+	 * The matcher function. Return true if the mock should be used.
+	 * You can use test assertions in the handler to verify the request.
+	 * If error is thrown the handler is skipped and the next handler is called.
+	 */
+	match: (req: MockRequest) => Promise<boolean> | boolean;
+	/**
+	 * The handler function. Return the mocked response.
+	 * You can use test assertions in the handler to verify the request.
+	 * If error is thrown the handler is skipped and the next handler is called.
+	 */
+	handler: (req: MockRequest) => Promise<MockResponse<Response>> | MockResponse<Response>;
 }
 
-export interface RequestInterceptor {
-	match: (req: Omit<MockRequest, '_body'>) => Promise<boolean> | boolean;
-	handler: (req: Omit<MockRequest, '_body'>) => Promise<MockResponse> | MockResponse;
-	scope: MockScope;
-}
-
-export interface ConnectInterceptor {
+export interface ConnectMock {
+	type: 'connect';
+	scope: Scope;
+	/**
+	 * The matcher function. Return true if the request should be asserted.
+	 */
 	match: (req: Request) => Promise<boolean> | boolean;
-	scope: MockScope;
 }
+
+export type Mock = RequestMock | ConnectMock;
 
 export interface MockResponse<Response = any> {
 	status?: number;
 	headers?: Record<string, string>;
 	body?: Response;
 }
+
+export interface MockRequestOptions<Response = any> extends Omit<RequestMock<Response>, 'scope' | 'type'> {
+	times?: number;
+	persist?: boolean;
+}
+
+export interface AssertConnectOptions<Response = any> extends Omit<ConnectMock, 'scope' | 'type'> {}
 
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
@@ -46,7 +64,7 @@ export interface UrlParts {
 	path: string;
 }
 
-export interface MockRequest {
+export interface InternalMockRequest {
 	url: UrlParts;
 
 	/**
@@ -75,17 +93,17 @@ export interface MockRequest {
 	_body?: any;
 }
 
+export interface MockRequest extends Omit<InternalMockRequest, '_body'> {}
+
 export class WunderGraphMockServer {
 	private proxy: Straightforward;
 	private port: number;
-	private requestInterceptors: Array<RequestInterceptor>;
-	private connectInterceptors: Array<ConnectInterceptor>;
+	private mocks: Mock[];
 
 	constructor() {
 		this.proxy = new Straightforward();
 		this.port = 0;
-		this.requestInterceptors = [];
-		this.connectInterceptors = [];
+		this.mocks = [];
 	}
 
 	/**
@@ -112,26 +130,21 @@ export class WunderGraphMockServer {
 		});
 	}
 
-	public pendingRequestInterceptors(): Array<RequestInterceptor> {
-		return this.requestInterceptors;
-	}
-
-	public pendingConnectInterceptors(): Array<ConnectInterceptor> {
-		return this.connectInterceptors;
-	}
-
 	private async handleRequest(ctx: RequestContext, next: Next) {
 		let req: Request = ctx.req;
 		let res = ctx.res;
 
-		let scope: MockScope | undefined = undefined;
-		let matched = false;
+		let scope: Scope | undefined = undefined;
 
-		for (let interceptor of this.requestInterceptors) {
-			scope = interceptor.scope;
+		for (let mock of this.mocks) {
+			scope = mock.scope;
+
+			if (mock.type !== 'request') {
+				continue;
+			}
 
 			try {
-				const mockReq: Omit<MockRequest, 'json' | 'text'> = {
+				const mockReq: Omit<InternalMockRequest, 'json' | 'text'> = {
 					headers: req.headers,
 					url: req.locals.urlParts,
 					method: req.method as HTTPMethod,
@@ -158,17 +171,18 @@ export class WunderGraphMockServer {
 					text,
 				};
 
-				// Skip if the request does not match, try the next interceptor
-				if (!(await interceptor.match(userMockReq))) {
-					log('request did not match interceptor: %s %s', req.method, req.url);
+				// Skip if the request does not match, try the next mock
+				if (!(await mock.match(userMockReq))) {
+					log('request did not match mock: %s %s', req.method, req.url);
 					continue;
 				}
 
-				log('request matched with interceptor: %s %s', req.method, req.url);
+				log('request matched with mock: %s %s', req.method, req.url);
 
-				const mockRes = await interceptor.handler(userMockReq);
+				const mockRes = await mock.handler(userMockReq);
 
-				matched = true;
+				scope.state.matched = true;
+				scope.state.pending++;
 
 				let headers: Record<string, string> = { ...(mockRes.headers || {}) };
 
@@ -188,18 +202,22 @@ export class WunderGraphMockServer {
 				res.writeHead(mockRes.status || 200, headers);
 				res.end(body);
 
-				// Remove the interceptor from the list after it was called
-				this.requestInterceptors = this.requestInterceptors.filter((ic) => ic !== interceptor);
+				if (scope.options?.persist) {
+					break;
+				}
 
-				scope.isDone = true;
+				scope.state.counter--;
 
-				// An interceptor can only be called once for now
-				break;
+				if (scope.state.counter === 0) {
+					// Remove the mock from the list after all requests have been handled
+					this.mocks = this.mocks.filter((ic) => ic !== mock);
+					break;
+				}
 			} catch (err: any) {
-				log('error in mock handler, continue with the next interceptor, %s, %s error: %s', req.method, req.url, err);
+				log('error in mock handler, continue with the next mock, %s, %s error: %s', req.method, req.url, err);
 
 				if (err instanceof Error) {
-					const cause = new Error(`No interceptor matched for request ${req.method} ${req.url}`);
+					const cause = new Error(`No mock matched for request ${req.method} ${req.url}`);
 					// Add more context to the error message. Can be replaced by setting `cause`
 					// when all popular test runners support it for printing the error message
 					err.message = err.message + '\nCaused by: ' + cause.message;
@@ -208,17 +226,18 @@ export class WunderGraphMockServer {
 				}
 
 				if (scope) {
-					scope.error = err;
-					scope.isDone = false;
+					scope.state.error = err;
 				}
+			} finally {
+				scope.state.pending--;
 			}
 		}
 
-		if (matched === false) {
+		if (scope?.state.matched === false) {
 			log('no mock handler matched, continue with the next handler, %s, %s', req.method, req.url);
 
-			if (scope && !scope.error) {
-				scope.error = new Error(`No interceptor matched for request ${req.method} ${req.url}`);
+			if (scope && !scope.state.error) {
+				scope.state.error = new Error(`No mock matched for request ${req.method} ${req.url}`);
 			}
 
 			await next();
@@ -228,54 +247,70 @@ export class WunderGraphMockServer {
 	private async handleConnect(ctx: ConnectContext) {
 		let req: Request = ctx.req;
 
-		let scope: MockScope | undefined = undefined;
-		let matched = false;
+		let scope: Scope | undefined = undefined;
 
-		for (let interceptor of this.connectInterceptors) {
-			scope = interceptor.scope;
+		for (let mock of this.mocks) {
+			scope = mock.scope;
+
+			if (mock.type !== 'connect') {
+				continue;
+			}
 
 			try {
 				// If the request does not match or throws, pass to the next handler.
-				if (!(await interceptor.match(req))) {
-					log('connect request did not match interceptor: %s %s', req.method, req.url);
+				if (!(await mock.match(req))) {
+					log('connect request did not match mock: %s %s', req.method, req.url);
 					continue;
 				}
 
-				matched = true;
+				scope.state.matched = true;
+				scope.state.pending++;
 
-				log('connect request matched with interceptor: %s %s', req.method, req.url);
+				log('connect request matched with mock: %s %s', req.method, req.url);
 
-				// Remove the interceptor from the list after it was called
-				this.connectInterceptors = this.connectInterceptors.filter((ic) => ic !== interceptor);
+				if (scope.options?.persist) {
+					break;
+				}
 
-				scope.isDone = true;
+				scope.state.counter--;
 
-				// An interceptor can only be called once for now
-				break;
+				if (scope.state.counter === 0) {
+					// Remove the mock from the list after all requests have been handled
+					this.mocks = this.mocks.filter((m) => m !== mock);
+					break;
+				}
 			} catch (err: any) {
-				log('error in connect matcher, continue with the next interceptor, %s, %s error: %s', req.method, req.url, err);
+				log('error in connect matcher, continue with the next mock, %s, %s error: %s', req.method, req.url, err);
 
 				if (scope) {
-					scope.error = err;
-					scope.isDone = false;
+					scope.state.error = err;
 				}
+			} finally {
+				scope.state.pending--;
 			}
 		}
 
-		if (matched === false) {
+		if (scope?.state.matched === false) {
 			log('no mock handler matched, continue with the next handler, %s, %s', req.method, req.url);
 			if (scope) {
-				scope.error = new Error(`No connect interceptor matched for request ${req.method} ${req.url}`);
+				scope.state.error = new Error(`No connect mock matched for request ${req.method} ${req.url}`);
 			}
 		}
+	}
+
+	/**
+	 * Removes all registered mocks, even if they has not been called.
+	 * This is useful for tests that require a clean state between persistent mocked requests.
+	 */
+	reset() {
+		this.mocks = [];
 	}
 
 	/**
 	 * Stop the server.
 	 */
 	async stop(): Promise<void> {
-		this.requestInterceptors = [];
-		this.connectInterceptors = [];
+		this.mocks = [];
 		this.port = 0;
 
 		process.nextTick(() => this.proxy.close());
@@ -291,30 +326,6 @@ export class WunderGraphMockServer {
 		return `http://0.0.0.0:${this.port}`;
 	}
 
-	private createScope(): MockScope {
-		return {
-			/**
-			 * Is true, if the mock matched and the handler was called.
-			 */
-			isDone: false,
-			/**
-			 * The error thrown by the matcher or handler.
-			 */
-			error: undefined,
-			/**
-			 * Throw an error if the scope is not done or an error was thrown.
-			 */
-			done() {
-				if (this.error) {
-					throw this.error;
-				}
-				if (!this.isDone) {
-					throw new Error('Not done');
-				}
-			},
-		};
-	}
-
 	/**
 	 *	When you setup a mock with mock() and the request matches, the mock server will return the response.
 	 *	If the request does not match, the mock server will return a 404 response and the call to scope.done() will fail the test.
@@ -322,27 +333,27 @@ export class WunderGraphMockServer {
 	 *	This is useful if you want to verify with test assertion that the request is correct.
 	 *	A thrown error is handled as an unmatched request and the next mock will be checked.
 	 */
-	mock<Response = any>(
-		/**
-		 * The matcher function.
-		 */
-		match: (req: Omit<MockRequest, '_body'>) => Promise<boolean> | boolean,
-		/**
-		 * The handler function. Return the mocked response.
-		 * You can use test assertions in the handler to verify the request.
-		 * If error is thrown the handler is skipped and the next handler is called.
-		 */
-		handler: (req: Omit<MockRequest, '_body'>) => Promise<MockResponse<Response>> | MockResponse<Response>
-	) {
-		const scope = this.createScope();
-
-		this.requestInterceptors.push({
-			scope,
-			match,
-			handler,
+	mock<Response = any>(options: MockRequestOptions<Response>) {
+		const scope = new Scope({
+			counter: options?.times,
+			persist: options?.persist,
 		});
 
-		return scope;
+		this.mocks.push({
+			type: 'request',
+			match: options.match,
+			handler: options.handler,
+			scope,
+		});
+
+		return scope as PublicScope;
+	}
+
+	/**
+	 * Returns an array of all pending mocks.
+	 */
+	pendingMocks() {
+		return this.mocks;
 	}
 
 	/**
@@ -351,38 +362,15 @@ export class WunderGraphMockServer {
 	 * You can use test assertions in the handler to verify the request.
 	 * If error is thrown the handler is skipped and the next handler is called.
 	 */
-	assertHTTPConnect(match: (req: Request) => Promise<boolean> | boolean) {
-		const scope = this.createScope();
+	assertHTTPConnect(options: AssertConnectOptions) {
+		const scope = new Scope();
 
-		this.connectInterceptors.push({
+		this.mocks.push({
+			type: 'connect',
 			scope,
-			match,
+			match: options.match,
 		});
 
-		return scope;
+		return scope as PublicScope;
 	}
-}
-
-function getJSONBody<Body = any>(req: Request): Promise<Body> {
-	return new Promise((resolve, reject) => {
-		getRawBody(req, (err, body) => {
-			if (err) {
-				reject(err);
-			} else {
-				resolve(JSON.parse(body.toString()));
-			}
-		});
-	});
-}
-
-function getTextBody(req: Request): Promise<string> {
-	return new Promise((resolve, reject) => {
-		getRawBody(req, (err, body) => {
-			if (err) {
-				reject(err);
-			} else {
-				resolve(body.toString());
-			}
-		});
-	});
 }
