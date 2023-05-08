@@ -1,0 +1,26 @@
+mutation CreateCheckoutSession($session: stripe_PostCheckoutSessions_request_Input!) @internalOperation {
+	session: stripe_PostCheckoutSessions(input: $session) {
+		__typename
+		... on stripe_Session {
+			after_expiration {
+				recovery {
+					enabled
+					expires_at
+					url
+				}
+			}
+			created
+			currency
+			customer {
+				id
+				email
+				name
+			}
+		}
+		... on stripe_error {
+			error {
+				code
+			}
+		}
+	}
+}

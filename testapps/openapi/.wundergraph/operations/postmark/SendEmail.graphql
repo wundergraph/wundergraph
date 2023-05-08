@@ -1,0 +1,12 @@
+mutation SendEmail(
+	$input: postmark_SendEmailRequest_Input!
+	$token: String! @injectEnvironmentVariable(name: "POSTMARK_SERVER_TOKEN")
+) @internalOperation {
+	postmark_sendEmail(input: $input, X_Postmark_Server_Token: $token) {
+		__typename
+		... on postmark_SendEmailResponse {
+			Message
+			MessageID
+		}
+	}
+}

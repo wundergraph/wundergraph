@@ -1,0 +1,13 @@
+query Subscription($subscriptionId: stripe_queryInput_GetSubscriptionsSubscriptionExposedId_subscription_exposed_id!)
+@internalOperation {
+	stripe_GetSubscriptionsSubscriptionExposedId(subscription_exposed_id: $subscriptionId) {
+		... on stripe_Subscription_ {
+			customer {
+				id
+			}
+			currency
+			days_until_due
+			status
+		}
+	}
+}

@@ -1,0 +1,57 @@
+
+> @test/nextjs@0.1.0 dev /Users/eelco/Development/wundergraph/wundergraph/testapps/nextjs
+> concurrently "npm run nextDev" "npm run wundergraph" "npm run browser"
+
+[2] 
+[2] > @test/nextjs@0.1.0 browser
+[2] > wait-on "http-get://localhost:3003" && wait-on "http-get://localhost:9991" && open-cli http://localhost:3003
+[2] 
+[0] 
+[0] > @test/nextjs@0.1.0 nextDev
+[0] > next dev --port 3003
+[0] 
+[1] 
+[1] > @test/nextjs@0.1.0 wundergraph
+[1] > wunderctl up
+[1] 
+[0] ready - started server on 0.0.0.0:3003, url: http://localhost:3003
+[0] info  - Loaded env from /Users/eelco/Development/wundergraph/wundergraph/testapps/nextjs/.env
+[1] 2023-04-03T10:39:00+02:00 [34mINFO[0m Starting WunderNode {"component": "@wundergraph/wunderctl", "version": "dev", "commit": "31dfa0f2", "date": "Mon Apr  3 09:53:05 CEST 2023", "builtBy": "dev"}
+[0] event - compiled client and server successfully in 343 ms (205 modules)
+[0] wait  - compiling / (client and server)...
+[0] event - compiled client and server successfully in 72 ms (261 modules)
+[1] 2023-04-03T10:39:04+02:00 [41mFATAL[49m: [36mCouldn't configure your WunderNode: Error: introspection failed (url: https://appulse-dev.myshopify.com/api/2021-07/graphql.json, namespace: shopify), error: Request failed with status code 403
+[1]     at introspectGraphQLAPI (/Users/eelco/Development/wundergraph/wundergraph/packages/sdk/dist/definition/graphql-introspection.js:262:15)
+[1]     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[1]     at async introspectGraphql (/Users/eelco/Development/wundergraph/wundergraph/packages/sdk/dist/definition/graphql-introspection.js:112:26)
+[1]     at async introspectWithCache (/Users/eelco/Development/wundergraph/wundergraph/packages/sdk/dist/definition/introspection-cache.js:114:15)
+[1]     at async Promise.all (index 4)
+[1]     at async resolveApplication (/Users/eelco/Development/wundergraph/wundergraph/packages/sdk/dist/configure/index.js:337:26)
+[1]     at async resolveConfig (/Users/eelco/Development/wundergraph/wundergraph/packages/sdk/dist/configure/index.js:115:22)[39m [90m{"component":"@wundergraph/sdk"}[39m
+[1] 2023-04-03T10:39:04+02:00 [31mERROR[0m Script runner exited with non-zero exit code {"component": "@wundergraph/wunderctl", "runnerName": "config-runner", "exit": 1, "startTs": 1680511140716571000, "stopTs": 1680511144834917000, "complete": true}
+[1] 2023-04-03T10:39:04+02:00 [34mINFO[0m Api config: file polling {"component": "@wundergraph/wunderctl", "component": "@wundergraph/node", "config_file_name": "/Users/eelco/Development/wundergraph/wundergraph/testapps/nextjs/.wundergraph/generated/wundergraph.config.json"}
+[1] 2023-04-03T10:39:04+02:00 [31mERROR[0m configuring auth {"component": "@wundergraph/node", "error": "error configuring OIDC providers: error in auth0 OIDC provider: OIDC issuer must not be empty"}
+[1] 2023-04-03T10:39:04+02:00 [31mERROR[0m registerS3UploadClient {"component": "@wundergraph/node", "error": "Get \"http://127.0.0.1:9000/uploads/?location=\": dial tcp 127.0.0.1:9000: connect: connection refused"}
+[1] 2023-04-03T10:39:04+02:00 [31mERROR[0m registerS3UploadClient {"component": "@wundergraph/node", "error": "Get \"http://127.0.0.1:9000/uploads/?location=\": dial tcp 127.0.0.1:9000: connect: connection refused"}
+[1] 2023-04-03T10:39:04+02:00 [33mWARN[0m EndpointUnavailableHandler {"component": "@wundergraph/node", "Operation": "StripeCreateCheckoutSession", "Endpoint": "/operations/StripeCreateCheckoutSession", "Help": "This operation is invalid. Please, check the logs"}
+[1] 2023-04-03T10:39:04+02:00 [33mWARN[0m EndpointUnavailableHandler {"component": "@wundergraph/node", "Operation": "StripeCreateCustomer", "Endpoint": "/operations/StripeCreateCustomer", "Help": "This operation is invalid. Please, check the logs"}
+[1] 2023-04-03T10:39:04+02:00 [33mWARN[0m EndpointUnavailableHandler {"component": "@wundergraph/node", "Operation": "StripeSubscription", "Endpoint": "/operations/StripeSubscription", "Help": "This operation is invalid. Please, check the logs"}
+[1] 2023-04-03T10:39:04+02:00 [34mINFO[0m listening on {"component": "@wundergraph/node", "addr": "127.0.0.1:9991"}
+[1] 2023-04-03T10:39:04+02:00 [34mINFO[0m listening on {"component": "@wundergraph/node", "addr": "[::1]:9991"}
+[1] 2023-04-03T10:39:05+02:00 [32mINFO[39m: [36mHooks plugin registered[39m [90m{"component":"@wundergraph/server"}[39m
+[1] 2023-04-03T10:39:05+02:00 [32mINFO[39m: [36mOpenAPI plugin registered[39m [90m{"component":"@wundergraph/server"}[39m
+[1] 2023-04-03T10:39:05+02:00 [32mINFO[39m: [36mOpenAPI GraphQL server 'stripe' listening at /openapis/stripe[39m [90m{"component":"@wundergraph/server"}[39m
+[1] 2023-04-03T10:39:05+02:00 [32mINFO[39m: [36mGraphQL plugin registered[39m [90m{"component":"@wundergraph/server"}[39m
+[1] 2023-04-03T10:39:05+02:00 [32mINFO[39m: [36mGraphQL server 'gql' listening at /gqls/gql/graphql[39m [90m{"component":"@wundergraph/server"}[39m
+[1] 2023-04-03T10:39:05+02:00 [32mINFO[39m: [36mWebhooks plugin registered[39m [90m{"component":"@wundergraph/server"}[39m
+[1] 2023-04-03T10:39:05+02:00 [32mINFO[39m: [36mFunctions plugin registered[39m [90m{"component":"@wundergraph/server"}[39m
+[1] 2023-04-03T10:39:05+02:00 [32mINFO[39m: [36mServer listening at http://127.0.0.1:9992[39m [90m{"component":"@wundergraph/server"}[39m
+[2] npm run browser exited with code 0
+[0] info  - Loaded env from /Users/eelco/Development/wundergraph/wundergraph/testapps/nextjs/.env
+[0] wait  - compiling...
+[0] event - compiled client and server successfully in 63 ms (261 modules)
+[1] 2023-04-03T10:43:40+02:00 [34mINFO[0m Context was canceled. Initialize WunderNode shutdown .... {"component": "@wundergraph/wunderctl"}
+[1] 2023-04-03T10:43:40+02:00 [34mINFO[0m server shutdown complete {"component": "@wundergraph/wunderctl"}
+[0] info  - Loaded env from /Users/eelco/Development/wundergraph/wundergraph/testapps/nextjs/.env
+[1] npm run wundergraph exited with code SIGINT
+[0] npm run nextDev exited with code 1
