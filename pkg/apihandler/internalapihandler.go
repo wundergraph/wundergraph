@@ -287,9 +287,8 @@ func (i *InternalBuilder) registerNodeJsOperation(operation *wgpb.Operation, api
 	route := i.router.Methods(http.MethodPost).Path(apiPath)
 
 	// Internal operations don't use the cache to store data, but they need it
-	// to calculate proper etags. Create a wgpb.OperationCacheConfig
-	// with all fields set to false/zero.
-	cache := newCacheHandler(nil, &wgpb.OperationCacheConfig{}, i.api.ApiConfigHash)
+	// to calculate proper etags.
+	cache := newCacheHandler(nil, nil, i.api.ApiConfigHash)
 	handler := &FunctionsHandler{
 		operation:            operation,
 		log:                  i.log,

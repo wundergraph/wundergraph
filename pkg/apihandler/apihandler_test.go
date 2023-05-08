@@ -938,12 +938,12 @@ func TestQueryHandler_Caching(t *testing.T) {
 			Response: &resolve.GraphQLResponse{},
 		},
 		pool: pool.New(),
-		cache: newCacheHandler(cache, &wgpb.OperationCacheConfig{
+		cache: newCacheHandler(cache, makeCacheConfig(&wgpb.OperationCacheConfig{
 			Enable:               true,
 			MaxAge:               2,
 			Public:               true,
 			StaleWhileRevalidate: 0,
-		}, ""),
+		}), ""),
 		operation:              operation,
 		rbacEnforcer:           &authentication.RBACEnforcer{},
 		stringInterpolator:     interpolateNothing,

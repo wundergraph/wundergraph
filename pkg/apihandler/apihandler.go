@@ -534,7 +534,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			preparedPlan:           synchronousPlan,
 			pool:                   r.pool,
 			extractedVariables:     make([]byte, len(shared.Doc.Input.Variables)),
-			cache:                  newCacheHandler(r.cache, operation.CacheConfig, r.api.ApiConfigHash),
+			cache:                  newCacheHandler(r.cache, makeCacheConfig(operation.CacheConfig), r.api.ApiConfigHash),
 			operation:              operation,
 			variablesValidator:     variablesValidator,
 			rbacEnforcer:           authentication.NewRBACEnforcer(operation),
@@ -568,10 +568,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			zap.String("method", http.MethodGet),
 			zap.String("path", apiPath),
 			zap.Bool("mock", operation.HooksConfiguration.MockResolve.Enable),
-			zap.Bool("cacheEnabled", handler.cache.config.Enable),
-			zap.Int("cacheMaxAge", int(handler.cache.config.MaxAge)),
-			zap.Int("cacheStaleWhileRevalidate", int(handler.cache.config.StaleWhileRevalidate)),
-			zap.Bool("cachePublic", handler.cache.config.Public),
+			zap.String("cache", handler.cache.String()),
 			zap.Bool("authRequired", operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired),
 		)
 	case wgpb.OperationType_MUTATION:
@@ -2040,7 +2037,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 	handler := &FunctionsHandler{
 		operation:            operation,
 		log:                  r.log,
-		cache:                newCacheHandler(r.cache, operation.CacheConfig, r.api.ApiConfigHash),
+		cache:                newCacheHandler(r.cache, makeCacheConfig(operation.CacheConfig), r.api.ApiConfigHash),
 		variablesValidator:   variablesValidator,
 		rbacEnforcer:         authentication.NewRBACEnforcer(operation),
 		hooksClient:          r.middlewareClient,

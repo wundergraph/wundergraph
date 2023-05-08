@@ -15,10 +15,20 @@ import (
 )
 
 type cacheConfig struct {
-	Enable               bool
 	MaxAge               int64
 	Public               bool
 	StaleWhileRevalidate int64
+}
+
+func makeCacheConfig(config *wgpb.OperationCacheConfig) *cacheConfig {
+	if config == nil || !config.Enable {
+		return nil
+	}
+	return &cacheConfig{
+		MaxAge:               config.MaxAge,
+		Public:               config.Public,
+		StaleWhileRevalidate: config.StaleWhileRevalidate,
+	}
 }
 
 // cacheHandler holds the cache configuration and data structures for an operation handler,
@@ -26,31 +36,34 @@ type cacheConfig struct {
 //
 // To create a cacheHandler, use newCacheHandler()
 type cacheHandler struct {
-	config cacheConfig
+	config *cacheConfig
 	cache  apicache.Cache
 	// configHash is the hash of the full application configuration. We use it as part
 	// of the cache keys to ensure any changes to the config invalidate the cache
 	configHash []byte
 }
 
-// newCacheHandler returns a new cacheHandler from an apicache.Cache, an wgpb.OperationCacheConfig representing
+// newCacheHandler returns a new cacheHandler from an apicache.Cache, an *cacheConfig representing
 // the cache configuration for an operation and the API configuration hash (typically from Api.ApiConfigHash)
-func newCacheHandler(cache apicache.Cache, config *wgpb.OperationCacheConfig, configHash string) *cacheHandler {
-	if config == nil {
-		// XXX: Lots of tests have a nil OperationCacheConfig. For now, patch this
-		// up here.
-		config = &wgpb.OperationCacheConfig{}
-	}
+func newCacheHandler(cache apicache.Cache, config *cacheConfig, configHash string) *cacheHandler {
+
 	return &cacheHandler{
-		config: cacheConfig{
-			Enable:               config.Enable,
-			MaxAge:               config.MaxAge,
-			Public:               config.Public,
-			StaleWhileRevalidate: config.StaleWhileRevalidate,
-		},
+		config:     config,
 		cache:      cache,
 		configHash: []byte(configHash),
 	}
+}
+
+// String returns a description of the cache, used for log messages
+func (c *cacheHandler) String() string {
+	if c == nil || c.config == nil {
+		return "disabled"
+	}
+	publicOrPrivate := "private"
+	if c.config.Public {
+		publicOrPrivate = "public"
+	}
+	return fmt.Sprintf("enabled, %s, max-age=%d, stale-while-revalidate=%d", publicOrPrivate, c.config.MaxAge, c.config.StaleWhileRevalidate)
 }
 
 // RequestHandler returns a handler for a single operation request, deriving the key from the
@@ -96,7 +109,7 @@ type requestCacheHandler struct {
 }
 
 func (c *requestCacheHandler) isEnabled() bool {
-	return c != nil && c.handler != nil && c.handler.config.Enable
+	return c != nil && c.handler != nil && c.handler.config != nil
 }
 
 // ETag returns a en ETag derived from the config hash and the received data
@@ -121,7 +134,7 @@ func (c *requestCacheHandler) SetHeaders(age int64) {
 	if !c.isEnabled() {
 		return
 	}
-	config := &c.handler.config
+	config := c.handler.config
 
 	publicOrPrivate := "private"
 	if config.Public {
@@ -175,7 +188,7 @@ func (c *requestCacheHandler) Store(data []byte) {
 	cacheData := make([]byte, len(data))
 	copy(cacheData, data)
 
-	config := &c.handler.config
+	config := c.handler.config
 	ttl := time.Second * time.Duration(config.MaxAge+config.StaleWhileRevalidate)
 	c.handler.cache.SetWithTTL(c.key, cacheData, ttl)
 }
