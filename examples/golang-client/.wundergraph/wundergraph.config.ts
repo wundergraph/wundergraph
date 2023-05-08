@@ -13,19 +13,18 @@ configureWunderGraphApplication({
 	apis: [countries],
 	server,
 	operations,
-	codeGenerators: [
-		{
-			templates: templates.typescript.all,
-		},
-		{
-			templates: [
-				...golangClient.all({
-					packageName: 'client',
-				}),
-			],
-			path: '../go/pkg/client',
-		},
-	],
+	generate: {
+		codeGenerators: [
+			{
+				templates: [
+					...golangClient.all({
+						packageName: 'client',
+					}),
+				],
+				path: '../go/pkg/client',
+			},
+		],
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins:

@@ -34,8 +34,13 @@ export const operations = (application: ResolvedApplication, operationType: Oper
 				path: op.Name,
 				hasInput: hasInput(op),
 				hasInternalInput: hasInternalInput(op),
+				injectedInputTypename: operationInjectedInputTypename(op),
+				inputTypename: operationInputTypename(op),
+				internalInputTypename: operationInternalInputTypename(op),
 				liveQuery: !!op.LiveQuery?.enable,
 				requiresAuthentication: op.AuthenticationConfig.required,
+				responseDataTypename: operationResponseDataTypename(op),
+				responseTypename: operationResponseTypename(op),
 				isTypeScriptOperation: op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS,
 			};
 		});
@@ -48,7 +53,12 @@ export const queries = (application: ResolvedApplication, includeInternal: boole
 			path: op.Name,
 			hasInput: hasInput(op),
 			hasInternalInput: hasInternalInput(op),
+			injectedInputTypename: operationInjectedInputTypename(op),
+			inputTypename: operationInputTypename(op),
+			internalInputTypename: operationInternalInputTypename(op),
 			requiresAuthentication: op.AuthenticationConfig.required,
+			responseDataTypename: operationResponseDataTypename(op),
+			responseTypename: operationResponseTypename(op),
 			liveQuery: !!op.LiveQuery?.enable,
 		};
 	});
@@ -63,10 +73,21 @@ export const liveQueries = (application: ResolvedApplication, includeInternal: b
 				path: op.Name,
 				hasInput: hasInput(op),
 				hasInternalInput: hasInternalInput(op),
+				injectedInputTypename: operationInjectedInputTypename(op),
+				inputTypename: operationInputTypename(op),
+				internalInputTypename: operationInternalInputTypename(op),
 				liveQuery: true,
 				requiresAuthentication: op.AuthenticationConfig.required,
+				responseDataTypename: operationResponseDataTypename(op),
+				responseTypename: operationResponseTypename(op),
 			};
 		});
+
+export const operationInputTypename = (op: GraphQLOperation) => `${op.Name}Input`;
+export const operationInternalInputTypename = (op: GraphQLOperation) => `${op.Name}InputInternal`;
+export const operationInjectedInputTypename = (op: GraphQLOperation) => `${op.Name}InputInjected`;
+export const operationResponseTypename = (op: GraphQLOperation) => `${op.Name}Response`;
+export const operationResponseDataTypename = (op: GraphQLOperation) => `${op.Name}ResponseData`;
 
 export const modelImports = (
 	application: ResolvedApplication,
@@ -75,18 +96,18 @@ export const modelImports = (
 ): string => {
 	return filteredOperations(application, includeInternal)
 		.map((op) => {
-			let out = `${op.Name}Response`;
+			let out = operationResponseTypename(op);
 			if (hasInput(op)) {
-				out += `,${op.Name}Input`;
+				out += `,${operationInputTypename(op)}`;
 			}
 			if (includeInternal && hasInternalInput(op)) {
-				out += `,Internal${op.Name}Input`;
+				out += `,${operationInternalInputTypename(op)}`;
 			}
 			if (includeInternal && hasInjectedInput(op)) {
-				out += `,Injected${op.Name}Input`;
+				out += `,${operationInjectedInputTypename(op)}`;
 			}
 			if (includeResponseData === true) {
-				out += `,${op.Name}ResponseData`;
+				out += `,${operationResponseDataTypename(op)}`;
 			}
 			return out;
 		})

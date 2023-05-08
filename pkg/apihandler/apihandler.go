@@ -878,7 +878,7 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			flushWriter *httpFlushWriter
 			ok          bool
 		)
-		shared.Ctx.Context, flushWriter, ok = getFlushWriter(shared.Ctx.Context, shared.Ctx.Variables, r, w)
+		shared.Ctx, flushWriter, ok = getFlushWriter(shared.Ctx, shared.Ctx.Variables, r, w)
 		if !ok {
 			requestLogger.Error("connection not flushable")
 			http.Error(w, "Connection not flushable", http.StatusBadRequest)
@@ -1250,7 +1250,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if cacheIsStale {
 			buf.Reset()
-			ctx.Context = context.WithValue(context.Background(), "user", authentication.UserFromContext(r.Context()))
+			ctx = ctx.WithContext(context.WithValue(context.Background(), "user", authentication.UserFromContext(r.Context())))
 			err := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
 			if err == nil {
 				bufferedData := buf.Bytes()
@@ -1267,7 +1267,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 
-	if !validateInputVariables(ctx, requestLogger, ctx.Variables, h.variablesValidator, w) {
+	if !validateInputVariables(ctx.Context(), requestLogger, ctx.Variables, h.variablesValidator, w) {
 		return
 	}
 
@@ -1315,7 +1315,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if h.cacheConfig.enable {
 		cacheKey = string(h.configHash) + r.RequestURI
-		item, hit := h.cache.Get(ctx.Context, cacheKey)
+		item, hit := h.cache.Get(ctx.Context(), cacheKey)
 		if hit {
 
 			w.Header().Set(WgCacheHeader, "HIT")
@@ -1421,7 +1421,7 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, w http.Respons
 func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, ctx *resolve.Context, requestBuf *bytes.Buffer, flusher http.Flusher, requestLogger *zap.Logger) {
 	wgParams := NewWgRequestParams(r)
 
-	done := ctx.Context.Done()
+	done := ctx.Context().Done()
 
 	hookBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(hookBuf)
@@ -1612,7 +1612,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 
-	if !validateInputVariables(ctx, requestLogger, ctx.Variables, h.variablesValidator, w) {
+	if !validateInputVariables(ctx.Context(), requestLogger, ctx.Variables, h.variablesValidator, w) {
 		return
 	}
 
@@ -1701,7 +1701,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 
-	if !validateInputVariables(ctx, requestLogger, ctx.Variables, h.variablesValidator, w) {
+	if !validateInputVariables(ctx.Context(), requestLogger, ctx.Variables, h.variablesValidator, w) {
 		return
 	}
 
@@ -1729,7 +1729,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	flushWriter, ok := getHooksFlushWriter(ctx, r, w, h.hooksPipeline, h.log)
+	ctx, flushWriter, ok := getHooksFlushWriter(ctx, r, w, h.hooksPipeline, h.log)
 	if !ok {
 		http.Error(w, "Connection not flushable", http.StatusBadRequest)
 		return
@@ -1821,8 +1821,11 @@ func (f *httpFlushWriter) Flush() {
 	if f.hooksPipeline != nil {
 		postResolveResponse, err := f.hooksPipeline.PostResolve(f.resolveContext, nil, f.request, resp)
 		if err != nil {
+			if errors.Is(err, context.Canceled) {
+				return
+			}
 			if f.logger != nil {
-				f.logger.Error("subscription preResolve hooks", zap.Error(err))
+				f.logger.Error("subscription postResolve hooks", zap.Error(err))
 			}
 		} else {
 			resp = postResolveResponse.Data
@@ -2243,7 +2246,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx.Variables = variablesBuf.Bytes()
 
-	if !validateInputVariables(ctx, requestLogger, ctx.Variables, h.variablesValidator, w) {
+	if !validateInputVariables(ctx.Context(), requestLogger, ctx.Variables, h.variablesValidator, w) {
 		return
 	}
 
@@ -2267,7 +2270,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
+func (h *FunctionsHandler) handleLiveQuery(resolveCtx *resolve.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
 
 	var (
 		err error
@@ -2276,7 +2279,7 @@ func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseW
 		out *hooks.MiddlewareHookResponse
 	)
 
-	ctx, fw, ok = getFlushWriter(ctx, input, r, w)
+	resolveCtx, fw, ok = getFlushWriter(resolveCtx, input, r, w)
 	if !ok {
 		requestLogger.Error("request doesn't support flushing")
 		w.WriteHeader(http.StatusBadRequest)
@@ -2292,6 +2295,7 @@ func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseW
 
 	defer fw.Close()
 
+	ctx := resolveCtx.Context()
 	for {
 		select {
 		case <-ctx.Done():
@@ -2321,11 +2325,12 @@ func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseW
 	}
 }
 
-func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWriter, input []byte, requestLogger *zap.Logger) {
+func (h *FunctionsHandler) handleRequest(resolveCtx *resolve.Context, w http.ResponseWriter, input []byte, requestLogger *zap.Logger) {
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
+	ctx := resolveCtx.Context()
 	out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input, buf)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -2344,12 +2349,13 @@ func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWri
 	}
 }
 
-func (h *FunctionsHandler) handleSubscriptionRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
+func (h *FunctionsHandler) handleSubscriptionRequest(resolveCtx *resolve.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
 	wgParams := NewWgRequestParams(r)
 
 	setSubscriptionHeaders(w)
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
+	ctx := resolveCtx.Context()
 	err := h.hooksClient.DoFunctionSubscriptionRequest(ctx, h.operation.Path, input, wgParams.SubsribeOnce, wgParams.UseSse, wgParams.UseJsonPatch, w, buf)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -2440,22 +2446,22 @@ func setSubscriptionHeaders(w http.ResponseWriter) {
 	w.Header().Set("X-Accel-Buffering", "no")
 }
 
-func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter, pipeline *hooks.SubscriptionOperationPipeline, logger *zap.Logger) (*httpFlushWriter, bool) {
+func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter, pipeline *hooks.SubscriptionOperationPipeline, logger *zap.Logger) (*resolve.Context, *httpFlushWriter, bool) {
 	var flushWriter *httpFlushWriter
 	var ok bool
-	ctx.Context, flushWriter, ok = getFlushWriter(ctx.Context, ctx.Variables, r, w)
+	ctx, flushWriter, ok = getFlushWriter(ctx, ctx.Variables, r, w)
 	if !ok {
-		return nil, false
+		return nil, nil, false
 	}
 
 	flushWriter.resolveContext = ctx
 	flushWriter.request = r
 	flushWriter.hooksPipeline = pipeline
 	flushWriter.logger = logger
-	return flushWriter, true
+	return ctx, flushWriter, true
 }
 
-func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w http.ResponseWriter) (context.Context, *httpFlushWriter, bool) {
+func getFlushWriter(ctx *resolve.Context, variables []byte, r *http.Request, w http.ResponseWriter) (*resolve.Context, *httpFlushWriter, bool) {
 	wgParams := NewWgRequestParams(r)
 
 	flusher, ok := w.(http.Flusher)
@@ -2476,13 +2482,15 @@ func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w ht
 		useJsonPatch: wgParams.UseJsonPatch,
 		buf:          &bytes.Buffer{},
 		lastMessage:  &bytes.Buffer{},
-		ctx:          ctx,
+		ctx:          ctx.Context(),
 		variables:    variables,
 	}
 
 	if wgParams.SubsribeOnce {
 		flushWriter.subscribeOnce = true
-		ctx, flushWriter.close = context.WithCancel(ctx)
+		var cancellableCtx context.Context
+		cancellableCtx, flushWriter.close = context.WithCancel(ctx.Context())
+		ctx = ctx.WithContext(cancellableCtx)
 	}
 
 	return ctx, flushWriter, true

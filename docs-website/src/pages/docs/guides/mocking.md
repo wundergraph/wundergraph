@@ -83,14 +83,19 @@ If you have a demanding test suite, you can create multiple test files and vites
 When you setup a mock with `mock()` and the request matches, the mock server will return the response. If the request does not match, the mock server will return a 404 response and the call to `scope.done()` will fail the test.
 You have also the ability to throw an error inside the response function to fail the mock. This is useful if you want to verify with test assertion that the request is correct. A thrown error is handled as an unmatched request and the next mock will be checked.
 
-The first argument of the `mock` function is a predicate that is used to match the request. The second argument is the function that returns the response.
+The first argument of the `mock` function is an object that accepts the following properties:
+
+- `match` - A function that returns true if the request matches
+- `handler` - A function that returns the response or throws an error
+- `times` - The number of times the mock should be called. Defaults to 1.
+- `persist` - If true, the mock will not be removed after any number of calls. Be careful with this option, as it can lead to unexpected results if you forget to remove the mock with `ts.mockServer.reset()` after the test. Defaults to false.
 
 ```ts
-const scope = ts.mockServer.mock(
-  async ({ url, method }) => {
+const scope = ts.mockServer.mock({
+  match: ({ url, method }) => {
     return url.path === '/' && method === 'POST';
   },
-  async ({ json }) => {
+  handler: async ({ json }) => {
     const body = await json();
 
     expect(body.variables.code).toEqual('ES');
@@ -115,8 +120,8 @@ const scope = ts.mockServer.mock(
         },
       },
     };
-  }
-);
+  },
+});
 ```
 
 ### Make a request and validate the mock
@@ -140,6 +145,18 @@ scope.done();
 expect(result.error).toBeUndefined();
 expect(result.data).toBeDefined();
 expect(result.data?.countries_countries?.[0].capital).toBe('Madrid');
+```
+
+If an assertion fails or any error is thrown inside the handlers, the test will fail and the error will be rethrown when calling `scope.done()`. This ensure that the test runner can handle the error correctly e.g. by printing a stack trace or showing a diff.
+
+```bash
+AssertionError: expected 'ES' to deeply equal 'DE'
+Caused by: No mock matched for request POST http://0.0.0.0:36331/
+Expected :DE
+Actual   :ES
+<Click to see difference>
+
+    at Object.handler (/c/app/countries.test.ts:29:33)
 ```
 
 For a full example please check the example in the [WunderGraph repository](https://github.com/wundergraph/wundergraph/tree/main/packages/testsuite/apps/mock/test/mock-datasource.test.ts)

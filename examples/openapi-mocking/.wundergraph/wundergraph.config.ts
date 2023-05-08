@@ -16,19 +16,15 @@ configureWunderGraphApplication({
 	apis: [notes],
 	server,
 	operations,
-	codeGenerators: [
-		{
-			templates: [
-				// use all the typescript react templates to generate a client
-				...templates.typescript.all,
-				templates.typescript.operations,
-				templates.typescript.linkBuilder,
-				templates.typescript.client,
-			],
-			// create-react-app expects all code to be inside /src
-			// path: "../frontend/src/generated",
-		},
-	],
+	generate: {
+		codeGenerators: [
+			{
+				templates: [templates.typescript.operations, templates.typescript.linkBuilder, templates.typescript.client],
+				// create-react-app expects all code to be inside /src
+				// path: "../frontend/src/generated",
+			},
+		],
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins:

@@ -11,11 +11,11 @@ describe('Mock server', () => {
 	});
 
 	test('Should be able to mock an endpoint', async () => {
-		const scope = server.mock(
-			async ({ url, method }) => {
+		const scope = server.mock({
+			match: async ({ url, method }) => {
 				return url.path === '/test?a=b' && method === 'GET';
 			},
-			async () => {
+			handler: async () => {
 				return {
 					status: 200,
 					headers: {
@@ -27,8 +27,8 @@ describe('Mock server', () => {
 						},
 					},
 				};
-			}
-		);
+			},
+		});
 
 		const resp = await fetch(`${server.url()}/test?a=b`);
 		const data = await resp.json();
@@ -44,12 +44,12 @@ describe('Mock server', () => {
 		});
 	});
 
-	test('Should be able to mock the same request multiple times', async () => {
-		let scope = server.mock(
-			async ({ url, method }) => {
+	test('Should be able to mock the same request multiple times with different responses', async () => {
+		let scope = server.mock({
+			match: async ({ url, method }) => {
 				return url.path === '/test' && method === 'GET';
 			},
-			async () => {
+			handler: async () => {
 				return {
 					body: {
 						getUser: {
@@ -57,8 +57,8 @@ describe('Mock server', () => {
 						},
 					},
 				};
-			}
-		);
+			},
+		});
 
 		let resp = await fetch(`${server.url()}/test`);
 		let data = await resp.json();
@@ -72,11 +72,11 @@ describe('Mock server', () => {
 			},
 		});
 
-		scope = server.mock(
-			async ({ url, method }) => {
+		scope = server.mock({
+			match: async ({ url, method }) => {
 				return url.path === '/test' && method === 'GET';
 			},
-			async () => {
+			handler: async () => {
 				return {
 					body: {
 						getUser: {
@@ -84,8 +84,8 @@ describe('Mock server', () => {
 						},
 					},
 				};
-			}
-		);
+			},
+		});
 
 		resp = await fetch(`${server.url()}/test`);
 		data = await resp.json();
@@ -100,12 +100,13 @@ describe('Mock server', () => {
 		});
 	});
 
-	test('Should throw an error when mock interceptor could not be found', async () => {
-		const scope = server.mock(
-			async ({ url, method }) => {
-				return url.path === '/does_not_exist';
+	test('Should be able to persist mocks', async () => {
+		let scope = server.mock({
+			persist: true,
+			match: async ({ url, method }) => {
+				return url.path === '/test' && method === 'GET';
 			},
-			async () => {
+			handler: async () => {
 				return {
 					body: {
 						getUser: {
@@ -113,27 +114,149 @@ describe('Mock server', () => {
 						},
 					},
 				};
-			}
-		);
+			},
+		});
+
+		let resp = await fetch(`${server.url()}/test`);
+		let data = await resp.json();
+
+		// Does not throw, because the mock matched
+		scope.done();
+
+		expect(resp.status).toBe(200);
+		expect(data).toEqual({
+			getUser: {
+				id: '123',
+			},
+		});
+
+		resp = await fetch(`${server.url()}/test`);
+		data = await resp.json();
+
+		// Does not throw, because the mock matched again
+		scope.done();
+
+		expect(resp.status).toBe(200);
+		expect(data).toEqual({
+			getUser: {
+				id: '123',
+			},
+		});
+
+		server.reset();
+	});
+
+	test('Persistent mocks are done when at least one request has matched', async () => {
+		let scope = server.mock({
+			persist: true,
+			match: async ({ url, method }) => {
+				return url.path === '/test' && method === 'GET';
+			},
+			handler: async () => {
+				return {
+					body: {
+						getUser: {
+							id: '123',
+						},
+					},
+				};
+			},
+		});
+
+		expect(() => scope.done()).toThrow('No request matched.');
+
+		let resp = await fetch(`${server.url()}/test`);
+		let data = await resp.json();
+
+		expect(resp.status).toBe(200);
+		expect(data).toEqual({
+			getUser: {
+				id: '123',
+			},
+		});
+
+		scope.done();
+
+		server.reset();
+	});
+
+	test('Should be able to use mock for N requests', async () => {
+		let scope = server.mock({
+			times: 2,
+			match: async ({ url, method }) => {
+				return url.path === '/test' && method === 'GET';
+			},
+			handler: async () => {
+				return {
+					body: {
+						getUser: {
+							id: '123',
+						},
+					},
+				};
+			},
+		});
+
+		let resp = await fetch(`${server.url()}/test`);
+		let data = await resp.json();
+
+		expect(() => scope.done()).toThrow('Mock is not done. Expect 1 more calls.');
+
+		expect(resp.status).toBe(200);
+		expect(data).toEqual({
+			getUser: {
+				id: '123',
+			},
+		});
+
+		resp = await fetch(`${server.url()}/test`);
+		data = await resp.json();
+
+		scope.done();
+
+		expect(resp.status).toBe(200);
+
+		expect(data).toEqual({
+			getUser: {
+				id: '123',
+			},
+		});
+	});
+
+	test('Should throw an error when mock could not be found', async () => {
+		const scope = server.mock({
+			match: async ({ url, method }) => {
+				return url.path === '/does_not_exist';
+			},
+			handler: async () => {
+				return {
+					body: {
+						getUser: {
+							id: '123',
+						},
+					},
+				};
+			},
+		});
 
 		const resp = await fetch(`${server.url()}/test`);
 
-		expect(() => scope.done()).toThrow('No interceptor matched for request GET /test');
+		expect(() => scope.done()).toThrow('No mock matched for request GET /test');
 
 		expect(resp.status).toBe(404);
 		expect(scope.isDone).toBe(false);
 		expect(scope.error).toBeDefined();
 	});
 
-	test('Should return 404 and throw with original error when handler does not match with any interceptor / handler', async () => {
-		let scope = server.mock(
-			async ({ url, method }) => {
+	test('Should return 404 and throw with original error when handler does not match with any mock / handler', async () => {
+		let scope = server.mock({
+			match: ({ url, method }) => {
 				return url.path === '/test' && method === 'GET';
 			},
-			async () => {
+			handler: () => {
 				throw new Error('Request does not match');
-			}
-		);
+			},
+		});
 
 		let resp = await fetch(`${server.url()}/test`);
 
@@ -142,17 +265,15 @@ describe('Mock server', () => {
 		expect(scope.error).toBeDefined();
 		// @ts-expect-error
 		expect(scope.error.cause).toBeDefined();
-		expect(() => scope.done()).toThrow(
-			'Request does not match\n' + 'Caused by: No interceptor matched for request GET /test'
-		);
+		expect(() => scope.done()).toThrow('Request does not match\n' + 'Caused by: No mock matched for request GET /test');
 
-		// Let's test if the interceptor was reset
+		// Let's test if the mock was reset
 
-		scope = server.mock(
-			async ({ url, method }) => {
+		scope = server.mock({
+			match: ({ url, method }) => {
 				return url.path === '/test' && method === 'GET';
 			},
-			async () => {
+			handler: () => {
 				return {
 					body: {
 						getUser: {
@@ -160,8 +281,8 @@ describe('Mock server', () => {
 						},
 					},
 				};
-			}
-		);
+			},
+		});
 
 		resp = await fetch(`${server.url()}/test`);
 
@@ -177,15 +298,15 @@ describe('Mock server', () => {
 		});
 	});
 
-	test('Should return 404 and throw with original error when handler does not match with any interceptor / match', async () => {
-		let scope = server.mock(
-			async ({ url, method }) => {
+	test('Should return 404 and throw with original error when handler does not match with any mock / match', async () => {
+		let scope = server.mock({
+			match: ({ url, method }) => {
 				throw new Error('Request does not match');
 			},
-			async () => {
+			handler: () => {
 				return {};
-			}
-		);
+			},
+		});
 
 		let resp = await fetch(`${server.url()}/test`);
 
@@ -194,17 +315,15 @@ describe('Mock server', () => {
 		expect(scope.error).toBeDefined();
 		// @ts-expect-error
 		expect(scope.error.cause).toBeDefined();
-		expect(() => scope.done()).toThrow(
-			'Request does not match\n' + 'Caused by: No interceptor matched for request GET /test'
-		);
+		expect(() => scope.done()).toThrow('Request does not match\n' + 'Caused by: No mock matched for request GET /test');
 
-		// Let's test if the interceptor was reset
+		// Let's test if the mock was reset
 
-		scope = server.mock(
-			async ({ url, method }) => {
+		scope = server.mock({
+			match: ({ url, method }) => {
 				return url.path === '/test' && method === 'GET';
 			},
-			async () => {
+			handler: () => {
 				return {
 					body: {
 						getUser: {
@@ -212,8 +331,8 @@ describe('Mock server', () => {
 						},
 					},
 				};
-			}
-		);
+			},
+		});
 
 		resp = await fetch(`${server.url()}/test`);
 
@@ -229,15 +348,15 @@ describe('Mock server', () => {
 		});
 	});
 
-	test('Should return 404 and throw with not found error when handler does not match with any interceptor', async () => {
-		let scope = server.mock(
-			async ({ url, method }) => {
+	test('Should return 404 and throw with not found error when handler does not match with any mock', async () => {
+		let scope = server.mock({
+			match: ({ url, method }) => {
 				return url.path === '/no_match' && method === 'GET';
 			},
-			async () => {
+			handler: () => {
 				return {};
-			}
-		);
+			},
+		});
 
 		let resp = await fetch(`${server.url()}/test`);
 
@@ -246,15 +365,15 @@ describe('Mock server', () => {
 		expect(scope.error).toBeDefined();
 		// @ts-expect-error
 		expect(scope.error.cause).toBeUndefined();
-		expect(() => scope.done()).toThrow('No interceptor matched for request GET /test');
+		expect(() => scope.done()).toThrow('No mock matched for request GET /test');
 
-		// Let's test if the interceptor was reset
+		// Let's test if the mock was reset
 
-		scope = server.mock(
-			async ({ url, method }) => {
+		scope = server.mock({
+			match: ({ url, method }) => {
 				return url.path === '/test' && method === 'GET';
 			},
-			async () => {
+			handler: () => {
 				return {
 					body: {
 						getUser: {
@@ -262,8 +381,8 @@ describe('Mock server', () => {
 						},
 					},
 				};
-			}
-		);
+			},
+		});
 
 		resp = await fetch(`${server.url()}/test`);
 
@@ -275,15 +394,15 @@ describe('Mock server', () => {
 	});
 
 	test('Should be possible to consume the payload twice', async () => {
-		const scope = server.mock(
-			async ({ url, method, json }) => {
+		const scope = server.mock({
+			match: async ({ url, method, json }) => {
 				const body = await json();
 
 				expect(body).toEqual({ a: 'b' });
 
 				return url.path === '/test?a=b' && method === 'POST';
 			},
-			async ({ json }) => {
+			handler: async ({ json }) => {
 				const body = await json();
 
 				expect(body).toEqual({ a: 'b' });
@@ -295,8 +414,8 @@ describe('Mock server', () => {
 					},
 					body,
 				};
-			}
-		);
+			},
+		});
 
 		const resp = await fetch(`${server.url()}/test?a=b`, {
 			method: 'POST',

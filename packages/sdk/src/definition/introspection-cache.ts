@@ -1,3 +1,5 @@
+import { setTimeout } from 'node:timers/promises';
+
 import {
 	Api,
 	ApiType,
@@ -108,16 +110,15 @@ function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<A>): Ap
 	);
 }
 
-const updateIntrospectionCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
-	api: Api<A>,
+const updateIntrospectionCache = async <TApi extends ApiType>(
+	api: Api<TApi>,
 	bucket: LocalCacheBucket,
 	cacheKey: string
 ): Promise<boolean> => {
 	const cached = await bucket.get(cacheKey);
 	const data = JSON.stringify(toCacheEntry(api));
 	if (cached !== data) {
-		bucket.set(cacheKey, data);
-		return true;
+		return bucket.set(cacheKey, data);
 	}
 	return false;
 };
@@ -128,6 +129,10 @@ type ApiGenerator<
 	TApiType extends ApiType
 > = (introspection: TIntrospection, options: TOptions) => Promise<Api<TApiType>>;
 
+/**
+ * introspectInInterval runs introspection at a regular interval forever. It only
+ * stops if the parent process exits
+ */
 const introspectInInterval = async <
 	TIntrospection extends IntrospectionConfiguration,
 	TOptions extends ApiIntrospectionOptions,
@@ -140,7 +145,15 @@ const introspectInInterval = async <
 	generator: ApiGenerator<TIntrospection, TOptions, TApiType>,
 	options: TOptions
 ) => {
-	const pollingRunner = async () => {
+	let continuePolling = true;
+
+	// Exit the long-running introspection poller when wunderctl exited without the chance to kill the child processes
+	onParentProcessExit(() => {
+		continuePolling = false;
+	});
+
+	while (continuePolling) {
+		await setTimeout(intervalInSeconds * 1000);
 		try {
 			const cacheKey = introspectionCacheConfigurationKey(introspection, configuration, options);
 			const api = await generator(introspection, options);
@@ -151,14 +164,7 @@ const introspectInInterval = async <
 		} catch (e) {
 			Logger.error(`error polling API: ${e}`);
 		}
-	};
-
-	const pollingInterval = setInterval(pollingRunner, intervalInSeconds * 1000);
-
-	// Exit the long-running introspection poller when wunderctl exited without the chance to kill the child processes
-	onParentProcessExit(() => {
-		pollingInterval.unref();
-	});
+	}
 };
 
 /*
