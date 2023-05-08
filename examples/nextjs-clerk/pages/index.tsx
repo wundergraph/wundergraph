@@ -1,6 +1,7 @@
 import { NextPage } from 'next';
 import { useQuery, useUser } from '../components/generated/nextjs';
-import { SignInButton, SignOutButton, useAuth } from '@clerk/nextjs';
+import { SignInButton } from '@clerk/nextjs';
+import { SignOutButton } from '@clerk/clerk-react';
 
 const Home: NextPage = () => {
 	const user = useUser();
