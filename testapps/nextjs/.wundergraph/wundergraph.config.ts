@@ -183,15 +183,14 @@ configureWunderGraphApplication({
 			useSSL: false,
 		},
 	],
-	codeGenerators: [
-		{
-			templates: [...templates.typescript.all],
-		},
-		{
-			templates: [new NextJsTemplate()],
-			path: '../components/generated',
-		},
-	],
+	generate: {
+		codeGenerators: [
+			{
+				templates: [new NextJsTemplate()],
+				path: '../components/generated',
+			},
+		],
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins: ['http://localhost:3003'],

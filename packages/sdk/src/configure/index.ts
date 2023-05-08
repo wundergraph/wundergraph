@@ -83,6 +83,7 @@ import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations
 import zodToJsonSchema from 'zod-to-json-schema';
 import { GenerateConfig, OperationsGenerationConfig } from './codegeneration';
 import { generateOperations } from '../codegen/generateoperations';
+import templates from '../codegen/templates';
 
 const utf8 = 'utf8';
 const generated = 'generated';
@@ -1040,7 +1041,13 @@ export const configureWunderGraphApplication = <
 				}
 			}
 
-			const combined = [...(config.generate?.codeGenerators || []), ...(config.codeGenerators || [])];
+			const defaultCodeGenerators: CodeGen = { templates: [...templates.typescript.all] };
+
+			const combined = [
+				defaultCodeGenerators,
+				...(config.generate?.codeGenerators || []),
+				...(config.codeGenerators || []),
+			];
 			for (let i = 0; i < combined.length; i++) {
 				const gen = combined[i];
 				await GenerateCode({
