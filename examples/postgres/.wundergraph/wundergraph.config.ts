@@ -12,11 +12,9 @@ configureWunderGraphApplication({
 	apis: [db],
 	server,
 	operations,
-	codeGenerators: [
-		{
-			templates: [...templates.typescript.all],
-		},
-	],
+	generate: {
+		codeGenerators: [],
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins: ['http://localhost:3000'],

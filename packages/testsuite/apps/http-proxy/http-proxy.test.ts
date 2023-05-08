@@ -118,8 +118,10 @@ describe('Invalid proxy configurations', () => {
 		const cleanup = await ts.start();
 		onTestFailed(() => cleanup());
 
-		const scope = ts.mockServer.assertHTTPConnect(async ({ url }) => {
-			return url === 'countries.trevorblades.com:443';
+		const scope = ts.mockServer.assertHTTPConnect({
+			match: ({ url }) => {
+				return url === 'countries.trevorblades.com:443';
+			},
 		});
 
 		const result = await ts.testServer.client().query({

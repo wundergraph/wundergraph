@@ -46,6 +46,6 @@ export class WunderGraphTestServers<ClientType extends Client = Client> {
 	 * Stop all servers.
 	 */
 	public async stop() {
-		return Promise.all([this.mockServer.stop(), this.testServer.stop()]);
+		await Promise.all([this.mockServer.stop(), this.testServer.stop()]);
 	}
 }

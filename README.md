@@ -82,9 +82,6 @@ configureWunderGraphApplication({
   // generate type-safe clients for your Frontend
   codeGenerators: [
     {
-      templates: [...templates.typescript.all],
-    },
-    {
       templates: [new NextJsTemplate()],
       path: '../web/components/generated',
     },
@@ -98,7 +95,8 @@ This makes it easy to update an API dependency without a single click.
 2. **Define an Operation**
 
 By combining the introspected APIs, WunderGraph generates a unified GraphQL Schema across all APIs.
-All we have to do is define an Operation and call it from our Frontend.
+All we have to do is define an Operation and call it from our Frontend. You can create a GraphQL operation or a TypeScript operation. Both are type-safe.
+TypeScript operations allows you to add custom logic e.g aggregating data from multiple APIs, defining custom input validation, etc.
 
 <table>
 <tr>

@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.153.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.152.1...@wundergraph/sdk@0.153.0) (2023-05-08)
+
+### Features
+
+* improve mocking library, support N times and persistent mocks ([#934](https://github.com/wundergraph/wundergraph/issues/934)) ([029bf3a](https://github.com/wundergraph/wundergraph/commit/029bf3aa266bac21ecbdaf906115379fa7f6e37e)) (@StarpTech)
+
+### Bug Fixes
+
+* don't skip second level operations in Postman collections, skip internal ([#930](https://github.com/wundergraph/wundergraph/issues/930)) ([71302da](https://github.com/wundergraph/wundergraph/commit/71302da555ff7ab91f0bed9f0bada20db7244c3b)) (@fiam)
+
 ## [0.152.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.152.0...@wundergraph/sdk@0.152.1) (2023-05-05)
 
 ### Bug Fixes
