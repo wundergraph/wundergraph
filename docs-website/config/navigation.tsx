@@ -611,11 +611,15 @@ const navigation = [
 						href: '/docs/architecture/architecture-diagram',
 					},
 					{
-						title: 'WunderGraph Explained in one Sequence Diagram',
+						title: 'WunderGraph Server',
+						href: '/docs/architecture/wundergraph-server',
+					},
+					{
+						title: 'WunderGraph in one Sequence Diagram',
 						href: '/docs/architecture/wundergraph-explained-in-one-sequence-diagram',
 					},
 					{
-						title: 'WunderGraph RPC Protocol explained',
+						title: 'WunderGraph RPC Protocol',
 						href: '/docs/architecture/wundergraph-rpc-protocol-explained',
 					},
 					{
