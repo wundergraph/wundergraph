@@ -17,6 +17,10 @@ const (
 
 	// logger field name must be aligned with fastify
 	requestIDField = "reqId"
+
+	//	environment variables
+	WgCloudEnvironmentID = "WG_CLOUD_ENVIRONMENT_ID"
+	WgCloudProjectID     = "WG_CLOUD_PROJECT_ID"
 )
 
 type RequestIDKey struct{}
@@ -78,6 +82,16 @@ func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool, le
 	host, err := os.Hostname()
 	if err != nil {
 		host = "unknown"
+	}
+
+	environmentID := os.Getenv(WgCloudEnvironmentID)
+	if environmentID != "" {
+		zapLogger = zapLogger.With(zap.String("environmentID", environmentID))
+	}
+
+	projectID := os.Getenv(WgCloudProjectID)
+	if projectID != "" {
+		zapLogger = zapLogger.With(zap.String("projectID", projectID))
 	}
 
 	return zapLogger.With(
