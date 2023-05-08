@@ -20,20 +20,19 @@ set -e
 SKIP="faunadb-nextjs graphql-hasura-subscriptions inject-bearer"
 
 # These are broken
-SKIP="${SKIP} nextjs-todos remix"
+SKIP="${SKIP} nextjs-todos remix nuxt"
 
 # XXX: This breaks only in CI (fastify issue?)
 SKIP="${SKIP} graphql-ws-subscriptions"
-
-# Nuxt uses ESNEXT so skip temporarily
-SKIP="${SKIP} nuxt"
 
 # Move to repo root
 cd `dirname ${0}`/../..
 
 if test ${target} = "workspace"; then
     # Add examples to workspace
-    echo "  - 'examples/*'" >> pnpm-workspace.yaml
+		echo "  - 'examples/*'" >> pnpm-workspace.yaml
+		# nuxt + pnpm is broken Refer: https://github.com/nuxt/nuxt/issues/14146
+		echo "  - '!examples/nuxt'" >> pnpm-workspace.yaml
 
     # Replace dependencies with workspace
     find examples -name package.json -exec sed -i.bak -E 's/(@wundergraph\/.*": ")\^[0-9\.]+/\1workspace:*/g' {} \;

@@ -64,7 +64,7 @@ When using custom environment variables, you need to make sure that the environm
 ### Configure options with static values
 
 ```typescript
-export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
+export default configureWunderGraphServer(() => ({
   options: {
     listen: {
       host: 'localhost',
@@ -83,7 +83,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 ```typescript
 import { configureWunderGraphServer, EnvironmentVariable, LoggerLevel } from '@wundergraph/sdk/server'
 
-export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
+export default configureWunderGraphServer(() => ({
   options: {
     listen: {
       host: new EnvironmentVariable('SERVER_HOST', 'localhost'),
@@ -107,7 +107,7 @@ By using default environment variables names you could stick with Wundergraph De
 import { configureWunderGraphServer, EnvironmentVariable, LoggerLevel, WgEnv } from '@wundergraph/sdk/server'
 
 // use WgEnv enum to set variable names
-export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
+export default configureWunderGraphServer(() => ({
   options: {
     listen: {
       host: new EnvironmentVariable(WgEnv.ServerHost, 'localhost'),
@@ -124,7 +124,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 })
 
 // alternative using plain string variable names
-export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
+export default configureWunderGraphServer(() => ({
   options: {
     listen: {
       host: new EnvironmentVariable('WG_SERVER_HOST', 'localhost'),

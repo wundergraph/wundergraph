@@ -92,7 +92,7 @@ const spacex = introspect.graphql({
       inputTypeReplacement: 'LocationInput',
     },
   ],
-})
+});
 ```
 
 Now the operation looks like this:
@@ -166,7 +166,7 @@ const db = introspect.postgresql({
       inputTypeReplacement: `ContactInput`,
     },
   ],
-})
+});
 ```
 
 The Query operation will look like this:
@@ -190,14 +190,9 @@ you couldn't be able to select the `phone` and `type` fields.
 Mutation:
 
 ```graphql
-mutation (
-  $email: String! @fromClaim(name: EMAIL)
-  $name: String! @fromClaim(name: NAME)
-  $payload: db_ContactInput!
-) @rbac(requireMatchAll: [user]) {
-  createOneusers: db_createOneusers(
-    data: { name: $name, email: $email, contact: $payload }
-  ) {
+mutation ($email: String! @fromClaim(name: EMAIL), $name: String! @fromClaim(name: NAME), $payload: db_ContactInput!)
+@rbac(requireMatchAll: [user]) {
+  createOneusers: db_createOneusers(data: { name: $name, email: $email, contact: $payload }) {
     id
     name
     email
@@ -384,5 +379,5 @@ const users = introspect.openApi({
       responseTypeReplacement: `Contact`,
     },
   ],
-})
+});
 ```

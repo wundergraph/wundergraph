@@ -8,7 +8,7 @@ import {
 } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
-import { golangClient } from '@wundergraph/golang-client';
+import generate from './wundergraph.generate';
 
 const jsp = introspect.openApiV2({
 	id: 'jsp',
@@ -54,6 +54,14 @@ const federatedApi = introspect.federation({
 const spacex = introspect.graphql({
 	apiNamespace: 'spacex',
 	url: 'https://spacex-api.fly.dev/graphql/',
+	schemaExtension: `
+	extend type Capsule {
+		myCustomField: String
+	}
+	`,
+	introspection: {
+		disableCache: true,
+	},
 });
 
 const countries = introspect.graphql({
@@ -62,6 +70,7 @@ const countries = introspect.graphql({
 });
 
 const weather = introspect.graphql({
+	id: 'weather',
 	apiNamespace: 'weather',
 	url: 'https://weather-api.wundergraph.com/',
 	introspection: {
@@ -92,25 +101,10 @@ configureWunderGraphApplication({
 	apis: [jsp, weather, countries, spacex, chinook, db, jsp2, usersPost, federatedApi],
 	server,
 	operations,
+	generate,
 	authorization: {
 		roles: ['admin', 'user'],
 	},
-	codeGenerators: [
-		{
-			templates: [
-				// use all the typescript react templates to generate a client
-				...templates.typescript.all,
-			],
-		},
-		{
-			templates: [
-				...golangClient.all({
-					packageName: 'client',
-				}),
-			],
-			path: './generated/golang/client',
-		},
-	],
 	cors: {
 		...cors.allowAll,
 		allowedOrigins:

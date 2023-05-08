@@ -98,26 +98,22 @@ Now we're going to reduce our app to the bare minimum and explain what each step
 `wundergraph.config.ts` so it looks like this:
 
 ```typescript
-import {
-  Application,
-  configureWunderGraphApplication,
-  introspect,
-} from '@wundergraph/sdk'
-import server from './wundergraph.server'
-import operations from './wundergraph.operations'
+import { Application, configureWunderGraphApplication, introspect } from '@wundergraph/sdk';
+import server from './wundergraph.server';
+import operations from './wundergraph.operations';
 
 const world = introspect.graphql({
   // Namespace inside our virtual graph
   apiNamespace: 'world',
   // URL of the data source
   url: 'https://countries.trevorblades.com/',
-})
+});
 
 configureWunderGraphApplication({
   apis: [world],
   server,
   operations,
-})
+});
 ```
 
 You will notice that our WunderGraph node now starts producing some errors:

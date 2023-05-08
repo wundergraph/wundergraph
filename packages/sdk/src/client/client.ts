@@ -6,7 +6,9 @@ import {
 	Headers,
 	LogoutOptions,
 	MutationRequestOptions,
+	OperationDefinition,
 	OperationRequestOptions,
+	OperationsDefinition,
 	QueryRequestOptions,
 	SubscriptionEventHandler,
 	SubscriptionRequestOptions,
@@ -59,10 +61,12 @@ interface LogoutResponse {
 }
 
 export class Client {
-	constructor(private options: ClientConfig) {
-		this.baseHeaders = {
-			'WG-SDK-Version': options.sdkVersion,
-		};
+	constructor(protected options: ClientConfig) {
+		this.baseHeaders = options.sdkVersion
+			? {
+					'WG-SDK-Version': options.sdkVersion,
+			  }
+			: {};
 
 		this.extraHeaders = { ...options.extraHeaders };
 
@@ -72,7 +76,7 @@ export class Client {
 	private readonly baseHeaders: Headers = {};
 	private extraHeaders: Headers = {};
 	private csrfToken: string | undefined;
-	private readonly csrfEnabled: boolean = true;
+	protected readonly csrfEnabled: boolean = true;
 
 	public static buildCacheKey(query: OperationRequestOptions): string {
 		return serialize(query);
@@ -82,11 +86,11 @@ export class Client {
 		return !!this.options.operationMetadata?.[operationName]?.requiresAuthentication;
 	}
 
-	private operationUrl(operationName: string) {
+	protected operationUrl(operationName: string) {
 		return this.options.baseURL + '/operations/' + operationName;
 	}
 
-	private addUrlParams(url: string, queryParams: URLSearchParams): string {
+	protected addUrlParams(url: string, queryParams: URLSearchParams): string {
 		// stable stringify
 		queryParams.sort();
 
@@ -95,14 +99,24 @@ export class Client {
 		return url + (queryString ? `?${queryString}` : '');
 	}
 
-	private encodeQueryParams(queryParams: URLSearchParams): string {
+	protected encodeQueryParams(queryParams: URLSearchParams): string {
 		const originalString = queryParams.toString();
 		const withoutEmptyArgs = originalString.replace('=&', '&');
 		return withoutEmptyArgs.endsWith('=') ? withoutEmptyArgs.slice(0, -1) : withoutEmptyArgs;
 	}
 
-	private async fetchJson(url: string, init: RequestInit = {}) {
+	protected searchParams(queryParams?: Record<string, string>) {
+		const searchParams = new URLSearchParams(queryParams);
+		if (this.options.applicationHash) {
+			searchParams.set('wg_api_hash', this.options.applicationHash);
+		}
+
+		return searchParams;
+	}
+
+	protected async fetchJson(url: string, init: RequestInit = {}) {
 		init.headers = { ...init.headers, Accept: 'application/json', 'Content-Type': 'application/json' };
+
 		return this.fetch(url, init);
 	}
 
@@ -115,11 +129,26 @@ export class Client {
 			...init.headers,
 		};
 
-		return fetchImpl(input, {
-			credentials: 'include',
-			mode: 'cors',
-			...init,
-		});
+		let timeout: NodeJS.Timeout | undefined;
+
+		if (!init.signal && this.options.requestTimeoutMs && this.options.requestTimeoutMs > 0) {
+			const controller = new AbortController();
+			timeout = setTimeout(() => controller.abort(), this.options.requestTimeoutMs);
+			init.signal = controller.signal;
+		}
+
+		try {
+			const resp = await fetchImpl(input, {
+				credentials: 'include',
+				mode: 'cors',
+				...init,
+			});
+			return resp;
+		} finally {
+			if (timeout) {
+				clearTimeout(timeout);
+			}
+		}
 	}
 
 	private convertGraphQLResponse(resp: GraphQLResponse, statusCode: number = 200): ClientResponse {
@@ -197,7 +226,7 @@ export class Client {
 	 * Network errors or non-200 status codes are converted to an error. Application errors
 	 * as from GraphQL are returned as an Error from type GraphQLResponseError.
 	 */
-	private async fetchResponseToClientResponse(response: globalThis.Response): Promise<ClientResponse> {
+	protected async fetchResponseToClientResponse(response: globalThis.Response): Promise<ClientResponse> {
 		// The Promise returned from fetch() won't reject on HTTP error status
 		// even if the response is an HTTP 404 or 500.
 
@@ -216,7 +245,7 @@ export class Client {
 		);
 	}
 
-	private stringifyInput(input: any) {
+	protected stringifyInput(input: any) {
 		const encoded = JSON.stringify(input || {});
 		return encoded === '{}' ? undefined : encoded;
 	}
@@ -226,6 +255,10 @@ export class Client {
 			...this.extraHeaders,
 			...headers,
 		};
+	}
+
+	public hasExtraHeaders() {
+		return Object.keys(this.extraHeaders).length > 0;
 	}
 
 	/**
@@ -257,17 +290,15 @@ export class Client {
 	public async query<RequestOptions extends QueryRequestOptions, Data = any, Error = any>(
 		options: RequestOptions
 	): Promise<ClientResponse<Data, Error>> {
-		const searchParams = new URLSearchParams({
-			wg_api_hash: this.options.applicationHash,
-		});
+		const params = this.searchParams();
 		const variables = this.stringifyInput(options.input);
 		if (variables) {
-			searchParams.set('wg_variables', variables);
+			params.set('wg_variables', variables);
 		}
 		if (options.subscribeOnce) {
-			searchParams.set('wg_subscribe_once', '');
+			params.set('wg_subscribe_once', '');
 		}
-		const url = this.addUrlParams(this.operationUrl(options.operationName), searchParams);
+		const url = this.addUrlParams(this.operationUrl(options.operationName), params);
 		const resp = await this.fetchJson(url, {
 			method: 'GET',
 			signal: options.abortSignal,
@@ -302,12 +333,8 @@ export class Client {
 	public async mutate<RequestOptions extends MutationRequestOptions, Data = any, Error = any>(
 		options: RequestOptions
 	): Promise<ClientResponse<Data, Error>> {
-		const url = this.addUrlParams(
-			this.operationUrl(options.operationName),
-			new URLSearchParams({
-				wg_api_hash: this.options.applicationHash,
-			})
-		);
+		const params = this.searchParams();
+		const url = this.addUrlParams(this.operationUrl(options.operationName), params);
 
 		const headers: Headers = {};
 
@@ -331,9 +358,7 @@ export class Client {
 	 * the server returns a non-200 status code.
 	 */
 	public async fetchUser<U extends User>(options?: FetchUserRequestOptions): Promise<U> {
-		const params = new URLSearchParams({
-			wg_api_hash: this.options.applicationHash,
-		});
+		const params = this.searchParams();
 		if (options?.revalidate) {
 			params.set('revalidate', '');
 		}
@@ -351,34 +376,57 @@ export class Client {
 
 	/**
 	 * Set up subscriptions over SSE with fallback to web streams.
+	 *
+	 * Falls back to web streams if extraHeaders are set,
+	 * no callback is supplied or EventSource is not supported.
+	 *
 	 * When called with subscribeOnce it will return the response directly
 	 * without setting up a subscription.
 	 * @see https://docs.wundergraph.com/docs/architecture/wundergraph-rpc-protocol-explained#subscriptions
 	 */
+	public async subscribe<
+		RequestOptions extends SubscriptionRequestOptions,
+		Data = any,
+		Error = any,
+		Response = ClientResponse<Data, Error>
+	>(options: RequestOptions): Promise<Response>;
 	public async subscribe<RequestOptions extends SubscriptionRequestOptions, Data = any, Error = any>(
 		options: RequestOptions,
-		cb: SubscriptionEventHandler<Data, Error>
-	) {
+		cb?: SubscriptionEventHandler<Data, Error>
+	): Promise<ClientResponse<Data, Error> | void>;
+	public async subscribe<RequestOptions extends SubscriptionRequestOptions, Data = any, Error = any>(
+		options: RequestOptions,
+		cb?: SubscriptionEventHandler<Data, Error>
+	): Promise<any> {
 		if (options.subscribeOnce) {
 			const result = await this.query<RequestOptions, Data, Error>(options);
-			cb(result);
+			cb?.(result);
 			return result;
 		}
-		if ('EventSource' in globalThis) {
+
+		const shouldUseSSE = this.options.forceSSE || !this.hasExtraHeaders();
+		if (cb && 'EventSource' in globalThis && shouldUseSSE) {
 			return this.subscribeWithSSE<Data, Error>(options, cb);
 		}
-		for await (const event of this.subscribeWithFetch<Data, Error>(options)) {
-			cb(event);
+
+		const generator = this.subscribeWithFetch<Data, Error>(options);
+
+		if (cb) {
+			for await (const event of generator) {
+				cb(event);
+			}
+			return;
 		}
+
+		return generator;
 	}
 
-	private subscribeWithSSE<Data = any, Error = any>(
+	protected subscribeWithSSE<Data = any, Error = any>(
 		subscription: SubscriptionRequestOptions,
 		cb: SubscriptionEventHandler<Data, Error>
 	) {
 		return new Promise<void>((resolve, reject) => {
-			const params = new URLSearchParams({
-				wg_api_hash: this.options.applicationHash,
+			const params = this.searchParams({
 				wg_sse: '',
 				wg_json_patch: '',
 			});
@@ -427,12 +475,10 @@ export class Client {
 		});
 	}
 
-	private async *subscribeWithFetch<Data = any, Error = any>(
+	protected async *subscribeWithFetch<Data = any, Error = any>(
 		subscription: SubscriptionRequestOptions
 	): AsyncGenerator<ClientResponse<Data, Error>> {
-		const params = new URLSearchParams({
-			wg_api_hash: this.options.applicationHash,
-		});
+		const params = this.searchParams();
 		const variables = this.stringifyInput(subscription.input);
 		if (variables) {
 			params.set('wg_variables', variables);
@@ -503,9 +549,7 @@ export class Client {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 
-		const params = new URLSearchParams({
-			wg_api_hash: this.options.applicationHash,
-		});
+		const params = this.searchParams();
 
 		if ('profile' in config) {
 			headers['X-Upload-Profile'] = (config as any).profile;

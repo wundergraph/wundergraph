@@ -12,7 +12,7 @@ configureWunderGraphApplication({
     enableGraphQLEndpoint: true,
     allowedHosts: ['localhost:3000'],
   },
-})
+});
 ```
 
 ## Enable GraphQL Endpoint

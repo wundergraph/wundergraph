@@ -276,7 +276,7 @@ Simply pass a `schema.prisma` file to the `introspect.prisma` function and you'r
 // wundergraph.config.ts
 const myDB = introspect.prisma({
   apiNamespace: 'my_db',
-  schemaPath: './schema.prisma',
+  prismaFilePath: './schema.prisma',
 });
 
 configureWunderGraphApplication({

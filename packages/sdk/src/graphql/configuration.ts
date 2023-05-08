@@ -1,12 +1,4 @@
-import {
-	buildASTSchema,
-	DocumentNode,
-	GraphQLSchema,
-	OperationDefinitionNode,
-	parse,
-	SelectionSetNode,
-	visit,
-} from 'graphql';
+import { DocumentNode, GraphQLSchema, OperationDefinitionNode, parse, SelectionSetNode, visit } from 'graphql';
 import {
 	ArgumentConfiguration,
 	ArgumentRenderConfiguration,
@@ -18,6 +10,7 @@ import {
 import { ArgumentReplacement } from '../transformations/transformSchema';
 import { TypeNode } from 'graphql/language/ast';
 import { Kind } from 'graphql/language/kinds';
+import { GraphQLIntrospection } from '../definition';
 
 const DefaultJsonType = 'JSON';
 
@@ -30,7 +23,7 @@ export interface GraphQLConfiguration {
 
 export const configuration = (
 	schema: DocumentNode,
-	customJsonScalars: string[] = [],
+	introspection: GraphQLIntrospection,
 	serviceSDL?: DocumentNode,
 	argumentReplacements?: ArgumentReplacement[]
 ): GraphQLConfiguration => {
@@ -42,11 +35,48 @@ export const configuration = (
 	};
 	const replacements = argumentReplacements || [];
 	if (serviceSDL !== undefined) {
-		visitSchema(serviceSDL, config, customJsonScalars, true, replacements);
+		visitSchema(serviceSDL, config, introspection.customJSONScalars || [], true, replacements);
 	} else {
-		visitSchema(schema, config, customJsonScalars, false, replacements);
+		visitSchema(schema, config, introspection.customJSONScalars || [], false, replacements);
+	}
+	if (introspection.schemaExtension) {
+		applySchemaExtension(config, introspection.schemaExtension);
 	}
 	return config;
+};
+
+const applySchemaExtension = (config: GraphQLConfiguration, schemaExtension: string) => {
+	const document = parse(schemaExtension);
+	let typeName: string = '';
+	visit(document, {
+		ObjectTypeDefinition: (node) => {
+			typeName = node.name.value;
+		},
+		ObjectTypeExtension: (node) => {
+			typeName = node.name.value;
+		},
+		InterfaceTypeDefinition: (node) => {
+			typeName = node.name.value;
+		},
+		InterfaceTypeExtension: (node) => {
+			typeName = node.name.value;
+		},
+		FieldDefinition: (node) => {
+			const fieldName = node.name.value;
+			// remove field from root nodes
+			config.RootNodes = config.RootNodes.map((r) => ({
+				...r,
+				fieldNames: r.fieldNames.filter((f) => !(r.typeName === typeName && f === fieldName)),
+			}));
+			// remove field from child nodes
+			config.ChildNodes = config.ChildNodes.map((r) => ({
+				...r,
+				fieldNames: r.fieldNames.filter((f) => !(r.typeName === typeName && f === fieldName)),
+			}));
+			// remove field from fields
+			config.Fields = config.Fields.filter((f) => !(f.typeName === typeName && f.fieldName === fieldName));
+		},
+	});
 };
 
 interface JsonTypeField {

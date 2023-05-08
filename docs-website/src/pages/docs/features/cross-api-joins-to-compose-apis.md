@@ -18,12 +18,12 @@ one to query the capitals and the other to query the weather data.
 const weather = introspect.graphql({
   apiNamespace: 'weather',
   url: 'https://weather-api.wundergraph.com/',
-})
+});
 
 const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
-})
+});
 ```
 
 Next, let's define our JOIN query.

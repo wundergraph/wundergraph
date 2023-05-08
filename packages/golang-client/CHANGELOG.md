@@ -3,6 +3,54 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.27](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.5.26...@wundergraph/golang-client@0.5.27) (2023-05-08)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.5.26](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.5.25...@wundergraph/golang-client@0.5.26) (2023-05-05)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.5.25](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.5.24...@wundergraph/golang-client@0.5.25) (2023-05-04)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.5.24](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.5.23...@wundergraph/golang-client@0.5.24) (2023-05-03)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.5.23](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.5.22...@wundergraph/golang-client@0.5.23) (2023-05-03)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.5.22](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.5.21...@wundergraph/golang-client@0.5.22) (2023-04-27)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.5.21](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.5.20...@wundergraph/golang-client@0.5.21) (2023-04-27)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.5.20](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.5.19...@wundergraph/golang-client@0.5.20) (2023-04-27)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.5.19](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.5.18...@wundergraph/golang-client@0.5.19) (2023-04-26)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.5.18](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.5.17...@wundergraph/golang-client@0.5.18) (2023-04-26)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.5.17](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.5.16...@wundergraph/golang-client@0.5.17) (2023-04-25)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.5.16](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.5.15...@wundergraph/golang-client@0.5.16) (2023-04-24)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
 ## [0.5.15](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.5.14...@wundergraph/golang-client@0.5.15) (2023-04-20)
 
 **Note:** Version bump only for package @wundergraph/golang-client

@@ -11,6 +11,7 @@ test('renameTypes', async () => {
 		resolve(
 			new GraphQLApi(
 				schema,
+				'',
 				[
 					{
 						RootNodes: [
@@ -81,6 +82,7 @@ test('renameTypes', async () => {
 	const renamedSchema = print(parse('type PetStore_User {name: String!} type Query {me: PetStore_User!}'));
 	const expected = await new GraphQLApi(
 		renamedSchema,
+		'',
 		[
 			{
 				RootNodes: [
@@ -152,6 +154,7 @@ test('renameTypeFields', async () => {
 		resolve(
 			new GraphQLApi(
 				schema,
+				'',
 				[
 					{
 						RootNodes: [
@@ -242,6 +245,7 @@ test('renameTypeFields', async () => {
 		resolve(
 			new GraphQLApi(
 				updatedSchema,
+				'',
 				[
 					{
 						RootNodes: [

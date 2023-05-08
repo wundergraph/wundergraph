@@ -17,11 +17,11 @@ const db = introspect.sqlserver({
   introspection: {
     pollingIntervalSeconds: 5,
   },
-})
+});
 
 configureWunderGraphApplication({
   apis: [db],
-})
+});
 ```
 
 Define the `databaseURL` which is the connection string to the database.

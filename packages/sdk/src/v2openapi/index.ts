@@ -139,7 +139,10 @@ class RESTApiBuilder {
 			}
 		});
 		const filtered = this.filterEmptyTypes(this.graphQLSchema);
-		const { schemaSDL: replaced } = transformSchema.replaceCustomScalars(print(filtered), this.introspection);
+		const { schemaSDL: replaced } = transformSchema.replaceCustomScalars(
+			print(filtered) + '\n' + (this.introspection.schemaExtension || ''),
+			this.introspection
+		);
 		const schema = buildASTSchema(parse(replaced));
 		const schemaString = printSchema(schema);
 		const dataSources = this.dataSources.map((ds) => {
@@ -167,6 +170,7 @@ class RESTApiBuilder {
 		}
 		return new RESTApi(
 			applyNameSpaceToGraphQLSchema(schemaString, [], this.apiNamespace),
+			this.apiNamespace || '',
 			dataSources,
 			applyNamespaceToExistingRootFieldConfigurations(this.fields, schema, this.apiNamespace),
 			[],
@@ -207,6 +211,8 @@ class RESTApiBuilder {
 					mTLS: buildMTLSConfiguration(this.introspection),
 					upstreamAuthentication: buildUpstreamAuthentication(this.introspection),
 					urlEncodeBody: false,
+					httpProxyUrl:
+						this.introspection.httpProxyUrl != null ? mapInputVariable(this.introspection.httpProxyUrl) : undefined,
 				},
 				Subscription: {
 					Enabled: false,
@@ -451,7 +457,8 @@ class RESTApiBuilder {
 			}
 		}
 		if (schema.allOf) {
-			schema = (schema.allOf! as JSONSchema[]).map(this.resolveSchema).reduce(this.mergeJSONSchemas);
+			const allOf = allOfOasMapper(schema);
+			schema = allOf.map(this.resolveSchema).reduce(this.mergeJSONSchemas);
 		}
 		if (schema.type === undefined) {
 			this.ensureType('scalar', 'JSON');
@@ -490,6 +497,13 @@ class RESTApiBuilder {
 						this.addEnumValues(enumName, schema.enum);
 						return;
 					}
+					if ((argumentName || '').trim().length <= 0) {
+						const enumTypeName = `${parentTypeName}${(fieldName || '').trim().length > 0 ? '_' + fieldName : ''}`;
+						this.ensureType('enum', enumTypeName);
+						this.addEnumValues(enumTypeName, schema.enum);
+						this.addField(parentTypeName, objectKind, fieldName, enumTypeName, enclosingTypes);
+						return;
+					}
 					this.addEnumValues(parentTypeName, schema.enum);
 					return;
 				}
@@ -522,6 +536,7 @@ class RESTApiBuilder {
 				return;
 			case 'object':
 				if (!schema.properties) {
+					// @ts-ignore
 					if (schema?.additionalProperties && schema.additionalProperties !== false) {
 						this.ensureType('scalar', 'JSON');
 						this.addField(parentTypeName, objectKind, fieldName, 'JSON', enclosingTypes);
@@ -940,6 +955,10 @@ class RESTApiBuilder {
 	};
 	private addEnumValues = (enumTypeName: string, values: JSONSchema7Type[]) => {
 		const nodes: EnumValueDefinitionNode[] = [];
+		if (values && !Array.isArray(values) && values['$values']) {
+			values = values['$values'];
+		}
+
 		values.forEach((value) => {
 			if (typeof value !== 'string') {
 				return;
@@ -1086,7 +1105,8 @@ class RESTApiBuilder {
 			return this.resolveSchema(value.oneOf[0] as JSONSchema);
 		}
 		if (value.allOf) {
-			return (value.allOf! as JSONSchema[]).map(this.resolveSchema).reduce(this.mergeJSONSchemas);
+			const allOf = allOfOasMapper(value);
+			return allOf.map(this.resolveSchema).reduce(this.mergeJSONSchemas);
 		}
 		return value as JSONSchema;
 	};
@@ -1249,6 +1269,18 @@ const fixOasReplacer = (key: string, value: any): any => {
 		default:
 			return value;
 	}
+};
+
+const allOfOasMapper = (schema: any): JSONSchema[] => {
+	let allOf: JSONSchema[] = schema.allOf;
+	if (!Array.isArray(schema.allOf) && schema.allOf['$values'] && Array.isArray(schema.allOf['$values'])) {
+		allOf = schema.allOf['$values'];
+	}
+	if (!Array.isArray(allOf)) {
+		console.error('Error parsing "allOf" for schema!', allOf, schema);
+		throw new Error('Error parsing "allOf"!');
+	}
+	return allOf;
 };
 
 export const getFormattedPath = (path: string): string => {

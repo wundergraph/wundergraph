@@ -230,6 +230,8 @@ export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOpti
 		return relayEnvironment;
 	};
 
+	const getEnvironment = () => initEnvironment();
+
 	const useEnvironment = (initialRecords?: RecordMap) => {
 		const store = useMemo(() => initEnvironment(initialRecords), [initialRecords]);
 		return store;
@@ -265,5 +267,6 @@ export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOpti
 		WunderGraphRelayProvider,
 		fetchWunderGraphSSRQuery,
 		useLiveQuery,
+		getEnvironment,
 	};
 };

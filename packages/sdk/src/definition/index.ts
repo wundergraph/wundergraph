@@ -19,7 +19,7 @@ import {
 } from '@wundergraph/protobuf';
 import { applyNameSpaceToGraphQLSchema } from './namespacing';
 import { InputVariable, mapInputVariable } from '../configure/variables';
-import { introspectGraphqlWithCache } from './graphql-introspection';
+import { introspectGraphql, introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
 import { openApi, OpenAPIIntrospectionNew, openApiV2 } from './openapi-introspection';
@@ -47,6 +47,17 @@ export const WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS = (() => {
 	return isNaN(seconds) ? 0 : seconds;
 })();
 
+/**
+ * ApiIntrospectionOptions contains options that are passed to
+ * all ApiIntrospector<T> functions
+ */
+export interface ApiIntrospectionOptions {
+	/**
+	 * Global proxy URL, which might be overridden at the data source level
+	 */
+	httpProxyUrl?: string;
+}
+
 export interface RenameType {
 	from: string;
 	to: string;
@@ -71,6 +82,7 @@ export type ApiType = GraphQLApiCustom | RESTApiCustom | DatabaseApiCustom;
 export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	constructor(
 		schema: string,
+		namespace: string,
 		dataSources: DataSource<T>[],
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
@@ -78,6 +90,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		customJsonScalars?: string[]
 	) {
 		this.Schema = schema;
+		this.Namespace = namespace;
 		this.DataSources = dataSources;
 		this.Fields = fields;
 		this.Types = types;
@@ -92,6 +105,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	Types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
 	CustomJsonScalars?: string[];
+	Namespace: string;
 
 	renameTypes(rename: RenameType[]): void {
 		this.Schema = renameTypes(this.Schema, rename);
@@ -186,7 +200,7 @@ const typeFieldsRenameTypeField = (fields: TypeField[], rename: RenameTypeField[
 
 export const createMockApi = async (sdl: string, apiNamespace?: string): Promise<Api<any>> => {
 	const schema = print(parse(sdl));
-	return new GraphQLApi(applyNameSpaceToGraphQLSchema(schema, [], apiNamespace), [], [], [], []);
+	return new GraphQLApi(applyNameSpaceToGraphQLSchema(schema, [], apiNamespace), apiNamespace || '', [], [], [], []);
 };
 
 export class GraphQLApi extends Api<GraphQLApiCustom> {}
@@ -242,7 +256,7 @@ export interface GraphQLIntrospection extends GraphQLUpstream, GraphQLIntrospect
 export interface GraphQLFederationUpstream extends Omit<Omit<GraphQLUpstream, 'introspection'>, 'apiNamespace'> {
 	name?: string;
 	loadSchemaFromString?: GraphQLIntrospectionOptions['loadSchemaFromString'];
-	introspection?: GraphqlIntrospectionHeaders;
+	introspection?: IntrospectionFetchOptions & GraphqlIntrospectionHeaders;
 }
 
 export interface GraphQLFederationIntrospection extends IntrospectionConfiguration {
@@ -275,6 +289,11 @@ export interface PrismaIntrospection extends IntrospectionConfiguration {
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
+export interface IntrospectionFetchOptions {
+	disableCache?: boolean;
+	pollingIntervalSeconds?: number;
+}
+
 export interface IntrospectionConfiguration {
 	// id is the unique identifier for the data source
 	id?: string;
@@ -287,10 +306,7 @@ export interface IntrospectionConfiguration {
 	 * @defaultValue Use the default timeout for this node.
 	 */
 	requestTimeoutSeconds?: number;
-	introspection?: {
-		disableCache?: boolean;
-		pollingIntervalSeconds?: number;
-	};
+	introspection?: IntrospectionFetchOptions;
 }
 
 export interface HTTPUpstream extends IntrospectionConfiguration {
@@ -298,6 +314,12 @@ export interface HTTPUpstream extends IntrospectionConfiguration {
 	headers?: (builder: IHeadersBuilder) => IHeadersBuilder;
 	authentication?: HTTPUpstreamAuthentication;
 	mTLS?: HTTPmTlsConfiguration;
+	/** HTTP(S) proxy to use, overriding the default one. To disable a global proxy
+	 * set its value to null.
+	 *
+	 * @defaultValue undefined, which uses the global proxy defined in configureWunderGraphApplication()
+	 */
+	httpProxyUrl?: InputVariable | null;
 }
 
 export type HTTPmTlsConfiguration = {
@@ -345,7 +367,7 @@ export interface GraphQLUpstream extends HTTPUpstream {
 	path?: InputVariable;
 	subscriptionsURL?: InputVariable;
 	subscriptionsUseSSE?: boolean;
-	introspection?: HTTPUpstream['introspection'] & GraphqlIntrospectionHeaders;
+	introspection?: IntrospectionFetchOptions & GraphqlIntrospectionHeaders;
 }
 
 export interface OpenAPIIntrospectionFile {
@@ -427,7 +449,7 @@ export interface GraphQLServerConfiguration extends Omit<GraphQLIntrospection, '
 	schema: GraphQLSchema | Promise<GraphQLSchema>;
 }
 
-export const introspectGraphqlServer = async (introspection: GraphQLServerConfiguration): Promise<GraphQLApi> => {
+export const introspectGraphqlServer = async (introspection: GraphQLServerConfiguration) => {
 	const { schema, ...rest } = introspection;
 	const resolvedSchema = (await schema) as GraphQLSchema;
 
@@ -439,7 +461,7 @@ export const introspectGraphqlServer = async (introspection: GraphQLServerConfig
 };
 
 export const introspect = {
-	graphql: (introspection: Omit<GraphQLIntrospection, 'isFederation'>): Promise<GraphQLApi> => {
+	graphql: (introspection: Omit<GraphQLIntrospection, 'isFederation'>) => {
 		return introspectGraphqlWithCache(introspection);
 	},
 	postgresql: introspectPostgresql,
@@ -450,12 +472,8 @@ export const introspect = {
 	mongodb: introspectMongoDB,
 	prisma: introspectPrisma,
 	federation: introspectFederation,
-	openApi: (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
-		return openApi(introspection);
-	},
-	openApiV2: (introspection: OpenAPIIntrospectionNew): Promise<GraphQLApi> => {
-		return openApiV2(introspection);
-	},
+	openApi: openApi,
+	openApiV2: openApiV2,
 };
 
 export const buildUpstreamAuthentication = (upstream: HTTPUpstream): UpstreamAuthentication | undefined => {

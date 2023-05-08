@@ -3,8 +3,22 @@ description: 'This action install wunderctl with race detection enabled and sets
 runs:
   using: 'composite'
   steps:
-    - name: Build wunderctl with race detection enabled and make it available in $PATH
+    - name: Make bin path available in $PATH
+      shell: bash
+      run: |
+        echo WUNDERCTL_BINARY_PATH=$(go env GOPATH)/bin/wunderctl >> $GITHUB_ENV
+
+    - uses: actions/cache@v3
+      id: cache-wunderctl
+      name: Cache wunderctl
+      with:
+        path: ${{ env.WUNDERCTL_BINARY_PATH }}
+        key: ${{ runner.os }}-wunderctl-${{ hashFiles('go.mod', 'go.sum', '**/*.go', 'pkg/**', 'cli/**', 'cmd/**', 'internal/**') }}
+        restore-keys: |
+          ${{ runner.os }}-wunderctl-
+
+    - name: Build wunderctl with race detection enabled
+      if: steps.cache-wunderctl.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd cmd/wunderctl && go install -race
-        echo WUNDERCTL_BINARY_PATH=$(go env GOPATH)/bin/wunderctl >> $GITHUB_ENV

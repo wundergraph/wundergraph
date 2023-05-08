@@ -3,6 +3,56 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.27](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.26...@wundergraph/solid-query@0.4.27) (2023-05-08)
+
+**Note:** Version bump only for package @wundergraph/solid-query
+
+## [0.4.26](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.25...@wundergraph/solid-query@0.4.26) (2023-05-05)
+
+**Note:** Version bump only for package @wundergraph/solid-query
+
+## [0.4.25](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.24...@wundergraph/solid-query@0.4.25) (2023-05-04)
+
+**Note:** Version bump only for package @wundergraph/solid-query
+
+## [0.4.24](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.23...@wundergraph/solid-query@0.4.24) (2023-05-03)
+
+**Note:** Version bump only for package @wundergraph/solid-query
+
+## [0.4.23](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.22...@wundergraph/solid-query@0.4.23) (2023-05-03)
+
+**Note:** Version bump only for package @wundergraph/solid-query
+
+## [0.4.22](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.21...@wundergraph/solid-query@0.4.22) (2023-04-27)
+
+**Note:** Version bump only for package @wundergraph/solid-query
+
+## [0.4.21](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.20...@wundergraph/solid-query@0.4.21) (2023-04-27)
+
+**Note:** Version bump only for package @wundergraph/solid-query
+
+## [0.4.20](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.19...@wundergraph/solid-query@0.4.20) (2023-04-27)
+
+**Note:** Version bump only for package @wundergraph/solid-query
+
+## [0.4.19](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.18...@wundergraph/solid-query@0.4.19) (2023-04-26)
+
+**Note:** Version bump only for package @wundergraph/solid-query
+
+## [0.4.18](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.17...@wundergraph/solid-query@0.4.18) (2023-04-26)
+
+**Note:** Version bump only for package @wundergraph/solid-query
+
+## [0.4.17](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.16...@wundergraph/solid-query@0.4.17) (2023-04-25)
+
+**Note:** Version bump only for package @wundergraph/solid-query
+
+## [0.4.16](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.15...@wundergraph/solid-query@0.4.16) (2023-04-24)
+
+### Bug Fixes
+
+* update tanstack query ([#884](https://github.com/wundergraph/wundergraph/issues/884)) ([c8dcc42](https://github.com/wundergraph/wundergraph/commit/c8dcc42526af696df2636b7e861c227feb03a872)) (@Pagebakers)
+
 ## [0.4.15](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.14...@wundergraph/solid-query@0.4.15) (2023-04-20)
 
 **Note:** Version bump only for package @wundergraph/solid-query

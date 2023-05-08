@@ -45,32 +45,32 @@ Here's an extensive example of how using the client might look like:
 
 ```typescript jsx
 interface Props {
-  products?: FakeProductsResponse
+  products?: FakeProductsResponse;
 }
 
 const IndexPage: NextPage<Props> = ({ products }) => {
-  const { login, logout } = useAuth()
-  const user = useUser()
+  const { login, logout } = useAuth();
+  const user = useUser();
   const fakeProducts = useQuery({
     operationName: 'FakeProducts',
     input: { first: 5 },
     initialState: products,
-  })
+  });
   const price = useMutation({
     operationName: 'SetPrice',
     input: { price: 0, upc: '1' },
-  })
-  const priceUpdate = useSubscription({ operationName: 'PriceUpdates' })
+  });
+  const priceUpdate = useSubscription({ operationName: 'PriceUpdates' });
   const oasUsers = useQuery({
     operationName: 'OasUsers',
     refetchOnWindowFocus: true,
-  })
-  const countries = useQuery({ operationName: 'Countries' })
+  });
+  const countries = useQuery({ operationName: 'Countries' });
   const liveProducts = useQuery({
     operationName: 'TopProducts',
     liveQuery: true,
-  })
-  const users = useQuery({ operationName: 'Users' })
+  });
+  const users = useQuery({ operationName: 'Users' });
   return (
     <div>
       <h1>Hello Wundergraph</h1>
@@ -80,9 +80,7 @@ const IndexPage: NextPage<Props> = ({ products }) => {
         {user !== undefined && `name: ${user.name}, email: ${user.email}`}
       </p>
       <p>
-        {user === undefined && (
-          <button onClick={() => login.github()}>login</button>
-        )}
+        {user === undefined && <button onClick={() => login.github()}>login</button>}
         {user !== undefined && <button onClick={() => logout()}>logout</button>}
       </p>
       <h2>FakeProducts</h2>
@@ -91,7 +89,7 @@ const IndexPage: NextPage<Props> = ({ products }) => {
       <h2>Set Price</h2>
       <button
         onClick={() => {
-          setPrice({ input: { upc: '2', price: randomInt(100) } })
+          setPrice({ input: { upc: '2', price: randomInt(100) } });
         }}
       >
         Set
@@ -108,23 +106,20 @@ const IndexPage: NextPage<Props> = ({ products }) => {
       <h2>JSON Placeholder Users</h2>
       <p>{JSON.stringify(users)}</p>
     </div>
-  )
-}
+  );
+};
 
-export const getServerSideProps: GetServerSideProps<Props> = async (
-  context
-) => {
-  const client = new Client()
-  const products = await client.query.FakeProducts({ input: { first: 5 } })
+export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  const client = new Client();
+  const products = await client.query.FakeProducts({ input: { first: 5 } });
   return {
     props: {
       products: products.status === 'ok' ? products.body : null,
     },
-  }
-}
+  };
+};
 
-const randomInt = (max: number) =>
-  Math.floor(Math.random() * Math.floor(max)) + 1
+const randomInt = (max: number) => Math.floor(Math.random() * Math.floor(max)) + 1;
 ```
 
 It has everything you might come across.

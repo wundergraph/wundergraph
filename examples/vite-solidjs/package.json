@@ -34,8 +34,8 @@
   },
   "dependencies": {
     "@tanstack/solid-query": "^4.24.6",
-    "@wundergraph/sdk": "^0.145.1",
-    "@wundergraph/solid-query": "^0.4.12",
+    "@wundergraph/sdk": "^0.149.1",
+    "@wundergraph/solid-query": "^0.4.22",
     "solid-js": "^1.6.10"
   }
 }

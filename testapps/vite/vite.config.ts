@@ -10,4 +10,9 @@ export default defineConfig({
 			target: 'es2020',
 		},
 	},
+	build: {
+		commonjsOptions: {
+			include: [/wundergraph/],
+		},
+	},
 });

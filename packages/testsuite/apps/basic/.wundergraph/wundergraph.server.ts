@@ -1,12 +1,25 @@
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
-import type { HooksConfig } from './generated/wundergraph.hooks';
-import type { InternalClient } from './generated/wundergraph.internal.client';
-import { buildSchema, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql/index';
+import { GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql/index';
 import { GraphQLExecutionContext } from './generated/wundergraph.server';
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
 	hooks: {
-		queries: {},
+		queries: {
+			Schema_extensionsExtensionWithHook: {
+				mutatingPostResolve: async ({ response }) => {
+					return {
+						...response,
+						data: {
+							...response.data,
+							spacex_capsule: {
+								...response.data?.spacex_capsule,
+								myCustomField: 'resolved by mutatingPostResolve hook',
+							},
+						},
+					};
+				},
+			},
+		},
 		mutations: {},
 	},
 	graphqlServers: [

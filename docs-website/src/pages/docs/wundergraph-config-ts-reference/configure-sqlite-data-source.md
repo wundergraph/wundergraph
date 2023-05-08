@@ -17,11 +17,11 @@ const db = introspect.sqlite({
   introspection: {
     pollingIntervalSeconds: 5,
   },
-})
+});
 
 configureWunderGraphApplication({
   apis: [db],
-})
+});
 ```
 
 Define the `databaseURL` which is file path to the database.

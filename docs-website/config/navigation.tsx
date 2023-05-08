@@ -387,6 +387,10 @@ const navigation = [
 						title: 'End to end testing',
 						href: '/docs/guides/end-to-end-testing',
 					},
+					{
+						title: 'Mocking',
+						href: '/docs/guides/mocking',
+					},
 				],
 			},
 			{
@@ -416,6 +420,18 @@ const navigation = [
 					{
 						title: 'Signing Origin Requests',
 						href: '/docs/guides/signing-origin-requests',
+					},
+					{
+						title: 'Using HTTP proxies',
+						href: '/docs/guides/using-http-proxies',
+					},
+					{
+						title: 'Publish generated client to NPM',
+						href: '/docs/guides/publish-generated-client-to-npm',
+					},
+					{
+						title: 'Extend third party GraphQL APIs',
+						href: '/docs/guides/extend-third-party-graphql-apis',
 					},
 				],
 			},
@@ -595,11 +611,15 @@ const navigation = [
 						href: '/docs/architecture/architecture-diagram',
 					},
 					{
-						title: 'WunderGraph Explained in one Sequence Diagram',
+						title: 'WunderGraph Server',
+						href: '/docs/architecture/wundergraph-server',
+					},
+					{
+						title: 'WunderGraph in one Sequence Diagram',
 						href: '/docs/architecture/wundergraph-explained-in-one-sequence-diagram',
 					},
 					{
-						title: 'WunderGraph RPC Protocol explained',
+						title: 'WunderGraph RPC Protocol',
 						href: '/docs/architecture/wundergraph-rpc-protocol-explained',
 					},
 					{
@@ -1019,20 +1039,20 @@ const navigation = [
 				href: '/docs/clients-reference/swr',
 			},
 			{
-				title: 'React Query',
-				href: '/docs/clients-reference/react-query',
+				title: 'Next.js',
+				href: '/docs/clients-reference/nextjs',
 			},
 			{
 				title: 'React Relay',
 				href: '/docs/clients-reference/react-relay',
 			},
 			{
-				title: 'Solid Query',
-				href: '/docs/clients-reference/solid-query',
+				title: 'React Query',
+				href: '/docs/clients-reference/react-query',
 			},
 			{
-				title: 'Next.js',
-				href: '/docs/clients-reference/nextjs',
+				title: 'Solid Query',
+				href: '/docs/clients-reference/solid-query',
 			},
 			{
 				title: 'Svelte Query',
@@ -1274,7 +1294,11 @@ const navigation = [
 		title: 'Operations reference',
 		href: '/docs/operations-reference',
 		icon: <CogIcon />,
-		paths: ['/docs/typescript-operations-reference', '/docs/directives-reference'],
+		paths: [
+			'/docs/typescript-operations-reference',
+			'/docs/directives-reference',
+			'/docs/auto-generated-operations-reference',
+		],
 		links: [
 			{
 				title: 'Overview',
@@ -1373,6 +1397,15 @@ const navigation = [
 					},
 				],
 			},
+			{
+				title: 'Auto-generated Operations',
+				links: [
+					{
+						title: 'Overview',
+						href: '/docs/auto-generated-operations-reference',
+					},
+				],
+			},
 		],
 	},
 	{
@@ -1453,6 +1486,10 @@ const navigation = [
 					{
 						title: 'Simplified URL structure',
 						href: '/docs/upgrade-guides/simplifying-the-wundergraph-url-structure',
+					},
+					{
+						title: 'Internal Client deprecated',
+						href: '/docs/upgrade-guides/internal-client-deprecated',
 					},
 				],
 			},

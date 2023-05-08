@@ -59,22 +59,6 @@ describe('Operations', () => {
 		expect(badRequestError?.statusCode).toBe(400);
 	});
 
-	it('Should return a client request header', async () => {
-		const client = wg.client();
-		client.setExtraHeaders({
-			'X-Test': 'test123',
-		});
-		const { data, error } = await client.query({
-			operationName: 'clientrequest/Header',
-			input: {
-				header: 'X-Test',
-			},
-		});
-
-		expect(error).toBeUndefined();
-		expect(data?.embedded_clientRequestHeader).toBe('test123');
-	});
-
 	it('Function to function call with input vars', async () => {
 		const client = wg.client();
 
@@ -84,5 +68,37 @@ describe('Operations', () => {
 
 		expect(result.error).toBeUndefined();
 		expect(result.data.greeting).toBeDefined();
+	});
+
+	it('should allow operation names with hyphens', async () => {
+		const result = await wg.client().query({
+			operationName: 'with-hyphen/country-code-with-hyphen',
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data?.countries_countries?.[0].capital).toBe('Berlin');
+	});
+
+	it('should allow calling operation names with hyphens', async () => {
+		const result = await wg.client().query({
+			operationName: 'with-hyphen/call-country-code-with-hyphen-from-ts',
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data?.data?.countries_countries?.[0].capital).toBe('Berlin');
+	});
+
+	it('should allow using operations starting and ending in underscore', async () => {
+		const result = await wg.client().query({
+			operationName: '__underscores__/__more_underscores__',
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data?.countries_countries?.[0].capital).toBe('Madrid');
+	});
+
+	it('should allow using operations with numbers in the middle', async () => {
+		const result = await wg.client().query({
+			operationName: '__underscores__/42_as_a_string',
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data).toBe('42');
 	});
 });

@@ -23,6 +23,7 @@ import {
 	DataSource,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
+	ApiIntrospectionOptions,
 	RESTApiCustom,
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
@@ -30,6 +31,7 @@ import {
 import { mergeApis } from '../definition/merge';
 import {
 	GraphQLOperation,
+	GraphQLOperationFile,
 	isInternalOperationByAPIMountPath,
 	isWellKnownClaim,
 	loadOperations,
@@ -79,6 +81,8 @@ import logger, { FatalLogger, Logger } from '../logger';
 import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
+import { GenerateConfig, OperationsGenerationConfig } from './codegeneration';
+import { generateOperations } from '../codegen/generateoperations';
 
 const utf8 = 'utf8';
 const generated = 'generated';
@@ -94,12 +98,29 @@ export interface WunderGraphCorsConfiguration {
 	allowCredentials?: boolean;
 }
 
+/**
+ * ApiIntrospector<T> is a function type which the API generators must conform to.
+ * Given an ApiIntrospectionOptions, they should return a Promise that resolves
+ * to an Api<T>
+ */
+export type ApiIntrospector<T> = (options: ApiIntrospectionOptions) => Promise<Api<T>>;
+/**
+ * AsyncApiIntrospector<T> is the type returned by all functions that generate something
+ * "introspectable" (e.g. an API). These get awaited in parallel while resolving the
+ * application configuration.
+ */
+export type AsyncApiIntrospector<T> = Promise<ApiIntrospector<T>>;
+
 export interface WunderGraphConfigApplicationConfig<
 	TCustomClaim extends string = string,
 	TPublicClaim extends TCustomClaim | WellKnownClaim = TCustomClaim | WellKnownClaim
 > {
-	apis: Promise<Api<any>>[];
+	apis: AsyncApiIntrospector<any>[];
+	/**
+	 * @deprecated use `generate` instead
+	 */
 	codeGenerators?: CodeGen[];
+	generate?: GenerateConfig;
 	options?: NodeOptions;
 	server?: WunderGraphHooksAndServerConfig;
 	cors?: WunderGraphCorsConfiguration;
@@ -188,7 +209,7 @@ export interface CustomClaim {
 	 *
 	 * @default 'string'
 	 */
-	type?: 'string' | 'int' | 'float' | 'boolean';
+	type?: 'string' | 'int' | 'float' | 'boolean' | 'any';
 
 	/** If required is true, users without this claim will
 	 * fail to authenticate
@@ -350,7 +371,9 @@ const resolvePublicClaims = (config: WunderGraphConfigApplicationConfig) => {
 	return publicClaims;
 };
 
-const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promise<ResolvedWunderGraphConfig> => {
+const resolveConfig = async (
+	config: WunderGraphConfigApplicationConfig
+): Promise<{ config: ResolvedWunderGraphConfig; apis: Api<any>[] }> => {
 	const api = {
 		id: '',
 	};
@@ -402,10 +425,31 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	const roles = config.authorization?.roles || ['admin', 'user'];
 	const customClaims = Object.keys(config.authentication?.customClaims ?? {});
 
+	const apiIntrospectionOptions: ApiIntrospectionOptions = {
+		httpProxyUrl:
+			resolvedNodeOptions.defaultHttpProxyUrl !== undefined
+				? resolveConfigurationVariable(resolvedNodeOptions.defaultHttpProxyUrl)
+				: undefined,
+	};
+
+	// Generate the promises first, then await them all at once
+	// to run them in parallel
+	const generators = await Promise.all(config.apis);
+	const resolvedApis = await Promise.all(generators.map((generator) => generator(apiIntrospectionOptions)));
+
+	if (WG_DATA_SOURCE_POLLING_MODE) {
+		// To avoid having to deal with different return types, exit here when running in
+		// WG_DATA_SOURCE_POLLING_MODE. If there are any APIs with polling enabled this point
+		// will never be reached because we'll keep waiting while resolving the APIs while the
+		// polling runs at regular intervals.
+		process.exit(0);
+	}
+
 	const resolved = await resolveApplication(
 		roles,
 		customClaims,
-		config.apis,
+		resolvedApis,
+		apiIntrospectionOptions,
 		cors,
 		config.s3UploadProvider || [],
 		config.server?.hooks
@@ -478,11 +522,8 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 		serverOptions: resolvedServerOptions,
 	};
 
-	if (config.links) {
-		return addLinks(resolvedConfig, config.links);
-	}
-
-	return resolvedConfig;
+	const appConfig = config.links ? addLinks(resolvedConfig, config.links) : resolvedConfig;
+	return { config: appConfig, apis: resolvedApis };
 };
 
 const addLinks = (config: ResolvedWunderGraphConfig, links: LinkDefinition[]): ResolvedWunderGraphConfig => {
@@ -672,12 +713,12 @@ const resolveUploadConfiguration = (
 const resolveApplication = async (
 	roles: string[],
 	customClaims: string[],
-	apis: Promise<Api<any>>[],
+	resolvedApis: Api<any>[],
+	apiIntrospectionOptions: ApiIntrospectionOptions,
 	cors: CorsConfiguration,
 	s3?: S3Provider,
 	hooks?: HooksConfiguration
 ): Promise<ResolvedApplication> => {
-	const resolvedApis = await Promise.all(apis);
 	const merged = mergeApis(roles, customClaims, ...resolvedApis);
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
 	return {
@@ -690,6 +731,13 @@ const resolveApplication = async (
 	};
 };
 
+const logLoadedOperations = (files: GraphQLOperationFile[] | TypeScriptOperationFile[] | undefined, suffix: string) => {
+	if (files) {
+		Logger.info(`found ${files.length ?? 0} ${suffix} operations`);
+		Logger.debug(files.map((op) => op.operation_name).join(', '));
+	}
+};
+
 // configureWunderGraphApplication generates the file "generated/wundergraph.config.json" and runs the configured code generators
 // the wundergraph.config.json file will be picked up by "wunderctl up" to configure your development environment
 export const configureWunderGraphApplication = <
@@ -698,17 +746,6 @@ export const configureWunderGraphApplication = <
 >(
 	config: WunderGraphConfigApplicationConfig<TCustomClaim, TPublicClaim>
 ) => {
-	if (WG_DATA_SOURCE_POLLING_MODE) {
-		// if the DataSourcePolling environment variable is set to 'true',
-		// we don't run the regular config build process which would generate the whole config
-		// instead, we only resolve all Promises of the API Introspection
-		// This will keep polling the (configured) DataSources until `wunderctl up` stops the polling process
-		// If a change is detected in the DataSource, the cache is updated,
-		// which will trigger a re-run of the config build process
-		Promise.all(config.apis).catch();
-		return;
-	}
-
 	const wgDirAbs = process.env.WG_DIR_ABS;
 	if (!wgDirAbs) {
 		throw new Error('environment variable WG_DIR_ABS is empty');
@@ -746,8 +783,8 @@ export const configureWunderGraphApplication = <
 	};
 
 	resolveConfig(config)
-		.then(async (resolved) => {
-			Logger.info('Building ...');
+		.then(async ({ config: resolved, apis }) => {
+			Logger.info({ sdk: buildInfo.sdk?.version, wunderctl: buildInfo.wunderctl?.version }, 'Building ...');
 
 			const app = resolved.application;
 			const schemaFileName = `wundergraph.schema.graphql`;
@@ -797,7 +834,23 @@ export const configureWunderGraphApplication = <
 				buildInfo.stats.totalWebhooks = resolved.webhooks?.length ?? 0;
 			}
 
+			if (config.generate?.operationsGenerator) {
+				const operationGenerationConfig = new OperationsGenerationConfig({ resolved, app: config, apis });
+				config.generate.operationsGenerator(operationGenerationConfig);
+				await generateOperations({
+					wgDirAbs,
+					operationGenerationConfig,
+					resolved,
+					app,
+					basePath: operationGenerationConfig.getBasePath(),
+					fields: operationGenerationConfig.getRootFields(),
+				});
+			}
+
 			const loadedOperations = await loadOperations(schemaFileName);
+
+			logLoadedOperations(loadedOperations.graphql_operation_files, 'GraphQL');
+			logLoadedOperations(loadedOperations.typescript_operation_files, 'TypeScript');
 
 			const operations = await resolveOperationsConfigurations(
 				wgDirAbs,
@@ -816,8 +869,8 @@ export const configureWunderGraphApplication = <
 					switch (op.OperationType) {
 						case OperationType.MUTATION:
 							let mutationConfig = cfg.mutations(base);
-							if (customize as CustomizeMutation) {
-								mutationConfig = customize(mutationConfig);
+							if (customize) {
+								mutationConfig = (customize as CustomizeMutation)(mutationConfig);
 							}
 							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
@@ -828,8 +881,8 @@ export const configureWunderGraphApplication = <
 							});
 						case OperationType.QUERY:
 							let queryConfig = cfg.queries(base);
-							if (customize as CustomizeQuery) {
-								queryConfig = customize(queryConfig);
+							if (customize) {
+								queryConfig = (customize as CustomizeQuery)(queryConfig);
 							}
 							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
@@ -847,8 +900,8 @@ export const configureWunderGraphApplication = <
 							});
 						case OperationType.SUBSCRIPTION:
 							let subscriptionConfig = cfg.subscriptions(base);
-							if (customize as CustomizeSubscription) {
-								subscriptionConfig = customize(subscriptionConfig);
+							if (customize) {
+								subscriptionConfig = (customize as CustomizeSubscription)(subscriptionConfig);
 							}
 							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
@@ -947,7 +1000,8 @@ export const configureWunderGraphApplication = <
 						subscriptionPollingIntervalMillis: 0,
 					};
 					op.HooksConfiguration.postResolve = hooks.postResolve !== undefined;
-					op.HooksConfiguration.mutatingPreResolve = hooks.mutatingPreResolve !== undefined;
+					op.HooksConfiguration.mutatingPreResolve =
+						'mutatingPreResolve' in hooks && hooks.mutatingPreResolve !== undefined;
 					op.HooksConfiguration.mutatingPostResolve = hooks.mutatingPostResolve !== undefined;
 					op.HooksConfiguration.customResolve = hooks.customResolve !== undefined;
 				}
@@ -965,7 +1019,8 @@ export const configureWunderGraphApplication = <
 						subscriptionPollingIntervalMillis: 0,
 					};
 					op.HooksConfiguration.postResolve = hooks.postResolve !== undefined;
-					op.HooksConfiguration.mutatingPreResolve = hooks.mutatingPreResolve !== undefined;
+					op.HooksConfiguration.mutatingPreResolve =
+						'mutatingPreResolve' in hooks && hooks.mutatingPreResolve !== undefined;
 					op.HooksConfiguration.mutatingPostResolve = hooks.mutatingPostResolve !== undefined;
 					op.HooksConfiguration.customResolve = hooks.customResolve !== undefined;
 				}
@@ -979,20 +1034,20 @@ export const configureWunderGraphApplication = <
 				if (op !== undefined && hooks !== undefined) {
 					op.HooksConfiguration.preResolve = hooks.preResolve !== undefined;
 					op.HooksConfiguration.postResolve = hooks.postResolve !== undefined;
-					op.HooksConfiguration.mutatingPreResolve = hooks.mutatingPreResolve !== undefined;
+					op.HooksConfiguration.mutatingPreResolve =
+						'mutatingPreResolve' in hooks && hooks.mutatingPreResolve !== undefined;
 					op.HooksConfiguration.mutatingPostResolve = hooks.mutatingPostResolve !== undefined;
 				}
 			}
 
-			if (config.codeGenerators) {
-				for (let i = 0; i < config.codeGenerators.length; i++) {
-					const gen = config.codeGenerators[i];
-					await GenerateCode({
-						wunderGraphConfig: resolved,
-						templates: gen.templates,
-						basePath: gen.path || generated,
-					});
-				}
+			const combined = [...(config.generate?.codeGenerators || []), ...(config.codeGenerators || [])];
+			for (let i = 0; i < combined.length; i++) {
+				const gen = combined[i];
+				await GenerateCode({
+					wunderGraphConfig: resolved,
+					templates: gen.templates,
+					basePath: gen.path || generated,
+				});
 			}
 
 			// Update response types for TS operations. Do this only after code generation completes,
@@ -1032,7 +1087,7 @@ export const configureWunderGraphApplication = <
 
 			writeWunderGraphFileSync('openapi', openApiSpec);
 
-			Logger.info(`Build completed.`);
+			Logger.info('Build completed.');
 		})
 		.then(() => {
 			buildInfo.success = true;
@@ -1450,6 +1505,9 @@ const resolveOperationsConfigurations = async (
 			case 'boolean':
 				claimType = ValueType.FLOAT;
 				break;
+			case 'any':
+				claimType = ValueType.ANY;
+				break;
 			case undefined:
 				claimType = ValueType.STRING;
 				break;
@@ -1524,7 +1582,7 @@ const loadAndApplyNodeJsOperationOverrides = async (
 // this function.
 const applyNodeJsOperationOverrides = (
 	operation: TypeScriptOperation,
-	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any>
+	overrides: NodeJSOperation<any, any, any, any, any, any, any, any>
 ): TypeScriptOperation => {
 	if (overrides.inputSchema) {
 		const schema = zodToJsonSchema(overrides.inputSchema) as any;

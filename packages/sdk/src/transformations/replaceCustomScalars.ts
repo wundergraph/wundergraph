@@ -11,12 +11,9 @@ export const replaceCustomScalars = (
 	schemaSDL: string,
 	introspection: GraphQLIntrospection | OpenAPIIntrospection
 ): ReplaceCustomScalarsResult => {
-	if (introspection.schemaExtension) {
-		schemaSDL = schemaSDL + ' ' + introspection.schemaExtension;
-	} else {
+	if (introspection.replaceCustomScalarTypeFields?.length === 0) {
 		return { schemaSDL, customScalarTypeFields: [] };
 	}
-
 	let insideCustomScalarType = false;
 	let insideCustomScalarField = false;
 	let replaceCustomScalarType: ReplaceCustomScalarTypeFieldConfiguration | undefined;

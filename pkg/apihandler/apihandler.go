@@ -288,7 +288,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			},
 		)
 		if err != nil {
-			r.log.Info("unable to register S3 provider",
+			r.log.Error("unable to register S3 provider",
 				zap.Error(err),
 				zap.String("provider", s3Provider.Name),
 				zap.String("endpoint", loadvariable.String(s3Provider.Endpoint)),
@@ -822,45 +822,23 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, _ = shared.Hash.Write(requestOperationName)
-
-	err = shared.Printer.Print(shared.Doc, h.definition, shared.Hash)
+	prepared, err := h.preparePlan(requestOperationName, shared)
 	if err != nil {
-		requestLogger.Error("shared printer print failed", zap.Error(err))
-		http.Error(w, "bad request", http.StatusBadRequest)
-		return
-	}
-	if shared.Report.HasErrors() {
-		h.logInternalErrors(shared.Report, requestLogger)
-		h.writeRequestErrors(shared.Report, w, requestLogger)
-
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	operationHash := shared.Hash.Sum64()
-
-	h.preparedMux.RLock()
-	prepared, exists := h.prepared[operationHash]
-	h.preparedMux.RUnlock()
-	if !exists {
-		prepared, err = h.preparePlan(operationHash, requestOperationName, shared)
-		if err != nil {
-			if shared.Report.HasErrors() {
-				h.logInternalErrors(shared.Report, requestLogger)
-				h.writeRequestErrors(shared.Report, w, requestLogger)
-			} else {
-				requestLogger.Error("prepare plan failed", zap.Error(err))
-				w.WriteHeader(http.StatusBadRequest)
-			}
-
-			return
+		if shared.Report.HasErrors() {
+			h.logInternalErrors(shared.Report, requestLogger)
+			h.writeRequestErrors(shared.Report, w, requestLogger)
+		} else {
+			requestLogger.Error("prepare plan failed", zap.Error(err))
+			w.WriteHeader(http.StatusBadRequest)
 		}
+
+		return
 	}
 
 	if len(prepared.variables) != 0 {
 		// we have to merge query variables into extracted variables to been able to override default values
-		shared.Ctx.Variables = MergeJsonRightIntoLeft(prepared.variables, shared.Ctx.Variables)
+		// we make a copy of the extracted variables to not override h.extractedVariables
+		shared.Ctx.Variables = MergeJsonRightIntoLeft(shared.Ctx.Variables, prepared.variables)
 	}
 
 	switch p := prepared.preparedPlan.(type) {
@@ -900,7 +878,7 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			flushWriter *httpFlushWriter
 			ok          bool
 		)
-		shared.Ctx.Context, flushWriter, ok = getFlushWriter(shared.Ctx.Context, shared.Ctx.Variables, r, w)
+		shared.Ctx, flushWriter, ok = getFlushWriter(shared.Ctx, shared.Ctx.Variables, r, w)
 		if !ok {
 			requestLogger.Error("connection not flushable")
 			http.Error(w, "Connection not flushable", http.StatusBadRequest)
@@ -952,42 +930,29 @@ func (h *GraphQLHandler) writeRequestErrors(report *operationreport.Report, w ht
 	}
 }
 
-func (h *GraphQLHandler) preparePlan(operationHash uint64, requestOperationName []byte, shared *pool.Shared) (planWithExtractedVariables, error) {
-	preparedPlan, err, _ := h.sf.Do(strconv.Itoa(int(operationHash)), func() (interface{}, error) {
-		if len(requestOperationName) == 0 {
-			shared.Normalizer.NormalizeOperation(shared.Doc, h.definition, shared.Report)
-		} else {
-			shared.Normalizer.NormalizeNamedOperation(shared.Doc, h.definition, requestOperationName, shared.Report)
-		}
-		if shared.Report.HasErrors() {
-			return nil, fmt.Errorf(ErrMsgOperationNormalizationFailed, shared.Report)
-		}
-
-		state := shared.Validation.Validate(shared.Doc, h.definition, shared.Report)
-		if state != astvalidation.Valid {
-			return nil, errInvalid
-		}
-
-		preparedPlan := shared.Planner.Plan(shared.Doc, h.definition, unsafebytes.BytesToString(requestOperationName), shared.Report)
-		shared.Postprocess.Process(preparedPlan)
-
-		prepared := planWithExtractedVariables{
-			preparedPlan: preparedPlan,
-			variables:    make([]byte, len(shared.Doc.Input.Variables)),
-		}
-
-		copy(prepared.variables, shared.Doc.Input.Variables)
-
-		h.preparedMux.Lock()
-		h.prepared[operationHash] = prepared
-		h.preparedMux.Unlock()
-
-		return prepared, nil
-	})
-	if err != nil {
-		return planWithExtractedVariables{}, err
+func (h *GraphQLHandler) preparePlan(requestOperationName []byte, shared *pool.Shared) (planWithExtractedVariables, error) {
+	if len(requestOperationName) == 0 {
+		shared.Normalizer.NormalizeOperation(shared.Doc, h.definition, shared.Report)
+	} else {
+		shared.Normalizer.NormalizeNamedOperation(shared.Doc, h.definition, requestOperationName, shared.Report)
 	}
-	return preparedPlan.(planWithExtractedVariables), nil
+	if shared.Report.HasErrors() {
+		return planWithExtractedVariables{}, fmt.Errorf(ErrMsgOperationNormalizationFailed, shared.Report)
+	}
+
+	state := shared.Validation.Validate(shared.Doc, h.definition, shared.Report)
+	if state != astvalidation.Valid {
+		return planWithExtractedVariables{}, errInvalid
+	}
+
+	preparedPlan := shared.Planner.Plan(shared.Doc, h.definition, unsafebytes.BytesToString(requestOperationName), shared.Report)
+	shared.Postprocess.Process(preparedPlan)
+
+	prepared := planWithExtractedVariables{
+		preparedPlan: preparedPlan,
+		variables:    shared.Doc.Input.Variables,
+	}
+	return prepared, nil
 }
 
 func postProcessVariables(operation *wgpb.Operation, r *http.Request, variables []byte) ([]byte, error) {
@@ -1074,7 +1039,7 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 		}
 		return variables, nil
 	case string:
-		if custom.Type != wgpb.ValueType_STRING {
+		if custom.Type != wgpb.ValueType_STRING && custom.Type != wgpb.ValueType_ANY {
 			return nil, inputvariables.NewValidationError(
 				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
 				nil,
@@ -1083,7 +1048,7 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 		}
 		replacement = []byte("\"" + string(x) + "\"")
 	case bool:
-		if custom.Type != wgpb.ValueType_BOOLEAN {
+		if custom.Type != wgpb.ValueType_BOOLEAN && custom.Type != wgpb.ValueType_ANY {
 			return nil, inputvariables.NewValidationError(
 				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
 				nil,
@@ -1107,7 +1072,7 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 				)
 			}
 			replacement = []byte(strconv.FormatInt(int64(x), 10))
-		case wgpb.ValueType_FLOAT:
+		case wgpb.ValueType_FLOAT, wgpb.ValueType_ANY:
 			// JSON number is always a valid float
 			replacement = []byte(strconv.FormatFloat(x, 'f', -1, 64))
 		default:
@@ -1118,7 +1083,18 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 			)
 		}
 	default:
-		return nil, fmt.Errorf("unhandled custom claim type %T", x)
+		if custom.Type != wgpb.ValueType_ANY {
+			return nil, inputvariables.NewValidationError(
+				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+				nil,
+				nil,
+			)
+		}
+		var err error
+		replacement, err = json.Marshal(value)
+		if err != nil {
+			return nil, fmt.Errorf("error serializing data %v for custom claim %s: %w", value, custom.Name, err)
+		}
 	}
 	var err error
 	variables, err = jsonparser.Set(variables, replacement, claim.VariablePathComponents...)
@@ -1274,7 +1250,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if cacheIsStale {
 			buf.Reset()
-			ctx.Context = context.WithValue(context.Background(), "user", authentication.UserFromContext(r.Context()))
+			ctx = ctx.WithContext(context.WithValue(context.Background(), "user", authentication.UserFromContext(r.Context())))
 			err := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
 			if err == nil {
 				bufferedData := buf.Bytes()
@@ -1291,7 +1267,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 
-	if !validateInputVariables(ctx, requestLogger, ctx.Variables, h.variablesValidator, w) {
+	if !validateInputVariables(ctx.Context(), requestLogger, ctx.Variables, h.variablesValidator, w) {
 		return
 	}
 
@@ -1308,6 +1284,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx.Variables = h.jsonStringInterpolator.Interpolate(ctx.Variables)
 
 	if len(h.extractedVariables) != 0 {
+		// we make a copy of the extracted variables to not override h.extractedVariables
 		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
@@ -1338,7 +1315,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if h.cacheConfig.enable {
 		cacheKey = string(h.configHash) + r.RequestURI
-		item, hit := h.cache.Get(ctx.Context, cacheKey)
+		item, hit := h.cache.Get(ctx.Context(), cacheKey)
 		if hit {
 
 			w.Header().Set(WgCacheHeader, "HIT")
@@ -1444,7 +1421,7 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, w http.Respons
 func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, ctx *resolve.Context, requestBuf *bytes.Buffer, flusher http.Flusher, requestLogger *zap.Logger) {
 	wgParams := NewWgRequestParams(r)
 
-	done := ctx.Context.Done()
+	done := ctx.Context().Done()
 
 	hookBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(hookBuf)
@@ -1635,7 +1612,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 
-	if !validateInputVariables(ctx, requestLogger, ctx.Variables, h.variablesValidator, w) {
+	if !validateInputVariables(ctx.Context(), requestLogger, ctx.Variables, h.variablesValidator, w) {
 		return
 	}
 
@@ -1652,6 +1629,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx.Variables = h.jsonStringInterpolator.Interpolate(ctx.Variables)
 
 	if len(h.extractedVariables) != 0 {
+		// we make a copy of the extracted variables to not override h.extractedVariables
 		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
@@ -1723,7 +1701,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 
-	if !validateInputVariables(ctx, requestLogger, ctx.Variables, h.variablesValidator, w) {
+	if !validateInputVariables(ctx.Context(), requestLogger, ctx.Variables, h.variablesValidator, w) {
 		return
 	}
 
@@ -1740,6 +1718,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	ctx.Variables = h.jsonStringInterpolator.Interpolate(ctx.Variables)
 
 	if len(h.extractedVariables) != 0 {
+		// we make a copy of the extracted variables to not override h.extractedVariables
 		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
@@ -1901,10 +1880,10 @@ func (f *httpFlushWriter) Flush() {
 
 // MergeJsonRightIntoLeft merges the right JSON into the left JSON while overriding the left side
 func MergeJsonRightIntoLeft(left, right []byte) []byte {
-	if left == nil {
+	if len(left) == 0 {
 		return right
 	}
-	if right == nil {
+	if len(right) == 0 {
 		return left
 	}
 	result := gjson.ParseBytes(right)
@@ -2264,7 +2243,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx.Variables = variablesBuf.Bytes()
 
-	if !validateInputVariables(ctx, requestLogger, ctx.Variables, h.variablesValidator, w) {
+	if !validateInputVariables(ctx.Context(), requestLogger, ctx.Variables, h.variablesValidator, w) {
 		return
 	}
 
@@ -2288,7 +2267,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
+func (h *FunctionsHandler) handleLiveQuery(resolveCtx *resolve.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
 
 	var (
 		err error
@@ -2297,7 +2276,7 @@ func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseW
 		out *hooks.MiddlewareHookResponse
 	)
 
-	ctx, fw, ok = getFlushWriter(ctx, input, r, w)
+	resolveCtx, fw, ok = getFlushWriter(resolveCtx, input, r, w)
 	if !ok {
 		requestLogger.Error("request doesn't support flushing")
 		w.WriteHeader(http.StatusBadRequest)
@@ -2313,6 +2292,7 @@ func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseW
 
 	defer fw.Close()
 
+	ctx := resolveCtx.Context()
 	for {
 		select {
 		case <-ctx.Done():
@@ -2342,11 +2322,12 @@ func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseW
 	}
 }
 
-func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWriter, input []byte, requestLogger *zap.Logger) {
+func (h *FunctionsHandler) handleRequest(resolveCtx *resolve.Context, w http.ResponseWriter, input []byte, requestLogger *zap.Logger) {
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
+	ctx := resolveCtx.Context()
 	out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input, buf)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -2365,12 +2346,13 @@ func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWri
 	}
 }
 
-func (h *FunctionsHandler) handleSubscriptionRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
+func (h *FunctionsHandler) handleSubscriptionRequest(resolveCtx *resolve.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
 	wgParams := NewWgRequestParams(r)
 
 	setSubscriptionHeaders(w)
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
+	ctx := resolveCtx.Context()
 	err := h.hooksClient.DoFunctionSubscriptionRequest(ctx, h.operation.Path, input, wgParams.SubsribeOnce, wgParams.UseSse, wgParams.UseJsonPatch, w, buf)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -2464,7 +2446,7 @@ func setSubscriptionHeaders(w http.ResponseWriter) {
 func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter, pipeline *hooks.SubscriptionOperationPipeline, logger *zap.Logger) (*httpFlushWriter, bool) {
 	var flushWriter *httpFlushWriter
 	var ok bool
-	ctx.Context, flushWriter, ok = getFlushWriter(ctx.Context, ctx.Variables, r, w)
+	ctx, flushWriter, ok = getFlushWriter(ctx, ctx.Variables, r, w)
 	if !ok {
 		return nil, false
 	}
@@ -2476,7 +2458,7 @@ func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseW
 	return flushWriter, true
 }
 
-func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w http.ResponseWriter) (context.Context, *httpFlushWriter, bool) {
+func getFlushWriter(ctx *resolve.Context, variables []byte, r *http.Request, w http.ResponseWriter) (*resolve.Context, *httpFlushWriter, bool) {
 	wgParams := NewWgRequestParams(r)
 
 	flusher, ok := w.(http.Flusher)
@@ -2497,13 +2479,15 @@ func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w ht
 		useJsonPatch: wgParams.UseJsonPatch,
 		buf:          &bytes.Buffer{},
 		lastMessage:  &bytes.Buffer{},
-		ctx:          ctx,
+		ctx:          ctx.Context(),
 		variables:    variables,
 	}
 
 	if wgParams.SubsribeOnce {
 		flushWriter.subscribeOnce = true
-		ctx, flushWriter.close = context.WithCancel(ctx)
+		var cancellableCtx context.Context
+		cancellableCtx, flushWriter.close = context.WithCancel(ctx.Context())
+		ctx = ctx.WithContext(cancellableCtx)
 	}
 
 	return ctx, flushWriter, true

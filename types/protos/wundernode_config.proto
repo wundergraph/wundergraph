@@ -236,6 +236,7 @@ enum ValueType {
 	INT = 1;
 	FLOAT = 2;
 	BOOLEAN = 3;
+	ANY = 4;
 }
 
 message OperationLiveQueryConfig {
@@ -365,6 +366,7 @@ message FetchConfiguration {
 	MTLSConfiguration mTLS = 8;
 	ConfigurationVariable baseUrl = 9;
 	ConfigurationVariable path = 10;
+	optional ConfigurationVariable httpProxyUrl = 11;
 }
 
 message MTLSConfiguration {
@@ -534,6 +536,7 @@ message NodeOptions {
 	int64 defaultRequestTimeoutSeconds = 5;
 	InternalListenerOptions listenInternal = 6;
 	ConfigurationVariable nodeInternalUrl = 7;
+	ConfigurationVariable defaultHttpProxyUrl = 8;
 }
 
 message ServerLogging {

@@ -3,6 +3,56 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.27](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.26...@wundergraph/react-query@0.8.27) (2023-05-08)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.26](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.25...@wundergraph/react-query@0.8.26) (2023-05-05)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.25](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.24...@wundergraph/react-query@0.8.25) (2023-05-04)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.24](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.23...@wundergraph/react-query@0.8.24) (2023-05-03)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.23](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.22...@wundergraph/react-query@0.8.23) (2023-05-03)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.22](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.21...@wundergraph/react-query@0.8.22) (2023-04-27)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.21](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.20...@wundergraph/react-query@0.8.21) (2023-04-27)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.20](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.19...@wundergraph/react-query@0.8.20) (2023-04-27)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.19](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.18...@wundergraph/react-query@0.8.19) (2023-04-26)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.18](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.17...@wundergraph/react-query@0.8.18) (2023-04-26)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.17](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.16...@wundergraph/react-query@0.8.17) (2023-04-25)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.16](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.15...@wundergraph/react-query@0.8.16) (2023-04-24)
+
+### Bug Fixes
+
+* update tanstack query ([#884](https://github.com/wundergraph/wundergraph/issues/884)) ([c8dcc42](https://github.com/wundergraph/wundergraph/commit/c8dcc42526af696df2636b7e861c227feb03a872)) (@Pagebakers)
+
 ## [0.8.15](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.14...@wundergraph/react-query@0.8.15) (2023-04-20)
 
 **Note:** Version bump only for package @wundergraph/react-query

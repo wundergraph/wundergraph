@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.143.0",
+  "version": "0.148.0",
   "name": "wundergraph",
   "license": "Apache-2.0",
   "author": {
@@ -18,9 +18,11 @@
     "build:sdk": "pnpm -r run --filter='./packages/sdk' build",
     "watch:libs": "pnpm -r --parallel run --filter='./packages/*' --filter='!./docs-website' build --watch",
     "watch:sdk": "pnpm -r run --filter='./packages/sdk' watch",
-    "test": "pnpm run -r test",
+    "test": "pnpm run -r --parallel --filter='!./packages/testsuite' test",
+    "test:suite": "pnpm run -r --filter='./packages/testsuite' test",
     "format": "prettier --write --loglevel warn '**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}'",
     "format:examples": "prettier --write --loglevel warn 'examples/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}'",
+    "format:testapps": "prettier --write --loglevel warn 'testapps/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}'",
     "codegen": "pnpm run --filter='./packages/protobuf' build",
     "preview:version:packages": "lerna version --dry-run",
     "preview:version:packages-next": "lerna version prerelease --dry-run",
@@ -73,12 +75,17 @@
     "@commitlint/cli": "^17.0.1",
     "@commitlint/config-conventional": "^17.0.0",
     "@lerna-lite/cli": "1.12.0",
-    "@milahu/patch-package-with-pnpm-support": "6.4.10",
+    "@milahu/patch-package": "^6.4.14",
     "@release-it/bumper": "^4.0.0",
+    "del-cli": "^5.0.0",
     "husky": "^8.0.1",
     "lint-staged": "^12.4.2",
-    "prettier": "^2.6.2",
-    "release-it": "^15.4.1",
-    "del-cli": "^5.0.0"
+    "prettier": "^2.8.7",
+    "release-it": "^15.4.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "@tanstack/query-core": "^4.29.1"
+    }
   }
 }

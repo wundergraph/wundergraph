@@ -1,0 +1,5 @@
+mutation ($text: String!) {
+	notes_newNote(input: $text) {
+		id
+	}
+}
