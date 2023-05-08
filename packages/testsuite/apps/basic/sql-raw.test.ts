@@ -26,7 +26,6 @@ describe('SQL raw', () => {
 		});
 		expect(result.error).toBeUndefined();
 		expect(result.data?.users_post_executeRaw).toBe(0);
-		console.log(JSON.stringify(result));
 	});
 
 	it('execute raw inline', async () => {
@@ -36,7 +35,6 @@ describe('SQL raw', () => {
 		});
 		expect(result.error).toBeUndefined();
 		expect(result.data?.users_post_executeRaw).toBe(0);
-		console.log(JSON.stringify(result));
 	});
 
 	it('query raw json', async () => {
@@ -70,7 +68,6 @@ describe('SQL raw', () => {
 			operationName: 'rawsql/QueryRowInline',
 		});
 		expect(result.error).toBeUndefined();
-		console.log(JSON.stringify(result.data?.row));
 		expect(result.data?.row[0].id).toEqual(2);
 		expect(result.data?.row[0].name).toEqual('Jannik');
 		expect(result.data?.row[0].email).toEqual('jannik@wundergraph.com');

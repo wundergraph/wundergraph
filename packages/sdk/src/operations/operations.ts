@@ -1,4 +1,4 @@
-import * as z from 'zod';
+import { z } from 'zod';
 import * as fs from 'fs';
 import type { BaseRequestContext, InternalClient, OperationsClient, WunderGraphUser } from '../server';
 import { OperationError } from '../client';
@@ -65,7 +65,7 @@ const createQuery =
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient
 	>() =>
-	<Input extends z.ZodObject<any> = any, InferredResponse = any, ZodResponse = any>({
+	<Input extends z.ZodObject<any> = any, InferredResponse = unknown, ZodResponse = unknown>({
 		input,
 		response,
 		handler,
@@ -122,7 +122,7 @@ const createMutation =
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient
 	>() =>
-	<Input extends z.ZodObject<any> = any, InferredResponse = any, ZodResponse = any>({
+	<Input extends z.ZodObject<any> = any, InferredResponse = unknown, ZodResponse = unknown>({
 		input,
 		response,
 		handler,
@@ -177,7 +177,7 @@ const createSubscription =
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient
 	>() =>
-	<Input extends z.ZodObject<any> = any, InferredResponse = any, ZodResponse = any>({
+	<Input extends z.ZodObject<any> = any, InferredResponse = unknown, ZodResponse = unknown>({
 		input,
 		handler,
 		response,

@@ -57,6 +57,11 @@ export interface ClientConfig {
 	customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 	extraHeaders?: Headers;
 	operationMetadata?: OperationMetadata;
+	/**
+	 * Specifies the number of milliseconds before the request times out.
+	 * default is `0` (no timeout)
+	 */
+	requestTimeoutMs?: number;
 	csrfEnabled?: boolean;
 	/**
 	 * Force SSE for subscriptions if extraHeaders are set.
@@ -89,6 +94,11 @@ export interface OperationRequestOptions<
 	Input extends object | undefined = object | undefined
 > {
 	operationName: OperationName;
+	/**
+	 * If you pass an AbortSignal, the request will be aborted when the signal is aborted.
+	 * You are responsible of handling the request timeout if you want to pass a custom AbortSignal.
+	 * @see https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal
+	 */
 	abortSignal?: AbortSignal;
 	input?: Input;
 }

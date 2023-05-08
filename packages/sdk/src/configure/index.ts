@@ -31,6 +31,7 @@ import {
 import { mergeApis } from '../definition/merge';
 import {
 	GraphQLOperation,
+	GraphQLOperationFile,
 	isInternalOperationByAPIMountPath,
 	isWellKnownClaim,
 	loadOperations,
@@ -208,7 +209,7 @@ export interface CustomClaim {
 	 *
 	 * @default 'string'
 	 */
-	type?: 'string' | 'int' | 'float' | 'boolean';
+	type?: 'string' | 'int' | 'float' | 'boolean' | 'any';
 
 	/** If required is true, users without this claim will
 	 * fail to authenticate
@@ -722,6 +723,13 @@ const resolveApplication = async (
 	};
 };
 
+const logLoadedOperations = (files: GraphQLOperationFile[] | TypeScriptOperationFile[] | undefined, suffix: string) => {
+	if (files) {
+		Logger.info(`found ${files.length ?? 0} ${suffix} operations`);
+		Logger.debug(files.map((op) => op.operation_name).join(', '));
+	}
+};
+
 // configureWunderGraphApplication generates the file "generated/wundergraph.config.json" and runs the configured code generators
 // the wundergraph.config.json file will be picked up by "wunderctl up" to configure your development environment
 export const configureWunderGraphApplication = <
@@ -779,7 +787,7 @@ export const configureWunderGraphApplication = <
 
 	resolveConfig(config)
 		.then(async ({ config: resolved, apis }) => {
-			Logger.info('Building ...');
+			Logger.info({ sdk: buildInfo.sdk?.version, wunderctl: buildInfo.wunderctl?.version }, 'Building ...');
 
 			const app = resolved.application;
 			const schemaFileName = `wundergraph.schema.graphql`;
@@ -843,6 +851,9 @@ export const configureWunderGraphApplication = <
 			}
 
 			const loadedOperations = await loadOperations(schemaFileName);
+
+			logLoadedOperations(loadedOperations.graphql_operation_files, 'GraphQL');
+			logLoadedOperations(loadedOperations.typescript_operation_files, 'TypeScript');
 
 			const operations = await resolveOperationsConfigurations(
 				wgDirAbs,
@@ -992,7 +1003,8 @@ export const configureWunderGraphApplication = <
 						subscriptionPollingIntervalMillis: 0,
 					};
 					op.HooksConfiguration.postResolve = hooks.postResolve !== undefined;
-					op.HooksConfiguration.mutatingPreResolve = hooks.mutatingPreResolve !== undefined;
+					op.HooksConfiguration.mutatingPreResolve =
+						'mutatingPreResolve' in hooks && hooks.mutatingPreResolve !== undefined;
 					op.HooksConfiguration.mutatingPostResolve = hooks.mutatingPostResolve !== undefined;
 					op.HooksConfiguration.customResolve = hooks.customResolve !== undefined;
 				}
@@ -1010,7 +1022,8 @@ export const configureWunderGraphApplication = <
 						subscriptionPollingIntervalMillis: 0,
 					};
 					op.HooksConfiguration.postResolve = hooks.postResolve !== undefined;
-					op.HooksConfiguration.mutatingPreResolve = hooks.mutatingPreResolve !== undefined;
+					op.HooksConfiguration.mutatingPreResolve =
+						'mutatingPreResolve' in hooks && hooks.mutatingPreResolve !== undefined;
 					op.HooksConfiguration.mutatingPostResolve = hooks.mutatingPostResolve !== undefined;
 					op.HooksConfiguration.customResolve = hooks.customResolve !== undefined;
 				}
@@ -1024,7 +1037,8 @@ export const configureWunderGraphApplication = <
 				if (op !== undefined && hooks !== undefined) {
 					op.HooksConfiguration.preResolve = hooks.preResolve !== undefined;
 					op.HooksConfiguration.postResolve = hooks.postResolve !== undefined;
-					op.HooksConfiguration.mutatingPreResolve = hooks.mutatingPreResolve !== undefined;
+					op.HooksConfiguration.mutatingPreResolve =
+						'mutatingPreResolve' in hooks && hooks.mutatingPreResolve !== undefined;
 					op.HooksConfiguration.mutatingPostResolve = hooks.mutatingPostResolve !== undefined;
 				}
 			}
@@ -1076,7 +1090,7 @@ export const configureWunderGraphApplication = <
 
 			writeWunderGraphFileSync('openapi', openApiSpec);
 
-			Logger.info(`Build completed.`);
+			Logger.info('Build completed.');
 		})
 		.then(() => {
 			buildInfo.success = true;
@@ -1493,6 +1507,9 @@ const resolveOperationsConfigurations = async (
 				break;
 			case 'boolean':
 				claimType = ValueType.FLOAT;
+				break;
+			case 'any':
+				claimType = ValueType.ANY;
 				break;
 			case undefined:
 				claimType = ValueType.STRING;

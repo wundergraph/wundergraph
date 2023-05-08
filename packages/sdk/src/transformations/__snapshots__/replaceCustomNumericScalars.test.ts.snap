@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`should replace float scalar: custom float scalar 1`] = `
+exports[`replaceCustomNumericScalars should replace float scalar: custom float scalar 1`] = `
 {
   "argumentReplacements": [
     {
@@ -17,7 +17,7 @@ exports[`should replace float scalar: custom float scalar 1`] = `
 }
 `;
 
-exports[`should replace int scalar: custom int scalar 1`] = `
+exports[`replaceCustomNumericScalars should replace int scalar: custom int scalar 1`] = `
 {
   "argumentReplacements": [
     {

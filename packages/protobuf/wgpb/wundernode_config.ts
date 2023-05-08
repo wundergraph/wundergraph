@@ -380,6 +380,7 @@ export enum ValueType {
   INT = 1,
   FLOAT = 2,
   BOOLEAN = 3,
+  ANY = 4,
 }
 
 export function valueTypeFromJSON(object: any): ValueType {
@@ -396,6 +397,9 @@ export function valueTypeFromJSON(object: any): ValueType {
     case 3:
     case "BOOLEAN":
       return ValueType.BOOLEAN;
+    case 4:
+    case "ANY":
+      return ValueType.ANY;
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum ValueType");
   }
@@ -411,6 +415,8 @@ export function valueTypeToJSON(object: ValueType): string {
       return "FLOAT";
     case ValueType.BOOLEAN:
       return "BOOLEAN";
+    case ValueType.ANY:
+      return "ANY";
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum ValueType");
   }
