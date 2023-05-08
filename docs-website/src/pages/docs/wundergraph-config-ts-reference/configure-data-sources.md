@@ -202,3 +202,31 @@ configureWunderGraphApplication({
 | `schemaExtension`               | A string that is appended to the schema. Useful for adding custom scalars.           |
 | `replaceCustomScalarTypeFields` | An array of custom scalar type fields to replace.                                    |
 | `httpProxyUrl`                  | HTTP(S) proxy to use, overriding the default one (if any). Set to `null` to disable. |
+
+## SOAP
+
+You can use the `introspect.soap` function to configure a SOAP API.
+
+```typescript
+// wundergraph.config.ts
+const greeting = introspect.soap({
+  apiNamespace: 'greeting',
+  source: {
+    kind: 'file',
+    filePath: './greeting.wsdl',
+  },
+  headers: (builder) =>
+    builder.addClientRequestHeader('X-Authorization', 'Authorization').addStaticHeader('X-Static', 'Static'),
+});
+configureWunderGraphApplication({
+  apis: [greeting],
+});
+```
+
+### Properties
+
+| Property       | Description                          |
+| -------------- | ------------------------------------ |
+| `apiNamespace` | The namespace of the SOAP API        |
+| `source`       | The source of the SOAP wsdl. File.   |
+| `headers`      | The headers to send with the request |
