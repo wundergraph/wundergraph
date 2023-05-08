@@ -82,9 +82,6 @@ configureWunderGraphApplication({
   // generate type-safe clients for your Frontend
   codeGenerators: [
     {
-      templates: [...templates.typescript.all],
-    },
-    {
       templates: [new NextJsTemplate()],
       path: '../web/components/generated',
     },
