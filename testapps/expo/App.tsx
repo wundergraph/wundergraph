@@ -6,7 +6,7 @@ export default function App() {
 	const { data, isLoading, error } = useQuery({
 		operationName: 'Dragons',
 	});
-	console.log(data, error);
+
 	return (
 		<View style={styles.container}>
 			{isLoading && <Text>Loading...</Text>}
