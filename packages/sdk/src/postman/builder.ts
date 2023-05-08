@@ -17,6 +17,10 @@ const buildItem = (op: GraphQLOperation, operationURL: string, opName: string) =
 	let paths: JSONSchemaParameterPath[] = [];
 	buildPath([], false, op.VariablesSchema, paths);
 
+	if (op.Internal) {
+		return undefined;
+	}
+
 	if (op.OperationType !== OperationType.MUTATION) {
 		const request = queryRequestJson(operationURL, paths);
 
@@ -37,56 +41,61 @@ const buildItem = (op: GraphQLOperation, operationURL: string, opName: string) =
 };
 
 export const PostmanBuilder = (operations: GraphQLOperation[], options: PostmanBuilderOptions) => {
-	const mapOfItems = new Map<string, any[]>();
-	const operationsGroup = new Collection();
-	operationsGroup.id = 'operations';
-	operationsGroup.name = 'operations';
+	const separator = '/';
+
+	const rootCollection = new Collection();
+	rootCollection.id = 'operations';
+	rootCollection.name = 'operations';
+
+	// Since there's no guarantee of the operation order, create a collection
+	// per directory for now, then iterate the keys to add child/parent relationships
+	const collectionsByKey: Record<string, Collection> = { '': rootCollection };
 
 	operations.forEach((op) => {
 		const operationURL = `{{apiBaseUrl}}/operations/${op.PathName}`;
-		const folders = op.PathName.split('/');
+		const folders = op.PathName.split(separator);
 		const opName = folders.pop();
-		if (opName && folders.length > 0) {
-			const item = buildItem(op, operationURL, opName);
-			const key = folders.join('/');
-			const keySet = mapOfItems.get(key);
-			if (keySet) {
-				keySet.push(item);
-			} else {
-				mapOfItems.set(key, [item]);
-			}
-		} else if (opName) {
-			operationsGroup.items.add(buildItem(op, operationURL, opName));
+		if (!opName) {
+			return;
 		}
+		const item = buildItem(op, operationURL, opName);
+		if (!item) {
+			return;
+		}
+		const key = folders.join(separator);
+		let collection = collectionsByKey[key];
+		if (collection === undefined) {
+			collection = new Collection();
+			collection.id = key;
+			collection.name = key;
+			collectionsByKey[key] = collection;
+		}
+		collection.items.add(item);
 	});
 
-	// Bit of a mind bender here, but we need to iterate over the keys to flatten the folders and only keep the last folder
-	const keys = mapOfItems.keys();
+	// Skip key === '', since that's the root object. Then sort keys by length so parents come before children
+	// and we initialize the container before its items.
+	const keys = Object.keys(collectionsByKey)
+		.filter((key) => key !== '')
+		.sort((a, b) => a.length - b.length);
+
 	for (const key of keys) {
-		const keySet = new Set();
-		key.split('/').forEach((i) => keySet.add(i));
-		const uniqueArray = Array.from(keySet);
-
-		for (let i = 0; i < uniqueArray.length; i++) {
-			const fullKey = uniqueArray.join('/');
-			const lastFolder = uniqueArray.pop();
-			const remainderKey = uniqueArray.join('/');
-
-			const itemFolder = {
-				name: lastFolder,
-				id: fullKey,
-				item: mapOfItems.get(fullKey),
-			};
-
-			mapOfItems.get(remainderKey)?.push(itemFolder);
-			if (uniqueArray.length > 0) {
-				mapOfItems.delete(fullKey);
+		const value = collectionsByKey[key];
+		let parent: Collection | undefined;
+		if (key.includes(separator)) {
+			const components = key.split(separator);
+			components.pop();
+			while (components.length > 0) {
+				const parentKey = components.join(separator);
+				if (collectionsByKey[parentKey]) {
+					parent = collectionsByKey[parentKey];
+					break;
+				}
+				components.pop();
 			}
 		}
-	}
-
-	for (const [key, value] of mapOfItems.entries()) {
-		operationsGroup.items.add({ id: key, name: key, item: value });
+		parent = parent || rootCollection;
+		parent.items.add(value);
 	}
 
 	const myCollection = new Collection();
@@ -102,7 +111,7 @@ export const PostmanBuilder = (operations: GraphQLOperation[], options: PostmanB
 	});
 
 	// add sub collections
-	myCollection.items.add(operationsGroup.toJSON());
+	myCollection.items.add(rootCollection.toJSON());
 
 	return myCollection;
 };

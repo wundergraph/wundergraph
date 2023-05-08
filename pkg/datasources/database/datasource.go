@@ -1093,21 +1093,21 @@ func (s *Source) Load(ctx context.Context, input []byte, w io.Writer) (err error
 	request = s.unNullRequest(request)
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
-	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	cancellableCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 	for {
 		s.log.Debug("database.Source.Execute",
 			zap.ByteString("request", request),
 		)
 
-		err = s.engine.Execute(ctx, request, buf)
+		err = s.engine.Execute(cancellableCtx, request, buf)
 		if err != nil {
 			s.log.Debug("database.Source.Execute.Error",
 				zap.ByteString("request", request),
 				zap.Error(err),
 			)
 
-			if ctx.Err() != nil {
+			if cancellableCtx.Err() != nil {
 				s.log.Debug("database.Source.Execute.Deadline Exceeded")
 
 				return err

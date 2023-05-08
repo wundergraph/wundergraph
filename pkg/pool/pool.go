@@ -52,8 +52,7 @@ func GetCtx(r, clientRequest *http.Request, cfg Config) *resolve.Context {
 		resolveCtx.RenameTypeNames = cfg.RenameTypeNames
 		return resolveCtx
 	}
-	resolveContext := next.(*resolve.Context)
-	resolveContext.Context = ctx
+	resolveContext := next.(*resolve.Context).WithContext(ctx)
 	resolveContext.Request.Header = r.Header
 	resolveContext.RenameTypeNames = cfg.RenameTypeNames
 	return resolveContext
@@ -97,7 +96,7 @@ func (p *Pool) GetShared(ctx context.Context, planConfig plan.Configuration, cfg
 	if shared != nil {
 		s := shared.(*Shared)
 		s.Planner.SetConfig(planConfig)
-		s.Ctx.Context = ctx
+		s.Ctx = s.Ctx.WithContext(ctx)
 		s.Ctx.RenameTypeNames = cfg.RenameTypeNames
 		return s
 	}
@@ -123,7 +122,7 @@ func (p *Pool) GetSharedFromRequest(ctx context.Context, r *http.Request, planCo
 	if shared != nil {
 		s := shared.(*Shared)
 		s.Planner.SetConfig(planConfig)
-		s.Ctx.Context = c
+		s.Ctx = s.Ctx.WithContext(ctx)
 		s.Ctx.Request.Header = r.Header
 		s.Ctx.RenameTypeNames = cfg.RenameTypeNames
 		return s

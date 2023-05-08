@@ -437,6 +437,14 @@ const resolveConfig = async (
 	const generators = await Promise.all(config.apis);
 	const resolvedApis = await Promise.all(generators.map((generator) => generator(apiIntrospectionOptions)));
 
+	if (WG_DATA_SOURCE_POLLING_MODE) {
+		// To avoid having to deal with different return types, exit here when running in
+		// WG_DATA_SOURCE_POLLING_MODE. If there are any APIs with polling enabled this point
+		// will never be reached because we'll keep waiting while resolving the APIs while the
+		// polling runs at regular intervals.
+		process.exit(0);
+	}
+
 	const resolved = await resolveApplication(
 		roles,
 		customClaims,
@@ -738,17 +746,6 @@ export const configureWunderGraphApplication = <
 >(
 	config: WunderGraphConfigApplicationConfig<TCustomClaim, TPublicClaim>
 ) => {
-	if (WG_DATA_SOURCE_POLLING_MODE) {
-		// if the DataSourcePolling environment variable is set to 'true',
-		// we don't run the regular config build process which would generate the whole config
-		// instead, we only resolve all Promises of the API Introspection
-		// This will keep polling the (configured) DataSources until `wunderctl up` stops the polling process
-		// If a change is detected in the DataSource, the cache is updated,
-		// which will trigger a re-run of the config build process
-		Promise.all(config.apis).catch();
-		return;
-	}
-
 	const wgDirAbs = process.env.WG_DIR_ABS;
 	if (!wgDirAbs) {
 		throw new Error('environment variable WG_DIR_ABS is empty');
