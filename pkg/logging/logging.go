@@ -54,6 +54,30 @@ func zapConsoleEncoder() zapcore.Encoder {
 	return zapcore.NewConsoleEncoder(ec)
 }
 
+func attachBaseFields(logger *zap.Logger) *zap.Logger {
+	host, err := os.Hostname()
+	if err != nil {
+		host = "unknown"
+	}
+
+	logger = logger.With(
+		zap.String("hostname", host),
+		zap.Int("pid", os.Getpid()),
+	)
+
+	environmentID := os.Getenv(WgCloudEnvironmentID)
+	if environmentID != "" {
+		logger = logger.With(zap.String("environmentID", environmentID))
+	}
+
+	projectID := os.Getenv(WgCloudProjectID)
+	if projectID != "" {
+		logger = logger.With(zap.String("projectID", projectID))
+	}
+
+	return logger
+}
+
 func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool, level zapcore.Level) *zap.Logger {
 	var encoder zapcore.Encoder
 	var zapOpts []zap.Option
@@ -79,25 +103,9 @@ func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool, le
 		return zapLogger
 	}
 
-	host, err := os.Hostname()
-	if err != nil {
-		host = "unknown"
-	}
+	zapLogger = attachBaseFields(zapLogger)
 
-	environmentID := os.Getenv(WgCloudEnvironmentID)
-	if environmentID != "" {
-		zapLogger = zapLogger.With(zap.String("environmentID", environmentID))
-	}
-
-	projectID := os.Getenv(WgCloudProjectID)
-	if projectID != "" {
-		zapLogger = zapLogger.With(zap.String("projectID", projectID))
-	}
-
-	return zapLogger.With(
-		zap.String("hostname", host),
-		zap.Int("pid", os.Getpid()),
-	)
+	return zapLogger
 }
 
 func FindLogLevel(logLevel string) (zapcore.Level, error) {
