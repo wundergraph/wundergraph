@@ -157,10 +157,19 @@ export class LocalCacheBucket {
 		}
 	}
 
-	async set(key: any, data: string, opts?: CacheSetOptions): Promise<void> {
+	/**
+	 * set stores the given into data into the cache associated with the provided key
+	 * and overwriting previous entries under the same key
+	 *
+	 * @param key cache key to store the data under
+	 * @param data data to store
+	 * @param opts options for storing the data
+	 * @returns true if the value could be stored, false otherwise
+	 */
+	async set(key: any, data: string, opts?: CacheSetOptions): Promise<boolean> {
 		const filePath = this.keyPath(key);
 		if (!filePath) {
-			return;
+			return false;
 		}
 		const ttlSeconds = opts?.ttlSeconds ?? 0;
 		const expiration = ttlSeconds !== 0 ? Date.now() / 1000 + ttlSeconds : 0;
@@ -171,7 +180,9 @@ export class LocalCacheBucket {
 			await this.write(filePath, buf);
 		} catch (e: any) {
 			logger.error(`error storing cache entry at ${filePath}: ${e}`);
+			return false;
 		}
+		return true;
 	}
 
 	async getJSON(key: any, opts?: CacheGetOptions): Promise<any> {
@@ -186,15 +197,25 @@ export class LocalCacheBucket {
 		return undefined;
 	}
 
-	async setJSON(key: any, data: any, opts?: CacheSetOptions): Promise<void> {
+	/**
+	 * setJSON encodes the given data with JSON, then stores the given into data into the cache
+	 * associated with the provided key and overwriting previous entries under the same key
+	 *
+	 * @param key cache key to store the data under
+	 * @param data data to store
+	 * @param opts options for storing the data
+	 * @returns true if the value could be stored, false otherwise
+	 */
+
+	async setJSON(key: any, data: any, opts?: CacheSetOptions): Promise<boolean> {
 		let encoded: string;
 		try {
 			encoded = JSON.stringify(data);
 		} catch (e: any) {
 			logger.error(`error storing encoding cached data: ${e}`);
-			return;
+			return false;
 		}
 
-		await this.set(key, encoded, opts);
+		return await this.set(key, encoded, opts);
 	}
 }

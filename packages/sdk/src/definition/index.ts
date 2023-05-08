@@ -256,7 +256,7 @@ export interface GraphQLIntrospection extends GraphQLUpstream, GraphQLIntrospect
 export interface GraphQLFederationUpstream extends Omit<Omit<GraphQLUpstream, 'introspection'>, 'apiNamespace'> {
 	name?: string;
 	loadSchemaFromString?: GraphQLIntrospectionOptions['loadSchemaFromString'];
-	introspection?: GraphqlIntrospectionHeaders;
+	introspection?: IntrospectionFetchOptions & GraphqlIntrospectionHeaders;
 }
 
 export interface GraphQLFederationIntrospection extends IntrospectionConfiguration {
@@ -289,6 +289,11 @@ export interface PrismaIntrospection extends IntrospectionConfiguration {
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
+export interface IntrospectionFetchOptions {
+	disableCache?: boolean;
+	pollingIntervalSeconds?: number;
+}
+
 export interface IntrospectionConfiguration {
 	// id is the unique identifier for the data source
 	id?: string;
@@ -301,10 +306,7 @@ export interface IntrospectionConfiguration {
 	 * @defaultValue Use the default timeout for this node.
 	 */
 	requestTimeoutSeconds?: number;
-	introspection?: {
-		disableCache?: boolean;
-		pollingIntervalSeconds?: number;
-	};
+	introspection?: IntrospectionFetchOptions;
 }
 
 export interface HTTPUpstream extends IntrospectionConfiguration {
@@ -365,7 +367,7 @@ export interface GraphQLUpstream extends HTTPUpstream {
 	path?: InputVariable;
 	subscriptionsURL?: InputVariable;
 	subscriptionsUseSSE?: boolean;
-	introspection?: HTTPUpstream['introspection'] & GraphqlIntrospectionHeaders;
+	introspection?: IntrospectionFetchOptions & GraphqlIntrospectionHeaders;
 }
 
 export interface OpenAPIIntrospectionFile {
