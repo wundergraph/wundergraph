@@ -39,8 +39,8 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/operationreport"
 
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
-	"github.com/wundergraph/wundergraph/pkg/apicache"
 	"github.com/wundergraph/wundergraph/pkg/authentication"
+	"github.com/wundergraph/wundergraph/pkg/cacheheaders"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/graphiql"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
@@ -57,7 +57,6 @@ import (
 )
 
 const (
-	WgCacheHeader           = "X-Wg-Cache"
 	WgInternalApiCallHeader = "X-WG-Internal-GraphQL-API"
 
 	WgPrefix             = "wg_"
@@ -97,8 +96,6 @@ type Builder struct {
 	log *zap.Logger
 
 	planConfig plan.Configuration
-
-	cache apicache.Cache
 
 	insecureCookies      bool
 	forceHttpsRedirects  bool
@@ -145,13 +142,6 @@ func NewBuilder(pool *pool.Pool,
 
 func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Router, api *Api) (streamClosers []chan struct{}, err error) {
 	r.api = api
-
-	if api.CacheConfig != nil {
-		err = r.configureCache(api)
-		if err != nil {
-			return streamClosers, err
-		}
-	}
 
 	r.router = r.createSubRouter(router)
 
@@ -534,7 +524,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			preparedPlan:           synchronousPlan,
 			pool:                   r.pool,
 			extractedVariables:     make([]byte, len(shared.Doc.Input.Variables)),
-			cache:                  newCacheHandler(r.cache, makeCacheConfig(operation.CacheConfig), r.api.ApiConfigHash),
+			cacheHeaders:           cacheheaders.New(newCacheControl(operation.CacheConfig), r.api.ApiConfigHash),
 			operation:              operation,
 			variablesValidator:     variablesValidator,
 			rbacEnforcer:           authentication.NewRBACEnforcer(operation),
@@ -568,7 +558,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			zap.String("method", http.MethodGet),
 			zap.String("path", apiPath),
 			zap.Bool("mock", operation.HooksConfiguration.MockResolve.Enable),
-			zap.String("cache", handler.cache.String()),
+			zap.String("cache", handler.cacheHeaders.String()),
 			zap.Bool("authRequired", operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired),
 		)
 	case wgpb.OperationType_MUTATION:
@@ -684,21 +674,7 @@ func cleanupJsonSchema(schema string) string {
 	return schema
 }
 
-func (r *Builder) configureCache(api *Api) error {
-	cache, err := newAPICache(r.api, r.log)
-	if err != nil {
-		return err
-	}
-	r.cache = cache
-	return nil
-}
-
 func (r *Builder) Close() error {
-	if closer, ok := r.cache.(io.Closer); ok {
-		if err := closer.Close(); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -1162,7 +1138,7 @@ type QueryHandler struct {
 	preparedPlan           *plan.SynchronousResponsePlan
 	extractedVariables     []byte
 	pool                   *pool.Pool
-	cache                  *cacheHandler
+	cacheHeaders           *cacheheaders.Headers
 	liveQuery              liveQueryConfig
 	operation              *wgpb.Operation
 	variablesValidator     *inputvariables.Validator
@@ -1193,17 +1169,6 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		RenameTypeNames: h.renameTypeNames,
 	})
 	defer pool.PutCtx(ctx)
-	cache := h.cache.RequestHandler(r, w)
-
-	defer cache.IfStale(func() ([]byte, error) {
-		buf.Reset()
-		ctx = ctx.WithContext(context.WithValue(context.Background(), "user", authentication.UserFromContext(r.Context())))
-		resp, err := h.hooksPipeline.Run(ctx, nil, r, buf)
-		if err != nil {
-			return nil, err
-		}
-		return resp.Data, nil
-	})
 
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
@@ -1254,14 +1219,6 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	served, err := cache.Serve(r.Context())
-	if done := handleOperationErr(requestLogger, err, w, "request cache failed", h.operation); done {
-		return
-	}
-	if served {
-		return
-	}
-
 	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
 	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
 		return
@@ -1271,14 +1228,11 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	etag := cache.SetETag(resp.Data)
-	cache.SetHeaders(0)
-	cache.Store(resp.Data)
-
-	ifNoneMatch := r.Header.Get("If-None-Match")
-	if ifNoneMatch == etag {
-		w.WriteHeader(http.StatusNotModified)
-		return
+	if h.cacheHeaders != nil {
+		h.cacheHeaders.Set(w, resp.Data)
+		if h.cacheHeaders.NotModified(r, w) {
+			return
+		}
 	}
 
 	_, err = w.Write(resp.Data)
@@ -2037,7 +1991,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 	handler := &FunctionsHandler{
 		operation:            operation,
 		log:                  r.log,
-		cache:                newCacheHandler(r.cache, makeCacheConfig(operation.CacheConfig), r.api.ApiConfigHash),
+		cacheHeaders:         cacheheaders.New(newCacheControl(operation.CacheConfig), r.api.ApiConfigHash),
 		variablesValidator:   variablesValidator,
 		rbacEnforcer:         authentication.NewRBACEnforcer(operation),
 		hooksClient:          r.middlewareClient,
@@ -2068,7 +2022,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 type FunctionsHandler struct {
 	operation            *wgpb.Operation
 	log                  *zap.Logger
-	cache                *cacheHandler
+	cacheHeaders         *cacheheaders.Headers
 	variablesValidator   *inputvariables.Validator
 	rbacEnforcer         *authentication.RBACEnforcer
 	hooksClient          *hooks.Client
@@ -2217,25 +2171,6 @@ func (h *FunctionsHandler) handleRequest(resolveCtx *resolve.Context, r *http.Re
 
 	ctx := resolveCtx.Context()
 
-	cache := h.cache.RequestHandler(r, w)
-
-	served, err := cache.Serve(r.Context())
-	if done := handleOperationErr(requestLogger, err, w, "request cache failed", h.operation); done {
-		return
-	}
-	if served {
-		return
-	}
-
-	defer cache.IfStale(func() ([]byte, error) {
-		buf.Reset()
-		out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input, buf)
-		if err != nil {
-			return nil, err
-		}
-		return out.Response, nil
-	})
-
 	out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input, buf)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -2247,14 +2182,11 @@ func (h *FunctionsHandler) handleRequest(resolveCtx *resolve.Context, r *http.Re
 		return
 	}
 
-	etag := cache.SetETag(out.Response)
-	cache.SetHeaders(0)
-	cache.Store(out.Response)
-
-	ifNoneMatch := r.Header.Get("If-None-Match")
-	if ifNoneMatch == etag {
-		w.WriteHeader(http.StatusNotModified)
-		return
+	if h.cacheHeaders != nil {
+		h.cacheHeaders.Set(w, out.Response)
+		if h.cacheHeaders.NotModified(r, w) {
+			return
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -2463,4 +2395,15 @@ func validateInputVariables(ctx context.Context, log *zap.Logger, variables []by
 		return false
 	}
 	return true
+}
+
+func newCacheControl(config *wgpb.OperationCacheConfig) *cacheheaders.CacheControl {
+	if config == nil || !config.Enable {
+		return nil
+	}
+	return &cacheheaders.CacheControl{
+		MaxAge:               config.MaxAge,
+		Public:               config.Public,
+		StaleWhileRevalidate: config.StaleWhileRevalidate,
+	}
 }
