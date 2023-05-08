@@ -1,8 +1,11 @@
 import { MetroConfig } from 'metro-config';
 
-export const withWunderGraphConfig = (config: MetroConfig) => {
+export const metroWunderGraphConfig = (config: MetroConfig) => {
 	return {
 		...config,
+		transformer: {
+			babelTransformerPath: require.resolve('./polyfill'),
+		},
 		resolver: {
 			...config.resolver,
 			resolveRequest: (context, moduleName, platform) => {
