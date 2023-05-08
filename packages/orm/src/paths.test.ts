@@ -13,5 +13,26 @@ describe('paths', () => {
 
 			expect(print(actual)).toEqual(print(expected));
 		});
+
+		it('handles multiple nested', () => {
+			const actual = toSelectionSet([
+				['id'],
+				['status'],
+				['dragon'],
+				['dragon', 'diamater', 'feet'],
+				['dragon', 'diamater', 'meters'],
+			]);
+			const expected = selectionSet([
+				field('id'),
+				field('status'),
+				field(
+					'dragon',
+					undefined,
+					selectionSet([field('diamater', undefined, selectionSet([field('feet'), field('meters')]))])
+				),
+			]);
+
+			expect(print(actual)).toEqual(print(expected));
+		});
 	});
 });

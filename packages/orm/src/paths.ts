@@ -1,5 +1,5 @@
 import { Field, SelectionSet, field, selectionSet } from '@timkendall/tql';
-import type { Fn, Unions, Tuples, Objects, Strings, Call, Pipe } from 'hotscript';
+import type { Fn, Unions, Tuples, Objects, Strings, Booleans, Call, Pipe } from 'hotscript';
 import * as R from 'remeda';
 
 type Primitive = string | number | boolean | bigint | null | undefined | symbol;
@@ -75,7 +75,6 @@ export type Paths<T> = Call<AllPaths, T>;
  * 4. Group segments by field (e.g `{ foo: [['bar','baz']] }`)
  * 5. Back to tuples (e.g `[ ['foo', ['bar','baz']] ]`)
  * 5. Recursively map to `Fields` (e.g [Field<'foo', undefined, ToSelectionSet<[['bar','baz']]>>])
- *
  */
 
 interface ToObject extends Fn {
@@ -107,6 +106,12 @@ export type ToSelectionSet<Segments extends string[][]> = SelectionSet<
 		Pipe<
 			Segments,
 			[
+				// @note address `Field<"dragon", undefined, ToSelectionSet<[[]], ["diameter", "feet"], [...]]>`
+				// i.e where is that empty head segment coming from?
+				//
+				// This works for now..
+				Tuples.Filter<Booleans.NotEqual<[]>>,
+
 				Tuples.Map<ToObject>,
 				Objects.GroupBy<GetFieldKey>,
 				Objects.MapValues<ToSegments>,
@@ -133,5 +138,5 @@ export const toSelectionSet = <T extends string[][]>(segments: T): ToSelectionSe
 					: field(fieldName, undefined, toSelectionSet(selections.filter(Boolean) as string[][]))
 			)
 		)
-	) as any as ToSelectionSet<T>;
+	) as unknown as ToSelectionSet<T>;
 };

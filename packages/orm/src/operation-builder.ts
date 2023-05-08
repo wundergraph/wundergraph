@@ -10,6 +10,7 @@ import {
 	isObjectType,
 	isAbstractType,
 	getNamedType,
+	GraphQLObjectType,
 } from 'graphql';
 import {
 	field,
@@ -30,11 +31,16 @@ import {
 	namedType,
 } from '@timkendall/tql';
 import { pathOr } from 'remeda';
-import { from } from 'ix/asynciterable'
+import { from } from 'ix/asynciterable';
 import { map } from 'ix/asynciterable/operators';
 
 import { NamedType } from './definition';
-import { ArgumentDefinitions, type AbstractTypesInSelection } from './selections';
+import {
+	ArgumentDefinitions,
+	type AbstractTypesInSelection,
+	type ExpandSelectionSet,
+	expandSelection,
+} from './selections';
 import { Paths, ToSelectionSet, toSelectionSet } from './paths';
 import { FragmentDefinitionBuilder } from './fragment-definition-builder';
 import { AddFragment } from './add-fragment-selection';
@@ -52,19 +58,6 @@ export interface OperationBuilderConfig {
 	typeSelection: SelectionSet<any>;
 	fragmentDefinitions: ReadonlyArray<FragmentDefinition<any, any, any>>;
 }
-
-type SelectMethod<Config extends OperationBuilderConfig> = <Selected extends Array<Paths<NamedType<Config['type']>>>>(
-	...paths: Selected
-) => OperationBuilder<{
-	schema: Config['schema'];
-	operation: Config['operation'];
-	rootType: Config['rootType'];
-	rootField: Config['rootField'];
-	type: Config['type'];
-	typeSelection: ToSelectionSet<Call<Tuples.Map<Strings.Split<'.'>>, Selected>>;
-	// @fixme we get `[...any[], ..]`
-	fragmentDefinitions: []; // Config['fragmentDefinitions']
-}>;
 
 type WhereMethod<Config extends OperationBuilderConfig> = <
 	T extends Exclude<
@@ -247,22 +240,39 @@ export class OperationBuilder<Config extends OperationBuilderConfig> {
 		return this as any;
 	};
 
-	select: SelectMethod<Config> = (...paths) => {
-		const segments = paths.map((path) => path.split('.'));
+	select<
+		Selected extends Array<Paths<NamedType<Config['type']>>>,
+		Builder extends OperationBuilder<{
+			schema: Config['schema'];
+			operation: Config['operation'];
+			rootType: Config['rootType'];
+			rootField: Config['rootField'];
+			type: Config['type'];
 
-		// @todo retain provided (nested) arguments
-		this.#typeSelection = toSelectionSet(segments);
+			typeSelection: ExpandSelectionSet<
+				NamedType<Config['type']>,
+				ToSelectionSet<Call<Tuples.Map<Strings.Split<'.'>>, Selected>>
+			>;
+
+			fragmentDefinitions: [];
+		}>
+	>(...paths: Selected): Builder {
+		const segments = paths.map((path) => path.split('.'));
+		const initialTypeSelection = toSelectionSet(segments);
+
+		if (this.config.type instanceof GraphQLObjectType) {
+			// @todo retain provided (nested) arguments
+			this.#typeSelection = expandSelection(this.config.schema, this.config.type, initialTypeSelection);
+		} else {
+			this.#typeSelection = initialTypeSelection;
+		}
+
 		this.#rootSelection = selectionSet([
-			field(
-				this.config.rootField, 
-				this.#rootSelection.selections[0]!.arguments,
-				this.#typeSelection
-			),
+			field(this.config.rootField, this.#rootSelection.selections[0]!.arguments, this.#typeSelection),
 		]);
 
-		// @note needed to prevent TypeScript from entering infinite type inference recursion
-		return this as any;
-	};
+		return this as unknown as Builder;
+	}
 
 	on: OnMethod<Config> = (typename, builderCb) => {
 		const type = this.config.schema.getType(typename);
@@ -340,10 +350,10 @@ export class OperationBuilder<Config extends OperationBuilderConfig> {
 		if (result !== null && typeof (result as any)[Symbol.asyncIterator] === 'function') {
 			// `Executor` implementations return `AsyncIterators` for subscription operations
 			return from(result as any).pipe(
-				map(nextResult => {
+				map((nextResult) => {
 					return (nextResult as any)[this.config.rootField];
 				})
-			)
+			);
 		} else if (result !== null && typeof result === 'object') {
 			// extract the result from the root field
 			// @todo freeze objects (to match `readonly` semantics defined by typings)

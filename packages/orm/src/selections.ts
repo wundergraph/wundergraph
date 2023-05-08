@@ -1,4 +1,4 @@
-import type { Fn, Objects, Booleans, Call, Pipe, Tuples } from 'hotscript';
+import type { Fn, Objects, Booleans, Call, Pipe, Tuples, Unions, Strings } from 'hotscript';
 import type { Primitive, EmptyObject } from 'type-fest';
 import {
 	GraphQLObjectType,
@@ -19,7 +19,7 @@ import {
 	InterfaceTypeDefinitionNode,
 	UnionTypeDefinitionNode,
 } from 'graphql';
-import { field, selectionSet, type Field, type Selection, type SelectionSet } from '@timkendall/tql';
+import { field, selectionSet, type Field, type SelectionSet } from '@timkendall/tql';
 
 import {
 	NamedType,
@@ -28,6 +28,7 @@ import {
 	type ArgumentsFromField,
 	type FieldHasArguments,
 } from './definition';
+import { ToSelectionSet } from './paths';
 
 const TYPENAME_SELECTION = field('__typename');
 
@@ -146,31 +147,6 @@ export type ArgumentDefinitions<Schema, Type extends Record<string, any>, Select
 	[Objects.OmitBy<Booleans.Equals<undefined>>]
 >;
 
-interface ArgumentDefinition<Schema, Type extends Record<string, any>> extends Fn {
-	return: this['arg0'] extends Field<infer Name, any, undefined>
-		? [Name, Parameters<Type[Name]>[0]] // no selection set
-		: this['arg0'] extends Field<infer Name, any, infer Sel extends SelectionSet<any>>
-		? [
-				Name,
-				Call<
-					Objects.Assign<ArgumentDefinitions<Schema, Exclude<ReturnType<Type[Name]>, null>, Sel>>,
-					Parameters<Type[Name]>[0] extends infer U ? (U extends undefined ? {} : U) : never
-				>
-		  ]
-		: never;
-}
-
-// @todo this implementation requires tuples (e.g `SelectionSet<[<Field<'a'>, Field<'b'>]>)
-export type ArgumentDefinitions2<Schema, Type extends Record<string, any>, Selections extends SelectionSet<any>> = Pipe<
-	Selections['selections'],
-	[
-		Tuples.Map<ArgumentDefinition<Schema, Type>>,
-		Tuples.Map<Objects.FromEntries>,
-		Tuples.Reduce<Objects.Assign, {}>,
-		Objects.PickBy<Booleans.NotEqual<undefined>>
-	]
->;
-
 // @todo make recursive
 export type AbstractTypesInSelection<
 	Schema,
@@ -187,3 +163,43 @@ export type AbstractTypesInSelection<
 			: never
 		: never
 	: never;
+
+// conditional mapping
+interface ToExpanded<Type extends Record<string, any>> extends Fn {
+	return: this['arg0'] extends Field<infer Name>
+		? // @todo handled fields with selection sets to support auto-selecting N nested object fields
+		  NamedType<NonNullable<ReturnType<Type[Name]>>> extends infer NestedType extends object
+			? Field<Name, never /* @todo pass through args*/, DefaultSelection<NestedType>>
+			: this['arg0']
+		: this['arg0'];
+}
+
+export type ExpandSelectionSet<
+	Type extends Record<string, any>,
+	Selections extends SelectionSet<ReadonlyArray<any>>
+> = SelectionSet<ReadonlyArray<Pipe<Selections['selections'][number], [Unions.Map<ToExpanded<Type>>]>>>;
+
+export const expandSelection = (
+	schema: GraphQLSchema,
+	type: GraphQLObjectType,
+	selectionSet: SelectionSetNode
+): SelectionSetNode => {
+	const typeInfo = new TypeInfo(schema, type);
+	const visitor = visitWithTypeInfo(typeInfo, {
+		Field(node) {
+			const fieldType = typeInfo.getType();
+			if (!fieldType) {
+				console.warn(`expandSelection: unable to determine field type.`);
+				return;
+			}
+
+			const unwrappedType = getNamedType(fieldType);
+			// @todo interface type common fields
+			if (unwrappedType instanceof GraphQLObjectType && !node.selectionSet?.selections.length) {
+				return field(node.name.value, undefined /* @todo passthrough args*/, defaultSelection(unwrappedType));
+			}
+		},
+	});
+
+	return visit(selectionSet, visitor);
+};
