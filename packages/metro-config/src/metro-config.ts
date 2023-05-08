@@ -7,8 +7,8 @@ export const wgMetroConfig = (config: MetroConfig) => {
 	return {
 		...config,
 		transformer: {
-			babelTransformerPath: require.resolve('./transformer'),
 			...config.transformer,
+			babelTransformerPath: require.resolve('./transformer'),
 		},
 		resolver: {
 			...config.resolver,

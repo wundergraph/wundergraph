@@ -1,7 +1,7 @@
 ---
 title: Expo + SWR Example
 pageTitle: WunderGraph - Examples - Expo + SWR
-description:
+description: A simple example using Expo and SWR
 ---
 
 This example shows the bare minimum configuration to get WunderGraph up and running with React Native, using [Expo](https://expo.io/) and [SWR](https://swr.vercel.app/).
