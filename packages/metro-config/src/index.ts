@@ -1,1 +1,1 @@
-export { metroWunderGraphConfig } from './metro-config';
+export { wgMetroConfig } from './metro-config';

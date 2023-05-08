@@ -1,7 +1,7 @@
 // Learn more https://docs.expo.io/guides/customizing-metro
-const { withWunderGraphConfig } = require('@wundergraph/expo');
+const { wgMetroConfig } = require('@wundergraph/metro-config');
 const { getDefaultConfig } = require('expo/metro-config');
 
 const config = getDefaultConfig(__dirname);
 
-module.exports = withWunderGraphConfig(config);
+module.exports = wgMetroConfig(config);

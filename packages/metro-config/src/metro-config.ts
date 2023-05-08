@@ -1,6 +1,9 @@
 import { MetroConfig } from 'metro-config';
 
-export const metroWunderGraphConfig = (config: MetroConfig) => {
+/**
+ * Add resolvers and required polyfills to the metro config
+ */
+export const wgMetroConfig = (config: MetroConfig) => {
 	return {
 		...config,
 		transformer: {

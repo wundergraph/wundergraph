@@ -1,29 +1,29 @@
-# WunderGraph Expo Integration
+# WunderGraph Metro Config
 
 ![wunderctl](https://img.shields.io/npm/v/@wundergraph/expo.svg)
 
-Official WunderGraph Expo integration.
+Official WunderGraph Metro Config for React Native and Expo.
 
 ## Getting Started
 
 ```shell
-npm install @wundergraph/expo @wundergraph/swr
+npm install @wundergraph/metro-config
 ```
 
-Before you can use the hooks, you need to modify your code generation to include the base typescript client.
+## Configuration
+
+### metro.config.js
 
 ```typescript
-// wundergraph.config.ts
-configureWunderGraphApplication({
-  // ... omitted for brevity
-  codeGenerators: [
-    {
-      templates: [templates.typescript.client],
-      // the location where you want to generate the client
-      path: '../src/components/generated',
-    },
-  ],
-});
+// Learn more https://docs.expo.io/guides/customizing-metro
+const { wgMetroConfig } = require('@wundergraph/metro-config');
+const { getDefaultConfig } = require('expo/metro-config');
+
+const config = getDefaultConfig(__dirname);
+
+module.exports = wgMetroConfig(config);
 ```
 
-Second, run `wunderctl generate` to generate the code.
+## Usage
+
+After configuration the metro config you can use [`@wundergraph/swr`](https://docs.wundergraph.com/docs/clients-reference/swr) or [`@wundergraph/react-query`](https://docs.wundergraph.com/docs/clients-reference/react-query) in your React Native or Expo project.

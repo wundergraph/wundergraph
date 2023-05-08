@@ -5,7 +5,7 @@
   "dependencies": {
     "@babel/runtime": "^7.21.0",
     "@expo/webpack-config": "^18.0.1",
-    "@wundergraph/expo": "^0.0.1",
+    "@wundergraph/metro-config": "^0.0.1",
     "@wundergraph/sdk": "^0.147.1",
     "@wundergraph/swr": "^0.14.17",
     "expo": "^48.0.11",

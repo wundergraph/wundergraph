@@ -1,5 +1,5 @@
 // Learn more https://docs.expo.io/guides/customizing-metro
-const { metroWunderGraphConfig } = require('@wundergraph/metro-config');
+const { wgMetroConfig } = require('@wundergraph/metro-config');
 const { makeMetroConfig } = require('@rnx-kit/metro-config');
 const MetroSymlinksResolver = require('@rnx-kit/metro-resolver-symlinks');
 const path = require('path');
@@ -9,7 +9,7 @@ const projectRoot = __dirname;
 
 const symlinkResolver = MetroSymlinksResolver();
 
-module.exports = metroWunderGraphConfig(
+module.exports = wgMetroConfig(
 	makeMetroConfig({
 		projectRoot,
 		resolver: {
