@@ -21,6 +21,7 @@ const (
 	//	environment variables
 	WgCloudEnvironmentID = "WG_CLOUD_ENVIRONMENT_ID"
 	WgCloudProjectID     = "WG_CLOUD_PROJECT_ID"
+	WgCloudDeploymentID  = "WG_CLOUD_DEPLOYMENT_ID"
 )
 
 type RequestIDKey struct{}
@@ -73,6 +74,11 @@ func attachBaseFields(logger *zap.Logger) *zap.Logger {
 	projectID := os.Getenv(WgCloudProjectID)
 	if projectID != "" {
 		logger = logger.With(zap.String("projectID", projectID))
+	}
+
+	deploymentID := os.Getenv(WgCloudDeploymentID)
+	if projectID != "" {
+		logger = logger.With(zap.String("deploymentID", deploymentID))
 	}
 
 	return logger
