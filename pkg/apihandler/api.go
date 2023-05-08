@@ -122,7 +122,6 @@ type Api struct {
 	Operations            []*wgpb.Operation
 	InvalidOperationNames []string
 	CorsConfiguration     *wgpb.CorsConfiguration
-	DeploymentId          string
 	ApiConfigHash         string
 	AuthenticationConfig  *wgpb.ApiAuthenticationConfig
 	S3UploadConfiguration []*wgpb.S3UploadConfiguration
