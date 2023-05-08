@@ -7,7 +7,8 @@ export const wgMetroConfig = (config: MetroConfig) => {
 	return {
 		...config,
 		transformer: {
-			babelTransformerPath: require.resolve('./polyfill'),
+			babelTransformerPath: require.resolve('./transformer'),
+			...config.transformer,
 		},
 		resolver: {
 			...config.resolver,

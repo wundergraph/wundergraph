@@ -9,6 +9,6 @@
     "incremental": false,
     "outDir": "./dist"
   },
-  "include": ["src/**/*", "tests"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

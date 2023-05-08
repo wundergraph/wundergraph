@@ -1,4 +1,5 @@
 {
   "name": "wundergraph-metro-transformer",
-  "main": "../dist/polyfill.js"
+  "main": "../dist/transformer.js",
+  "types": "../dist/transformer.d.ts"
 }

@@ -24,6 +24,23 @@ const config = getDefaultConfig(__dirname);
 module.exports = wgMetroConfig(config);
 ```
 
+## Advanced
+
+In case you have a custom Metro transformer configured, you can import the WunderGraph transformer and add it to your custom transformer.
+
+```typescript
+// custom-transformer.js
+const { transform } = require('@wundergraph/metro-config/transformer');
+
+module.exports = {
+  transform(file) {
+    // custom transforms
+
+    return transform(file);
+  },
+};
+```
+
 ## Usage
 
 After configuration the metro config you can use [`@wundergraph/swr`](https://docs.wundergraph.com/docs/clients-reference/swr) or [`@wundergraph/react-query`](https://docs.wundergraph.com/docs/clients-reference/react-query) in your React Native or Expo project.
