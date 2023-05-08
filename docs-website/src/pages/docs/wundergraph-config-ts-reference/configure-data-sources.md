@@ -28,18 +28,19 @@ Each introspection supports an `apiNamespace` property. This property is used to
 
 ## Supported introspections
 
-| Introspection            | Description            |
-| ------------------------ | ---------------------- |
-| `introspect.graphql`     | GraphQL API            |
-| `introspect.postgresql`  | PostgreSQL database    |
-| `introspect.mysql`       | MySQL database         |
-| `introspect.planetscale` | Planetscale database   |
-| `introspect.sqlite`      | SQLite database        |
-| `introspect.sqlserver`   | SQL Server database    |
-| `introspect.mongodb`     | MongoDB database       |
-| `introspect.prisma`      | Prisma database        |
-| `introspect.federation`  | GraphQL Federation API |
-| `introspect.openApi`     | OpenAPI API            |
+| Introspection                                                                                            | Description            |
+| -------------------------------------------------------------------------------------------------------- | ---------------------- |
+| [`introspect.graphql`](/docs/wundergraph-config-ts-reference/configure-graphql-data-source)              | GraphQL API            |
+| [`introspect.postgresql`](/docs/wundergraph-config-ts-reference/configure-postgresql-data-source)        | PostgreSQL database    |
+| [`introspect.mysql`](/docs/wundergraph-config-ts-reference/configure-mysql-data-source)                  | MySQL database         |
+| [`introspect.planetscale`](/docs/wundergraph-config-ts-reference/configure-planetscale-data-source)      | Planetscale database   |
+| [`introspect.sqlite`](/docs/wundergraph-config-ts-reference/configure-sqlite-data-source)                | SQLite database        |
+| [`introspect.sqlserver`](/docs/wundergraph-config-ts-reference/configure-sqlserver-data-source)          | SQL Server database    |
+| [`introspect.mongodb`](/docs/wundergraph-config-ts-reference/configure-mongodb-atlas-data-source)        | MongoDB database       |
+| [`introspect.prisma`](/docs/wundergraph-config-ts-reference/configure-prisma-datasource)                 | Prisma database        |
+| [`introspect.federation`](/docs/wundergraph-config-ts-reference/configure-apollo-federation-data-source) | GraphQL Federation API |
+| [`introspect.openApi`](/docs/wundergraph-config-ts-reference/configure-openapi-rest-data-source)         | OpenAPI API            |
+| [`introspect.soap`](/docs/wundergraph-config-ts-reference/configure-soap-data-source)                    | SOAP                   |
 
 ## GraphQL
 
