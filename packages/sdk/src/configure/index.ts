@@ -437,7 +437,9 @@ const resolveConfig = async (
 	// Generate the promises first, then await them all at once
 	// to run them in parallel
 	const generators = await Promise.all(config.apis);
-	const resolvedApis = await Promise.all(generators.map((generator) => generator(apiIntrospectionOptions)));
+	const resolvedApis = await Promise.all(
+		generators.map((generator, index) => generator({ ...apiIntrospectionOptions, apiID: index.toString() }))
+	);
 
 	if (WG_DATA_SOURCE_POLLING_MODE) {
 		// To avoid having to deal with different return types, exit here when running in
