@@ -131,6 +131,7 @@
     "@graphql-tools/utils": "^9.2.1",
     "@omnigraph/json-schema": "^0.38.24",
     "@omnigraph/openapi": "^0.19.26",
+    "@omnigraph/soap": "^0.93.1",
     "@prisma/generator-helper": "^3.9.2",
     "@web-std/fetch": "^4.1.0",
     "@whatwg-node/fetch": "^0.8.4",

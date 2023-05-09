@@ -340,6 +340,7 @@ importers:
       '@graphql-tools/utils': ^9.2.1
       '@omnigraph/json-schema': ^0.38.24
       '@omnigraph/openapi': ^0.19.26
+      '@omnigraph/soap': ^0.93.1
       '@prisma/generator-helper': ^3.9.2
       '@types/chai': ^4.2.22
       '@types/cors': ^2.8.10
@@ -407,6 +408,7 @@ importers:
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       '@omnigraph/json-schema': 0.38.24_a3jmoj4zm6ie4hyd74ois3xtgm
       '@omnigraph/openapi': 0.19.26_a3jmoj4zm6ie4hyd74ois3xtgm
+      '@omnigraph/soap': 0.93.1_xld6wysqa4wpgtzuq5ms4lirwu
       '@prisma/generator-helper': 3.15.2
       '@web-std/fetch': 4.1.0
       '@whatwg-node/fetch': 0.8.4
@@ -4971,6 +4973,23 @@ packages:
       tslib: 2.5.0
     transitivePeerDependencies:
       - '@graphql-tools/utils'
+    dev: false
+
+  /@omnigraph/soap/0.93.1_xld6wysqa4wpgtzuq5ms4lirwu:
+    resolution: {integrity: sha512-GiGWgeUHyXI5+/51A19ygPOPz49bLM7WMIRsKW4G+UjfBcB2wUeI2q//pK2yqIFWeT71tKxvg9hIcDh7hdYacg==}
+    peerDependencies:
+      '@graphql-mesh/types': ^0.93.1
+      '@graphql-mesh/utils': ^0.93.1
+      '@graphql-tools/utils': ^9.2.1
+      graphql: '*'
+    dependencies:
+      '@graphql-mesh/types': 0.91.12_uoeeqqlv6c6lhv3gqe7g3h6vhq
+      '@graphql-mesh/utils': 0.43.20_v3a6cfexazovcqdusp5gotjnd4
+      '@graphql-tools/utils': 9.2.1_graphql@16.6.0
+      fast-xml-parser: 4.2.2
+      graphql: 16.6.0
+      graphql-compose: 9.0.10_graphql@16.6.0
+      graphql-scalars: 1.21.3_graphql@16.6.0
     dev: false
 
   /@opensearch-project/opensearch/2.2.1:
@@ -9671,6 +9690,13 @@ packages:
     resolution: {integrity: sha512-5jOCVXADYNuRkKFzNJ0dCCewsZiYo0dz8QNYljkOpFC6r2U4OBmKtvm/Tsuh4w1YYdDqDb31a8TVhBJ2OJKdqQ==}
     dependencies:
       punycode: 1.4.1
+    dev: false
+
+  /fast-xml-parser/4.2.2:
+    resolution: {integrity: sha512-DLzIPtQqmvmdq3VUKR7T6omPK/VCRNqgFlGtbESfyhcH2R4I8EzK1/K6E8PkRCK2EabWrUHK32NjYRbEFnnz0Q==}
+    hasBin: true
+    dependencies:
+      strnum: 1.0.5
     dev: false
 
   /fastify-graceful-shutdown/3.4.0:
@@ -17206,6 +17232,10 @@ packages:
     dependencies:
       '@types/node': 18.16.0
       qs: 6.11.0
+    dev: false
+
+  /strnum/1.0.5:
+    resolution: {integrity: sha512-J8bbNyKKXl5qYcR36TIO8W3mVGVHrmmxsd5PAItGkmyzwJvybiw2IVq5nqd0i4LSNSkB/sx9VHllbfFdr9k1JA==}
     dev: false
 
   /strong-log-transformer/2.1.0:
