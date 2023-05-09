@@ -1,8 +1,0 @@
-mutation CreateCustomer($customer: stripe_PostCustomers_request_Input) @internalOperation {
-	customer: stripe_PostCustomers(input: $customer) {
-		__typename
-		... on stripe_Customer {
-			id
-		}
-	}
-}

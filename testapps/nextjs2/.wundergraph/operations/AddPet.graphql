@@ -1,3 +1,0 @@
-mutation AddPet($input: petstore_Pet_Input!) {
-	petstore_addPet(input: $input)
-}

@@ -1,9 +1,0 @@
-query searchProduct {
-	typesense_searchCollection(collectionName: "product", searchParameters: { q: "test", query_by: "category" }) {
-		... on typesense_SearchResult {
-			hits {
-				document
-			}
-		}
-	}
-}
