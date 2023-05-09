@@ -7,6 +7,7 @@ import { RemixLogo } from '@/components/logos/remix';
 import { SvelteLogo } from '@/components/logos/svelte';
 import { NuxtLogo } from '@/components/logos/nuxt';
 import { RelayLogo } from '@/components/logos/relay';
+import { ExpoLogo } from '@/components/logos/expo';
 
 export default function GettingStartedPage() {
 	return (
@@ -71,6 +72,13 @@ export default function GettingStartedPage() {
 						description="Learn how to use WunderGraph with Nuxt."
 						logo={<NuxtLogo />}
 						href="/docs/getting-started/nuxt-quickstart"
+						variant="plain"
+					/>
+					<QuickLink
+						title="Expo"
+						description="Learn how to use WunderGraph with Expo."
+						logo={<ExpoLogo />}
+						href="/docs/getting-started/expo-quickstart"
 						variant="plain"
 					/>
 				</QuickLinks>
