@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.154.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.153.0...@wundergraph/sdk@0.154.0) (2023-05-09)
+
+### Features
+
+* soap datasource ([#924](https://github.com/wundergraph/wundergraph/issues/924)) ([f545293](https://github.com/wundergraph/wundergraph/commit/f5452931aa27c5d0a9530e53a9ae3c692bf03b57)) (@devsergiy)
+* update code generation to generate all typescript templates ([#927](https://github.com/wundergraph/wundergraph/issues/927)) ([20d11df](https://github.com/wundergraph/wundergraph/commit/20d11dfc800a64b8c4893235beb7c0d22774154b)) (@JivusAyrus)
+
+### Bug Fixes
+
+* polling for federation sources, allow individual configuration ([#921](https://github.com/wundergraph/wundergraph/issues/921)) ([424b470](https://github.com/wundergraph/wundergraph/commit/424b4703fca250919b571bcd70bf104c8fb41373)) (@fiam)
+
 ## [0.153.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.152.1...@wundergraph/sdk@0.153.0) (2023-05-08)
 
 ### Features
