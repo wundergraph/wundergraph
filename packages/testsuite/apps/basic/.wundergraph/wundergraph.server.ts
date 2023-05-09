@@ -1,4 +1,4 @@
-import { configureWunderGraphServer } from '@wundergraph/sdk/server';
+import { WunderGraphServerRequest, configureWunderGraphServer } from '@wundergraph/sdk/server';
 import { GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql/index';
 import { GraphQLExecutionContext } from './generated/wundergraph.server';
 
@@ -9,7 +9,7 @@ class CustomContext {
 	}
 }
 
-const createContext = async (): Promise<CustomContext> => {
+const createContext = async (req: WunderGraphServerRequest): Promise<CustomContext> => {
 	return new CustomContext();
 };
 
