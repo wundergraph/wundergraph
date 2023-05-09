@@ -1,5 +1,3 @@
-import { print } from 'graphql';
-
 import { createOperation } from '../../generated/wundergraph.factory';
 
 export default createOperation.query({
