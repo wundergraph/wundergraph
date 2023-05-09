@@ -63,11 +63,9 @@ These two APIs are introspected and added to the WunderGraph virtual graph, as y
 configureWunderGraphApplication({
   apis: [countries, spaceX],
   //...
-  codeGenerators: [
-    {
-      templates: [...templates.typescript.all],
-    },
-  ],
+  generate: {
+    codeGenerators: [],
+  },
   //...
 });
 ```
