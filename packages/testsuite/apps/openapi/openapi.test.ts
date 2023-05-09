@@ -111,4 +111,27 @@ describe('Test error responses', () => {
 	test('handle undeclared 400', async () => await expectHttpStatusCodeInMutation(400));
 	test('handle undeclared 404', async () => await expectHttpStatusCodeInMutation(404));
 	test('handle undeclared 500', async () => await expectHttpStatusCodeInMutation(500));
+
+	test.only('return timeout as 504', async () => {
+		const wg = createTestServer({
+			dir: __dirname,
+			env: {
+				// This timeouts instead of failing to connect
+				OPENAPI_URL: 'http://1.2.3.4:8080',
+			},
+		});
+		await wg.start();
+
+		const result = await wg.client().query({
+			operationName: 'NoteByID',
+			input: {
+				id: 1,
+			},
+		});
+
+		expect(result.error).toBeDefined();
+		expect(result.error?.statusCode).toBe(504);
+
+		await wg.stop();
+	});
 });
