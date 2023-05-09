@@ -419,6 +419,7 @@ export const createServer = async ({
 				globalContext,
 				createContext,
 				releaseContext,
+				// @todo export an `ORM` class that we construct here (i.e so we can provide dependencies)
 				orm: ormModule ? ormModule.orm : null,
 			});
 			fastify.log.debug('Functions plugin registered');

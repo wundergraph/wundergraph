@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import path from 'path';
 import type { Namespace } from '@wundergraph/orm';
+import { AsyncLocalStorage } from 'async_hooks';
 
 import { InternalClientFactory } from '../internal-client';
 import type { TypeScriptOperationFile } from '../../graphql/operations';
@@ -9,6 +10,18 @@ import { HandlerContext } from '../../operations/operations';
 import process from 'node:process';
 import { OperationsClient } from '../operations-client';
 import { InternalError, OperationError } from '../../client/errors';
+import { Logger } from '../../logger';
+
+// @note we utilize async context to
+interface OpsAsyncContext {
+	ormOperationControllers: Array<AbortController>;
+}
+// @todo move this `AsyncLocalStorage` to be a dependency of the ORM and OperationsClient (so we don't need to use globals)
+declare global {
+	var __OPERATIONS_ASYNC_STORAGE__: AsyncLocalStorage<OpsAsyncContext> | undefined;
+}
+
+globalThis.__OPERATIONS_ASYNC_STORAGE__ = new AsyncLocalStorage();
 
 interface FastifyFunctionsOptions {
 	operations: TypeScriptOperationFile[];
@@ -65,24 +78,49 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 
 						switch (implementation.type) {
 							case 'subscription':
-								if (!implementation.subscriptionHandler) {
-									return reply.status(500);
-								}
-								const subscribeOnce = request.headers['x-wg-subscribe-once'] === 'true';
-								reply.hijack();
-								const gen = await implementation.subscriptionHandler(ctx);
-								reply.raw.once('close', () => {
-									gen.return(0);
-									operationClient.cancelSubscriptions();
-								});
-								for await (const next of gen) {
-									reply.raw.write(`${JSON.stringify({ data: next })}\n\n`);
-									if (subscribeOnce) {
-										await gen.return(0);
+								// @note this is used by the `orm` to record operations
+								// initiated in the context of this request (so that we
+								// can implement cancellation/cleanup)
+								const asyncContext: OpsAsyncContext = {
+									ormOperationControllers: [
+										/* no signals to abort */
+									],
+								};
+
+								return await globalThis
+									.__OPERATIONS_ASYNC_STORAGE__!.run(asyncContext, async () => {
+										if (!implementation.subscriptionHandler) {
+											return reply.status(500);
+										}
+
+										reply.hijack();
+
+										const subscribeOnce = request.headers['x-wg-subscribe-once'] === 'true';
+										const gen = implementation.subscriptionHandler(ctx);
+
+										reply.raw.once('close', async () => {
+											// call return on the operation's `AsyncGenerator`
+											await gen.return(0);
+											// Cancel operations created by the ORM for this operation
+											asyncContext.ormOperationControllers.forEach((controller) => controller.abort());
+											operationClient.cancelSubscriptions();
+											Logger.debug('Canceling operations created by operation.');
+										});
+
+										for await (const next of gen) {
+											reply.raw.write(`${JSON.stringify({ data: next })}\n\n`);
+											if (subscribeOnce) {
+												await gen.return(0);
+												return reply.raw.end();
+											}
+										}
+
 										return reply.raw.end();
-									}
-								}
-								return reply.raw.end();
+									})
+									.catch((e: any) => {
+										// @todo return proper `500` error code
+										return reply.raw.end();
+									});
 							case 'query':
 								if (!implementation.queryHandler) {
 									return reply.status(500);

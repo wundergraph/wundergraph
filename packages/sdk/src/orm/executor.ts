@@ -14,7 +14,7 @@ import { fetch } from '@whatwg-node/fetch';
 
 import { JSONObject } from '../server/types';
 import { wellKnownTypeNames } from '../definition/namespacing';
-import { ResponseError } from '../client/errors';
+import { Logger } from '../logger';
 
 interface GraphQLResult<T = unknown> {
 	data?: T;
@@ -34,6 +34,8 @@ export interface NamespacingExecutorConfig {
 // @todo we could make this generic enough to implement in
 // the `@wundergraph/orm` package (i.e support a middleware-style
 // API like `graphql-request` does).
+
+// @todo extend `Client` if possible (is it meant for interfacing with the "native" GraphQL API's the WunderNode exposes?)
 export class NamespacingExecutor implements Executor {
 	readonly url: string;
 
@@ -50,7 +52,14 @@ export class NamespacingExecutor implements Executor {
 		const body = JSON.stringify(this.#buildOperationPayload(transformedDocument, variables));
 
 		if (operation === OperationTypeNode.SUBSCRIPTION) {
-			return (await this.#fetchMany(body)) as any;
+			// we create an abort signal to manage request cancellation
+			// upon disconnect from the initiating WunderGraph custom operation
+			const controller = new AbortController();
+			const generator = this.#fetchMany(body, controller.signal);
+			// this is setup by the WunderGraph server
+			globalThis.__OPERATIONS_ASYNC_STORAGE__?.getStore()?.ormOperationControllers.push(controller);
+
+			return generator as any;
 		} else {
 			const response = await this.#fetch(body);
 			const json = await response.json();
@@ -157,19 +166,45 @@ export class NamespacingExecutor implements Executor {
 	// @todo error handling
 	// @note we can copy `graphql-request`'s implementation (or just use them)
 	// https://github.com/jasonkuhrt/graphql-request/blob/main/src/index.ts
-
-	async *#fetchMany(body: any) {
-		const response = await this.#fetch(body);
-		// web-streams, no support in node-fetch or Node.js yet (so we must use
-		// a polyfil such as `@whatwg-node/fetch` that implements this support)
-		const reader = response.body!.getReader();
+	async *#fetchMany(body: any, signal?: AbortSignal) {
+		const response = await this.#fetch(body, signal);
+		//
+		// `@whatwg-node/fetch` implementation (better since it implements a standard / doesn't rely on Node's custom implementation)
+		//
+		// @note we expect the `fetch` implementation to conform to the WHATWG `fetch` standard. Importantly,
+		// this includes returning a spec-conforming `ReadableStream` the `Response.body` type. We utilize
+		// `getReader()` to consume the HTTP event stream events.
+		const reader = response.body?.getReader();
+		if (!reader) {
+			// see https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream/getReader
+			throw new Error("`fetch` implementation does not implement `getReader()` on it's `Response.body`.");
+		}
 		const decoder = new TextDecoder();
+
+		// we need to handle rejections of `reader.closed` as this
+		// is what indicates to us that the stream has errored. Importantly,
+		// it will also be rejected when the stream is cancelled with an `AbortSignal`.
+		//
+		// See https://developer.mozilla.org/en-US/docs/Web/API/ReadableStreamDefaultReader/closed
+		reader.closed.catch((reason) => {
+			// @note ideally we can check for an instance of `AbortError`
+			if (reason instanceof Error && reason.message.includes('abort')) {
+				Logger.debug("SSE's ReadableStream was cancelled.");
+			} else {
+				// @todo propogate this error from our generator (we can't simply throw from this callback)
+				Logger.error(`SSE\'s ReadableStream was closed due to error. Error "${reason}".`);
+			}
+		});
+
 		let message: string = '';
 		let lastResponse: GraphQLResult | null = null;
+
 		while (true) {
 			const { value, done } = await reader.read();
+
 			if (done) return;
 			if (!value) continue;
+
 			message += decoder.decode(value);
 			if (message.endsWith('\n\n')) {
 				const jsonResp = JSON.parse(message.substring(0, message.length - 2));
@@ -184,11 +219,12 @@ export class NamespacingExecutor implements Executor {
 		}
 	}
 
-	async #fetch(body: globalThis.BodyInit) {
+	async #fetch(body: globalThis.BodyInit, signal?: AbortSignal) {
 		const fetchImp = this.config.fetch ?? fetch;
 
 		const headers = {
 			'Content-Type': 'application/json',
+			Accept: 'text/event-stream',
 		};
 
 		// @todo check `res.ok` before requesting JSON w/ `res.json`
@@ -196,6 +232,7 @@ export class NamespacingExecutor implements Executor {
 			headers,
 			method: 'POST',
 			body,
+			signal,
 		});
 	}
 }
