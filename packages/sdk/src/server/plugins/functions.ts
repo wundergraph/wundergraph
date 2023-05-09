@@ -44,12 +44,12 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 						const clientRequest = (request.body as any)?.__wg.clientRequest;
 						const operationClient = new OperationsClient({
 							baseURL: config.nodeURL,
-							clientRequest: (request.body as any)?.__wg.clientRequest,
+							clientRequest,
 						});
 						const ctx: HandlerContext<any, any, any, any, any, any> = {
 							log: fastify.log,
 							user: (request.body as any)?.__wg.user!,
-							internalClient: config.internalClientFactory(undefined, (request.body as any)?.__wg.clientRequest),
+							internalClient: config.internalClientFactory(undefined, clientRequest),
 							clientRequest,
 							input: (request.body as any)?.input,
 							operations: operationClient,
