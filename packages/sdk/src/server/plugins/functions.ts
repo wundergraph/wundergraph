@@ -7,12 +7,13 @@ import { HandlerContext } from '../../operations/operations';
 import process from 'node:process';
 import { OperationsClient } from '../operations-client';
 import { InternalError, OperationError } from '../../client/errors';
+import { WunderGraphServerRequest } from '../types';
 
 interface FastifyFunctionsOptions {
 	operations: TypeScriptOperationFile[];
 	internalClientFactory: InternalClientFactory;
 	nodeURL: string;
-	makeContext: () => Promise<any>;
+	makeContext: (req: WunderGraphServerRequest) => Promise<any>;
 }
 
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {
@@ -40,6 +41,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 				handler: async (request, reply) => {
 					const implementation = maybeImplementation!;
 					try {
+						const clientRequest = (request.body as any)?.__wg.clientRequest;
 						const operationClient = new OperationsClient({
 							baseURL: config.nodeURL,
 							clientRequest: (request.body as any)?.__wg.clientRequest,
@@ -48,10 +50,10 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							log: fastify.log,
 							user: (request.body as any)?.__wg.user!,
 							internalClient: config.internalClientFactory(undefined, (request.body as any)?.__wg.clientRequest),
-							clientRequest: (request.body as any)?.__wg.clientRequest,
+							clientRequest,
 							input: (request.body as any)?.input,
 							operations: operationClient,
-							context: await config.makeContext(),
+							context: await config.makeContext({ clientRequest }),
 						};
 
 						switch (implementation.type) {

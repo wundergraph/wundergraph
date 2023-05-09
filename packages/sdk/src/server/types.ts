@@ -230,6 +230,10 @@ export interface ServerRunOptions {
 	clientFactory: InternalClientFactory;
 }
 
+export interface WunderGraphServerRequest {
+	clientRequest: ClientRequest;
+}
+
 export interface WunderGraphServerConfig<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig,
@@ -240,7 +244,7 @@ export interface WunderGraphServerConfig<
 	// routeUrl is set internally
 	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
 	options?: ServerOptions;
-	context?: () => Promise<TCustomContext>;
+	context?: (req: WunderGraphServerRequest) => Promise<TCustomContext>;
 }
 
 // internal representation of the fully resolved server config

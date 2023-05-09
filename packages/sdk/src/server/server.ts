@@ -22,6 +22,7 @@ import type {
 	ServerRunOptions,
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
+	WunderGraphServerRequest,
 } from './types';
 import type { LoadOperationsOutput } from '../graphql/operations';
 import FastifyFunctionsPlugin from './plugins/functions';
@@ -208,9 +209,9 @@ export const createServer = async ({
 		},
 	});
 
-	const makeContext = async () => {
+	const makeContext = async (req: WunderGraphServerRequest) => {
 		if (typeof serverConfig.context === 'function') {
-			const result = await serverConfig.context();
+			const result = await serverConfig.context(req);
 			if (result === undefined) {
 				throw new Error('could not instantiate custom handler context');
 			}
@@ -248,15 +249,16 @@ export const createServer = async ({
 		 * Registering this handler will only affect child plugins
 		 */
 		fastify.addHook<{ Body: FastifyRequestBody }>('preHandler', async (req, reply) => {
+			// clientRequest represents the original client request that was sent initially to the WunderNode.
+			const clientRequest = {
+				headers: new Headers(req.body.__wg.clientRequest?.headers),
+				requestURI: req.body.__wg.clientRequest?.requestURI || '',
+				method: req.body.__wg.clientRequest?.method || 'GET',
+			};
 			req.ctx = {
 				log: req.log,
 				user: req.body.__wg.user!,
-				// clientRequest represents the original client request that was sent initially to the WunderNode.
-				clientRequest: {
-					headers: new Headers(req.body.__wg.clientRequest?.headers),
-					requestURI: req.body.__wg.clientRequest?.requestURI || '',
-					method: req.body.__wg.clientRequest?.method || 'GET',
-				},
+				clientRequest,
 				internalClient: clientFactory({ 'x-request-id': req.id }, req.body.__wg.clientRequest),
 				operations: new OperationsClient({
 					baseURL: nodeInternalURL,
@@ -265,7 +267,7 @@ export const createServer = async ({
 						'x-request-id': req.id,
 					},
 				}),
-				context: await makeContext(),
+				context: await makeContext({ clientRequest }),
 			};
 		});
 
