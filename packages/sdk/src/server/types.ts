@@ -126,7 +126,7 @@ export interface WunderGraphFile {
 	readonly type: string;
 }
 
-export interface PreUploadHookRequest<User extends WunderGraphUser = WunderGraphUser, TCustomContext = never> {
+export interface PreUploadHookRequest<User extends WunderGraphUser = WunderGraphUser, TCustomContext = any> {
 	/**
 	 * The user that is currently logged in, if any.
 	 */
@@ -148,7 +148,7 @@ export interface PreUploadHookRequest<User extends WunderGraphUser = WunderGraph
 export interface PostUploadHookRequest<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
-	TCustomContext = never
+	TCustomContext = any
 > extends PreUploadHookRequest<User, TCustomContext> {
 	internalClient: IC;
 	error: Error;

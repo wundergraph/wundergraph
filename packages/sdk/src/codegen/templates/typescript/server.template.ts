@@ -27,7 +27,7 @@ export interface GraphQLExecutionContext<TCustomContext = any> {
 
 declare module "@wundergraph/sdk/server" {
 	export function configureWunderGraphServer<
-		TCustomContext = never,
+		TCustomContext = any,
 		GeneratedHooksConfig = HooksConfig<TCustomContext>,
 		GeneratedInternalClient = InternalClient,
 		GeneratedWebhooksConfig = WebhooksConfig

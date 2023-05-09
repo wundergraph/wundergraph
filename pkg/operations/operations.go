@@ -115,7 +115,7 @@ var (
 	type ContextField = Required<typeof server>['context'];
 	type ContextType = ContextField extends (...args: any) => any ? Awaited<ReturnType<ContextField>> : ContextField;
 	{{ else }}
-	type ContextType = never;
+	type ContextType = any;
 	{{ end }}
 
 	export {z, AuthorizationError} from "@wundergraph/sdk/operations";
