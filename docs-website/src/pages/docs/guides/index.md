@@ -41,4 +41,6 @@ Here's an overview of all the available guides.
 
 {% quick-link title="Extend third party GraphQL APIs" icon="core" href="/docs/guides/extend-third-party-graphql-apis" description="Add custom fields and resolvers to third party APIs that you cannot control." /%}
 
+{% quick-link title="Using a request context" icon="core" href="/docs/guides/custom-context" description="Use a custom context type for dependency injection." /%}
+
 {% /quick-links %}

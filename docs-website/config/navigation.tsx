@@ -437,6 +437,10 @@ const navigation = [
 						title: 'Extend third party GraphQL APIs',
 						href: '/docs/guides/extend-third-party-graphql-apis',
 					},
+					{
+						title: 'Use a custom context',
+						href: '/docs/guides/custom-context',
+					},
 				],
 			},
 		],
