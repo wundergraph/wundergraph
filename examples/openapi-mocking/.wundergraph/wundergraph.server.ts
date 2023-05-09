@@ -5,7 +5,7 @@ import type { InternalClient } from './generated/wundergraph.internal.client';
 
 let notes: Record<number, string> = {};
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
 	hooks: {
 		queries: {
 			NoteByID: {

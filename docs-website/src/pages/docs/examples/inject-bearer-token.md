@@ -18,7 +18,7 @@ like an ID token in this example.
 
 ```typescript
 // wundergraph.server.ts
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     global: {
       httpTransport: {

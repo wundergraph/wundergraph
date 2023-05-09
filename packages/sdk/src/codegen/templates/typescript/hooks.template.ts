@@ -21,9 +21,9 @@ import { InternalOperationsClient } from "./wundergraph.internal.operations.clie
 
 export type DATA_SOURCES = {{{dataSourcesUnion}}};
 										
-export interface HookContext<TCustomContext> extends BaseRequestContext<User, InternalClient, InternalOperationsClient, TCustomContext> {}
+export interface HookContext<TCustomContext = any> extends BaseRequestContext<User, InternalClient, InternalOperationsClient, TCustomContext> {}
 
-export type HooksConfig<TCustomContext> = HooksConfiguration<
+export type HooksConfig<TCustomContext = any> = HooksConfiguration<
 	QueryHooks<TCustomContext>,
 	MutationHooks<TCustomContext>,
 	SubscriptionHooks<TCustomContext>,
@@ -32,7 +32,7 @@ export type HooksConfig<TCustomContext> = HooksConfiguration<
 	HookContext<TCustomContext>
 >;
 
-export type QueryHooks<TCustomContext> = {
+export type QueryHooks<TCustomContext = any> = {
 {{#if hasQueries}}
 	{{#each queries}}
 		{{operationName}}?: QueryHook{{#if hasInternalInput}}<{{injectedInputTypename}}, {{else}}WithoutInput<{{/if}}{{responseTypename}}, HookContext<TCustomContext>>,
@@ -40,7 +40,7 @@ export type QueryHooks<TCustomContext> = {
 {{/if}}
 }
 
-export type MutationHooks<TCustomContext> ={
+export type MutationHooks<TCustomContext = any> = {
 {{#if hasMutations}}
 	{{#each mutations}}
 		{{operationName}}?: MutationHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext<TCustomContext>>,
@@ -48,7 +48,7 @@ export type MutationHooks<TCustomContext> ={
 {{/if}}
 }
 
-export type SubscriptionHooks<TCustomContext> = {
+export type SubscriptionHooks<TCustomContext = any> = {
 {{#if hasSubscriptions}}
 	{{#each subscriptions}}
 		{{operationName}}?: SubscriptionHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext<TCustomContext>>,
@@ -56,7 +56,7 @@ export type SubscriptionHooks<TCustomContext> = {
 {{/if}}
 }
 
-export interface UploadHooks<TCustomContext> {
+export interface UploadHooks<TCustomContext = any> {
     {{#each uploadProviders}}
         {{name}}?: {
             {{#each uploadProfiles}}

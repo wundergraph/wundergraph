@@ -3,7 +3,7 @@ import type { HooksConfig } from './generated/wundergraph.hooks';
 import type { InternalClient } from './generated/wundergraph.internal.client';
 
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
 	hooks: {
 		authentication: {
 			async mutatingPostAuthentication({internalClient, user}){						

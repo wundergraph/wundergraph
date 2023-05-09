@@ -27,7 +27,7 @@ Here's an example:
 
 const randomInt = (max: number) => Math.floor(Math.random() * Math.floor(max)) + 1;
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     queries: {
       FakeProducts: {

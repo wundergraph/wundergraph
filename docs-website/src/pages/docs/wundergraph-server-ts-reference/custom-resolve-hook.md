@@ -30,7 +30,7 @@ e.g. to talk to a database or another service to enrich a response or manipulate
 
 ```typescript
 // wundergraph.server.ts
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     queries: {
       Dragons: {

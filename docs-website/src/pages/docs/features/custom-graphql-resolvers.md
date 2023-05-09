@@ -33,7 +33,7 @@ Both schemas are automatically added to your virtual Graph.
 
 ```typescript
 // wundergraph.server.ts
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     authentication: {},
     global: {},
