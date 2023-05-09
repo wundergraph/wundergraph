@@ -1,5 +1,4 @@
 import fetch from 'cross-fetch';
-import type { Readable } from 'stream';
 import {
 	Client,
 	ClientConfig,
@@ -7,7 +6,6 @@ import {
 	MutationRequestOptions,
 	OperationRequestOptions,
 	QueryRequestOptions,
-	SubscriptionEventHandler,
 	SubscriptionRequestOptions,
 } from '../client';
 
@@ -88,13 +86,14 @@ export class OperationsClient<
 	>(
 		options: OperationName extends string ? QueryRequestOptions<OperationName, Input> : OperationRequestOptions
 	): Promise<ClientResponse<TResponse['data'], TResponse['error']>> => {
+		const searchParams = this.searchParams();
 		const params: any = { input: options.input, __wg: { clientRequest: this.clientRequest } };
 
 		if (options.subscribeOnce) {
-			params.wg_subscribe_once = '';
+			searchParams.set('wg_subscribe_once', '');
 		}
 
-		const url = this.operationUrl(options.operationName);
+		const url = this.addUrlParams(this.operationUrl(options.operationName), searchParams);
 		const res = await this.fetchJson(url, {
 			method: 'POST',
 			body: this.stringifyInput(params),
@@ -111,7 +110,7 @@ export class OperationsClient<
 	>(
 		options: OperationName extends string ? MutationRequestOptions<OperationName, Input> : OperationRequestOptions
 	): Promise<ClientResponse<TResponse['data'], TResponse['error']>> => {
-		return super.mutate(options);
+		return super.query(options);
 	};
 
 	/**
@@ -127,10 +126,35 @@ export class OperationsClient<
 	>(
 		options: OperationName extends string ? SubscriptionRequestOptions<OperationName, Input> : OperationRequestOptions
 	): Promise<ReturnType> => {
-		const sub = await super.subscribeWithFetch(options);
+		if (options.subscribeOnce) {
+			const self = this;
+			const generator = async function* () {
+				const res = await self.query(options);
+				yield res;
+			};
+			return generator() as any;
+		}
+
+		const sub = await this.subscribeWithFetch(options);
 
 		this.subscriptions.push(sub);
 
 		return sub as any;
 	};
+
+	protected async fetchSubscription<Data = any, Error = any>(subscription: SubscriptionRequestOptions) {
+		const searchParams = this.searchParams();
+		const params: any = { input: subscription.input, __wg: { clientRequest: this.clientRequest } };
+
+		if (subscription.liveQuery) {
+			searchParams.set('wg_live', '');
+		}
+
+		const url = this.addUrlParams(this.operationUrl(subscription.operationName), searchParams);
+		return await this.fetchJson(url, {
+			method: 'POST',
+			body: this.stringifyInput(params),
+			signal: subscription.abortSignal,
+		});
+	}
 }
