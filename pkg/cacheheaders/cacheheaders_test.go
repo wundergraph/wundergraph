@@ -1,6 +1,7 @@
 package cacheheaders
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -53,4 +54,25 @@ func TestETag(t *testing.T) {
 
 	// Our ETag headers should be weak etags
 	assert.Equal(t, "W", string(result2.Header["ETag"][0][0]))
+}
+
+func TestNotModified(t *testing.T) {
+	headers := New(nil, "")
+
+	var rc1 httptest.ResponseRecorder
+	headers.Set(&rc1, []byte("something"))
+	response := rc1.Result()
+	etag := response.Header["ETag"][0]
+	assert.NotEqual(t, "", etag)
+
+	var rc2 httptest.ResponseRecorder
+	rc2.Header()["ETag"] = []string{etag}
+
+	r, err := http.NewRequest("GET", "http://example.com", nil)
+	assert.NoError(t, err, "invalid request")
+	assert.False(t, headers.NotModified(r, &rc2))
+
+	r.Header.Add("If-None-Match", etag)
+	assert.True(t, headers.NotModified(r, &rc2))
+	assert.Equal(t, rc2.Result().StatusCode, http.StatusNotModified)
 }
