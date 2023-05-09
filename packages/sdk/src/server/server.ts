@@ -77,7 +77,7 @@ export function configureWunderGraphServer<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedInternalClient = InternalClient,
 	GeneratedWebhooksConfig = WebhooksConfig,
-	TCustomContext = never
+	TCustomContext = any
 >(configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TCustomContext>) {
 	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig, TCustomContext>(configWrapper());
 }
@@ -85,7 +85,7 @@ export function configureWunderGraphServer<
 const _configureWunderGraphServer = <
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig,
-	TCustomContext = never
+	TCustomContext = any
 >(
 	config: WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TCustomContext>
 ): WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TCustomContext> => {

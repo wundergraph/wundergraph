@@ -11,29 +11,29 @@ export type Role = {{{ roleDefinitions }}};
 
 export interface User extends WunderGraphUser<Role, CustomClaims> {}
 
-export interface Config {
-    hooks: HooksConfig;
+export interface Config<TCustomContext> {
+    hooks: HooksConfig<TCustomContext>;
     graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
 }
 
-export interface OutputConfig {
-    hooks: HooksConfig;
+export interface OutputConfig<TCustomContext> {
+    hooks: HooksConfig<TCustomContext>;
     graphqlServers?: (GraphQLServerConfig & { url: string })[];
 }
 
-export interface GraphQLExecutionContext {
-    wundergraph: BaseRequestContext<User, InternalClient, InternalOperationsClient>;
+export interface GraphQLExecutionContext<TCustomContext = any> {
+    wundergraph: BaseRequestContext<User, InternalClient, InternalOperationsClient, TCustomContext>;
 }
 
 declare module "@wundergraph/sdk/server" {
 	export function configureWunderGraphServer<
-		GeneratedHooksConfig = HooksConfig,
+		TCustomContext = never,
+		GeneratedHooksConfig = HooksConfig<TCustomContext>,
 		GeneratedInternalClient = InternalClient,
-		GeneratedWebhooksConfig = WebhooksConfig,
-		TCustomContext = never
+		GeneratedWebhooksConfig = WebhooksConfig
 	>(
-		configWrapper: () => WunderGraphServerConfig<HooksConfig, WebhooksConfig, TCustomContext>
-	): WunderGraphHooksAndServerConfig<HooksConfig, WebhooksConfig, TCustomContext>;
+		configWrapper: () => WunderGraphServerConfig<HooksConfig<TCustomContext>, WebhooksConfig, TCustomContext>
+	): WunderGraphHooksAndServerConfig<any, any, TCustomContext>;
 }
 
 `;

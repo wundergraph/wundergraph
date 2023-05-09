@@ -228,7 +228,7 @@ export interface ServerRunOptions {
 export interface WunderGraphServerConfig<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig,
-	TCustomContext = never
+	TCustomContext = any
 > {
 	webhooks?: GeneratedWebhooksConfig;
 	hooks?: GeneratedHooksConfig;
@@ -242,7 +242,7 @@ export interface WunderGraphServerConfig<
 export interface WunderGraphHooksAndServerConfig<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig,
-	TCustomContext = never
+	TCustomContext = any
 > extends WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TCustomContext> {
 	webhooks?: GeneratedWebhooksConfig;
 	hooks?: GeneratedHooksConfig;

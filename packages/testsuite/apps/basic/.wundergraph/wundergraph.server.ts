@@ -30,6 +30,13 @@ export default configureWunderGraphServer(() => ({
 					};
 				},
 			},
+			CustomcontextGraphql: {
+				mutatingPostResolve: async ({ context, response }) => {
+					return {
+						data: context.hello(),
+					};
+				},
+			},
 		},
 		mutations: {},
 	},
@@ -39,7 +46,7 @@ export default configureWunderGraphServer(() => ({
 			apiNamespace: 'embedded',
 			serverName: 'embedded',
 			schema: new GraphQLSchema({
-				query: new GraphQLObjectType<any, GraphQLExecutionContext>({
+				query: new GraphQLObjectType<any, GraphQLExecutionContext<CustomContext>>({
 					name: 'Query',
 					fields: {
 						clientRequestHeader: {

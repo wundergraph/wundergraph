@@ -21,42 +21,42 @@ import { InternalOperationsClient } from "./wundergraph.internal.operations.clie
 
 export type DATA_SOURCES = {{{dataSourcesUnion}}};
 										
-export interface HookContext extends BaseRequestContext<User, InternalClient, InternalOperationsClient> {}
+export interface HookContext<TCustomContext> extends BaseRequestContext<User, InternalClient, InternalOperationsClient, TCustomContext> {}
 
-export type HooksConfig = HooksConfiguration<
-	QueryHooks,
-	MutationHooks,
-	SubscriptionHooks,
-	UploadHooks,
+export type HooksConfig<TCustomContext> = HooksConfiguration<
+	QueryHooks<TCustomContext>,
+	MutationHooks<TCustomContext>,
+	SubscriptionHooks<TCustomContext>,
+	UploadHooks<TCustomContext>,
 	DATA_SOURCES,
-	HookContext
+	HookContext<TCustomContext>
 >;
 
-export type QueryHooks = {
+export type QueryHooks<TCustomContext> = {
 {{#if hasQueries}}
 	{{#each queries}}
-		{{operationName}}?: QueryHook{{#if hasInternalInput}}<{{injectedInputTypename}}, {{else}}WithoutInput<{{/if}}{{responseTypename}}, HookContext>,
+		{{operationName}}?: QueryHook{{#if hasInternalInput}}<{{injectedInputTypename}}, {{else}}WithoutInput<{{/if}}{{responseTypename}}, HookContext<TCustomContext>>,
 	{{/each}}
 {{/if}}
 }
 
-export type MutationHooks ={
+export type MutationHooks<TCustomContext> ={
 {{#if hasMutations}}
 	{{#each mutations}}
-		{{operationName}}?: MutationHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext>,
+		{{operationName}}?: MutationHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext<TCustomContext>>,
 	{{/each}}
 {{/if}}
 }
 
-export type SubscriptionHooks = {
+export type SubscriptionHooks<TCustomContext> = {
 {{#if hasSubscriptions}}
 	{{#each subscriptions}}
-		{{operationName}}?: SubscriptionHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext>,
+		{{operationName}}?: SubscriptionHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext<TCustomContext>>,
 	{{/each}}
 {{/if}}
 }
 
-export interface UploadHooks {
+export interface UploadHooks<TCustomContext> {
     {{#each uploadProviders}}
         {{name}}?: {
             {{#each uploadProfiles}}

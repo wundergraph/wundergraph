@@ -24,4 +24,15 @@ describe('Custom context', () => {
 		expect(error).toBeUndefined();
 		expect(data?.hello).toBe('world');
 	});
+
+	it('should use custom context in hooks', async () => {
+		const client = wg.client();
+
+		const { data, error } = await client.query({
+			operationName: 'customcontext/graphql',
+		});
+
+		expect(error).toBeUndefined();
+		expect(data).toBe('world');
+	});
 });
