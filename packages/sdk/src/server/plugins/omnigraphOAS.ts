@@ -1,9 +1,8 @@
 import { FastifyBaseLogger, FastifyPluginAsync } from 'fastify';
-import { execute, GraphQLSchema, parse } from 'graphql';
+import { GraphQLSchema } from 'graphql';
 import { getGraphQLParameters, processRequest, sendResult } from 'graphql-helix';
-import { pino } from 'pino';
 import { buildSchema } from 'graphql/index';
-import { DefaultLogger, PubSub } from '@graphql-mesh/utils';
+import { PubSub } from '@graphql-mesh/utils';
 import { LazyLoggerMessage, Logger, MeshFetch, MeshPubSub } from '@graphql-mesh/types';
 import { processDirectives } from '@omnigraph/openapi';
 import { fetch } from '@whatwg-node/fetch';
@@ -15,12 +14,7 @@ export interface OpenApiServerConfig {
 	upstreamURL?: string;
 }
 
-const FastifyGraphQLPlugin: FastifyPluginAsync<OpenApiServerConfig> = async (fastify, config) => {
-	if (process.env.WG_DEBUG_MODE === 'true') {
-		// enable debugging queries in mesh omnigraph
-		process.env.DEBUG = 'true';
-	}
-
+const FastifyOASGraphQLPlugin: FastifyPluginAsync<OpenApiServerConfig> = async (fastify, config) => {
 	const schema = executableSchema(config.schema, fastify.log, config.upstreamURL);
 
 	fastify.route({
@@ -115,4 +109,4 @@ interface ProcessDirectiveArgs {
 	queryParams?: Record<string, any>;
 }
 
-export default FastifyGraphQLPlugin;
+export default FastifyOASGraphQLPlugin;

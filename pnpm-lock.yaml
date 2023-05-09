@@ -160,7 +160,7 @@ importers:
       '@types/node': ^17.0.32
       '@types/object-hash': ^1.3.4
       '@wundergraph/protobuf': workspace:^0.110.0
-      '@wundergraph/sdk': workspace:^0.153.0
+      '@wundergraph/sdk': workspace:^0.154.0
       execa: 5.1.1
       handlebars: ^4.7.7
       json-schema: ^0.4.0
@@ -363,6 +363,7 @@ importers:
       '@graphql-tools/utils': ^9.2.1
       '@omnigraph/json-schema': ^0.38.24
       '@omnigraph/openapi': ^0.19.26
+      '@omnigraph/soap': ^0.93.1
       '@prisma/generator-helper': ^3.9.2
       '@types/chai': ^4.2.22
       '@types/cors': ^2.8.10
@@ -380,7 +381,7 @@ importers:
       '@whatwg-node/fetch': ^0.8.4
       '@wundergraph/protobuf': workspace:^0.110.0
       '@wundergraph/straightforward': ^4.2.5
-      '@wundergraph/wunderctl': workspace:^0.148.0
+      '@wundergraph/wunderctl': workspace:^0.149.0
       axios: ^0.26.1
       axios-retry: ^3.3.1
       chai: ^4.3.4
@@ -431,6 +432,7 @@ importers:
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       '@omnigraph/json-schema': 0.38.24_a3jmoj4zm6ie4hyd74ois3xtgm
       '@omnigraph/openapi': 0.19.26_a3jmoj4zm6ie4hyd74ois3xtgm
+      '@omnigraph/soap': 0.93.1_xld6wysqa4wpgtzuq5ms4lirwu
       '@prisma/generator-helper': 3.15.2
       '@web-std/fetch': 4.1.0
       '@whatwg-node/fetch': 0.8.4
@@ -5435,6 +5437,23 @@ packages:
       tslib: 2.5.0
     transitivePeerDependencies:
       - '@graphql-tools/utils'
+    dev: false
+
+  /@omnigraph/soap/0.93.1_xld6wysqa4wpgtzuq5ms4lirwu:
+    resolution: {integrity: sha512-GiGWgeUHyXI5+/51A19ygPOPz49bLM7WMIRsKW4G+UjfBcB2wUeI2q//pK2yqIFWeT71tKxvg9hIcDh7hdYacg==}
+    peerDependencies:
+      '@graphql-mesh/types': ^0.93.1
+      '@graphql-mesh/utils': ^0.93.1
+      '@graphql-tools/utils': ^9.2.1
+      graphql: '*'
+    dependencies:
+      '@graphql-mesh/types': 0.91.12_uoeeqqlv6c6lhv3gqe7g3h6vhq
+      '@graphql-mesh/utils': 0.43.20_v3a6cfexazovcqdusp5gotjnd4
+      '@graphql-tools/utils': 9.2.1_graphql@16.6.0
+      fast-xml-parser: 4.2.2
+      graphql: 16.6.0
+      graphql-compose: 9.0.10_graphql@16.6.0
+      graphql-scalars: 1.21.3_graphql@16.6.0
     dev: false
 
   /@opensearch-project/opensearch/2.2.1:
@@ -11879,6 +11898,13 @@ packages:
 
   /fast-xml-parser/4.2.0:
     resolution: {integrity: sha512-+zVQv4aVTO+o8oRUyRL7PjgeVo1J6oP8Cw2+a8UTZQcj5V0yUK5T63gTN0ldgiHDPghUjKc4OpT6SwMTwnOQug==}
+    hasBin: true
+    dependencies:
+      strnum: 1.0.5
+    dev: false
+
+  /fast-xml-parser/4.2.2:
+    resolution: {integrity: sha512-DLzIPtQqmvmdq3VUKR7T6omPK/VCRNqgFlGtbESfyhcH2R4I8EzK1/K6E8PkRCK2EabWrUHK32NjYRbEFnnz0Q==}
     hasBin: true
     dependencies:
       strnum: 1.0.5
@@ -24325,7 +24351,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.153.0
+    version: 0.154.0
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.3.0
@@ -24336,6 +24362,7 @@ packages:
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       '@omnigraph/json-schema': 0.38.24_a3jmoj4zm6ie4hyd74ois3xtgm
       '@omnigraph/openapi': 0.19.26_a3jmoj4zm6ie4hyd74ois3xtgm
+      '@omnigraph/soap': 0.93.1_xld6wysqa4wpgtzuq5ms4lirwu
       '@prisma/generator-helper': 3.15.2
       '@web-std/fetch': 4.1.0
       '@whatwg-node/fetch': 0.8.4
