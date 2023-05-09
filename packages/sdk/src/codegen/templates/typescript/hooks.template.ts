@@ -61,8 +61,8 @@ export interface UploadHooks<TCustomContext> {
         {{name}}?: {
             {{#each uploadProfiles}}
                 {{@key}}?: {
-                    preUpload?: (hook: PreUploadHookRequest<User>) => PreUploadHookResponse;
-                    postUpload?: (hook: PostUploadHookRequest<User, InternalClient>) => PostUploadHookResponse;
+                    preUpload?: (hook: PreUploadHookRequest<User, TCustomContext>) => PreUploadHookResponse;
+                    postUpload?: (hook: PostUploadHookRequest<User, InternalClient, TCustomContext>) => PostUploadHookResponse;
                 }
             {{/each}}
         }

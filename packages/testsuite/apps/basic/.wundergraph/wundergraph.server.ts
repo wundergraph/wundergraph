@@ -31,7 +31,7 @@ export default configureWunderGraphServer(() => ({
 				},
 			},
 			CustomcontextGraphql: {
-				mutatingPostResolve: async ({ context, response }) => {
+				mutatingPostResolve: async ({ context }) => {
 					return {
 						data: context.hello(),
 					};
@@ -58,6 +58,12 @@ export default configureWunderGraphServer(() => ({
 							},
 							resolve: async (parent, args, ctx) => {
 								return ctx.wundergraph.clientRequest.headers.get(args.header);
+							},
+						},
+						fromCustomContext: {
+							type: GraphQLString,
+							resolve: async (parent, args, ctx) => {
+								return ctx.wundergraph.context.hello();
 							},
 						},
 					},

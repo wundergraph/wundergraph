@@ -35,4 +35,15 @@ describe('Custom context', () => {
 		expect(error).toBeUndefined();
 		expect(data).toBe('world');
 	});
+
+	it('should use custom context in embedded GraphQL server', async () => {
+		const client = wg.client();
+
+		const { data, error } = await client.query({
+			operationName: 'customcontext/embedded',
+		});
+
+		expect(error).toBeUndefined();
+		expect(data?.embedded_fromCustomContext).toBe('world');
+	});
 });
