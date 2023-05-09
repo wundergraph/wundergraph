@@ -112,7 +112,7 @@ describe('Test error responses', () => {
 	test('handle undeclared 404', async () => await expectHttpStatusCodeInMutation(404));
 	test('handle undeclared 500', async () => await expectHttpStatusCodeInMutation(500));
 
-	test.only('return timeout as 504', async () => {
+	test('return timeout as 504', async () => {
 		const wg = createTestServer({
 			dir: __dirname,
 			env: {
