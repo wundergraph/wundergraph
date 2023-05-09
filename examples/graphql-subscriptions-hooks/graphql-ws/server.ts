@@ -1,6 +1,6 @@
 import { GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql';
 import Fastify from 'fastify'; // yarn add fastify
-import fastifyWebsocket from '@fastify/websocket'; // yarn add @fastify/websocket
+import FastifyWebsocket from '@fastify/websocket'; // yarn add @fastify/websocket
 import { makeHandler } from 'graphql-ws/lib/use/@fastify/websocket';
 
 /**
@@ -43,7 +43,7 @@ export const schema = new GraphQLSchema({
 });
 
 const fastify = Fastify();
-fastify.register(fastifyWebsocket, {
+fastify.register(FastifyWebsocket as any, {
 	options: {
 		handleProtocols: (protocols: string[], client: any) => {
 			return 'graphql-transport-ws';

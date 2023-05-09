@@ -1,0 +1,46 @@
+{
+  "name": "@wundergraph/metro-config",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "description": "WunderGraph Metro Config for React Native and Expo",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts src/transformer.ts --dts --format cjs --external ./transformer"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wundergraph/wundergraph.git"
+  },
+  "dependencies": {
+    "event-source-polyfill": "^1.0.31",
+    "metro-react-native-babel-transformer": "^0.76.3",
+    "url-search-params-polyfill": "^8.1.1"
+  },
+  "devDependencies": {
+    "@types/event-source-polyfill": "^1.0.1",
+    "@types/metro": "^0.76.0",
+    "@types/metro-cache": "^0.76.0",
+    "@types/metro-config": "^0.76.2",
+    "tsup": "^6.5.0",
+    "typescript": "^4.8.2"
+  },
+  "homepage": "https://wundergraph.com",
+  "author": {
+    "name": "WunderGraph Maintainers",
+    "email": "info@wundergraph.com"
+  },
+  "keywords": [
+    "expo",
+    "wundergraph",
+    "react-native",
+    "metro-config"
+  ]
+}
