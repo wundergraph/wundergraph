@@ -1,5 +1,5 @@
 import closeWithGrace from 'close-with-grace';
-import { Headers } from '@web-std/fetch';
+import { Headers } from '@whatwg-node/fetch';
 import process from 'node:process';
 import Fastify, { FastifyInstance } from 'fastify';
 import { InternalClient, InternalClientFactory, internalClientFactory } from './internal-client';

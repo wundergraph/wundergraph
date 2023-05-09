@@ -421,7 +421,7 @@ importers:
       '@types/traverse': ^0.6.32
       '@types/write-file-atomic': ^4.0.0
       '@web-std/fetch': ^4.1.0
-      '@whatwg-node/fetch': ^0.8.4
+      '@whatwg-node/fetch': ^0.8.8
       '@wundergraph/orm': workspace:*
       '@wundergraph/protobuf': workspace:^0.111.0
       '@wundergraph/straightforward': ^4.2.5
@@ -480,7 +480,7 @@ importers:
       '@omnigraph/soap': 0.93.1_xld6wysqa4wpgtzuq5ms4lirwu
       '@prisma/generator-helper': 3.15.2
       '@web-std/fetch': 4.1.0
-      '@whatwg-node/fetch': 0.8.4
+      '@whatwg-node/fetch': 0.8.8
       '@wundergraph/orm': link:../orm
       '@wundergraph/protobuf': link:../protobuf
       '@wundergraph/straightforward': 4.2.5
@@ -5502,7 +5502,7 @@ packages:
       '@graphql-mesh/utils': 0.43.20_v3a6cfexazovcqdusp5gotjnd4
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       '@json-schema-tools/meta-schema': 1.7.0
-      '@whatwg-node/fetch': 0.8.4
+      '@whatwg-node/fetch': 0.8.8
       ajv: 8.12.0
       ajv-formats: 2.1.1
       dset: 3.1.2
@@ -7755,8 +7755,8 @@ packages:
       '@xtuc/long': 4.2.2
     dev: false
 
-  /@whatwg-node/events/0.0.2:
-    resolution: {integrity: sha512-WKj/lI4QjnLuPrim0cfO7i+HsDSXHxNv1y0CrJhdntuO3hxWZmnXCwNDnwOvry11OjRin6cgWNF+j/9Pn8TN4w==}
+  /@whatwg-node/events/0.0.3:
+    resolution: {integrity: sha512-IqnKIDWfXBJkvy/k6tzskWTc2NK3LcqHlb+KHGCrjOCH4jfQckRX0NAiIcC/vIqQkzLYw2r2CTSwAxcrtcD6lA==}
     dev: false
 
   /@whatwg-node/fetch/0.3.2:
@@ -7775,20 +7775,20 @@ packages:
       - encoding
     dev: false
 
-  /@whatwg-node/fetch/0.8.4:
-    resolution: {integrity: sha512-xK0NGWt49P+JmsdfN+8zmHzZoscENrV0KL1SyyncvWkc6vbFmSqGSpvItEBuhj1PAfTGFEUpyiRMCsut2hLy/Q==}
+  /@whatwg-node/fetch/0.8.8:
+    resolution: {integrity: sha512-CdcjGC2vdKhc13KKxgsc6/616BQ7ooDIgPeTuAiE8qfCnS0mGzcfCOoZXypQSz73nxI+GWc7ZReIAVhxoE1KCg==}
     dependencies:
       '@peculiar/webcrypto': 1.4.0
-      '@whatwg-node/node-fetch': 0.3.4
+      '@whatwg-node/node-fetch': 0.3.6
       busboy: 1.6.0
-      urlpattern-polyfill: 6.0.2
+      urlpattern-polyfill: 8.0.2
       web-streams-polyfill: 3.2.1
     dev: false
 
-  /@whatwg-node/node-fetch/0.3.4:
-    resolution: {integrity: sha512-gP1MN6DiHVbhkLWH1eCELhE2ZtLRxb+HRKu4eYze1Tijxz0uT1T2kk3lseZp94txzxCfbxGFU0jsWkxNdH3EXA==}
+  /@whatwg-node/node-fetch/0.3.6:
+    resolution: {integrity: sha512-w9wKgDO4C95qnXZRwZTfCmLWqyRnooGjcIwG0wADWjw9/HN0p7dtvtgSvItZtUyNteEvgTrd8QojNEqV6DAGTA==}
     dependencies:
-      '@whatwg-node/events': 0.0.2
+      '@whatwg-node/events': 0.0.3
       busboy: 1.6.0
       fast-querystring: 1.1.1
       fast-url-parser: 1.1.3
@@ -16412,7 +16412,7 @@ packages:
       '@graphql-mesh/utils': 0.43.20_v3a6cfexazovcqdusp5gotjnd4
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       '@json-schema-tools/meta-schema': 1.7.0
-      '@whatwg-node/fetch': 0.8.4
+      '@whatwg-node/fetch': 0.8.8
       graphql: 16.6.0
       json-pointer: 0.6.2
       to-json-schema: 0.2.5
@@ -23745,10 +23745,8 @@ packages:
     resolution: {integrity: sha512-KmkCs6SjE6t4ihrfW9JelAPQIIIFbJweaaSLTh/4AO+c58JlDcb+GbdPt8yr5lRcFg4rPswRFRRhBGpWwh0K/Q==}
     dev: false
 
-  /urlpattern-polyfill/6.0.2:
-    resolution: {integrity: sha512-5vZjFlH9ofROmuWmXM9yj2wljYKgWstGwe8YTyiqM7hVum/g9LyCizPZtb3UqsuppVwety9QJmfc42VggLpTgg==}
-    dependencies:
-      braces: 3.0.2
+  /urlpattern-polyfill/8.0.2:
+    resolution: {integrity: sha512-Qp95D4TPJl1kC9SKigDcqgyM2VDVO4RiJc2d4qe5GrYm+zbIQCWWKAFaJNQ4BhdFeDGwBmAxqJBwWSJDb9T3BQ==}
     dev: false
 
   /use-sync-external-store/1.2.0_react@18.2.0:
@@ -24770,7 +24768,7 @@ packages:
       '@omnigraph/soap': 0.93.1_xld6wysqa4wpgtzuq5ms4lirwu
       '@prisma/generator-helper': 3.15.2
       '@web-std/fetch': 4.1.0
-      '@whatwg-node/fetch': 0.8.4
+      '@whatwg-node/fetch': 0.8.8
       '@wundergraph/orm': link:packages/orm
       '@wundergraph/protobuf': link:packages/protobuf
       '@wundergraph/straightforward': 4.2.5
