@@ -22,6 +22,9 @@ SKIP="faunadb-nextjs graphql-hasura-subscriptions inject-bearer"
 # These are broken
 SKIP="${SKIP} nextjs-todos remix nuxt"
 
+## Doesn't support monorepo
+SKIP="${SKIP} expo-swr"
+
 # XXX: This breaks only in CI (fastify issue?)
 SKIP="${SKIP} graphql-ws-subscriptions"
 
