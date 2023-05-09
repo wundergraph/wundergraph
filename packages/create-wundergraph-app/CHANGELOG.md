@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.4](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.3.3...create-wundergraph-app@0.3.4) (2023-05-08)
+
+### Bug Fixes
+
+* print error reason when create-wundergraph-app fails ([#936](https://github.com/wundergraph/wundergraph/issues/936)) ([4fb7555](https://github.com/wundergraph/wundergraph/commit/4fb7555102bc89a33ce044e4fe2975a52bc8f0d7)) (@fiam)
+
 ## [0.3.3](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.3.2...create-wundergraph-app@0.3.3) (2023-02-28)
 
 ### Bug Fixes

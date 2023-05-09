@@ -67,7 +67,7 @@ const createQuery =
 		UserRole extends string,
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient,
-		CustomContext
+		TCustomContext
 	>() =>
 	<Input extends z.ZodObject<any> = any, InferredResponse = unknown, ZodResponse = unknown>({
 		input,
@@ -84,10 +84,10 @@ const createQuery =
 		response?: ZodResponse;
 		handler: ZodResponse extends z.ZodObject<any>
 			? (
-					ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, CustomContext>
+					ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, TCustomContext>
 			  ) => Promise<z.infer<ZodResponse>>
 			: (
-					ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, CustomContext>
+					ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, TCustomContext>
 			  ) => Promise<InferredResponse>;
 		live?: LiveQueryConfig;
 	} & BaseOperationConfiguration<UserRole>): NodeJSOperation<
@@ -99,7 +99,7 @@ const createQuery =
 		UserRole,
 		CustomClaims,
 		InternalOperationsClient,
-		CustomContext
+		TCustomContext
 	> => {
 		return {
 			type: 'query',

@@ -40,9 +40,22 @@ const usersPost = introspect.prisma({
 	},
 });
 
+const spacex = introspect.graphql({
+	apiNamespace: 'spacex',
+	url: 'https://spacex-api.fly.dev/graphql/',
+	schemaExtension: `
+	extend type Capsule {
+		myCustomField: String
+	}
+	`,
+	introspection: {
+		disableCache: true,
+	},
+});
+
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [weather, countries, chinook, usersPost, geojson],
+	apis: [weather, countries, chinook, usersPost, geojson, spacex],
 	server,
 	operations,
 	generate,

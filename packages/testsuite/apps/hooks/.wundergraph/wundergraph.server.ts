@@ -48,13 +48,13 @@ export default configureWunderGraphServer(() => ({
 				},
 			},
 			MutatingPreResolveFailure: {
-				preResolve: () => {},
+				preResolve: async () => {},
 				mutatingPreResolve: async (hook) => {
 					throw new Error('stop');
 				},
 			},
 			CustomResolveFailure: {
-				preResolve: () => {},
+				preResolve: async () => {},
 				customResolve: async (hook) => {
 					throw new Error('stop');
 				},
@@ -74,7 +74,7 @@ export default configureWunderGraphServer(() => ({
 				},
 			},
 			PreResolveChain: {
-				preResolve: () => {},
+				preResolve: async () => {},
 				mutatingPreResolve: async (hook) => {
 					return {
 						s: hook.input.s + '.mutatingPreResolve',

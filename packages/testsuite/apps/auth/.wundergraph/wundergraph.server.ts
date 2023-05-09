@@ -23,10 +23,13 @@ export default configureWunderGraphServer(() => ({
 						message: 'denied by mutatingPostAuthentication',
 					};
 				}
+				const customClaims = hook.user.customClaims ?? {};
+				customClaims.aTestValue = ['anArray'];
 				return {
 					status: 'ok',
 					user: {
 						...hook.user,
+						customClaims,
 						firstName: hook.user.firstName ?? 'mutatingPostAuthentication',
 					},
 				};

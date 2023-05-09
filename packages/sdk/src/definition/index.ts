@@ -19,10 +19,10 @@ import {
 } from '@wundergraph/protobuf';
 import { applyNameSpaceToGraphQLSchema } from './namespacing';
 import { InputVariable, mapInputVariable } from '../configure/variables';
-import { introspectGraphql, introspectGraphqlWithCache } from './graphql-introspection';
+import { introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
-import { openApi, OpenAPIIntrospectionNew, openApiV2 } from './openapi-introspection';
+import { introspectOpenApi, introspectOpenApiV2 } from './openapi-introspection';
 import {
 	introspectMongoDB,
 	introspectMySQL,
@@ -32,6 +32,7 @@ import {
 	introspectSQLite,
 	introspectSQLServer,
 } from './database-introspection';
+import { introspectSoap } from './soap-introspection';
 
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
@@ -56,6 +57,7 @@ export interface ApiIntrospectionOptions {
 	 * Global proxy URL, which might be overridden at the data source level
 	 */
 	httpProxyUrl?: string;
+	apiID?: string;
 }
 
 export interface RenameType {
@@ -256,7 +258,7 @@ export interface GraphQLIntrospection extends GraphQLUpstream, GraphQLIntrospect
 export interface GraphQLFederationUpstream extends Omit<Omit<GraphQLUpstream, 'introspection'>, 'apiNamespace'> {
 	name?: string;
 	loadSchemaFromString?: GraphQLIntrospectionOptions['loadSchemaFromString'];
-	introspection?: GraphqlIntrospectionHeaders;
+	introspection?: IntrospectionFetchOptions & GraphqlIntrospectionHeaders;
 }
 
 export interface GraphQLFederationIntrospection extends IntrospectionConfiguration {
@@ -289,6 +291,11 @@ export interface PrismaIntrospection extends IntrospectionConfiguration {
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
+export interface IntrospectionFetchOptions {
+	disableCache?: boolean;
+	pollingIntervalSeconds?: number;
+}
+
 export interface IntrospectionConfiguration {
 	// id is the unique identifier for the data source
 	id?: string;
@@ -301,10 +308,7 @@ export interface IntrospectionConfiguration {
 	 * @defaultValue Use the default timeout for this node.
 	 */
 	requestTimeoutSeconds?: number;
-	introspection?: {
-		disableCache?: boolean;
-		pollingIntervalSeconds?: number;
-	};
+	introspection?: IntrospectionFetchOptions;
 }
 
 export interface HTTPUpstream extends IntrospectionConfiguration {
@@ -365,7 +369,7 @@ export interface GraphQLUpstream extends HTTPUpstream {
 	path?: InputVariable;
 	subscriptionsURL?: InputVariable;
 	subscriptionsUseSSE?: boolean;
-	introspection?: HTTPUpstream['introspection'] & GraphqlIntrospectionHeaders;
+	introspection?: IntrospectionFetchOptions & GraphqlIntrospectionHeaders;
 }
 
 export interface OpenAPIIntrospectionFile {
@@ -470,8 +474,9 @@ export const introspect = {
 	mongodb: introspectMongoDB,
 	prisma: introspectPrisma,
 	federation: introspectFederation,
-	openApi: openApi,
-	openApiV2: openApiV2,
+	openApi: introspectOpenApi,
+	openApiV2: introspectOpenApiV2,
+	soap: introspectSoap,
 };
 
 export const buildUpstreamAuthentication = (upstream: HTTPUpstream): UpstreamAuthentication | undefined => {

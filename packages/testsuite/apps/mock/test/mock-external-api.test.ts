@@ -1,10 +1,9 @@
 import { expect, beforeAll, describe, it } from 'vitest';
 import { join } from 'path';
-import { createTestAndMockServer } from '../.wundergraph/generated/testing';
+import { TestServers, createTestAndMockServer } from '../.wundergraph/generated/testing';
 import { createClient } from '../.wundergraph/generated/client';
 import { TestContext } from '../types';
 import { mockSearchResponse } from './mocks/mockSearchResponse';
-import { TestServers } from '@wundergraph/sdk/dist/testing';
 
 let ts: TestServers;
 
@@ -29,11 +28,11 @@ beforeAll(async (ctx) => {
 describe('Mock external api', () => {
 	it<TestContext>('Should mock search call to OpenSearch', async () => {
 		// Mock the search endpoint of OpenSearch
-		const scope = ts.mockServer.mock<Record<string, any>>(
-			({ url, method }) => {
+		const scope = ts.mockServer.mock<Record<string, any>>({
+			match: ({ url, method }) => {
 				return url.path === '/books/_search' && method === 'POST';
 			},
-			async ({ json }) => {
+			handler: async ({ json }) => {
 				expect(await json()).toEqual({
 					query: {
 						match: {
@@ -47,8 +46,8 @@ describe('Mock external api', () => {
 				return {
 					body: mockSearchResponse,
 				};
-			}
-		);
+			},
+		});
 
 		const result = await ts.testServer.client().query({
 			operationName: 'search',
@@ -62,11 +61,11 @@ describe('Mock external api', () => {
 	});
 
 	it<TestContext>('Should handle mocks per request.', async () => {
-		const scope1 = ts.mockServer.mock<Record<string, any>>(
-			({ url, method }) => {
+		const scope1 = ts.mockServer.mock<Record<string, any>>({
+			match: ({ url, method }) => {
 				return url.path === '/books/_search' && method === 'POST';
 			},
-			async ({ json }) => {
+			handler: async ({ json }) => {
 				expect(await json()).toEqual({
 					query: {
 						match: {
@@ -82,14 +81,14 @@ describe('Mock external api', () => {
 						a: 1,
 					},
 				};
-			}
-		);
+			},
+		});
 
-		const scope2 = ts.mockServer.mock<Record<string, any>>(
-			({ url, method }) => {
+		const scope2 = ts.mockServer.mock<Record<string, any>>({
+			match: ({ url, method }) => {
 				return url.path === '/books/_search' && method === 'POST';
 			},
-			async ({ json }) => {
+			handler: async ({ json }) => {
 				expect(await json()).toEqual({
 					query: {
 						match: {
@@ -105,8 +104,8 @@ describe('Mock external api', () => {
 						a: 2,
 					},
 				};
-			}
-		);
+			},
+		});
 
 		let result = await ts.testServer.client().query({
 			operationName: 'search',
@@ -116,7 +115,7 @@ describe('Mock external api', () => {
 
 		expect(result.error).toBeUndefined();
 		expect(result.data).toBeDefined();
-		expect(result.data.a).toEqual(1);
+		expect(result.data).toEqual({ a: 1 });
 
 		result = await ts.testServer.client().query({
 			operationName: 'search',
@@ -126,24 +125,24 @@ describe('Mock external api', () => {
 
 		expect(result.error).toBeUndefined();
 		expect(result.data).toBeDefined();
-		expect(result.data.a).toEqual(2);
+		expect(result.data).toEqual({ a: 2 });
 	});
 
 	it<TestContext>('Should try next handlers when the first does not match or throws', async () => {
-		const scope1 = ts.mockServer.mock<Record<string, any>>(
-			({ url, method }) => {
+		const scope1 = ts.mockServer.mock<Record<string, any>>({
+			match: ({ url, method }) => {
 				expect.fail('Should not be called');
 			},
-			({ json }) => {
+			handler: ({ json }) => {
 				expect.fail('Should not be called');
-			}
-		);
+			},
+		});
 
-		const scope2 = ts.mockServer.mock<Record<string, any>>(
-			({ url, method }) => {
+		const scope2 = ts.mockServer.mock<Record<string, any>>({
+			match: ({ url, method }) => {
 				return url.path === '/books/_search' && method === 'POST';
 			},
-			async ({ json }) => {
+			handler: async ({ json }) => {
 				expect(await json()).toEqual({
 					query: {
 						match: {
@@ -159,35 +158,37 @@ describe('Mock external api', () => {
 						a: 2,
 					},
 				};
-			}
-		);
+			},
+		});
 
 		let result = await ts.testServer.client().query({
 			operationName: 'search',
 		});
 
-		expect(ts.mockServer.pendingRequestInterceptors().length).greaterThan(0);
 		expect(scope1.isDone).toEqual(false);
+		expect(scope1.error).toBeDefined();
 
 		scope2.done();
+		expect(scope2.isDone).toEqual(true);
+		expect(scope2.error).toBeUndefined();
 
 		expect(result.error).toBeUndefined();
 		expect(result.data).toBeDefined();
-		expect(result.data.a).toEqual(2);
+		expect(result.data).toEqual({ a: 2 });
 	});
 
 	it<TestContext>('Should error because handler does not match', async () => {
 		// Mock the search endpoint of OpenSearch
-		const scope = ts.mockServer.mock(
-			({ url, method }) => {
+		const scope = ts.mockServer.mock({
+			match: ({ url, method }) => {
 				return url.path === '/does_not_match';
 			},
-			() => {
+			handler: () => {
 				return {
 					body: 'This should not be returned',
 				};
-			}
-		);
+			},
+		});
 
 		try {
 			await ts.testServer.client().query({
@@ -197,6 +198,6 @@ describe('Mock external api', () => {
 			expect(err.message).toEqual('This operation was aborted');
 		}
 
-		expect(() => scope.done()).toThrow('no interceptor matched for request POST /books/_search');
+		expect(() => scope.done()).toThrow('No mock matched for request POST /books/_search');
 	});
 });

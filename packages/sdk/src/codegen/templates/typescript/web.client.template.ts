@@ -88,13 +88,13 @@ export class Client {
     {{#if hasQueries}}
     public query = {
         {{#each queries}}
-        {{operationName}}: async (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>) => {
+        {{operationName}}: async (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{responseTypename}}>) => {
             const result = await this._client.query({
                 operationName: "{{operationName}}",
                 input: options.input,
                 abortSignal: options.abortSignal,
             })
-            return this.resultToResponse<{{operationName}}Response>(result)
+            return this.resultToResponse<{{responseTypename}}>(result)
         },
         {{/each}}
     }
@@ -102,13 +102,13 @@ export class Client {
     {{#if hasMutations}}
     public mutation = {
     {{#each mutations}}
-        {{operationName}}: async (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>) => {
+        {{operationName}}: async (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{responseTypename}}>) => {
             const result =  await this._client.mutate({
                 operationName: "{{operationName}}",
                 input: options.input,
                 abortSignal: options.abortSignal,
             })
-            return this.resultToResponse<{{operationName}}Response>(result)
+            return this.resultToResponse<{{responseTypename}}>(result)
         },
     {{/each}}
     }
@@ -116,13 +116,13 @@ export class Client {
     {{#if hasSubscriptions}}{{#unless reactNative}}
     public subscription = {
     {{#each subscriptions}}
-        {{operationName}}: (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>, cb: (response: Response<{{operationName}}Response>) => void) => {
+        {{operationName}}: (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{responseTypename}}>, cb: (response: Response<{{responseTypename}}>) => void) => {
             return this._client.subscribe({
                 operationName: "{{operationName}}",
                 liveQuery: false,
                 input: options.input,
                 abortSignal: options.abortSignal,
-            }, (result) => cb(this.resultToResponse<{{operationName}}Response>(result)));
+            }, (result) => cb(this.resultToResponse<{{responseTypename}}>(result)));
         },
     {{/each}}
     }
@@ -130,13 +130,13 @@ export class Client {
     {{#if hasLiveQueries }}{{#unless reactNative}}
         public liveQuery = {
         {{#each liveQueries }}
-            {{operationName}}: (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>, cb: (response: Response<{{operationName}}Response>) => void) => {
+            {{operationName}}: (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{responseTypename}}>, cb: (response: Response<{{responseTypename}}>) => void) => {
                 return this._client.subscribe({
                     operationName: "{{operationName}}",
                     liveQuery: true,
                     input: options.input,
                     abortSignal: options.abortSignal,
-                }, (result) => cb(this.resultToResponse<{{operationName}}Response>(result)));
+                }, (result) => cb(this.resultToResponse<{{responseTypename}}>(result)));
             },
         {{/each}}
         }

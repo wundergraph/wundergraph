@@ -2,11 +2,38 @@ import { configureWunderGraphServer } from '@wundergraph/sdk/server';
 import { GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql/index';
 import { GraphQLExecutionContext } from './generated/wundergraph.server';
 
+class CustomContext {
+	hello() {
+		console.log('hello');
+		return 'world';
+	}
+}
+
+const createContext = async (): Promise<CustomContext> => {
+	return new CustomContext();
+};
+
 export default configureWunderGraphServer(() => ({
 	hooks: {
-		queries: {},
+		queries: {
+			Schema_extensionsExtensionWithHook: {
+				mutatingPostResolve: async ({ response }) => {
+					return {
+						...response,
+						data: {
+							...response.data,
+							spacex_capsule: {
+								...response.data?.spacex_capsule,
+								myCustomField: 'resolved by mutatingPostResolve hook',
+							},
+						},
+					};
+				},
+			},
+		},
 		mutations: {},
 	},
+	context: createContext,
 	graphqlServers: [
 		{
 			apiNamespace: 'embedded',

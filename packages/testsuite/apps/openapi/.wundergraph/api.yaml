@@ -1,0 +1,65 @@
+openapi: 3.0.0
+info:
+  title: Notes API
+  description: An API which supports storing and retrieving notes
+  version: '0.1'
+
+servers:
+  - url: http://api.example.com/v1
+    description: Example Server
+
+paths:
+  /notes/note/{noteID}:
+    get:
+      summary: Returns a note by ID
+      operationId: noteByID
+      parameters:
+        - name: noteID
+          in: path
+          required: true
+          description: Note unique identifier
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: A note object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                  text:
+                    type: string
+        '400':
+          description: The specified note ID is invalid (not a number).
+        '404':
+          description: A note with the specified ID was not found.
+        default:
+          description: Unexpected error
+  /notes/new:
+    post:
+      summary: Creates a new note
+      operationId: newNote
+      parameters:
+        - name: text
+          in: body
+          required: true
+          description: Note text
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64

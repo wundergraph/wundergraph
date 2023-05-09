@@ -1,4 +1,4 @@
-query ($countryCode: String!, $capital: String! @internal) @internalOperation {
+query ($countryCode: String!, $capital: String! @internal) {
 	country: countries_countries(filter: { code: { eq: $countryCode } }) {
 		code
 		name

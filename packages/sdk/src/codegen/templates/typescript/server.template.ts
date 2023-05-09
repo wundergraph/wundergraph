@@ -29,10 +29,11 @@ declare module "@wundergraph/sdk/server" {
 	export function configureWunderGraphServer<
 		GeneratedHooksConfig = HooksConfig,
 		GeneratedInternalClient = InternalClient,
-		GeneratedWebhooksConfig = WebhooksConfig
+		GeneratedWebhooksConfig = WebhooksConfig,
+		TCustomContext = never
 	>(
-		configWrapper: () => WunderGraphServerConfig<HooksConfig, WebhooksConfig>
-	): WunderGraphHooksAndServerConfig;
+		configWrapper: () => WunderGraphServerConfig<HooksConfig, WebhooksConfig, TCustomContext>
+	): WunderGraphHooksAndServerConfig<HooksConfig, WebhooksConfig, TCustomContext>;
 }
 
 `;

@@ -9,7 +9,7 @@ import { {{ modelImports }} } from "./models"
 export interface Queries  {
 {{#if hasInternalQueries}}
     {{#each internalQueries}}
-        {{operationName}}: ({{#if hasInternalInput}}options: OperationArgsWithInput<Internal{{operationName}}Input>{{/if}}) => Promise<{{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, errors?: OperationErrors['{{operationPath}}'][] }{{else}}{ data?: {{operationName}}Response['data'], errors?: Required<{{operationName}}Response>['errors'] }{{/if}}>;
+        {{operationName}}: ({{#if hasInternalInput}}options: OperationArgsWithInput<{{internalInputTypename}}>{{/if}}) => Promise<{{#if isTypeScriptOperation}}{ data?: {{responseDataTypename}}, errors?: OperationErrors['{{operationPath}}'][] }{{else}}{ data?: {{responseTypename}}['data'], errors?: Required<{{responseTypename}}>['errors'] }{{/if}}>;
     {{/each}}
 {{/if}}
 }
@@ -17,7 +17,7 @@ export interface Queries  {
 export interface Mutations  {
 {{#if hasInternalMutations}}
     {{#each internalMutations}}
-        {{operationName}}: ({{#if hasInternalInput}}options: OperationArgsWithInput<{{operationName}}Input>{{/if}}) => Promise<{{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, errors?: OperationErrors['{{operationPath}}'][] }{{else}}{ data?: {{operationName}}Response['data'], errors?: Required<{{operationName}}Response>['errors'] }{{/if}}>;
+        {{operationName}}: ({{#if hasInternalInput}}options: OperationArgsWithInput<{{internalInputTypename}}>{{/if}}) => Promise<{{#if isTypeScriptOperation}}{ data?: {{responseDataTypename}}, errors?: OperationErrors['{{operationPath}}'][] }{{else}}{ data?: {{responseTypename}}['data'], errors?: Required<{{responseTypename}}>['errors'] }{{/if}}>;
     {{/each}}
 {{/if}}
 }

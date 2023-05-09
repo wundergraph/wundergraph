@@ -1,7 +1,7 @@
 import { expect, describe, it, beforeAll } from 'vitest';
 import { join } from 'path';
 import { createTestAndMockServer } from '../.wundergraph/generated/testing';
-import { TestServers } from '@wundergraph/sdk/dist/testing';
+import type { TestServers } from '../.wundergraph/generated/testing';
 
 let ts: TestServers;
 
@@ -20,11 +20,11 @@ beforeAll(async () => {
 describe('Mock http datasource', () => {
 	it('Should mock countries origin API', async () => {
 		// Mock the countries origin API
-		const scope = ts.mockServer.mock(
-			({ url, method }) => {
+		const scope = ts.mockServer.mock({
+			match: ({ url, method }) => {
 				return url.path === '/' && method === 'POST';
 			},
-			async ({ json }) => {
+			handler: async ({ json }) => {
 				const body = await json();
 				expect(body.variables.code).toEqual('ES');
 				expect(body.query).toEqual(
@@ -48,8 +48,8 @@ describe('Mock http datasource', () => {
 						},
 					},
 				};
-			}
-		);
+			},
+		});
 
 		const result = await ts.testServer.client().query({
 			operationName: 'CountryByCode',
@@ -66,16 +66,16 @@ describe('Mock http datasource', () => {
 	});
 
 	it('Should not be called because does not match', async () => {
-		const scope = ts.mockServer.mock(
-			async ({ url }) => {
+		const scope = ts.mockServer.mock({
+			match: ({ url }) => {
 				throw new Error(`Unexpected call to ${url}`);
 			},
-			async (req) => {
+			handler: (req) => {
 				expect.fail('This should not be called');
 
 				return {};
-			}
-		);
+			},
+		});
 
 		const result = await ts.testServer.client().query({
 			operationName: 'CountryByCode',

@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.2.1...@wundergraph/react-relay@0.2.2) (2023-05-08)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.2.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.2.0...@wundergraph/react-relay@0.2.1) (2023-05-05)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.2.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.1.13...@wundergraph/react-relay@0.2.0) (2023-05-04)
+
+### Features
+
+* relay todo list example ([#878](https://github.com/wundergraph/wundergraph/issues/878)) ([feb533c](https://github.com/wundergraph/wundergraph/commit/feb533ceb793e86ff5de0c62dac2254e2939d5b0)) (@DaniAkash)
+
+## [0.1.13](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.1.12...@wundergraph/react-relay@0.1.13) (2023-05-03)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.1.12](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.1.11...@wundergraph/react-relay@0.1.12) (2023-05-03)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
 ## [0.1.11](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.1.10...@wundergraph/react-relay@0.1.11) (2023-04-27)
 
 **Note:** Version bump only for package @wundergraph/react-relay

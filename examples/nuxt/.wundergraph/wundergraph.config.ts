@@ -12,15 +12,14 @@ configureWunderGraphApplication({
 	apis: [spaceX],
 	server,
 	operations,
-	codeGenerators: [
-		{
-			templates: [...templates.typescript.all],
-		},
-		{
-			templates: [templates.typescript.client],
-			path: './components/generated',
-		},
-	],
+	generate: {
+		codeGenerators: [
+			{
+				templates: [templates.typescript.client],
+				path: './components/generated',
+			},
+		],
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins: process.env.NODE_ENV === 'production' ? ['https://*'] : ['http://*'],
