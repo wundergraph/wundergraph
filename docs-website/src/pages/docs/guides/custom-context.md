@@ -41,7 +41,7 @@ export default configureWunderGraphServer(() => ({
     },
     mutations: {},
   },
-  context: makeContext,
+  context: createContext,
 }));
 ```
 
@@ -82,7 +82,7 @@ export default configureWunderGraphServer(() => ({
     },
     mutations: {},
   },
-  context: makeContext,
+  context: createContext,
 }));
 ```
 
