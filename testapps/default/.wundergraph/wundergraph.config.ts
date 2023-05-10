@@ -4,7 +4,6 @@ import {
 	cors,
 	EnvironmentVariable,
 	introspect,
-	templates,
 } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
@@ -26,29 +25,41 @@ const jsp2 = introspect.openApi({
 		filePath: '../json_placeholder.json',
 	},
 	baseURL: new EnvironmentVariable('JSP_BASE_URL'),
-	headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
 });
+
+const federationLocalUpstreams = [
+	{
+		url: 'http://localhost:4001/graphql',
+	},
+	{
+		url: 'http://localhost:4003/graphql',
+	},
+	{
+		url: 'http://localhost:4002/graphql',
+	},
+	{
+		url: 'http://localhost:4004/graphql',
+	},
+];
+
+const federationCloudUpstreams = [
+	{
+		url: 'https://wg-federation-demo-accounts.fly.dev/graphql',
+	},
+	{
+		url: 'https://wg-federation-demo-products.fly.dev/graphql',
+	},
+	{
+		url: 'https://wg-federation-demo-reviews.fly.dev/graphql',
+	},
+	{
+		url: 'https://wg-federation-demo-inventory.fly.dev/graphql',
+	},
+];
 
 const federatedApi = introspect.federation({
 	apiNamespace: 'federated',
-	upstreams: [
-		{
-			url: 'https://wg-federation-demo-accounts.fly.dev/graphql',
-			headers: (b) => b.addClientRequestHeader('Authorization', 'Authorization'),
-		},
-		{
-			url: 'https://wg-federation-demo-products.fly.dev/graphql',
-			headers: (b) => b.addClientRequestHeader('Authorization', 'Authorization'),
-		},
-		{
-			url: 'https://wg-federation-demo-reviews.fly.dev/graphql',
-			headers: (b) => b.addClientRequestHeader('Authorization', 'Authorization'),
-		},
-		{
-			url: 'https://wg-federation-demo-inventory.fly.dev/graphql',
-			headers: (b) => b.addClientRequestHeader('Authorization', 'Authorization'),
-		},
-	],
+	upstreams: federationLocalUpstreams,
 });
 
 const spacex = introspect.graphql({
