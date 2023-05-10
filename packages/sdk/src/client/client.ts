@@ -121,7 +121,7 @@ export class Client {
 
 	private async fetch(input: RequestInfo, init: RequestInit = {}): Promise<globalThis.Response> {
 		const fetchImpl = this.options.customFetch || globalThis.fetch;
-		const customFetchOptions = this.options.customFetchOptions || {};
+		const customFetchOptions = this.options.customFetchOptions || { credentials: 'include', mode: 'cors' };
 
 		init.headers = {
 			...this.baseHeaders,
