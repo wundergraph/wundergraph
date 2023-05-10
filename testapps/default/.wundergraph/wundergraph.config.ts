@@ -59,7 +59,7 @@ const federationCloudUpstreams = [
 
 const federatedApi = introspect.federation({
 	apiNamespace: 'federated',
-	upstreams: federationLocalUpstreams,
+	upstreams: federationCloudUpstreams,
 });
 
 const spacex = introspect.graphql({
