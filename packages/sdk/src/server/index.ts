@@ -26,7 +26,6 @@ export type {
 	MutationHookWithoutInput,
 	SubscriptionHook,
 	SubscriptionHookWithoutInput,
-	WunderGraphServerRequest,
 } from './types';
 export type {
 	SubscriptionRequestOptions,

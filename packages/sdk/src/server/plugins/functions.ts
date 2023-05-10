@@ -7,13 +7,13 @@ import { HandlerContext } from '../../operations/operations';
 import process from 'node:process';
 import { OperationsClient } from '../operations-client';
 import { InternalError, OperationError } from '../../client/errors';
-import { WunderGraphServerRequest } from '../types';
+import { ContextFactoryContext } from '..';
 
 interface FastifyFunctionsOptions {
 	operations: TypeScriptOperationFile[];
 	internalClientFactory: InternalClientFactory;
 	nodeURL: string;
-	makeContext: (req: WunderGraphServerRequest) => Promise<any>;
+	createContext: (ctx: ContextFactoryContext) => Promise<any>;
 }
 
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {
@@ -46,14 +46,17 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							baseURL: config.nodeURL,
 							clientRequest,
 						});
-						const ctx: HandlerContext<any, any, any, any, any, any> = {
+						const createContextCtx = {
 							log: fastify.log,
 							user: (request.body as any)?.__wg.user!,
 							internalClient: config.internalClientFactory(undefined, clientRequest),
 							clientRequest,
 							input: (request.body as any)?.input,
 							operations: operationClient,
-							context: await config.makeContext({ clientRequest }),
+						};
+						const ctx: HandlerContext<any, any, any, any, any, any> = {
+							...createContextCtx,
+							context: await config.createContext(createContextCtx),
 						};
 
 						switch (implementation.type) {

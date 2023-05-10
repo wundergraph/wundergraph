@@ -237,10 +237,6 @@ export interface ServerRunOptions {
 	clientFactory: InternalClientFactory;
 }
 
-export interface WunderGraphServerRequest {
-	clientRequest: ClientRequest;
-}
-
 export interface WunderGraphServerConfig<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig,

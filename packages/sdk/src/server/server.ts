@@ -23,7 +23,6 @@ import type {
 	ServerRunOptions,
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
-	WunderGraphServerRequest,
 } from './types';
 import type { LoadOperationsOutput } from '../graphql/operations';
 import FastifyFunctionsPlugin from './plugins/functions';
@@ -230,15 +229,15 @@ export const createServer = async ({
 		},
 	});
 
-	const makeContext = async (req: WunderGraphServerRequest) => {
-		// if (typeof serverConfig.context === 'function') {
-		// 	const result = await serverConfig.context(req);
-		// 	if (result === undefined) {
-		// 		throw new Error('could not instantiate custom handler context');
-		// 	}
-		// 	return result;
-		// }
-		// return serverConfig.context;
+	const createContext = async (ctx: ContextFactoryContext) => {
+		if (typeof serverConfig.createContext === 'function') {
+			const result = await serverConfig.createContext(ctx);
+			if (result === undefined) {
+				throw new Error('could not instantiate custom handler context');
+			}
+			return result;
+		}
+		return serverConfig.createContext;
 	};
 
 	/**
@@ -276,7 +275,7 @@ export const createServer = async ({
 				requestURI: req.body.__wg.clientRequest?.requestURI || '',
 				method: req.body.__wg.clientRequest?.method || 'GET',
 			};
-			req.ctx = {
+			const ctx = {
 				log: req.log,
 				user: req.body.__wg.user!,
 				clientRequest,
@@ -288,7 +287,10 @@ export const createServer = async ({
 						'x-request-id': req.id,
 					},
 				}),
-				context: await makeContext({ clientRequest }),
+			};
+			req.ctx = {
+				...ctx,
+				context: await createContext(ctx),
 			};
 		});
 
@@ -407,7 +409,7 @@ export const createServer = async ({
 				operations: operationsConfig.typescript_operation_files,
 				internalClientFactory: clientFactory,
 				nodeURL: nodeInternalURL,
-				makeContext,
+				createContext,
 			});
 			fastify.log.debug('Functions plugin registered');
 		}

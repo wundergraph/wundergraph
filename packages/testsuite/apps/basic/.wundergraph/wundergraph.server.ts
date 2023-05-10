@@ -1,4 +1,4 @@
-import { ContextFactoryContext, WunderGraphServerRequest, configureWunderGraphServer } from '@wundergraph/sdk/server';
+import { ContextFactoryContext, configureWunderGraphServer } from '@wundergraph/sdk/server';
 import { GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql/index';
 import { GraphQLExecutionContext } from './generated/wundergraph.server';
 
