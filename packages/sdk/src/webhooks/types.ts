@@ -20,7 +20,8 @@ export type WebhookHeaders = Record<string, string>;
 export type WebhookQuery = Record<string, string | string[]>;
 export interface WebhookRequestContext<
 	TInternalClient extends InternalClient = InternalClient,
-	TOperationsClient extends OperationsClient = OperationsClient
+	TOperationsClient extends OperationsClient = OperationsClient,
+	TCustomContext = any
 > {
 	/**
 	 * The internal client is used to make requests to the WunderGraph API.
@@ -36,6 +37,10 @@ export interface WebhookRequestContext<
 	 * The operations client is used to make requests to the WunderGraph API.
 	 */
 	operations: TOperationsClient;
+	/**
+	 * Custom context
+	 */
+	context: TCustomContext;
 }
 interface LogFn {
 	<T extends object>(obj: T, msg?: string, ...args: any[]): void;
