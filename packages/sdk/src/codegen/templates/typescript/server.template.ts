@@ -5,11 +5,20 @@ import type { WebhooksConfig } from "./wundergraph.webhooks";
 import type { InternalClient } from "./wundergraph.internal.client"
 import type { InternalOperationsClient } from "./wundergraph.internal.operations.client";
 import type { CustomClaims } from "./claims";
-import type { GraphQLServerConfig, BaseRequestContext, WunderGraphUser, WunderGraphServerConfig, WunderGraphHooksAndServerConfig } from "@wundergraph/sdk/server";
+import type {
+	BaseRequestContext,
+	ContextFactoryContext as InternalContextFactoryContext,
+	GraphQLServerConfig,
+	WunderGraphUser,
+	WunderGraphServerConfig,
+	WunderGraphHooksAndServerConfig
+} from "@wundergraph/sdk/server";
 
 export type Role = {{{ roleDefinitions }}};
 
 export interface User extends WunderGraphUser<Role, CustomClaims> {}
+
+export interface ContextFactoryContext extends InternalContextFactoryContext<User, InternalClient, InternalOperationsClient> {}
 
 export interface Config<TCustomContext> {
     hooks: HooksConfig<TCustomContext>;
@@ -27,13 +36,14 @@ export interface GraphQLExecutionContext<TCustomContext = any> {
 
 declare module "@wundergraph/sdk/server" {
 	export function configureWunderGraphServer<
-		TCustomContext = any,
+		TCustomContext,
+		TContextFactoryContext extends ContextFactoryContext = ContextFactoryContext,
 		GeneratedHooksConfig = HooksConfig<TCustomContext>,
 		GeneratedInternalClient = InternalClient,
-		GeneratedWebhooksConfig = WebhooksConfig
+		GeneratedWebhooksConfig = WebhooksConfig,
 	>(
-		configWrapper: () => WunderGraphServerConfig<HooksConfig<TCustomContext>, WebhooksConfig, TCustomContext>
-	): WunderGraphHooksAndServerConfig<any, any, TCustomContext>;
+		configWrapper: () => WunderGraphServerConfig<HooksConfig<TCustomContext>, WebhooksConfig, TContextFactoryContext, TCustomContext>
+	): WunderGraphHooksAndServerConfig<any, any, TContextFactoryContext, TCustomContext>;
 }
 
 `;

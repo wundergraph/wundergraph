@@ -7,6 +7,7 @@ export type {
 	AuthenticationRequestContext,
 	AuthenticationResponse,
 	BaseRequestContext,
+	ContextFactoryContext,
 	ClientRequest,
 	ClientRequestHeaders,
 	PostUploadHookRequest,

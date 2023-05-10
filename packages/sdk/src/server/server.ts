@@ -17,6 +17,7 @@ import type { WebhooksConfig } from '../webhooks/types';
 import type { HooksRouteConfig } from './plugins/hooks';
 import type { WebHookRouteConfig } from './plugins/webhooks';
 import type {
+	ContextFactoryContext,
 	FastifyRequestBody,
 	HooksConfiguration,
 	ServerRunOptions,
@@ -78,21 +79,41 @@ export function configureWunderGraphServer<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedInternalClient = InternalClient,
 	GeneratedWebhooksConfig = WebhooksConfig,
+	TContextFactoryContext extends ContextFactoryContext = ContextFactoryContext,
 	TCustomContext = any
->(configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TCustomContext>) {
-	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig, TCustomContext>(configWrapper());
+>(
+	configWrapper: () => WunderGraphServerConfig<
+		GeneratedHooksConfig,
+		GeneratedWebhooksConfig,
+		TContextFactoryContext,
+		TCustomContext
+	>
+) {
+	return _configureWunderGraphServer<
+		GeneratedHooksConfig,
+		GeneratedWebhooksConfig,
+		TContextFactoryContext,
+		TCustomContext
+	>(configWrapper());
 }
 
 const _configureWunderGraphServer = <
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig,
+	TContextFactoryContext extends ContextFactoryContext = ContextFactoryContext,
 	TCustomContext = any
 >(
-	config: WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TCustomContext>
-): WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TCustomContext> => {
+	config: WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TContextFactoryContext, TCustomContext>
+): WunderGraphHooksAndServerConfig<
+	GeneratedHooksConfig,
+	GeneratedWebhooksConfig,
+	TContextFactoryContext,
+	TCustomContext
+> => {
 	const serverConfig = config as WunderGraphHooksAndServerConfig<
 		GeneratedHooksConfig,
 		GeneratedWebhooksConfig,
+		TContextFactoryContext,
 		TCustomContext
 	>;
 
@@ -210,14 +231,14 @@ export const createServer = async ({
 	});
 
 	const makeContext = async (req: WunderGraphServerRequest) => {
-		if (typeof serverConfig.context === 'function') {
-			const result = await serverConfig.context(req);
-			if (result === undefined) {
-				throw new Error('could not instantiate custom handler context');
-			}
-			return result;
-		}
-		return serverConfig.context;
+		// if (typeof serverConfig.context === 'function') {
+		// 	const result = await serverConfig.context(req);
+		// 	if (result === undefined) {
+		// 		throw new Error('could not instantiate custom handler context');
+		// 	}
+		// 	return result;
+		// }
+		// return serverConfig.context;
 	};
 
 	/**

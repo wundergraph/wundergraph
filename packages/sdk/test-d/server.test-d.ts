@@ -1,6 +1,7 @@
 import { expectType } from 'tsd';
 import {
 	BaseRequestContext,
+	ContextFactoryContext as InternalContextFactoryContext,
 	HooksConfiguration,
 	PreUploadHookRequest,
 	PreUploadHookResponse,
@@ -30,47 +31,62 @@ export interface User extends WunderGraphUser<Role, CustomClaims> {}
 
 export type DataSources = 'counter';
 
-export interface HookContext extends BaseRequestContext<User, InternalClient, OperationsClient> {}
+export interface HookContext<TCustomContext>
+	extends BaseRequestContext<User, InternalClient, OperationsClient, TCustomContext> {}
 
-export type HooksConfig = HooksConfiguration<
-	QueryHooks,
-	MutationHooks,
-	SubscriptionHooks,
-	UploadHooks,
+export interface ContextFactoryContext extends InternalContextFactoryContext<User, InternalClient, OperationsClient> {}
+
+export type HooksConfig<TCustomContext> = HooksConfiguration<
+	QueryHooks<TCustomContext>,
+	MutationHooks<TCustomContext>,
+	SubscriptionHooks<TCustomContext>,
+	UploadHooks<TCustomContext>,
 	DataSources,
-	HookContext
+	HookContext<TCustomContext>
 >;
 
-export type QueryHooks = {
-	Country?: QueryHook<{ id: number }, { data: { name: string } }, HookContext>;
-	FakeWeather?: QueryHookWithoutInput<{ data: { temp: number } }, HookContext>;
+export type QueryHooks<TCustomContext> = {
+	Country?: QueryHook<{ id: number }, { data: { name: string } }, HookContext<TCustomContext>>;
+	FakeWeather?: QueryHookWithoutInput<{ data: { temp: number } }, HookContext<TCustomContext>>;
 };
 
-export type MutationHooks = {
-	SetName?: MutationHook<{ id: number }, { data: { name: string } }, HookContext>;
-	Delete?: MutationHookWithoutInput<{}, HookContext>;
+export type MutationHooks<TCustomContext> = {
+	SetName?: MutationHook<{ id: number }, { data: { name: string } }, HookContext<TCustomContext>>;
+	Delete?: MutationHookWithoutInput<{}, HookContext<TCustomContext>>;
 };
 
-export type SubscriptionHooks = {
-	Countdown?: SubscriptionHook<{ from: number }, { data: { countdown: number } }, HookContext>;
-	Price?: SubscriptionHookWithoutInput<{ data: { price: number } }, HookContext>;
+export type SubscriptionHooks<TCustomContext> = {
+	Countdown?: SubscriptionHook<{ from: number }, { data: { countdown: number } }, HookContext<TCustomContext>>;
+	Price?: SubscriptionHookWithoutInput<{ data: { price: number } }, HookContext<TCustomContext>>;
 };
 
 export type WebhooksConfig = {
 	stripe?: WebhookConfiguration;
 };
 
-export interface UploadHooks {
+export interface UploadHooks<TCustomContext> {
 	withProfiles?: {
 		avatar?: {
-			preUpload?: (hook: PreUploadHookRequest<User>) => PreUploadHookResponse;
-			postUpload?: (hook: PostUploadHookRequest<User, InternalClient>) => PostUploadHookResponse;
+			preUpload?: (hook: PreUploadHookRequest<User, TCustomContext>) => PreUploadHookResponse;
+			postUpload?: (hook: PostUploadHookRequest<User, InternalClient, TCustomContext>) => PostUploadHookResponse;
 		};
 	};
 	withoutProfiles?: {};
 }
 
-const configuration = configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
+class MyCustomContext {
+	hello() {
+		return 'world';
+	}
+}
+
+const configuration = configureWunderGraphServer<
+	HooksConfig<MyCustomContext>,
+	InternalClient,
+	WebhooksConfig,
+	ContextFactoryContext,
+	MyCustomContext
+>(() => ({
 	hooks: {
 		global: {
 			httpTransport: {
@@ -161,6 +177,10 @@ const configuration = configureWunderGraphServer<HooksConfig, InternalClient, We
 			},
 		},
 	},
+	createContext: async (_) => {
+		return new MyCustomContext();
+	},
 }));
 
-expectType<WunderGraphHooksAndServerConfig<any, any>>(configuration);
+expectType<WunderGraphHooksAndServerConfig<any, any, ContextFactoryContext, MyCustomContext>>(configuration);
+expectType<(ctx: ContextFactoryContext) => Promise<MyCustomContext>>(configuration.createContext!);

@@ -73,11 +73,10 @@ export interface FastifyRequestContext<
 	ctx: AuthenticationHookRequest<BaseRequestContext<User, IC, InternalOperationsClient>>;
 }
 
-export interface BaseRequestContext<
+export interface ContextFactoryContext<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
-	InternalOperationsClient extends OperationsClient = OperationsClient,
-	CustomContext = any
+	InternalOperationsClient extends OperationsClient = OperationsClient
 > {
 	/**
 	 * The user that is currently logged in.
@@ -99,6 +98,14 @@ export interface BaseRequestContext<
 	 * The operations client that is used to communicate with the server.
 	 */
 	operations: Omit<InternalOperationsClient, 'cancelSubscriptions'>;
+}
+
+export interface BaseRequestContext<
+	User extends WunderGraphUser = WunderGraphUser,
+	IC extends InternalClient = InternalClient,
+	InternalOperationsClient extends OperationsClient = OperationsClient,
+	CustomContext = any
+> extends ContextFactoryContext<User, IC, InternalOperationsClient> {
 	/**
 	 * Custom context
 	 */
@@ -237,6 +244,7 @@ export interface WunderGraphServerRequest {
 export interface WunderGraphServerConfig<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig,
+	TContextFactoryContext extends ContextFactoryContext = ContextFactoryContext,
 	TCustomContext = any
 > {
 	webhooks?: GeneratedWebhooksConfig;
@@ -244,15 +252,21 @@ export interface WunderGraphServerConfig<
 	// routeUrl is set internally
 	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
 	options?: ServerOptions;
-	context?: (req: WunderGraphServerRequest) => Promise<TCustomContext>;
+	createContext?: (ctx: TContextFactoryContext) => Promise<TCustomContext>;
 }
 
 // internal representation of the fully resolved server config
 export interface WunderGraphHooksAndServerConfig<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig,
+	TContextFactoryContext extends ContextFactoryContext = ContextFactoryContext,
 	TCustomContext = any
-> extends WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TCustomContext> {
+> extends WunderGraphServerConfig<
+		GeneratedHooksConfig,
+		GeneratedWebhooksConfig,
+		TContextFactoryContext,
+		TCustomContext
+	> {
 	webhooks?: GeneratedWebhooksConfig;
 	hooks?: GeneratedHooksConfig;
 	graphqlServers?: GraphQLServerConfig[];

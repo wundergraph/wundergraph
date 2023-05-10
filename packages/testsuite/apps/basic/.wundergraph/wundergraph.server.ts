@@ -2,22 +2,19 @@ import { WunderGraphServerRequest, configureWunderGraphServer } from '@wundergra
 import { GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql/index';
 import { GraphQLExecutionContext } from './generated/wundergraph.server';
 
-class CustomContext {
+class MyCustomContext {
 	hello() {
 		console.log('hello');
 		return 'world';
 	}
 }
 
-const createContext = async (req: WunderGraphServerRequest): Promise<CustomContext> => {
-	return new CustomContext();
-};
-
 export default configureWunderGraphServer(() => ({
 	hooks: {
 		queries: {
 			Schema_extensionsExtensionWithHook: {
-				mutatingPostResolve: async ({ response }) => {
+				mutatingPostResolve: async ({ response, context }) => {
+					console.log(`hello ${context.hello()}`);
 					return {
 						...response,
 						data: {
@@ -40,13 +37,16 @@ export default configureWunderGraphServer(() => ({
 		},
 		mutations: {},
 	},
-	context: createContext,
+	//createContext: async (): Promise<MyCustomContext> => {
+	createContext: async (): Promise<MyCustomContext> => {
+		return new MyCustomContext();
+	},
 	graphqlServers: [
 		{
 			apiNamespace: 'embedded',
 			serverName: 'embedded',
 			schema: new GraphQLSchema({
-				query: new GraphQLObjectType<any, GraphQLExecutionContext<CustomContext>>({
+				query: new GraphQLObjectType<any, GraphQLExecutionContext<MyCustomContext>>({
 					name: 'Query',
 					fields: {
 						clientRequestHeader: {
