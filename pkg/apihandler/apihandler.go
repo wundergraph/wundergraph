@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"os"
@@ -2355,7 +2356,9 @@ func handleOperationErr(log *zap.Logger, err error, w http.ResponseWriter, error
 		w.WriteHeader(499)
 		return true
 	}
-	if errors.Is(err, context.DeadlineExceeded) {
+	// This detects all timeout errors, including context.DeadlineExceeded
+	var ne net.Error
+	if errors.As(err, &ne) && ne.Timeout() {
 		// request timeout exceeded
 		log.Error("request timeout exceeded",
 			zap.String("operationName", operation.Name),

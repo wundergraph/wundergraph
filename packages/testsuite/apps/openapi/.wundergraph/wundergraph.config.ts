@@ -9,7 +9,7 @@ const notes = introspect.openApiV2({
 		kind: 'file',
 		filePath: './api.yaml',
 	},
-	baseURL: 'http://localhost:8090/',
+	baseURL: new EnvironmentVariable('OPENAPI_URL', 'http://localhost:8090/'),
 });
 
 // configureWunderGraph emits the configuration

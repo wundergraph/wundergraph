@@ -6,6 +6,7 @@ import '@/styles/globals.css';
 import { useEffect } from 'react';
 import { ThemeProvider } from 'next-themes';
 import { plausible } from '@/utils/analytics';
+import Seo from '@/components/Seo';
 
 function getNodeText(node) {
 	let text = '';
@@ -53,22 +54,13 @@ export default function App({ Component, pageProps }) {
 	}, []);
 
 	let title = pageProps.title || pageProps.markdoc?.frontmatter.title || 'WunderGraph';
-
-	let pageTitle =
-		pageProps.title ||
-		pageProps.markdoc?.frontmatter.pageTitle ||
-		`${pageProps.markdoc?.frontmatter.title || 'WunderGraph'} - Docs`;
-
 	let description = pageProps.description || pageProps.markdoc?.frontmatter.description;
 
 	let tableOfContents = pageProps.markdoc?.content ? collectHeadings(pageProps.markdoc.content) : [];
 
 	return (
 		<>
-			<Head>
-				<title>{pageTitle}</title>
-				{description && <meta name="description" content={description} />}
-			</Head>
+			<Seo title={title} description={description} />
 			<ThemeProvider attribute="class" enableSystem>
 				<Layout title={title} tableOfContents={tableOfContents} frontmatter={pageProps.markdoc?.frontmatter}>
 					<Component {...pageProps} />

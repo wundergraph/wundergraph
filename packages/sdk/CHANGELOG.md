@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.155.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.154.0...@wundergraph/sdk@0.155.0) (2023-05-09)
+
+### Features
+
+* official react-native and expo integration package ([#851](https://github.com/wundergraph/wundergraph/issues/851)) ([83e5231](https://github.com/wundergraph/wundergraph/commit/83e5231644ee540bd27097dec28b62589a5ebb7f)) (@Pagebakers)
+* support all HTTP methods in mocking library ([#945](https://github.com/wundergraph/wundergraph/issues/945)) ([21173e0](https://github.com/wundergraph/wundergraph/commit/21173e051045579209707703766790cdfc90ecfa)) (@StarpTech)
+
 ## [0.154.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.153.0...@wundergraph/sdk@0.154.0) (2023-05-09)
 
 ### Features
