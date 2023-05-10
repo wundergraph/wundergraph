@@ -14,7 +14,7 @@ instructions for setting it up and running.
 
 Examples are expected to include the following node scripts:
 
-    1. `postinstall` (optional, Development & CI): prepare the start e.g. by copying .env.example to .env
+    1. `postinstall` (optional, Development & CI): prepare the start e.g. by copying .env.example to .env.test
     2. `start`: (required, development) starts the example with a single command
     3. `start:services` (optional, Development & CI): start any local services (docker, additonal server) required by the example
     4. `wait-on:services` (optional, Development & CI): wait for the services to be ready

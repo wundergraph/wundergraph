@@ -1,6 +1,7 @@
 import { Client, CreateClientConfig } from '../client';
 import { Subprocess, wunderctl } from '../wunderctlexec';
 import { retry } from 'ts-retry-promise';
+import { join } from 'node:path';
 import terminate from 'terminate/promise';
 import { freeport } from './util';
 
@@ -38,12 +39,14 @@ export interface ServerOptions<ClientType extends Client = Client> {
 
 	/**
 	 * The WunderGraph directory to use.
+	 * By default, the current working directory is used.
 	 */
 	dir?: string;
 
 	/**
 	 * Additional environment variables to pass to the test server.
 	 * Existing environment variables are always inherited.
+	 * By default, the WunderGraph loads the `.env.test` file at the WunderGraph directory.
 	 *
 	 * @default None
 	 */
@@ -127,6 +130,10 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 
 			if (this.options.dir) {
 				cmd.push('--wundergraph-dir', this.options.dir);
+				// Overwrite --env option to not load .env for tests
+				cmd.push('--env', join(this.options.dir, '.env.test'));
+			} else {
+				cmd.push('--env', '.env.test');
 			}
 
 			subprocess = wunderctl({ cmd, env, stdio: 'inherit' });
@@ -141,7 +148,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		const health = this.url('/health');
 		const checkHealth = async () => {
 			const controller = new AbortController();
-			const id = setTimeout(() => controller.abort(), 5000);
+			const id = setTimeout(() => controller.abort(), 2000);
 			try {
 				const resp = await this.options.fetch(health, { signal: controller.signal });
 				if (resp.status == 200) {
@@ -154,7 +161,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			}
 		};
 		try {
-			await retry(checkHealth, { retries: 100 });
+			await retry(checkHealth, { retries: 100, delay: 100 });
 		} catch (e: any) {
 			await this.stopSubprocess(subprocess);
 			throw new Error(`could not start WunderGraph server: ${e}`);
