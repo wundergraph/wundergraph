@@ -67,7 +67,7 @@ describe('Operations', () => {
 		});
 
 		expect(result.error).toBeUndefined();
-		expect(result.data.greeting).toBeDefined();
+		expect(result.data?.greeting).toBeDefined();
 	});
 
 	it('should allow operation names with hyphens', async () => {
