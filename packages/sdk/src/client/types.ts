@@ -56,6 +56,7 @@ export interface ClientConfig {
 	baseURL: string;
 	sdkVersion?: string;
 	customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
+	customFetchOptions?: RequestInit;
 	extraHeaders?: Headers;
 	operationMetadata?: OperationMetadata;
 	/**
