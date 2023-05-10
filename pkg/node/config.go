@@ -3,7 +3,6 @@ package node
 import (
 	"fmt"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -81,26 +80,6 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 		defaultRequestTimeout = time.Duration(graphConfig.Api.NodeOptions.DefaultRequestTimeoutSeconds) * time.Second
 	}
 
-	var cacheConfig *wgpb.ApiCacheConfig
-	inMemoryCacheConfig := os.Getenv(wgInMemoryCacheConfigEnvKey)
-	if strings.ToLower(inMemoryCacheConfig) != "off" {
-		cacheSize := defaultInMemoryCacheSize
-		if inMemoryCacheConfig != "" {
-			cacheSize, err = units.RAMInBytes(inMemoryCacheConfig)
-			if err != nil {
-				return nil, fmt.Errorf("can't parse %s = %q: %w", wgInMemoryCacheConfigEnvKey, inMemoryCacheConfig, err)
-			}
-		}
-		if cacheSize > 0 {
-			cacheConfig = &wgpb.ApiCacheConfig{
-				Kind: wgpb.ApiCacheKind_IN_MEMORY_CACHE,
-				InMemoryConfig: &wgpb.InMemoryCacheConfig{
-					MaxSize: cacheSize,
-				},
-			}
-		}
-	}
-
 	var defaultHTTPProxyURL *url.URL
 	if defaultHTTPProxyURLString := loadvariable.String(graphConfig.Api.GetNodeOptions().GetDefaultHttpProxyUrl()); defaultHTTPProxyURLString != "" {
 		defaultHTTPProxyURL, err = url.Parse(defaultHTTPProxyURLString)
@@ -119,8 +98,8 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 			Operations:            graphConfig.Api.Operations,
 			InvalidOperationNames: graphConfig.Api.InvalidOperationNames,
 			CorsConfiguration:     graphConfig.Api.CorsConfiguration,
+			ApiConfigHash:         graphConfig.ConfigHash,
 			S3UploadConfiguration: graphConfig.Api.S3UploadConfiguration,
-			CacheConfig:           cacheConfig,
 			AuthenticationConfig:  graphConfig.Api.AuthenticationConfig,
 			Webhooks:              graphConfig.Api.Webhooks,
 			Options: &apihandler.Options{

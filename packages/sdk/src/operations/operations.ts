@@ -2,6 +2,25 @@ import { z } from 'zod';
 import * as fs from 'fs';
 import type { BaseRequestContext, InternalClient, OperationsClient, WunderGraphUser } from '../server';
 import { OperationError } from '../client';
+import {
+	LiveQueryConfiguration,
+	QueryCacheConfiguration as OperationQueryCacheConfiguration,
+} from '../configure/operations';
+export type { LiveQueryConfiguration } from '../configure/operations';
+
+export type QueryCacheConfiguration = Omit<OperationQueryCacheConfiguration, 'enable'>;
+
+const disabledLiveQueryConfiguration = {
+	enable: false,
+	pollingIntervalSeconds: 0,
+};
+
+const disabledCacheConfiguration = {
+	enable: false,
+	public: false,
+	maxAge: 0,
+	staleWhileRevalidate: 0,
+};
 
 export type SubscriptionHandler<
 	Input,
@@ -56,11 +75,6 @@ export interface BaseOperationConfiguration<UserRole extends string> {
 	};
 }
 
-export interface LiveQueryConfig {
-	enable: boolean;
-	pollingIntervalSeconds: number;
-}
-
 const createQuery =
 	<
 		IC extends InternalClient,
@@ -74,6 +88,7 @@ const createQuery =
 		response,
 		handler,
 		live,
+		cache,
 		requireAuthentication = false,
 		internal = false,
 		rbac,
@@ -89,7 +104,8 @@ const createQuery =
 			: (
 					ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, TCustomContext>
 			  ) => Promise<InferredResponse>;
-		live?: LiveQueryConfig;
+		live?: LiveQueryConfiguration;
+		cache?: QueryCacheConfiguration;
 	} & BaseOperationConfiguration<UserRole>): NodeJSOperation<
 		z.infer<Input>,
 		InferredResponse,
@@ -115,6 +131,11 @@ const createQuery =
 				requireMatchAny: rbac?.requireMatchAny || [],
 			},
 			errors,
+			cache: {
+				...disabledCacheConfiguration,
+				...cache,
+				enable: cache !== undefined,
+			},
 			liveQuery: {
 				enable: live?.enable || true,
 				pollingIntervalSeconds: live?.pollingIntervalSeconds || 5,
@@ -174,10 +195,8 @@ const createMutation =
 				requireMatchAny: rbac?.requireMatchAny || [],
 			},
 			errors,
-			liveQuery: {
-				enable: false,
-				pollingIntervalSeconds: 0,
-			},
+			liveQuery: disabledLiveQueryConfiguration,
+			cache: disabledCacheConfiguration,
 		};
 	};
 
@@ -236,10 +255,8 @@ const createSubscription =
 				requireMatchAny: rbac?.requireMatchAny || [],
 			},
 			errors,
-			liveQuery: {
-				enable: false,
-				pollingIntervalSeconds: 0,
-			},
+			liveQuery: disabledLiveQueryConfiguration,
+			cache: disabledCacheConfiguration,
 		};
 	};
 
@@ -296,10 +313,8 @@ export type NodeJSOperation<
 	errors?: { new (): OperationError }[];
 	requireAuthentication?: boolean;
 	internal: boolean;
-	liveQuery: {
-		enable: boolean;
-		pollingIntervalSeconds: number;
-	};
+	liveQuery: LiveQueryConfiguration;
+	cache: OperationQueryCacheConfiguration;
 	rbac: {
 		requireMatchAll: string[];
 		requireMatchAny: string[];

@@ -7,4 +7,9 @@ export default createOperation.query({
 	handler: async ({ input }) => {
 		return 'Hello I am ' + input.name;
 	},
+	cache: {
+		public: true,
+		maxAge: 60,
+		staleWhileRevalidate: 120,
+	},
 });
