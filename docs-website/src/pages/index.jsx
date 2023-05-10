@@ -24,6 +24,7 @@ import { NuxtLogo } from '@/components/logos/nuxt';
 import clsx from 'clsx';
 import { DiscordIcon } from '../components/logos/discord';
 import { GitHubIcon } from '../components/logos/github';
+import { ExpoLogo } from '@/components/logos/expo';
 
 const code = `npx create-wundergraph-app my-project -E nextjs \\ &&
 cd my-project && npm i && npm start`;
@@ -128,6 +129,13 @@ export default function HomePage() {
 						description="Learn how to use WunderGraph with Nuxt."
 						logo={<NuxtLogo />}
 						href="/docs/getting-started/nuxt-quickstart"
+						variant="plain"
+					/>
+					<QuickLink
+						title="Expo"
+						description="Learn how to use WunderGraph with Expo."
+						logo={<ExpoLogo />}
+						href="/docs/getting-started/expo-quickstart"
 						variant="plain"
 					/>
 				</QuickLinks>

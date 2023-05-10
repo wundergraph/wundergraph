@@ -67,6 +67,10 @@ const navigation = [
 						title: 'Nuxt',
 						href: '/docs/getting-started/nuxt-quickstart',
 					},
+					{
+						title: 'Expo',
+						href: '/docs/getting-started/expo-quickstart',
+					},
 				],
 			},
 			{

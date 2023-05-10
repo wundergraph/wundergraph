@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"os"
@@ -1729,7 +1730,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	flushWriter, ok := getHooksFlushWriter(ctx, r, w, h.hooksPipeline, h.log)
+	ctx, flushWriter, ok := getHooksFlushWriter(ctx, r, w, h.hooksPipeline, h.log)
 	if !ok {
 		http.Error(w, "Connection not flushable", http.StatusBadRequest)
 		return
@@ -1821,8 +1822,11 @@ func (f *httpFlushWriter) Flush() {
 	if f.hooksPipeline != nil {
 		postResolveResponse, err := f.hooksPipeline.PostResolve(f.resolveContext, nil, f.request, resp)
 		if err != nil {
+			if errors.Is(err, context.Canceled) {
+				return
+			}
 			if f.logger != nil {
-				f.logger.Error("subscription preResolve hooks", zap.Error(err))
+				f.logger.Error("subscription postResolve hooks", zap.Error(err))
 			}
 		} else {
 			resp = postResolveResponse.Data
@@ -2443,19 +2447,19 @@ func setSubscriptionHeaders(w http.ResponseWriter) {
 	w.Header().Set("X-Accel-Buffering", "no")
 }
 
-func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter, pipeline *hooks.SubscriptionOperationPipeline, logger *zap.Logger) (*httpFlushWriter, bool) {
+func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter, pipeline *hooks.SubscriptionOperationPipeline, logger *zap.Logger) (*resolve.Context, *httpFlushWriter, bool) {
 	var flushWriter *httpFlushWriter
 	var ok bool
 	ctx, flushWriter, ok = getFlushWriter(ctx, ctx.Variables, r, w)
 	if !ok {
-		return nil, false
+		return nil, nil, false
 	}
 
 	flushWriter.resolveContext = ctx
 	flushWriter.request = r
 	flushWriter.hooksPipeline = pipeline
 	flushWriter.logger = logger
-	return flushWriter, true
+	return ctx, flushWriter, true
 }
 
 func getFlushWriter(ctx *resolve.Context, variables []byte, r *http.Request, w http.ResponseWriter) (*resolve.Context, *httpFlushWriter, bool) {
@@ -2502,7 +2506,9 @@ func handleOperationErr(log *zap.Logger, err error, w http.ResponseWriter, error
 		w.WriteHeader(499)
 		return true
 	}
-	if errors.Is(err, context.DeadlineExceeded) {
+	// This detects all timeout errors, including context.DeadlineExceeded
+	var ne net.Error
+	if errors.As(err, &ne) && ne.Timeout() {
 		// request timeout exceeded
 		log.Error("request timeout exceeded",
 			zap.String("operationName", operation.Name),

@@ -83,6 +83,7 @@ import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations
 import zodToJsonSchema from 'zod-to-json-schema';
 import { GenerateConfig, OperationsGenerationConfig } from './codegeneration';
 import { generateOperations } from '../codegen/generateoperations';
+import templates from '../codegen/templates';
 
 const utf8 = 'utf8';
 const generated = 'generated';
@@ -435,7 +436,9 @@ const resolveConfig = async (
 	// Generate the promises first, then await them all at once
 	// to run them in parallel
 	const generators = await Promise.all(config.apis);
-	const resolvedApis = await Promise.all(generators.map((generator) => generator(apiIntrospectionOptions)));
+	const resolvedApis = await Promise.all(
+		generators.map((generator, index) => generator({ ...apiIntrospectionOptions, apiID: index.toString() }))
+	);
 
 	if (WG_DATA_SOURCE_POLLING_MODE) {
 		// To avoid having to deal with different return types, exit here when running in
@@ -1040,7 +1043,13 @@ export const configureWunderGraphApplication = <
 				}
 			}
 
-			const combined = [...(config.generate?.codeGenerators || []), ...(config.codeGenerators || [])];
+			const defaultCodeGenerators: CodeGen = { templates: [...templates.typescript.all] };
+
+			const combined = [
+				defaultCodeGenerators,
+				...(config.generate?.codeGenerators || []),
+				...(config.codeGenerators || []),
+			];
 			for (let i = 0; i < combined.length; i++) {
 				const gen = combined[i];
 				await GenerateCode({
