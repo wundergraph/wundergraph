@@ -9,6 +9,10 @@ class MyCustomContext {
 	}
 }
 
+const myCreateContext = async (req: ContextFactoryContext) => {
+	return new MyCustomContext();
+};
+
 export default configureWunderGraphServer(() => ({
 	hooks: {
 		queries: {
@@ -27,20 +31,27 @@ export default configureWunderGraphServer(() => ({
 					};
 				},
 			},
-			CustomcontextGraphql: {
-				mutatingPostResolve: async ({ context }) => {
-					return {
-						data: context.hello(),
-					};
-				},
-			},
+			// CustomcontextGraphql: {
+			// 	mutatingPostResolve: async ({ context }) => {
+			// 		return {
+			// 			data: context.hello(),
+			// 		};
+			// 	},
+			// },
 		},
 		mutations: {},
 	},
-	//createContext: async (): Promise<MyCustomContext> => {
-	createContext: async (): Promise<MyCustomContext> => {
+	// This works, declaring return type makes no difference
+	createContext: async () => {
 		return new MyCustomContext();
 	},
+	// This works
+	//createContext: myCreateContext,
+	// This does NOT work, regardless of the declared return type
+	// unless we use configureWunderGraphServer<MyCustomContext>
+	// createContext: async (req): Promise<MyCustomContext> => {
+	// 	return new MyCustomContext();
+	// },
 	graphqlServers: [
 		{
 			apiNamespace: 'embedded',
