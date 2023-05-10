@@ -47,7 +47,7 @@ export interface MockRequestOptions<Response = any> extends Omit<RequestMock<Res
 
 export interface AssertConnectOptions<Response = any> extends Omit<ConnectMock, 'scope' | 'type'> {}
 
-export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 
 export interface UrlParts {
 	/**
