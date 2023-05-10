@@ -36,7 +36,7 @@ export interface GraphQLExecutionContext<TCustomContext = any> {
 
 declare module "@wundergraph/sdk/server" {
 	export function configureWunderGraphServer<
-		TCustomContext,
+		TCustomContext = any,
 		TContextFactoryContext extends ContextFactoryContext = ContextFactoryContext,
 		GeneratedHooksConfig = HooksConfig<TCustomContext>,
 		GeneratedInternalClient = InternalClient,
