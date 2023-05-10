@@ -90,41 +90,6 @@ export function authProviderKindToJSON(object: AuthProviderKind): string {
   }
 }
 
-export enum ApiCacheKind {
-  NO_CACHE = 0,
-  IN_MEMORY_CACHE = 1,
-  REDIS_CACHE = 2,
-}
-
-export function apiCacheKindFromJSON(object: any): ApiCacheKind {
-  switch (object) {
-    case 0:
-    case "NO_CACHE":
-      return ApiCacheKind.NO_CACHE;
-    case 1:
-    case "IN_MEMORY_CACHE":
-      return ApiCacheKind.IN_MEMORY_CACHE;
-    case 2:
-    case "REDIS_CACHE":
-      return ApiCacheKind.REDIS_CACHE;
-    default:
-      throw new globalThis.Error("Unrecognized enum value " + object + " for enum ApiCacheKind");
-  }
-}
-
-export function apiCacheKindToJSON(object: ApiCacheKind): string {
-  switch (object) {
-    case ApiCacheKind.NO_CACHE:
-      return "NO_CACHE";
-    case ApiCacheKind.IN_MEMORY_CACHE:
-      return "IN_MEMORY_CACHE";
-    case ApiCacheKind.REDIS_CACHE:
-      return "REDIS_CACHE";
-    default:
-      throw new globalThis.Error("Unrecognized enum value " + object + " for enum ApiCacheKind");
-  }
-}
-
 export enum OperationExecutionEngine {
   ENGINE_GRAPHQL = 0,
   ENGINE_NODEJS = 1,
@@ -807,20 +772,6 @@ export interface OpenIDConnectAuthProviderConfig {
   queryParameters: OpenIDConnectQueryParameter[];
 }
 
-export interface ApiCacheConfig {
-  kind: ApiCacheKind;
-  inMemoryConfig: InMemoryCacheConfig | undefined;
-  redisConfig: RedisCacheConfig | undefined;
-}
-
-export interface InMemoryCacheConfig {
-  maxSize: number;
-}
-
-export interface RedisCacheConfig {
-  redisUrlEnvVar: string;
-}
-
 export interface Operation {
   name: string;
   content: string;
@@ -1117,6 +1068,7 @@ export interface WunderGraphConfiguration {
   apiId: string;
   environmentIds: string[];
   dangerouslyEnableGraphQLEndpoint: boolean;
+  configHash: string;
 }
 
 export interface S3UploadProfileHooksConfiguration {
@@ -1682,86 +1634,6 @@ export const OpenIDConnectAuthProviderConfig = {
       ? ConfigurationVariable.fromPartial(object.clientSecret)
       : undefined;
     message.queryParameters = object.queryParameters?.map((e) => OpenIDConnectQueryParameter.fromPartial(e)) || [];
-    return message;
-  },
-};
-
-function createBaseApiCacheConfig(): ApiCacheConfig {
-  return { kind: 0, inMemoryConfig: undefined, redisConfig: undefined };
-}
-
-export const ApiCacheConfig = {
-  fromJSON(object: any): ApiCacheConfig {
-    return {
-      kind: isSet(object.kind) ? apiCacheKindFromJSON(object.kind) : 0,
-      inMemoryConfig: isSet(object.inMemoryConfig) ? InMemoryCacheConfig.fromJSON(object.inMemoryConfig) : undefined,
-      redisConfig: isSet(object.redisConfig) ? RedisCacheConfig.fromJSON(object.redisConfig) : undefined,
-    };
-  },
-
-  toJSON(message: ApiCacheConfig): unknown {
-    const obj: any = {};
-    message.kind !== undefined && (obj.kind = apiCacheKindToJSON(message.kind));
-    message.inMemoryConfig !== undefined &&
-      (obj.inMemoryConfig = message.inMemoryConfig ? InMemoryCacheConfig.toJSON(message.inMemoryConfig) : undefined);
-    message.redisConfig !== undefined &&
-      (obj.redisConfig = message.redisConfig ? RedisCacheConfig.toJSON(message.redisConfig) : undefined);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<ApiCacheConfig>, I>>(object: I): ApiCacheConfig {
-    const message = createBaseApiCacheConfig();
-    message.kind = object.kind ?? 0;
-    message.inMemoryConfig = (object.inMemoryConfig !== undefined && object.inMemoryConfig !== null)
-      ? InMemoryCacheConfig.fromPartial(object.inMemoryConfig)
-      : undefined;
-    message.redisConfig = (object.redisConfig !== undefined && object.redisConfig !== null)
-      ? RedisCacheConfig.fromPartial(object.redisConfig)
-      : undefined;
-    return message;
-  },
-};
-
-function createBaseInMemoryCacheConfig(): InMemoryCacheConfig {
-  return { maxSize: 0 };
-}
-
-export const InMemoryCacheConfig = {
-  fromJSON(object: any): InMemoryCacheConfig {
-    return { maxSize: isSet(object.maxSize) ? Number(object.maxSize) : 0 };
-  },
-
-  toJSON(message: InMemoryCacheConfig): unknown {
-    const obj: any = {};
-    message.maxSize !== undefined && (obj.maxSize = Math.round(message.maxSize));
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<InMemoryCacheConfig>, I>>(object: I): InMemoryCacheConfig {
-    const message = createBaseInMemoryCacheConfig();
-    message.maxSize = object.maxSize ?? 0;
-    return message;
-  },
-};
-
-function createBaseRedisCacheConfig(): RedisCacheConfig {
-  return { redisUrlEnvVar: "" };
-}
-
-export const RedisCacheConfig = {
-  fromJSON(object: any): RedisCacheConfig {
-    return { redisUrlEnvVar: isSet(object.redisUrlEnvVar) ? String(object.redisUrlEnvVar) : "" };
-  },
-
-  toJSON(message: RedisCacheConfig): unknown {
-    const obj: any = {};
-    message.redisUrlEnvVar !== undefined && (obj.redisUrlEnvVar = message.redisUrlEnvVar);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<RedisCacheConfig>, I>>(object: I): RedisCacheConfig {
-    const message = createBaseRedisCacheConfig();
-    message.redisUrlEnvVar = object.redisUrlEnvVar ?? "";
     return message;
   },
 };
@@ -3472,7 +3344,7 @@ export const ArgumentConfiguration = {
 };
 
 function createBaseWunderGraphConfiguration(): WunderGraphConfiguration {
-  return { api: undefined, apiId: "", environmentIds: [], dangerouslyEnableGraphQLEndpoint: false };
+  return { api: undefined, apiId: "", environmentIds: [], dangerouslyEnableGraphQLEndpoint: false, configHash: "" };
 }
 
 export const WunderGraphConfiguration = {
@@ -3484,6 +3356,7 @@ export const WunderGraphConfiguration = {
       dangerouslyEnableGraphQLEndpoint: isSet(object.dangerouslyEnableGraphQLEndpoint)
         ? Boolean(object.dangerouslyEnableGraphQLEndpoint)
         : false,
+      configHash: isSet(object.configHash) ? String(object.configHash) : "",
     };
   },
 
@@ -3498,6 +3371,7 @@ export const WunderGraphConfiguration = {
     }
     message.dangerouslyEnableGraphQLEndpoint !== undefined &&
       (obj.dangerouslyEnableGraphQLEndpoint = message.dangerouslyEnableGraphQLEndpoint);
+    message.configHash !== undefined && (obj.configHash = message.configHash);
     return obj;
   },
 
@@ -3509,6 +3383,7 @@ export const WunderGraphConfiguration = {
     message.apiId = object.apiId ?? "";
     message.environmentIds = object.environmentIds?.map((e) => e) || [];
     message.dangerouslyEnableGraphQLEndpoint = object.dangerouslyEnableGraphQLEndpoint ?? false;
+    message.configHash = object.configHash ?? "";
     return message;
   },
 };
