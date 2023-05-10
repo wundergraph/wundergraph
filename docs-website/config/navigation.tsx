@@ -438,8 +438,8 @@ const navigation = [
 						href: '/docs/guides/extend-third-party-graphql-apis',
 					},
 					{
-						title: 'Use a custom context',
-						href: '/docs/guides/custom-context',
+						title: 'Extend the WunderGraph server context',
+						href: '/docs/guides/context-factory',
 					},
 				],
 			},
