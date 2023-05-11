@@ -32,12 +32,3 @@ npm run dev:remix
 Open up [http://localhost:3000](http://localhost:3000) and you should be ready to go!
 
 If you're used to using the `vercel dev` command provided by [Vercel CLI](https://vercel.com/cli) instead, you can also use that, but it's not needed.
-
-## Test the API
-
-1. (Optional) Copy the `.env.example` file to `.env.test` and fill in the required values.
-2. Run the following command:
-
-```shell
-npm run test
-```

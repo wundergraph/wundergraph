@@ -65,11 +65,8 @@ if test ${update_package_json} = "yes"; then
 fi
 
 # If we have an example .env.example file
-# copy it to .env and .env.test to use default values in the CI
-if test -f .env.example ; then
-	# For generate
-	cp -n .env.example .env
-	# For testing
+# copy it to .env.test to use default values in the CI
+if test -f .env.example && ! test -f .env.test; then
 	cp -n .env.example .env.test
 fi
 
