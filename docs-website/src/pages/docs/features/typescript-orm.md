@@ -4,11 +4,28 @@ pageTitle: WunderGraph - Features - TypeScript ORM
 description: The TypeScript ORM allows you to access data sources fluently from TypeScript
 ---
 
+The data sources that you add to your WunderGraph application can be accessed via. our purpose-built TypeScript ORM (object-relational mapper).
+
+## Setup
+
 {% callout type="warning" %}
 Our ORM is currently alpha so expect bugs and API changes. Please report bugs and feature requests on [GitHub](https://github.com/wundergraph/wundergraph/issues/new/choose) 🙏
 {% /callout %}
 
-The data sources that you add to your WunderGraph application can be accessed via. our purpose-built TypeScript ORM (object-relational mapper).
+Since the ORM is experimental you must explicitly opt-in to said functionality. Set `experimental.orm` to `true` in your `wundergraph.config.ts`.
+
+```typescript
+import { configureWunderGraphApplication } from '@wundergraph/sdk';
+
+configureWunderGraphApplication({
+  // ...
+  experimental: {
+    // The ORM will now be available to your operation handlers
+    // on the `graph` reference!
+    orm: true,
+  },
+});
+```
 
 ## Operations
 
@@ -43,11 +60,7 @@ const user = await graph
 Stream operations are specified via. the `subscribe` method. For example,
 
 ```typescript
-const userUpdates = await graph
-  .from('foo')
-  .subscribe('userUpdated')
-  .where({ id: 'abc' })
-  .exec();
+const userUpdates = await graph.from('foo').subscribe('userUpdated').where({ id: 'abc' }).exec();
 
 for (const user of userUpdates) {
   // => { id: 'abc', name: { first: 'John', last: 'Cena' }, createdAt: '2023-04-16T09:34:37.192Z' }
@@ -63,8 +76,8 @@ const result = await graph
   .from('people')
   .query('user')
   .select('id', 'firstName', 'friends.firstName', 'friends.lastName')
-  .where({ id: 'abc', fiends: { limit: 1 }})
-  .exec()
+  .where({ id: 'abc', fiends: { limit: 1 } })
+  .exec();
 
 // => { id: 'abc', firstName: 'John', friends: [{ firstName: 'Hulk', lastName: 'Hogan' }] }
 ```

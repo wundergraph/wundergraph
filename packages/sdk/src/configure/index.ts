@@ -131,6 +131,9 @@ export interface WunderGraphConfigApplicationConfig<
 	authorization?: {
 		roles?: string[];
 	};
+	experimental?: {
+		orm?: boolean;
+	};
 	authentication?: {
 		cookieBased?: {
 			providers: AuthenticationProvider[];
@@ -347,6 +350,9 @@ export interface ResolvedWunderGraphConfig {
 	webhooks: WebhookConfiguration[];
 	nodeOptions: ResolvedNodeOptions;
 	serverOptions?: ResolvedServerOptions;
+	experimental: {
+		orm: boolean;
+	};
 }
 
 export interface CodeGenerationConfig {
@@ -525,6 +531,9 @@ const resolveConfig = async (
 		webhooks: [],
 		nodeOptions: resolvedNodeOptions,
 		serverOptions: resolvedServerOptions,
+		experimental: {
+			orm: config.experimental?.orm ?? false,
+		},
 	};
 
 	const appConfig = config.links ? addLinks(resolvedConfig, config.links) : resolvedConfig;
@@ -1222,6 +1231,9 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 				};
 			}),
 			corsConfiguration: config.application.CorsConfiguration,
+			experimentalConfig: {
+				orm: config.experimental.orm ?? false,
+			},
 			authenticationConfig: {
 				cookieBased: {
 					providers: config.authentication.cookieBased,

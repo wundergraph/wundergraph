@@ -506,6 +506,9 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 					allowedHostNames: [],
 				},
 				interpolateVariableDefinitionAsJSON: [],
+				experimental: {
+					orm: false,
+				},
 			},
 			templates,
 		},

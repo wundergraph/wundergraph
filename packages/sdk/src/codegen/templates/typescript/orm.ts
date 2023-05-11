@@ -14,10 +14,9 @@ import path from 'node:path';
 
 import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { CodeGenerationConfig } from '../../../configure';
-import { resolveConfigurationVariable } from '../../../configure/variables';
 import { Logger } from '../../../logger';
 import { formatTypeScript } from './index';
-import { schemasTemplate, ormTemplate } from './orm.template';
+import { schemasTemplate, ormTemplate, emptyOrm } from './orm.template';
 
 import Handlebars from 'handlebars';
 
@@ -67,17 +66,38 @@ export class ORM implements Template {
 	static BUILD_INFO_FILENAME = 'orm.build_info.json';
 
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		// record the checksum of the WunderGraph schema we last generated the ORM for
+		const buildInfo = {
+			schemaSha256: generationConfig.config.application.EngineConfiguration.schemaSha256,
+			disabled: !generationConfig.config.experimental.orm,
+		};
+
+		if (!generationConfig.config.experimental.orm) {
+			Logger.warn('To enable the ORM set `experimental.orm` to `true` in your `wundergraph.config.ts`.');
+			return Promise.resolve([
+				{
+					path: `orm/${ORM.BUILD_INFO_FILENAME}`,
+					content: JSON.stringify(buildInfo),
+				},
+				{
+					path: 'orm/index.ts',
+					content: formatTypeScript(emptyOrm),
+					header: doNotEditHeader,
+				},
+			]);
+		}
+
 		// path to directory containing generated TypeScript
 		const outputPath = path.join(generationConfig.wunderGraphDir, generationConfig.outPath, ORM.MODULE_DIR);
 		const buildInfoPath = path.join(outputPath, ORM.BUILD_INFO_FILENAME);
 
 		const currentSchemaSha256 = generationConfig.config.application.EngineConfiguration.schemaSha256;
-		const lastGeneratedWithSha256: string | null = fs.existsSync(buildInfoPath)
-			? JSON.parse(fs.readFileSync(buildInfoPath, 'utf-8')).schemaSha256
-			: null;
+		const existinBuildInfo = fs.existsSync(buildInfoPath) ? JSON.parse(fs.readFileSync(buildInfoPath, 'utf-8')) : null;
+		const regenerate = existinBuildInfo?.disabled == true;
+		const lastGeneratedWithSha256: string | null = existinBuildInfo?.schemaSha256 ?? null;
 
 		// quik way to skip regenerating the orm when there's no API changes
-		if (lastGeneratedWithSha256 && lastGeneratedWithSha256 === currentSchemaSha256) {
+		if (!regenerate && lastGeneratedWithSha256 && lastGeneratedWithSha256 === currentSchemaSha256) {
 			Logger.info('Skipping ORM code generation.');
 			return Promise.resolve([]);
 		}
@@ -105,9 +125,6 @@ export class ORM implements Template {
 		// generate the pre-configured ORM client
 		const schemasIndex = Handlebars.compile(schemasTemplate)({ namespaces });
 		const orm = Handlebars.compile(ormTemplate)({ namespaces });
-
-		// record the checksum of the WunderGraph schema we last generated the ORM for
-		const buildInfo = { schemaSha256: generationConfig.config.application.EngineConfiguration.schemaSha256 };
 
 		return Promise.resolve([
 			...schemas,

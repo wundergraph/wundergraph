@@ -409,19 +409,24 @@ export const createServer = async ({
 		const operationsConfigFile = fs.readFileSync(operationsFilePath, 'utf-8');
 		const operationsConfig = JSON.parse(operationsConfigFile) as LoadOperationsOutput;
 
-		// @todo only import if `config.experimental.orm` is `true`
 		const ormModulePath = path.join(wundergraphDir, 'generated', 'bundle', 'orm.cjs');
 		// the orm module simply provides (code generated) TypeScript representations of our API schemas
-		const ormModule = await import(ormModulePath);
-
-		console.log('#nodeInternalURL', nodeInternalURL);
-		const orm = new ORM({
-			apis: ormModule.SCHEMAS,
-			executor: new NamespacingExecutor({
-				requestContext,
-				baseUrl: nodeInternalURL,
-			}),
-		});
+		const ormModule = config.api?.experimentalConfig?.orm ? await import(ormModulePath) : null;
+		const orm = ormModule
+			? new ORM({
+					apis: ormModule.SCHEMAS,
+					executor: new NamespacingExecutor({
+						requestContext,
+						baseUrl: nodeInternalURL,
+					}),
+			  })
+			: ({
+					from() {
+						throw new Error(
+							`ORM is not enabled for your application. Set "experimental.orm" to "true" in your \`wundergraph.config.ts\` to enable.`
+						);
+					},
+			  } as any);
 
 		if (
 			operationsConfig &&

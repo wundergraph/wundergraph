@@ -1109,6 +1109,7 @@ export interface UserDefinedApi {
   invalidOperationNames: string[];
   corsConfiguration: CorsConfiguration | undefined;
   authenticationConfig: ApiAuthenticationConfig | undefined;
+  experimentalConfig: ExperimentalConfig | undefined
   s3UploadConfiguration: S3UploadConfiguration[];
   allowedHostNames: ConfigurationVariable[];
   webhooks: WebhookConfiguration[];
@@ -1242,6 +1243,40 @@ export interface BuildInfoStats {
   totalWebhooks: number;
   hasAuthenticationProvider: boolean;
   hasUploadProvider: boolean;
+}
+
+export interface ExperimentalConfig {
+  orm: boolean | undefined
+}
+
+function createBaseExperimentalConfiguration(): ExperimentalConfig {
+  return { orm: undefined }
+}
+
+export const ExperimentalConfig = {
+  fromJSON(object: any): ExperimentalConfig {
+    return {
+      orm: isSet(object.orm) ? object.orm : undefined,
+    };
+  },
+
+  toJSON(message: ExperimentalConfig): unknown {
+    const obj: any = {};
+
+    if (message.orm !== undefined) {
+      obj.orm = message.orm
+    }
+
+    return obj
+  },
+
+  fromPartial<I extends Exact<DeepPartial<ExperimentalConfig>, I>>(object: I): ExperimentalConfig {
+    const message = createBaseExperimentalConfiguration();
+    if (object.orm !== undefined) {
+      message.orm = message.orm
+    }
+    return message;
+  },
 }
 
 function createBaseApiAuthenticationConfig(): ApiAuthenticationConfig {
@@ -3618,6 +3653,7 @@ function createBaseUserDefinedApi(): UserDefinedApi {
     webhooks: [],
     serverOptions: undefined,
     nodeOptions: undefined,
+    experimentalConfig: undefined
   };
 }
 
@@ -3649,6 +3685,7 @@ export const UserDefinedApi = {
         : [],
       serverOptions: isSet(object.serverOptions) ? ServerOptions.fromJSON(object.serverOptions) : undefined,
       nodeOptions: isSet(object.nodeOptions) ? NodeOptions.fromJSON(object.nodeOptions) : undefined,
+      experimentalConfig: isSet(object.experimentalConfig) ? ExperimentalConfig.fromJSON(object) : undefined
     };
   },
 
