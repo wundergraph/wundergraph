@@ -9,7 +9,7 @@ export type {
 	BaseRequestContext,
 	ClientRequest,
 	ClientRequestHeaders,
-	InternalContextFactoryRequest,
+	InternalCreateRequestContextData,
 	PostUploadHookRequest,
 	PostUploadHookResponse,
 	PreUploadHookRequest,
@@ -69,7 +69,7 @@ export type { FastifyLoggerInstance } from 'fastify';
 
 // Implementations
 
-export { configureWunderGraphServer, createContext } from './server';
+export { configureWunderGraphServer, createRequestContext } from './server';
 
 export { GithubWebhookVerifier, CreateWebhookVerifier, WebhookVerifierKind } from '../webhooks/verifiers';
 export { createWebhookFactory } from '../webhooks/factory';

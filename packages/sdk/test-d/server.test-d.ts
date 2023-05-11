@@ -2,7 +2,7 @@ import { expectType } from 'tsd';
 import {
 	BaseRequestContext,
 	HooksConfiguration,
-	InternalContextFactoryRequest,
+	InternalCreateRequestContextData,
 	PreUploadHookRequest,
 	PreUploadHookResponse,
 	PostUploadHookRequest,
@@ -34,7 +34,8 @@ export type DataSources = 'counter';
 export interface HookContext<TCustomContext>
 	extends BaseRequestContext<User, InternalClient, OperationsClient, TCustomContext> {}
 
-export interface ContextFactoryRequest extends InternalContextFactoryRequest<User, InternalClient, OperationsClient> {}
+export interface CreateRequestContextData
+	extends InternalCreateRequestContextData<User, InternalClient, OperationsClient> {}
 
 export type HooksConfig<TCustomContext> = HooksConfiguration<
 	QueryHooks<TCustomContext>,
@@ -74,19 +75,27 @@ export interface UploadHooks<TCustomContext> {
 	withoutProfiles?: {};
 }
 
-class MyCustomContext {
-	hello() {
-		return 'world';
+class MyGlobalContext {
+	whoami() {
+		return 'global';
 	}
 }
 
-type ContextFactory = (req: ContextFactoryRequest) => Promise<MyCustomContext>;
+class MyRequestContext {
+	whoami() {
+		return 'request';
+	}
+}
+
+//type ContextFactory = (req: ContextFactoryRequest) => Promise<MyCustomContext>;
 
 const configuration = configureWunderGraphServer<
-	HooksConfig<MyCustomContext>,
+	HooksConfig<MyRequestContext>,
 	InternalClient,
 	WebhooksConfig,
-	ContextFactory
+	MyGlobalContext,
+	MyRequestContext,
+	CreateRequestContextData
 >(() => ({
 	hooks: {
 		global: {
@@ -178,10 +187,22 @@ const configuration = configureWunderGraphServer<
 			},
 		},
 	},
-	createContext: async (_) => {
-		return new MyCustomContext();
+	createGlobalContext: async () => {
+		return new MyGlobalContext();
+	},
+	releaseGlobalContext: async (ctx) => {
+		expectType<MyGlobalContext>(ctx);
+	},
+	createRequestContext: async (data, ctx) => {
+		expectType<CreateRequestContextData>(data);
+		expectType<MyGlobalContext>(ctx);
+		return new MyRequestContext();
 	},
 }));
 
-expectType<WunderGraphHooksAndServerConfig<any, any, ContextFactory>>(configuration);
-expectType<(req: ContextFactoryRequest) => Promise<MyCustomContext>>(configuration.createContext!);
+expectType<WunderGraphHooksAndServerConfig<any, any, MyGlobalContext, MyRequestContext, CreateRequestContextData>>(
+	configuration
+);
+expectType<(data: CreateRequestContextData, ctx: MyGlobalContext) => Promise<MyRequestContext>>(
+	configuration.createRequestContext!
+);

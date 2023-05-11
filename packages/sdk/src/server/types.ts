@@ -68,12 +68,12 @@ export interface FastifyRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
 	InternalOperationsClient extends OperationsClient = OperationsClient,
-	CustomContext = any
+	TRequestContext = any
 > {
-	ctx: AuthenticationHookRequest<BaseRequestContext<User, IC, InternalOperationsClient>>;
+	ctx: AuthenticationHookRequest<BaseRequestContext<User, IC, InternalOperationsClient, TRequestContext>>;
 }
 
-export interface InternalContextFactoryRequest<
+export interface InternalCreateRequestContextData<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
 	InternalOperationsClient extends OperationsClient = OperationsClient
@@ -105,7 +105,7 @@ export interface BaseRequestContext<
 	IC extends InternalClient = InternalClient,
 	InternalOperationsClient extends OperationsClient = OperationsClient,
 	CustomContext = any
-> extends InternalContextFactoryRequest<User, IC, InternalOperationsClient> {
+> extends InternalCreateRequestContextData<User, IC, InternalOperationsClient> {
 	/**
 	 * Custom context
 	 */
@@ -237,27 +237,39 @@ export interface ServerRunOptions {
 	clientFactory: InternalClientFactory;
 }
 
+export type DefaultRequestContextFactory = (ctx: any) => void;
+
 export interface WunderGraphServerConfig<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig,
-	TContextFactory extends DefaultContextFactory = DefaultContextFactory
+	TGlobalContext = any,
+	TRequestContext = any,
+	TRequestContextData = any
 > {
 	webhooks?: GeneratedWebhooksConfig;
 	hooks?: GeneratedHooksConfig;
 	// routeUrl is set internally
 	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
 	options?: ServerOptions;
-	createContext?: TContextFactory;
+	createGlobalContext?: () => Promise<TGlobalContext>;
+	releaseGlobalContext?: (ctx: TGlobalContext) => Promise<void>;
+	createRequestContext?: (data: TRequestContextData, ctx: TGlobalContext) => Promise<TRequestContext>;
 }
-
-export type DefaultContextFactory = (ctx: any) => void;
 
 // internal representation of the fully resolved server config
 export interface WunderGraphHooksAndServerConfig<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig,
-	TContextFactory extends DefaultContextFactory = DefaultContextFactory
-> extends WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TContextFactory> {
+	TGlobalContext = any,
+	TRequestContext = any,
+	TRequestContextData = any
+> extends WunderGraphServerConfig<
+		GeneratedHooksConfig,
+		GeneratedWebhooksConfig,
+		TGlobalContext,
+		TRequestContext,
+		TRequestContextData
+	> {
 	webhooks?: GeneratedWebhooksConfig;
 	hooks?: GeneratedHooksConfig;
 	graphqlServers?: GraphQLServerConfig[];

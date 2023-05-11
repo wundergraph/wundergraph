@@ -2,7 +2,7 @@ import { FastifyPluginAsync } from 'fastify';
 import path from 'path';
 import { Webhook, WebhookHeaders, WebhookQuery } from '../../webhooks/types';
 import { Headers } from '@web-std/fetch';
-import type { InternalContextFactoryRequest, RequestMethod } from '../types';
+import type { InternalCreateRequestContextData, RequestMethod } from '../types';
 import type { WebhookConfiguration } from '@wundergraph/protobuf';
 import type { InternalClientFactory } from '../internal-client';
 import process from 'node:process';
@@ -17,7 +17,8 @@ interface FastifyWebHooksOptions {
 	webhooks: WebhookConfiguration[];
 	internalClientFactory: InternalClientFactory;
 	nodeURL: string;
-	createContext: (ctx: InternalContextFactoryRequest) => Promise<any>;
+	globalContext: any;
+	createRequestContext: (globalContext: any, data: InternalCreateRequestContextData) => Promise<any>;
 }
 
 const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async (fastify, config) => {
@@ -43,7 +44,7 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 							baseURL: config.nodeURL,
 							clientRequest,
 						});
-						const createContextCtx = {
+						const createRequestContextData = {
 							log: request.log.child({ webhook: hook.name }),
 							internalClient: config.internalClientFactory({}, clientRequest),
 							operations: operationClient,
@@ -58,8 +59,8 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 								query: (request.query as WebhookQuery) || {},
 							},
 							{
-								...createContextCtx,
-								context: await config.createContext(createContextCtx),
+								...createRequestContextData,
+								context: await config.createRequestContext(config.globalContext, createRequestContextData),
 							}
 						);
 

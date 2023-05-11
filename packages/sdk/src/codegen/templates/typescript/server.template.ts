@@ -7,7 +7,7 @@ import type { InternalOperationsClient } from "./wundergraph.internal.operations
 import type { CustomClaims } from "./claims";
 import type {
 	BaseRequestContext,
-	InternalContextFactoryRequest,
+	InternalCreateRequestContextData,
 	GraphQLServerConfig,
 	WunderGraphUser,
 	WunderGraphServerConfig,
@@ -18,7 +18,7 @@ export type Role = {{{ roleDefinitions }}};
 
 export interface User extends WunderGraphUser<Role, CustomClaims> {}
 
-export interface ContextFactoryRequest extends InternalContextFactoryRequest<User, InternalClient, InternalOperationsClient> {}
+export interface CreateRequestContextData extends InternalCreateRequestContextData<User, InternalClient, InternalOperationsClient> {}
 
 export interface Config<TCustomContext> {
     hooks: HooksConfig<TCustomContext>;
@@ -35,13 +35,14 @@ export interface GraphQLExecutionContext<TCustomContext = any> {
 }
 
 declare module "@wundergraph/sdk/server" {
-	export function configureWunderGraphServer<TCustomContext = any>(
+	export function configureWunderGraphServer<TRequestContext = any, TGlobalContext = any>(
 		configWrapper: () => WunderGraphServerConfig<
-			HooksConfig<TCustomContext>,
+			HooksConfig<TRequestContext>,
 			WebhooksConfig,
-			(req: ContextFactoryRequest) => Promise<TCustomContext>
+			TGlobalContext,
+			TRequestContext,
+			CreateRequestContextData
 		>
-	): WunderGraphHooksAndServerConfig<any, any, (req: ContextFactoryRequest) => Promise<TCustomContext>>;
+	): WunderGraphHooksAndServerConfig<any, any, TGlobalContext, TRequestContext, CreateRequestContextData>;
 }
-
 `;

@@ -7,13 +7,14 @@ import { HandlerContext } from '../../operations/operations';
 import process from 'node:process';
 import { OperationsClient } from '../operations-client';
 import { InternalError, OperationError } from '../../client/errors';
-import { InternalContextFactoryRequest } from '../types';
+import { InternalCreateRequestContextData } from '../types';
 
 interface FastifyFunctionsOptions {
 	operations: TypeScriptOperationFile[];
 	internalClientFactory: InternalClientFactory;
 	nodeURL: string;
-	createContext: (ctx: InternalContextFactoryRequest) => Promise<any>;
+	globalContext: any;
+	createContext: (globalContext: any, data: InternalCreateRequestContextData) => Promise<any>;
 }
 
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {
@@ -46,7 +47,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							baseURL: config.nodeURL,
 							clientRequest,
 						});
-						const createContextCtx = {
+						const createRequestContextData = {
 							log: fastify.log,
 							user: (request.body as any)?.__wg.user!,
 							internalClient: config.internalClientFactory(undefined, clientRequest),
@@ -55,8 +56,8 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							operations: operationClient,
 						};
 						const ctx: HandlerContext<any, any, any, any, any, any> = {
-							...createContextCtx,
-							context: await config.createContext(createContextCtx),
+							...createRequestContextData,
+							context: await config.createContext(config.globalContext, createRequestContextData),
 						};
 
 						switch (implementation.type) {

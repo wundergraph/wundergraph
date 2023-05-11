@@ -1,8 +1,17 @@
-import { configureWunderGraphServer, createContext } from '@wundergraph/sdk/server';
+import { configureWunderGraphServer, createRequestContext } from '@wundergraph/sdk/server';
 import { GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql/index';
 import { GraphQLExecutionContext } from './generated/wundergraph.server';
 
-class MyCustomContext {
+class GlobalContext {
+	release() {
+		console.log('global context released');
+	}
+	globalHello() {
+		console.log('global hello');
+	}
+}
+
+class RequestContext {
 	hello() {
 		console.log('hello');
 		return 'world';
@@ -37,15 +46,22 @@ export default configureWunderGraphServer(() => ({
 		},
 		mutations: {},
 	},
-	createContext: createContext(async (_req) => {
-		return new MyCustomContext();
+	createGlobalContext: async () => {
+		return new GlobalContext();
+	},
+	releaseGlobalContext: async (ctx) => {
+		ctx.release();
+	},
+
+	createRequestContext: createRequestContext(async (data, ctx) => {
+		return new RequestContext();
 	}),
 	graphqlServers: [
 		{
 			apiNamespace: 'embedded',
 			serverName: 'embedded',
 			schema: new GraphQLSchema({
-				query: new GraphQLObjectType<any, GraphQLExecutionContext<MyCustomContext>>({
+				query: new GraphQLObjectType<any, GraphQLExecutionContext<RequestContext>>({
 					name: 'Query',
 					fields: {
 						clientRequestHeader: {

@@ -17,10 +17,9 @@ import type { WebhooksConfig } from '../webhooks/types';
 import type { HooksRouteConfig } from './plugins/hooks';
 import type { WebHookRouteConfig } from './plugins/webhooks';
 import type {
-	DefaultContextFactory,
 	FastifyRequestBody,
 	HooksConfiguration,
-	InternalContextFactoryRequest,
+	InternalCreateRequestContextData,
 	ServerRunOptions,
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
@@ -76,37 +75,73 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 }
 
 /**
- * createContext is a helper function for instantiating the a context factory without
+ * createRequestContext is a helper function for instantiating the a context factory without
  * specifying its type manually
  * @param contextFactory
  * @returns The context factory
  */
-export const createContext = <TContextFactoryRequest extends InternalContextFactoryRequest, TCustomContext>(
-	contextFactory: (req: TContextFactoryRequest) => Promise<TCustomContext>
+export const createRequestContext = <
+	TCreateContextData extends InternalCreateRequestContextData,
+	TRequestContext,
+	TGlobalContext
+>(
+	factory: (data: TCreateContextData, ctx: TGlobalContext) => Promise<TRequestContext>
 ) => {
-	return contextFactory;
+	return factory;
 };
 
 export function configureWunderGraphServer<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedInternalClient = InternalClient,
 	GeneratedWebhooksConfig = WebhooksConfig,
-	TContextFactory extends DefaultContextFactory = DefaultContextFactory
->(configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TContextFactory>) {
-	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig, TContextFactory>(configWrapper());
+	TGlobalContext = any,
+	TRequestContext = any,
+	TRequestContextData = any
+>(
+	configWrapper: () => WunderGraphServerConfig<
+		GeneratedHooksConfig,
+		GeneratedWebhooksConfig,
+		TGlobalContext,
+		TRequestContext,
+		TRequestContextData
+	>
+) {
+	return _configureWunderGraphServer<
+		GeneratedHooksConfig,
+		GeneratedWebhooksConfig,
+		TGlobalContext,
+		TRequestContext,
+		TRequestContextData
+	>(configWrapper());
 }
 
 const _configureWunderGraphServer = <
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig,
-	TContextFactory extends DefaultContextFactory = DefaultContextFactory
+	TGlobalContext = any,
+	TRequestContext = any,
+	TRequestContextData = any
 >(
-	config: WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TContextFactory>
-): WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TContextFactory> => {
+	config: WunderGraphServerConfig<
+		GeneratedHooksConfig,
+		GeneratedWebhooksConfig,
+		TGlobalContext,
+		TRequestContext,
+		TRequestContextData
+	>
+): WunderGraphHooksAndServerConfig<
+	GeneratedHooksConfig,
+	GeneratedWebhooksConfig,
+	TGlobalContext,
+	TRequestContext,
+	TRequestContextData
+> => {
 	const serverConfig = config as WunderGraphHooksAndServerConfig<
 		GeneratedHooksConfig,
 		GeneratedWebhooksConfig,
-		TContextFactory
+		TGlobalContext,
+		TRequestContext,
+		TRequestContextData
 	>;
 
 	/**
@@ -198,6 +233,8 @@ export const createServer = async ({
 		},
 	});
 
+	const globalContext = serverConfig.createGlobalContext ? await serverConfig.createGlobalContext() : undefined;
+
 	/**
 	 * Custom request logging to not log all requests with INFO level.
 	 */
@@ -222,15 +259,15 @@ export const createServer = async ({
 		},
 	});
 
-	const createContext = async (ctx: InternalContextFactoryRequest) => {
-		if (typeof serverConfig.createContext === 'function') {
-			const result = await serverConfig.createContext(ctx);
+	const createContext = async (globalContext: any, ctx: InternalCreateRequestContextData) => {
+		if (serverConfig.createRequestContext) {
+			const result = await serverConfig.createRequestContext(globalContext, ctx);
 			if (result === undefined) {
-				throw new Error('could not instantiate custom handler context');
+				throw new Error('could not instantiate request context');
 			}
 			return result;
 		}
-		return serverConfig.createContext;
+		return undefined;
 	};
 
 	/**
@@ -283,7 +320,7 @@ export const createServer = async ({
 			};
 			req.ctx = {
 				...ctx,
-				context: await createContext(ctx),
+				context: await createContext(globalContext, ctx),
 			};
 		});
 
@@ -383,6 +420,7 @@ export const createServer = async ({
 			webhooks: config.api.webhooks,
 			internalClientFactory: clientFactory,
 			nodeURL: nodeInternalURL,
+			globalContext,
 			createContext,
 		});
 		fastify.log.debug('Webhooks plugin registered');
@@ -403,6 +441,7 @@ export const createServer = async ({
 				operations: operationsConfig.typescript_operation_files,
 				internalClientFactory: clientFactory,
 				nodeURL: nodeInternalURL,
+				globalContext,
 				createContext,
 			});
 			fastify.log.debug('Functions plugin registered');
@@ -424,6 +463,12 @@ export const createServer = async ({
 		// server has 500ms to close all connections before the process is killed
 		closeWithGrace({ delay: 500 }, handler);
 	}
+
+	fastify.addHook('onClose', async () => {
+		if (serverConfig.releaseGlobalContext) {
+			await serverConfig.releaseGlobalContext(globalContext);
+		}
+	});
 
 	return fastify;
 };
