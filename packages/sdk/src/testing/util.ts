@@ -1,6 +1,7 @@
 import net from 'net';
 import { Request } from '@wundergraph/straightforward';
 import getRawBody from 'raw-body';
+import { access } from 'node:fs/promises';
 
 export async function freeport(): Promise<number> {
 	const server = net.createServer();
@@ -33,4 +34,13 @@ export function getTextBody(req: Request): Promise<string> {
 			}
 		});
 	});
+}
+
+export async function fileExists(path: string) {
+	try {
+		await access(path);
+		return true;
+	} catch {
+		return false;
+	}
 }

@@ -12,17 +12,20 @@ export interface BaseOperationConfiguration {
 	};
 }
 
+export interface QueryCacheConfiguration {
+	enable: boolean;
+	public: boolean;
+	maxAge: number;
+	staleWhileRevalidate: number;
+}
+
+export interface LiveQueryConfiguration {
+	enable: boolean;
+	pollingIntervalSeconds: number;
+}
 export interface QueryConfiguration extends BaseOperationConfiguration {
-	caching: {
-		enable: boolean;
-		public: boolean;
-		maxAge: number;
-		staleWhileRevalidate: number;
-	};
-	liveQuery: {
-		enable: boolean;
-		pollingIntervalSeconds: number;
-	};
+	caching: QueryCacheConfiguration;
+	liveQuery: LiveQueryConfiguration;
 }
 
 export interface MutationConfiguration extends BaseOperationConfiguration {}

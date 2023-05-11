@@ -3,13 +3,7 @@ const withMarkdoc = require('@markdoc/next.js');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	reactStrictMode: true,
-	pageExtensions: ['js', 'jsx', 'md'],
-	experimental: {
-		newNextLinkBehavior: true,
-		images: {
-			allowFutureImage: true,
-		},
-	},
+	pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md'],
 	async redirects() {
 		return [
 			{
@@ -45,6 +39,11 @@ const nextConfig = {
 			{
 				source: '/getting-started',
 				destination: '/docs/getting-started',
+				permanent: true,
+			},
+			{
+				source: '/docs/guides/publish-generated-client-to-npm',
+				destination: '/docs/guides/bundle-generated-client-for-distribution',
 				permanent: true,
 			},
 		];

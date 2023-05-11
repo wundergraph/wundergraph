@@ -1,5 +1,7 @@
+import objectHash from 'object-hash';
+
 import type { GraphQLOperation } from '../../../graphql/operations';
-import type { ResolvedApplication } from '../../../configure';
+import type { ResolvedApplication, ResolvedWunderGraphConfig } from '../../../configure';
 import { OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 
 export const isNotInternal = (op: GraphQLOperation): boolean => !op.Internal;
@@ -112,4 +114,8 @@ export const modelImports = (
 			return out;
 		})
 		.join(',');
+};
+
+export const configurationHash = (config: ResolvedWunderGraphConfig) => {
+	return objectHash(config).substring(0, 8);
 };
