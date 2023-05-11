@@ -1,4 +1,4 @@
-import { ContextFactoryContext, configureWunderGraphServer } from '@wundergraph/sdk/server';
+import { ContextFactoryContext, configureWunderGraphServer, createContext } from '@wundergraph/sdk/server';
 import { GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql/index';
 import { GraphQLExecutionContext } from './generated/wundergraph.server';
 
@@ -9,9 +9,33 @@ class MyCustomContext {
 	}
 }
 
-const myCreateContext = async (req: ContextFactoryContext) => {
+// declare module "@wundergraph/sdk/server" {
+// 	export function configureWunderGraphServer<
+// 		GeneratedHooksConfig = HooksConfig,
+// 		GeneratedInternalClient = InternalClient,
+// 		GeneratedWebhooksConfig = WebhooksConfig,
+// 		TCustomContext = any,
+// 		TContextFactoryContext extends ContextFactoryContext = ContextFactoryContext,
+// 	>(
+// 		configWrapper: () => WunderGraphServerConfig<
+// 			HooksConfig<TCustomContext>,
+// 			WebhooksConfig,
+// 			TContextFactoryContext,
+// 			TCustomContext
+// 		>
+// 	): WunderGraphHooksAndServerConfig<any, any, TContextFactoryContext, TCustomContext>;
+// 	export const createContext: <TCustomContext>(
+// 		contextFactory: (req: ContextFactoryContext) => Promise<TCustomContext>
+// 	) => (req: ContextFactoryContext) => Promise<TCustomContext>;
+// }
+
+// export const createContext = <CustomContext>(contextFactory: (req: ContextFactoryContext) => Promise<CustomContext>) => {
+// 	return contextFactory;
+// };
+
+const myContext = createContext(async (req) => {
 	return new MyCustomContext();
-};
+});
 
 export default configureWunderGraphServer(() => ({
 	hooks: {
@@ -42,9 +66,10 @@ export default configureWunderGraphServer(() => ({
 		mutations: {},
 	},
 	// This works, declaring return type makes no difference
-	createContext: async () => {
+	// createContext: myContext,
+	createContext: createContext(async (req) => {
 		return new MyCustomContext();
-	},
+	}),
 	// This works
 	//createContext: myCreateContext,
 	// This does NOT work, regardless of the declared return type
