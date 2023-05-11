@@ -440,6 +440,7 @@ importers:
       graphql-helix: ^1.13.0
       handlebars: ^4.7.7
       https-proxy-agent: ^5.0.1
+      ix: ^5.0.0
       jest: ^29.0.3
       js-yaml: ^4.1.0
       json-schema: ^0.4.0
@@ -498,6 +499,7 @@ importers:
       graphql-helix: 1.13.0_graphql@16.6.0
       handlebars: 4.7.7
       https-proxy-agent: 5.0.1
+      ix: 5.0.0
       js-yaml: 4.1.0
       json-schema: 0.4.0
       json-schema-to-typescript: 11.0.3
@@ -8416,7 +8418,7 @@ packages:
   /axios/0.26.1_debug@4.3.4:
     resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.2_debug@4.3.4
     transitivePeerDependencies:
       - debug
     dev: false
@@ -12411,6 +12413,18 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
+
+  /follow-redirects/1.15.2_debug@4.3.4:
+    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dependencies:
+      debug: 4.3.4
+    dev: false
 
   /fontfaceobserver/2.3.0:
     resolution: {integrity: sha512-6FPvD/IVyT4ZlNe7Wcn5Fb/4ChigpucKYSvD6a+0iMoLn2inpo711eyIcKjmDtE5XNcgAkSH9uN/nfAeZzHEfg==}

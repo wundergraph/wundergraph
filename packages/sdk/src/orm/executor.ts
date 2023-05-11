@@ -11,10 +11,13 @@ import { type Executor } from '@wundergraph/orm';
 import traverse from 'traverse';
 import { applyPatch } from 'fast-json-patch';
 import { fetch } from '@whatwg-node/fetch';
+import { from } from 'ix/asynciterable';
+import { map } from 'ix/asynciterable/operators';
 
 import { JSONObject } from '../server/types';
 import { wellKnownTypeNames } from '../definition/namespacing';
 import { Logger } from '../logger';
+import type { OperationsAsyncContext } from '../server/operations-context';
 
 interface GraphQLResult<T = unknown> {
 	data?: T;
@@ -23,8 +26,8 @@ interface GraphQLResult<T = unknown> {
 
 export interface NamespacingExecutorConfig {
 	baseUrl: string;
+	requestContext: OperationsAsyncContext;
 	fetch?: typeof globalThis.fetch;
-	namespace?: string;
 }
 
 // @note this is just a POC implementation meant to be used for
@@ -46,24 +49,27 @@ export class NamespacingExecutor implements Executor {
 	async execute<T>(
 		operation: OperationTypeNode,
 		document: DocumentNode,
-		variables?: Record<string, unknown> | undefined
+		variables?: Record<string, unknown> | undefined,
+		namespace?: string
 	): Promise<T> {
-		const transformedDocument = this.config.namespace ? this.#namespaceOperation(document) : document;
+		const transformedDocument = namespace ? this.#namespaceOperation(document, namespace) : document;
 		const body = JSON.stringify(this.#buildOperationPayload(transformedDocument, variables));
 
 		if (operation === OperationTypeNode.SUBSCRIPTION) {
 			// we create an abort signal to manage request cancellation
 			// upon disconnect from the initiating WunderGraph custom operation
 			const controller = new AbortController();
-			const generator = this.#fetchMany(body, controller.signal);
-			// this is setup by the WunderGraph server
-			globalThis.__OPERATIONS_ASYNC_STORAGE__?.getStore()?.ormOperationControllers.push(controller);
+			const generator = from(this.#fetchMany(body, controller.signal)).pipe(
+				map((result) => this.#processJson(result, namespace))
+			);
+			// hook into our server's request context
+			this.config.requestContext.getStore()?.ormOperationControllers.push(controller);
 
 			return generator as any;
 		} else {
 			const response = await this.#fetch(body);
 			const json = await response.json();
-			return this.#processJson(json);
+			return this.#processJson(json, namespace);
 		}
 	}
 
@@ -78,7 +84,7 @@ export class NamespacingExecutor implements Executor {
 		};
 	}
 
-	#processJson(json: any) {
+	#processJson(json: any, namespace?: string) {
 		// @todo make this runtime safe
 		const result = json as GraphQLResult;
 
@@ -87,51 +93,53 @@ export class NamespacingExecutor implements Executor {
 			throw new Error(`Operation execution did not return a successful result. Received errors: "${errorMessage}".`);
 		}
 
-		if (this.config.namespace) {
-			const transformedResult = this.#transformResult(result.data as any /* @todo */);
+		if (namespace) {
+			const transformedResult = this.#transformResult(result.data as any /* @todo */, namespace);
 			return transformedResult;
 		} else {
 			return result.data;
 		}
 	}
 
-	#applyNamespace(name: string): string {
-		if (this.config.namespace) {
-			return `${this.config.namespace}_${name}`;
+	#applyNamespace(name: string, namespace: string): string {
+		if (namespace) {
+			return `${namespace}_${name}`;
 		} else {
 			throw new Error('No namespace is configured.');
 		}
 	}
 
-	#removeNamespace(name: string): string {
-		if (this.config.namespace) {
-			return name.replace(`${this.config.namespace}_`, '');
+	#removeNamespace(name: string, namespace: string): string {
+		if (namespace) {
+			return name.replace(`${namespace}_`, '');
 		} else {
 			throw new Error('No namespace is configured.');
 		}
 	}
 
 	// we need to de-namespace responses (i.e root object field keys and `__typename` field values)
-	#transformResult(result: JSONObject) {
+	#transformResult(result: JSONObject, namespace: string) {
 		// We can't use non this-binding arrow functions w/`traverse`
 		const self = this;
 
 		return traverse(result).map(function (value: any) {
 			// update root field keys
 			if (this.isRoot && typeof value === 'object') {
-				const renamed = Object.fromEntries(Object.entries(value).map(([k, v]) => [self.#removeNamespace(k), v]));
+				const renamed = Object.fromEntries(
+					Object.entries(value).map(([k, v]) => [self.#removeNamespace(k, namespace), v])
+				);
 				this.update(renamed);
 			}
 
 			// update `__typename` values
 			if (this.key === '__typename' && typeof value === 'string') {
-				const renamed = self.#removeNamespace(value);
+				const renamed = self.#removeNamespace(value, namespace);
 				this.update(renamed);
 			}
 		});
 	}
 
-	#namespaceOperation(document: DocumentNode): DocumentNode {
+	#namespaceOperation(document: DocumentNode, namespace: string): DocumentNode {
 		return visit(document, {
 			[Kind.OPERATION_DEFINITION]: (node): OperationDefinitionNode => {
 				return {
@@ -140,7 +148,10 @@ export class NamespacingExecutor implements Executor {
 						...node.selectionSet,
 						selections: node.selectionSet.selections.map((selection) => {
 							if (selection.kind === Kind.FIELD) {
-								return { ...selection, name: { kind: Kind.NAME, value: this.#applyNamespace(selection.name.value) } };
+								return {
+									...selection,
+									name: { kind: Kind.NAME, value: this.#applyNamespace(selection.name.value, namespace) },
+								};
 							} else {
 								return selection;
 							}
@@ -155,7 +166,7 @@ export class NamespacingExecutor implements Executor {
 						...node,
 						name: {
 							...node.name,
-							value: this.#applyNamespace(node.name.value),
+							value: this.#applyNamespace(node.name.value, namespace),
 						},
 					};
 				}
@@ -213,7 +224,7 @@ export class NamespacingExecutor implements Executor {
 				} else {
 					lastResponse = jsonResp as GraphQLResult;
 				}
-				yield this.#processJson(lastResponse);
+				yield lastResponse;
 				message = '';
 			}
 		}

@@ -19,7 +19,7 @@ describe('OperationCreator', () => {
 					throw new Error();
 				},
 			};
-			const creator = new OperationCreator({ schema, executor });
+			const creator = new OperationCreator({ schema, executor, namespace: 'foo' });
 
 			expect(() => (creator as any)[method]('')).toThrowError(`Schema does not support operation type "${operation}".`);
 		});
@@ -32,7 +32,7 @@ describe('OperationCreator', () => {
 				},
 			};
 			const field = 'bar';
-			const creator = new OperationCreator({ schema, executor });
+			const creator = new OperationCreator({ schema, executor, namespace: 'foo' });
 
 			expect(() => (creator as any)[method](field)).toThrowError(
 				`Schema does not support field "${field}" on operation "${operation}".`
@@ -57,7 +57,7 @@ describe('OperationCreator', () => {
 				},
 			};
 			const field = 'foo';
-			const creator = new OperationCreator({ schema, executor });
+			const creator = new OperationCreator({ schema, executor, namespace: 'foo' });
 			const builder = (creator as any)[method](field);
 
 			expect(builder).toBeInstanceOf(OperationBuilder);
@@ -68,6 +68,7 @@ describe('OperationCreator', () => {
 				rootField: field,
 				type: schema.getType('Boolean')!,
 				typeSelection: undefined, // no selection on scalar or enum types
+				namespace: 'foo',
 			});
 		});
 	});

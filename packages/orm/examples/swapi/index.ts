@@ -20,6 +20,7 @@ const executor: Executor = {
 	const creator = new OperationCreator<{ schema: Schema }>({
 		schema: SCHEMA,
 		executor,
+		namespace: 'swapi',
 	});
 
 	// const films = await creator

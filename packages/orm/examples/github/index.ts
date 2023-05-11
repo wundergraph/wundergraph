@@ -28,6 +28,7 @@ const executor: Executor = {
 	const creator = new OperationCreator<{ schema: Schema }>({
 		schema: SCHEMA,
 		executor,
+		namespace: 'github',
 	});
 
 	const viewer = await creator

@@ -105,7 +105,7 @@ var (
 
 import type { InternalClient } from "./wundergraph.internal.client";
 import type { InternalOperationsClient } from "./wundergraph.internal.operations.client";
-import type { orm } from './orm'
+import type { ORM } from './orm'
 import type { Role } from "./wundergraph.server";
 import type { CustomClaims } from "./claims";
 import { createOperationFactory } from "@wundergraph/sdk/operations";
@@ -120,7 +120,7 @@ export type ContextType = never;
 {{ end }}
 
 export {z, AuthorizationError} from "@wundergraph/sdk/operations";
-export const createOperation = createOperationFactory<InternalClient, Role, CustomClaims, InternalOperationsClient, ContextType, typeof orm>();`))
+export const createOperation = createOperationFactory<InternalClient, Role, CustomClaims, InternalOperationsClient, ContextType, ORM>();`))
 )
 
 type wunderGraphFactoryTemplateData struct {

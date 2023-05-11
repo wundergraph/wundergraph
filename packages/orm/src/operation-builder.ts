@@ -153,6 +153,7 @@ export class OperationBuilder<Config extends OperationBuilderConfig> {
 			rootField: string;
 			typeSelection: SelectionSet<any> | undefined;
 			executor: Executor;
+			namespace?: string;
 		}
 	) {
 		this.#rootSelection = selectionSet([field(this.config.rootField, undefined, this.config.typeSelection)]);
@@ -345,7 +346,12 @@ export class OperationBuilder<Config extends OperationBuilderConfig> {
 	};
 
 	exec: ExecMethod<Config> = async () => {
-		const result = await this.config.executor.execute(this.config.rootType, this.compile(), this.variables);
+		const result = await this.config.executor.execute(
+			this.config.rootType,
+			this.compile(),
+			this.variables,
+			this.config.namespace
+		);
 
 		if (result !== null && typeof (result as any)[Symbol.asyncIterator] === 'function') {
 			// `Executor` implementations return `AsyncIterators` for subscription operations

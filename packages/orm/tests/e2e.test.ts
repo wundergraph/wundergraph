@@ -68,7 +68,11 @@ describe('e2e', () => {
 				}) as any;
 			},
 		};
-		const { query } = new OperationCreator<{ schema: Schema; executor: typeof executor }>({ schema, executor });
+		const { query } = new OperationCreator<{ schema: Schema; executor: typeof executor }>({
+			schema,
+			executor,
+			namespace: 'foo',
+		});
 
 		const result = await query('simple').exec();
 		expect(result).toBe(true);
@@ -90,7 +94,11 @@ describe('e2e', () => {
 				}) as any;
 			},
 		};
-		const { query } = new OperationCreator<{ schema: Schema; executor: typeof executor }>({ schema, executor });
+		const { query } = new OperationCreator<{ schema: Schema; executor: typeof executor }>({
+			schema,
+			executor,
+			namespace: 'foo',
+		});
 
 		const result = await query('getCityByName')
 			.select('id', 'name', 'coord.x', 'coord.y', 'coord.zs')

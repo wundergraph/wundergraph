@@ -1,8 +1,10 @@
 import closeWithGrace from 'close-with-grace';
 import { Headers } from '@whatwg-node/fetch';
 import process from 'node:process';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import Fastify, { FastifyInstance } from 'fastify';
 import { InternalClient, InternalClientFactory, internalClientFactory } from './internal-client';
+import { ORM } from '@wundergraph/orm';
 import { pino } from 'pino';
 import path from 'path';
 import fs from 'fs';
@@ -29,6 +31,8 @@ import { WgEnv } from '../configure/options';
 import { OperationsClient } from './operations-client';
 import { OpenApiServerConfig } from './plugins/omnigraphOAS';
 import { SoapServerConfig } from './plugins/omnigraphSOAP';
+import { NamespacingExecutor } from '../orm';
+import type { OperationsAsyncContext } from './operations-context';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -180,6 +184,7 @@ export const createServer = async ({
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
 
+	const requestContext: OperationsAsyncContext = new AsyncLocalStorage();
 	const nodeInternalURL = config?.api?.nodeOptions?.nodeInternalUrl
 		? resolveConfigurationVariable(config.api.nodeOptions.nodeInternalUrl)
 		: '';
@@ -404,8 +409,19 @@ export const createServer = async ({
 		const operationsConfigFile = fs.readFileSync(operationsFilePath, 'utf-8');
 		const operationsConfig = JSON.parse(operationsConfigFile) as LoadOperationsOutput;
 
+		// @todo only import if `config.experimental.orm` is `true`
 		const ormModulePath = path.join(wundergraphDir, 'generated', 'bundle', 'orm.cjs');
+		// the orm module simply provides (code generated) TypeScript representations of our API schemas
 		const ormModule = await import(ormModulePath);
+
+		console.log('#nodeInternalURL', nodeInternalURL);
+		const orm = new ORM({
+			apis: ormModule.SCHEMAS,
+			executor: new NamespacingExecutor({
+				requestContext,
+				baseUrl: nodeInternalURL,
+			}),
+		});
 
 		if (
 			operationsConfig &&
@@ -413,6 +429,7 @@ export const createServer = async ({
 			operationsConfig.typescript_operation_files.length
 		) {
 			await fastify.register(FastifyFunctionsPlugin, {
+				requestContext,
 				operations: operationsConfig.typescript_operation_files,
 				internalClientFactory: clientFactory,
 				nodeURL: nodeInternalURL,
@@ -433,6 +450,7 @@ export const createServer = async ({
 			}
 			fastify.log.debug({ err, signal, manual }, 'graceful shutdown was initiated manually');
 
+			requestContext.disable();
 			await fastify.close();
 			fastify.log.info({ err, signal, manual }, 'server process shutdown');
 		};

@@ -54,7 +54,7 @@ type RootMethod<Config extends OperationCreatorConfig, Type extends RootType> = 
 }>;
 
 export class OperationCreator<Config extends OperationCreatorConfig> {
-	constructor(private readonly config: { schema: GraphQLSchema; executor: Executor }) {}
+	constructor(private readonly config: { schema: GraphQLSchema; namespace: string; executor: Executor }) {}
 
 	query: RootMethod<Config, 'Query'> = (rootField) => {
 		const rootType = OperationTypeNode.QUERY;
@@ -101,6 +101,7 @@ export class OperationCreator<Config extends OperationCreatorConfig> {
 			type: unwrappedType,
 			typeSelection: selection,
 			executor: this.config.executor,
+			namespace: this.config.namespace,
 		});
 	}
 }

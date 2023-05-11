@@ -82,9 +82,6 @@ export class ORM implements Template {
 			return Promise.resolve([]);
 		}
 
-		// Utilize our internal GraphQL API URL
-		const baseUrl = resolveConfigurationVariable(generationConfig.config.nodeOptions.nodeInternalUrl);
-
 		// @todo support non-namespaced APIs in an implicit "default" namespace
 		// @todo merge all non-namespaced API's into a single schema artifact
 		// @todo may be best to generate only interface files
@@ -107,7 +104,7 @@ export class ORM implements Template {
 
 		// generate the pre-configured ORM client
 		const schemasIndex = Handlebars.compile(schemasTemplate)({ namespaces });
-		const orm = Handlebars.compile(ormTemplate)({ baseUrl, namespaces });
+		const orm = Handlebars.compile(ormTemplate)({ namespaces });
 
 		// record the checksum of the WunderGraph schema we last generated the ORM for
 		const buildInfo = { schemaSha256: generationConfig.config.application.EngineConfiguration.schemaSha256 };
