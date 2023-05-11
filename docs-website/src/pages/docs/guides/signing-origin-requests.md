@@ -28,8 +28,6 @@ Here's an example of how the AWS request signing could be implemented:
 // wundergraph.server.ts
 
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
-import type { HooksConfig } from './generated/wundergraph.hooks';
-import type { InternalClient } from './generated/wundergraph.internal.client';
 
 export default configureWunderGraphServer(() => ({
   hooks: {
