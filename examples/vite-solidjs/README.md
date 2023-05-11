@@ -29,6 +29,15 @@ It correctly bundles Solid in production mode and optimizes the build for the be
 The build is minified and the filenames include the hashes.<br>
 Your app is ready to be deployed!
 
+## Test the API
+
+1. (Optional) Copy the `.env.example` file to `.env.test` and fill in the required values.
+2. Run the following command:
+
+```shell
+npm run test
+```
+
 ## Deploy to WunderGraph Cloud
 
 [![Deploy to WunderGraph](https://wundergraph.com/button)](https://cloud.wundergraph.com/new/clone?templateName=vite-solidjs)

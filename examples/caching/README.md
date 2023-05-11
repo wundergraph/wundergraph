@@ -14,6 +14,15 @@ On subsequent requests, the client will automatically attach the ETag to the req
 npm install && npm start
 ```
 
+## Test the API
+
+1. (Optional) Copy the `.env.example` file to `.env.test` and fill in the required values.
+2. Run the following command:
+
+```shell
+npm run test
+```
+
 ## Learn More
 
 Read the [Docs](https://wundergraph.com/docs).

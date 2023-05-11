@@ -30,6 +30,15 @@ Notice the returned JSON with the newly created ID:
 curl 'http://localhost:9991/operations/NoteByID?id=1'
 ```
 
+## Test the API
+
+1. (Optional) Copy the `.env.example` file to `.env.test` and fill in the required values.
+2. Run the following command:
+
+```shell
+npm run test
+```
+
 ## Learn More
 
 Read the [Docs](https://wundergraph.com/docs).

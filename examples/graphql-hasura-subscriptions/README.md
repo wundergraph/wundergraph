@@ -44,6 +44,15 @@ curl -N http://localhost:9991/operations/users/get?id=1
 Use https://hasura.io/learn/graphql/graphiql to add new users and todos, and explore schema.
 Add new operations to the `.wundergraph/operations` folder and run `npm start` to see the results.
 
+## Test the API
+
+1. (Optional) Copy the `.env.example` file to `.env.test` and fill in the required values.
+2. Run the following command:
+
+```shell
+npm run test
+```
+
 ## Learn More
 
 Read the [Docs](https://wundergraph.com/docs).

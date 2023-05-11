@@ -18,6 +18,15 @@ pnpm install
 pnpm dev
 ```
 
+## Test the API
+
+1. (Optional) Copy the `.env.example` file to `.env.test` and fill in the required values.
+2. Run the following command:
+
+```shell
+npm run test
+```
+
 ## Production
 
 Build the application for production:

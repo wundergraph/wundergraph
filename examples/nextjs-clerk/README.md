@@ -39,6 +39,15 @@ npm install && npm start
 On the NextJS frontend, click the "Login" button.
 Once the login is complete, the Frontend will automatically fetch the data and inject the bearer token into the origin request.
 
+## Test the API
+
+1. (Optional) Copy the `.env.example` file to `.env.test` and fill in the required values.
+2. Run the following command:
+
+```shell
+npm run test
+```
+
 ## Learn More
 
 - [WunderGraph Docs](https://docs.wundergraph.com/docs/auth/token-based-auth/clerk).
