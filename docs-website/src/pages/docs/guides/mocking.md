@@ -72,7 +72,7 @@ beforeAll(async () => {
 #### Environment variables
 
 We recommend creating a `.env.test` file to set the environment variables for the test environment. This allows you to set the environment variables for the test environment without affecting your local development environment.
-The test server loads the `.env.test` file automatically but ignores the `.env` file to not infer with each other. You can also use the capabilities of your testing framework to set the environment variables.
+The test server loads the `.env.test` file automatically but ignores the `.env` file to not infer with each other. You can also pass environment variables to the test server with the `env` option of the `createTestAndMockServer` method.
 
 ### Writing tests
 
