@@ -430,8 +430,8 @@ const navigation = [
 						href: '/docs/guides/using-http-proxies',
 					},
 					{
-						title: 'Publish generated client to NPM',
-						href: '/docs/guides/publish-generated-client-to-npm',
+						title: 'Bundle the generated client for distribution',
+						href: '/docs/guides/bundle-generated-client-for-distribution',
 					},
 					{
 						title: 'Extend third party GraphQL APIs',

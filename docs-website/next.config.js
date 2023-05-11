@@ -47,6 +47,11 @@ const nextConfig = {
 				destination: '/docs/getting-started',
 				permanent: true,
 			},
+			{
+				source: '/docs/guides/publish-generated-client-to-npm',
+				destination: '/docs/guides/bundle-generated-client-for-distribution',
+				permanent: true,
+			},
 		];
 	},
 };
