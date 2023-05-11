@@ -138,12 +138,10 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 				} else if (await fileExists(join(this.options.dir, '.env'))) {
 					cmd.push('--env', join(this.options.dir, '.env'));
 				}
-			} else {
-				if (await fileExists('.env.test')) {
-					cmd.push('--env', '.env.test');
-				} else if (await fileExists('.env')) {
-					cmd.push('--env', '.env');
-				}
+			} else if (await fileExists('.env.test')) {
+				cmd.push('--env', '.env.test');
+			} else if (await fileExists('.env')) {
+				cmd.push('--env', '.env');
 			}
 
 			subprocess = wunderctl({ cmd, env, stdio: 'inherit' });
