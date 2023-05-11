@@ -131,8 +131,8 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			if (this.options.dir) {
 				cmd.push('--wundergraph-dir', this.options.dir);
 
-				// We try to load the .env.test file from the WunderGraph directory
-				// otherwise WunderGraph will load .env from the current working directory
+				// We try first to load the .env.test file, if it exists
+				// and fallback to .env if it doesn't
 				if (await fileExists(join(this.options.dir, '.env.test'))) {
 					cmd.push('--env', join(this.options.dir, '.env.test'));
 				} else if (await fileExists(join(this.options.dir, '.env'))) {
