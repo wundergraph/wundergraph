@@ -15,7 +15,7 @@ To use it, declare a function that returns your context type and pass it to `cre
 
 ```typescript
 // wundergraph.server.ts
-import { configureWunderGraphServer } from '@wundergraph/sdk/server';
+import { configureWunderGraphServer, createContext } from '@wundergraph/sdk/server';
 
 export class MyContext {
   hello() {
@@ -38,9 +38,9 @@ export default configureWunderGraphServer(() => ({
     },
     mutations: {},
   },
-  createContext: async (ctx) => {
+  createContext: createContext(async (req) => {
     return new MyContext();
-  },
+  }),
 }));
 ```
 
