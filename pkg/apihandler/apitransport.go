@@ -174,6 +174,14 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 		requestDump, _ = httputil.DumpRequest(request, true)
 	}
 
+	if host := request.Header.Get("host"); host != "" {
+		// in order to provide different host value we have to set it on the request.Host field
+		// https://pkg.go.dev/net/http#Request
+		// this is done here in order to support all go based data sources
+
+		request.Host = host
+	}
+
 	start := time.Now()
 	res, err = t.httpTransport.RoundTrip(request)
 	duration := time.Since(start).Milliseconds()
