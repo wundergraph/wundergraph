@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 overrides:
   '@tanstack/query-core': ^4.29.1
+  zod: ^3.21.4
 
 importers:
 
@@ -425,7 +426,7 @@ importers:
       typescript: ^4.8.2
       typescript-json-schema: ^0.55.0
       write-file-atomic: ^5.0.0
-      zod: ^3.20.2
+      zod: ^3.21.4
       zod-to-json-schema: ^3.20.2
     dependencies:
       '@fastify/formbody': 7.3.0
@@ -474,8 +475,8 @@ importers:
       tslib: 2.5.0
       typescript-json-schema: 0.55.0
       write-file-atomic: 5.0.0
-      zod: 3.20.2
-      zod-to-json-schema: 3.20.2_zod@3.20.2
+      zod: 3.21.4
+      zod-to-json-schema: 3.20.2_zod@3.21.4
     devDependencies:
       '@types/chai': 4.3.3
       '@types/cors': 2.8.12
@@ -727,7 +728,7 @@ importers:
       pg: ^8.7.3
       stripe: ^11.12.0
       typescript: ^4.9.4
-      zod: ^3.20.2
+      zod: ^3.21.4
     dependencies:
       '@octokit/webhooks-types': 6.10.0
       '@types/node': 18.16.0
@@ -737,7 +738,7 @@ importers:
       pg: 8.8.0
       stripe: 11.12.0
       typescript: 4.9.4
-      zod: 3.20.2
+      zod: 3.21.4
 
   testapps/expo:
     specifiers:
@@ -839,7 +840,7 @@ importers:
       swr: ^2.0.0
       typescript: ^4.8.2
       wait-on: ^6.0.0
-      zod: ^3.20.2
+      zod: ^3.21.4
     dependencies:
       '@graphql-yoga/node': 2.13.13_graphql@16.6.0
       '@tanstack/react-query': 4.20.4_biqbaboplfbrettd7655fr4n2y
@@ -852,7 +853,7 @@ importers:
       react-dom: 18.2.0_react@18.2.0
       stripe: 11.12.0
       swr: 2.0.0_react@18.2.0
-      zod: 3.20.2
+      zod: 3.21.4
     devDependencies:
       '@types/node': 18.16.0
       '@types/react': 18.0.24
@@ -889,7 +890,7 @@ importers:
       swr: ^2.0.0
       typescript: ^4.8.2
       wait-on: ^6.0.0
-      zod: ^3.20.2
+      zod: ^3.21.4
     dependencies:
       '@graphql-yoga/node': 2.13.13_graphql@16.6.0
       '@tanstack/react-query': 4.20.4_biqbaboplfbrettd7655fr4n2y
@@ -905,7 +906,7 @@ importers:
       relay-runtime: 15.0.0
       stripe: 11.12.0
       swr: 2.0.0_react@18.2.0
-      zod: 3.20.2
+      zod: 3.21.4
     devDependencies:
       '@types/node': 18.16.0
       '@types/react': 18.0.35
@@ -7605,16 +7606,16 @@ packages:
   /acorn-globals/7.0.1:
     resolution: {integrity: sha512-umOSDSDrfHbTNPuNpC2NSnnA3LUrqpevPb4T9jRx4MagXNS0rs+gwiTcAvqCRmsD6utzsrzNt+ebm00SNWiC3Q==}
     dependencies:
-      acorn: 8.8.1
+      acorn: 8.8.2
       acorn-walk: 8.2.0
     dev: true
 
-  /acorn-import-assertions/1.8.0_acorn@8.8.1:
+  /acorn-import-assertions/1.8.0_acorn@8.8.2:
     resolution: {integrity: sha512-m7VZ3jwz4eK6A4Vtt8Ew1/mNbP24u0FhdyfA7fSvnJR6LMdfOYnmuIrrJAgrYfYJ10F/otaHTtrtrtmHdMNzEw==}
     peerDependencies:
       acorn: ^8
     dependencies:
-      acorn: 8.8.1
+      acorn: 8.8.2
     dev: false
 
   /acorn-jsx/5.3.2_acorn@8.8.1:
@@ -7652,6 +7653,7 @@ packages:
     resolution: {integrity: sha512-7zFpHzhnqYKrkYdUjF1HI1bzd0VygEGX8lFk4k5zVMqHEoES+P+7TKI+EvLO9WVMJ8eekdO0aDEK044xTXwPPA==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+    dev: true
 
   /acorn/8.8.2:
     resolution: {integrity: sha512-xjIYgE8HBrkpd/sJqOGNspf8uHG+NOHGOw6a/Urj8taM2EXfdNAH2oFcPeIFfsv3+kz/mJrS5VuMqbNLjCa2vw==}
@@ -15955,7 +15957,7 @@ packages:
         optional: true
     dependencies:
       abab: 2.0.6
-      acorn: 8.8.1
+      acorn: 8.8.2
       acorn-globals: 7.0.1
       cssom: 0.5.0
       cssstyle: 2.3.0
@@ -22598,7 +22600,7 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 16.18.14
-      acorn: 8.8.1
+      acorn: 8.8.2
       acorn-walk: 8.2.0
       arg: 4.1.3
       create-require: 1.1.1
@@ -22629,7 +22631,7 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 18.16.0
-      acorn: 8.8.1
+      acorn: 8.8.2
       acorn-walk: 8.2.0
       arg: 4.1.3
       create-require: 1.1.1
@@ -22660,7 +22662,7 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 14.18.33
-      acorn: 8.8.1
+      acorn: 8.8.2
       acorn-walk: 8.2.0
       arg: 4.1.3
       create-require: 1.1.1
@@ -23816,8 +23818,8 @@ packages:
       '@webassemblyjs/ast': 1.11.1
       '@webassemblyjs/wasm-edit': 1.11.1
       '@webassemblyjs/wasm-parser': 1.11.1
-      acorn: 8.8.1
-      acorn-import-assertions: 1.8.0_acorn@8.8.1
+      acorn: 8.8.2
+      acorn-import-assertions: 1.8.0_acorn@8.8.2
       browserslist: 4.21.5
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.12.0
@@ -24292,24 +24294,12 @@ packages:
     resolution: {integrity: sha512-N+d4UJSJbt/R3wqY7Coqs5pcV0aUj2j9IaQ3rNj9bVCLld8tTGKRa2USARjnvZJWVx1NDmQev8EknoczaOQDOA==}
     dev: false
 
-  /zod-to-json-schema/3.20.2_zod@3.20.2:
-    resolution: {integrity: sha512-qka3UAXmVXD8z5SHkRU89UyHp8JHJW7zc8RQCpt7QloJOn6uijwkjUm8o+M/cF1IysmKc5gxac/QeDikaQMdzQ==}
-    peerDependencies:
-      zod: ^3.20.0
-    dependencies:
-      zod: 3.20.2
-    dev: false
-
   /zod-to-json-schema/3.20.2_zod@3.21.4:
     resolution: {integrity: sha512-qka3UAXmVXD8z5SHkRU89UyHp8JHJW7zc8RQCpt7QloJOn6uijwkjUm8o+M/cF1IysmKc5gxac/QeDikaQMdzQ==}
     peerDependencies:
       zod: ^3.20.0
     dependencies:
       zod: 3.21.4
-    dev: false
-
-  /zod/3.20.2:
-    resolution: {integrity: sha512-1MzNQdAvO+54H+EaK5YpyEy0T+Ejo/7YLHS93G3RnYWh5gaotGHwGeN/ZO687qEDU2y4CdStQYXVHIgrUl5UVQ==}
     dev: false
 
   /zod/3.21.4:

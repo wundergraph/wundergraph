@@ -85,7 +85,8 @@
   },
   "pnpm": {
     "overrides": {
-      "@tanstack/query-core": "^4.29.1"
+      "@tanstack/query-core": "^4.29.1",
+      "zod": "^3.21.4"
     }
   }
 }
