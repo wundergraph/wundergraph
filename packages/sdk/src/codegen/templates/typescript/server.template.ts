@@ -7,7 +7,7 @@ import type { InternalOperationsClient } from "./wundergraph.internal.operations
 import type { CustomClaims } from "./claims";
 import type {
 	BaseRequestContext,
-	ContextFactoryContext as InternalContextFactoryContext,
+	InternalContextFactoryContext,
 	GraphQLServerConfig,
 	WunderGraphUser,
 	WunderGraphServerConfig,
@@ -37,7 +37,7 @@ export interface GraphQLExecutionContext<TCustomContext = any> {
 declare module "@wundergraph/sdk/server" {
 	export function configureWunderGraphServer<
 		TCustomContext = any,
-		TContextFactoryContext extends ContextFactoryContext = ContextFactoryContext,
+		TContextFactoryContext = ContextFactoryContext,
 		GeneratedHooksConfig = HooksConfig<TCustomContext>,
 		GeneratedInternalClient = InternalClient,
 		GeneratedWebhooksConfig = WebhooksConfig,
