@@ -1,7 +1,6 @@
 import { expect, beforeAll, describe, it } from 'vitest';
 import { join } from 'path';
 import { TestServers, createTestAndMockServer } from '../.wundergraph/generated/testing';
-import { createClient } from '../.wundergraph/generated/client';
 import { TestContext } from '../types';
 import { mockSearchResponse } from './mocks/mockSearchResponse';
 
@@ -11,12 +10,6 @@ beforeAll(async (ctx) => {
 	ts = createTestAndMockServer({
 		// The directory where your wundergraph directory is located
 		dir: join(__dirname, '..'),
-		createClient: (cfg) => {
-			return createClient({
-				...cfg,
-				requestTimeoutMs: 1000,
-			});
-		},
 	});
 
 	return ts.start({

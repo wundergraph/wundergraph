@@ -3,7 +3,7 @@ import { Subprocess, wunderctl } from '../wunderctlexec';
 import { retry } from 'ts-retry-promise';
 import { join } from 'node:path';
 import terminate from 'terminate/promise';
-import { freeport } from './util';
+import { freeport, fileExists } from './util';
 
 type FetchFn = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>;
 
@@ -130,10 +130,20 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 
 			if (this.options.dir) {
 				cmd.push('--wundergraph-dir', this.options.dir);
-				// Overwrite --env option to not load .env for tests
-				cmd.push('--env', join(this.options.dir, '.env.test'));
+
+				// We try to load the .env.test file from the WunderGraph directory
+				// otherwise WunderGraph will load .env from the current working directory
+				if (await fileExists(join(this.options.dir, '.env.test'))) {
+					cmd.push('--env', join(this.options.dir, '.env.test'));
+				} else if (await fileExists(join(this.options.dir, '.env'))) {
+					cmd.push('--env', join(this.options.dir, '.env'));
+				}
 			} else {
-				cmd.push('--env', '.env.test');
+				if (await fileExists('.env.test')) {
+					cmd.push('--env', '.env.test');
+				} else if (await fileExists('.env')) {
+					cmd.push('--env', '.env');
+				}
 			}
 
 			subprocess = wunderctl({ cmd, env, stdio: 'inherit' });
