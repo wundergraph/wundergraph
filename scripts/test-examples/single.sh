@@ -4,7 +4,7 @@ usage()
 {
   echo "Usage: $0 [-u]" 1>&2
   echo "This script tests a single example, optionally updating dependencies to point to workspace" 1>&2
-  echo "It must be run from the example directory e.g. ../../scripts/test-example.sh" 1>&2
+  echo "It must be run from the example directory e.g. ../../scripts/test-example/single.sh" 1>&2
   exit 2
 }
 

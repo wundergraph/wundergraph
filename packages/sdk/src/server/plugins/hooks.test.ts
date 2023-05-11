@@ -43,6 +43,7 @@ export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) 
 			},
 			apiId: '',
 			dangerouslyEnableGraphQLEndpoint: false,
+			configHash: '',
 			environmentIds: [],
 		},
 		serverConfig,
