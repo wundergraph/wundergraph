@@ -7,13 +7,13 @@ import { HandlerContext } from '../../operations/operations';
 import process from 'node:process';
 import { OperationsClient } from '../operations-client';
 import { InternalError, OperationError } from '../../client/errors';
-import { ContextFactoryContext } from '..';
+import { InternalContextFactoryContext } from '../types';
 
 interface FastifyFunctionsOptions {
 	operations: TypeScriptOperationFile[];
 	internalClientFactory: InternalClientFactory;
 	nodeURL: string;
-	createContext: (ctx: ContextFactoryContext) => Promise<any>;
+	createContext: (ctx: InternalContextFactoryContext) => Promise<any>;
 }
 
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {

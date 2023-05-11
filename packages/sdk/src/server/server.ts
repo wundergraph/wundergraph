@@ -17,9 +17,10 @@ import type { WebhooksConfig } from '../webhooks/types';
 import type { HooksRouteConfig } from './plugins/hooks';
 import type { WebHookRouteConfig } from './plugins/webhooks';
 import type {
-	ContextFactoryContext,
+	DefaultContextFactory,
 	FastifyRequestBody,
 	HooksConfiguration,
+	InternalContextFactoryContext,
 	ServerRunOptions,
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
@@ -78,42 +79,22 @@ export function configureWunderGraphServer<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedInternalClient = InternalClient,
 	GeneratedWebhooksConfig = WebhooksConfig,
-	TContextFactoryContext extends ContextFactoryContext = ContextFactoryContext,
-	TCustomContext = any
->(
-	configWrapper: () => WunderGraphServerConfig<
-		GeneratedHooksConfig,
-		GeneratedWebhooksConfig,
-		TContextFactoryContext,
-		TCustomContext
-	>
-) {
-	return _configureWunderGraphServer<
-		GeneratedHooksConfig,
-		GeneratedWebhooksConfig,
-		TContextFactoryContext,
-		TCustomContext
-	>(configWrapper());
+	TContextFactory extends DefaultContextFactory = DefaultContextFactory
+>(configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TContextFactory>) {
+	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig, TContextFactory>(configWrapper());
 }
 
 const _configureWunderGraphServer = <
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig,
-	TContextFactoryContext extends ContextFactoryContext = ContextFactoryContext,
-	TCustomContext = any
+	TContextFactory extends DefaultContextFactory = DefaultContextFactory
 >(
-	config: WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TContextFactoryContext, TCustomContext>
-): WunderGraphHooksAndServerConfig<
-	GeneratedHooksConfig,
-	GeneratedWebhooksConfig,
-	TContextFactoryContext,
-	TCustomContext
-> => {
+	config: WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TContextFactory>
+): WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TContextFactory> => {
 	const serverConfig = config as WunderGraphHooksAndServerConfig<
 		GeneratedHooksConfig,
 		GeneratedWebhooksConfig,
-		TContextFactoryContext,
-		TCustomContext
+		TContextFactory
 	>;
 
 	/**
@@ -229,7 +210,7 @@ export const createServer = async ({
 		},
 	});
 
-	const createContext = async (ctx: ContextFactoryContext) => {
+	const createContext = async (ctx: InternalContextFactoryContext) => {
 		if (typeof serverConfig.createContext === 'function') {
 			const result = await serverConfig.createContext(ctx);
 			if (result === undefined) {
