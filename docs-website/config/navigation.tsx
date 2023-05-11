@@ -28,7 +28,7 @@ const navigation = [
 	{
 		title: 'Getting started',
 		href: '/docs/getting-started',
-		paths: ['/docs/tutorials', '/docs/examples'],
+		paths: ['/docs/examples'],
 		icon: <BoltIcon />,
 		links: [
 			{
@@ -74,15 +74,6 @@ const navigation = [
 				],
 			},
 			{
-				title: 'Tutorials',
-				links: [
-					{
-						title: 'Your first WunderGraph Application',
-						href: '/docs/tutorials/your-first-wundergraph-application',
-					},
-				],
-			},
-			{
 				title: 'Examples',
 				links: [
 					{
@@ -112,6 +103,10 @@ const navigation = [
 					{
 						title: 'Next.js + Clerk',
 						href: '/docs/examples/nextjs-clerk',
+					},
+					{
+						title: 'Remix',
+						href: '/docs/examples/remix',
 					},
 					{
 						title: 'SvelteKit + SSR with TanStack Query',

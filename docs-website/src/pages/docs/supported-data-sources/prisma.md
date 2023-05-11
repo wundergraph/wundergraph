@@ -1,6 +1,5 @@
 ---
-title: Prisma
-pageTitle: WunderGraph - Prisma
+title: Prisma support
 description: WunderGraph is the easiest way to expose Prisma through GraphQL.
 ---
 

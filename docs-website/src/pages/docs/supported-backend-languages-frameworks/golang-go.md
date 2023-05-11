@@ -1,7 +1,6 @@
 ---
-title: GoLang / Go
-pageTitle: WunderGraph - GoLang / Go
-description:
+title: GoLang / Go support
+description: WunderGraph supports Golang out of the box.
 ---
 
 WunderGraph supports Golang out of the box.

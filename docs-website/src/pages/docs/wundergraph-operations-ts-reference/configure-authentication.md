@@ -1,7 +1,6 @@
 ---
 title: Configure Authentication
-pageTitle: WunderGraph - Configure Authentication
-description:
+description: How to configure authentication for operations.
 ---
 
 In this section, we'll configure authentication for our API.

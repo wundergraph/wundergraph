@@ -1,7 +1,6 @@
 ---
 title: '@injectEnvironmentVariable Directive'
-pageTitle: WunderGraph - Directives - @injectEnvironmentVariable
-description:
+description: Inject environment variables into a variable definition
 ---
 
 The `@injectEnvironmentVariable` allows you to inject an environment variable into a VariableDefinition of your GraphQL Operations.

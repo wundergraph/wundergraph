@@ -1,7 +1,7 @@
 ---
 title: Configure WunderNode options
 pageTitle: 'WunderGraph - Configure WunderNode options'
-description:
+description: How to set configurations options of WunderNode.
 ---
 
 This section describes how to set configurations options of WunderNode.

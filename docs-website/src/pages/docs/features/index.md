@@ -1,7 +1,6 @@
 ---
-title: Overview
-pageTitle: WunderGraph - Features - Overview
-description:
+title: Features Overview
+description: Overview of the most important features of WunderGraph.
 hideTableOfContents: true
 fullWidthContent: true
 isIndexFile: true

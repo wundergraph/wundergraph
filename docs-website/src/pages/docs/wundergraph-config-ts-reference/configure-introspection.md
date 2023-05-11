@@ -1,7 +1,6 @@
 ---
 title: Configure Introspection
-pageTitle: WunderGraph - Configure Introspection
-description:
+description: Configure introspection caching, polling and headers.
 ---
 
 When running `wunderctl up`,

@@ -1,7 +1,6 @@
 ---
 title: Configure Headers for HTTP-based Data Sources
-pageTitle: WunderGraph - Configure Headers for HTTP-based Data Sources
-description:
+description: Configure headers for HTTP-based data sources like GraphQL, Apollo Federation or OpenAPI.
 ---
 
 When configuring a HTTP-based data source,

@@ -1,7 +1,6 @@
 ---
-title: SQL Server
-pageTitle: WunderGraph - SQL Server
-description:
+title: SQL Server support
+description: The SQLServer DataSource allows you to turn any SQLServer protocol compatible Database into a secure production-grade GraphQL API.
 ---
 
 The SQLServer DataSource allows you to turn any SQLServer protocol compatible Database into a secure production-grade GraphQL API.

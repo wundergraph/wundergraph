@@ -1,7 +1,6 @@
 ---
 title: Components of WunderGraph - Overview
-pageTitle: WunderGraph - Components of WunderGraph - Overview
-description:
+description: Overview of the components of WunderGraph.
 hideTableOfContents: true
 fullWidthContent: true
 isIndexFile: true

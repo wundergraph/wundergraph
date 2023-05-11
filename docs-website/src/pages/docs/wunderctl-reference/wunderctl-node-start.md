@@ -1,7 +1,6 @@
 ---
 title: wunderctl node start
-pageTitle: WunderGraph - wunderctl node start
-description:
+description: Start WunderNode in the production mode.
 ---
 
 The cmd `wunderctl node start` starts WunderNode in the production mode.

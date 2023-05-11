@@ -1,7 +1,6 @@
 ---
 title: OpenID Connect-Based Authentication
-pageTitle: WunderGraph - Features - OpenID Connect-Based Authentication
-description:
+description: Configure OpenID Connect-based authentication for your application.
 ---
 
 Authentication is that one topic we're spending way too much time on.

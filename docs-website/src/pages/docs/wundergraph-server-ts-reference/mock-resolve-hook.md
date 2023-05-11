@@ -1,7 +1,6 @@
 ---
-title: Mock Resolve Hook
-pageTitle: WunderGraph - Mock Resolve Hook
-description:
+title: mockResolve hook
+description: Reference documentation for the mockResolve hook
 ---
 
 The `mockResolve` hook, as the name indicates,

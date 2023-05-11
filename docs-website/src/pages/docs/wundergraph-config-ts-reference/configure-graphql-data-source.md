@@ -1,7 +1,6 @@
 ---
 title: Configure GraphQL Data Source
-pageTitle: WunderGraph - Configure GraphQL Data Source
-description:
+description: Introspect GraphQL services and add them to your Virtual Graph.
 ---
 
 The `GraphQL` data source allows you to introspect GraphQL services and add them to your virtual Graph.

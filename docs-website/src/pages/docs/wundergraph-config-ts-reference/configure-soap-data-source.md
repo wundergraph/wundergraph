@@ -1,7 +1,6 @@
 ---
 title: Configure SOAP Datasource
-pageTitle: WunderGraph - Configure SOAP Datasource
-description:
+description: Introspect SOAP services and add them to the Virtual Graph.
 ---
 
 The SOAP data source introspects WSDL and generates a GraphQL schema from it.

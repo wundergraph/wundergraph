@@ -1,7 +1,6 @@
 ---
-title: Post Logout Hook
-pageTitle: WunderGraph - Post Logout Hook
-description:
+title: postLogout hook
+description: Reference documentation for the postLogout hook
 ---
 
 The `postLogout` hook gets called after the user has been logged out.

@@ -2,7 +2,7 @@
 title: 'Hello World'
 tags: []
 date: 2022-01-02
-description: ''
+description: Learn how to create your first simple Hello World application.
 layout: 'wg_by_example'
 ---
 
