@@ -31,10 +31,9 @@ export class TypeScriptClient implements Template {
 				const profile = provider.uploadProfiles[key];
 				if (profile.meta) {
 					let schema: object;
-					// XXX: This seems to be the only reliable check
-					if (profile.meta.constructor.name.startsWith('Zod')) {
+					if (profile.meta instanceof z.ZodType) {
 						try {
-							schema = zodToJsonSchema(profile.meta as z.ZodAny);
+							schema = zodToJsonSchema(profile.meta);
 						} catch (e: any) {
 							throw new Error(`could not convert zod type to JSON schema: ${e}`);
 						}
