@@ -174,7 +174,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 		requestDump, _ = httputil.DumpRequest(request, true)
 	}
 
-	if host := request.Header.Get("host"); host != "" {
+	if host := request.Header.Get("Host"); host != "" {
 		// in order to provide different host value we have to set it on the request.Host field
 		// https://pkg.go.dev/net/http#Request
 		// this is done here in order to support all go based data sources
