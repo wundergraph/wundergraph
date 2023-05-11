@@ -9,34 +9,6 @@ class MyCustomContext {
 	}
 }
 
-// declare module "@wundergraph/sdk/server" {
-// 	export function configureWunderGraphServer<
-// 		GeneratedHooksConfig = HooksConfig,
-// 		GeneratedInternalClient = InternalClient,
-// 		GeneratedWebhooksConfig = WebhooksConfig,
-// 		TCustomContext = any,
-// 		TContextFactoryContext extends ContextFactoryContext = ContextFactoryContext,
-// 	>(
-// 		configWrapper: () => WunderGraphServerConfig<
-// 			HooksConfig<TCustomContext>,
-// 			WebhooksConfig,
-// 			TContextFactoryContext,
-// 			TCustomContext
-// 		>
-// 	): WunderGraphHooksAndServerConfig<any, any, TContextFactoryContext, TCustomContext>;
-// 	export const createContext: <TCustomContext>(
-// 		contextFactory: (req: ContextFactoryContext) => Promise<TCustomContext>
-// 	) => (req: ContextFactoryContext) => Promise<TCustomContext>;
-// }
-
-// export const createContext = <CustomContext>(contextFactory: (req: ContextFactoryContext) => Promise<CustomContext>) => {
-// 	return contextFactory;
-// };
-
-const myContext = createContext(async (req) => {
-	return new MyCustomContext();
-});
-
 export default configureWunderGraphServer(() => ({
 	hooks: {
 		queries: {
@@ -55,28 +27,19 @@ export default configureWunderGraphServer(() => ({
 					};
 				},
 			},
-			// CustomcontextGraphql: {
-			// 	mutatingPostResolve: async ({ context }) => {
-			// 		return {
-			// 			data: context.hello(),
-			// 		};
-			// 	},
-			// },
+			CustomcontextGraphql: {
+				mutatingPostResolve: async ({ context }) => {
+					return {
+						data: `fromHook: ${context.hello()}`,
+					};
+				},
+			},
 		},
 		mutations: {},
 	},
-	// This works, declaring return type makes no difference
-	// createContext: myContext,
-	createContext: createContext(async (req) => {
+	createContext: createContext(async (_req) => {
 		return new MyCustomContext();
 	}),
-	// This works
-	//createContext: myCreateContext,
-	// This does NOT work, regardless of the declared return type
-	// unless we use configureWunderGraphServer<MyCustomContext>
-	// createContext: async (req): Promise<MyCustomContext> => {
-	// 	return new MyCustomContext();
-	// },
 	graphqlServers: [
 		{
 			apiNamespace: 'embedded',

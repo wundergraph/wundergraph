@@ -1,5 +1,3 @@
 query {
-	countries_countries(filter: { code: { eq: "ES" } }) {
-		code
-	}
+	embedded_fromCustomContext
 }

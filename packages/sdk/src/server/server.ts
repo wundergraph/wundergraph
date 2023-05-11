@@ -20,7 +20,7 @@ import type {
 	DefaultContextFactory,
 	FastifyRequestBody,
 	HooksConfiguration,
-	InternalContextFactoryContext,
+	InternalContextFactoryRequest,
 	ServerRunOptions,
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
@@ -74,6 +74,18 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 		process.exit(1);
 	}
 }
+
+/**
+ * createContext is a helper function for instantiating the a context factory without
+ * specifying its type manually
+ * @param contextFactory
+ * @returns The context factory
+ */
+export const createContext = <TContextFactoryRequest extends InternalContextFactoryRequest, TCustomContext>(
+	contextFactory: (req: TContextFactoryRequest) => Promise<TCustomContext>
+) => {
+	return contextFactory;
+};
 
 export function configureWunderGraphServer<
 	GeneratedHooksConfig = HooksConfiguration,
@@ -210,7 +222,7 @@ export const createServer = async ({
 		},
 	});
 
-	const createContext = async (ctx: InternalContextFactoryContext) => {
+	const createContext = async (ctx: InternalContextFactoryRequest) => {
 		if (typeof serverConfig.createContext === 'function') {
 			const result = await serverConfig.createContext(ctx);
 			if (result === undefined) {

@@ -33,7 +33,7 @@ describe('Custom context', () => {
 		});
 
 		expect(error).toBeUndefined();
-		expect(data).toBe('world');
+		expect(data).toBe('fromHook: world');
 	});
 
 	it('should use custom context in embedded GraphQL server', async () => {

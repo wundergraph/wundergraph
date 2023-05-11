@@ -2,7 +2,7 @@ import { expectType } from 'tsd';
 import {
 	BaseRequestContext,
 	HooksConfiguration,
-	InternalContextFactoryContext,
+	InternalContextFactoryRequest,
 	PreUploadHookRequest,
 	PreUploadHookResponse,
 	PostUploadHookRequest,
@@ -34,7 +34,7 @@ export type DataSources = 'counter';
 export interface HookContext<TCustomContext>
 	extends BaseRequestContext<User, InternalClient, OperationsClient, TCustomContext> {}
 
-export interface ContextFactoryContext extends InternalContextFactoryContext<User, InternalClient, OperationsClient> {}
+export interface ContextFactoryRequest extends InternalContextFactoryRequest<User, InternalClient, OperationsClient> {}
 
 export type HooksConfig<TCustomContext> = HooksConfiguration<
 	QueryHooks<TCustomContext>,
@@ -80,7 +80,7 @@ class MyCustomContext {
 	}
 }
 
-type ContextFactory = (ctx: ContextFactoryContext) => Promise<MyCustomContext>;
+type ContextFactory = (req: ContextFactoryRequest) => Promise<MyCustomContext>;
 
 const configuration = configureWunderGraphServer<
 	HooksConfig<MyCustomContext>,
@@ -184,4 +184,4 @@ const configuration = configureWunderGraphServer<
 }));
 
 expectType<WunderGraphHooksAndServerConfig<any, any, ContextFactory>>(configuration);
-expectType<(ctx: ContextFactoryContext) => Promise<MyCustomContext>>(configuration.createContext!);
+expectType<(req: ContextFactoryRequest) => Promise<MyCustomContext>>(configuration.createContext!);

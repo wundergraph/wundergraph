@@ -73,7 +73,7 @@ export interface FastifyRequestContext<
 	ctx: AuthenticationHookRequest<BaseRequestContext<User, IC, InternalOperationsClient>>;
 }
 
-export interface InternalContextFactoryContext<
+export interface InternalContextFactoryRequest<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
 	InternalOperationsClient extends OperationsClient = OperationsClient
@@ -105,7 +105,7 @@ export interface BaseRequestContext<
 	IC extends InternalClient = InternalClient,
 	InternalOperationsClient extends OperationsClient = OperationsClient,
 	CustomContext = any
-> extends InternalContextFactoryContext<User, IC, InternalOperationsClient> {
+> extends InternalContextFactoryRequest<User, IC, InternalOperationsClient> {
 	/**
 	 * Custom context
 	 */
