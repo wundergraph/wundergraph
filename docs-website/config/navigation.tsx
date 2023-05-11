@@ -220,7 +220,7 @@ const navigation = [
 		title: 'About WunderGraph',
 		href: '/manifesto',
 		icon: <QuestionMarkCircleIcon />,
-		paths: ['/docs/frequently-asked-questions', '/usage-information', '/about', '/docs/use-cases'],
+		paths: ['/usage-information', '/about', '/docs/use-cases'],
 		links: [
 			{
 				title: 'Manifesto',
@@ -290,23 +290,6 @@ const navigation = [
 					{
 						title: 'Enabling your Organization to become API first',
 						href: '/docs/use-cases/enabling-your-organization-to-become-api-first',
-					},
-				],
-			},
-			{
-				title: 'Frequently Asked Questions',
-				links: [
-					{
-						title: 'How is WunderGraph faster and more secure than other GraphQL solutions?',
-						href: '/docs/frequently-asked-questions/how-is-wundergraph-faster-and-more-secure-than-other-graphql-solutions',
-					},
-					{
-						title: 'How is the developer experience different from legacy GraphQL?',
-						href: '/docs/frequently-asked-questions/how-is-the-developer-experience-different-from-legacy-graphql',
-					},
-					{
-						title: 'How is server-side only GraphQL different from client-side GraphQL?',
-						href: '/docs/frequently-asked-questions/how-is-server-side-only-graphql-different-from-client-side-graphql',
 					},
 				],
 			},
