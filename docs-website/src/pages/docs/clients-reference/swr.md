@@ -1,7 +1,6 @@
 ---
-title: SWR Client
-pageTitle: WunderGraph SWR Client
-description: SWR Client reference
+title: SWR client
+description: Reference documentation for the WunderGraph SWR Client.
 ---
 
 The SWR Client is our default client for React projects. It's a lightweight wrapper around the [SWR](https://swr.vercel.app/) library from Vercel.

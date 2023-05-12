@@ -1,7 +1,7 @@
 ---
-title: Apollo Federation
+title: Apollo Federation support
 pageTitle: WunderGraph - Apollo Federation
-description:
+description: WunderGraph supports Apollo Federation out of the box. You can use WunderGraph as a replacement for any other Federation Gateway.
 ---
 
 Federation is a concept, built on top of GraphQL, to help companies implement GraphQL at scale.

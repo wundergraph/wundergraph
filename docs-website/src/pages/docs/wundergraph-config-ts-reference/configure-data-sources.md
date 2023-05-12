@@ -1,7 +1,6 @@
 ---
 title: Data Sources Reference
-pageTitle: WunderGraph - Data Sources Reference
-description:
+description: Reference for all supported data sources
 ---
 
 WunderGraph supports a variety of data sources. They can be configured in the `wundergraph.config.ts` file by adding introspections to the `apis` configuration.

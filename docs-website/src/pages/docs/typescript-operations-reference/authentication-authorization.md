@@ -1,7 +1,6 @@
 ---
-title: TypeScript Operations Reference
-pageTitle: WunderGraph - Reference - TypeScript Operations - Authentication & Authorization
-description:
+title: Authenticating and Authorizing TypeScript Operations
+description: Learn how to authenticate and authorize users in TypeScript Operations.
 ---
 
 Here's an overview of the different ways to authenticate and authorize users in WunderGraph.

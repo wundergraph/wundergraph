@@ -1,7 +1,6 @@
 ---
-title: Solid Query Client
-pageTitle: WunderGraph Solid Query Client
-description: Solid Query Client reference
+title: Solid Query client
+description: Reference documentation for the Solid Query client.
 ---
 
 This package provides a type-safe integration of [Solid Query](https://tanstack.com/query/v4/docs/react/adapters/solid-query) with WunderGraph.

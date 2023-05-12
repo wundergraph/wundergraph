@@ -1,7 +1,6 @@
 ---
-title: TypeScript Operations Reference
-pageTitle: WunderGraph - Reference - TypeScript Operations - Subscriptions
-description:
+title: TypeScript Subscription Operations
+description: Learn how to create TypeScript Subscription Operations
 ---
 
 The third type of operation is a subscription. Subscriptions are similar to queries, but instead of returning a single result, they return a stream of results.

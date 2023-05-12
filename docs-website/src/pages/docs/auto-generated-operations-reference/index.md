@@ -1,7 +1,6 @@
 ---
 title: Auto-generated Operations reference
-pageTitle: WunderGraph - Auto-generated Operations reference
-description:
+description: Reference for the auto-generated Operations feature.
 hideTableOfContents: true
 fullWidthContent: true
 isIndexFile: true

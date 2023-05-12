@@ -1,7 +1,6 @@
 ---
 title: Core Concepts
-pageTitle: WunderGraph - Core Concepts
-description:
+description: An overview of the core concepts of WunderGraph.
 hideTableOfContents: true
 fullWidthContent: true
 isIndexFile: true

@@ -1,6 +1,5 @@
 ---
-title: Yugabyte to GraphQL
-pageTitle: WunderGraph - Yugabyte DataSource
+title: Yugabyte support
 description: WunderGraph is the easiest way to expose Yugabyte APIs through GraphQL.
 ---
 

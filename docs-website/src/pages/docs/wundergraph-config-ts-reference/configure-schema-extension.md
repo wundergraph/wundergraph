@@ -1,7 +1,6 @@
 ---
 title: Configure Schema Extension
-pageTitle: WunderGraph - Configure Schema Extension
-description:
+description: How to extend the GraphQL Schema of an origin and replace specific fields with a custom type.
 ---
 
 WunderGraph allows you to extend the GraphQL Schema of an origin and replace specific fields with a custom type.

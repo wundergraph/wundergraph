@@ -1,7 +1,6 @@
 ---
 title: wunderctl up
-pageTitle: WunderGraph - wunderctl up
-description:
+description: Start the WunderGraph development process.
 ---
 
 The cmd `wunderctl up` is probably the most used command of the WunderGraph cli.

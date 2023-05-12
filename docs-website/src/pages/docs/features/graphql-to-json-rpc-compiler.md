@@ -1,7 +1,6 @@
 ---
 title: GraphQL to JSON-RPC Compiler
-pageTitle: WunderGraph - Features - GraphQL to JSON-RPC Compiler
-description:
+description: How WunderGraph compiles GraphQL Operations to JSON-RPC
 ---
 
 The most obvious advantage of GraphQL is that you can query exactly the data you want.

@@ -1,7 +1,6 @@
 ---
-title: SQLite
-pageTitle: WunderGraph - SQLite
-description:
+title: SQLite support
+description: WunderGraph is the easiest way to expose SQLite Databases through GraphQL.
 ---
 
 The SQLite DataSource allows you to turn any SQLite protocol compatible Database into a secure production-grade GraphQL API.
