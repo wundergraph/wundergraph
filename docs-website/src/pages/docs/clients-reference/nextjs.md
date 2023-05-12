@@ -21,15 +21,14 @@ import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 // wundergraph.config.ts
 configureWunderGraphApplication({
   // ... your config
-  codeGenerators: [
-    {
-      templates: [...templates.typescript.all],
-    },
-    {
-      templates: [new NextJsTemplate()],
-      path: '../components/generated',
-    },
-  ],
+  generate: {
+    codeGenerators: [
+      {
+        templates: [new NextJsTemplate()],
+        path: '../components/generated',
+      },
+    ],
+  },
 });
 ```
 
