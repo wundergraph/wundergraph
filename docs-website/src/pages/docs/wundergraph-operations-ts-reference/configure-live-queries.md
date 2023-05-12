@@ -1,7 +1,6 @@
 ---
 title: Configure Live Queries
-pageTitle: WunderGraph - Configure Live Queries
-description:
+description: How to configure Live Queries.
 ---
 
 Another essential feature of WunderGraph is Live Queries.

@@ -1,7 +1,6 @@
 ---
 title: Virtual Graph
-pageTitle: WunderGraph - Core Concepts - Virtual Graph
-description:
+description: The Virtual Graph is a concept to represent your composed virtual Graphs.
 ---
 
 The Virtual Graph is a concept we've introduced in WunderGraph.

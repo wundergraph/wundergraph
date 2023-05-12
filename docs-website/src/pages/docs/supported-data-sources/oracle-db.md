@@ -1,6 +1,5 @@
 ---
-title: Oracle DB to GraphQL
-pageTitle: WunderGraph - Oracle DB DataSource
+title: Oracle DB support
 description: WunderGraph is the easiest way to expose Oracle DB databases through GraphQL.
 ---
 

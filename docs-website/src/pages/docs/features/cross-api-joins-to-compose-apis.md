@@ -1,7 +1,6 @@
 ---
 title: Cross-API Joins to Compose APIs
-pageTitle: WunderGraph - Features - Cross-API Joins to Compose APIs
-description:
+description: Access Data from multiple APIs and combine the results into a single dataset.
 ---
 
 Imagine you'd like to access Data from multiple APIs and combine the results into a single dataset.

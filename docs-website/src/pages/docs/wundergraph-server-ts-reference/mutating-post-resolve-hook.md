@@ -1,7 +1,6 @@
 ---
-title: Mutating Post Resolve Hook
-pageTitle: WunderGraph - Post Resolve Hook
-description:
+title: mutatingPostResolve hook
+description: Reference documentation for the mutatingPostResolve hook
 ---
 
 The `mutatingPostResolve` hook is called after the response of an Operation has been resolved.

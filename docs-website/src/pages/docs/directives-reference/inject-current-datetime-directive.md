@@ -1,7 +1,6 @@
 ---
 title: '@injectCurrentDatetime Directive'
-pageTitle: WunderGraph - Directives - @injectCurrentDatetime
-description:
+description: Inject the current dateTime into a variable
 ---
 
 When building APIs,

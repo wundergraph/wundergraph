@@ -1,7 +1,6 @@
 ---
 title: wunderctl server start
-pageTitle: WunderGraph - wunderctl server start
-description:
+description: Start WunderGraph Server in the production mode.
 ---
 
 The cmd `wunderctl server start` starts WunderGraph Server in the production mode.

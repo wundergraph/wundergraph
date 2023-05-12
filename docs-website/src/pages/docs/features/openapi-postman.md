@@ -1,6 +1,6 @@
 ---
 title: Generate OpenAPI definitions and Postman collections
-pageTitle: WunderGraph - OpenAPI definitions and Postman collection
+description: Generate OpenAPI definitions and Postman collections for your APIs.
 ---
 
 ## OpenAPI and Postman collection generation

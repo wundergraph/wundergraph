@@ -46,6 +46,11 @@ const nextConfig = {
 				destination: '/docs/guides/bundle-generated-client-for-distribution',
 				permanent: true,
 			},
+			{
+				source: '/docs/tutorials/your-first-wundergraph-application',
+				destination: '/docs/getting-started/quickstart',
+				permanent: true,
+			},
 		];
 	},
 };

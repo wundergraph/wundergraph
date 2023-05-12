@@ -1,7 +1,6 @@
 ---
 title: Configure PostgreSQL Data Source
-pageTitle: WunderGraph - Configure PostgreSQL Data Source
-description:
+description: Introspect PostgreSQL databases and add them to your Virtual Graph.
 ---
 
 The PostgreSQL data source introspects the database and generates a GraphQL schema.

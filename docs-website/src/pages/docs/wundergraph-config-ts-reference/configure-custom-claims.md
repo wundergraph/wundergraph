@@ -1,6 +1,5 @@
 ---
 title: Using claims
-pageTitle: WunderGraph - Using claims
 description: Declare and manipulate user attributes.
 ---
 

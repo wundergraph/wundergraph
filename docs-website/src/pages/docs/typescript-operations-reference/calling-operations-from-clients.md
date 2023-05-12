@@ -1,7 +1,6 @@
 ---
-title: TypeScript Operations Reference
-pageTitle: WunderGraph - Reference - TypeScript Operations - Calling TypeScript Operations from Clients
-description:
+title: Calling TypeScript Operations from Clients
+description: How to call TypeScript Operations from clients
 ---
 
 You might have seen it in the other examples, but we'd like to dedicate an extra section to calling TypeScript Operations from clients because there are a few things to note.

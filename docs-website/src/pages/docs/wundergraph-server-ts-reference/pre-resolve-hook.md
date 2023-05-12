@@ -1,7 +1,6 @@
 ---
-title: Pre Resolve Hook
-pageTitle: WunderGraph - Pre Resolve Hook
-description:
+title: preResolve hook
+description: Reference documentation for the preResolve hook
 ---
 
 The `preResolve` hook is called before the Operation gets resolved.

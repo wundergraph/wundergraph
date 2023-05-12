@@ -1,7 +1,6 @@
 ---
-title: GraphQL
-pageTitle: WunderGraph - GraphQL
-description:
+title: GraphQL support
+description: WunderGraph is a GraphQL API Gateway that allows you to combine multiple GraphQL APIs into a single endpoint.
 ---
 
 The GraphQL DataSource allows you to connect any compatible GraphQL Server.

@@ -1,7 +1,6 @@
 ---
 title: The WunderGraph Server
-pageTitle: WunderGraph - Architecture - WunderGraph Server
-description:
+description: The WunderGraph Server is a central component in the architecture of WunderGraph.
 ---
 
 ## Introduction

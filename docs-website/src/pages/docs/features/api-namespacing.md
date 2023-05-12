@@ -1,7 +1,6 @@
 ---
 title: API Namespacing
-pageTitle: WunderGraph - Features - API Namespacing
-description:
+description: Namespacing allows you to merge multiple APIs into one single GraphQL Schema.
 ---
 
 The intention of WunderGraph is to make it possible to access many APIs at once.

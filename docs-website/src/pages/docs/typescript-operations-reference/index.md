@@ -1,6 +1,5 @@
 ---
 title: TypeScript Operations Reference
-pageTitle: WunderGraph - Reference - TypeScript Operations
 description: TypeScript Operations allow you to extend your WunderGraph API with custom business logic
 ---
 

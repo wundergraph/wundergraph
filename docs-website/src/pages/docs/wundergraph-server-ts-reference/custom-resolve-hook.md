@@ -1,7 +1,6 @@
 ---
-title: Custom Resolve Hook
-pageTitle: WunderGraph - Custom Resolve Hook
-description:
+title: customResolve hook
+description: Reference documentation for the customResolve hook
 ---
 
 The `customResolve` hook allows you to override the default resolve behavior of WunderGraph.
