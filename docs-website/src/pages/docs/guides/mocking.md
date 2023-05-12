@@ -26,14 +26,9 @@ configureWunderGraphApplication({
   apis: [countries],
   server,
   operations,
-  codeGenerators: [
-    {
-      templates: [
-        // Generate all TypeScript based templates, which includes the testing library
-        ...templates.typescript.all,
-      ],
-    },
-  ],
+  generate: {
+    codeGenerators: [],
+  },
 });
 ```
 
