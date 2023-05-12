@@ -174,13 +174,8 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 		requestDump, _ = httputil.DumpRequest(request, true)
 	}
 
-	if host := request.Header.Get("Host"); host != "" {
-		// in order to provide different host value we have to set it on the request.Host field
-		// https://pkg.go.dev/net/http#Request
-		// this is done here in order to support all go based data sources
-
-		request.Host = host
-	}
+	// adjust request.Host before roundtrip
+	setRequestHost(request)
 
 	start := time.Now()
 	res, err = t.httpTransport.RoundTrip(request)
@@ -277,6 +272,7 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 	}
 
 	req.Header = request.Header.Clone()
+	setRequestHost(req)
 
 	return t.httpTransport.RoundTrip(req)
 }
@@ -435,4 +431,14 @@ func (t *ApiTransport) handleUpstreamAuthentication(request *http.Request, auth 
 		return fmt.Errorf("not implemented")
 	}
 	return nil
+}
+
+// setRequestHost - sets the request.Host to a value of the Host header if it is set
+func setRequestHost(request *http.Request) {
+	// in order to provide different host value we have to set it on the request.Host field
+	// https://pkg.go.dev/net/http#Request
+
+	if host := request.Header.Get("Host"); host != "" {
+		request.Host = host
+	}
 }
