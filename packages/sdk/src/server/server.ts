@@ -392,6 +392,7 @@ export const createServer = async ({
 			nodeURL: nodeInternalURL,
 			globalContext,
 			createContext,
+			releaseContext,
 		});
 		fastify.log.debug('Webhooks plugin registered');
 	}

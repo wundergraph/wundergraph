@@ -18,7 +18,7 @@ interface FastifyWebHooksOptions {
 	internalClientFactory: InternalClientFactory;
 	nodeURL: string;
 	globalContext: any;
-	createRequestContext: (globalContext: any) => Promise<any>;
+	createContext: (globalContext: any) => Promise<any>;
 	releaseContext: (requestContext: any) => Promise<void>;
 }
 
@@ -37,7 +37,7 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 				handler: async (request, reply) => {
 					let requestContext;
 					try {
-						requestContext = await config.createRequestContext(config.globalContext);
+						requestContext = await config.createContext(config.globalContext);
 						const clientRequest = {
 							headers: new Headers(request.headers as Record<string, string>),
 							method: request.method as RequestMethod,
