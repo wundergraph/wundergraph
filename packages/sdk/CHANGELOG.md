@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.157.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.156.0...@wundergraph/sdk@0.157.0) (2023-05-12)
+
+### Features
+
+* context factories ([#914](https://github.com/wundergraph/wundergraph/issues/914)) ([ec60996](https://github.com/wundergraph/wundergraph/commit/ec60996ce766248a352655995af34c6b0338ceaf)) (@fiam)
+
 ## [0.156.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.155.0...@wundergraph/sdk@0.156.0) (2023-05-12)
 
 ### Features
