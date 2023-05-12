@@ -72,11 +72,11 @@ export interface FastifyRequestContext<
 > {
 	ctx: AuthenticationHookRequest<BaseRequestContext<User, IC, InternalOperationsClient, TRequestContext>>;
 }
-
-export interface InternalCreateRequestContextData<
+export interface BaseRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
-	InternalOperationsClient extends OperationsClient = OperationsClient
+	InternalOperationsClient extends OperationsClient = OperationsClient,
+	TCustomContext = any
 > {
 	/**
 	 * The user that is currently logged in.
@@ -98,18 +98,10 @@ export interface InternalCreateRequestContextData<
 	 * The operations client that is used to communicate with the server.
 	 */
 	operations: Omit<InternalOperationsClient, 'cancelSubscriptions'>;
-}
-
-export interface BaseRequestContext<
-	User extends WunderGraphUser = WunderGraphUser,
-	IC extends InternalClient = InternalClient,
-	InternalOperationsClient extends OperationsClient = OperationsClient,
-	CustomContext = any
-> extends InternalCreateRequestContextData<User, IC, InternalOperationsClient> {
 	/**
 	 * Custom context
 	 */
-	context: CustomContext;
+	context: TCustomContext;
 }
 export interface AuthenticationRequestContext<User extends WunderGraphUser = WunderGraphUser> {
 	/**
@@ -231,45 +223,44 @@ export interface WunderGraphUser<Role extends string = any, CustomClaims extends
 
 export interface ServerRunOptions {
 	wundergraphDir: string;
-	serverConfig: WunderGraphHooksAndServerConfig<any, any, any>;
+	serverConfig: WunderGraphHooksAndServerConfig<any, any, any, any>;
 	config: WunderGraphConfiguration;
 	gracefulShutdown: boolean;
 	clientFactory: InternalClientFactory;
 }
 
-export type DefaultRequestContextFactory = (ctx: any) => void;
+export interface WunderGraphServerContext<TRequestContext = any, TGlobalContext = any> {
+	global?: {
+		create?: () => Promise<TGlobalContext>;
+		release?: (ctx: TGlobalContext) => Promise<void>;
+	};
+	request?: {
+		create?: (ctx: TGlobalContext) => Promise<TRequestContext>;
+		release?: (ctx: TRequestContext) => Promise<void>;
+	};
+}
 
 export interface WunderGraphServerConfig<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig,
-	TGlobalContext = any,
 	TRequestContext = any,
-	TRequestContextData = any
+	TGlobalContext = any
 > {
 	webhooks?: GeneratedWebhooksConfig;
 	hooks?: GeneratedHooksConfig;
 	// routeUrl is set internally
 	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
 	options?: ServerOptions;
-	createGlobalContext?: () => Promise<TGlobalContext>;
-	releaseGlobalContext?: (ctx: TGlobalContext) => Promise<void>;
-	createRequestContext?: (data: TRequestContextData, ctx: TGlobalContext) => Promise<TRequestContext>;
+	context?: WunderGraphServerContext<TRequestContext, TGlobalContext>;
 }
 
 // internal representation of the fully resolved server config
 export interface WunderGraphHooksAndServerConfig<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig,
-	TGlobalContext = any,
 	TRequestContext = any,
-	TRequestContextData = any
-> extends WunderGraphServerConfig<
-		GeneratedHooksConfig,
-		GeneratedWebhooksConfig,
-		TGlobalContext,
-		TRequestContext,
-		TRequestContextData
-	> {
+	TGlobalContext = any
+> extends WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TRequestContext, TGlobalContext> {
 	webhooks?: GeneratedWebhooksConfig;
 	hooks?: GeneratedHooksConfig;
 	graphqlServers?: GraphQLServerConfig[];

@@ -7,14 +7,14 @@ import { HandlerContext } from '../../operations/operations';
 import process from 'node:process';
 import { OperationsClient } from '../operations-client';
 import { InternalError, OperationError } from '../../client/errors';
-import { InternalCreateRequestContextData } from '../types';
 
 interface FastifyFunctionsOptions {
 	operations: TypeScriptOperationFile[];
 	internalClientFactory: InternalClientFactory;
 	nodeURL: string;
 	globalContext: any;
-	createContext: (globalContext: any, data: InternalCreateRequestContextData) => Promise<any>;
+	createContext: (globalContext: any) => Promise<any>;
+	releaseContext: (requestContext: any) => Promise<void>;
 }
 
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {
@@ -40,24 +40,23 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 				method: ['POST'],
 				config: {},
 				handler: async (request, reply) => {
+					let requestContext;
 					const implementation = maybeImplementation!;
 					try {
+						requestContext = await config.createContext(config.globalContext);
 						const clientRequest = (request.body as any)?.__wg.clientRequest;
 						const operationClient = new OperationsClient({
 							baseURL: config.nodeURL,
 							clientRequest,
 						});
-						const createRequestContextData = {
+						const ctx: HandlerContext<any, any, any, any, any, any> = {
 							log: fastify.log,
 							user: (request.body as any)?.__wg.user!,
 							internalClient: config.internalClientFactory(undefined, clientRequest),
 							clientRequest,
 							input: (request.body as any)?.input,
 							operations: operationClient,
-						};
-						const ctx: HandlerContext<any, any, any, any, any, any> = {
-							...createRequestContextData,
-							context: await config.createContext(config.globalContext, createRequestContextData),
+							context: requestContext,
 						};
 
 						switch (implementation.type) {
@@ -137,6 +136,8 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 								response,
 							});
 						}
+					} finally {
+						await config.releaseContext(requestContext);
 					}
 				},
 			});

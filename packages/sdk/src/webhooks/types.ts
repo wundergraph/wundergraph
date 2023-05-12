@@ -1,4 +1,4 @@
-import { InternalClient, OperationsClient } from '../server';
+import { ClientRequest, InternalClient, OperationsClient } from '../server';
 import { RequestMethod } from '../server/types';
 import { WebhookVerifierKind } from './verifiers';
 import { EnvironmentVariable } from '../configure/variables';
@@ -29,6 +29,10 @@ export interface WebhookRequestContext<
 	 * @see https://wundergraph.com/docs/upgrade-guides/internal-client-deprecated
 	 */
 	internalClient: TInternalClient;
+	/**
+	 * HTTP client request
+	 */
+	clientRequest: ClientRequest;
 	/**
 	 * The logger is used to log messages.
 	 */

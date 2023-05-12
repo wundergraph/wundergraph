@@ -19,7 +19,6 @@ import type { WebHookRouteConfig } from './plugins/webhooks';
 import type {
 	FastifyRequestBody,
 	HooksConfiguration,
-	InternalCreateRequestContextData,
 	ServerRunOptions,
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
@@ -74,74 +73,38 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 	}
 }
 
-/**
- * createRequestContext is a helper function for instantiating the a context factory without
- * specifying its type manually
- * @param contextFactory
- * @returns The context factory
- */
-export const createRequestContext = <
-	TCreateContextData extends InternalCreateRequestContextData,
-	TRequestContext,
-	TGlobalContext
->(
-	factory: (data: TCreateContextData, ctx: TGlobalContext) => Promise<TRequestContext>
-) => {
-	return factory;
-};
-
 export function configureWunderGraphServer<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedInternalClient = InternalClient,
 	GeneratedWebhooksConfig = WebhooksConfig,
-	TGlobalContext = any,
 	TRequestContext = any,
-	TRequestContextData = any
+	TGlobalContext = any
 >(
 	configWrapper: () => WunderGraphServerConfig<
 		GeneratedHooksConfig,
 		GeneratedWebhooksConfig,
-		TGlobalContext,
 		TRequestContext,
-		TRequestContextData
+		TGlobalContext
 	>
 ) {
-	return _configureWunderGraphServer<
-		GeneratedHooksConfig,
-		GeneratedWebhooksConfig,
-		TGlobalContext,
-		TRequestContext,
-		TRequestContextData
-	>(configWrapper());
+	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig, TRequestContext, TGlobalContext>(
+		configWrapper()
+	);
 }
 
 const _configureWunderGraphServer = <
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig,
-	TGlobalContext = any,
 	TRequestContext = any,
-	TRequestContextData = any
+	TGlobalContext = any
 >(
-	config: WunderGraphServerConfig<
-		GeneratedHooksConfig,
-		GeneratedWebhooksConfig,
-		TGlobalContext,
-		TRequestContext,
-		TRequestContextData
-	>
-): WunderGraphHooksAndServerConfig<
-	GeneratedHooksConfig,
-	GeneratedWebhooksConfig,
-	TGlobalContext,
-	TRequestContext,
-	TRequestContextData
-> => {
+	config: WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TRequestContext, TGlobalContext>
+): WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TRequestContext, TGlobalContext> => {
 	const serverConfig = config as WunderGraphHooksAndServerConfig<
 		GeneratedHooksConfig,
 		GeneratedWebhooksConfig,
-		TGlobalContext,
 		TRequestContext,
-		TRequestContextData
+		TGlobalContext
 	>;
 
 	/**
@@ -233,7 +196,7 @@ export const createServer = async ({
 		},
 	});
 
-	const globalContext = serverConfig.createGlobalContext ? await serverConfig.createGlobalContext() : undefined;
+	const globalContext = serverConfig.context?.global?.create ? await serverConfig.context.global.create() : undefined;
 
 	/**
 	 * Custom request logging to not log all requests with INFO level.
@@ -259,15 +222,21 @@ export const createServer = async ({
 		},
 	});
 
-	const createContext = async (globalContext: any, ctx: InternalCreateRequestContextData) => {
-		if (serverConfig.createRequestContext) {
-			const result = await serverConfig.createRequestContext(globalContext, ctx);
+	const createContext = async (globalContext: any) => {
+		if (serverConfig.context?.request?.create) {
+			const result = await serverConfig.context.request.create(globalContext);
 			if (result === undefined) {
 				throw new Error('could not instantiate request context');
 			}
 			return result;
 		}
 		return undefined;
+	};
+
+	const releaseContext = async (requestContext: any) => {
+		if (serverConfig.context?.request?.release) {
+			await serverConfig.context.request.release(requestContext);
+		}
 	};
 
 	/**
@@ -305,7 +274,7 @@ export const createServer = async ({
 				requestURI: req.body.__wg.clientRequest?.requestURI || '',
 				method: req.body.__wg.clientRequest?.method || 'GET',
 			};
-			const ctx = {
+			req.ctx = {
 				log: req.log,
 				user: req.body.__wg.user!,
 				clientRequest,
@@ -317,11 +286,12 @@ export const createServer = async ({
 						'x-request-id': req.id,
 					},
 				}),
+				context: await createContext(globalContext),
 			};
-			req.ctx = {
-				...ctx,
-				context: await createContext(globalContext, ctx),
-			};
+		});
+
+		fastify.addHook<{ Body: FastifyRequestBody }>('onResponse', async (req) => {
+			releaseContext(req.ctx.context);
 		});
 
 		if (serverConfig?.hooks && Object.keys(serverConfig.hooks).length > 0) {
@@ -443,6 +413,7 @@ export const createServer = async ({
 				nodeURL: nodeInternalURL,
 				globalContext,
 				createContext,
+				releaseContext,
 			});
 			fastify.log.debug('Functions plugin registered');
 		}
@@ -465,8 +436,8 @@ export const createServer = async ({
 	}
 
 	fastify.addHook('onClose', async () => {
-		if (serverConfig.releaseGlobalContext) {
-			await serverConfig.releaseGlobalContext(globalContext);
+		if (serverConfig.context?.global?.release) {
+			await serverConfig.context.global.release(globalContext);
 		}
 	});
 

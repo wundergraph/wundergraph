@@ -1,10 +1,13 @@
-import { configureWunderGraphServer, createRequestContext } from '@wundergraph/sdk/server';
+import { configureWunderGraphServer } from '@wundergraph/sdk/server';
 import { GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql/index';
 import { GraphQLExecutionContext } from './generated/wundergraph.server';
 
 class GlobalContext {
+	constructor() {
+		console.log('create GlobalContext');
+	}
 	release() {
-		console.log('global context released');
+		console.log('release GlobalContext');
 	}
 	globalHello() {
 		console.log('global hello');
@@ -12,6 +15,13 @@ class GlobalContext {
 }
 
 class RequestContext {
+	id: string = (Math.random() + 1).toString(36).substring(7);
+	constructor(private ctx: GlobalContext) {
+		console.log(`create RequestContext: ${this.id}`);
+	}
+	release() {
+		console.log(`release RequestContext: ${this.id}`);
+	}
 	hello() {
 		console.log('hello');
 		return 'world';
@@ -39,23 +49,34 @@ export default configureWunderGraphServer(() => ({
 			CustomcontextGraphql: {
 				mutatingPostResolve: async ({ context }) => {
 					return {
-						data: `fromHook: ${context.hello()}`,
+						data: {
+							embedded_fromCustomContext: `fromHook: ${context.hello()}`,
+						},
 					};
 				},
 			},
 		},
 		mutations: {},
 	},
-	createGlobalContext: async () => {
-		return new GlobalContext();
+	context: {
+		global: {
+			create: async () => {
+				return new GlobalContext();
+			},
+			release: async (ctx) => {
+				ctx.release();
+			},
+		},
+		request: {
+			create: async (ctx: GlobalContext) => {
+				ctx.globalHello();
+				return new RequestContext(ctx);
+			},
+			release: async (ctx: RequestContext) => {
+				ctx.release();
+			},
+		},
 	},
-	releaseGlobalContext: async (ctx) => {
-		ctx.release();
-	},
-
-	createRequestContext: createRequestContext(async (data, ctx) => {
-		return new RequestContext();
-	}),
 	graphqlServers: [
 		{
 			apiNamespace: 'embedded',

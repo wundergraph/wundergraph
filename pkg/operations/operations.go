@@ -112,10 +112,10 @@ import { createOperationFactory } from "@wundergraph/sdk/operations";
 {{ if .HasWunderGraphServerTs }}
 import server from '../wundergraph.server';
 
-type ContextField = Required<typeof server>['createContext'];
-export type ContextType = ContextField extends (...args: any) => any ? Awaited<ReturnType<ContextField>> : ContextField;
+type ContextField = Required<Required<Required<typeof server>['context']>['request']>['create'];
+export type ContextType = ContextField extends (...args: any) => any ? Awaited<ReturnType<ContextField>> : never;
 {{ else }}
-export type ContextType = any;
+export type ContextType = never;
 {{ end }}
 
 export {z, AuthorizationError} from "@wundergraph/sdk/operations";

@@ -1,8 +1,7 @@
-import { expectType } from 'tsd';
+import { expectAssignable, expectType } from 'tsd';
 import {
 	BaseRequestContext,
 	HooksConfiguration,
-	InternalCreateRequestContextData,
 	PreUploadHookRequest,
 	PreUploadHookResponse,
 	PostUploadHookRequest,
@@ -33,9 +32,6 @@ export type DataSources = 'counter';
 
 export interface HookContext<TCustomContext>
 	extends BaseRequestContext<User, InternalClient, OperationsClient, TCustomContext> {}
-
-export interface CreateRequestContextData
-	extends InternalCreateRequestContextData<User, InternalClient, OperationsClient> {}
 
 export type HooksConfig<TCustomContext> = HooksConfiguration<
 	QueryHooks<TCustomContext>,
@@ -87,15 +83,12 @@ class MyRequestContext {
 	}
 }
 
-//type ContextFactory = (req: ContextFactoryRequest) => Promise<MyCustomContext>;
-
 const configuration = configureWunderGraphServer<
 	HooksConfig<MyRequestContext>,
 	InternalClient,
 	WebhooksConfig,
-	MyGlobalContext,
 	MyRequestContext,
-	CreateRequestContextData
+	MyGlobalContext
 >(() => ({
 	hooks: {
 		global: {
@@ -187,22 +180,28 @@ const configuration = configureWunderGraphServer<
 			},
 		},
 	},
-	createGlobalContext: async () => {
-		return new MyGlobalContext();
-	},
-	releaseGlobalContext: async (ctx) => {
-		expectType<MyGlobalContext>(ctx);
-	},
-	createRequestContext: async (data, ctx) => {
-		expectType<CreateRequestContextData>(data);
-		expectType<MyGlobalContext>(ctx);
-		return new MyRequestContext();
+	context: {
+		global: {
+			create: async () => {
+				return new MyGlobalContext();
+			},
+			release: async (ctx) => {
+				expectType<MyGlobalContext>(ctx);
+			},
+		},
+		request: {
+			create: async (ctx) => {
+				expectType<MyGlobalContext>(ctx);
+				return new MyRequestContext();
+			},
+			release: async (ctx) => {
+				expectType<MyRequestContext>(ctx);
+			},
+		},
 	},
 }));
 
-expectType<WunderGraphHooksAndServerConfig<any, any, MyGlobalContext, MyRequestContext, CreateRequestContextData>>(
-	configuration
-);
-expectType<(data: CreateRequestContextData, ctx: MyGlobalContext) => Promise<MyRequestContext>>(
-	configuration.createRequestContext!
-);
+expectType<WunderGraphHooksAndServerConfig<any, any, MyRequestContext, MyGlobalContext>>(configuration);
+
+expectAssignable<(ctx: MyGlobalContext) => void>(configuration.context?.global?.release!);
+expectAssignable<(ctx: MyRequestContext) => void>(configuration.context?.request?.release!);
