@@ -291,7 +291,7 @@ export const createServer = async ({
 		});
 
 		fastify.addHook<{ Body: FastifyRequestBody }>('onResponse', async (req) => {
-			releaseContext(req.ctx.context);
+			await releaseContext(req.ctx.context);
 		});
 
 		if (serverConfig?.hooks && Object.keys(serverConfig.hooks).length > 0) {
