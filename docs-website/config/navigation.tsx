@@ -415,6 +415,10 @@ const navigation = [
 						title: 'Extend third party GraphQL APIs',
 						href: '/docs/guides/extend-third-party-graphql-apis',
 					},
+					{
+						title: 'Extend the WunderGraph server context',
+						href: '/docs/guides/context-factory',
+					},
 				],
 			},
 		],

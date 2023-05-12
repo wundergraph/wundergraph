@@ -12,6 +12,9 @@ interface FastifyFunctionsOptions {
 	operations: TypeScriptOperationFile[];
 	internalClientFactory: InternalClientFactory;
 	nodeURL: string;
+	globalContext: any;
+	createContext: (globalContext: any) => Promise<any>;
+	releaseContext: (requestContext: any) => Promise<void>;
 }
 
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {
@@ -23,7 +26,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 			}
 			const filePath = path.join(process.env.WG_DIR_ABS!, operationPath + '.cjs');
 			const routeUrl = `/functions/${operation.api_mount_path}`;
-			let maybeImplementation: NodeJSOperation<any, any, any, any, any, any, any, any> | undefined;
+			let maybeImplementation: NodeJSOperation<any, any, any, any, any, any, any, any, any> | undefined;
 			try {
 				maybeImplementation = (await import(filePath)).default;
 			} catch (e) {
@@ -37,19 +40,23 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 				method: ['POST'],
 				config: {},
 				handler: async (request, reply) => {
+					let requestContext;
 					const implementation = maybeImplementation!;
 					try {
+						requestContext = await config.createContext(config.globalContext);
+						const clientRequest = (request.body as any)?.__wg.clientRequest;
 						const operationClient = new OperationsClient({
 							baseURL: config.nodeURL,
-							clientRequest: (request.body as any)?.__wg.clientRequest,
+							clientRequest,
 						});
-						const ctx: HandlerContext<any, any, any, any, any> = {
+						const ctx: HandlerContext<any, any, any, any, any, any> = {
 							log: fastify.log,
 							user: (request.body as any)?.__wg.user!,
-							internalClient: config.internalClientFactory(undefined, (request.body as any)?.__wg.clientRequest),
-							clientRequest: (request.body as any)?.__wg.clientRequest,
+							internalClient: config.internalClientFactory(undefined, clientRequest),
+							clientRequest,
 							input: (request.body as any)?.input,
 							operations: operationClient,
+							context: requestContext,
 						};
 
 						switch (implementation.type) {
@@ -129,6 +136,8 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 								response,
 							});
 						}
+					} finally {
+						await config.releaseContext(requestContext);
 					}
 				},
 			});

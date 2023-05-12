@@ -18,7 +18,7 @@ so we're pretty flexible in what we can do with it.
 
 ```typescript
 // wundergraph.server.ts
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     queries: {
       Dragons: {

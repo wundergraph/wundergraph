@@ -202,7 +202,7 @@ also a `postUpload` hook which runs after the upload completes or fails (the `er
 hooks, define them in your `wundergraph.server.ts` file:
 
 ```typescript
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
 	hooks: {
     ...
 		uploads: {
