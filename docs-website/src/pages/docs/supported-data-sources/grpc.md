@@ -1,6 +1,5 @@
 ---
-title: gRPC GraphQL DataSource
-pageTitle: WunderGraph - gRPC DataSource
+title: gRPC GraphQL support
 description: WunderGraph is the easiest way to expose gRPC APIs through GraphQL.
 ---
 

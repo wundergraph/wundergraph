@@ -1,7 +1,6 @@
 ---
 title: Configure MongoDB / Atlas Data Source
-pageTitle: WunderGraph - Configure MongoDB / Atlas Data Source
-description:
+description: How to introspects MongoDB databases and generates a GraphQL schema.
 ---
 
 The MongoDB data source introspects the database and generates a GraphQL schema.

@@ -1,7 +1,6 @@
 ---
 title: Live Queries
-pageTitle: WunderGraph - Features - Live Queries
-description:
+description: Live Queries allow you to turn any Query into a Live-Query with just one piece of configuration.
 ---
 
 Not every system is capable of implementing GraphQL Subscriptions.

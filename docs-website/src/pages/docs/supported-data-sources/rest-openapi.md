@@ -1,7 +1,6 @@
 ---
-title: REST/OpenAPI
-pageTitle: WunderGraph - REST/OpenAPI
-description:
+title: REST/OpenAPI support
+description: WunderGraph is the easiest way to expose REST APIs through GraphQL.
 ---
 
 REST is the most commonly used style to build APIs.

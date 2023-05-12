@@ -1,7 +1,6 @@
 ---
 title: Custom GraphQL Resolvers
-pageTitle: WunderGraph - Features - Custom GraphQL Resolvers
-description:
+description: WunderGraph allows you to build custom GraphQL Resolvers
 ---
 
 Sometimes, you don't just want to expose the introspected APIs directly.

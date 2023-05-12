@@ -1,7 +1,6 @@
 ---
 title: WunderNode / WunderGraph Server
-pageTitle: WunderGraph - Components - WunderNode / WunderGraph Server
-description:
+description: Difference between WunderNode and WunderGraph Server.
 ---
 
 ## WunderNode

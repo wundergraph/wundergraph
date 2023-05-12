@@ -1,10 +1,11 @@
 ---
-title: Publish the generated client to NPM
-pageTitle: WunderGraph - Publish the generated client to NPM
-description: This guide shows how to publish the generated client to NPM
+title: Bundle the generated client for distribution
+description: This guide shows how to bundle the generated client for distribution to other teams, repositories or NPM.
 ---
 
-This guide shows you how to bundle the generated client code for distribution to NPM.
+There are situations where you want to share the generated client across teams, different repositories, or distribute it via NPM. This guide shows how to bundle the generated client into a single file that can be published to NPM, Github Packages or a private package registry.
+
+Since the generated client depends on dynamic types for TypeScript operations, it's not possible to publish it as a library. Instead, we need to bundle the generated client so that it includes all (static) TypeScript types. In this guide we will use [TSUP](https://tsup.egoist.dev/) for bundling, it uses ESBuild under the hood and is very fast.
 
 ## Prerequisites
 
@@ -112,7 +113,42 @@ Now we're ready to build the client:
 pnpm build
 ```
 
-After building the client, it's ready to be published to NPM, Google Packages or a private package registry.
+After building the client, it's ready to be shared with other teams, repositories or published to NPM.
+
+In case your backend and frontend teams work in the same repository, but you want to use static typing for the frontend, you can also add the `@my-org/client` package as a dependency to the frontend workspace and import the generated client from there.
+
+```ts
+// inside the frontend workspace
+import { createClient } from '@my-org/client';
+
+export const client = createClient();
+```
+
+### Distribute the client
+
+If you want to share the client with other teams or repositories, you can create a tarball and share it manually or via CDN, or preferably publish it to a NPM registry.
+
+### Create a tarball
+
+Inside `packages/client` run:
+
+```bash
+pnpm pack --pack-destination ./dir
+```
+
+### Publish to NPM
+
+To publish the client to npmjs.com or a private NPM registry, you can run:
+
+```bash
+pnpm publish
+```
+
+Or for private packages:
+
+```bash
+pnpm publish --registry https://npm.my-registry.com --access restricted
+```
 
 ## Learn More
 

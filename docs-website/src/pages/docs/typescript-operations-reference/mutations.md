@@ -1,7 +1,6 @@
 ---
-title: TypeScript Operations Reference
-pageTitle: WunderGraph - Reference - TypeScript Operations - Mutations
-description:
+title: TypeScript Mutation Operations
+description: Learn how to create TypeScript Mutation Operations
 ---
 
 In this part, we'll create two mutations, `create` and `update`, that will create and update users in our database.

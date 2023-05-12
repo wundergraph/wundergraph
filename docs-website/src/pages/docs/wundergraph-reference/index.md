@@ -1,7 +1,6 @@
 ---
 title: WunderGraph directory reference - Overview
-pageTitle: WunderGraph directory reference - Overview
-description: WunderGraph
+description: Reference documentation for the .wundergraph directory
 hideTableOfContents: true
 fullWidthContent: true
 isIndexFile: true

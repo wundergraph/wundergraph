@@ -1,6 +1,5 @@
 ---
-title: FaunaDB DataSource
-pageTitle: WunderGraph - FaunaDB DataSource
+title: FaunaDB support
 description: WunderGraph is the easiest way to build web applications on top of FaunaDB.
 ---
 

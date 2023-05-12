@@ -1,7 +1,6 @@
 ---
 title: wunderctl start
-pageTitle: WunderGraph - wunderctl start
-description:
+description: Start WunderNode and WunderGraph Server together in a single process.
 ---
 
 The cmd `wunderctl start` starts WunderNode and WunderGraph Server together in a single process.

@@ -1,7 +1,6 @@
 ---
-title: Overview
-pageTitle: WunderGraph - Supported Backend Languages & Frameworks - Overview
-description:
+title: Supported Backend Languages & Frameworks - Overview
+description: An overview of all the supported Backend Languages & Frameworks.
 hideTableOfContents: true
 fullWidthContent: true
 isIndexFile: true

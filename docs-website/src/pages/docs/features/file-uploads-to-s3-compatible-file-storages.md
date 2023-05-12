@@ -1,7 +1,6 @@
 ---
 title: File Uploads to S3-compatible File Storages
-pageTitle: WunderGraph - Features - File Uploads to S3-compatible File Storages
-description:
+description: Upload files to S3-compatible file storages.
 ---
 
 While WunderGraph's main purpose is to deal with structured data,

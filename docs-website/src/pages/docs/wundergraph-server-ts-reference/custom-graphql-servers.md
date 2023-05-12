@@ -1,7 +1,6 @@
 ---
-title: Custom GraphQL Servers
-pageTitle: WunderGraph - Custom GraphQL Servers
-description:
+title: graphqlServers configuration
+description: Reference documentation for custom GraphQL servers
 ---
 
 The Custom GraphQL Servers feature allows you to extend your Virtual Graph with any graphql-js compatible GraphQL server implementation.

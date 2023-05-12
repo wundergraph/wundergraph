@@ -1,7 +1,6 @@
 ---
 title: File-based Operations
-pageTitle: WunderGraph - Features - File-based Operations
-description:
+description: Build API Endpoints by writing GraphQL Operations.
 ---
 
 File-based Operations is a pattern we've adopted from NextJS.

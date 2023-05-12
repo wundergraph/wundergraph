@@ -1,7 +1,6 @@
 ---
 title: Authorization - Injecting Claims
-pageTitle: WunderGraph - Features - Authorization - Injecting Claims
-description:
+description: Injecting Claims into GraphQL Operations
 ---
 
 One of our most powerful features is the ability to inject Claims into GraphQL Operations.

@@ -1,7 +1,6 @@
 ---
 title: Configure Code Generation
-pageTitle: WunderGraph - Configure Code Generation
-description:
+description: Configure code generation to generate clients, models, hooks definitions, and more for your application.
 ---
 
 This section describes how to configure code generation.

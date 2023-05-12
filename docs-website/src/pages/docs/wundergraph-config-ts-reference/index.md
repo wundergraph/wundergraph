@@ -1,6 +1,5 @@
 ---
 title: wundergraph.config.ts reference
-pageTitle: WunderGraph - wundergraph.config.ts reference
 description: ''
 hideTableOfContents: true
 fullWidthContent: true
@@ -56,10 +55,9 @@ configureWunderGraphApplication({
 | `options`          | WunderNode Options.                              |
 | `server`           | WunderGraph hooks server configuration.          |
 | `operations`       | WunderGraph operations configuration.            |
-| `codeGenerators`   | Code generators.                                 |
+| `generate`         | Code generators.                                 |
 | `s3UploadProvider` | Uploads configuration.                           |
 | `cors`             | CORS configuration.                              |
 | `authorization`    | Authorization configuration.                     |
 | `authentication`   | Configure cookie and token based authentication. |
-| `links`            | Link builder configuration.                      |
 | `security`         | Security configuration.                          |

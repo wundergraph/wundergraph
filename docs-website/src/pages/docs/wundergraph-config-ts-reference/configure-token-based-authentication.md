@@ -1,7 +1,6 @@
 ---
 title: Configure Token-based Authentication
-pageTitle: WunderGraph - Configure Token-based Authentication
-description:
+description: How to configure token-based auhtentication with WunderGraph.
 ---
 
 Token-Based Authentication is very flexible and gives you a lot of different ways of authenticating client against your WunderGraph applications.

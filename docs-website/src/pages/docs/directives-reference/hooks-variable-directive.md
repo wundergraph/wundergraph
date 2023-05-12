@@ -1,7 +1,6 @@
 ---
 title: '@hooksVariable Directive'
-pageTitle: WunderGraph - Directives - @hooksVariable
-description:
+description: Pass variables to hooks
 ---
 
 The `@hooksVariable` directive is useful when working with Hooks.

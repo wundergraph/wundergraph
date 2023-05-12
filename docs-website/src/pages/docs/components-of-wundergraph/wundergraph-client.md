@@ -1,10 +1,8 @@
 ---
 title: WunderGraph Client
-pageTitle: WunderGraph - Components - Client
-description:
+description: The WunderGraph client is a client that is generated for a specific project.
 ---
 
-WunderGraph doesn't have a single general purpose client.
 When we talk about the WunderGraph client,
 what we usually mean is a client that is generated for a specific project.
 

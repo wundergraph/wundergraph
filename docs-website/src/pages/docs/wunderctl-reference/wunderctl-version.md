@@ -1,7 +1,6 @@
 ---
 title: wunderctl version
-pageTitle: WunderGraph - wunderctl version
-description:
+description: Returns the version of the WunderGraph cli.
 ---
 
 This cmd returns the version of the WunderGraph cli.

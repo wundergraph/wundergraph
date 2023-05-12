@@ -1,7 +1,6 @@
 ---
 title: Type-Safe Mocking
-pageTitle: WunderGraph - Features - Type-Safe Mocking
-description:
+description: Write type-safe mocks for your APIs
 ---
 
 When we're looking at the lifecycle of APIs, it's not always the case that an API is fully implemented yet or even available to our current environment.

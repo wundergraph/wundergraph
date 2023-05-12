@@ -1,7 +1,6 @@
 ---
-title: Revalidate Hook
-pageTitle: WunderGraph - Revalidate Hook
-description:
+title: revalidate hook
+description: Reference documentation for the revalidate hook
 ---
 
 The `revalidate` hook is used to "re-authenticate" a user.
