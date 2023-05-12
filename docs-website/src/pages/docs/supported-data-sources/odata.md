@@ -1,6 +1,5 @@
 ---
-title: OData to GraphQL
-pageTitle: WunderGraph - OData DataSource
+title: OData support
 description: WunderGraph is the easiest way to expose OData APIs through GraphQL.
 ---
 

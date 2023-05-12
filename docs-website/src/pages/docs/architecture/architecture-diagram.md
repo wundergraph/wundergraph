@@ -1,7 +1,6 @@
 ---
 title: Architecture Diagram
-pageTitle: WunderGraph - Architecture - Diagram
-description:
+description: Explaining the Architecture of WunderGraph.
 ---
 
 Before we dive into the Architecture of a typical WunderGraph application,

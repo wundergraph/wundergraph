@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.156.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.155.0...@wundergraph/sdk@0.156.0) (2023-05-12)
+
+### Features
+
+* add support for caching in function handlers ([#932](https://github.com/wundergraph/wundergraph/issues/932)) ([ce31c4c](https://github.com/wundergraph/wundergraph/commit/ce31c4c02cbfd121886cf4c8a0fe354ac19ed340)) (@fiam)
+* load .env.test instead .env for testing ([#950](https://github.com/wundergraph/wundergraph/issues/950)) ([a70d039](https://github.com/wundergraph/wundergraph/commit/a70d039217676caab230c2c88faea13b8c5055d1)) (@StarpTech)
+
+### Bug Fixes
+
+* clientrequest not passed to subscriptions in operation client ([#944](https://github.com/wundergraph/wundergraph/issues/944)) ([0c49451](https://github.com/wundergraph/wundergraph/commit/0c494511c22cf94cc806fbfe55abf712c914664c)) (@Pagebakers)
+
 ## [0.155.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.154.0...@wundergraph/sdk@0.155.0) (2023-05-09)
 
 ### Features

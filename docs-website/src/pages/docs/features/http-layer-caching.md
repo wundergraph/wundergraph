@@ -1,7 +1,6 @@
 ---
 title: HTTP Layer Caching
-pageTitle: WunderGraph - Features - HTTP Layer Caching
-description:
+description: Caching GraphQL Operations on the HTTP Layer
 ---
 
 As described in another chapter, WunderGraph compiles GraphQL Operations into

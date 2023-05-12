@@ -1,6 +1,5 @@
 ---
 title: TypeScript Webhooks
-pageTitle: WunderGraph - Features - TypeScript Webhooks
 description: TypeScript Webhooks make it easy to integrate third party applications. With WunderGraph, you're able to use TypeScript to make this as easy and secure as possible.
 ---
 

@@ -1,7 +1,6 @@
 ---
-title: Post Resolve Hook
-pageTitle: WunderGraph - Post Resolve Hook
-description:
+title: postResolve hook
+description: Reference documentation for the postResolve hook
 ---
 
 The `postResolve` hook is called after the response of an Operation has been resolved.

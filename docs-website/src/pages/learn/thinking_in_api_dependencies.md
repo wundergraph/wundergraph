@@ -2,7 +2,7 @@
 title: 'Thinking in API Dependencies'
 tags: []
 date: 2022-01-02
-description: ''
+description: Learn the concept of API dependencies and how to use them in your application.
 layout: 'wg_by_example'
 ---
 

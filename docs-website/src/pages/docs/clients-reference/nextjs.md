@@ -1,7 +1,6 @@
 ---
-title: Next.js Client
-pageTitle: WunderGraph - Next.js
-description:
+title: Next.js client
+description: Next.js client reference documentation
 ---
 
 The Next.js client uses [SWR](/docs/clients-reference/swr) under the hood.

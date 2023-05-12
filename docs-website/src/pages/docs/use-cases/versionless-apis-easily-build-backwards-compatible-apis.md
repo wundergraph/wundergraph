@@ -1,7 +1,6 @@
 ---
 title: Versionless APIs - Easily build backwards compatible APIs
-pageTitle: WunderGraph - Use Cases - Versionless APIs - Easily build backwards compatible APIs
-description:
+description: Enable versionless APIs to keep APIs backwards compatible, while being able to continuously change your API design.
 ---
 
 Versioning is a very common problem when building APIs.

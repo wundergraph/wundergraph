@@ -1,7 +1,6 @@
 ---
-title: Vue.js
-pageTitle: WunderGraph - Vue.js
-description:
+title: Vue.js support
+description: Wundergraph can be be integrated with Vue through the Vue Query integration.
 ---
 
 Wundergraph can be be integrated with Vue through the Vue Query integration.

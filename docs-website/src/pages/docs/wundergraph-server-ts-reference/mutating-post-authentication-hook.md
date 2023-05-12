@@ -1,7 +1,6 @@
 ---
-title: Mutating Post Authentication Hook
-pageTitle: WunderGraph - Mutating Post Authentication Hook
-description:
+title: mutatingPostAuthentication hook
+description: Reference documentation for the mutatingPostAuthentication hook
 ---
 
 The `mutatingPostAuthentication` hook can be used to allow or deny the user to be authenticated,

@@ -1,7 +1,6 @@
 ---
-title: Vue Query Client
-pageTitle: WunderGraph Vue Query Client
-description: Vue Query Client reference
+title: Vue Query client
+description: Reference documentation for the Vue Query client.
 ---
 
 This package provides a type-safe integration of [Vue Query](https://tanstack.com/query/v4/docs/vue/overview) with WunderGraph.

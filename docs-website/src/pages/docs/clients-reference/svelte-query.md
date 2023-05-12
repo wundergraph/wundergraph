@@ -1,7 +1,6 @@
 ---
-title: Svelte Query Client
-pageTitle: WunderGraph Svelte Query Client
-description: Svelte Query Client reference
+title: Svelte Query client
+description: Reference documentation for the Svelte Query client.
 ---
 
 # WunderGraph Svelte Query Integration

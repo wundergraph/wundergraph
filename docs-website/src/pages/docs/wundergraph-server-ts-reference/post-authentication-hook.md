@@ -1,7 +1,6 @@
 ---
-title: Post Authentication Hook
-pageTitle: WunderGraph - Post Authentication Hook
-description:
+title: postAuthentication hook
+description: Reference documentation for the postAuthentication hook
 ---
 
 The `postAuthentication` hook gets called after the user has been authenticated.

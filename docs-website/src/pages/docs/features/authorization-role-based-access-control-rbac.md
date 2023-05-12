@@ -1,7 +1,6 @@
 ---
 title: Authorization - Role Based Access Control (RBAC)
-pageTitle: WunderGraph - Features - Authorization - Role Based Access Control (RBAC)
-description:
+description: Configuring authorization roles (RBAC)
 ---
 
 Aside from injecting claims into Operations,

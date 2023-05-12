@@ -1,7 +1,7 @@
 ---
 title: Simplifying the WunderGraph URL Structure
 pageTitle: WunderGraph - Simplifying the WunderGraph URL Structure
-description:
+description: This document describes the changes to the WunderGraph URL structure we've made at version 0.121.0.
 ---
 
 This document describes the changes to the WunderGraph URL structure we've made at version 0.121.0.

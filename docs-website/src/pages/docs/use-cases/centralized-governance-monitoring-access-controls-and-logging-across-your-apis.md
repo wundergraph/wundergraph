@@ -1,7 +1,6 @@
 ---
 title: Centralized Governance Monitoring, Access Controls and Logging across your APIs
-pageTitle: WunderGraph - Centralized Governance Monitoring, Access Controls and Logging across your APIs
-description:
+description: Piping all your APIs, services, databases, and other resources through a single unified API layer allows you to apply security policies, monitoring and logging across all your APIs.
 ---
 
 Is there a way to be able to apply security policies across different API styles?

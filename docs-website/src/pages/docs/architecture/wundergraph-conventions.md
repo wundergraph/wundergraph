@@ -1,7 +1,6 @@
 ---
 title: WunderGraph Conventions
-pageTitle: WunderGraph - Conventions
-description:
+description: Everything you need to know about WunderGraph Conventions.
 ---
 
 - A valid WunderGraph application must have `.wundergraph` directory

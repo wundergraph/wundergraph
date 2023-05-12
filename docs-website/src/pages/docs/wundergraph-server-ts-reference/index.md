@@ -1,7 +1,6 @@
 ---
 title: wundergraph.server.ts reference
-pageTitle: WunderGraph - wundergraph.server.ts reference
-description:
+description: Reference documentation for wundergraph.server.ts
 hideTableOfContents: true
 fullWidthContent: true
 isIndexFile: true

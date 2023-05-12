@@ -2,7 +2,7 @@
 title: 'Joining Data Across APIs'
 tags: []
 date: 2022-01-02
-description: ''
+description: Learn how to to use the GraphQL Execution Engine of WunderGraph to join data across two APIs.
 layout: 'wg_by_example'
 ---
 

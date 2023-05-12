@@ -1,7 +1,6 @@
 ---
-title: TypeScript Operations Reference
-pageTitle: WunderGraph - Reference - TypeScript Operations - Queries
-description:
+title: TypeScript Query Operations
+description: Learn how to implement Query Operations using TypeScript
 ---
 
 In this section, we'll learn how to implement a Query Operation using TypeScript.

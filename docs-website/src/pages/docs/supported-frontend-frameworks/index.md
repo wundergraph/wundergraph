@@ -1,7 +1,7 @@
 ---
 title: Overview
 pageTitle: WunderGraph - Supported Frontend Frameworks
-description:
+description: Overview of all the Frontend Frameworks that WunderGraph supports.
 hideTableOfContents: true
 fullWidthContent: true
 isIndexFile: true

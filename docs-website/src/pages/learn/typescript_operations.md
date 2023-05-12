@@ -2,7 +2,7 @@
 title: 'TypeScript Operations'
 tags: []
 date: 2022-01-02
-description: ''
+description: Learn how to use TypeScript Operations to go beyond what's possible with pure GraphQL.
 layout: 'wg_by_example'
 ---
 
