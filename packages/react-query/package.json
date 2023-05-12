@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/react-query",
-  "version": "0.8.29",
+  "version": "0.8.30",
   "license": "Apache-2.0",
   "description": "WunderGraph React Query Integration",
   "main": "./dist/index.js",
