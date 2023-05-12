@@ -229,13 +229,43 @@ export interface ServerRunOptions {
 	clientFactory: InternalClientFactory;
 }
 
+/***
+ * WunderGraphServerContext encapsulates the available functions for
+ * creating and release global and per request custom contexts.
+ */
 export interface WunderGraphServerContext<TRequestContext = any, TGlobalContext = any> {
 	global?: {
+		/**
+		 * Create is called once during server startup and the returned
+		 * value is passed to all per-request context creation calls as
+		 * well as the global context release.
+		 *
+		 * @returns The global context
+		 */
 		create?: () => Promise<TGlobalContext>;
+		/**
+		 * Release was called once during server shutdown, givin the global
+		 * context a chance to release its resources.
+		 *
+		 * @param ctx Global context returned by create
+		 */
 		release?: (ctx: TGlobalContext) => Promise<void>;
 	};
 	request?: {
+		/**
+		 * Create is called once per request, returning the per-request context
+		 * accessible to hooks, functions, webhooks and other handlers.
+		 *
+		 * @param ctx Global context returned by global.create
+		 * @returns The per-request context
+		 */
 		create?: (ctx: TGlobalContext) => Promise<TRequestContext>;
+		/**
+		 * Release is called once after the request ends, allowing the per-request
+		 * context to release any pending resources.
+		 *
+		 * @param ctx Per-request context returned by create
+		 */
 		release?: (ctx: TRequestContext) => Promise<void>;
 	};
 }
@@ -251,6 +281,9 @@ export interface WunderGraphServerConfig<
 	// routeUrl is set internally
 	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
 	options?: ServerOptions;
+	/**
+	 * Context creation/release
+	 */
 	context?: WunderGraphServerContext<TRequestContext, TGlobalContext>;
 }
 

@@ -16,7 +16,7 @@ class GlobalContext {
 
 class RequestContext {
 	id: string = (Math.random() + 1).toString(36).substring(7);
-	constructor(private ctx: GlobalContext) {
+	constructor(private ctx?: GlobalContext) {
 		console.log(`create RequestContext: ${this.id}`);
 	}
 	release() {
@@ -68,11 +68,11 @@ export default configureWunderGraphServer(() => ({
 			},
 		},
 		request: {
-			create: async (ctx: GlobalContext) => {
+			create: async (ctx) => {
 				ctx.globalHello();
 				return new RequestContext(ctx);
 			},
-			release: async (ctx: RequestContext) => {
+			release: async (ctx) => {
 				ctx.release();
 			},
 		},

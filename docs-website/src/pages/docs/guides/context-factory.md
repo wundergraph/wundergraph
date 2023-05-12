@@ -15,9 +15,12 @@ To use it, declare a function that returns your context type and pass it to `cre
 
 ```typescript
 // wundergraph.server.ts
-import { configureWunderGraphServer, createContext } from '@wundergraph/sdk/server';
+import { configureWunderGraphServer } from '@wundergraph/sdk/server';
 
 export class MyContext {
+  release() {
+    console.log('bye');
+  }
   hello() {
     return 'world';
   }
@@ -38,11 +41,21 @@ export default configureWunderGraphServer(() => ({
     },
     mutations: {},
   },
-  createContext: createContext(async (req) => {
-    return new MyContext();
-  }),
+  context: {
+    request: {
+      create: async () => {
+        return new MyContext();
+      },
+      release: async (ctx) => {
+        ctx.release();
+      },
+    },
+  },
 }));
 ```
+
+This will create a per-request context for every request, pass it to every handler and finally call
+`context.release`, giving it a chance to free any pending resources.
 
 Additionally, this context can also be used from TypeScript functions:
 
@@ -84,8 +97,12 @@ And embedded GraphQL servers:
 ```typescript
 export default configureWunderGraphServer(() => ({
   /* ... */
-  createContext: async (): Promise<MyCustomContext> => {
-    return new MyCustomContext();
+  context: {
+    request: {
+      create: async () => {
+        return new MyCustomContext();
+      },
+    },
   },
   graphqlServers: [
     {
@@ -109,29 +126,47 @@ export default configureWunderGraphServer(() => ({
 }));
 ```
 
-Notice that, while this example uses a new instance per handler invocation, it is also possible to share the same
-instance across all handlers. For example:
+## Storing global data
+
+Besides the per-request context, WunderGraph suports a global context too. This context gets instantiated once
+when the server starts and can be used when instantiating the per-request contexts:
 
 ```typescript
-export class MyContext {}
+// wundergraph.server.ts
 
-const sharedContext = new MyContext();
+class MyGlobalContext {
+
+}
+
+class MyRequestContext {
+    constructor(private ctx: MyGlobalContext)
+}
+
 
 export default configureWunderGraphServer(() => ({
   hooks: {
     queries: {},
     mutations: {},
   },
-  createContext: async () => {
-    return sharedContext;
-  },
-}));
+	context: {
+		global: {
+			create: async () => {
+				return new MyGlobalContext();
+			},
+			release: async (ctx/*: MyGlobalContext*/) => {
+        // Called at server shutdown
++			},
+		},
+		request: {
+			create: async (ctx/*: MyGlobalContext*/) => {
+				return new MyRequestContext(ctx);
+			},
+			release: async (ctx/*: MyRequestContext*/) => {
+        // Called after every request
+			},
+		},
+	},
+});
 ```
 
-This way the context can be used with popular dependency injection frameworks like [awilix](https://github.com/jeffijoe/awilix).
-
-## Using additional information when instantiating the context
-
-The context generator function can take an optional `ctx` argument. This parameter contains information
-about e.g. the request being currently served as well as references to the current user, the logger and
-the internal operations client.
+This pattern can be used with popular dependency injection frameworks like [awilix](https://github.com/jeffijoe/awilix).

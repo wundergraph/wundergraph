@@ -4,14 +4,17 @@ pageTitle: WunderGraph - Context Factory
 description:
 ---
 
-When configuring your WunderGraph server `createContext` allows you ro provide a factory function
-to instantiate a custom context type for every incoming request:
+When configuring your WunderGraph server `context` allows you ro provide functions
+to instantiate and release custom contexts for every incoming request:
 
 ```typescript
 // wundergraph.server.ts
-import { configureWunderGraphServer, createContext } from '@wundergraph/sdk/server';
+import { configureWunderGraphServer } from '@wundergraph/sdk/server';
 
-export class MyContext {
+class GlobalContext {}
+
+class RequestContext {
+  constructor(private ctx: GlobalContext) {}
   hello() {
     return 'world';
   }
@@ -25,9 +28,20 @@ export default configureWunderGraphServer(() => ({
     queries: {},
     mutations: {},
   },
-  createContext: createContext(async (req) => {
-    return new MyContext();
-  }),
+  context: {
+    global: {
+      create: async () => {
+        return new GlobalContext();
+      },
+      release: async (ctx) => {},
+    },
+    request: {
+      create: async (ctx) => {
+        return new RequestContext(ctx);
+      },
+      release: async (ctx) => {},
+    },
+  },
 }));
 ```
 
