@@ -1109,12 +1109,16 @@ export interface UserDefinedApi {
   invalidOperationNames: string[];
   corsConfiguration: CorsConfiguration | undefined;
   authenticationConfig: ApiAuthenticationConfig | undefined;
-  experimentalConfig: ExperimentalConfig | undefined
   s3UploadConfiguration: S3UploadConfiguration[];
   allowedHostNames: ConfigurationVariable[];
   webhooks: WebhookConfiguration[];
   serverOptions: ServerOptions | undefined;
   nodeOptions: NodeOptions | undefined;
+  experimentalConfig: ExperimentalConfiguration | undefined;
+}
+
+export interface ExperimentalConfiguration {
+  orm: boolean;
 }
 
 export interface ListenerOptions {
@@ -1243,40 +1247,6 @@ export interface BuildInfoStats {
   totalWebhooks: number;
   hasAuthenticationProvider: boolean;
   hasUploadProvider: boolean;
-}
-
-export interface ExperimentalConfig {
-  orm: boolean | undefined
-}
-
-function createBaseExperimentalConfiguration(): ExperimentalConfig {
-  return { orm: undefined }
-}
-
-export const ExperimentalConfig = {
-  fromJSON(object: any): ExperimentalConfig {
-    return {
-      orm: isSet(object.orm) ? object.orm : undefined,
-    };
-  },
-
-  toJSON(message: ExperimentalConfig): unknown {
-    const obj: any = {};
-
-    if (message.orm !== undefined) {
-      obj.orm = message.orm
-    }
-
-    return obj
-  },
-
-  fromPartial<I extends Exact<DeepPartial<ExperimentalConfig>, I>>(object: I): ExperimentalConfig {
-    const message = createBaseExperimentalConfiguration();
-    if (object.orm !== undefined) {
-      message.orm = message.orm
-    }
-    return message;
-  },
 }
 
 function createBaseApiAuthenticationConfig(): ApiAuthenticationConfig {
@@ -3653,7 +3623,7 @@ function createBaseUserDefinedApi(): UserDefinedApi {
     webhooks: [],
     serverOptions: undefined,
     nodeOptions: undefined,
-    experimentalConfig: undefined
+    experimentalConfig: undefined,
   };
 }
 
@@ -3685,7 +3655,9 @@ export const UserDefinedApi = {
         : [],
       serverOptions: isSet(object.serverOptions) ? ServerOptions.fromJSON(object.serverOptions) : undefined,
       nodeOptions: isSet(object.nodeOptions) ? NodeOptions.fromJSON(object.nodeOptions) : undefined,
-      experimentalConfig: isSet(object.experimentalConfig) ? ExperimentalConfig.fromJSON(object) : undefined
+      experimentalConfig: isSet(object.experimentalConfig)
+        ? ExperimentalConfiguration.fromJSON(object.experimentalConfig)
+        : undefined,
     };
   },
 
@@ -3732,6 +3704,9 @@ export const UserDefinedApi = {
       (obj.serverOptions = message.serverOptions ? ServerOptions.toJSON(message.serverOptions) : undefined);
     message.nodeOptions !== undefined &&
       (obj.nodeOptions = message.nodeOptions ? NodeOptions.toJSON(message.nodeOptions) : undefined);
+    message.experimentalConfig !== undefined && (obj.experimentalConfig = message.experimentalConfig
+      ? ExperimentalConfiguration.toJSON(message.experimentalConfig)
+      : undefined);
     return obj;
   },
 
@@ -3759,6 +3734,31 @@ export const UserDefinedApi = {
     message.nodeOptions = (object.nodeOptions !== undefined && object.nodeOptions !== null)
       ? NodeOptions.fromPartial(object.nodeOptions)
       : undefined;
+    message.experimentalConfig = (object.experimentalConfig !== undefined && object.experimentalConfig !== null)
+      ? ExperimentalConfiguration.fromPartial(object.experimentalConfig)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseExperimentalConfiguration(): ExperimentalConfiguration {
+  return { orm: false };
+}
+
+export const ExperimentalConfiguration = {
+  fromJSON(object: any): ExperimentalConfiguration {
+    return { orm: isSet(object.orm) ? Boolean(object.orm) : false };
+  },
+
+  toJSON(message: ExperimentalConfiguration): unknown {
+    const obj: any = {};
+    message.orm !== undefined && (obj.orm = message.orm);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<ExperimentalConfiguration>, I>>(object: I): ExperimentalConfiguration {
+    const message = createBaseExperimentalConfiguration();
+    message.orm = object.orm ?? false;
     return message;
   },
 };
