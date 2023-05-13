@@ -70,10 +70,9 @@ export interface GraphQLOperation {
 		SubscriptionPollingInterval?: number;
 	};
 	/***
-	 * Cache configuration for query operations. If not specified, it defaults
+	 * Cache configuration for operations. If not specified, it defaults
 	 * to "public, max-age=0, must-revalidate", overriding public with private
-	 * in authenticated operations. Mutation and subscription operations always
-	 * use the default cache headers.
+	 * in authenticated operations.
 	 */
 	CacheConfig?: QueryCacheConfiguration;
 	LiveQuery?: {
