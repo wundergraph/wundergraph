@@ -184,7 +184,7 @@ export const createServer = async ({
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
 
-	const requestContext: OperationsAsyncContext = new AsyncLocalStorage();
+	const operationsRequestContext: OperationsAsyncContext = new AsyncLocalStorage();
 	const nodeInternalURL = config?.api?.nodeOptions?.nodeInternalUrl
 		? resolveConfigurationVariable(config.api.nodeOptions.nodeInternalUrl)
 		: '';
@@ -416,7 +416,7 @@ export const createServer = async ({
 			? new ORM({
 					apis: ormModule.SCHEMAS,
 					executor: new NamespacingExecutor({
-						requestContext,
+						requestContext: operationsRequestContext,
 						baseUrl: nodeInternalURL,
 					}),
 			  })
@@ -434,15 +434,14 @@ export const createServer = async ({
 			operationsConfig.typescript_operation_files.length
 		) {
 			await fastify.register(FastifyFunctionsPlugin, {
-				requestContext,
 				operations: operationsConfig.typescript_operation_files,
+				operationsRequestContext,
 				internalClientFactory: clientFactory,
 				nodeURL: nodeInternalURL,
 				globalContext,
 				createContext,
 				releaseContext,
-				// @todo export an `ORM` class that we construct here (i.e so we can provide dependencies)
-				orm: ormModule ? ormModule.orm : null,
+				orm,
 			});
 			fastify.log.debug('Functions plugin registered');
 		}
@@ -455,7 +454,7 @@ export const createServer = async ({
 			}
 			fastify.log.debug({ err, signal, manual }, 'graceful shutdown was initiated manually');
 
-			requestContext.disable();
+			operationsRequestContext.disable();
 			await fastify.close();
 			fastify.log.info({ err, signal, manual }, 'server process shutdown');
 		};

@@ -13,7 +13,7 @@ import { Logger } from '../../logger';
 import type { AsyncStore, OperationsAsyncContext } from '../operations-context';
 
 interface FastifyFunctionsOptions {
-	requestContext: OperationsAsyncContext;
+	operationsRequestContext: OperationsAsyncContext;
 	operations: TypeScriptOperationFile[];
 	internalClientFactory: InternalClientFactory;
 	orm: ORM<any>;
@@ -24,7 +24,7 @@ interface FastifyFunctionsOptions {
 }
 
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {
-	const { operations, internalClientFactory, orm, nodeURL, requestContext } = config;
+	const { operations, internalClientFactory, orm, nodeURL, operationsRequestContext } = config;
 
 	for (const operation of operations) {
 		try {
@@ -60,7 +60,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 						const ctx: HandlerContext<any, any, any, any, any, any, any> = {
 							log: fastify.log,
 							user: (request.body as any)?.__wg.user!,
-							internalClient: config.internalClientFactory(undefined, clientRequest),
+							internalClient: internalClientFactory(undefined, clientRequest),
 							clientRequest,
 							input: (request.body as any)?.input,
 							operations: operationClient,
@@ -76,7 +76,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 								const context: AsyncStore = { ormOperationControllers: [] };
 
 								// @todo abstract `requestContext` properly (e.g `requestContext.create().scope(() => {/* handler */}))`
-								return await requestContext.run(context, async () => {
+								return await operationsRequestContext.run(context, async () => {
 									if (!implementation.subscriptionHandler) {
 										return reply.status(500);
 									}

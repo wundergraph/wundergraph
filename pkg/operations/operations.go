@@ -120,7 +120,7 @@ export type ContextType = never;
 {{ end }}
 
 export {z, AuthorizationError} from "@wundergraph/sdk/operations";
-export const createOperation = createOperationFactory<InternalClient, Role, CustomClaims, InternalOperationsClient, ContextType, ORM>();`))
+export const createOperation = createOperationFactory<InternalClient, Role, CustomClaims, InternalOperationsClient, ORM, ContextType>();`))
 )
 
 type wunderGraphFactoryTemplateData struct {
