@@ -778,7 +778,7 @@ export interface Operation {
   operationType: OperationType;
   variablesSchema: string;
   responseSchema: string;
-  cacheConfig: OperationCacheConfig | undefined;
+  cacheConfig?: OperationCacheConfig | undefined;
   authenticationConfig: OperationAuthenticationConfig | undefined;
   liveQueryConfig: OperationLiveQueryConfig | undefined;
   authorizationConfig: OperationAuthorizationConfig | undefined;
@@ -879,10 +879,11 @@ export interface OperationAuthenticationConfig {
 }
 
 export interface OperationCacheConfig {
-  enable: boolean;
-  maxAge: number;
-  public: boolean;
-  staleWhileRevalidate: number;
+  enable?: boolean | undefined;
+  maxAge?: number | undefined;
+  public?: boolean | undefined;
+  staleWhileRevalidate?: number | undefined;
+  mustRevalidate?: boolean | undefined;
 }
 
 export interface EngineConfiguration {
@@ -2242,16 +2243,23 @@ export const OperationAuthenticationConfig = {
 };
 
 function createBaseOperationCacheConfig(): OperationCacheConfig {
-  return { enable: false, maxAge: 0, public: false, staleWhileRevalidate: 0 };
+  return {
+    enable: undefined,
+    maxAge: undefined,
+    public: undefined,
+    staleWhileRevalidate: undefined,
+    mustRevalidate: undefined,
+  };
 }
 
 export const OperationCacheConfig = {
   fromJSON(object: any): OperationCacheConfig {
     return {
-      enable: isSet(object.enable) ? Boolean(object.enable) : false,
-      maxAge: isSet(object.maxAge) ? Number(object.maxAge) : 0,
-      public: isSet(object.public) ? Boolean(object.public) : false,
-      staleWhileRevalidate: isSet(object.staleWhileRevalidate) ? Number(object.staleWhileRevalidate) : 0,
+      enable: isSet(object.enable) ? Boolean(object.enable) : undefined,
+      maxAge: isSet(object.maxAge) ? Number(object.maxAge) : undefined,
+      public: isSet(object.public) ? Boolean(object.public) : undefined,
+      staleWhileRevalidate: isSet(object.staleWhileRevalidate) ? Number(object.staleWhileRevalidate) : undefined,
+      mustRevalidate: isSet(object.mustRevalidate) ? Boolean(object.mustRevalidate) : undefined,
     };
   },
 
@@ -2261,15 +2269,17 @@ export const OperationCacheConfig = {
     message.maxAge !== undefined && (obj.maxAge = Math.round(message.maxAge));
     message.public !== undefined && (obj.public = message.public);
     message.staleWhileRevalidate !== undefined && (obj.staleWhileRevalidate = Math.round(message.staleWhileRevalidate));
+    message.mustRevalidate !== undefined && (obj.mustRevalidate = message.mustRevalidate);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<OperationCacheConfig>, I>>(object: I): OperationCacheConfig {
     const message = createBaseOperationCacheConfig();
-    message.enable = object.enable ?? false;
-    message.maxAge = object.maxAge ?? 0;
-    message.public = object.public ?? false;
-    message.staleWhileRevalidate = object.staleWhileRevalidate ?? 0;
+    message.enable = object.enable ?? undefined;
+    message.maxAge = object.maxAge ?? undefined;
+    message.public = object.public ?? undefined;
+    message.staleWhileRevalidate = object.staleWhileRevalidate ?? undefined;
+    message.mustRevalidate = object.mustRevalidate ?? undefined;
     return message;
   },
 };

@@ -39,6 +39,7 @@ import { Logger } from '../logger';
 import * as fs from 'fs';
 import process from 'node:process';
 import { OperationError } from '../client';
+import { QueryCacheConfiguration } from '../operations';
 
 export const isInternalOperationByAPIMountPath = (path: string) => {
 	// Split the file path by the path separator
@@ -68,12 +69,13 @@ export interface GraphQLOperation {
 		Endpoint: string;
 		SubscriptionPollingInterval?: number;
 	};
-	CacheConfig?: {
-		enable: boolean;
-		public: boolean;
-		maxAge: number;
-		staleWhileRevalidate: number;
-	};
+	/***
+	 * Cache configuration for query operations. If not specified, it defaults
+	 * to "public, max-age=0, must-revalidate", overriding public with private
+	 * in authenticated operations. Mutation and subscription operations always
+	 * use the default cache headers.
+	 */
+	CacheConfig?: QueryCacheConfiguration;
 	LiveQuery?: {
 		enable: boolean;
 		pollingIntervalSeconds: number;
@@ -727,7 +729,7 @@ const parseOperationTypeNode = (node: OperationTypeNode): OperationType => {
 		case 'query':
 			return OperationType.QUERY;
 		default:
-			return -1;
+			throw new Error(`invalid operation type ${node}`);
 	}
 };
 

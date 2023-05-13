@@ -868,8 +868,7 @@ export const configureWunderGraphApplication = <
 				const ops = app.Operations.map(async (op) => {
 					const cfg = config.operations!;
 					const base = Object.assign({}, cfg.defaultConfig);
-					const customize =
-						cfg.custom !== undefined && cfg.custom[op.Name] !== undefined ? cfg.custom[op.Name] : undefined;
+					const customize = cfg.custom?.[op.Name];
 					switch (op.OperationType) {
 						case OperationType.MUTATION:
 							let mutationConfig = cfg.mutations(base);
@@ -890,12 +889,7 @@ export const configureWunderGraphApplication = <
 							}
 							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
-								CacheConfig: {
-									enable: queryConfig.caching.enable,
-									maxAge: queryConfig.caching.maxAge,
-									public: queryConfig.caching.public,
-									staleWhileRevalidate: queryConfig.caching.staleWhileRevalidate,
-								},
+								CacheConfig: queryConfig.caching,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
 									required: op.AuthenticationConfig.required || queryConfig.authentication.required,
@@ -1139,12 +1133,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 		interpolationVariablesSchema: JSON.stringify(op.InterpolationVariablesSchema),
 		operationType: op.OperationType,
 		engine: op.ExecutionEngine,
-		cacheConfig: op.CacheConfig || {
-			enable: false,
-			maxAge: 0,
-			public: false,
-			staleWhileRevalidate: 0,
-		},
+		cacheConfig: op.CacheConfig,
 		authenticationConfig: {
 			authRequired: op.AuthenticationConfig.required,
 		},

@@ -9,12 +9,6 @@ export default configureWunderGraphOperations({
 		},
 		queries: (config) => ({
 			...config,
-			caching: {
-				enable: false,
-				staleWhileRevalidate: 60,
-				maxAge: 60,
-				public: true,
-			},
 			liveQuery: {
 				enable: true,
 				pollingIntervalSeconds: 1,

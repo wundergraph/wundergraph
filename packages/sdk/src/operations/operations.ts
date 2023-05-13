@@ -2,24 +2,12 @@ import { z } from 'zod';
 import * as fs from 'fs';
 import type { BaseRequestContext, InternalClient, OperationsClient, WunderGraphUser } from '../server';
 import { OperationError } from '../client';
-import {
-	LiveQueryConfiguration,
-	QueryCacheConfiguration as OperationQueryCacheConfiguration,
-} from '../configure/operations';
-export type { LiveQueryConfiguration } from '../configure/operations';
-
-export type QueryCacheConfiguration = Omit<OperationQueryCacheConfiguration, 'enable'>;
+import { LiveQueryConfiguration, QueryCacheConfiguration } from '../configure/operations';
+export type { LiveQueryConfiguration, QueryCacheConfiguration } from '../configure/operations';
 
 const disabledLiveQueryConfiguration = {
 	enable: false,
 	pollingIntervalSeconds: 0,
-};
-
-const disabledCacheConfiguration = {
-	enable: false,
-	public: false,
-	maxAge: 0,
-	staleWhileRevalidate: 0,
 };
 
 export type SubscriptionHandler<
@@ -131,11 +119,7 @@ const createQuery =
 				requireMatchAny: rbac?.requireMatchAny || [],
 			},
 			errors,
-			cache: {
-				...disabledCacheConfiguration,
-				...cache,
-				enable: cache !== undefined,
-			},
+			cache,
 			liveQuery: {
 				enable: live?.enable || true,
 				pollingIntervalSeconds: live?.pollingIntervalSeconds || 5,
@@ -196,7 +180,6 @@ const createMutation =
 			},
 			errors,
 			liveQuery: disabledLiveQueryConfiguration,
-			cache: disabledCacheConfiguration,
 		};
 	};
 
@@ -256,7 +239,6 @@ const createSubscription =
 			},
 			errors,
 			liveQuery: disabledLiveQueryConfiguration,
-			cache: disabledCacheConfiguration,
 		};
 	};
 
@@ -314,7 +296,7 @@ export type NodeJSOperation<
 	requireAuthentication?: boolean;
 	internal: boolean;
 	liveQuery: LiveQueryConfiguration;
-	cache: OperationQueryCacheConfiguration;
+	cache?: QueryCacheConfiguration;
 	rbac: {
 		requireMatchAll: string[];
 		requireMatchAny: string[];

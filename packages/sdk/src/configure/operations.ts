@@ -13,18 +13,46 @@ export interface BaseOperationConfiguration {
 }
 
 export interface QueryCacheConfiguration {
-	enable: boolean;
-	public: boolean;
-	maxAge: number;
-	staleWhileRevalidate: number;
+	/**
+	 * Wether to enable the cache headers.
+	 *
+	 * @default true if any other field is defined, false otherwise.
+	 */
+	enable?: boolean;
+	/**
+	 * Mark responses as public or private. Set to undefined to omit. Notice that
+	 * any authenticated operation will override this header and set it to private.
+	 *
+	 * @default Public for operations without authentication, private otherwise
+	 */
+	public?: boolean;
+	/**
+	 * max-age component of the Cache-Control header.
+	 * Set to undefined to omit this component.
+	 *
+	 * @default undefined
+	 */
+	maxAge?: number;
+	/**
+	 * stale-while-revalidate component of the Cache-Control header.
+	 * Set to undefined to omit this component.
+	 *
+	 * @default undefined
+	 */
+	staleWhileRevalidate?: number;
+	/**
+	 * Wether to include must-revalidate in the Cache-Control header
+	 *
+	 * @default false
+	 */
+	mustRevalidate?: boolean;
 }
-
 export interface LiveQueryConfiguration {
 	enable: boolean;
 	pollingIntervalSeconds: number;
 }
 export interface QueryConfiguration extends BaseOperationConfiguration {
-	caching: QueryCacheConfiguration;
+	caching?: QueryCacheConfiguration;
 	liveQuery: LiveQueryConfiguration;
 }
 
