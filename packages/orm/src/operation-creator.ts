@@ -1,17 +1,5 @@
-import { OperationTypeNode, GraphQLSchema, getNamedType, print } from 'graphql';
-import {
-	field,
-	selectionSet,
-	Field,
-	SelectionSet,
-	Result,
-	argument,
-	variable,
-	VariableDefinition,
-	variableDefinition,
-	operation,
-	document,
-} from '@timkendall/tql';
+import { OperationTypeNode, GraphQLSchema, getNamedType } from 'graphql';
+import { Field, SelectionSet } from '@timkendall/tql';
 
 import type { NamedType } from './definition';
 import { defaultSelection, type DefaultSelection } from './selections';

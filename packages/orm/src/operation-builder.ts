@@ -25,10 +25,7 @@ import {
 	operation,
 	document,
 	FragmentDefinition,
-	NamedType as NamedTypedDef,
-	FragmentSpread,
 	inlineFragment,
-	namedType,
 } from '@timkendall/tql';
 import { pathOr } from 'remeda';
 import { from } from 'ix/asynciterable';
@@ -67,9 +64,9 @@ type WhereMethod<Config extends OperationBuilderConfig> = <
 			SelectionSet<[Field<Config['rootField'], undefined, Config['typeSelection']>]>
 		>,
 		undefined
-	>[Config['rootField']]
+	>
 >(
-	variables: T
+	variables: T extends Record<string, any> ? T[Config['rootField']] : never
 ) => OperationBuilder<{
 	schema: Config['schema'];
 	operation: Config['operation'];

@@ -1,5 +1,5 @@
-import type { Fn, Objects, Booleans, Call, Pipe, Tuples, Unions, Strings } from 'hotscript';
-import type { Primitive, EmptyObject } from 'type-fest';
+import type { Fn, Objects, Booleans, Call, Pipe, Unions } from 'hotscript';
+import type { Primitive, EmptyObject, SetOptional } from 'type-fest';
 import {
 	GraphQLObjectType,
 	GraphQLScalarType,
@@ -122,6 +122,30 @@ interface OmitEmpty extends Fn {
 	return: this['arg0'] extends EmptyObject ? never : this['arg0'];
 }
 
+/**
+ * Optional objects are objects whos every key is optional (e.g `{ lang?: string | undefined }`)
+ */
+
+interface IsOptional extends Fn {
+	return: undefined extends this['arg0'] ? true : false;
+}
+
+// is it an object with all optional keys
+interface IsOptionalObject extends Fn {
+	return: Pipe<this['arg0'], [Objects.OmitBy<IsOptional>, Booleans.Extends<EmptyObject>]>;
+}
+
+// get all fields that are optional objects
+interface KeysOfOptionalObjects extends Fn {
+	return: Pipe<
+		this['arg0'],
+		[Objects.PickBy<Booleans.Extends<object>>, Objects.PickBy<IsOptionalObject>, Objects.Keys]
+	>;
+}
+interface SetOptionalFields extends Fn {
+	return: SetOptional<this['arg0'], Call<KeysOfOptionalObjects, this['arg0']>>;
+}
+
 // @note gross but works for unions (e.g `SelectionSet<ReadonlyArray<Field<'a'> | Field<'b'>>>)
 // @todo rewrite this to correctly filter undefined and empty objects
 export type ArgumentDefinitions<Schema, Type extends Record<string, any>, Selections extends SelectionSet<any>> = Pipe<
@@ -144,7 +168,7 @@ export type ArgumentDefinitions<Schema, Type extends Record<string, any>, Select
 				: V
 			: never;
 	},
-	[Objects.OmitBy<Booleans.Equals<undefined>>]
+	[Objects.OmitBy<Booleans.Equals<undefined>>, SetOptionalFields]
 >;
 
 // @todo make recursive

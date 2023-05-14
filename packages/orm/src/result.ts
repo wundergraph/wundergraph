@@ -1,6 +1,6 @@
 import { L, Test } from 'ts-toolbelt';
 
-import type { Field, FragmentDefinition, InlineFragment, NamedType, Selection, SelectionSet } from '@timkendall/tql';
+import type { Field, InlineFragment, NamedType, Selection, SelectionSet } from '@timkendall/tql';
 
 // @todo rebuild type-system AST logic ontop of generic visitor implementations
 // `Visit<Visitor extends ASTVisitor>`
@@ -20,8 +20,8 @@ export type Result<
 			? HasInlineFragment<Selected> extends Test.Pass
 				? SpreadFragments<Schema, Selected>
 				: {
-						readonly // @todo cleanup mapped typed field name mapping
-						[F in Selected['selections'][number] as InferName<F>]: InferResult<F, Schema, Parent>;
+						// @todo cleanup mapped typed field name mapping
+						readonly [F in Selected['selections'][number] as InferName<F>]: InferResult<F, Schema, Parent>;
 				  }
 			: never
 		: // Scalars

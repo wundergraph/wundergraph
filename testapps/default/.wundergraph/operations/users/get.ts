@@ -5,8 +5,8 @@ export default createOperation.query({
 		const foo = await graph
 			.from('weather')
 			.query('getCityByName')
-			.where({ name: 'Berlin' })
 			.select('id', 'name')
+			.where({ name: 'Berlin' })
 			.exec();
 
 		const bar = await graph
@@ -17,11 +17,14 @@ export default createOperation.query({
 
 		const baz = await graph.from('spacex').query('capsules').select('id', 'status', 'dragon').exec();
 
+		const bong = await graph.from('countries').query('country').where({ code: 'DE' }).exec();
+
 		return {
 			hello: 'world',
 			foo,
 			bar,
 			baz,
+			bong,
 		};
 	},
 });
