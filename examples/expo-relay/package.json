@@ -9,9 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "deprecated-react-native-prop-types": "^4.1.0",
     "expo": "~48.0.15",
-    "expo-font": "^11.1.1",
     "expo-status-bar": "~1.4.4",
     "react": "18.2.0",
     "react-native": "0.71.7"
