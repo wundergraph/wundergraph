@@ -1,7 +1,6 @@
 ---
 title: Type-Safe Mocking
-pageTitle: WunderGraph - Features - Type-Safe Mocking
-description:
+description: Write type-safe mocks for your APIs
 ---
 
 When we're looking at the lifecycle of APIs, it's not always the case that an API is fully implemented yet or even available to our current environment.
@@ -27,7 +26,7 @@ Here's an example:
 
 const randomInt = (max: number) => Math.floor(Math.random() * Math.floor(max)) + 1;
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     queries: {
       FakeProducts: {

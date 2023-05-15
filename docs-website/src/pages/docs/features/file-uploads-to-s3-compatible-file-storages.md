@@ -1,7 +1,6 @@
 ---
 title: File Uploads to S3-compatible File Storages
-pageTitle: WunderGraph - Features - File Uploads to S3-compatible File Storages
-description:
+description: Upload files to S3-compatible file storages.
 ---
 
 While WunderGraph's main purpose is to deal with structured data,
@@ -203,7 +202,7 @@ also a `postUpload` hook which runs after the upload completes or fails (the `er
 hooks, define them in your `wundergraph.server.ts` file:
 
 ```typescript
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
 	hooks: {
     ...
 		uploads: {

@@ -1,7 +1,6 @@
 ---
-title: Mutating Pre Resolve Hook
-pageTitle: WunderGraph - Mutating Pre Resolve Hook
-description:
+title: mutatingPreResolve hook
+description: Reference documentation for the mutatingPreResolve hook
 ---
 
 The `mutatingPreResolve` hook is called before the Operation gets resolved.

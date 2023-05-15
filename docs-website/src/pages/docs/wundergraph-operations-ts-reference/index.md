@@ -1,7 +1,6 @@
 ---
 title: wundergraph.operations.ts reference
-pageTitle: WunderGraph - wundergraph.operations.ts reference
-description:
+description: Reference documentation for the wundergraph.operations.ts file.
 hideTableOfContents: true
 fullWidthContent: true
 isIndexFile: true

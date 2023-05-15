@@ -1,7 +1,6 @@
 ---
-title: On WS Connection Init Hook
-pageTitle: WunderGraph - On WS Connection Init Hook
-description:
+title: onConnectionInit hook
+description: Reference documentation for the onConnectionInit hook
 ---
 
 The `onConnectionInit` hook is called when the engine is initiating a WebSocket connection with a GraphQL Server.

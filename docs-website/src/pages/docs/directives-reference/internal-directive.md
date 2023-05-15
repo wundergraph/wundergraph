@@ -1,7 +1,6 @@
 ---
 title: '@internal Directive'
-pageTitle: WunderGraph - Directives - @internal
-description:
+description: Mark a field as internal
 ---
 
 Using the `@export` directive,

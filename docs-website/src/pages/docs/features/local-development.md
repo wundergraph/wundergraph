@@ -1,7 +1,6 @@
 ---
 title: Local Development
-pageTitle: WunderGraph - Features - Local Development
-description:
+description: Develop your WunderGraph application locally
 ---
 
 Modern technologies like Serverless are easy to scale in the cloud but make it hard to develop on your local machine.

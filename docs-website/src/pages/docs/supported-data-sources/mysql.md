@@ -1,7 +1,6 @@
 ---
-title: MySQL
-pageTitle: WunderGraph - MySQL
-description:
+title: MySQL support
+description: The MySQL DataSource allows you to turn any MySQL protocol compatible Database into a secure production-grade GraphQL API.
 ---
 
 The MySQL DataSource allows you to turn any MySQL protocol compatible Database into a secure production-grade GraphQL API.

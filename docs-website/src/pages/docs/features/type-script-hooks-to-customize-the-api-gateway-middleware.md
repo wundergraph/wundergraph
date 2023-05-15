@@ -1,6 +1,5 @@
 ---
 title: TypeScript Hooks to Customize the API Gateway Middleware
-pageTitle: WunderGraph - Features - TypeScript Hooks to Customize the API Gateway Middleware
 description: It's important to be able to customize the API Gateway middleware. With WunderGraph, you're able to use TypeScript to make this as easy as possible.
 ---
 

@@ -28,7 +28,7 @@ const navigation = [
 	{
 		title: 'Getting started',
 		href: '/docs/getting-started',
-		paths: ['/docs/tutorials', '/docs/examples'],
+		paths: ['/docs/examples'],
 		icon: <BoltIcon />,
 		links: [
 			{
@@ -74,15 +74,6 @@ const navigation = [
 				],
 			},
 			{
-				title: 'Tutorials',
-				links: [
-					{
-						title: 'Your first WunderGraph Application',
-						href: '/docs/tutorials/your-first-wundergraph-application',
-					},
-				],
-			},
-			{
 				title: 'Examples',
 				links: [
 					{
@@ -112,6 +103,10 @@ const navigation = [
 					{
 						title: 'Next.js + Clerk',
 						href: '/docs/examples/nextjs-clerk',
+					},
+					{
+						title: 'Remix',
+						href: '/docs/examples/remix',
 					},
 					{
 						title: 'SvelteKit + SSR with TanStack Query',
@@ -225,7 +220,7 @@ const navigation = [
 		title: 'About WunderGraph',
 		href: '/manifesto',
 		icon: <QuestionMarkCircleIcon />,
-		paths: ['/docs/frequently-asked-questions', '/usage-information', '/about', '/docs/use-cases'],
+		paths: ['/usage-information', '/about', '/docs/use-cases'],
 		links: [
 			{
 				title: 'Manifesto',
@@ -295,23 +290,6 @@ const navigation = [
 					{
 						title: 'Enabling your Organization to become API first',
 						href: '/docs/use-cases/enabling-your-organization-to-become-api-first',
-					},
-				],
-			},
-			{
-				title: 'Frequently Asked Questions',
-				links: [
-					{
-						title: 'How is WunderGraph faster and more secure than other GraphQL solutions?',
-						href: '/docs/frequently-asked-questions/how-is-wundergraph-faster-and-more-secure-than-other-graphql-solutions',
-					},
-					{
-						title: 'How is the developer experience different from legacy GraphQL?',
-						href: '/docs/frequently-asked-questions/how-is-the-developer-experience-different-from-legacy-graphql',
-					},
-					{
-						title: 'How is server-side only GraphQL different from client-side GraphQL?',
-						href: '/docs/frequently-asked-questions/how-is-server-side-only-graphql-different-from-client-side-graphql',
 					},
 				],
 			},
@@ -436,6 +414,10 @@ const navigation = [
 					{
 						title: 'Extend third party GraphQL APIs',
 						href: '/docs/guides/extend-third-party-graphql-apis',
+					},
+					{
+						title: 'Extend the WunderGraph server context',
+						href: '/docs/guides/context-factory',
 					},
 				],
 			},

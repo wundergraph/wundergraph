@@ -1,7 +1,6 @@
 ---
 title: '@jsonSchema Directive'
-pageTitle: WunderGraph - Directives - @jsonSchema
-description:
+description: Configure a JSON Schema for the variables of an Operation.
 ---
 
 The `@jsonSchema` directive can be used to configure a JSON Schema for the variables of an Operation.

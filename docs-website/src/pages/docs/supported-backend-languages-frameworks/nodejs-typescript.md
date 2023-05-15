@@ -1,6 +1,5 @@
 ---
-title: Node.js / TypeScript
-pageTitle: WunderGraph - Node.js / TypeScript
+title: Node.js / TypeScript support
 description: WunderGraph is the easiest way to consume (GraphQL, REST, ...) APIs in Node.js / TypeScript.
 ---
 
