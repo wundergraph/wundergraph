@@ -162,7 +162,7 @@ export default configureWunderGraphServer(() => ({
 				return new MyRequestContext(ctx);
 			},
 			release: async (ctx/*: MyRequestContext*/) => {
-        // Called after every request
+        // Called after every response
 			},
 		},
 	},
