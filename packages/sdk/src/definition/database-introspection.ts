@@ -157,7 +157,7 @@ type databaseConstructor<T> = (
 	fields: FieldConfiguration[],
 	types: TypeConfiguration[],
 	interpolateVariableDefinitionAsJSON: string[],
-	customJsonScalars?: string[] | undefined,
+	customJsonScalars?: string[] | undefined
 ) => T;
 
 type DbApi = Api<DatabaseApiCustom>;

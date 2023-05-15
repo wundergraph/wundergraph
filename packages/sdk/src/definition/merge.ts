@@ -21,11 +21,7 @@ import {
 import { Api, DataSource, StaticApiCustom } from './index';
 import { WellKnownClaim, WellKnownClaimValues } from '../graphql/operations';
 
-export const mergeApis = <T extends {} = {}>(
-	roles: string[],
-	customClaims: string[],
-	...apis: Api<T>[]
-): Api<T> => {
+export const mergeApis = <T extends {} = {}>(roles: string[], customClaims: string[], ...apis: Api<T>[]): Api<T> => {
 	const dataSources: DataSource<T>[] = apis
 		.map((api) => api.DataSources || [])
 		.reduce((previousValue, currentValue) => [...previousValue, ...currentValue], []);
