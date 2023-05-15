@@ -104,6 +104,22 @@ export default configureWunderGraphServer(() => ({
 						},
 					},
 				}),
+				mutation: new GraphQLObjectType<any, any>({
+					name: 'Mutation',
+					fields: {
+						setName: {
+							type: GraphQLString,
+							args: {
+								name: {
+									type: new GraphQLNonNull(GraphQLString),
+								},
+							},
+							resolve: async (source, args, context, info) => {
+								return args.name;
+							},
+						},
+					},
+				}),
 			}),
 		},
 	],
