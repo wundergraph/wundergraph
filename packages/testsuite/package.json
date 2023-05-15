@@ -22,6 +22,7 @@
   "devDependencies": {
     "execa": "5.1.1",
     "fastify": "^4.10.2",
+    "graphql-request": "^6.0.0",
     "jose": "^4.11.1",
     "straightforward": "^4.2.2",
     "typescript": "^4.8.2",
