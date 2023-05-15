@@ -31,7 +31,7 @@ export type SubscriptionHandler<
 	UserRole extends string,
 	CustomClaims extends {},
 	InternalOperationsClient extends OperationsClient,
-	TypedORM extends ORM<any>,
+	TypedORM,
 	CustomContext
 > = ZodResponse extends z.ZodObject<any>
 	? (
@@ -49,7 +49,7 @@ interface _HandlerContext<
 	Role extends string,
 	CustomClaims extends {},
 	InternalOperationsClient extends OperationsClient,
-	TypedORM extends ORM<any>,
+	TypedORM,
 	CustomContext
 > extends BaseRequestContext<WunderGraphUser<Role, CustomClaims>, IC, OperationsClient, CustomContext> {
 	input: Input extends {} ? Input : never;
@@ -63,7 +63,7 @@ export type HandlerContext<
 	Role extends string,
 	CustomClaims extends {},
 	InternalOperationsClient extends OperationsClient,
-	TypedORM extends ORM<any>,
+	TypedORM,
 	CustomContext
 > = Input extends z.ZodObject<any>
 	? _HandlerContext<z.infer<Input>, IC, Role, CustomClaims, InternalOperationsClient, TypedORM, CustomContext>
@@ -86,7 +86,7 @@ const createQuery =
 		UserRole extends string,
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient,
-		TypedORM extends ORM<any>,
+		TypedORM,
 		TCustomContext
 	>() =>
 	<Input extends z.ZodObject<any> = any, InferredResponse = unknown, ZodResponse = unknown>({
@@ -156,7 +156,7 @@ const createMutation =
 		UserRole extends string,
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient,
-		TypedORM extends ORM<any>,
+		TypedORM,
 		CustomContext
 	>() =>
 	<Input extends z.ZodObject<any> = any, InferredResponse = unknown, ZodResponse = unknown>({
@@ -215,7 +215,7 @@ const createSubscription =
 		UserRole extends string,
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient,
-		TypedORM extends ORM<any>,
+		TypedORM,
 		CustomContext
 	>() =>
 	<Input extends z.ZodObject<any> = any, InferredResponse = unknown, ZodResponse = unknown>({
@@ -277,7 +277,7 @@ export const createOperationFactory = <
 	UserRole extends string,
 	CustomClaims extends {},
 	InternalOperationsClient extends OperationsClient,
-	TypedORM extends ORM<any>,
+	TypedORM,
 	CustomContext
 >() => ({
 	query: createQuery<IC, UserRole, CustomClaims, InternalOperationsClient, TypedORM, CustomContext>(),
@@ -294,7 +294,7 @@ export type NodeJSOperation<
 	UserRole extends string,
 	CustomClaims extends {},
 	InternalOperationsClient extends OperationsClient,
-	TypedORM extends ORM<any>,
+	TypedORM,
 	CustomContext
 > = {
 	type: OperationType;
