@@ -31,5 +31,8 @@ export type ORM = ORMClass<Schemas>
 `;
 
 export const emptyOrm = `
-  export type ORM = 'Warning: \`Enable the ORM by setting \`experimental.orm\` to \`true\` in your \`wundergraph.config.ts\`.'
+/**
+ * Warning: Enable the ORM by setting \`experimental.orm\` to \`true\` in your \`wundergraph.config.ts\`.
+ */
+export type ORM = never
 `;
