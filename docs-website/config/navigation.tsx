@@ -145,6 +145,10 @@ const navigation = [
 						href: '/docs/examples/expo-swr',
 					},
 					{
+						title: 'Expo + Relay',
+						href: '/docs/examples/expo-relay',
+					},
+					{
 						title: 'FaunaDB Next.js',
 						href: '/docs/examples/fauna-db-nextjs',
 					},

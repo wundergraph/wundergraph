@@ -200,6 +200,7 @@ The best way to try them out is by cloning the mono-repo.
 - [Caching](examples/caching)
 - [Cross API Joins](examples/cross-api-joins)
 - [Expo swr](examples/expo-swr)
+- [Expo Relay](examples/expo-relay)
 - [FaunaDB NextJS](examples/faunadb-nextjs)
 - [Fragments](examples/fragments)
 - [Golang Client](examples/golang-client)
