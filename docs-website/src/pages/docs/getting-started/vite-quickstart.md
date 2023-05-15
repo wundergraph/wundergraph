@@ -66,15 +66,14 @@ configureWunderGraphApplication({
   // the const defined above is provided in the array of apis here
   apis: [spaceX],
   // ...
-  codeGenerators: [
-    {
-      templates: [...templates.typescript.all],
-    },
-    {
-      templates: [templates.typescript.client],
-      path: '../src/generated',
-    },
-  ],
+  generate: {
+    codeGenerators: [
+      {
+        templates: [templates.typescript.client],
+        path: '../src/generated',
+      },
+    ],
+  },
   // ...
 });
 ```

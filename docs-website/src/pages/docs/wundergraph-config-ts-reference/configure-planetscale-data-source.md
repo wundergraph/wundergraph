@@ -1,7 +1,6 @@
 ---
 title: Configure Planetscale Data Source
-pageTitle: WunderGraph - Configure Planetscale Data Source
-description:
+description: Introspect Planetscale databases and add them to your Virtual Graph.
 ---
 
 The Planetscale data source introspects the database and generates a GraphQL schema.

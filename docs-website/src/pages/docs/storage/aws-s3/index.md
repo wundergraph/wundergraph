@@ -1,6 +1,5 @@
 ---
 title: AWS S3 Storage Provider
-pageTitle: WunderGraph - AWS S3 Storage Provider
 description: Use Amazon S3 as your storage provider.
 ---
 

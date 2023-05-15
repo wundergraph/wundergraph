@@ -64,12 +64,14 @@ configureWunderGraphApplication({
   // the const defined above is provided in the array of apis here
   apis: [spaceX],
   // ...
-  codeGenerators: [
-    {
-      templates: [...templates.typescript.all],
-      path: '../src/lib/.wundergraph/generated',
-    },
-  ],
+  generate: {
+    codeGenerators: [
+      {
+        templates: [...templates.typescript.all],
+        path: '../src/lib/.wundergraph/generated',
+      },
+    ],
+  },
   // ...
 });
 ```

@@ -1,7 +1,6 @@
 ---
 title: '@rbac Directive'
-pageTitle: WunderGraph - Directives - @rbac
-description:
+description: Attach RBAC rules to Operations
 ---
 
 The `@rbac` directive attaches rules for Role Based Access Control (RBAC) to Operations.

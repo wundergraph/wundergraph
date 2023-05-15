@@ -1,7 +1,6 @@
 ---
 title: '@transform Directive'
-pageTitle: WunderGraph - Directives - @transform
-description:
+description: Transform the response of a field
 ---
 
 One of the issues when using the `_join` field is that the response will have more nesting than necessary.

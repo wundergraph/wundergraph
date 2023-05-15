@@ -275,7 +275,7 @@ export default function HomePage() {
 
 HomePage.getInitialProps = () => {
 	return {
-		title: 'WunderGraph Docs',
+		title: 'Documentation Overview',
 		description: 'Learn more about how to integrate APIs and build complete backends with WunderGraph.',
 	};
 };

@@ -1,6 +1,5 @@
 ---
-title: MongoDB / Atlas to GraphQL
-pageTitle: WunderGraph - MongoDB / Atlas
+title: MongoDB / Atlas support
 description: WunderGraph is the easiest way to expose MongoDB / Atlas APIs through GraphQL.
 ---
 

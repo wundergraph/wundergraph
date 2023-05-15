@@ -2,7 +2,6 @@ import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
 import Handlebars from 'handlebars';
-import hash from 'object-hash';
 import { compile as compileJSONSchema } from 'json-schema-to-typescript';
 
 import { handlebarTemplate } from './client.template';
@@ -10,7 +9,7 @@ import { Template, TemplateOutputFile } from '../../index';
 import { formatTypeScript } from './';
 import { OperationType } from '@wundergraph/protobuf';
 import { CodeGenerationConfig } from '../../../configure';
-import { liveQueries, modelImports, operations, queries as allQueries } from './helpers';
+import { liveQueries, modelImports, operations, queries as allQueries, configurationHash } from './helpers';
 import templates from '../index';
 import { isWellKnownClaim, wellKnownClaimField } from '../../../graphql/operations';
 
@@ -71,7 +70,7 @@ export class TypeScriptClient implements Template {
 			baseURL: config.deployment.environment.baseUrl,
 			roleDefinitions: config.authentication.roles.map((role) => '"' + role + '"').join(' | '),
 			sdkVersion: config.sdkVersion,
-			applicationHash: hash(config).substring(0, 8),
+			applicationHash: configurationHash(config),
 			queries: _queries,
 			allOperations: allOperations,
 			liveQueries: _liveQueries,

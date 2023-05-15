@@ -1,7 +1,6 @@
 ---
 title: '@internalOperation Directive'
-pageTitle: WunderGraph - Directives - @internalOperation
-description:
+description: Mark an operation as internal
 ---
 
 {% callout type="warning" %}

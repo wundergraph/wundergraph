@@ -1,7 +1,6 @@
 ---
 title: API Management
-pageTitle: WunderGraph - API Management
-description:
+description: Managing APIs is the classic use case supported by WunderGraph.
 ---
 
 Managing APIs is the classic use case supported by WunderGraph.

@@ -33,7 +33,7 @@ What's missing is that we need to implement a hook to fetch the short-lived toke
 
 ```typescript
 // wundergraph.server.ts
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     mutations: {
       draw: {
