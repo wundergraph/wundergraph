@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "npm run build:wundergraph && concurrently \"npm run wundergraph\" \"npm run relay\" \"vite --port 3000\"",
-    "build": "npm run build:wundergraph && relay-compiler && tsc && vite build",
+    "build": "relay-compiler && npm run build:wundergraph && tsc && vite build",
     "preview": "vite preview",
     "relay": "relay-compiler --watch",
     "build:wundergraph": "wunderctl generate",
