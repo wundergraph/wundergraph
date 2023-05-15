@@ -19,9 +19,7 @@ export const Dragon: FC<DragonsProps> = ({ dragon }) => {
 	return (
 		<View>
 			<Text>Dragon Name: {data.name}</Text>
-			<Text>
-				status: <i>{data.active ? 'active' : 'retired'}</i>
-			</Text>
+			<Text>status: {data.active ? 'active' : 'retired'}</Text>
 		</View>
 	);
 };
