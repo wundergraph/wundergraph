@@ -143,6 +143,7 @@ var upCmd = &cobra.Command{
 		webhooksDir := filepath.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
 		configOutFile := filepath.Join("generated", "bundle", "config.cjs")
 		serverOutFile := filepath.Join("generated", "bundle", "server.cjs")
+		ormOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "orm.cjs")
 		operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
 		generatedBundleOutDir := filepath.Join("generated", "bundle")
 
@@ -234,6 +235,16 @@ var upCmd = &cobra.Command{
 		}
 
 		if codeServerFilePath != "" {
+			ormEntryPointFilename := filepath.Join(wunderGraphDir, "generated", "orm", "index.ts")
+			ormBundler := bundler.NewBundler(bundler.Config{
+				Name:          "orm-bundler",
+				Production:    true,
+				AbsWorkingDir: wunderGraphDir,
+				EntryPoints:   []string{ormEntryPointFilename},
+				OutFile:       ormOutFile,
+				Logger:        log,
+			})
+
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "hooks-bundler",
 				EntryPoints:   []string{serverEntryPointFilename},
@@ -303,6 +314,10 @@ var upCmd = &cobra.Command{
 				}
 
 				var wg errgroup.Group
+
+				wg.Go(func() error {
+					return ormBundler.Bundle()
+				})
 
 				wg.Go(func() error {
 					return hooksBundler.Bundle()

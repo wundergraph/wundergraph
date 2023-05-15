@@ -1,0 +1,269 @@
+# Architecture
+
+The ORM exposes an object-relational interface over GraphQL APIs. Just like common (realtional database-backed) ORMs translate method calls to SQL queries, our ORM translates method calls to GraphQL queries.
+
+## Type-Saftey
+
+In-order-for the ORM to provide type-saftey, it must understand the schema of the underlying data source both at compile-time and runtime. It must also track the operation constructed in a similar manner in-order-to infer and validate operation arguments and result types. Since we are targeting GraphQL, we must have representations of both the GraphQL API schema and operations in TypeScript.
+
+### Schema Representation
+
+Schemas are represented at compile-time and runtime with TypeScript interfaces and [`graphql` type objects](https://github.com/graphql/graphql-js/blob/main/src/type/definition.ts) respectively (in the future this representation may be unified like we do for operations).
+
+> Note: The ORM provides a code-generator to generate these artifacts from GraphQL SDL.
+
+For example:
+
+```graphql
+schema {
+  query: Query
+}
+
+type Query {
+  node(id: ID!): Node
+}
+```
+
+```typescript
+import { Kind, buildASTSchema } from 'graphql';
+
+// utilized at compile-time
+interface Schema {
+  Query: Query;
+  Node: Node;
+}
+
+interface Query {
+  node(variables: { id: string }): Node | null;
+}
+
+interface Node {
+  id: string;
+}
+
+// utilized at runtime
+const SCHEMA = buildASTSchema({
+  kind: Kind.SCHEMA,
+  definitions: [
+    /* ... */
+  ],
+});
+```
+
+### Operation Representation
+
+Operations are represented at compile-time and runtime with TypeScript (GraphQL) AST objects. These TypeScript AST definitions are currently provided by [`@timkendall/tql`](https://github.com/timkendall/tql/blob/master/src/AST.ts).
+
+For example:
+
+```graphql
+query Foo {
+  node(id: "abc") {
+    __typename
+    id
+  }
+}
+```
+
+```typescript
+import { field, argument, selectionSet, operation, OperationType, Result } from '@timkendall/tql';
+import type { Schema, Query } from './generated/schema';
+
+const query = operation({
+  operation: OperationType.QUERY,
+  name: 'Foo',
+  variableDefinitions: [
+    /* none */
+  ],
+  selectionSet: selectionSet([
+    field('node', [argument('id', 'abc')], selectionSet([field('__typename'), field('id')])),
+  ]),
+});
+
+type test = Result<Schema, Query, (typeof query)['selectionSet']>;
+/*
+  { 
+    readonly node: { 
+      __typename: 'Foo' | 'Bar'
+      id: string 
+    } | null
+  }
+*/
+```
+
+## Operation Construction & Execution
+
+The ORM orchestrates operation construction via. it's public `query`, `mutate`, `subscribe`, `select`, `where`, and `on` methods. Each method call results in the creation or modification of an internal TypeScript representation of a GraphQL AST.
+
+For example:
+
+```typescript
+const operation = graph
+  .from('myNamespace') // <- internally used to lookup correct API schema (and record the namespace an operation will be executed under)
+  .query('foo')
+  .where({ id: 'bar' });
+
+/*
+  {
+    kind: Kind.OPERATION_DEFINITION,
+    selectionSet: {
+      kind: Kind.SELECTION_SET,
+      selections: [
+        {
+          kind: Kind.FIELD,
+          name: {
+            kind: Kind.NAME,
+            value: 'foo'
+          },
+          selectionSet: {
+             kind: Kind.SELECTION_SET,
+             selections: [...]
+          }
+        }
+      ]
+    }
+  }
+*/
+```
+
+Operation execution is initiated with the `exec` method whereas the operation AST, variable values, and other metadata are passed to an implementation of `Executor`.
+
+> Note: An executor must return a full operation result (e.g the `data` portion of a GraphQL HTTP response) and throw if there are errors in remote execution. This is because the ORM does not currently support partially successful operations.
+
+The `Executor` has the following interface:
+
+```typescript
+interface Executor {
+  execute<T>(
+    operation: OperationTypeNode,
+    document: DocumentNode,
+    variables?: Record<string, unknown>,
+    namespace?: string
+  ): Promise<T>;
+}
+```
+
+## WunderGraph Integration
+
+Our TypeScript ORM is designed to be generic but is of course deeply integrated into WunderGraph to provide the best experience for WunderGraph users. The ORM is integrated into both the [Code Generation](https://docs.wundergraph.com/docs/features/generated-clients-and-sdks) and [Server](https://docs.wundergraph.com/docs/components-of-wundergraph/wundernode-wundergraph-server#wunder-graph-server) components of WunderGraph.
+
+### Code Generation
+
+A WunderGraph code generation `Template` translates each configured data source's GraphQL API schema to the cooresponding TypeScript representation and exposes a pre-configured ORM object that is utilized by a WunderGraph server at runtime. The output of code generation results in a file structure like this:
+
+```md
+app/
+└── .wundergraph/
+└── generated/
+└── orm/
+├── schemas/
+│ ├── a.ts
+│ ├── b.ts
+│ └── c.ts
+└── index.ts
+```
+
+The generated `index.ts` module looks like this:
+
+```typescript
+// Code generated by wunderctl. DO NOT EDIT.
+
+import { OperationCreator } from '@wundergraph/orm';
+import { NamespacingExecutor } from '@wundergraph/sdk/orm';
+
+import { A, B, C } from './schemas';
+
+export * from './schemas';
+
+const BASE_URL = 'http://localhost:9991';
+
+const APIs = {
+  get a() {
+    const executor = new NamespacingExecutor({
+      baseUrl: BASE_URL,
+      namespace: 'a',
+    });
+
+    return new OperationCreator<{ schema: A.Schema }>({
+      schema: A.SCHEMA,
+      executor,
+    });
+  },
+  // ...etc
+};
+
+export const orm = {
+  from<Namespace extends keyof typeof APIs>(namespace: Namespace) {
+    return APIs[namespace];
+  },
+};
+```
+
+### Server
+
+The WunderGraph server loads the above generated module dynamically at runtime and passes a reference to the `orm` export in the context object the server provides to operations defined with `createOperation`. This allows the ORM to be accessed within operation definitions like so:
+
+```typescript
+import { createOperation, z } from '../generated/wundergraph.factory';
+
+export default createOperation.query({
+  input: z.object({
+    id: z.string(),
+  }),
+  handler: async ({ input, graph }) => {
+    // orm!
+    const user = await graph.from('users').query('get').where({ id: input.id }).exec();
+
+    return {
+      userID: user.id,
+      userName: user.name,
+    };
+  },
+});
+```
+
+In-order-to execute an operation against a WunderNode, a GraphQL operation is namespaced (see `NamespacingExecutor` in `@wundergraph/sdk`) before being sent to the WunderNode. Results are un-namespaced (i.e root field names and `__typename` values replaced) before being returned from the ORM.
+
+1. Original operation generated by the ORM
+
+```graphql
+query ($id_0: ID!) {
+  node(id: $id) {
+    __typename
+    id
+  }
+}
+```
+
+2. Transformed operation (sent to WunderNode, assuming a namespace of "foo")
+
+```graphql
+query ($id_0: ID!) {
+  foo_node(id: $id) {
+    __typename
+    id
+  }
+}
+```
+
+3. Original result returned from the WunderNode
+
+```json
+{
+  "data": {
+    "foo_node": {
+      "__typename": "foo_SomeType",
+      "id": "1234"
+    }
+  }
+}
+```
+
+4. Transformed result returned from the ORM (note how the root field is "unwrapped")
+
+```typescript
+{
+  __typename: "SomeType",
+  id: "1234"
+}
+```
