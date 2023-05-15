@@ -1,7 +1,6 @@
 ---
 title: Configure CORS
-pageTitle: WunderGraph - Configure CORS
-description:
+description: How to configure CORS in WunderGraph.
 ---
 
 This section describes how to configure CORS in WunderGraph.

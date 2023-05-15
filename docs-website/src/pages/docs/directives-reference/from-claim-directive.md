@@ -1,7 +1,6 @@
 ---
 title: '@fromClaim Directive'
-pageTitle: WunderGraph - Directives - @fromClaim
-description:
+description: Inject claims into variables
 ---
 
 WunderGraph builds on top of OpenID Connect for authentication.

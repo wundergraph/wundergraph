@@ -122,8 +122,6 @@ type Api struct {
 	Operations            []*wgpb.Operation
 	InvalidOperationNames []string
 	CorsConfiguration     *wgpb.CorsConfiguration
-	DeploymentId          string
-	CacheConfig           *wgpb.ApiCacheConfig // TODO: extract from proto
 	ApiConfigHash         string
 	AuthenticationConfig  *wgpb.ApiAuthenticationConfig
 	S3UploadConfiguration []*wgpb.S3UploadConfiguration

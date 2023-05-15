@@ -1,6 +1,5 @@
 ---
-title: Python
-pageTitle: WunderGraph - Python
+title: Python support
 description: WunderGraph is the easiest way to consume GraphQL APIs in Python.
 ---
 

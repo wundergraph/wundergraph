@@ -1,6 +1,5 @@
 ---
-title: SOAP to GraphQL
-pageTitle: WunderGraph - SOAP
+title: SOAP support
 description: WunderGraph is the easiest way to expose SOAP APIs through GraphQL.
 ---
 

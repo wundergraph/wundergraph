@@ -1,7 +1,6 @@
 ---
 title: Multi-database multi-schema ORM
-pageTitle: WunderGraph - Multi-database Multi-schema ORM
-description:
+description: Use WunderGraph as an ORM for all your databases
 ---
 
 As you might know,

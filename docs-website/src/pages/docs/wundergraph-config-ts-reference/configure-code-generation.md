@@ -1,7 +1,6 @@
 ---
 title: Configure Code Generation
-pageTitle: WunderGraph - Configure Code Generation
-description:
+description: Configure code generation to generate clients, models, hooks definitions, and more for your application.
 ---
 
 This section describes how to configure code generation.
@@ -14,11 +13,9 @@ You should never have to manually infer any types.
 ```typescript
 // wundergraph.config.ts
 configureWunderGraphApplication({
-  codeGenerators: [
-    {
-      templates: [...templates.typescript.all],
-    },
-  ],
+  generate: {
+    codeGenerators: [],
+  },
 });
 ```
 
@@ -42,15 +39,14 @@ configureWunderGraphApplication({
   application: myApplication,
   server,
   operations,
-  codeGenerators: [
-    {
-      templates: [...templates.typescript.all],
-    },
-    {
-      templates: [new NextJsTemplate()],
-      path: '../components/generated',
-    },
-  ],
+  generate: {
+    codeGenerators: [
+      {
+        templates: [new NextJsTemplate()],
+        path: '../components/generated',
+      },
+    ],
+  },
 });
 ```
 

@@ -20,7 +20,7 @@ configureWunderGraphApplication({
 
 ```typescript
 // wundergraph.server.ts
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     global: {
       wsTransport: {

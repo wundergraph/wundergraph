@@ -1,10 +1,9 @@
 ---
-title: Webhooks Configuration
-pageTitle: WunderGraph - Webhooks Configuration
+title: webhooks configuration
 description: Configure webhook verifiers in the WunderGraph server.
 ---
 
-This property allows you to configure your custom webhooks.
+This property allows you to configure verifiers for your custom webhooks.
 Currently, only the `verifier` option is supported.
 The `verifier` define how the webhook is verified. Verification is handled by the gateway. Before a webhook can be configured you need to create one. See webhooks feature for more information.
 

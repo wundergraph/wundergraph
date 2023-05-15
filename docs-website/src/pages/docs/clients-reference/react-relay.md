@@ -1,7 +1,6 @@
 ---
-title: React Relay Client
-pageTitle: WunderGraph React Relay Client
-description: React Relay Client reference
+title: React Relay client
+description: Reference documentation for the WunderGraph React Relay client.
 ---
 
 # WunderGraph Relay Integration

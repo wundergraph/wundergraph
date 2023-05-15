@@ -25,12 +25,14 @@ configureWunderGraphApplication({
   apis: [spaceX],
   server,
   operations,
-  codeGenerators: [
-    {
-      templates: [...templates.typescript.all],
-      path: '../src/lib/.wundergraph/generated',
-    },
-  ],
+  generate: {
+    codeGenerators: [
+      {
+        templates: [...templates.typescript.all],
+        path: '../src/lib/.wundergraph/generated',
+      },
+    ],
+  },
 });
 ```
 

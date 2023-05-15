@@ -1,6 +1,5 @@
 ---
-title: Next.js
-pageTitle: WunderGraph - Next.js
+title: Next.js support
 description: WunderGraph is the easiest way to consume GraphQL APIs in Next.js.
 ---
 

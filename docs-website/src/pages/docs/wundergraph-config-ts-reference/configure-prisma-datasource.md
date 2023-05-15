@@ -1,7 +1,6 @@
 ---
 title: Configure Prisma Data Source
-pageTitle: WunderGraph - Configure Prisma Data Source
-description: Learn how to configure Prisma with WunderGraph
+description: Introspect Prisma schema's and add them to your Virtual Graph.
 ---
 
 The Prisma data source loads a Prisma schema from a file and generates a GraphQL schema.

@@ -1,7 +1,6 @@
 ---
-title: PostgreSQL
-pageTitle: WunderGraph - PostgreSQL
-description:
+title: PostgreSQL support
+description: Turn any PostgreSQL protocol compatible Database into a secure production-grade GraphQL API.
 ---
 
 The PostgreSQL DataSource allows you to turn any PostgreSQL protocol compatible Database into a secure production-grade GraphQL API.

@@ -1,7 +1,6 @@
 ---
 title: Configure OpenAPI-/REST Datasource
-pageTitle: WunderGraph - Configure OpenAPI-/REST Datasource
-description:
+description: The OpenAPI-/REST data source introspects an OpenAPI Specification and generates a GraphQL schema from it.
 ---
 
 The OpenAPI-/REST data source introspects an OpenAPI Specification and generates a GraphQL schema from it.

@@ -1,6 +1,5 @@
 ---
-title: Java / Kotlin
-pageTitle: WunderGraph - Java / Kotlin
+title: Java / Kotlin support
 description: WunderGraph is the easiest way to consume GraphQL APIs in Java / Kotlin.
 ---
 

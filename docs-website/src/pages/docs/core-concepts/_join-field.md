@@ -1,7 +1,6 @@
 ---
 title: The _join field explained
-pageTitle: WunderGraph - Core Concepts - The _join field explained
-description:
+description: The _join field allows you to join data from multiple GraphQL APIs
 ---
 
 It's quite likely that you've already seen the `_join` field in one of the examples.
