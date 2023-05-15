@@ -110,7 +110,7 @@ export class OperationsClient<
 	>(
 		options: OperationName extends string ? MutationRequestOptions<OperationName, Input> : OperationRequestOptions
 	): Promise<ClientResponse<TResponse['data'], TResponse['error']>> => {
-		return super.query(options);
+		return this.query(options as any);
 	};
 
 	/**
