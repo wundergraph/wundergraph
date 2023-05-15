@@ -6,7 +6,7 @@
     "start": "npm run dev",
     "dev": "npm run build:wundergraph && concurrently \"npm run wundergraph\" \"npm run relay\"",
     "expo:start": "expo start",
-    "build": "relay-compiler && npm run build:wundergraph",
+    "build": "npm run build:wundergraph && relay-compiler",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
