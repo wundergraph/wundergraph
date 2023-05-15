@@ -18,8 +18,8 @@ To use it, declare a function that returns your context type and pass it to `cre
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
 
 export class MyContext {
-  release() {
-    console.log('bye');
+  cleanup() {
+    console.log('cleaning up');
   }
   hello() {
     return 'world';
@@ -47,7 +47,7 @@ export default configureWunderGraphServer(() => ({
         return new MyContext();
       },
       release: async (ctx) => {
-        ctx.release();
+        ctx.cleanup();
       },
     },
   },
@@ -155,14 +155,14 @@ export default configureWunderGraphServer(() => ({
 			},
 			release: async (ctx/*: MyGlobalContext*/) => {
         // Called at server shutdown
-+			},
+			},
 		},
 		request: {
 			create: async (ctx/*: MyGlobalContext*/) => {
 				return new MyRequestContext(ctx);
 			},
 			release: async (ctx/*: MyRequestContext*/) => {
-        // Called after every request
+        // Called after every response
 			},
 		},
 	},
