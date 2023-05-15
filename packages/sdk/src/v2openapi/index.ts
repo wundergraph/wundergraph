@@ -174,6 +174,7 @@ class RESTApiBuilder {
 			dataSources,
 			applyNamespaceToExistingRootFieldConfigurations(this.fields, schema, this.apiNamespace),
 			[],
+			[],
 			[]
 		);
 	};

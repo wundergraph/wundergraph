@@ -12,7 +12,7 @@ import {
 } from '../types';
 import { OperationType, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/utils';
-import { Headers } from '@web-std/fetch';
+import { Headers } from '@whatwg-node/fetch';
 import { FastifyRequest } from 'fastify';
 
 const maximumRecursionLimit = 16;

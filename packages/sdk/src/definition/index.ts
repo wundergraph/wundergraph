@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { buildClientSchema, GraphQLSchema, introspectionFromSchema, parse, print, printSchema } from 'graphql';
 import { renameTypeFields, renameTypes } from '../graphql/renametypes';
 import {
@@ -98,6 +99,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
 		this.CustomJsonScalars = customJsonScalars;
+		this.Namespace = namespace;
 	}
 
 	DefaultFlushInterval: number = 500;
@@ -108,6 +110,12 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	interpolateVariableDefinitionAsJSON: string[];
 	CustomJsonScalars?: string[];
 	Namespace: string;
+
+	get schemaSha256() {
+		const hash = createHash('sha256');
+		hash.update(this.Schema);
+		return hash.digest('hex');
+	}
 
 	renameTypes(rename: RenameType[]): void {
 		this.Schema = renameTypes(this.Schema, rename);

@@ -29,7 +29,7 @@ import {
 import { isRootType } from '../graphql/configuration';
 import { Api, DataSource } from './index';
 
-const wellKnownTypeNames: string[] = [
+export const wellKnownTypeNames: string[] = [
 	'Query',
 	'Mutation',
 	'Subscription',

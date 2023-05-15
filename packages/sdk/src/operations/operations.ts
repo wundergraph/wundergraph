@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import * as fs from 'fs';
+import type { ORM } from '@wundergraph/orm';
 import type { BaseRequestContext, InternalClient, OperationsClient, WunderGraphUser } from '../server';
 import { OperationError } from '../client';
 import {
@@ -30,13 +31,14 @@ export type SubscriptionHandler<
 	UserRole extends string,
 	CustomClaims extends {},
 	InternalOperationsClient extends OperationsClient,
+	TypedORM,
 	CustomContext
 > = ZodResponse extends z.ZodObject<any>
 	? (
-			ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, CustomContext>
+			ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, TypedORM, CustomContext>
 	  ) => AsyncGenerator<z.infer<ZodResponse>>
 	: (
-			ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, CustomContext>
+			ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, TypedORM, CustomContext>
 	  ) => AsyncGenerator<InferredResponse>;
 
 export type OperationTypes = 'query' | 'mutation' | 'subscription';
@@ -47,10 +49,12 @@ interface _HandlerContext<
 	Role extends string,
 	CustomClaims extends {},
 	InternalOperationsClient extends OperationsClient,
+	TypedORM,
 	CustomContext
 > extends BaseRequestContext<WunderGraphUser<Role, CustomClaims>, IC, OperationsClient, CustomContext> {
 	input: Input extends {} ? Input : never;
 	operations: Omit<InternalOperationsClient, 'cancelSubscriptions'>;
+	graph: TypedORM;
 }
 
 export type HandlerContext<
@@ -59,10 +63,11 @@ export type HandlerContext<
 	Role extends string,
 	CustomClaims extends {},
 	InternalOperationsClient extends OperationsClient,
+	TypedORM,
 	CustomContext
 > = Input extends z.ZodObject<any>
-	? _HandlerContext<z.infer<Input>, IC, Role, CustomClaims, InternalOperationsClient, CustomContext>
-	: Omit<_HandlerContext<never, IC, Role, CustomClaims, InternalOperationsClient, CustomContext>, 'input'>;
+	? _HandlerContext<z.infer<Input>, IC, Role, CustomClaims, InternalOperationsClient, TypedORM, CustomContext>
+	: Omit<_HandlerContext<never, IC, Role, CustomClaims, InternalOperationsClient, TypedORM, CustomContext>, 'input'>;
 
 export interface BaseOperationConfiguration<UserRole extends string> {
 	requireAuthentication?: boolean;
@@ -81,6 +86,7 @@ const createQuery =
 		UserRole extends string,
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient,
+		TypedORM,
 		TCustomContext
 	>() =>
 	<Input extends z.ZodObject<any> = any, InferredResponse = unknown, ZodResponse = unknown>({
@@ -99,10 +105,10 @@ const createQuery =
 		response?: ZodResponse;
 		handler: ZodResponse extends z.ZodObject<any>
 			? (
-					ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, TCustomContext>
+					ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, TypedORM, TCustomContext>
 			  ) => Promise<z.infer<ZodResponse>>
 			: (
-					ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, TCustomContext>
+					ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, TypedORM, TCustomContext>
 			  ) => Promise<InferredResponse>;
 		live?: LiveQueryConfiguration;
 		cache?: QueryCacheConfiguration;
@@ -115,6 +121,7 @@ const createQuery =
 		UserRole,
 		CustomClaims,
 		InternalOperationsClient,
+		TypedORM,
 		TCustomContext
 	> => {
 		return {
@@ -149,6 +156,7 @@ const createMutation =
 		UserRole extends string,
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient,
+		TypedORM,
 		CustomContext
 	>() =>
 	<Input extends z.ZodObject<any> = any, InferredResponse = unknown, ZodResponse = unknown>({
@@ -165,10 +173,10 @@ const createMutation =
 		response?: ZodResponse;
 		handler: ZodResponse extends z.ZodObject<any>
 			? (
-					ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, CustomContext>
+					ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, TypedORM, CustomContext>
 			  ) => Promise<z.infer<ZodResponse>>
 			: (
-					ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, CustomContext>
+					ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, TypedORM, CustomContext>
 			  ) => Promise<InferredResponse>;
 	} & BaseOperationConfiguration<UserRole>): NodeJSOperation<
 		z.infer<Input>,
@@ -179,6 +187,7 @@ const createMutation =
 		UserRole,
 		CustomClaims,
 		InternalOperationsClient,
+		TypedORM,
 		CustomContext
 	> => {
 		return {
@@ -206,6 +215,7 @@ const createSubscription =
 		UserRole extends string,
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient,
+		TypedORM,
 		CustomContext
 	>() =>
 	<Input extends z.ZodObject<any> = any, InferredResponse = unknown, ZodResponse = unknown>({
@@ -228,6 +238,7 @@ const createSubscription =
 			UserRole,
 			CustomClaims,
 			InternalOperationsClient,
+			TypedORM,
 			CustomContext
 		>;
 	} & BaseOperationConfiguration<UserRole>): NodeJSOperation<
@@ -239,6 +250,7 @@ const createSubscription =
 		UserRole,
 		CustomClaims,
 		InternalOperationsClient,
+		TypedORM,
 		CustomContext
 	> => {
 		return {
@@ -265,11 +277,12 @@ export const createOperationFactory = <
 	UserRole extends string,
 	CustomClaims extends {},
 	InternalOperationsClient extends OperationsClient,
+	TypedORM,
 	CustomContext
 >() => ({
-	query: createQuery<IC, UserRole, CustomClaims, InternalOperationsClient, CustomContext>(),
-	mutation: createMutation<IC, UserRole, CustomClaims, InternalOperationsClient, CustomContext>(),
-	subscription: createSubscription<IC, UserRole, CustomClaims, InternalOperationsClient, CustomContext>(),
+	query: createQuery<IC, UserRole, CustomClaims, InternalOperationsClient, TypedORM, CustomContext>(),
+	mutation: createMutation<IC, UserRole, CustomClaims, InternalOperationsClient, TypedORM, CustomContext>(),
+	subscription: createSubscription<IC, UserRole, CustomClaims, InternalOperationsClient, TypedORM, CustomContext>(),
 });
 
 export type NodeJSOperation<
@@ -281,6 +294,7 @@ export type NodeJSOperation<
 	UserRole extends string,
 	CustomClaims extends {},
 	InternalOperationsClient extends OperationsClient,
+	TypedORM,
 	CustomContext
 > = {
 	type: OperationType;
@@ -288,17 +302,17 @@ export type NodeJSOperation<
 	responseSchema?: ZodResponse;
 	queryHandler?: ZodResponse extends z.ZodObject<any>
 		? (
-				ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, CustomContext>
+				ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, TypedORM, CustomContext>
 		  ) => Promise<z.infer<ZodResponse>>
 		: (
-				ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, CustomContext>
+				ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, TypedORM, CustomContext>
 		  ) => Promise<Response>;
 	mutationHandler?: ZodResponse extends z.ZodObject<any>
 		? (
-				ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, CustomContext>
+				ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, TypedORM, CustomContext>
 		  ) => Promise<z.infer<ZodResponse>>
 		: (
-				ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, CustomContext>
+				ctx: HandlerContext<Input, IC, UserRole, CustomClaims, InternalOperationsClient, TypedORM, CustomContext>
 		  ) => Promise<Response>;
 	subscriptionHandler?: SubscriptionHandler<
 		Input,
@@ -308,6 +322,7 @@ export type NodeJSOperation<
 		UserRole,
 		CustomClaims,
 		InternalOperationsClient,
+		TypedORM,
 		CustomContext
 	>;
 	errors?: { new (): OperationError }[];
@@ -323,11 +338,14 @@ export type NodeJSOperation<
 	};
 };
 
-export type ExtractInput<B> = B extends NodeJSOperation<infer T, any, any, any, any, any, any, any, any> ? T : never;
+export type ExtractInput<B> = B extends NodeJSOperation<infer T, any, any, any, any, any, any, any, any, any>
+	? T
+	: never;
 export type ExtractResponse<B> = B extends NodeJSOperation<
 	any,
 	infer Response,
 	infer ZodResponse,
+	any,
 	any,
 	any,
 	any,
@@ -342,7 +360,7 @@ export type ExtractResponse<B> = B extends NodeJSOperation<
 
 export const loadNodeJsOperationDefaultModule = async (
 	operationPath: string
-): Promise<NodeJSOperation<any, any, any, any, any, any, any, any, any>> => {
+): Promise<NodeJSOperation<any, any, any, any, any, any, any, any, any, any>> => {
 	// remove .js or / from the end of operationPath if present
 	if (operationPath.endsWith('.cjs')) {
 		operationPath = operationPath.slice(0, -4);

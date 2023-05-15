@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import path from 'path';
 import { Webhook, WebhookHeaders, WebhookQuery } from '../../webhooks/types';
-import { Headers } from '@web-std/fetch';
+import { Headers } from '@whatwg-node/fetch';
 import type { RequestMethod } from '../types';
 import type { WebhookConfiguration } from '@wundergraph/protobuf';
 import type { InternalClientFactory } from '../internal-client';
