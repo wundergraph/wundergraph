@@ -6,9 +6,12 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "wundergraph": "wunderctl up",
+    "build:wundergraph": "wunderctl generate"
   },
   "dependencies": {
+    "@wundergraph/sdk": "^0.157.0",
     "expo": "~48.0.15",
     "expo-status-bar": "~1.4.4",
     "react": "18.2.0",
