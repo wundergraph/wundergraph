@@ -155,7 +155,7 @@ export default configureWunderGraphServer(() => ({
 			},
 			release: async (ctx/*: MyGlobalContext*/) => {
         // Called at server shutdown
-+			},
+			},
 		},
 		request: {
 			create: async (ctx/*: MyGlobalContext*/) => {
