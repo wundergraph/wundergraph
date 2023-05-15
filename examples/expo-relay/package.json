@@ -7,6 +7,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "relay": "relay-compiler --watch",
     "wundergraph": "wunderctl up",
     "build:wundergraph": "wunderctl generate"
   },
@@ -15,12 +16,32 @@
     "expo": "~48.0.15",
     "expo-status-bar": "~1.4.4",
     "react": "18.2.0",
-    "react-native": "0.71.7"
+    "react-native": "0.71.7",
+    "relay-runtime": "^15.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@types/react": "~18.0.14",
+    "babel-plugin-relay": "^15.0.0",
+    "graphql": "^16.6.0",
+    "relay-compiler": "^15.0.0",
     "typescript": "^4.9.4"
+  },
+  "relay": {
+    "src": "./",
+    "artifactDirectory": "./__relay__generated__",
+    "language": "typescript",
+    "schema": "./.wundergraph/generated/wundergraph.schema.graphql",
+    "exclude": [
+      "**/node_modules/**",
+      "**/__mocks__/**",
+      "**/__generated__/**",
+      "**/.wundergraph/generated/**"
+    ],
+    "persistConfig": {
+      "file": "./.wundergraph/operations/relay/persisted.json"
+    },
+    "eagerEsModules": true
   },
   "private": true
 }
