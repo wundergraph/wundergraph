@@ -6,10 +6,14 @@ const countries = introspect.graphql({
 	apiNamespace: 'countries',
 	url: 'https://countries.trevorblades.com/',
 });
+const spaceX = introspect.graphql({
+	apiNamespace: 'spacex',
+	url: 'https://spacex-api.fly.dev/graphql/',
+});
 
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [countries],
+	apis: [countries, spaceX],
 	server,
 	operations,
 	generate: {
