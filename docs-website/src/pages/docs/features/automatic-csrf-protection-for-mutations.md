@@ -1,7 +1,6 @@
 ---
 title: Automatic CSRF protection for mutations
-pageTitle: WunderGraph - Features - Automatic CSRF protection for mutations
-description:
+description: WunderGraph automatically protects you from CSRF attacks
 ---
 
 Many services use cookies to remember if a user is authenticated or not.

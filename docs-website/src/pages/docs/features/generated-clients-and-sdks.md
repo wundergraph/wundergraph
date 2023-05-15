@@ -1,7 +1,6 @@
 ---
 title: Generated Clients and SDKs
-pageTitle: WunderGraph - Features - Generated Clients and SDKs
-description:
+description: WunderGraph generates clients and SDKs for you
 ---
 
 One pain point of client side API integration is the network client itself.

@@ -1,4 +1,4 @@
-import { InternalClient, OperationsClient } from '../server';
+import { ClientRequest, InternalClient, OperationsClient } from '../server';
 import { RequestMethod } from '../server/types';
 import { WebhookVerifierKind } from './verifiers';
 import { EnvironmentVariable } from '../configure/variables';
@@ -20,7 +20,8 @@ export type WebhookHeaders = Record<string, string>;
 export type WebhookQuery = Record<string, string | string[]>;
 export interface WebhookRequestContext<
 	TInternalClient extends InternalClient = InternalClient,
-	TOperationsClient extends OperationsClient = OperationsClient
+	TOperationsClient extends OperationsClient = OperationsClient,
+	TCustomContext = any
 > {
 	/**
 	 * The internal client is used to make requests to the WunderGraph API.
@@ -29,6 +30,10 @@ export interface WebhookRequestContext<
 	 */
 	internalClient: TInternalClient;
 	/**
+	 * HTTP client request
+	 */
+	clientRequest: ClientRequest;
+	/**
 	 * The logger is used to log messages.
 	 */
 	log: WebhookLogger;
@@ -36,6 +41,10 @@ export interface WebhookRequestContext<
 	 * The operations client is used to make requests to the WunderGraph API.
 	 */
 	operations: TOperationsClient;
+	/**
+	 * Custom context
+	 */
+	context: TCustomContext;
 }
 interface LogFn {
 	<T extends object>(obj: T, msg?: string, ...args: any[]): void;

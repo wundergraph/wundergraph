@@ -1,6 +1,5 @@
 ---
-title: Planetscale to GraphQL
-pageTitle: WunderGraph - Planetscale DataSource
+title: Planetscale support
 description: WunderGraph is the easiest way to expose Planetscale APIs through GraphQL.
 ---
 

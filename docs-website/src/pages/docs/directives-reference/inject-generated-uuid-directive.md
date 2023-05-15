@@ -1,7 +1,6 @@
 ---
 title: '@injectGeneratedUUID Directive'
-pageTitle: WunderGraph - Directives - @injectGeneratedUUID
-description:
+description: Inject a generated UUID into a variable
 ---
 
 When creating new object in a database, it's common to use an incremental number as the primary key.

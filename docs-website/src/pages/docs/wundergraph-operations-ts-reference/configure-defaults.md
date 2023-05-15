@@ -1,7 +1,6 @@
 ---
 title: Configure Defaults
-pageTitle: WunderGraph - Configure Defaults
-description:
+description: How to configure default options for all operations.
 ---
 
 The `defaultConfig` field is mandatory and allows you to configure the default options for all Operations.

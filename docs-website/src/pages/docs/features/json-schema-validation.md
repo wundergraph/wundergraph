@@ -1,7 +1,6 @@
 ---
 title: JSON Schema Validation
-pageTitle: WunderGraph - Features - JSON Schema Validation
-description:
+description: Validate inputs using JSON Schema
 ---
 
 WunderGraph comes with JSON validation for inputs out of the box.

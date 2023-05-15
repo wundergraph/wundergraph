@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 overrides:
   '@tanstack/query-core': ^4.29.1
+  zod: ^3.21.4
 
 importers:
 
@@ -163,8 +164,8 @@ importers:
       '@types/lodash': ^4.14.178
       '@types/node': ^17.0.32
       '@types/object-hash': ^1.3.4
-      '@wundergraph/protobuf': workspace:^0.110.0
-      '@wundergraph/sdk': workspace:^0.155.0
+      '@wundergraph/protobuf': workspace:^0.111.0
+      '@wundergraph/sdk': workspace:^0.157.0
       execa: 5.1.1
       handlebars: ^4.7.7
       json-schema: ^0.4.0
@@ -220,7 +221,7 @@ importers:
       '@types/node-fetch': 2.6.2
       '@types/object-hash': ^1.3.4
       '@types/react': ^18.0.15
-      '@wundergraph/protobuf': workspace:^0.110.0
+      '@wundergraph/protobuf': workspace:^0.111.0
       '@wundergraph/sdk': workspace:*
       '@wundergraph/swr': workspace:*
       handlebars: ^4.7.7
@@ -383,9 +384,9 @@ importers:
       '@types/write-file-atomic': ^4.0.0
       '@web-std/fetch': ^4.1.0
       '@whatwg-node/fetch': ^0.8.4
-      '@wundergraph/protobuf': workspace:^0.110.0
+      '@wundergraph/protobuf': workspace:^0.111.0
       '@wundergraph/straightforward': ^4.2.5
-      '@wundergraph/wunderctl': workspace:^0.149.0
+      '@wundergraph/wunderctl': workspace:^0.151.0
       axios: ^0.26.1
       axios-retry: ^3.3.1
       chai: ^4.3.4
@@ -425,7 +426,7 @@ importers:
       typescript: ^4.8.2
       typescript-json-schema: ^0.55.0
       write-file-atomic: ^5.0.0
-      zod: ^3.20.2
+      zod: ^3.21.4
       zod-to-json-schema: ^3.20.2
     dependencies:
       '@fastify/formbody': 7.3.0
@@ -474,8 +475,8 @@ importers:
       tslib: 2.5.0
       typescript-json-schema: 0.55.0
       write-file-atomic: 5.0.0
-      zod: 3.20.2
-      zod-to-json-schema: 3.20.2_zod@3.20.2
+      zod: 3.21.4
+      zod-to-json-schema: 3.20.2_zod@3.21.4
     devDependencies:
       '@types/chai': 4.3.3
       '@types/cors': 2.8.12
@@ -640,7 +641,7 @@ importers:
       jose: ^4.11.1
       straightforward: ^4.2.2
       typescript: ^4.8.2
-      vitest: ^0.30.1
+      vitest: ^0.31.0
     dependencies:
       '@opensearch-project/opensearch': 2.2.1
       '@wundergraph/sdk': link:../sdk
@@ -652,7 +653,7 @@ importers:
       jose: 4.11.2
       straightforward: 4.2.2
       typescript: 4.9.4
-      vitest: 0.30.1
+      vitest: 0.31.0
 
   packages/vue-query:
     specifiers:
@@ -727,7 +728,7 @@ importers:
       pg: ^8.7.3
       stripe: ^11.12.0
       typescript: ^4.9.4
-      zod: ^3.20.2
+      zod: ^3.21.4
     dependencies:
       '@octokit/webhooks-types': 6.10.0
       '@types/node': 18.16.0
@@ -737,7 +738,7 @@ importers:
       pg: 8.8.0
       stripe: 11.12.0
       typescript: 4.9.4
-      zod: 3.20.2
+      zod: 3.21.4
 
   testapps/expo:
     specifiers:
@@ -839,7 +840,7 @@ importers:
       swr: ^2.0.0
       typescript: ^4.8.2
       wait-on: ^6.0.0
-      zod: ^3.20.2
+      zod: ^3.21.4
     dependencies:
       '@graphql-yoga/node': 2.13.13_graphql@16.6.0
       '@tanstack/react-query': 4.20.4_biqbaboplfbrettd7655fr4n2y
@@ -852,7 +853,7 @@ importers:
       react-dom: 18.2.0_react@18.2.0
       stripe: 11.12.0
       swr: 2.0.0_react@18.2.0
-      zod: 3.20.2
+      zod: 3.21.4
     devDependencies:
       '@types/node': 18.16.0
       '@types/react': 18.0.24
@@ -889,7 +890,7 @@ importers:
       swr: ^2.0.0
       typescript: ^4.8.2
       wait-on: ^6.0.0
-      zod: ^3.20.2
+      zod: ^3.21.4
     dependencies:
       '@graphql-yoga/node': 2.13.13_graphql@16.6.0
       '@tanstack/react-query': 4.20.4_biqbaboplfbrettd7655fr4n2y
@@ -905,7 +906,7 @@ importers:
       relay-runtime: 15.0.0
       stripe: 11.12.0
       swr: 2.0.0_react@18.2.0
-      zod: 3.20.2
+      zod: 3.21.4
     devDependencies:
       '@types/node': 18.16.0
       '@types/react': 18.0.35
@@ -916,92 +917,6 @@ importers:
       graphql: 16.6.0
       open-cli: 7.1.0
       relay-compiler: 15.0.0
-      typescript: 4.9.4
-      wait-on: 6.0.1
-
-  testapps/nextjs3:
-    specifiers:
-      '@graphql-yoga/node': ^2.13.13
-      '@tanstack/react-query': ^4.20.4
-      '@types/node': ^17.0.27
-      '@types/react': ^18.0.7
-      '@wundergraph/nextjs': workspace:*
-      '@wundergraph/react-query': workspace:*
-      '@wundergraph/sdk': workspace:*
-      '@wundergraph/swr': workspace:*
-      concurrently: ^6.0.0
-      graphql: ^16.3.0
-      next: ^13.1.1
-      open-cli: ^7.0.1
-      react: ^18.2.0
-      react-dom: ^18.2.0
-      stripe: ^11.12.0
-      swr: ^2.0.0
-      typescript: ^4.8.2
-      wait-on: ^6.0.0
-      zod: ^3.20.2
-    dependencies:
-      '@graphql-yoga/node': 2.13.13_graphql@16.6.0
-      '@tanstack/react-query': 4.29.5_biqbaboplfbrettd7655fr4n2y
-      '@wundergraph/nextjs': link:../../packages/nextjs
-      '@wundergraph/react-query': link:../../packages/react-query
-      '@wundergraph/sdk': link:../../packages/sdk
-      '@wundergraph/swr': link:../../packages/swr
-      next: 13.4.1_biqbaboplfbrettd7655fr4n2y
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
-      stripe: 11.12.0
-      swr: 2.0.0_react@18.2.0
-      zod: 3.20.2
-    devDependencies:
-      '@types/node': 17.0.45
-      '@types/react': 18.0.35
-      concurrently: 6.5.1
-      graphql: 16.6.0
-      open-cli: 7.1.0
-      typescript: 4.9.4
-      wait-on: 6.0.1
-
-  testapps/openapi2:
-    specifiers:
-      '@graphql-yoga/node': ^2.13.13
-      '@tanstack/react-query': ^4.20.4
-      '@types/node': ^17.0.27
-      '@types/react': ^18.0.7
-      '@wundergraph/nextjs': workspace:*
-      '@wundergraph/react-query': workspace:*
-      '@wundergraph/sdk': workspace:*
-      '@wundergraph/swr': workspace:*
-      concurrently: ^6.0.0
-      graphql: ^16.3.0
-      next: ^13.1.1
-      open-cli: ^7.0.1
-      react: ^18.2.0
-      react-dom: ^18.2.0
-      stripe: ^11.12.0
-      swr: ^2.0.0
-      typescript: ^4.8.2
-      wait-on: ^6.0.0
-      zod: ^3.20.2
-    dependencies:
-      '@graphql-yoga/node': 2.13.13_graphql@16.6.0
-      '@tanstack/react-query': 4.29.5_biqbaboplfbrettd7655fr4n2y
-      '@wundergraph/nextjs': link:../../packages/nextjs
-      '@wundergraph/react-query': link:../../packages/react-query
-      '@wundergraph/sdk': link:../../packages/sdk
-      '@wundergraph/swr': link:../../packages/swr
-      next: 13.4.1_biqbaboplfbrettd7655fr4n2y
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
-      stripe: 11.12.0
-      swr: 2.0.0_react@18.2.0
-      zod: 3.20.2
-    devDependencies:
-      '@types/node': 17.0.45
-      '@types/react': 18.0.35
-      concurrently: 6.5.1
-      graphql: 16.6.0
-      open-cli: 7.1.0
       typescript: 4.9.4
       wait-on: 6.0.1
 
@@ -6409,6 +6324,7 @@ packages:
 
   /@tanstack/query-core/4.29.5:
     resolution: {integrity: sha512-xXIiyQ/4r9KfaJ3k6kejqcaqFXXBTzN2aOJ5H1J6aTJE9hl/nbgAdfF6oiIu0CD5xowejJEJ6bBg8TO7BN4NuQ==}
+    dev: true
 
   /@tanstack/react-query/4.20.4_biqbaboplfbrettd7655fr4n2y:
     resolution: {integrity: sha512-SJRxx13k/csb9lXAJfycgVA1N/yU/h3bvRNWP0+aHMfMjmbyX82FdoAcckDBbOdEyAupvb0byelNHNeypCFSyA==}
@@ -6444,6 +6360,7 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       use-sync-external-store: 1.2.0_react@18.2.0
+    dev: true
 
   /@tanstack/solid-query/4.29.1_solid-js@1.6.11:
     resolution: {integrity: sha512-XvRfk7Epi0gh5p+sgaMrrFu2yLY0nIq1wYbcBExehiNgyIfOw032xyZLNk5LJTAy5bLwMqL7hYR92j+ThtZ8mA==}
@@ -7291,39 +7208,39 @@ packages:
       - supports-color
     dev: true
 
-  /@vitest/expect/0.30.1:
-    resolution: {integrity: sha512-c3kbEtN8XXJSeN81iDGq29bUzSjQhjES2WR3aColsS4lPGbivwLtas4DNUe0jD9gg/FYGIteqOenfU95EFituw==}
+  /@vitest/expect/0.31.0:
+    resolution: {integrity: sha512-Jlm8ZTyp6vMY9iz9Ny9a0BHnCG4fqBa8neCF6Pk/c/6vkUk49Ls6UBlgGAU82QnzzoaUs9E/mUhq/eq9uMOv/g==}
     dependencies:
-      '@vitest/spy': 0.30.1
-      '@vitest/utils': 0.30.1
+      '@vitest/spy': 0.31.0
+      '@vitest/utils': 0.31.0
       chai: 4.3.7
     dev: true
 
-  /@vitest/runner/0.30.1:
-    resolution: {integrity: sha512-W62kT/8i0TF1UBCNMRtRMOBWJKRnNyv9RrjIgdUryEe0wNpGZvvwPDLuzYdxvgSckzjp54DSpv1xUbv4BQ0qVA==}
+  /@vitest/runner/0.31.0:
+    resolution: {integrity: sha512-H1OE+Ly7JFeBwnpHTrKyCNm/oZgr+16N4qIlzzqSG/YRQDATBYmJb/KUn3GrZaiQQyL7GwpNHVZxSQd6juLCgw==}
     dependencies:
-      '@vitest/utils': 0.30.1
+      '@vitest/utils': 0.31.0
       concordance: 5.0.4
       p-limit: 4.0.0
       pathe: 1.1.0
     dev: true
 
-  /@vitest/snapshot/0.30.1:
-    resolution: {integrity: sha512-fJZqKrE99zo27uoZA/azgWyWbFvM1rw2APS05yB0JaLwUIg9aUtvvnBf4q7JWhEcAHmSwbrxKFgyBUga6tq9Tw==}
+  /@vitest/snapshot/0.31.0:
+    resolution: {integrity: sha512-5dTXhbHnyUMTMOujZPB0wjFjQ6q5x9c8TvAsSPUNKjp1tVU7i9pbqcKPqntyu2oXtmVxKbuHCqrOd+Ft60r4tg==}
     dependencies:
       magic-string: 0.30.0
       pathe: 1.1.0
       pretty-format: 27.5.1
     dev: true
 
-  /@vitest/spy/0.30.1:
-    resolution: {integrity: sha512-YfJeIf37GvTZe04ZKxzJfnNNuNSmTEGnla2OdL60C8od16f3zOfv9q9K0nNii0NfjDJRt/CVN/POuY5/zTS+BA==}
+  /@vitest/spy/0.31.0:
+    resolution: {integrity: sha512-IzCEQ85RN26GqjQNkYahgVLLkULOxOm5H/t364LG0JYb3Apg0PsYCHLBYGA006+SVRMWhQvHlBBCyuByAMFmkg==}
     dependencies:
       tinyspy: 2.1.0
     dev: true
 
-  /@vitest/utils/0.30.1:
-    resolution: {integrity: sha512-/c8Xv2zUVc+rnNt84QF0Y0zkfxnaGhp87K2dYJMLtLOIckPzuxLVzAtFCicGFdB4NeBHNzTRr1tNn7rCtQcWFA==}
+  /@vitest/utils/0.31.0:
+    resolution: {integrity: sha512-kahaRyLX7GS1urekRXN2752X4gIgOGVX4Wo8eDUGUkTWlGpXzf5ZS6N9RUUS+Re3XEE8nVGqNyxkSxF5HXlGhQ==}
     dependencies:
       concordance: 5.0.4
       loupe: 2.3.6
@@ -7689,16 +7606,16 @@ packages:
   /acorn-globals/7.0.1:
     resolution: {integrity: sha512-umOSDSDrfHbTNPuNpC2NSnnA3LUrqpevPb4T9jRx4MagXNS0rs+gwiTcAvqCRmsD6utzsrzNt+ebm00SNWiC3Q==}
     dependencies:
-      acorn: 8.8.1
+      acorn: 8.8.2
       acorn-walk: 8.2.0
     dev: true
 
-  /acorn-import-assertions/1.8.0_acorn@8.8.1:
+  /acorn-import-assertions/1.8.0_acorn@8.8.2:
     resolution: {integrity: sha512-m7VZ3jwz4eK6A4Vtt8Ew1/mNbP24u0FhdyfA7fSvnJR6LMdfOYnmuIrrJAgrYfYJ10F/otaHTtrtrtmHdMNzEw==}
     peerDependencies:
       acorn: ^8
     dependencies:
-      acorn: 8.8.1
+      acorn: 8.8.2
     dev: false
 
   /acorn-jsx/5.3.2_acorn@8.8.1:
@@ -7736,6 +7653,7 @@ packages:
     resolution: {integrity: sha512-7zFpHzhnqYKrkYdUjF1HI1bzd0VygEGX8lFk4k5zVMqHEoES+P+7TKI+EvLO9WVMJ8eekdO0aDEK044xTXwPPA==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+    dev: true
 
   /acorn/8.8.2:
     resolution: {integrity: sha512-xjIYgE8HBrkpd/sJqOGNspf8uHG+NOHGOw6a/Urj8taM2EXfdNAH2oFcPeIFfsv3+kz/mJrS5VuMqbNLjCa2vw==}
@@ -9091,7 +9009,7 @@ packages:
       check-error: 1.0.2
       deep-eql: 4.1.3
       get-func-name: 2.0.0
-      loupe: 2.3.4
+      loupe: 2.3.6
       pathval: 1.1.1
       type-detect: 4.0.8
     dev: true
@@ -16039,7 +15957,7 @@ packages:
         optional: true
     dependencies:
       abab: 2.0.6
-      acorn: 8.8.1
+      acorn: 8.8.2
       acorn-globals: 7.0.1
       cssom: 0.5.0
       cssstyle: 2.3.0
@@ -22420,8 +22338,8 @@ packages:
       tinycolor2: 1.4.2
     dev: false
 
-  /tinypool/0.4.0:
-    resolution: {integrity: sha512-2ksntHOKf893wSAH4z/+JbPpi92esw8Gn9N2deXX+B0EO92hexAVI9GIZZPx7P5aYo5KULfeOSt3kMOmSOy6uA==}
+  /tinypool/0.5.0:
+    resolution: {integrity: sha512-paHQtnrlS1QZYKF/GnLoOM/DN9fqaGOFbCbxzAhwniySnzl9Ebk8w73/dd34DAhe/obUbPAOldTyYXQZxnPBPQ==}
     engines: {node: '>=14.0.0'}
     dev: true
 
@@ -22682,7 +22600,7 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 16.18.14
-      acorn: 8.8.1
+      acorn: 8.8.2
       acorn-walk: 8.2.0
       arg: 4.1.3
       create-require: 1.1.1
@@ -22713,7 +22631,7 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 18.16.0
-      acorn: 8.8.1
+      acorn: 8.8.2
       acorn-walk: 8.2.0
       arg: 4.1.3
       create-require: 1.1.1
@@ -22744,7 +22662,7 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 14.18.33
-      acorn: 8.8.1
+      acorn: 8.8.2
       acorn-walk: 8.2.0
       arg: 4.1.3
       create-require: 1.1.1
@@ -23517,8 +23435,8 @@ packages:
     engines: {node: '>= 0.8'}
     dev: false
 
-  /vite-node/0.30.1_@types+node@18.16.0:
-    resolution: {integrity: sha512-vTikpU/J7e6LU/8iM3dzBo8ZhEiKZEKRznEMm+mJh95XhWaPrJQraT/QsT2NWmuEf+zgAoMe64PKT7hfZ1Njmg==}
+  /vite-node/0.31.0_@types+node@18.16.0:
+    resolution: {integrity: sha512-8x1x1LNuPvE2vIvkSB7c1mApX5oqlgsxzHQesYF7l5n1gKrEmrClIiZuOFbFDQcjLsmcWSwwmrWrcGWm9Fxc/g==}
     engines: {node: '>=v14.18.0'}
     hasBin: true
     dependencies:
@@ -23605,8 +23523,8 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /vitest/0.30.1:
-    resolution: {integrity: sha512-y35WTrSTlTxfMLttgQk4rHcaDkbHQwDP++SNwPb+7H8yb13Q3cu2EixrtHzF27iZ8v0XCciSsLg00RkPAzB/aA==}
+  /vitest/0.31.0:
+    resolution: {integrity: sha512-JwWJS9p3GU9GxkG7eBSmr4Q4x4bvVBSswaCFf1PBNHiPx00obfhHRJfgHcnI0ffn+NMlIh9QGvG75FlaIBdKGA==}
     engines: {node: '>=v14.18.0'}
     hasBin: true
     peerDependencies:
@@ -23639,11 +23557,11 @@ packages:
       '@types/chai': 4.3.4
       '@types/chai-subset': 1.3.3
       '@types/node': 18.16.0
-      '@vitest/expect': 0.30.1
-      '@vitest/runner': 0.30.1
-      '@vitest/snapshot': 0.30.1
-      '@vitest/spy': 0.30.1
-      '@vitest/utils': 0.30.1
+      '@vitest/expect': 0.31.0
+      '@vitest/runner': 0.31.0
+      '@vitest/snapshot': 0.31.0
+      '@vitest/spy': 0.31.0
+      '@vitest/utils': 0.31.0
       acorn: 8.8.2
       acorn-walk: 8.2.0
       cac: 6.7.14
@@ -23654,13 +23572,12 @@ packages:
       magic-string: 0.30.0
       pathe: 1.1.0
       picocolors: 1.0.0
-      source-map: 0.6.1
       std-env: 3.3.2
       strip-literal: 1.0.1
       tinybench: 2.4.0
-      tinypool: 0.4.0
+      tinypool: 0.5.0
       vite: 3.2.3_@types+node@18.16.0
-      vite-node: 0.30.1_@types+node@18.16.0
+      vite-node: 0.31.0_@types+node@18.16.0
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less
@@ -23901,8 +23818,8 @@ packages:
       '@webassemblyjs/ast': 1.11.1
       '@webassemblyjs/wasm-edit': 1.11.1
       '@webassemblyjs/wasm-parser': 1.11.1
-      acorn: 8.8.1
-      acorn-import-assertions: 1.8.0_acorn@8.8.1
+      acorn: 8.8.2
+      acorn-import-assertions: 1.8.0_acorn@8.8.2
       browserslist: 4.21.5
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.12.0
@@ -24377,16 +24294,12 @@ packages:
     resolution: {integrity: sha512-N+d4UJSJbt/R3wqY7Coqs5pcV0aUj2j9IaQ3rNj9bVCLld8tTGKRa2USARjnvZJWVx1NDmQev8EknoczaOQDOA==}
     dev: false
 
-  /zod-to-json-schema/3.20.2_zod@3.20.2:
+  /zod-to-json-schema/3.20.2_zod@3.21.4:
     resolution: {integrity: sha512-qka3UAXmVXD8z5SHkRU89UyHp8JHJW7zc8RQCpt7QloJOn6uijwkjUm8o+M/cF1IysmKc5gxac/QeDikaQMdzQ==}
     peerDependencies:
       zod: ^3.20.0
     dependencies:
-      zod: 3.20.2
-    dev: false
-
-  /zod/3.20.2:
-    resolution: {integrity: sha512-1MzNQdAvO+54H+EaK5YpyEy0T+Ejo/7YLHS93G3RnYWh5gaotGHwGeN/ZO687qEDU2y4CdStQYXVHIgrUl5UVQ==}
+      zod: 3.21.4
     dev: false
 
   /zod/3.21.4:
@@ -24396,7 +24309,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.155.0
+    version: 0.157.0
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.3.0
@@ -24448,8 +24361,8 @@ packages:
       tslib: 2.5.0
       typescript-json-schema: 0.55.0
       write-file-atomic: 5.0.0
-      zod: 3.20.2
-      zod-to-json-schema: 3.20.2_zod@3.20.2
+      zod: 3.21.4
+      zod-to-json-schema: 3.20.2_zod@3.21.4
     transitivePeerDependencies:
       - '@graphql-mesh/store'
       - '@swc/core'

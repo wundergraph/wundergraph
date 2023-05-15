@@ -1,7 +1,6 @@
 ---
 title: Configuration as Code
-pageTitle: WunderGraph - Features - Configuration as Code
-description:
+description: Configure WunderGraph using TypeScript.
 ---
 
 One of our core principles is to deliver the best in class Developer Experience possible.

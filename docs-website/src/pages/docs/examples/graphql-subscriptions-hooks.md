@@ -29,7 +29,7 @@ Now let's configure the hooks in the `wundergraph.server.ts` file:
 
 ```typescript
 // wundergraph.server.ts
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     global: {
       wsTransport: {

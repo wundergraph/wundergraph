@@ -1,7 +1,6 @@
 ---
 title: Generated APIs for any database
-pageTitle: WunderGraph - Features - Auto-generated APIs for your database
-description:
+description: WunderGraph can introspect your database and generate a ready-to-use API from it.
 ---
 
 Building APIs can be a lot of work.

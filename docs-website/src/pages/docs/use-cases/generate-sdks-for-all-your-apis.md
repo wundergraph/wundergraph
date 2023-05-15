@@ -1,7 +1,6 @@
 ---
 title: Generate SDKs for all your APIs
-pageTitle: WunderGraph - Generate SDKs for all your APIs
-description:
+description: Use WunderGraph to generate SDKs for all your APIs
 ---
 
 Imagine you've got to build a new product.

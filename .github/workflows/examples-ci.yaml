@@ -35,7 +35,7 @@ jobs:
   collect:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - id: set-matrix
         run: |
           echo "matrix=$(./scripts/test-examples/collect.sh)" >> $GITHUB_OUTPUT

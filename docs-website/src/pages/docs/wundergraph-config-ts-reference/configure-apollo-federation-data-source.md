@@ -1,7 +1,6 @@
 ---
 title: Configure Apollo Federation Data Source
-pageTitle: WunderGraph - Configure Apollo Federation Data Source
-description:
+description: Introspect multiple `SubGraphs` and combine them into a `SuperGraph`
 ---
 
 With the `Apollo Federation` data source,

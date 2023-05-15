@@ -1,7 +1,6 @@
 ---
-title: Android - Kotlin/Java
-pageTitle: WunderGraph - Android - Kotlin/Java
-description:
+title: Android - Kotlin/Java support
+description: Support for Android with Kotlin and Java is planned, but there's not yet a schedule.
 ---
 
 Support for Android with Kotlin and Java is planned,

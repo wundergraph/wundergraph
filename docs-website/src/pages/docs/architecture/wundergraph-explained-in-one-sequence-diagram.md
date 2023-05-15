@@ -1,7 +1,6 @@
 ---
 title: WunderGraph explained in one sequence diagram
-pageTitle: WunderGraph - Architecture - WunderGraph explained in one sequence diagram
-description:
+description: This page explains how WunderGraph works in one sequence diagram.
 ---
 
 With this example, our goal is to explain how WunderGraph processes requests,

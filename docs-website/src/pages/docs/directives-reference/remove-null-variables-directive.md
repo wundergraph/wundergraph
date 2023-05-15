@@ -1,7 +1,6 @@
 ---
 title: '@removeNullVariables Directive'
-pageTitle: WunderGraph - Directives - @removeNullVariables
-description:
+description: Remove null variables from GraphQL Query or Mutation Operations
 ---
 
 The `@removeNullVariables` directive allows you to remove variables with null or empty object value from your GraphQL Query or Mutation Operations.

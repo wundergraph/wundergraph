@@ -1,7 +1,6 @@
 ---
 title: The WunderGraph RPC Protocol
-pageTitle: WunderGraph - The WunderGraph RPC Protocol
-description:
+description: How the WunderGraph RPC Protocol works.
 ---
 
 This is the WunderGraph JSON-RPC protocol.

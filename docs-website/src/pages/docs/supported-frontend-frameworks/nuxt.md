@@ -1,7 +1,6 @@
 ---
-title: Nuxt
-pageTitle: WunderGraph - Nuxt
-description:
+title: Nuxt support
+description: Wundergraph can be easily be integrated with Nuxt through the Vue Query integration.
 ---
 
 Wundergraph can be easily be integrated with Nuxt through the Vue Query integration.

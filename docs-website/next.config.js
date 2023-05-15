@@ -41,6 +41,16 @@ const nextConfig = {
 				destination: '/docs/getting-started',
 				permanent: true,
 			},
+			{
+				source: '/docs/guides/publish-generated-client-to-npm',
+				destination: '/docs/guides/bundle-generated-client-for-distribution',
+				permanent: true,
+			},
+			{
+				source: '/docs/tutorials/your-first-wundergraph-application',
+				destination: '/docs/getting-started/quickstart',
+				permanent: true,
+			},
 		];
 	},
 };

@@ -1,6 +1,5 @@
 ---
-title: Neo4j DataSource
-pageTitle: WunderGraph - Neo4j DataSource
+title: Neo4j support
 description: WunderGraph is the easiest way to expose Neo4j databases through GraphQL.
 ---
 

@@ -5,6 +5,8 @@ import { Heading } from '../src/components/Heading';
 import { Tag } from '@markdoc/markdoc';
 import tags from '../config/tags';
 
+import { isExternalUrl } from '@/utils/helpers';
+
 function generateID(children, attributes) {
 	if (attributes.id && typeof attributes.id === 'string') {
 		return attributes.id;
@@ -120,7 +122,7 @@ const nodes = {
 	},
 	link: {
 		render: ({ children, href, ...rest }) => {
-			const isExternal = href.match(/^http/);
+			const isExternal = isExternalUrl(href);
 
 			let target;
 			if (isExternal) {

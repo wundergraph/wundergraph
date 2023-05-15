@@ -1,7 +1,6 @@
 ---
 title: Configure Authorization
-pageTitle: WunderGraph - Configure Authorization
-description:
+description: Configuring authorization roles (RBAC)
 ---
 
 This section explains the `authorization` property of `configureWunderGraphApplication`.

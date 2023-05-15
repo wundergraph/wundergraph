@@ -1,6 +1,5 @@
 ---
-title: SvelteKit
-pageTitle: WunderGraph - SvelteKit
+title: SvelteKit support
 description: WunderGraph is the easiest way to consume all kinds of APIs (GraphQL, REST, gRPC, Kafka, etc...) in SvelteKit.
 ---
 

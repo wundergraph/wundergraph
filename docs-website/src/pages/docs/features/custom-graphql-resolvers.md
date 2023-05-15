@@ -1,7 +1,6 @@
 ---
 title: Custom GraphQL Resolvers
-pageTitle: WunderGraph - Features - Custom GraphQL Resolvers
-description:
+description: WunderGraph allows you to build custom GraphQL Resolvers
 ---
 
 Sometimes, you don't just want to expose the introspected APIs directly.
@@ -33,7 +32,7 @@ Both schemas are automatically added to your virtual Graph.
 
 ```typescript
 // wundergraph.server.ts
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     authentication: {},
     global: {},
