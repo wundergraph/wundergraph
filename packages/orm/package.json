@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/orm",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "Apache-2.0",
   "description": "WunderGraph ORM",
   "main": "./dist/src/index.js",
@@ -18,6 +18,9 @@
     "test": "jest",
     "type-test": "tsd"
   },
+  "files": [
+    "dist"
+  ],
   "tsd": {
     "directory": "./test-d",
     "compilerOptions": {
