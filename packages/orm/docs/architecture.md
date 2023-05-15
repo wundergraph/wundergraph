@@ -80,7 +80,7 @@ const query = operation({
   ]),
 });
 
-type test = Result<Schema, Query, typeof query['selectionSet']>;
+type test = Result<Schema, Query, (typeof query)['selectionSet']>;
 /*
   { 
     readonly node: { 
