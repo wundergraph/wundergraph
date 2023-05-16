@@ -76,15 +76,25 @@ export function Navigation({ navigation, className }) {
 					!isRoot && subNavigation ? 'hidden -translate-x-full opacity-0 lg:block' : 'translate-x-0'
 				)}
 			>
-				{navigation.map((section, i) =>
-					section.type === 'divider' ? (
-						<li key={i} className="mb-4 border-b border-transparent" />
-					) : (
-						<li key={section.title} className="relative">
-							<PrimaryNavLink {...section} />
-						</li>
-					)
-				)}
+				{navigation.map((section, i) => {
+					switch (section.type) {
+						case 'divider':
+							return <li key={i} className="mb-4 border-b border-transparent" />;
+						case 'title':
+							return (
+								<li key={section.title} className="relative mb-2">
+									<h3 className="mt-8 font-display font-medium text-gray-400 dark:text-gray-500">{section.title}</h3>
+								</li>
+							);
+						case 'link':
+						default:
+							return (
+								<li key={section.title} className="relative">
+									<PrimaryNavLink {...section} />
+								</li>
+							);
+					}
+				})}
 			</ul>
 			<div
 				className={clsx(
