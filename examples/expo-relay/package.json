@@ -15,8 +15,8 @@
     "build:wundergraph": "wunderctl generate"
   },
   "dependencies": {
-    "@wundergraph/react-relay": "^0.2.6",
-    "@wundergraph/sdk": "^0.157.0",
+    "@wundergraph/react-relay": "^0.2.7",
+    "@wundergraph/sdk": "^0.158.0",
     "expo": "~48.0.15",
     "expo-status-bar": "~1.4.4",
     "react": "18.2.0",
