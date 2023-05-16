@@ -1,8 +1,10 @@
 import closeWithGrace from 'close-with-grace';
-import { Headers } from '@web-std/fetch';
+import { Headers } from '@whatwg-node/fetch';
 import process from 'node:process';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import Fastify, { FastifyInstance } from 'fastify';
 import { InternalClient, InternalClientFactory, internalClientFactory } from './internal-client';
+import { ORM } from '@wundergraph/orm';
 import { pino } from 'pino';
 import path from 'path';
 import fs from 'fs';
@@ -29,6 +31,8 @@ import { WgEnv } from '../configure/options';
 import { OperationsClient } from './operations-client';
 import { OpenApiServerConfig } from './plugins/omnigraphOAS';
 import { SoapServerConfig } from './plugins/omnigraphSOAP';
+import { NamespacingExecutor } from '../orm';
+import type { OperationsAsyncContext } from './operations-context';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -180,6 +184,7 @@ export const createServer = async ({
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
 
+	const operationsRequestContext: OperationsAsyncContext = new AsyncLocalStorage();
 	const nodeInternalURL = config?.api?.nodeOptions?.nodeInternalUrl
 		? resolveConfigurationVariable(config.api.nodeOptions.nodeInternalUrl)
 		: '';
@@ -399,9 +404,29 @@ export const createServer = async ({
 
 	const operationsFilePath = path.join(wundergraphDir, 'generated', 'wundergraph.operations.json');
 	const operationsFileExists = fs.existsSync(operationsFilePath);
+
 	if (operationsFileExists) {
 		const operationsConfigFile = fs.readFileSync(operationsFilePath, 'utf-8');
 		const operationsConfig = JSON.parse(operationsConfigFile) as LoadOperationsOutput;
+
+		const ormModulePath = path.join(wundergraphDir, 'generated', 'bundle', 'orm.cjs');
+		// the orm module simply provides (code generated) TypeScript representations of our API schemas
+		const ormModule = config.api?.experimentalConfig?.orm ? await import(ormModulePath) : null;
+		const orm = ormModule
+			? new ORM({
+					apis: ormModule.SCHEMAS,
+					executor: new NamespacingExecutor({
+						requestContext: operationsRequestContext,
+						baseUrl: nodeInternalURL,
+					}),
+			  })
+			: ({
+					from() {
+						throw new Error(
+							`ORM is not enabled for your application. Set "experimental.orm" to "true" in your \`wundergraph.config.ts\` to enable.`
+						);
+					},
+			  } as any);
 
 		if (
 			operationsConfig &&
@@ -410,11 +435,13 @@ export const createServer = async ({
 		) {
 			await fastify.register(FastifyFunctionsPlugin, {
 				operations: operationsConfig.typescript_operation_files,
+				operationsRequestContext,
 				internalClientFactory: clientFactory,
 				nodeURL: nodeInternalURL,
 				globalContext,
 				createContext,
 				releaseContext,
+				orm,
 			});
 			fastify.log.debug('Functions plugin registered');
 		}
@@ -427,6 +454,7 @@ export const createServer = async ({
 			}
 			fastify.log.debug({ err, signal, manual }, 'graceful shutdown was initiated manually');
 
+			operationsRequestContext.disable();
 			await fastify.close();
 			fastify.log.info({ err, signal, manual }, 'server process shutdown');
 		};

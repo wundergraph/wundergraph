@@ -131,6 +131,9 @@ export interface WunderGraphConfigApplicationConfig<
 	authorization?: {
 		roles?: string[];
 	};
+	experimental?: {
+		orm?: boolean;
+	};
 	authentication?: {
 		cookieBased?: {
 			providers: AuthenticationProvider[];
@@ -237,6 +240,7 @@ export interface CodeGen {
 export type S3Provider = S3UploadConfiguration[];
 
 export interface ResolvedApplication {
+	Apis: Api<any>[];
 	EnableSingleFlight: boolean;
 	EngineConfiguration: Api<any>;
 	Operations: GraphQLOperation[];
@@ -346,6 +350,9 @@ export interface ResolvedWunderGraphConfig {
 	webhooks: WebhookConfiguration[];
 	nodeOptions: ResolvedNodeOptions;
 	serverOptions?: ResolvedServerOptions;
+	experimental: {
+		orm: boolean;
+	};
 }
 
 export interface CodeGenerationConfig {
@@ -524,6 +531,9 @@ const resolveConfig = async (
 		webhooks: [],
 		nodeOptions: resolvedNodeOptions,
 		serverOptions: resolvedServerOptions,
+		experimental: {
+			orm: config.experimental?.orm ?? false,
+		},
 	};
 
 	const appConfig = config.links ? addLinks(resolvedConfig, config.links) : resolvedConfig;
@@ -726,6 +736,7 @@ const resolveApplication = async (
 	const merged = mergeApis(roles, customClaims, ...resolvedApis);
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
 	return {
+		Apis: resolvedApis,
 		EngineConfiguration: merged,
 		EnableSingleFlight: true,
 		Operations: [],
@@ -1209,6 +1220,9 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 				};
 			}),
 			corsConfiguration: config.application.CorsConfiguration,
+			experimentalConfig: {
+				orm: config.experimental.orm ?? false,
+			},
 			authenticationConfig: {
 				cookieBased: {
 					providers: config.authentication.cookieBased,
@@ -1582,7 +1596,7 @@ const loadAndApplyNodeJsOperationOverrides = async (
 // this function.
 const applyNodeJsOperationOverrides = (
 	operation: TypeScriptOperation,
-	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any>
+	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any>
 ): TypeScriptOperation => {
 	if (overrides.inputSchema) {
 		const schema = zodToJsonSchema(overrides.inputSchema) as any;

@@ -145,6 +145,10 @@ const navigation = [
 						href: '/docs/examples/expo-swr',
 					},
 					{
+						title: 'Expo + Relay',
+						href: '/docs/examples/expo-relay',
+					},
+					{
 						title: 'FaunaDB Next.js',
 						href: '/docs/examples/fauna-db-nextjs',
 					},
@@ -846,6 +850,10 @@ const navigation = [
 				href: '/docs/features/typescript-operations',
 			},
 			{
+				title: 'TypeScript ORM',
+				href: '/docs/features/typescript-orm',
+			},
+			{
 				title: 'API Namespacing',
 				href: '/docs/features/api-namespacing',
 			},
@@ -1364,6 +1372,10 @@ const navigation = [
 					{
 						title: 'Subscriptions (STREAM)',
 						href: '/docs/typescript-operations-reference/subscriptions',
+					},
+					{
+						title: 'Accessing Data Sources',
+						href: '/docs/typescript-operations-reference/accessing-data-sources-from-operations',
 					},
 					{
 						title: 'Authentication & Authorization',

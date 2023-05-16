@@ -1,6 +1,6 @@
 import type { InternalClient, InternalClientFactory } from './internal-client';
 import type { FastifyLoggerInstance } from 'fastify';
-import type { Headers } from '@web-std/fetch';
+import type { Headers } from '@whatwg-node/fetch';
 import type { GraphQLServerConfig } from './plugins/graphql';
 import type { ConfigurationVariable, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import type { WebhooksConfig } from '../webhooks/types';

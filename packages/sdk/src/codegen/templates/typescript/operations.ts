@@ -4,6 +4,7 @@ import { formatTypeScript } from './index';
 import { OperationType } from '@wundergraph/protobuf';
 import Handlebars from 'handlebars';
 import { template } from './operations.template';
+import templates from '../index';
 
 export class Operations implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
