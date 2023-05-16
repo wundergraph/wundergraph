@@ -9,16 +9,12 @@ afterAll(() => wg.stop());
 describe('test Countries API', () => {
 	test('countries', async () => {
 		const result = await wg.client().query({
-			operationName: 'Countries',
+			operationName: 'country',
+			input: {
+				code: 'DE',
+			},
 		});
-		const countries = result.data?.countries_countries;
-		expect(countries?.length).toBe(250);
-	});
-
-	test('continents', async () => {
-		const result = await wg.client().query({
-			operationName: 'Continents',
-		});
-		expect(result.data?.countries_continents.length).toBe(7);
+		const code = result.data?.germany.code;
+		expect(code).toBe('DE');
 	});
 });
