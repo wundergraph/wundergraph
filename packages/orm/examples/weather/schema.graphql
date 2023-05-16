@@ -1,0 +1,134 @@
+directive @cacheControl(maxAge: Int, scope: CacheControlScope) on FIELD_DEFINITION | OBJECT | INTERFACE
+
+"""
+Exposes a URL that specifies the behaviour of this scalar.
+"""
+directive @specifiedBy(
+	"""
+	The URL that specifies the behaviour of this scalar.
+	"""
+	url: String!
+) on SCALAR
+
+enum CacheControlScope {
+	PUBLIC
+	PRIVATE
+}
+
+type City {
+	id: ID
+	name: String
+	country: String
+	coord: Coordinates
+	weather: Weather
+}
+
+type Clouds {
+	all: Int
+	visibility: Int
+	humidity: Int
+}
+
+input ConfigInput {
+	units: Unit
+	lang: Language
+}
+
+type Coordinates {
+	lon: Float
+	lat: Float
+}
+
+enum Language {
+	af
+	al
+	ar
+	az
+	bg
+	ca
+	cz
+	da
+	de
+	el
+	en
+	eu
+	fa
+	fi
+	fr
+	gl
+	he
+	hi
+	hr
+	hu
+	id
+	it
+	ja
+	kr
+	la
+	lt
+	mk
+	no
+	nl
+	pl
+	pt
+	pt_br
+	ro
+	ru
+	sv
+	se
+	sk
+	sl
+	sp
+	es
+	sr
+	th
+	tr
+	ua
+	uk
+	vi
+	zh_cn
+	zh_tw
+	zu
+}
+
+type Query {
+	getCityByName(name: String!, country: String, config: ConfigInput): City
+	getCityById(id: [String!], config: ConfigInput): [City]
+}
+
+type Summary {
+	title: String
+	description: String
+	icon: String
+}
+
+type Temperature {
+	actual: Float
+	feelsLike: Float
+	min: Float
+	max: Float
+}
+
+enum Unit {
+	metric
+	imperial
+	kelvin
+}
+
+"""
+The `Upload` scalar type represents a file upload.
+"""
+scalar Upload
+
+type Weather {
+	summary: Summary
+	temperature: Temperature
+	wind: Wind
+	clouds: Clouds
+	timestamp: Int
+}
+
+type Wind {
+	speed: Float
+	deg: Int
+}

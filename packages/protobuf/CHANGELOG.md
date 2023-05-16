@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.112.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.111.0...@wundergraph/protobuf@0.112.0) (2023-05-15)
+
+### Features
+
+* orm ([#963](https://github.com/wundergraph/wundergraph/issues/963)) ([8cd45a3](https://github.com/wundergraph/wundergraph/commit/8cd45a37f139e592f579c40e266ce128b8be1b5d)) (@Pagebakers)
+
 ## [0.111.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.110.0...@wundergraph/protobuf@0.111.0) (2023-05-12)
 
 ### Features

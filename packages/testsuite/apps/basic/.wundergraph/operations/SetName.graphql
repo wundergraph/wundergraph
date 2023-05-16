@@ -1,0 +1,3 @@
+mutation ($name: String!) {
+	embedded_setName(name: $name)
+}

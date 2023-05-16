@@ -1,20 +1,14 @@
 import { createOperation } from '../../generated/wundergraph.factory';
 
 export default createOperation.subscription({
-	handler: async function* ({ operations }) {
-		const updates = await operations.subscribe({
-			operationName: 'federation/PriceUpdates',
-			subscribeOnce: true,
-		});
+	handler: async function* ({ graph }) {
+		const updates = await graph.from('federated').subscribe('updatedPrice').exec();
+
 		for await (const update of updates) {
-			const data = update.data?.federated_updatedPrice ?? undefined;
-			if (!data) {
-				continue;
-			}
 			yield {
-				name: data.name,
-				upc: data.upc,
-				weight: data.weight,
+				name: update.name,
+				upc: update.upc,
+				weight: update.weight,
 			};
 		}
 	},

@@ -140,6 +140,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 					},
 				},
 				application: {
+					Apis: [],
 					EngineConfiguration: new Api<any>('', '', [], [], [], []),
 					EnableSingleFlight: true,
 					S3UploadProvider: [],
@@ -505,6 +506,9 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 					allowedHostNames: [],
 				},
 				interpolateVariableDefinitionAsJSON: [],
+				experimental: {
+					orm: false,
+				},
 			},
 			templates,
 		},
