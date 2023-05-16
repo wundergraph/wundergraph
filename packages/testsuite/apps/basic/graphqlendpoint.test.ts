@@ -41,4 +41,26 @@ describe('GraphQL endpoint', () => {
 		const data = (await client.request(query)) as any;
 		expect(data?.embedded_fromCustomContext).toBe('world');
 	});
+
+	it('Should be able to prepare requests in parallel', async () => {
+		const requests: Promise<unknown>[] = [];
+		for (let ii = 0; ii < 100; ii++) {
+			const client = new GraphQLClient(wg.graphqlEndpoint());
+			const query = gql`
+				{
+					weather_getCityByName(name: "Madrid") {
+						id
+						name
+					}
+				}
+			`;
+			requests.push(client.request(query));
+		}
+		const resolved = await Promise.all(requests);
+		for (const value of resolved) {
+			const city = (value as any).weather_getCityByName;
+			expect(city.id).toBe('3117735');
+			expect(city.name).toBe('Madrid');
+		}
+	});
 });
