@@ -216,6 +216,10 @@ const navigation = [
 						title: 'Nuxt + Vue Query',
 						href: '/docs/examples/nuxt',
 					},
+					{
+						title: 'TypeScript ORM',
+						href: '/docs/examples/orm',
+					},
 				],
 			},
 		],
@@ -1015,7 +1019,11 @@ const navigation = [
 	},
 	{ type: 'divider' },
 	{
-		title: 'Clients reference',
+		title: 'References',
+		type: 'title',
+	},
+	{
+		title: 'Clients',
 		href: '/docs/clients-reference',
 		icon: <ComputerDesktopIcon />,
 		links: [
@@ -1055,7 +1063,7 @@ const navigation = [
 		],
 	},
 	{
-		title: 'WunderGraph reference',
+		title: 'Config',
 		href: '/docs/wundergraph-reference',
 		paths: [
 			'/docs/wundergraph-config-ts-reference',
@@ -1285,7 +1293,7 @@ const navigation = [
 		],
 	},
 	{
-		title: 'Operations reference',
+		title: 'Operations',
 		href: '/docs/operations-reference',
 		icon: <CogIcon />,
 		paths: [
@@ -1407,7 +1415,12 @@ const navigation = [
 		],
 	},
 	{
-		title: 'CLI Reference',
+		title: 'TypeScript ORM',
+		href: '/docs/typescript-orm-reference',
+		icon: <CircleStackIcon />,
+	},
+	{
+		title: 'CLI',
 		href: '/docs/cli-reference',
 		icon: <CommandLineIcon />,
 		paths: ['/docs/wunderctl-reference'],

@@ -1,10 +1,11 @@
 ---
-title: TypeScript ORM
-pageTitle: WunderGraph - Features - TypeScript ORM
+title: TypeScript ORM reference
 description: The TypeScript ORM allows you to access data sources fluently from TypeScript
 ---
 
-The data sources that you add to your WunderGraph application can be accessed via our purpose-built TypeScript ORM (object-relational mapper).
+The TypeScript ORM allows you to read, write, and subscribe operations on the data sources configured in your WunderGraph application (the Virtual Graph) using TypeScript.
+
+The ORM is available in the request context of your operation handlers, webhooks, and hook server via the `graph` reference.
 
 ## Setup
 
@@ -33,38 +34,60 @@ The ORM supports read, write, and subscribe operations on the data sources confi
 
 ### Reads
 
-Read operations are specified via. the `query` method. For example,
+Read operations are specified via the `query` method. For example,
 
-```typescript
-const user = await graph.from('foo').query('user').where({ id: 'bar' }).exec();
+```typescript {% filename="getUser.ts" %}
+import { createOperation } from '../../generated/wundergraph.factory';
+
+export default createOperation.query({
+  handler: async ({ graph }) => {
+    return await graph.from('foo').query('user').where({ id: 'bar' }).exec();
+  },
+});
 
 // => { id: 'bar' }
 ```
 
 ### Writes
 
-Write operations are specified via. the `mutate` method. For example,
+Write operations are specified via the `mutate` method. For example,
 
-```typescript
-const user = await graph
-  .from('foo')
-  .mutate('createUser')
-  .where({ name: { first: 'John', last: 'Cena' } })
-  .exec();
+```typescript {% filename="createUser.ts" %}
+import { createOperation } from '../../generated/wundergraph.factory';
+
+export default createOperation.mutation({
+  handler: async ({ graph }) => {
+    return await graph
+      .from('foo')
+      .mutate('createUser')
+      .where({ name: { first: 'John', last: 'Cena' } })
+      .exec();
+  },
+});
 
 // => { id: 'abc', name: { first: 'John', last: 'Cena' }, createdAt: '2023-04-16T09:34:37.192Z' }
 ```
 
 ### Subscriptions
 
-Stream operations are specified via. the `subscribe` method. For example,
+Stream operations are specified via the `subscribe` method. For example,
 
-```typescript
-const userUpdates = await graph.from('foo').subscribe('userUpdated').where({ id: 'abc' }).exec();
+```typescript {% filename="liveUser.ts" %}
+import { createOperation, z } from '../../generated/wundergraph.factory';
 
-for (const user of userUpdates) {
-  // => { id: 'abc', name: { first: 'John', last: 'Cena' }, createdAt: '2023-04-16T09:34:37.192Z' }
-}
+export default createOperation.subscription({
+  input: z.object({
+    id: z.string(),
+  }),
+  handler: async function* ({ input }) {
+    const userUpdates = await graph.from('foo').subscribe('userUpdated').where({ id: input.id }).exec();
+
+    for (const user of userUpdates) {
+      yield user;
+      // => { id: 'abc', name: { first: 'John', last: 'Cena' }, createdAt: '2023-04-16T09:34:37.192Z' }
+    }
+  },
+});
 ```
 
 ## Nested and Filtered Selections
