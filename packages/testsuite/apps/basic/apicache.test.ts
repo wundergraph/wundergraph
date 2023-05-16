@@ -49,4 +49,26 @@ describe('API Cache', () => {
 		expect(cacheControl).toMatch(/max-age=60/);
 		expect(cacheControl).toMatch(/stale-while-revalidate=120/);
 	});
+
+	it('should override default headers with handler', async () => {
+		const resp = await fetchOperationUrl('CountryByFilter');
+		expect(resp.status).toBe(200);
+		const cacheControl = resp.headers.get('cache-control');
+		expect(cacheControl).not.toBeNull();
+		expect(cacheControl).toMatch(/public/);
+		expect(cacheControl).toMatch(/max-age=0/);
+		expect(cacheControl).toMatch(/stale-while-revalidate=0/);
+		expect(cacheControl).not.toMatch(/must-revalidate/);
+	});
+
+	it('should allow omitting some cache header values', async () => {
+		const resp = await fetchOperationUrl('with-hyphen/country-code-with-hyphen');
+		expect(resp.status).toBe(200);
+		const cacheControl = resp.headers.get('cache-control');
+		expect(cacheControl).not.toBeNull();
+		expect(cacheControl).toMatch(/public/);
+		expect(cacheControl).toMatch(/max-age=0/);
+		expect(cacheControl).not.toMatch(/stale-while-revalidate/);
+		expect(cacheControl).toMatch(/must-revalidate/);
+	});
 });
