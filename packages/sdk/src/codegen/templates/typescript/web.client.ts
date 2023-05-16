@@ -3,9 +3,8 @@ import { CodeGenerationConfig, ResolvedApplication } from '../../../configure';
 import Handlebars from 'handlebars';
 import { formatTypeScript } from './index';
 import { OperationType } from '@wundergraph/protobuf';
-import hash from 'object-hash';
 import { template } from './web.client.template';
-import { hasInput, hasInternalInput, modelImports } from './helpers';
+import { configurationHash, hasInput, hasInternalInput, modelImports } from './helpers';
 
 export class TypeScriptLegacyWebClient implements Template {
 	constructor(reactNative?: boolean) {
@@ -25,7 +24,7 @@ export class TypeScriptLegacyWebClient implements Template {
 			modelImports: modelImports(config.application, false),
 			baseURL: config.deployment.environment.baseUrl,
 			sdkVersion: config.sdkVersion,
-			applicationHash: hash(config).substring(0, 8),
+			applicationHash: configurationHash(config),
 			queries: _queries,
 			liveQueries: _liveQueries,
 			hasLiveQueries: _liveQueries.length !== 0,

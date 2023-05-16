@@ -1,7 +1,6 @@
 ---
 title: Manage API Dependencies explicitly
-pageTitle: WunderGraph - Manage API Dependencies explicitly
-description: Manage API Dependencies explicitly
+description: How WunderGraph allows you to manage API dependencies explicitly.
 ---
 
 Most if not all applications treat API dependencies implicitly.

@@ -67,7 +67,26 @@ describe('Operations', () => {
 		});
 
 		expect(result.error).toBeUndefined();
-		expect(result.data.greeting).toBeDefined();
+		expect(result.data?.greeting).toBeDefined();
+	});
+
+	it('Should run mutations inside ts operations', async () => {
+		/*
+		 * This test ensure that a client request header is correctly passed to an embedded GraphQL server.
+		 * The GraphQL Schema returns the value of the header as a string,
+		 * so we can check if the header was correctly passed back to the client.
+		 * */
+		const client = wg.client();
+
+		const { data, error } = await client.query({
+			operationName: 'functions/mutation',
+			input: {
+				name: 'Test',
+			},
+		});
+
+		expect(error).toBeUndefined();
+		expect(data?.embedded_setName).toBe('Test');
 	});
 
 	it('should allow operation names with hyphens', async () => {

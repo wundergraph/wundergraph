@@ -1,7 +1,6 @@
 ---
 title: wundergraph.server.ts reference
-pageTitle: WunderGraph - wundergraph.server.ts reference
-description:
+description: Reference documentation for wundergraph.server.ts
 hideTableOfContents: true
 fullWidthContent: true
 isIndexFile: true
@@ -26,4 +25,5 @@ Here's an overview of all the different options to extend your WunderGraph Serve
 {% quick-link title="mutatingPostAuthentication hook" icon="core" href="/docs/wundergraph-server-ts-reference/mutating-post-authentication-hook" description="This hook can be used to manipulate the user object AFTER the authentication flow is complete." /%}
 {% quick-link title="postLogout hook" icon="core" href="/docs/wundergraph-server-ts-reference/post-logout-hook" description="This hook is called AFTER the user is logged out." /%}
 {% quick-link title="Custom GraphQL Servers" icon="core" href="/docs/wundergraph-server-ts-reference/custom-graphql-servers" description="Write custom GraphQL servers/resolvers to extend your Virtual Graph." /%}
+{% quick-link title="Context factory" icon="core" href="/docs/wundergraph-server-ts-reference/context-factory" description="Extend the WunderGraph server context." /%}
 {% /quick-links %}

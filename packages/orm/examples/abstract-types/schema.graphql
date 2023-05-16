@@ -1,0 +1,20 @@
+type Query {
+	gqlUnion(which: Which!): GqlUnion
+}
+
+union GqlUnion = A | B
+
+type A {
+	id: String
+	name: String
+}
+
+type B {
+	id: String
+	name: String
+}
+
+enum Which {
+	a
+	b
+}

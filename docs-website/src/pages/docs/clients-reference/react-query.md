@@ -1,7 +1,6 @@
 ---
-title: React Query Client
-pageTitle: WunderGraph React Query Client
-description: React Query Client reference
+title: React Query client
+description: Reference documentation for the React Query client.
 ---
 
 This package provides a type-safe integration of [React Query](https://tanstack.com/query/v4/docs/overview) with WunderGraph.

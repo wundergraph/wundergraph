@@ -3,6 +3,51 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.158.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.157.0...@wundergraph/sdk@0.158.0) (2023-05-15)
+
+### Features
+
+* orm ([#963](https://github.com/wundergraph/wundergraph/issues/963)) ([8cd45a3](https://github.com/wundergraph/wundergraph/commit/8cd45a37f139e592f579c40e266ce128b8be1b5d)) (@Pagebakers)
+
+### Bug Fixes
+
+* operations mutation handler ([#964](https://github.com/wundergraph/wundergraph/issues/964)) ([ec502be](https://github.com/wundergraph/wundergraph/commit/ec502bee7db2e763d0568208c6cae2c06640f5c7)) (@Pagebakers)
+
+## [0.157.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.156.0...@wundergraph/sdk@0.157.0) (2023-05-12)
+
+### Features
+
+* context factories ([#914](https://github.com/wundergraph/wundergraph/issues/914)) ([ec60996](https://github.com/wundergraph/wundergraph/commit/ec60996ce766248a352655995af34c6b0338ceaf)) (@fiam)
+
+## [0.156.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.155.0...@wundergraph/sdk@0.156.0) (2023-05-12)
+
+### Features
+
+* add support for caching in function handlers ([#932](https://github.com/wundergraph/wundergraph/issues/932)) ([ce31c4c](https://github.com/wundergraph/wundergraph/commit/ce31c4c02cbfd121886cf4c8a0fe354ac19ed340)) (@fiam)
+* load .env.test instead .env for testing ([#950](https://github.com/wundergraph/wundergraph/issues/950)) ([a70d039](https://github.com/wundergraph/wundergraph/commit/a70d039217676caab230c2c88faea13b8c5055d1)) (@StarpTech)
+
+### Bug Fixes
+
+* clientrequest not passed to subscriptions in operation client ([#944](https://github.com/wundergraph/wundergraph/issues/944)) ([0c49451](https://github.com/wundergraph/wundergraph/commit/0c494511c22cf94cc806fbfe55abf712c914664c)) (@Pagebakers)
+
+## [0.155.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.154.0...@wundergraph/sdk@0.155.0) (2023-05-09)
+
+### Features
+
+* official react-native and expo integration package ([#851](https://github.com/wundergraph/wundergraph/issues/851)) ([83e5231](https://github.com/wundergraph/wundergraph/commit/83e5231644ee540bd27097dec28b62589a5ebb7f)) (@Pagebakers)
+* support all HTTP methods in mocking library ([#945](https://github.com/wundergraph/wundergraph/issues/945)) ([21173e0](https://github.com/wundergraph/wundergraph/commit/21173e051045579209707703766790cdfc90ecfa)) (@StarpTech)
+
+## [0.154.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.153.0...@wundergraph/sdk@0.154.0) (2023-05-09)
+
+### Features
+
+* soap datasource ([#924](https://github.com/wundergraph/wundergraph/issues/924)) ([f545293](https://github.com/wundergraph/wundergraph/commit/f5452931aa27c5d0a9530e53a9ae3c692bf03b57)) (@devsergiy)
+* update code generation to generate all typescript templates ([#927](https://github.com/wundergraph/wundergraph/issues/927)) ([20d11df](https://github.com/wundergraph/wundergraph/commit/20d11dfc800a64b8c4893235beb7c0d22774154b)) (@JivusAyrus)
+
+### Bug Fixes
+
+* polling for federation sources, allow individual configuration ([#921](https://github.com/wundergraph/wundergraph/issues/921)) ([424b470](https://github.com/wundergraph/wundergraph/commit/424b4703fca250919b571bcd70bf104c8fb41373)) (@fiam)
+
 ## [0.153.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.152.1...@wundergraph/sdk@0.153.0) (2023-05-08)
 
 ### Features

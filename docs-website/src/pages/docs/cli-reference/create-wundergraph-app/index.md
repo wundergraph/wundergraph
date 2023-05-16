@@ -1,7 +1,6 @@
 ---
 title: create-wundergraph-app
-pageTitle: WunderGraph - create-wundergraph-app
-description:
+description: Reference documentation for the create-wundergraph-app command.
 ---
 
 The cmd `npx create-wundergraph-app <project-name>` is used to initialize new WunderGraph projects.

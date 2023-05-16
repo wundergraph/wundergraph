@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { buildClientSchema, GraphQLSchema, introspectionFromSchema, parse, print, printSchema } from 'graphql';
 import { renameTypeFields, renameTypes } from '../graphql/renametypes';
 import {
@@ -19,10 +20,10 @@ import {
 } from '@wundergraph/protobuf';
 import { applyNameSpaceToGraphQLSchema } from './namespacing';
 import { InputVariable, mapInputVariable } from '../configure/variables';
-import { introspectGraphql, introspectGraphqlWithCache } from './graphql-introspection';
+import { introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
-import { openApi, OpenAPIIntrospectionNew, openApiV2 } from './openapi-introspection';
+import { introspectOpenApi, introspectOpenApiV2 } from './openapi-introspection';
 import {
 	introspectMongoDB,
 	introspectMySQL,
@@ -32,6 +33,7 @@ import {
 	introspectSQLite,
 	introspectSQLServer,
 } from './database-introspection';
+import { introspectSoap } from './soap-introspection';
 
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
@@ -56,6 +58,7 @@ export interface ApiIntrospectionOptions {
 	 * Global proxy URL, which might be overridden at the data source level
 	 */
 	httpProxyUrl?: string;
+	apiID?: string;
 }
 
 export interface RenameType {
@@ -96,6 +99,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
 		this.CustomJsonScalars = customJsonScalars;
+		this.Namespace = namespace;
 	}
 
 	DefaultFlushInterval: number = 500;
@@ -106,6 +110,12 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	interpolateVariableDefinitionAsJSON: string[];
 	CustomJsonScalars?: string[];
 	Namespace: string;
+
+	get schemaSha256() {
+		const hash = createHash('sha256');
+		hash.update(this.Schema);
+		return hash.digest('hex');
+	}
 
 	renameTypes(rename: RenameType[]): void {
 		this.Schema = renameTypes(this.Schema, rename);
@@ -472,8 +482,9 @@ export const introspect = {
 	mongodb: introspectMongoDB,
 	prisma: introspectPrisma,
 	federation: introspectFederation,
-	openApi: openApi,
-	openApiV2: openApiV2,
+	openApi: introspectOpenApi,
+	openApiV2: introspectOpenApiV2,
+	soap: introspectSoap,
 };
 
 export const buildUpstreamAuthentication = (upstream: HTTPUpstream): UpstreamAuthentication | undefined => {

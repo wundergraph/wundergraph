@@ -28,7 +28,7 @@ const navigation = [
 	{
 		title: 'Getting started',
 		href: '/docs/getting-started',
-		paths: ['/docs/tutorials', '/docs/examples'],
+		paths: ['/docs/examples'],
 		icon: <BoltIcon />,
 		links: [
 			{
@@ -67,14 +67,9 @@ const navigation = [
 						title: 'Nuxt',
 						href: '/docs/getting-started/nuxt-quickstart',
 					},
-				],
-			},
-			{
-				title: 'Tutorials',
-				links: [
 					{
-						title: 'Your first WunderGraph Application',
-						href: '/docs/tutorials/your-first-wundergraph-application',
+						title: 'Expo',
+						href: '/docs/getting-started/expo-quickstart',
 					},
 				],
 			},
@@ -108,6 +103,10 @@ const navigation = [
 					{
 						title: 'Next.js + Clerk',
 						href: '/docs/examples/nextjs-clerk',
+					},
+					{
+						title: 'Remix',
+						href: '/docs/examples/remix',
 					},
 					{
 						title: 'SvelteKit + SSR with TanStack Query',
@@ -144,6 +143,10 @@ const navigation = [
 					{
 						title: 'Expo + SWR',
 						href: '/docs/examples/expo-swr',
+					},
+					{
+						title: 'Expo + Relay',
+						href: '/docs/examples/expo-relay',
 					},
 					{
 						title: 'FaunaDB Next.js',
@@ -213,6 +216,10 @@ const navigation = [
 						title: 'Nuxt + Vue Query',
 						href: '/docs/examples/nuxt',
 					},
+					{
+						title: 'TypeScript ORM',
+						href: '/docs/examples/orm',
+					},
 				],
 			},
 		],
@@ -221,7 +228,7 @@ const navigation = [
 		title: 'About WunderGraph',
 		href: '/manifesto',
 		icon: <QuestionMarkCircleIcon />,
-		paths: ['/docs/frequently-asked-questions', '/usage-information', '/about', '/docs/use-cases'],
+		paths: ['/usage-information', '/about', '/docs/use-cases'],
 		links: [
 			{
 				title: 'Manifesto',
@@ -291,23 +298,6 @@ const navigation = [
 					{
 						title: 'Enabling your Organization to become API first',
 						href: '/docs/use-cases/enabling-your-organization-to-become-api-first',
-					},
-				],
-			},
-			{
-				title: 'Frequently Asked Questions',
-				links: [
-					{
-						title: 'How is WunderGraph faster and more secure than other GraphQL solutions?',
-						href: '/docs/frequently-asked-questions/how-is-wundergraph-faster-and-more-secure-than-other-graphql-solutions',
-					},
-					{
-						title: 'How is the developer experience different from legacy GraphQL?',
-						href: '/docs/frequently-asked-questions/how-is-the-developer-experience-different-from-legacy-graphql',
-					},
-					{
-						title: 'How is server-side only GraphQL different from client-side GraphQL?',
-						href: '/docs/frequently-asked-questions/how-is-server-side-only-graphql-different-from-client-side-graphql',
 					},
 				],
 			},
@@ -426,12 +416,16 @@ const navigation = [
 						href: '/docs/guides/using-http-proxies',
 					},
 					{
-						title: 'Publish generated client to NPM',
-						href: '/docs/guides/publish-generated-client-to-npm',
+						title: 'Bundle the generated client for distribution',
+						href: '/docs/guides/bundle-generated-client-for-distribution',
 					},
 					{
 						title: 'Extend third party GraphQL APIs',
 						href: '/docs/guides/extend-third-party-graphql-apis',
+					},
+					{
+						title: 'Extend the WunderGraph server context',
+						href: '/docs/guides/context-factory',
 					},
 				],
 			},
@@ -860,6 +854,10 @@ const navigation = [
 				href: '/docs/features/typescript-operations',
 			},
 			{
+				title: 'TypeScript ORM',
+				href: '/docs/features/typescript-orm',
+			},
+			{
 				title: 'API Namespacing',
 				href: '/docs/features/api-namespacing',
 			},
@@ -1021,7 +1019,11 @@ const navigation = [
 	},
 	{ type: 'divider' },
 	{
-		title: 'Clients reference',
+		title: 'References',
+		type: 'title',
+	},
+	{
+		title: 'Clients',
 		href: '/docs/clients-reference',
 		icon: <ComputerDesktopIcon />,
 		links: [
@@ -1061,7 +1063,7 @@ const navigation = [
 		],
 	},
 	{
-		title: 'WunderGraph reference',
+		title: 'Config',
 		href: '/docs/wundergraph-reference',
 		paths: [
 			'/docs/wundergraph-config-ts-reference',
@@ -1291,7 +1293,7 @@ const navigation = [
 		],
 	},
 	{
-		title: 'Operations reference',
+		title: 'Operations',
 		href: '/docs/operations-reference',
 		icon: <CogIcon />,
 		paths: [
@@ -1380,6 +1382,10 @@ const navigation = [
 						href: '/docs/typescript-operations-reference/subscriptions',
 					},
 					{
+						title: 'Accessing Data Sources',
+						href: '/docs/typescript-operations-reference/accessing-data-sources-from-operations',
+					},
+					{
 						title: 'Authentication & Authorization',
 						href: '/docs/typescript-operations-reference/authentication-authorization',
 					},
@@ -1409,7 +1415,12 @@ const navigation = [
 		],
 	},
 	{
-		title: 'CLI Reference',
+		title: 'TypeScript ORM',
+		href: '/docs/typescript-orm-reference',
+		icon: <CircleStackIcon />,
+	},
+	{
+		title: 'CLI',
 		href: '/docs/cli-reference',
 		icon: <CommandLineIcon />,
 		paths: ['/docs/wunderctl-reference'],

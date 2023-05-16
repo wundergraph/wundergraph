@@ -1,7 +1,6 @@
 ---
 title: wunderctl
-pageTitle: WunderGraph - Components - wunderctl
-description:
+description: The WunderGraph cli, also called wunderctl is the main entry point to use WunderGraph.
 ---
 
 The WunderGraph cli, also called `wunderctl` is the main entry point to use WunderGraph.

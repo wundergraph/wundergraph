@@ -60,15 +60,14 @@ configureWunderGraphApplication({
   apis: [pg],
   server,
   operations,
-  codeGenerators: [
-    {
-      templates: [...templates.typescript.all],
-    },
-    {
-      templates: [new NextJSTemplate()],
-      path: '../web/components/generated',
-    },
-  ],
+  generate: {
+    codeGenerators: [
+      {
+        templates: [new NextJSTemplate()],
+        path: '../web/components/generated',
+      },
+    ],
+  },
 });
 ```
 

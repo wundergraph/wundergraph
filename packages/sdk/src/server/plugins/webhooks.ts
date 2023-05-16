@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import path from 'path';
 import { Webhook, WebhookHeaders, WebhookQuery } from '../../webhooks/types';
-import { Headers } from '@web-std/fetch';
+import { Headers } from '@whatwg-node/fetch';
 import type { RequestMethod } from '../types';
 import type { WebhookConfiguration } from '@wundergraph/protobuf';
 import type { InternalClientFactory } from '../internal-client';
@@ -17,6 +17,9 @@ interface FastifyWebHooksOptions {
 	webhooks: WebhookConfiguration[];
 	internalClientFactory: InternalClientFactory;
 	nodeURL: string;
+	globalContext: any;
+	createContext: (globalContext: any) => Promise<any>;
+	releaseContext: (requestContext: any) => Promise<void>;
 }
 
 const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async (fastify, config) => {
@@ -32,7 +35,9 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 				method: ['GET', 'POST'],
 				config: { webhookName: hook.name, kind: 'webhook' },
 				handler: async (request, reply) => {
+					let requestContext;
 					try {
+						requestContext = await config.createContext(config.globalContext);
 						const clientRequest = {
 							headers: new Headers(request.headers as Record<string, string>),
 							method: request.method as RequestMethod,
@@ -54,6 +59,8 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 								log: request.log.child({ webhook: hook.name }),
 								internalClient: config.internalClientFactory({}, clientRequest),
 								operations: operationClient,
+								clientRequest,
+								context: requestContext,
 							}
 						);
 
@@ -67,6 +74,8 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 					} catch (e) {
 						request.log.child({ webhook: hook.name }).error(e, 'Webhook handler threw an error');
 						reply.code(500);
+					} finally {
+						await config.releaseContext(requestContext);
 					}
 				},
 			});

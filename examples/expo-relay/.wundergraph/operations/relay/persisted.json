@@ -1,0 +1,4 @@
+{
+  "c11158afcc8e55409b96972f20e26fa1": "query DragonsListDragonsQuery {\n  spacex_dragons {\n    ...Dragons_display_details\n    id\n  }\n}\n\nfragment Dragons_display_details on spacex_Dragon {\n  name\n  active\n}\n",
+  "ce2342daed4e1960717c581d645e335d": "query DragonsListDragonsQuery {\n  spacex_dragons {\n    name\n    active\n    id\n  }\n}\n"
+}

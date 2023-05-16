@@ -3,12 +3,13 @@ export { z } from 'zod';
 export type {
 	ExtractInput,
 	ExtractResponse,
-	LiveQueryConfig,
+	LiveQueryConfiguration,
 	SubscriptionHandler,
 	BaseOperationConfiguration,
 	HandlerContext,
 	NodeJSOperation,
 	OperationTypes,
+	QueryCacheConfiguration,
 } from './operations';
 export type {
 	GraphQLError,

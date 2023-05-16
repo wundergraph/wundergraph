@@ -475,9 +475,7 @@ export class Client {
 		});
 	}
 
-	protected async *subscribeWithFetch<Data = any, Error = any>(
-		subscription: SubscriptionRequestOptions
-	): AsyncGenerator<ClientResponse<Data, Error>> {
+	protected async fetchSubscription<Data = any, Error = any>(subscription: SubscriptionRequestOptions) {
 		const params = this.searchParams();
 		const variables = this.stringifyInput(subscription.input);
 		if (variables) {
@@ -486,17 +484,24 @@ export class Client {
 		if (subscription.liveQuery) {
 			params.set('wg_live', '');
 		}
+
 		const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
-		const response = await this.fetchJson(url, {
+		return await this.fetchJson(url, {
 			method: 'GET',
 			signal: subscription.abortSignal,
 		});
+	}
+
+	protected async *subscribeWithFetch<Data = any, Error = any>(
+		subscription: SubscriptionRequestOptions
+	): AsyncGenerator<ClientResponse<Data, Error>> {
+		const response = await this.fetchSubscription(subscription);
 
 		if (!response.ok || response.body === null) {
 			yield {
 				error: new ResponseError({
 					code: 'ResponseError',
-					message: `Response is not ok. Failed to subscribe to '${url}'`,
+					message: `Response is not ok. Failed to subscribe to '${subscription.operationName}'`,
 					statusCode: response.status,
 				}) as Error,
 			};

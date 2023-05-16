@@ -17,15 +17,14 @@ configureWunderGraphApplication({
 	],
 	server,
 	operations,
-	codeGenerators: [
-		{
-			templates: [...templates.typescript.all],
-		},
-		{
-			templates: [templates.typescript.client],
-			path: '../generated',
-		},
-	],
+	generate: {
+		codeGenerators: [
+			{
+				templates: [templates.typescript.client],
+				path: '../generated',
+			},
+		],
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins:
