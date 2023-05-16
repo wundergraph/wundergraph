@@ -1,8 +1,10 @@
 import closeWithGrace from 'close-with-grace';
-import { Headers } from '@web-std/fetch';
+import { Headers } from '@whatwg-node/fetch';
 import process from 'node:process';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import Fastify, { FastifyInstance } from 'fastify';
 import { InternalClient, InternalClientFactory, internalClientFactory } from './internal-client';
+import { ORM } from '@wundergraph/orm';
 import { pino } from 'pino';
 import path from 'path';
 import fs from 'fs';
@@ -26,8 +28,11 @@ import type {
 import type { LoadOperationsOutput } from '../graphql/operations';
 import FastifyFunctionsPlugin from './plugins/functions';
 import { WgEnv } from '../configure/options';
-import { OpenApiServerConfig } from './plugins/omnigraph';
 import { OperationsClient } from './operations-client';
+import { OpenApiServerConfig } from './plugins/omnigraphOAS';
+import { SoapServerConfig } from './plugins/omnigraphSOAP';
+import { NamespacingExecutor } from '../orm';
+import type { OperationsAsyncContext } from './operations-context';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -75,18 +80,36 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 export function configureWunderGraphServer<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedInternalClient = InternalClient,
-	GeneratedWebhooksConfig = WebhooksConfig
->(configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>) {
-	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig>(configWrapper());
+	GeneratedWebhooksConfig = WebhooksConfig,
+	TRequestContext = any,
+	TGlobalContext = any
+>(
+	configWrapper: () => WunderGraphServerConfig<
+		GeneratedHooksConfig,
+		GeneratedWebhooksConfig,
+		TRequestContext,
+		TGlobalContext
+	>
+) {
+	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig, TRequestContext, TGlobalContext>(
+		configWrapper()
+	);
 }
 
 const _configureWunderGraphServer = <
 	GeneratedHooksConfig = HooksConfiguration,
-	GeneratedWebhooksConfig = WebhooksConfig
+	GeneratedWebhooksConfig = WebhooksConfig,
+	TRequestContext = any,
+	TGlobalContext = any
 >(
-	config: WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>
-): WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig> => {
-	const serverConfig = config as WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>;
+	config: WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TRequestContext, TGlobalContext>
+): WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TRequestContext, TGlobalContext> => {
+	const serverConfig = config as WunderGraphHooksAndServerConfig<
+		GeneratedHooksConfig,
+		GeneratedWebhooksConfig,
+		TRequestContext,
+		TGlobalContext
+	>;
 
 	/**
 	 * Configure the custom GraphQL servers
@@ -161,6 +184,7 @@ export const createServer = async ({
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
 
+	const operationsRequestContext: OperationsAsyncContext = new AsyncLocalStorage();
 	const nodeInternalURL = config?.api?.nodeOptions?.nodeInternalUrl
 		? resolveConfigurationVariable(config.api.nodeOptions.nodeInternalUrl)
 		: '';
@@ -176,6 +200,8 @@ export const createServer = async ({
 			return `${++id}`;
 		},
 	});
+
+	const globalContext = serverConfig.context?.global?.create ? await serverConfig.context.global.create() : undefined;
 
 	/**
 	 * Custom request logging to not log all requests with INFO level.
@@ -200,6 +226,23 @@ export const createServer = async ({
 			reply.code(200).send({ status: 'ok' });
 		},
 	});
+
+	const createContext = async (globalContext: any) => {
+		if (serverConfig.context?.request?.create) {
+			const result = await serverConfig.context.request.create(globalContext);
+			if (result === undefined) {
+				throw new Error('could not instantiate request context');
+			}
+			return result;
+		}
+		return undefined;
+	};
+
+	const releaseContext = async (requestContext: any) => {
+		if (serverConfig.context?.request?.release) {
+			await serverConfig.context.request.release(requestContext);
+		}
+	};
 
 	/**
 	 * Calls per event registration. We use it for debugging only.
@@ -230,15 +273,16 @@ export const createServer = async ({
 		 * Registering this handler will only affect child plugins
 		 */
 		fastify.addHook<{ Body: FastifyRequestBody }>('preHandler', async (req, reply) => {
+			// clientRequest represents the original client request that was sent initially to the WunderNode.
+			const clientRequest = {
+				headers: new Headers(req.body.__wg.clientRequest?.headers),
+				requestURI: req.body.__wg.clientRequest?.requestURI || '',
+				method: req.body.__wg.clientRequest?.method || 'GET',
+			};
 			req.ctx = {
 				log: req.log,
 				user: req.body.__wg.user!,
-				// clientRequest represents the original client request that was sent initially to the WunderNode.
-				clientRequest: {
-					headers: new Headers(req.body.__wg.clientRequest?.headers),
-					requestURI: req.body.__wg.clientRequest?.requestURI || '',
-					method: req.body.__wg.clientRequest?.method || 'GET',
-				},
+				clientRequest,
 				internalClient: clientFactory({ 'x-request-id': req.id }, req.body.__wg.clientRequest),
 				operations: new OperationsClient({
 					baseURL: nodeInternalURL,
@@ -247,7 +291,12 @@ export const createServer = async ({
 						'x-request-id': req.id,
 					},
 				}),
+				context: await createContext(globalContext),
 			};
+		});
+
+		fastify.addHook<{ Body: FastifyRequestBody }>('onResponse', async (req) => {
+			await releaseContext(req.ctx.context);
 		});
 
 		if (serverConfig?.hooks && Object.keys(serverConfig.hooks).length > 0) {
@@ -256,43 +305,73 @@ export const createServer = async ({
 		}
 
 		let openApiServers: Set<OpenApiServerConfig> = new Set();
+		let soapServers: Set<SoapServerConfig> = new Set();
+
+		const serverUrlPlaceholderPrefix = WgEnv.ServerUrl + '-';
 
 		config.api?.engineConfiguration?.datasourceConfigurations?.forEach((ds) => {
-			if (
+			// we could identify omnigraph proxy when url contains `WG_SERVER_URL-` prefix
+			// example openapi server placeholder: `WG_SERVER_URL-openapi`
+			// example soap server placeholder: `WG_SERVER_URL-soap`
+			const isOmnigraph =
 				ds.kind == DataSourceKind.GRAPHQL &&
 				ds.customGraphql?.fetch?.url?.kind === ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE &&
-				ds.customGraphql?.fetch?.url?.staticVariableContent === WgEnv.ServerUrl
-			) {
-				const schema = ds.customGraphql.upstreamSchema;
-				let serverName, mountPath, upstreamURL;
+				ds.customGraphql?.fetch?.url?.staticVariableContent.startsWith(serverUrlPlaceholderPrefix);
+			if (!isOmnigraph) {
+				return;
+			}
 
-				if (ds.customGraphql?.fetch?.baseUrl) {
-					upstreamURL = resolveConfigurationVariable(ds.customGraphql?.fetch?.baseUrl);
-				}
+			const schema = ds.customGraphql?.upstreamSchema;
+			let serverName, mountPath;
 
-				if (ds.customGraphql?.fetch?.path?.staticVariableContent) {
-					mountPath = ds.customGraphql?.fetch?.path?.staticVariableContent;
-					serverName = mountPath.split('/').pop()!;
-				}
+			if (ds.customGraphql?.fetch?.path?.staticVariableContent) {
+				mountPath = ds.customGraphql?.fetch?.path?.staticVariableContent;
+				serverName = mountPath.split('/').pop()!;
+			}
 
-				openApiServers.add(<OpenApiServerConfig>{
-					serverName,
-					mountPath,
-					upstreamURL,
-					schema,
-				});
+			switch (ds.customGraphql?.fetch?.url?.staticVariableContent.slice(serverUrlPlaceholderPrefix.length)) {
+				case 'openapi':
+					let upstreamURL;
+					if (ds.customGraphql?.fetch?.baseUrl) {
+						upstreamURL = resolveConfigurationVariable(ds.customGraphql?.fetch?.baseUrl);
+					}
+
+					openApiServers.add(<OpenApiServerConfig>{
+						serverName,
+						mountPath,
+						upstreamURL,
+						schema,
+					});
+					break;
+				case 'soap':
+					soapServers.add(<SoapServerConfig>{
+						serverName,
+						mountPath,
+						schema,
+					});
+					break;
 			}
 		});
 
-		const hasOpenApiServers = openApiServers.size > 0;
-
-		if (hasOpenApiServers) {
-			const omnigraphPlugin = await require('./plugins/omnigraph');
+		// mount omnigraph open-api proxies
+		if (openApiServers.size > 0) {
+			const omnigraphPlugin = await require('./plugins/omnigraphOAS');
 
 			for (const server of openApiServers) {
 				await fastify.register(omnigraphPlugin, server);
 				fastify.log.debug('OpenAPI plugin registered');
 				fastify.log.info(`OpenAPI GraphQL server '${server.serverName}' listening at ${server.mountPath}`);
+			}
+		}
+
+		// mount omnigraph soap proxies
+		if (soapServers.size > 0) {
+			const soapPlugin = await require('./plugins/omnigraphSOAP');
+
+			for (const server of soapServers) {
+				await fastify.register(soapPlugin, server);
+				fastify.log.debug('SOAP plugin registered');
+				fastify.log.info(`SOAP GraphQL server '${server.serverName}' listening at ${server.mountPath}`);
 			}
 		}
 
@@ -316,15 +395,38 @@ export const createServer = async ({
 			webhooks: config.api.webhooks,
 			internalClientFactory: clientFactory,
 			nodeURL: nodeInternalURL,
+			globalContext,
+			createContext,
+			releaseContext,
 		});
 		fastify.log.debug('Webhooks plugin registered');
 	}
 
 	const operationsFilePath = path.join(wundergraphDir, 'generated', 'wundergraph.operations.json');
 	const operationsFileExists = fs.existsSync(operationsFilePath);
+
 	if (operationsFileExists) {
 		const operationsConfigFile = fs.readFileSync(operationsFilePath, 'utf-8');
 		const operationsConfig = JSON.parse(operationsConfigFile) as LoadOperationsOutput;
+
+		const ormModulePath = path.join(wundergraphDir, 'generated', 'bundle', 'orm.cjs');
+		// the orm module simply provides (code generated) TypeScript representations of our API schemas
+		const ormModule = config.api?.experimentalConfig?.orm ? await import(ormModulePath) : null;
+		const orm = ormModule
+			? new ORM({
+					apis: ormModule.SCHEMAS,
+					executor: new NamespacingExecutor({
+						requestContext: operationsRequestContext,
+						baseUrl: nodeInternalURL,
+					}),
+			  })
+			: ({
+					from() {
+						throw new Error(
+							`ORM is not enabled for your application. Set "experimental.orm" to "true" in your \`wundergraph.config.ts\` to enable.`
+						);
+					},
+			  } as any);
 
 		if (
 			operationsConfig &&
@@ -333,8 +435,13 @@ export const createServer = async ({
 		) {
 			await fastify.register(FastifyFunctionsPlugin, {
 				operations: operationsConfig.typescript_operation_files,
+				operationsRequestContext,
 				internalClientFactory: clientFactory,
 				nodeURL: nodeInternalURL,
+				globalContext,
+				createContext,
+				releaseContext,
+				orm,
 			});
 			fastify.log.debug('Functions plugin registered');
 		}
@@ -347,6 +454,7 @@ export const createServer = async ({
 			}
 			fastify.log.debug({ err, signal, manual }, 'graceful shutdown was initiated manually');
 
+			operationsRequestContext.disable();
 			await fastify.close();
 			fastify.log.info({ err, signal, manual }, 'server process shutdown');
 		};
@@ -355,6 +463,12 @@ export const createServer = async ({
 		// server has 500ms to close all connections before the process is killed
 		closeWithGrace({ delay: 500 }, handler);
 	}
+
+	fastify.addHook('onClose', async () => {
+		if (serverConfig.context?.global?.release) {
+			await serverConfig.context.global.release(globalContext);
+		}
+	});
 
 	return fastify;
 };

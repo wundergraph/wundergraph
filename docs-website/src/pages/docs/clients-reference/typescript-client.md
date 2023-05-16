@@ -1,7 +1,6 @@
 ---
-title: TypeScript Client
-pageTitle: WunderGraph TypeScript Client
-description: WunderGraph TypeScript Client reference
+title: TypeScript client
+description: Reference documentation for the WunderGraph TypeScript Client
 ---
 
 This is the base implementation of the WunderGraph HTTP protocol in TypeScript that can be used on both browser and server environments.

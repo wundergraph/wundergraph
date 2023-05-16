@@ -1,7 +1,6 @@
 ---
 title: Clients reference - Overview
-pageTitle: WunderGraph clients reference - Overview
-description:
+description: An overview of all WunderGraph clients.
 hideTableOfContents: true
 fullWidthContent: true
 isIndexFile: true

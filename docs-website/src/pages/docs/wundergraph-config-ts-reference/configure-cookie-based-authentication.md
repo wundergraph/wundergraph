@@ -1,7 +1,6 @@
 ---
 title: Configure Cookie-based authentication
-pageTitle: WunderGraph - Configure Cookie-based authentication
-description:
+description: Configure cookie-based authentication for your application.
 ---
 
 Cookie-Based Authentication is the best possible authentication flow to be used with a web-based application.

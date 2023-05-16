@@ -94,7 +94,7 @@ export default function Page() {
 You can customize the authentication flow by using hooks. For example to create a new user in your database after a successful authentication.
 
 ```ts {% filename="wundergraph.server.ts" %}
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     authentication: {
       postAuthentication: async ({ user, log }) => {

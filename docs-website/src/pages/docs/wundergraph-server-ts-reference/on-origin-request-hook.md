@@ -1,7 +1,6 @@
 ---
-title: On Origin Request Hook
-pageTitle: WunderGraph - On Origin Request Hook
-description:
+title: onOriginRequest hook
+description: Reference documentation for the onOriginRequest hook
 ---
 
 The `onOriginRequest` hook is called whenever the resolver needs to call a remote service.

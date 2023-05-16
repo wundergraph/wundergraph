@@ -17,14 +17,9 @@ configureWunderGraphApplication({
 	apis: [countries, spaceX],
 	server,
 	operations,
-	codeGenerators: [
-		{
-			templates: [
-				// use all the typescript react templates to generate a client
-				...templates.typescript.all,
-			],
-		},
-	],
+	generate: {
+		codeGenerators: [],
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins:

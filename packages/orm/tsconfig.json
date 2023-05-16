@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "declarationDir": "./dist",
+    "outDir": "./dist"
+  },
+  "baseUrl": "./src",
+  "paths": {
+    "~*": ["./*"]
+  },
+  "include": ["src/**/*", "tests/**/*", "examples/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

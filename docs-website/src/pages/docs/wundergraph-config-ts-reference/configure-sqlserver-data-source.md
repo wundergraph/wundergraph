@@ -1,7 +1,6 @@
 ---
 title: Configure SQLServer Data Source
-pageTitle: WunderGraph - Configure SQLServer Data Source
-description:
+description: Introspect SQLServer databases and add them to the Virtual Graph.
 ---
 
 The SQLServer data source introspects the database and generates a GraphQL schema.

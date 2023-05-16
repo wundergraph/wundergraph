@@ -1,6 +1,6 @@
 import type { InternalClient, InternalClientFactory } from './internal-client';
 import type { FastifyLoggerInstance } from 'fastify';
-import type { Headers } from '@web-std/fetch';
+import type { Headers } from '@whatwg-node/fetch';
 import type { GraphQLServerConfig } from './plugins/graphql';
 import type { ConfigurationVariable, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import type { WebhooksConfig } from '../webhooks/types';
@@ -67,15 +67,16 @@ export type AuthenticationHookRequest<Context extends BaseRequestContext = BaseR
 export interface FastifyRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
-	InternalOperationsClient extends OperationsClient = OperationsClient
+	InternalOperationsClient extends OperationsClient = OperationsClient,
+	TRequestContext = any
 > {
-	ctx: AuthenticationHookRequest<BaseRequestContext<User, IC, InternalOperationsClient>>;
+	ctx: AuthenticationHookRequest<BaseRequestContext<User, IC, InternalOperationsClient, TRequestContext>>;
 }
-
 export interface BaseRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
-	InternalOperationsClient extends OperationsClient = OperationsClient
+	InternalOperationsClient extends OperationsClient = OperationsClient,
+	TCustomContext = any
 > {
 	/**
 	 * The user that is currently logged in.
@@ -97,6 +98,10 @@ export interface BaseRequestContext<
 	 * The operations client that is used to communicate with the server.
 	 */
 	operations: Omit<InternalOperationsClient, 'cancelSubscriptions'>;
+	/**
+	 * Custom context
+	 */
+	context: TCustomContext;
 }
 export interface AuthenticationRequestContext<User extends WunderGraphUser = WunderGraphUser> {
 	/**
@@ -120,7 +125,7 @@ export interface WunderGraphFile {
 	readonly type: string;
 }
 
-export interface PreUploadHookRequest<User extends WunderGraphUser = WunderGraphUser> {
+export interface PreUploadHookRequest<User extends WunderGraphUser = WunderGraphUser, TCustomContext = any> {
 	/**
 	 * The user that is currently logged in, if any.
 	 */
@@ -133,12 +138,17 @@ export interface PreUploadHookRequest<User extends WunderGraphUser = WunderGraph
 	 * Metadata received from the client
 	 */
 	meta: any;
+	/**
+	 * Custom handler context
+	 */
+	context: TCustomContext;
 }
 
 export interface PostUploadHookRequest<
 	User extends WunderGraphUser = WunderGraphUser,
-	IC extends InternalClient = InternalClient
-> extends PreUploadHookRequest<User> {
+	IC extends InternalClient = InternalClient,
+	TCustomContext = any
+> extends PreUploadHookRequest<User, TCustomContext> {
 	internalClient: IC;
 	error: Error;
 }
@@ -213,28 +223,77 @@ export interface WunderGraphUser<Role extends string = any, CustomClaims extends
 
 export interface ServerRunOptions {
 	wundergraphDir: string;
-	serverConfig: WunderGraphHooksAndServerConfig<any, any>;
+	serverConfig: WunderGraphHooksAndServerConfig<any, any, any, any>;
 	config: WunderGraphConfiguration;
 	gracefulShutdown: boolean;
 	clientFactory: InternalClientFactory;
 }
 
+/***
+ * WunderGraphServerContext encapsulates the available functions for
+ * creating and release global and per request custom contexts.
+ */
+export interface WunderGraphServerContext<TRequestContext = any, TGlobalContext = any> {
+	global?: {
+		/**
+		 * Create is called once during server startup and the returned
+		 * value is passed to all per-request context creation calls as
+		 * well as the global context release.
+		 *
+		 * @returns The global context
+		 */
+		create?: () => Promise<TGlobalContext>;
+		/**
+		 * Release was called once during server shutdown, givin the global
+		 * context a chance to release its resources.
+		 *
+		 * @param ctx Global context returned by create
+		 */
+		release?: (ctx: TGlobalContext) => Promise<void>;
+	};
+	request?: {
+		/**
+		 * Create is called once per request, returning the per-request context
+		 * accessible to hooks, functions, webhooks and other handlers.
+		 *
+		 * @param ctx Global context returned by global.create
+		 * @returns The per-request context
+		 */
+		create?: (ctx: TGlobalContext) => Promise<TRequestContext>;
+		/**
+		 * Release is called once after the request ends, allowing the per-request
+		 * context to release any pending resources.
+		 *
+		 * @param ctx Per-request context returned by create
+		 */
+		release?: (ctx: TRequestContext) => Promise<void>;
+	};
+}
+
 export interface WunderGraphServerConfig<
 	GeneratedHooksConfig = HooksConfiguration,
-	GeneratedWebhooksConfig = WebhooksConfig
+	GeneratedWebhooksConfig = WebhooksConfig,
+	TRequestContext = any,
+	TGlobalContext = any
 > {
 	webhooks?: GeneratedWebhooksConfig;
 	hooks?: GeneratedHooksConfig;
 	// routeUrl is set internally
 	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
 	options?: ServerOptions;
+	/**
+	 * Context creation/release
+	 */
+	context?: WunderGraphServerContext<TRequestContext, TGlobalContext>;
 }
 
 // internal representation of the fully resolved server config
 export interface WunderGraphHooksAndServerConfig<
 	GeneratedHooksConfig = HooksConfiguration,
-	GeneratedWebhooksConfig = WebhooksConfig
-> extends WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig> {
+	GeneratedWebhooksConfig = WebhooksConfig,
+	TRequestContext = any,
+	TGlobalContext = any
+> extends WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TRequestContext, TGlobalContext> {
 	webhooks?: GeneratedWebhooksConfig;
 	hooks?: GeneratedHooksConfig;
 	graphqlServers?: GraphQLServerConfig[];

@@ -66,15 +66,14 @@ configureWunderGraphApplication({
   apis: [spaceX],
   server,
   operations,
-  codeGenerators: [
-    {
-      templates: [...templates.typescript.all],
-    },
-    {
-      templates: [new NextJsTemplate()],
-      path: '../components/generated',
-    },
-  ],
+  generate: {
+    codeGenerators: [
+      {
+        templates: [new NextJsTemplate()],
+        path: '../components/generated',
+      },
+    ],
+  },
   cors: {
     ...cors.allowAll,
     allowedOrigins: process.env.NODE_ENV === 'production' ? ['http://localhost:3000'] : ['http://localhost:3000'],
@@ -122,10 +121,8 @@ Now add the following code to `wundergraph.server.ts`.
 
 ```ts
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
-import type { HooksConfig } from './generated/wundergraph.hooks';
-import type { InternalClient } from './generated/wundergraph.internal.client';
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({}));
+export default configureWunderGraphServer(() => ({}));
 ```
 
 ### Add an operation

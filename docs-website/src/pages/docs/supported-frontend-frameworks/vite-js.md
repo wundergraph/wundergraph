@@ -1,6 +1,5 @@
 ---
-title: Vite.js
-pageTitle: WunderGraph - Vite.js
+title: Vite.js support
 description: WunderGraph is the easiest way to consume GraphQL APIs in Vite.js.
 ---
 

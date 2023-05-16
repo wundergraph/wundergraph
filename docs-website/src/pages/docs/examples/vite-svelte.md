@@ -25,11 +25,9 @@ configureWunderGraphApplication({
   apis: [spaceX],
   server,
   operations,
-  codeGenerators: [
-    {
-      templates: [...templates.typescript.all],
-    },
-  ],
+  generate: {
+    codeGenerators: [],
+  },
 });
 ```
 

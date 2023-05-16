@@ -1,7 +1,6 @@
 ---
-title: iOS - Swift/Objective-C
-pageTitle: WunderGraph - iOS - Swift/Objective-C
-description:
+title: iOS - Swift/Objective-C support
+description: Support for iOS with Swift & Objective-C is planned, but there's not yet a schedule.
 ---
 
 Support for iOS with Swift & Objective-C is planned,

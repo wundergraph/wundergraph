@@ -83,6 +83,8 @@ import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations
 import zodToJsonSchema from 'zod-to-json-schema';
 import { GenerateConfig, OperationsGenerationConfig } from './codegeneration';
 import { generateOperations } from '../codegen/generateoperations';
+import { configurationHash } from '../codegen/templates/typescript/helpers';
+import templates from '../codegen/templates';
 
 const utf8 = 'utf8';
 const generated = 'generated';
@@ -128,6 +130,9 @@ export interface WunderGraphConfigApplicationConfig<
 	operations?: OperationsConfiguration;
 	authorization?: {
 		roles?: string[];
+	};
+	experimental?: {
+		orm?: boolean;
 	};
 	authentication?: {
 		cookieBased?: {
@@ -235,6 +240,7 @@ export interface CodeGen {
 export type S3Provider = S3UploadConfiguration[];
 
 export interface ResolvedApplication {
+	Apis: Api<any>[];
 	EnableSingleFlight: boolean;
 	EngineConfiguration: Api<any>;
 	Operations: GraphQLOperation[];
@@ -344,6 +350,9 @@ export interface ResolvedWunderGraphConfig {
 	webhooks: WebhookConfiguration[];
 	nodeOptions: ResolvedNodeOptions;
 	serverOptions?: ResolvedServerOptions;
+	experimental: {
+		orm: boolean;
+	};
 }
 
 export interface CodeGenerationConfig {
@@ -435,7 +444,9 @@ const resolveConfig = async (
 	// Generate the promises first, then await them all at once
 	// to run them in parallel
 	const generators = await Promise.all(config.apis);
-	const resolvedApis = await Promise.all(generators.map((generator) => generator(apiIntrospectionOptions)));
+	const resolvedApis = await Promise.all(
+		generators.map((generator, index) => generator({ ...apiIntrospectionOptions, apiID: index.toString() }))
+	);
 
 	if (WG_DATA_SOURCE_POLLING_MODE) {
 		// To avoid having to deal with different return types, exit here when running in
@@ -520,6 +531,9 @@ const resolveConfig = async (
 		webhooks: [],
 		nodeOptions: resolvedNodeOptions,
 		serverOptions: resolvedServerOptions,
+		experimental: {
+			orm: config.experimental?.orm ?? false,
+		},
 	};
 
 	const appConfig = config.links ? addLinks(resolvedConfig, config.links) : resolvedConfig;
@@ -722,6 +736,7 @@ const resolveApplication = async (
 	const merged = mergeApis(roles, customClaims, ...resolvedApis);
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
 	return {
+		Apis: resolvedApis,
 		EngineConfiguration: merged,
 		EnableSingleFlight: true,
 		Operations: [],
@@ -1040,7 +1055,13 @@ export const configureWunderGraphApplication = <
 				}
 			}
 
-			const combined = [...(config.generate?.codeGenerators || []), ...(config.codeGenerators || [])];
+			const defaultCodeGenerators: CodeGen = { templates: [...templates.typescript.all] };
+
+			const combined = [
+				defaultCodeGenerators,
+				...(config.generate?.codeGenerators || []),
+				...(config.codeGenerators || []),
+			];
 			for (let i = 0; i < combined.length; i++) {
 				const gen = combined[i];
 				await GenerateCode({
@@ -1210,6 +1231,9 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 				};
 			}),
 			corsConfiguration: config.application.CorsConfiguration,
+			experimentalConfig: {
+				orm: config.experimental.orm ?? false,
+			},
 			authenticationConfig: {
 				cookieBased: {
 					providers: config.authentication.cookieBased,
@@ -1236,6 +1260,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 			serverOptions: config.serverOptions,
 		},
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
+		configHash: configurationHash(config),
 	};
 
 	return JSON.stringify(out, null, 2);
@@ -1582,7 +1607,7 @@ const loadAndApplyNodeJsOperationOverrides = async (
 // this function.
 const applyNodeJsOperationOverrides = (
 	operation: TypeScriptOperation,
-	overrides: NodeJSOperation<any, any, any, any, any, any, any, any>
+	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any>
 ): TypeScriptOperation => {
 	if (overrides.inputSchema) {
 		const schema = zodToJsonSchema(overrides.inputSchema) as any;
@@ -1593,6 +1618,11 @@ const applyNodeJsOperationOverrides = (
 		operation.LiveQuery = {
 			enable: overrides.liveQuery.enable,
 			pollingIntervalSeconds: overrides.liveQuery.pollingIntervalSeconds,
+		};
+	}
+	if (overrides.cache) {
+		operation.CacheConfig = {
+			...overrides.cache,
 		};
 	}
 	if (overrides.requireAuthentication) {

@@ -1,6 +1,5 @@
 ---
 title: MinIO Storage Provider
-pageTitle: WunderGraph - MinIO Storage Provider
 description: Use MinIO as your storage provider.
 ---
 

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"os"
@@ -16,7 +17,6 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
-	"github.com/cespare/xxhash"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/hashicorp/go-multierror"
@@ -40,8 +40,8 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/operationreport"
 
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
-	"github.com/wundergraph/wundergraph/pkg/apicache"
 	"github.com/wundergraph/wundergraph/pkg/authentication"
+	"github.com/wundergraph/wundergraph/pkg/cacheheaders"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/graphiql"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
@@ -58,7 +58,6 @@ import (
 )
 
 const (
-	WgCacheHeader           = "X-Wg-Cache"
 	WgInternalApiCallHeader = "X-WG-Internal-GraphQL-API"
 
 	WgPrefix             = "wg_"
@@ -98,8 +97,6 @@ type Builder struct {
 	log *zap.Logger
 
 	planConfig plan.Configuration
-
-	cache apicache.Cache
 
 	insecureCookies      bool
 	forceHttpsRedirects  bool
@@ -146,13 +143,6 @@ func NewBuilder(pool *pool.Pool,
 
 func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Router, api *Api) (streamClosers []chan struct{}, err error) {
 	r.api = api
-
-	if api.CacheConfig != nil {
-		err = r.configureCache(api)
-		if err != nil {
-			return streamClosers, err
-		}
-	}
 
 	r.router = r.createSubRouter(router)
 
@@ -535,8 +525,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			preparedPlan:           synchronousPlan,
 			pool:                   r.pool,
 			extractedVariables:     make([]byte, len(shared.Doc.Input.Variables)),
-			cache:                  r.cache,
-			configHash:             []byte(r.api.ApiConfigHash),
+			cacheHeaders:           cacheheaders.New(newCacheControl(operation.CacheConfig), r.api.ApiConfigHash),
 			operation:              operation,
 			variablesValidator:     variablesValidator,
 			rbacEnforcer:           authentication.NewRBACEnforcer(operation),
@@ -555,15 +544,6 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			}
 		}
 
-		if operation.CacheConfig != nil && operation.CacheConfig.Enable {
-			handler.cacheConfig = cacheConfig{
-				enable:               operation.CacheConfig.Enable,
-				maxAge:               operation.CacheConfig.MaxAge,
-				public:               operation.CacheConfig.Public,
-				staleWhileRevalidate: operation.CacheConfig.StaleWhileRevalidate,
-			}
-		}
-
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
 
 		route := r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
@@ -579,10 +559,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			zap.String("method", http.MethodGet),
 			zap.String("path", apiPath),
 			zap.Bool("mock", operation.HooksConfiguration.MockResolve.Enable),
-			zap.Bool("cacheEnabled", handler.cacheConfig.enable),
-			zap.Int("cacheMaxAge", int(handler.cacheConfig.maxAge)),
-			zap.Int("cacheStaleWhileRevalidate", int(handler.cacheConfig.staleWhileRevalidate)),
-			zap.Bool("cachePublic", handler.cacheConfig.public),
+			zap.String("cache", handler.cacheHeaders.String()),
 			zap.Bool("authRequired", operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired),
 		)
 	case wgpb.OperationType_MUTATION:
@@ -698,49 +675,7 @@ func cleanupJsonSchema(schema string) string {
 	return schema
 }
 
-func (r *Builder) configureCache(api *Api) (err error) {
-	config := api.CacheConfig
-	switch config.Kind {
-	case wgpb.ApiCacheKind_IN_MEMORY_CACHE:
-		r.log.Debug("configureCache",
-			zap.String("primaryHost", api.PrimaryHost),
-			zap.String("deploymentID", api.DeploymentId),
-			zap.String("cacheKind", config.Kind.String()),
-			zap.Int("cacheSize", int(config.InMemoryConfig.MaxSize)),
-		)
-		r.cache, err = apicache.NewInMemory(config.InMemoryConfig.MaxSize)
-		return
-	case wgpb.ApiCacheKind_REDIS_CACHE:
-
-		redisAddr := os.Getenv(config.RedisConfig.RedisUrlEnvVar)
-
-		r.log.Debug("configureCache",
-			zap.String("primaryHost", api.PrimaryHost),
-			zap.String("deploymentID", api.DeploymentId),
-			zap.String("cacheKind", config.Kind.String()),
-			zap.String("envVar", config.RedisConfig.RedisUrlEnvVar),
-			zap.String("redisAddr", redisAddr),
-		)
-
-		r.cache, err = apicache.NewRedis(redisAddr, r.log)
-		return
-	default:
-		r.log.Debug("configureCache",
-			zap.String("primaryHost", api.PrimaryHost),
-			zap.String("deploymentID", api.DeploymentId),
-			zap.String("cacheKind", config.Kind.String()),
-		)
-		r.cache = &apicache.NoOpCache{}
-		return
-	}
-}
-
 func (r *Builder) Close() error {
-	if closer, ok := r.cache.(io.Closer); ok {
-		if err := closer.Close(); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -1155,13 +1090,6 @@ func injectVariables(operation *wgpb.Operation, _ *http.Request, variables []byt
 	return variables
 }
 
-type cacheConfig struct {
-	enable               bool
-	maxAge               int64
-	public               bool
-	staleWhileRevalidate int64
-}
-
 type QueryResolver interface {
 	ResolveGraphQLResponse(ctx *resolve.Context, response *resolve.GraphQLResponse, data []byte, writer io.Writer) (err error)
 }
@@ -1211,9 +1139,7 @@ type QueryHandler struct {
 	preparedPlan           *plan.SynchronousResponsePlan
 	extractedVariables     []byte
 	pool                   *pool.Pool
-	cacheConfig            cacheConfig
-	cache                  apicache.Cache
-	configHash             []byte
+	cacheHeaders           *cacheheaders.Headers
 	liveQuery              liveQueryConfig
 	operation              *wgpb.Operation
 	variablesValidator     *inputvariables.Validator
@@ -1235,34 +1161,15 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var (
-		cacheKey     string
-		cacheIsStale = false
-	)
-
 	isLive := h.liveQuery.enabled && r.URL.Query().Has(WgLiveParam)
 
 	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+
 	ctx := pool.GetCtx(r, r, pool.Config{
 		RenameTypeNames: h.renameTypeNames,
 	})
-
-	defer func() {
-		if cacheIsStale {
-			buf.Reset()
-			ctx = ctx.WithContext(context.WithValue(context.Background(), "user", authentication.UserFromContext(r.Context())))
-			err := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
-			if err == nil {
-				bufferedData := buf.Bytes()
-				cacheData := make([]byte, len(bufferedData))
-				copy(cacheData, bufferedData)
-				h.cache.SetWithTTL(cacheKey, cacheData, time.Second*time.Duration(h.cacheConfig.maxAge+h.cacheConfig.staleWhileRevalidate))
-			}
-		}
-
-		pool.PutCtx(ctx)
-		pool.PutBytesBuffer(buf)
-	}()
+	defer pool.PutCtx(ctx)
 
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
@@ -1313,48 +1220,6 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if h.cacheConfig.enable {
-		cacheKey = string(h.configHash) + r.RequestURI
-		item, hit := h.cache.Get(ctx.Context(), cacheKey)
-		if hit {
-
-			w.Header().Set(WgCacheHeader, "HIT")
-
-			_, _ = buf.Write(item.Data)
-
-			hash := xxhash.New()
-			_, _ = hash.Write(h.configHash)
-			_, _ = hash.Write(buf.Bytes())
-			ETag := fmt.Sprintf("W/\"%d\"", hash.Sum64())
-
-			w.Header()["ETag"] = []string{ETag}
-
-			if h.cacheConfig.public {
-				w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d, stale-while-revalidate=%d", h.cacheConfig.maxAge, h.cacheConfig.staleWhileRevalidate))
-			} else {
-				w.Header().Set("Cache-Control", fmt.Sprintf("private, max-age=%d, stale-while-revalidate=%d", h.cacheConfig.maxAge, h.cacheConfig.staleWhileRevalidate))
-			}
-
-			age := item.Age()
-			w.Header().Set("Age", fmt.Sprintf("%d", age))
-
-			if age > h.cacheConfig.maxAge {
-				cacheIsStale = true
-			}
-
-			ifNoneMatch := r.Header.Get("If-None-Match")
-			if ifNoneMatch == ETag {
-				w.WriteHeader(http.StatusNotModified)
-				return
-			}
-
-			w.WriteHeader(http.StatusOK)
-			_, _ = buf.WriteTo(w)
-			return
-		}
-		w.Header().Set(WgCacheHeader, "MISS")
-	}
-
 	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
 	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
 		return
@@ -1364,38 +1229,14 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transformed := resp.Data
-
-	hash := xxhash.New()
-	_, _ = hash.Write(h.configHash)
-	_, _ = hash.Write(transformed)
-	ETag := fmt.Sprintf("W/\"%d\"", hash.Sum64())
-
-	w.Header()["ETag"] = []string{ETag}
-
-	if h.cacheConfig.enable {
-		if h.cacheConfig.public {
-			w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d, stale-while-revalidate=%d", h.cacheConfig.maxAge, h.cacheConfig.staleWhileRevalidate))
-		} else {
-			w.Header().Set("Cache-Control", fmt.Sprintf("private, max-age=%d, stale-while-revalidate=%d", h.cacheConfig.maxAge, h.cacheConfig.staleWhileRevalidate))
+	if h.cacheHeaders != nil {
+		h.cacheHeaders.Set(w, resp.Data)
+		if h.cacheHeaders.NotModified(r, w) {
+			return
 		}
-
-		w.Header().Set("Age", "0")
-
-		cacheData := make([]byte, len(transformed))
-		copy(cacheData, transformed)
-
-		h.cache.SetWithTTL(cacheKey, cacheData, time.Second*time.Duration(h.cacheConfig.maxAge+h.cacheConfig.staleWhileRevalidate))
 	}
 
-	ifNoneMatch := r.Header.Get("If-None-Match")
-	if ifNoneMatch == ETag {
-		w.WriteHeader(http.StatusNotModified)
-		return
-	}
-
-	reader := bytes.NewReader(transformed)
-	_, err = reader.WriteTo(w)
+	_, err = w.Write(resp.Data)
 	if done := handleOperationErr(requestLogger, err, w, "writing response failed", h.operation); done {
 		return
 	}
@@ -1729,7 +1570,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	flushWriter, ok := getHooksFlushWriter(ctx, r, w, h.hooksPipeline, h.log)
+	ctx, flushWriter, ok := getHooksFlushWriter(ctx, r, w, h.hooksPipeline, h.log)
 	if !ok {
 		http.Error(w, "Connection not flushable", http.StatusBadRequest)
 		return
@@ -1821,8 +1662,11 @@ func (f *httpFlushWriter) Flush() {
 	if f.hooksPipeline != nil {
 		postResolveResponse, err := f.hooksPipeline.PostResolve(f.resolveContext, nil, f.request, resp)
 		if err != nil {
+			if errors.Is(err, context.Canceled) {
+				return
+			}
 			if f.logger != nil {
-				f.logger.Error("subscription preResolve hooks", zap.Error(err))
+				f.logger.Error("subscription postResolve hooks", zap.Error(err))
 			}
 		} else {
 			resp = postResolveResponse.Data
@@ -2151,6 +1995,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 	handler := &FunctionsHandler{
 		operation:            operation,
 		log:                  r.log,
+		cacheHeaders:         cacheheaders.New(newCacheControl(operation.CacheConfig), r.api.ApiConfigHash),
 		variablesValidator:   variablesValidator,
 		rbacEnforcer:         authentication.NewRBACEnforcer(operation),
 		hooksClient:          r.middlewareClient,
@@ -2181,6 +2026,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 type FunctionsHandler struct {
 	operation            *wgpb.Operation
 	log                  *zap.Logger
+	cacheHeaders         *cacheheaders.Headers
 	variablesValidator   *inputvariables.Validator
 	rbacEnforcer         *authentication.RBACEnforcer
 	hooksClient          *hooks.Client
@@ -2198,16 +2044,19 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	r = setOperationMetaData(r, h.operation)
 
-	ctx := pool.GetCtx(r, r, pool.Config{})
-	defer pool.PutCtx(ctx)
-
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
+	ctx := pool.GetCtx(r, r, pool.Config{})
+	defer pool.PutCtx(ctx)
+
 	variablesBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(variablesBuf)
+
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
 
 	ct := r.Header.Get("Content-Type")
 	if r.Method == http.MethodGet {
@@ -2249,9 +2098,6 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	isLive := h.liveQuery.enabled && r.URL.Query().Has(WgLiveParam)
 
-	buf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(buf)
-
 	input, err := hooks.EncodeData(r, buf, ctx.Variables, nil)
 	if done := handleOperationErr(requestLogger, err, w, "encoding hook data failed", h.operation); done {
 		return
@@ -2263,7 +2109,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case h.operation.OperationType == wgpb.OperationType_SUBSCRIPTION:
 		h.handleSubscriptionRequest(ctx, w, r, input, requestLogger)
 	default:
-		h.handleRequest(ctx, w, input, requestLogger)
+		h.handleRequest(ctx, r, w, input, requestLogger)
 	}
 }
 
@@ -2322,12 +2168,13 @@ func (h *FunctionsHandler) handleLiveQuery(resolveCtx *resolve.Context, w http.R
 	}
 }
 
-func (h *FunctionsHandler) handleRequest(resolveCtx *resolve.Context, w http.ResponseWriter, input []byte, requestLogger *zap.Logger) {
+func (h *FunctionsHandler) handleRequest(resolveCtx *resolve.Context, r *http.Request, w http.ResponseWriter, input []byte, requestLogger *zap.Logger) {
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
 	ctx := resolveCtx.Context()
+
 	out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input, buf)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -2337,6 +2184,13 @@ func (h *FunctionsHandler) handleRequest(resolveCtx *resolve.Context, w http.Res
 		requestLogger.Error("failed to call function", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+
+	if h.cacheHeaders != nil {
+		h.cacheHeaders.Set(w, out.Response)
+		if h.cacheHeaders.NotModified(r, w) {
+			return
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -2443,19 +2297,19 @@ func setSubscriptionHeaders(w http.ResponseWriter) {
 	w.Header().Set("X-Accel-Buffering", "no")
 }
 
-func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter, pipeline *hooks.SubscriptionOperationPipeline, logger *zap.Logger) (*httpFlushWriter, bool) {
+func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter, pipeline *hooks.SubscriptionOperationPipeline, logger *zap.Logger) (*resolve.Context, *httpFlushWriter, bool) {
 	var flushWriter *httpFlushWriter
 	var ok bool
 	ctx, flushWriter, ok = getFlushWriter(ctx, ctx.Variables, r, w)
 	if !ok {
-		return nil, false
+		return nil, nil, false
 	}
 
 	flushWriter.resolveContext = ctx
 	flushWriter.request = r
 	flushWriter.hooksPipeline = pipeline
 	flushWriter.logger = logger
-	return flushWriter, true
+	return ctx, flushWriter, true
 }
 
 func getFlushWriter(ctx *resolve.Context, variables []byte, r *http.Request, w http.ResponseWriter) (*resolve.Context, *httpFlushWriter, bool) {
@@ -2502,7 +2356,9 @@ func handleOperationErr(log *zap.Logger, err error, w http.ResponseWriter, error
 		w.WriteHeader(499)
 		return true
 	}
-	if errors.Is(err, context.DeadlineExceeded) {
+	// This detects all timeout errors, including context.DeadlineExceeded
+	var ne net.Error
+	if errors.As(err, &ne) && ne.Timeout() {
 		// request timeout exceeded
 		log.Error("request timeout exceeded",
 			zap.String("operationName", operation.Name),
@@ -2545,4 +2401,15 @@ func validateInputVariables(ctx context.Context, log *zap.Logger, variables []by
 		return false
 	}
 	return true
+}
+
+func newCacheControl(config *wgpb.OperationCacheConfig) *cacheheaders.CacheControl {
+	if config == nil || !config.Enable {
+		return nil
+	}
+	return &cacheheaders.CacheControl{
+		MaxAge:               config.MaxAge,
+		Public:               config.Public,
+		StaleWhileRevalidate: config.StaleWhileRevalidate,
+	}
 }

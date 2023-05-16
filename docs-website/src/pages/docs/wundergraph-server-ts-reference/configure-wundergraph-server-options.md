@@ -1,7 +1,6 @@
 ---
 title: Configure WunderGraph Server options
-pageTitle: WunderGraph - Configure WunderGraph Server options
-description:
+description: Reference documentation for the WunderGraph Server options.
 ---
 
 This section describes how to set configurations options of WunderGraph Server.

@@ -1,7 +1,6 @@
 ---
 title: Authentication-aware data fetching
-pageTitle: WunderGraph - Features - Authentication-aware data fetching
-description:
+description: WunderGraph makes data fetching aware of authentication and authorization.
 ---
 
 As you've read in the previous section, we're already making authenticating users a breeze.

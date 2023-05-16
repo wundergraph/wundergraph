@@ -1,6 +1,5 @@
 ---
-title: Svelte
-pageTitle: WunderGraph - Svelte
+title: Svelte support
 description: WunderGraph is the easiest way to consume all kinds of APIs (GraphQL, REST, gRPC, Kafka, etc...) in Svelte.
 ---
 

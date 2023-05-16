@@ -34,4 +34,5 @@ Here's an overview of all the available examples.
 {% quick-link title="GraphQL subscriptions hooks" icon="core" href="/docs/examples/graphql-subscriptions-hooks" description="This example demonstrates how to use GraphQL subscriptions hooks with WunderGraph." /%}
 {% quick-link title="WunderGraph schema extension" icon="core" href="/docs/examples/schema-extension" description="This example demonstrates how to use GraphQL schema extension with WunderGraph." /%}
 {% quick-link title="Nextjs Todos" icon="core" href="/docs/examples/nextjs-todos" description="This Todo app demonstrate how to use SWR with WunderGraph" /%}
+{% quick-link title="TypeScript ORM" icon="core" href="/docs/examples/orm" description="A simple example demonstrating the TypeScript ORM" /%}
 {% /quick-links %}

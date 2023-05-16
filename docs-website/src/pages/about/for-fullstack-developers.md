@@ -93,11 +93,9 @@ configureWunderGraphApplication({
   apis: [pg, stripe],
   server,
   operations,
-  codeGenerators: [
-    {
-      templates: [...templates.typescript.all],
-    },
-  ],
+  generate: {
+    codeGenerators: [],
+  },
   authentication: {
     cookieBased: {
       providers: [

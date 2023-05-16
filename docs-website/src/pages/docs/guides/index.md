@@ -1,7 +1,7 @@
 ---
 title: Guides
 pageTitle: WunderGraph - Guides
-description:
+description: An overview of all the available guides.
 hideTableOfContents: true
 fullWidthContent: true
 isIndexFile: true
@@ -40,5 +40,7 @@ Here's an overview of all the available guides.
 {% quick-link title="Enable autocompletion in your IDE" icon="core" href="/docs/guides/enable-autocompletion-in-your-ide" description="Enable autocompletion in your IDE to leverage the full power of the virtual graph." /%}
 
 {% quick-link title="Extend third party GraphQL APIs" icon="core" href="/docs/guides/extend-third-party-graphql-apis" description="Add custom fields and resolvers to third party APIs that you cannot control." /%}
+
+{% quick-link title="Extend the WunderGraph server context" icon="core" href="/docs/guides/context-factory" description="Use a context factory to extend the WunderGraph server context." /%}
 
 {% /quick-links %}

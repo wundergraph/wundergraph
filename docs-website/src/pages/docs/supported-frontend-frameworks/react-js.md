@@ -1,6 +1,5 @@
 ---
-title: React.js
-pageTitle: WunderGraph - React.js
+title: React.js support
 description: WunderGraph is the easiest way to consume all kinds of APIs (GraphQL, REST, gRPC, Kafka, etc...) in React.js.
 ---
 

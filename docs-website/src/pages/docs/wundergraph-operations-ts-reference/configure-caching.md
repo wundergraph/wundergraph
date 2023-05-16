@@ -1,7 +1,6 @@
 ---
 title: Configure Caching
-pageTitle: WunderGraph - Configure Caching
-description:
+description: How to configure caching for operations.
 ---
 
 The `queries` field is also mandatory and allows you to configure the default options for all `Query` Operations.

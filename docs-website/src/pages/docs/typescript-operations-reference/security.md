@@ -1,7 +1,6 @@
 ---
-title: TypeScript Operations Reference
-pageTitle: WunderGraph - Reference - TypeScript Operations - Security
-description:
+title: TypeScript Operations Security
+description: Learn more about the security features of TypeScript Operations
 ---
 
 Here's a simplified overview of the WunderGraph architecture.

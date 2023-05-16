@@ -1,7 +1,6 @@
 ---
 title: Custom Operations Configuration
-pageTitle: WunderGraph - Custom Operations Configuration
-description:
+description: How to override configuration for specific operations.
 ---
 
 Finally, let's take a look at how we can add custom overrides on a per-Operation basis.

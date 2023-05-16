@@ -1,7 +1,6 @@
 ---
-title: Next.js Client
-pageTitle: WunderGraph - Next.js
-description:
+title: Next.js client
+description: Next.js client reference documentation
 ---
 
 The Next.js client uses [SWR](/docs/clients-reference/swr) under the hood.
@@ -22,15 +21,14 @@ import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 // wundergraph.config.ts
 configureWunderGraphApplication({
   // ... your config
-  codeGenerators: [
-    {
-      templates: [...templates.typescript.all],
-    },
-    {
-      templates: [new NextJsTemplate()],
-      path: '../components/generated',
-    },
-  ],
+  generate: {
+    codeGenerators: [
+      {
+        templates: [new NextJsTemplate()],
+        path: '../components/generated',
+      },
+    ],
+  },
 });
 ```
 

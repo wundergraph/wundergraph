@@ -76,26 +76,6 @@ message OpenIDConnectAuthProviderConfig {
 	repeated OpenIDConnectQueryParameter queryParameters = 4;
 }
 
-message ApiCacheConfig {
-	ApiCacheKind kind = 1;
-	InMemoryCacheConfig inMemoryConfig = 2;
-	RedisCacheConfig redisConfig = 3;
-}
-
-enum ApiCacheKind {
-	NO_CACHE = 0;
-	IN_MEMORY_CACHE = 1;
-	REDIS_CACHE = 2;
-}
-
-message InMemoryCacheConfig {
-	int64 maxSize = 1;
-}
-
-message RedisCacheConfig {
-	string redisUrlEnvVar = 1;
-}
-
 message Operation {
 	string name = 1;
 	string content = 2;
@@ -473,6 +453,7 @@ message WunderGraphConfiguration {
 	string apiId = 2;
 	repeated string environmentIds = 3;
 	bool dangerouslyEnableGraphQLEndpoint = 4;
+	string configHash = 5;
 }
 
 message S3UploadProfileHooksConfiguration {
@@ -513,6 +494,11 @@ message UserDefinedApi {
 	repeated WebhookConfiguration webhooks = 12;
 	ServerOptions serverOptions = 14;
 	NodeOptions nodeOptions = 15;
+	ExperimentalConfiguration experimentalConfig = 17;
+}
+
+message ExperimentalConfiguration {
+	bool orm = 1;
 }
 
 message ListenerOptions {

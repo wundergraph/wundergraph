@@ -100,7 +100,7 @@ export const graphqlIntrospectionCacheConfiguration = async (
 export const introspectGraphql = async (
 	introspection: GraphQLIntrospection,
 	options: ApiIntrospectionOptions,
-	generatedFromOpenApi?: boolean
+	preserveSchemaDirectives?: boolean
 ): Promise<GraphQLApi> => {
 	const headersBuilder = new HeadersBuilder();
 	const introspectionHeadersBuilder = new HeadersBuilder();
@@ -119,7 +119,7 @@ export const introspectGraphql = async (
 	let upstreamSchema = await introspectGraphQLSchema(introspection, options, introspectionHeaders);
 	upstreamSchema = lexicographicSortSchema(upstreamSchema);
 	const federationEnabled = introspection.isFederation || false;
-	const cleanUpstreamSchema = generatedFromOpenApi
+	const cleanUpstreamSchema = preserveSchemaDirectives
 		? printSchemaWithDirectives(upstreamSchema)
 		: cleanupSchema(upstreamSchema);
 

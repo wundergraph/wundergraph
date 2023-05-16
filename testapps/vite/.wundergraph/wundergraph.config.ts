@@ -119,15 +119,14 @@ configureWunderGraphApplication({
 			useSSL: false,
 		},
 	],
-	codeGenerators: [
-		{
-			templates: [...templates.typescript.all],
-		},
-		{
-			templates: [templates.typescript.client],
-			path: '../src/generated',
-		},
-	],
+	generate: {
+		codeGenerators: [
+			{
+				templates: [templates.typescript.client],
+				path: '../src/generated',
+			},
+		],
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins: ['http://localhost:5173', 'http://localhost:5173'],

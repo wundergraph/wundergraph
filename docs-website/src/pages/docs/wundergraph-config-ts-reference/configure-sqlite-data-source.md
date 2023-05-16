@@ -1,7 +1,6 @@
 ---
 title: Configure SQLite Data Source
-pageTitle: WunderGraph - Configure SQLite Data Source
-description:
+description: Introspect SQLite databases and add them to the Virtual Graph.
 ---
 
 The SQLite data source introspects the database and generates a GraphQL schema.

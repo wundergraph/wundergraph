@@ -1,7 +1,6 @@
 ---
 title: wunderctl generate
-pageTitle: WunderGraph - wunderctl generate
-description:
+description: Generate the WunderGraph configuration and code generation.
 ---
 
 WunderGraph uses a lot of code generation to give you not just type-safe APIs,

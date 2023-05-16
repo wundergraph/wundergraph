@@ -1,7 +1,6 @@
 ---
 title: Automatic Content Revalidation with ETags
-pageTitle: WunderGraph - Features - Automatic Content Revalidation with ETags
-description:
+description: WunderGraph automatically generates ETags for each Query and Mutation, making it possible to leverage the power of the browser.
 ---
 
 As you've learned in the previous section, WunderGraph automatically turns GraphQL Operations into JSON-RPC Endpoints.

@@ -460,7 +460,7 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	flushWriter, ok := getHooksFlushWriter(ctx, r, w, h.hooksPipeline, h.log)
+	ctx, flushWriter, ok := getHooksFlushWriter(ctx, r, w, h.hooksPipeline, h.log)
 	if !ok {
 		http.Error(w, "Connection not flushable", http.StatusBadRequest)
 		return

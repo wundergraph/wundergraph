@@ -1,7 +1,6 @@
 ---
 title: Configure mutual TLS (mTLS) for HTTP based data sources
-pageTitle: WunderGraph - Configure mutual TLS (mTLS) for HTTP based data sources
-description:
+description: configure mutual TLS (mTLS) for HTTP based data sources, like GraphQL, Apollo Federation, REST / OpenAPI and more.
 ---
 
 This section describes how to configure mutual TLS (mTLS) for HTTP based data sources,
