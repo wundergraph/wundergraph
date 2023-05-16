@@ -1,15 +1,11 @@
 ---
-import { readInlineData } from 'relay-runtime';
-import type { CountryName$key } from '../../__relay__generated__/CountryName.graphql';
-import { CountryNameFragment } from './CountryName.fragment';
+import type { CountryName$data } from '../../__relay__generated__/CountryName.graphql';
 
 interface Props {
-	countryNameReference: CountryName$key
+	countryName: CountryName$data
 }
 
-const { countryNameReference } = Astro.props
-
-const countryName = readInlineData(CountryNameFragment, countryNameReference)
+const { countryName } = Astro.props
 ---
 
 <li>{countryName.name} ({countryName.code})</li>

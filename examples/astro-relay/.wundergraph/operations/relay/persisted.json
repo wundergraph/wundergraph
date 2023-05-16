@@ -1,4 +1,6 @@
 {
+  "748a312cee04c08e4706dd20f73d9fcf": "query CountriesListQuery {\n  countries_countries {\n    ...CountryName\n  }\n}\n\nfragment CountryName on countries_Country {\n  code\n  name\n}\n",
   "99a23a4c1b068982455fe24523f36c83": "query CountriesListQuery {\n  countries_countries {\n    ...CountryName\n    continent {\n      ...ContinentName\n    }\n  }\n}\n\nfragment ContinentName on countries_Continent {\n  code\n  name\n}\n\nfragment CountryName on countries_Country {\n  code\n  name\n}\n",
-  "ac0bbf845a836254bf536ee2b069dd86": "query ContinentsListQuery {\n  countries_continents {\n    ...ContinentName\n    countries {\n      ...CountryName\n    }\n  }\n}\n\nfragment ContinentName on countries_Continent {\n  code\n  name\n}\n\nfragment CountryName on countries_Country {\n  code\n  name\n}\n"
+  "ac0bbf845a836254bf536ee2b069dd86": "query ContinentsListQuery {\n  countries_continents {\n    ...ContinentName\n    countries {\n      ...CountryName\n    }\n  }\n}\n\nfragment ContinentName on countries_Continent {\n  code\n  name\n}\n\nfragment CountryName on countries_Country {\n  code\n  name\n}\n",
+  "fd5a5e5877d98599770ea376abe61fa2": "query ContinentsListQuery {\n  countries_continents {\n    ...ContinentName\n  }\n}\n\nfragment ContinentName on countries_Continent {\n  code\n  name\n}\n"
 }

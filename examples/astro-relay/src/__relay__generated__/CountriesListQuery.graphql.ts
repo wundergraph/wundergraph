@@ -1,6 +1,6 @@
 /**
- * @generated SignedSource<<76b795e6f44eab10f48ddb04bb953b8e>>
- * @relayHash 99a23a4c1b068982455fe24523f36c83
+ * @generated SignedSource<<a7d7c025f54b46cae92d16fe818a59a7>>
+ * @relayHash 748a312cee04c08e4706dd20f73d9fcf
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,16 +9,13 @@
 /* eslint-disable */
 // @ts-nocheck
 
-// @relayRequestID 99a23a4c1b068982455fe24523f36c83
+// @relayRequestID 748a312cee04c08e4706dd20f73d9fcf
 
 import { ConcreteRequest, Query } from 'relay-runtime';
 import { FragmentRefs } from 'relay-runtime';
 export type CountriesListQuery$variables = {};
 export type CountriesListQuery$data = {
 	readonly countries_countries: ReadonlyArray<{
-		readonly continent: {
-			readonly ' $fragmentSpreads': FragmentRefs<'ContinentName'>;
-		};
 		readonly ' $fragmentSpreads': FragmentRefs<'CountryName'>;
 	}>;
 };
@@ -27,105 +24,75 @@ export type CountriesListQuery = {
 	variables: CountriesListQuery$variables;
 };
 
-const node: ConcreteRequest = (function () {
-	var v0 = {
-			alias: null,
-			args: null,
-			kind: 'ScalarField',
-			name: 'code',
-			storageKey: null,
-		},
-		v1 = {
-			alias: null,
-			args: null,
-			kind: 'ScalarField',
-			name: 'name',
-			storageKey: null,
-		};
-	return {
-		fragment: {
-			argumentDefinitions: [],
-			kind: 'Fragment',
-			metadata: null,
-			name: 'CountriesListQuery',
-			selections: [
-				{
-					alias: null,
-					args: null,
-					concreteType: 'countries_Country',
-					kind: 'LinkedField',
-					name: 'countries_countries',
-					plural: true,
-					selections: [
-						{
-							args: null,
-							kind: 'FragmentSpread',
-							name: 'CountryName',
-						},
-						{
-							alias: null,
-							args: null,
-							concreteType: 'countries_Continent',
-							kind: 'LinkedField',
-							name: 'continent',
-							plural: false,
-							selections: [
-								{
-									args: null,
-									kind: 'FragmentSpread',
-									name: 'ContinentName',
-								},
-							],
-							storageKey: null,
-						},
-					],
-					storageKey: null,
-				},
-			],
-			type: 'Query',
-			abstractKey: null,
-		},
-		kind: 'Request',
-		operation: {
-			argumentDefinitions: [],
-			kind: 'Operation',
-			name: 'CountriesListQuery',
-			selections: [
-				{
-					alias: null,
-					args: null,
-					concreteType: 'countries_Country',
-					kind: 'LinkedField',
-					name: 'countries_countries',
-					plural: true,
-					selections: [
-						v0 /*: any*/,
-						v1 /*: any*/,
-						{
-							alias: null,
-							args: null,
-							concreteType: 'countries_Continent',
-							kind: 'LinkedField',
-							name: 'continent',
-							plural: false,
-							selections: [v0 /*: any*/, v1 /*: any*/],
-							storageKey: null,
-						},
-					],
-					storageKey: null,
-				},
-			],
-		},
-		params: {
-			id: '99a23a4c1b068982455fe24523f36c83',
-			metadata: {},
-			name: 'CountriesListQuery',
-			operationKind: 'query',
-			text: null,
-		},
-	};
-})();
+const node: ConcreteRequest = {
+	fragment: {
+		argumentDefinitions: [],
+		kind: 'Fragment',
+		metadata: null,
+		name: 'CountriesListQuery',
+		selections: [
+			{
+				alias: null,
+				args: null,
+				concreteType: 'countries_Country',
+				kind: 'LinkedField',
+				name: 'countries_countries',
+				plural: true,
+				selections: [
+					{
+						args: null,
+						kind: 'FragmentSpread',
+						name: 'CountryName',
+					},
+				],
+				storageKey: null,
+			},
+		],
+		type: 'Query',
+		abstractKey: null,
+	},
+	kind: 'Request',
+	operation: {
+		argumentDefinitions: [],
+		kind: 'Operation',
+		name: 'CountriesListQuery',
+		selections: [
+			{
+				alias: null,
+				args: null,
+				concreteType: 'countries_Country',
+				kind: 'LinkedField',
+				name: 'countries_countries',
+				plural: true,
+				selections: [
+					{
+						alias: null,
+						args: null,
+						kind: 'ScalarField',
+						name: 'code',
+						storageKey: null,
+					},
+					{
+						alias: null,
+						args: null,
+						kind: 'ScalarField',
+						name: 'name',
+						storageKey: null,
+					},
+				],
+				storageKey: null,
+			},
+		],
+	},
+	params: {
+		id: '748a312cee04c08e4706dd20f73d9fcf',
+		metadata: {},
+		name: 'CountriesListQuery',
+		operationKind: 'query',
+		text: null,
+	},
+};
 
-(node as any).hash = '5354ab5d38fda80c0b86d2e26b0b32d4';
+(node as any).hash = 'fe314a17e5dfca535b8923e4a2d03e6f';
 
 export default node;

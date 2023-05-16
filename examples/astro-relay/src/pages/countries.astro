@@ -1,9 +1,11 @@
 ---
 import type { CountriesListQuery } from "../__relay__generated__/CountriesListQuery.graphql";
+import type { CountryName$data } from "../__relay__generated__/CountryName.graphql";
 import CountryName from "../components/CountryName/CountryName.astro";
-import { fetchWunderGraphSSRQuery } from "../lib/wundergraph";
+import {  fetchWunderGraphSSGQuery } from "../lib/wundergraph";
 import { CountriesList } from "../queries/CountriesList";
-const { queryResponse: countriesListData } = await fetchWunderGraphSSRQuery<CountriesListQuery>(CountriesList)
+
+const countriesListData = await fetchWunderGraphSSGQuery<CountriesListQuery>(CountriesList, {})
 ---
 
 <html lang="en">
@@ -18,11 +20,13 @@ const { queryResponse: countriesListData } = await fetchWunderGraphSSRQuery<Coun
 		<h1>Countries list generated at build time using Relay</h1>
 		<ul>
 			{
-				countriesListData && countriesListData.countries_countries.map(each => {
-					return <CountryName countryNameReference={each} />
+				countriesListData && countriesListData.countries_countries.map((each: CountryName$data) => {
+					return (
+						<CountryName countryName={each} />
+					)
 				})
 			}
 		</ul>
-		<button>Back</button>
+		<a href="/">Back</a>
 	</body>
 </html>

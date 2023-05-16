@@ -4,9 +4,6 @@ export const ContinentsList = graphql`
 	query ContinentsListQuery {
 		countries_continents {
 			...ContinentName
-			countries {
-				...CountryName
-			}
 		}
 	}
 `;
