@@ -15,14 +15,14 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
-func ServerPortFromConfig(configJsonPath string) (int, error) {
+func serverOptionsFromConfig(configJsonPath string) (*wgpb.ServerOptions, error) {
 	data, err := os.ReadFile(configJsonPath)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	if len(data) == 0 {
-		return 0, errors.New("config file is empty")
+		return nil, errors.New("config file is empty")
 	}
 
 	var graphConfig struct {
@@ -31,16 +31,38 @@ func ServerPortFromConfig(configJsonPath string) (int, error) {
 		} `json:"api,omitempty"`
 	}
 	if err := json.Unmarshal(data, &graphConfig); err != nil {
+		return nil, fmt.Errorf("error decoding config file: %w", err)
+	}
+	if graphConfig.Api == nil || graphConfig.Api.ServerOptions == nil {
+		return nil, fmt.Errorf("server configuration not found in %s", configJsonPath)
+	}
+	return graphConfig.Api.ServerOptions, nil
+}
+
+func ServerPortFromConfig(configJsonPath string) (int, error) {
+	opts, err := serverOptionsFromConfig(configJsonPath)
+	if err != nil {
 		return 0, err
 	}
-
-	if graphConfig.Api != nil && graphConfig.Api.ServerOptions != nil {
-		variable := graphConfig.Api.ServerOptions.GetListen().GetPort()
-		if variable != nil {
-			return loadvariable.Int(variable), nil
-		}
+	variable := opts.GetListen().GetPort()
+	if variable == nil {
+		return 0, errors.New("configuration is invalid")
 	}
-	return 0, errors.New("configuration is invalid")
+	return loadvariable.Int(variable), nil
+}
+
+func ServerAddressFromConfig(configJsonPath string) (string, error) {
+	opts, err := serverOptionsFromConfig(configJsonPath)
+	if err != nil {
+		return "", err
+	}
+	listen := opts.GetListen()
+	portVariable := listen.GetPort()
+	hostVariable := listen.GetHost()
+	if portVariable == nil || hostVariable == nil {
+		return "", errors.New("configuration is invalid")
+	}
+	return fmt.Sprintf("%s:%d", loadvariable.String(hostVariable), loadvariable.Int(portVariable)), nil
 }
 
 // KillExistingHooksProcess kills the existing hooks process before we start the new one

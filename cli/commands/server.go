@@ -51,20 +51,28 @@ func init() {
 }
 
 func startHooksServer(ctx context.Context) error {
-	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+	server, err := newHooksServer()
 	if err != nil {
 		return err
 	}
+	return server.Run(ctx)
+}
 
-	configFile := filepath.Join(wunderGraphDir, "generated", configJsonFilename)
+func newHooksServer() (*helpers.HooksServerRunner, error) {
+	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	configFile := helpers.ConfigFilePath(wunderGraphDir)
 	if !files.FileExists(configFile) {
-		return fmt.Errorf("could not find configuration file: %s", configFile)
+		return nil, fmt.Errorf("could not find configuration file: %s", configFile)
 	}
 
 	serverScriptFile := filepath.Join("generated", "bundle", "server.cjs")
 	serverExecutablePath := filepath.Join(wunderGraphDir, serverScriptFile)
 	if !files.FileExists(serverExecutablePath) {
-		return fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
+		return nil, fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
 	}
 
 	srvCfg := &helpers.HooksServerRunConfig{
@@ -77,9 +85,5 @@ func startHooksServer(ctx context.Context) error {
 		LogStreaming:      true,
 	}
 
-	hookServerRunner := helpers.NewHooksServerRunner(log, srvCfg)
-
-	<-hookServerRunner.Run(ctx)
-
-	return hookServerRunner.Error()
+	return helpers.NewHooksServerRunner(log, srvCfg), nil
 }
