@@ -23,6 +23,14 @@ func TestCacheControl(t *testing.T) {
 		{&CacheControl{},
 			"private, max-age=0, stale-while-revalidate=0",
 		},
+		{&CacheControl{
+			Public:               true,
+			MaxAge:               -1,
+			StaleWhileRevalidate: -1,
+			MustRevalidate:       true,
+		},
+			"public, must-revalidate",
+		},
 		{
 			nil,
 			"",
@@ -32,7 +40,7 @@ func TestCacheControl(t *testing.T) {
 		t.Run(tc.header, func(t *testing.T) {
 			var rc httptest.ResponseRecorder
 			headers := New(tc.cacheControl, "")
-			headers.Set(&rc, nil)
+			headers.Set(nil, &rc, nil)
 			result := rc.Result()
 			assert.Equal(t, tc.header, result.Header.Get("Cache-Control"))
 		})
@@ -42,13 +50,16 @@ func TestCacheControl(t *testing.T) {
 func TestETag(t *testing.T) {
 	headers := New(nil, "")
 
+	r, err := http.NewRequest("GET", "http://example.com", nil)
+	assert.NoError(t, err, "invalid request")
+
 	var rc1 httptest.ResponseRecorder
-	headers.Set(&rc1, nil)
+	headers.Set(r, &rc1, nil)
 	result1 := rc1.Result()
 	assert.Len(t, result1.Header["ETag"], 0)
 
 	var rc2 httptest.ResponseRecorder
-	headers.Set(&rc2, []byte("something"))
+	headers.Set(r, &rc2, []byte("something"))
 	result2 := rc2.Result()
 	assert.Len(t, result2.Header["ETag"], 1)
 
@@ -59,8 +70,11 @@ func TestETag(t *testing.T) {
 func TestNotModified(t *testing.T) {
 	headers := New(nil, "")
 
+	r, err := http.NewRequest("GET", "http://example.com", nil)
+	assert.NoError(t, err, "invalid request")
+
 	var rc1 httptest.ResponseRecorder
-	headers.Set(&rc1, []byte("something"))
+	headers.Set(r, &rc1, []byte("something"))
 	response := rc1.Result()
 	etag := response.Header["ETag"][0]
 	assert.NotEqual(t, "", etag)
@@ -68,8 +82,6 @@ func TestNotModified(t *testing.T) {
 	var rc2 httptest.ResponseRecorder
 	rc2.Header()["ETag"] = []string{etag}
 
-	r, err := http.NewRequest("GET", "http://example.com", nil)
-	assert.NoError(t, err, "invalid request")
 	assert.False(t, headers.NotModified(r, &rc2))
 
 	r.Header.Add("If-None-Match", etag)
