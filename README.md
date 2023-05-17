@@ -196,6 +196,7 @@ The best way to try them out is by cloning the mono-repo.
 
 - [Apollo Federation](examples/apollo-federation)
 - [Astro](examples/astro)
+- [Astro Relay (Experimental)](examples/astro-relay)
 - [Auth0 OpenID Connect Authentication](examples/auth0-oidc-authentication)
 - [Caching](examples/caching)
 - [Cross API Joins](examples/cross-api-joins)

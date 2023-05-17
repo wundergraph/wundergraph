@@ -1,3 +1,9 @@
+---
+title: Astro with Relay
+pageTitle: WunderGraph - Examples - Astro Relay
+description: Example using WunderGraph with Astro & Relay
+---
+
 The [Astro + Relay example](https://github.com/wundergraph/wundergraph/tree/main/examples/astro-relay) demonstrates how to use Relay with a Astro project in SSG mode.
 
 ## Getting Started
