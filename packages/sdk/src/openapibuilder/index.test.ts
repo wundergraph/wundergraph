@@ -2,7 +2,7 @@ import { JSONSchema7 } from 'json-schema';
 
 import { OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import { GraphQLOperation } from '../graphql/operations';
-import { OpenApiBuilder } from './index';
+import { OpenApiBuilder, isValidOpenApiSchemaName } from './index';
 
 const emptySchema = {
 	type: 'object',
@@ -251,7 +251,8 @@ describe('OpenAPI builder', () => {
 		expect(firstRef).toMatch(/#\/components\/schemas\/.*/);
 
 		const refName = firstRef?.substring('#/components/schemas/'.length);
-		expect(refName).toMatch(/^[a-zA-Z0-9._-]+$/);
+		expect(refName).toBeDefined();
+		expect(isValidOpenApiSchemaName(refName!)).toBeTruthy();
 		expect(result.components?.schemas?.[refName!]).toBeDefined();
 	});
 

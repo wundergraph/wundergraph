@@ -115,6 +115,18 @@ export interface OpenApiBuilderOptions {
 	description?: string;
 }
 
+/**
+ * isValidOpenApiSchemaName returns true iff the name is valid
+ * to be used as a schema name inside an OAS.
+ *
+ * @param name Schema name
+ * @returns True if the name is valid, false otherwise
+ */
+export const isValidOpenApiSchemaName = (name: string) => {
+	// name must match this regular expression to be a valid schema name in OAS
+	return name && name.match(/^[a-zA-Z0-9._-]+$/);
+};
+
 // OpenApiBuilder generates an OpenAPI specification for querying the provided operations.
 // Each operation should have proper VariablesSchema and ResponseSchema. Query and Subscription
 // operations produce GET requests with querystring parameters, while Mutation operations produce
@@ -206,12 +218,9 @@ export class OpenApiBuilder {
 	}
 
 	private validComponentsSchemaName(name: string) {
-		// name must match this regular expression to be a valid schema name in OAS
-		if (name.match(/^[a-zA-Z0-9._-]+$/)) {
-			return name;
-		}
-		// Hash the name to make it a valid identifier
-		return objectHash(name);
+		// If the name is not valid, we use its hash, which will always generate
+		// a valid name in a deterministic way
+		return isValidOpenApiSchemaName(name) ? name : objectHash(name);
 	}
 
 	private rewriteSchemaRefs(spec: OpenApiSpec, schema: JSONSchema7Definition) {
