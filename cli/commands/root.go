@@ -23,14 +23,13 @@ import (
 )
 
 const (
+	configJsonFilename       = "wundergraph.config.json"
 	configEntryPointFilename = "wundergraph.config.ts"
 	serverEntryPointFilename = "wundergraph.server.ts"
 
 	wunderctlBinaryPathEnvKey = "WUNDERCTL_BINARY_PATH"
 
 	defaultNodeGracefulTimeoutSeconds = 10
-
-	hooksServerWaitTimeout = 10 * time.Second
 )
 
 var (

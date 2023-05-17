@@ -41,18 +41,9 @@ var startCmd = &cobra.Command{
 		}
 
 		if !excludeServer {
-			hooksServer, err := newHooksServer()
-			if err != nil {
-				return err
-			}
 			g.Go(func() error {
-				return hooksServer.Run(ctx)
+				return startHooksServer(ctx)
 			})
-			waitCtx, cancel := context.WithTimeout(ctx, hooksServerWaitTimeout)
-			defer cancel()
-			if err := hooksServer.WaitUntilReady(waitCtx); err != nil {
-				log.Warn("hooks server hasn't started up yet", zap.Duration("wait", hooksServerWaitTimeout), zap.Error(err))
-			}
 		}
 
 		g.Go(func() error {

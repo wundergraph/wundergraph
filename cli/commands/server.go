@@ -50,34 +50,34 @@ func init() {
 	rootCmd.AddCommand(serverCmd)
 }
 
+// hooksServerRelativePath returns the path to the server entrypoint
+// script, relative to the WunderGraph directory
+func hooksServerRelativePath() string {
+	return filepath.Join("generated", "bundle", "server.cjs")
+}
+
+func hooksServerScriptPath(wunderGraphDir string) string {
+	return filepath.Join(wunderGraphDir, hooksServerRelativePath())
+}
+
 func startHooksServer(ctx context.Context) error {
-	server, err := newHooksServer()
+	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 	if err != nil {
 		return err
 	}
-	return server.Run(ctx)
-}
 
-func newHooksServer() (*helpers.HooksServerRunner, error) {
-	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	configFile := helpers.ConfigFilePath(wunderGraphDir)
+	configFile := filepath.Join(wunderGraphDir, "generated", configJsonFilename)
 	if !files.FileExists(configFile) {
-		return nil, fmt.Errorf("could not find configuration file: %s", configFile)
+		return fmt.Errorf("could not find configuration file: %s", configFile)
 	}
 
-	serverScriptFile := filepath.Join("generated", "bundle", "server.cjs")
-	serverExecutablePath := filepath.Join(wunderGraphDir, serverScriptFile)
-	if !files.FileExists(serverExecutablePath) {
-		return nil, fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
+	if p := hooksServerScriptPath(wunderGraphDir); !files.FileExists(hooksServerScriptPath(p)) {
+		return fmt.Errorf(`hooks server executable "%s" not found`, p)
 	}
 
 	srvCfg := &helpers.HooksServerRunConfig{
 		WunderGraphDirAbs: wunderGraphDir,
-		ServerScriptFile:  serverScriptFile,
+		ServerScriptFile:  hooksServerRelativePath(),
 		Production:        true,
 		Debug:             rootFlags.DebugMode,
 		Env:               helpers.CliEnv(rootFlags),
@@ -85,5 +85,9 @@ func newHooksServer() (*helpers.HooksServerRunner, error) {
 		LogStreaming:      true,
 	}
 
-	return helpers.NewHooksServerRunner(log, srvCfg), nil
+	hookServerRunner := helpers.NewHooksServerRunner(log, srvCfg)
+
+	<-hookServerRunner.Run(ctx)
+
+	return hookServerRunner.Error()
 }

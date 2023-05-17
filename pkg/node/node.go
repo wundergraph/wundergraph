@@ -31,8 +31,9 @@ import (
 )
 
 const (
-	rootEndpoint        = "/"
-	healthCheckEndpoint = "/health"
+	rootEndpoint                  = "/"
+	healthCheckEndpoint           = "/health"
+	initialHealthCheckWaitTimeout = 10 * time.Second
 )
 
 func New(ctx context.Context, info BuildInfo, wundergraphDir string, log *zap.Logger) *Node {
@@ -87,18 +88,26 @@ type options struct {
 	devMode                 bool
 	idleTimeout             time.Duration
 	idleHandler             func()
-	hooksServerHealthCheck  bool
-	healthCheckTimeout      time.Duration
-	onServerConfigLoad      func(config *WunderNodeConfig)
-	onServerError           func(err error)
+	hooksHealthCheck        struct {
+		periodic bool
+		initial  bool
+		timeout  time.Duration
+	}
+	onServerConfigLoad func(config *WunderNodeConfig)
+	onServerError      func(err error)
 }
 
 type Option func(options *options)
 
-func WithHooksServerHealthCheck(timeout time.Duration) Option {
+// WithHooksServerHealthCheck enables querying the hooks server during healthchecks
+// when the /health endpoint is hit. If initialCheck is true, it also enables
+// a check during startup to ensure the node doesn't listen until the hooks server
+// is ready
+func WithHooksServerHealthCheck(timeout time.Duration, initialCheck bool) Option {
 	return func(options *options) {
-		options.hooksServerHealthCheck = true
-		options.healthCheckTimeout = timeout
+		options.hooksHealthCheck.periodic = true
+		options.hooksHealthCheck.initial = initialCheck
+		options.hooksHealthCheck.timeout = timeout
 	}
 }
 
@@ -356,6 +365,40 @@ func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
 	n.log.Info("WunderNode shutdown complete")
 }
 
+// hooksServerHealthIsOk sends a request to the hooks server and returns wether it could
+// check its health successfully.
+func (n *Node) hooksServerHealthIsOk(ctx context.Context, hooksClient *hooks.Client) bool {
+	ctx, cancel := context.WithTimeout(ctx, n.options.hooksHealthCheck.timeout)
+	defer cancel()
+	return hooksClient.DoHealthCheckRequest(ctx)
+}
+
+// hooksServerInitialHealthCheck performs the initial health check for the hooks server
+// if hooksHealthCheck.initial is set, otherwise it returns immediately. It returns wether
+// a successful healthcheck could be completed
+func (n *Node) hooksServerInitialHealthCheck(hooksClient *hooks.Client) bool {
+	if !n.options.hooksHealthCheck.initial {
+		// Assume ok
+		return true
+	}
+	fmt.Println("HC START", time.Now())
+	initialHealthCheckCtx, cancel := context.WithTimeout(context.Background(), initialHealthCheckWaitTimeout)
+	defer cancel()
+	for {
+		select {
+		case <-initialHealthCheckCtx.Done():
+			n.log.Warn("hooks server didn't start after initial wait", zap.Duration("duration", initialHealthCheckWaitTimeout))
+			fmt.Println("HC CRAP", time.Now())
+			return false
+		default:
+			if n.hooksServerHealthIsOk(initialHealthCheckCtx, hooksClient) {
+				fmt.Println("HC OK", time.Now())
+				return true
+			}
+		}
+	}
+}
+
 func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (*HealthCheckReport, bool) {
 	deploymentId := os.Getenv("WG_CLOUD_DEPLOYMENT_ID")
 	commitSHA := os.Getenv("WG_CLOUD_DEPLOYMENT_COMMIT_SHA")
@@ -371,15 +414,12 @@ func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (
 		CommitURL:    commitURL,
 	}
 
-	if n.options.hooksServerHealthCheck {
-		ctx, cancel := context.WithTimeout(ctx, n.options.healthCheckTimeout)
-		defer cancel()
-		ok := hooksClient.DoHealthCheckRequest(ctx)
-		if ok {
-			healthCheck.ServerStatus = "READY"
-		} else {
+	if n.options.hooksHealthCheck.periodic {
+		if !n.hooksServerHealthIsOk(ctx, hooksClient) {
 			return healthCheck, false
 		}
+		healthCheck.ServerStatus = "READY"
+
 	} else {
 		healthCheck.ServerStatus = "SKIP"
 	}
@@ -420,6 +460,8 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	}
 
 	hooksClient := hooks.NewClient(nodeConfig.Api.Options.ServerUrl, n.log)
+
+	n.hooksServerInitialHealthCheck(hooksClient)
 
 	dialer := &net.Dialer{
 		Timeout:   10 * time.Second,

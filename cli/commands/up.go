@@ -139,7 +139,7 @@ var upCmd = &cobra.Command{
 			zap.String("builtBy", BuildInfo.BuiltBy),
 		)
 
-		configJsonPath := helpers.ConfigFilePath(wunderGraphDir)
+		configJsonPath := filepath.Join(wunderGraphDir, "generated", configJsonFilename)
 		webhooksDir := filepath.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
 		configOutFile := filepath.Join("generated", "bundle", "config.cjs")
 		serverOutFile := filepath.Join("generated", "bundle", "server.cjs")
@@ -188,7 +188,7 @@ var upCmd = &cobra.Command{
 			Streaming: devTUI == nil,
 		})
 
-		var hookServerRunner *helpers.HooksServerRunner
+		var hookServerRunner *scriptrunner.ScriptRunner
 		var webhooksBundler *bundler.Bundler
 		var onAfterBuild func(buildErr error, rebuild bool) error
 
@@ -335,8 +335,8 @@ var upCmd = &cobra.Command{
 
 				go func() {
 					// run or restart hook server
-					err := hookServerRunner.Run(ctx)
-					reportErrToTUI(err)
+					<-hookServerRunner.Run(ctx)
+					reportErrToTUI(hookServerRunner.Error())
 				}()
 
 				go func() {
@@ -498,14 +498,6 @@ var upCmd = &cobra.Command{
 				options = append(options, node.WithServerErrorHandler(func(err error) {
 					reportErrToTUI(multierror.Append(errors.New("could not start server"), err))
 				}))
-			}
-
-			if hookServerRunner != nil {
-				waitCtx, cancel := context.WithTimeout(ctx, hooksServerWaitTimeout)
-				defer cancel()
-				if err := hookServerRunner.WaitUntilReady(waitCtx); err != nil {
-					log.Warn("hooks server hasn't started up yet", zap.Duration("wait", hooksServerWaitTimeout), zap.Error(err))
-				}
 			}
 
 			err := n.StartBlocking(options...)

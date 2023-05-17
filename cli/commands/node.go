@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -14,7 +15,6 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
@@ -94,6 +94,8 @@ type options struct {
 
 type Option func(options *options)
 
+// WithHooksServerHealthCheck enables the node to health-check the hooks
+// server when the /health endpoint is queried
 func WithHooksServerHealthCheck() Option {
 	return func(options *options) {
 		options.hooksServerHealthCheck = true
@@ -118,7 +120,7 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 		opts[i](&options)
 	}
 
-	configFile := helpers.ConfigFilePath(n.WundergraphDir)
+	configFile := filepath.Join(n.WundergraphDir, "generated", configJsonFilename)
 	if !files.FileExists(configFile) {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
 	}
@@ -161,7 +163,8 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 	}
 
 	if options.hooksServerHealthCheck {
-		nodeOpts = append(nodeOpts, node.WithHooksServerHealthCheck(time.Duration(healthCheckTimeout)*time.Second))
+		initialCheck := files.FileExists(hooksServerScriptPath(n.WundergraphDir))
+		nodeOpts = append(nodeOpts, node.WithHooksServerHealthCheck(time.Duration(healthCheckTimeout)*time.Second, initialCheck))
 	}
 
 	if options.enableRequestLogging {
