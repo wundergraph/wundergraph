@@ -145,6 +145,10 @@ const navigation = [
 						href: '/docs/examples/expo-swr',
 					},
 					{
+						title: 'Expo + Relay',
+						href: '/docs/examples/expo-relay',
+					},
+					{
 						title: 'FaunaDB Next.js',
 						href: '/docs/examples/fauna-db-nextjs',
 					},
@@ -211,6 +215,10 @@ const navigation = [
 					{
 						title: 'Nuxt + Vue Query',
 						href: '/docs/examples/nuxt',
+					},
+					{
+						title: 'TypeScript ORM',
+						href: '/docs/examples/orm',
 					},
 				],
 			},
@@ -846,6 +854,10 @@ const navigation = [
 				href: '/docs/features/typescript-operations',
 			},
 			{
+				title: 'TypeScript ORM',
+				href: '/docs/features/typescript-orm',
+			},
+			{
 				title: 'API Namespacing',
 				href: '/docs/features/api-namespacing',
 			},
@@ -1007,7 +1019,11 @@ const navigation = [
 	},
 	{ type: 'divider' },
 	{
-		title: 'Clients reference',
+		title: 'References',
+		type: 'title',
+	},
+	{
+		title: 'Clients',
 		href: '/docs/clients-reference',
 		icon: <ComputerDesktopIcon />,
 		links: [
@@ -1047,7 +1063,7 @@ const navigation = [
 		],
 	},
 	{
-		title: 'WunderGraph reference',
+		title: 'Config',
 		href: '/docs/wundergraph-reference',
 		paths: [
 			'/docs/wundergraph-config-ts-reference',
@@ -1277,7 +1293,7 @@ const navigation = [
 		],
 	},
 	{
-		title: 'Operations reference',
+		title: 'Operations',
 		href: '/docs/operations-reference',
 		icon: <CogIcon />,
 		paths: [
@@ -1366,6 +1382,10 @@ const navigation = [
 						href: '/docs/typescript-operations-reference/subscriptions',
 					},
 					{
+						title: 'Accessing Data Sources',
+						href: '/docs/typescript-operations-reference/accessing-data-sources-from-operations',
+					},
+					{
 						title: 'Authentication & Authorization',
 						href: '/docs/typescript-operations-reference/authentication-authorization',
 					},
@@ -1395,7 +1415,12 @@ const navigation = [
 		],
 	},
 	{
-		title: 'CLI Reference',
+		title: 'TypeScript ORM',
+		href: '/docs/typescript-orm-reference',
+		icon: <CircleStackIcon />,
+	},
+	{
+		title: 'CLI',
 		href: '/docs/cli-reference',
 		icon: <CommandLineIcon />,
 		paths: ['/docs/wunderctl-reference'],

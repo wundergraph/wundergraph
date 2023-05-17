@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.158.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.158.0...@wundergraph/sdk@0.158.1) (2023-05-16)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.158.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.157.0...@wundergraph/sdk@0.158.0) (2023-05-15)
+
+### Features
+
+* orm ([#963](https://github.com/wundergraph/wundergraph/issues/963)) ([8cd45a3](https://github.com/wundergraph/wundergraph/commit/8cd45a37f139e592f579c40e266ce128b8be1b5d)) (@Pagebakers)
+
+### Bug Fixes
+
+* operations mutation handler ([#964](https://github.com/wundergraph/wundergraph/issues/964)) ([ec502be](https://github.com/wundergraph/wundergraph/commit/ec502bee7db2e763d0568208c6cae2c06640f5c7)) (@Pagebakers)
+
 ## [0.157.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.156.0...@wundergraph/sdk@0.157.0) (2023-05-12)
 
 ### Features

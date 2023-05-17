@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/swr",
-  "version": "0.14.31",
+  "version": "0.14.33",
   "license": "Apache-2.0",
   "description": "WunderGraph SWR Integration",
   "main": "./dist/index.js",

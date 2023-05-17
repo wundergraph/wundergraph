@@ -18,6 +18,7 @@ import { TypeScriptClaims } from './typescript/claims';
 import { TypeScriptClient } from './typescript/client';
 import { TypeScriptLegacyWebClient } from './typescript/web.client';
 import { TypeScriptTesting } from './typescript/testing';
+import { ORM } from './typescript/orm';
 
 const typescriptModels = [
 	new TypeScriptInputModels(),
@@ -33,6 +34,7 @@ const typescriptAll = [
 	new WunderGraphHooksPlugin(),
 	new WunderGraphWebhooksPlugin(),
 	new Operations(),
+	new ORM(),
 	new JsonSchema(),
 	new TypeScriptClient(),
 	new TypeScriptLinkBuilder(),
@@ -47,6 +49,7 @@ const templates = {
 		inputModels: new TypeScriptInputModels(),
 		responseModels: new TypeScriptResponseModels(),
 		client: new TypeScriptClient(),
+		orm: new ORM(),
 		testing: new TypeScriptTesting(),
 		all: [...typescriptAll, new AuthenticationProviderConfiguration()],
 		fastifyServer: new WunderGraphServer(),

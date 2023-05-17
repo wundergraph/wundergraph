@@ -778,7 +778,7 @@ export interface Operation {
   operationType: OperationType;
   variablesSchema: string;
   responseSchema: string;
-  cacheConfig: OperationCacheConfig | undefined;
+  cacheConfig?: OperationCacheConfig | undefined;
   authenticationConfig: OperationAuthenticationConfig | undefined;
   liveQueryConfig: OperationLiveQueryConfig | undefined;
   authorizationConfig: OperationAuthorizationConfig | undefined;
@@ -879,10 +879,11 @@ export interface OperationAuthenticationConfig {
 }
 
 export interface OperationCacheConfig {
-  enable: boolean;
-  maxAge: number;
-  public: boolean;
-  staleWhileRevalidate: number;
+  enable?: boolean | undefined;
+  maxAge?: number | undefined;
+  public?: boolean | undefined;
+  staleWhileRevalidate?: number | undefined;
+  mustRevalidate?: boolean | undefined;
 }
 
 export interface EngineConfiguration {
@@ -1114,6 +1115,11 @@ export interface UserDefinedApi {
   webhooks: WebhookConfiguration[];
   serverOptions: ServerOptions | undefined;
   nodeOptions: NodeOptions | undefined;
+  experimentalConfig: ExperimentalConfiguration | undefined;
+}
+
+export interface ExperimentalConfiguration {
+  orm: boolean;
 }
 
 export interface ListenerOptions {
@@ -2242,16 +2248,23 @@ export const OperationAuthenticationConfig = {
 };
 
 function createBaseOperationCacheConfig(): OperationCacheConfig {
-  return { enable: false, maxAge: 0, public: false, staleWhileRevalidate: 0 };
+  return {
+    enable: undefined,
+    maxAge: undefined,
+    public: undefined,
+    staleWhileRevalidate: undefined,
+    mustRevalidate: undefined,
+  };
 }
 
 export const OperationCacheConfig = {
   fromJSON(object: any): OperationCacheConfig {
     return {
-      enable: isSet(object.enable) ? Boolean(object.enable) : false,
-      maxAge: isSet(object.maxAge) ? Number(object.maxAge) : 0,
-      public: isSet(object.public) ? Boolean(object.public) : false,
-      staleWhileRevalidate: isSet(object.staleWhileRevalidate) ? Number(object.staleWhileRevalidate) : 0,
+      enable: isSet(object.enable) ? Boolean(object.enable) : undefined,
+      maxAge: isSet(object.maxAge) ? Number(object.maxAge) : undefined,
+      public: isSet(object.public) ? Boolean(object.public) : undefined,
+      staleWhileRevalidate: isSet(object.staleWhileRevalidate) ? Number(object.staleWhileRevalidate) : undefined,
+      mustRevalidate: isSet(object.mustRevalidate) ? Boolean(object.mustRevalidate) : undefined,
     };
   },
 
@@ -2261,15 +2274,17 @@ export const OperationCacheConfig = {
     message.maxAge !== undefined && (obj.maxAge = Math.round(message.maxAge));
     message.public !== undefined && (obj.public = message.public);
     message.staleWhileRevalidate !== undefined && (obj.staleWhileRevalidate = Math.round(message.staleWhileRevalidate));
+    message.mustRevalidate !== undefined && (obj.mustRevalidate = message.mustRevalidate);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<OperationCacheConfig>, I>>(object: I): OperationCacheConfig {
     const message = createBaseOperationCacheConfig();
-    message.enable = object.enable ?? false;
-    message.maxAge = object.maxAge ?? 0;
-    message.public = object.public ?? false;
-    message.staleWhileRevalidate = object.staleWhileRevalidate ?? 0;
+    message.enable = object.enable ?? undefined;
+    message.maxAge = object.maxAge ?? undefined;
+    message.public = object.public ?? undefined;
+    message.staleWhileRevalidate = object.staleWhileRevalidate ?? undefined;
+    message.mustRevalidate = object.mustRevalidate ?? undefined;
     return message;
   },
 };
@@ -3618,6 +3633,7 @@ function createBaseUserDefinedApi(): UserDefinedApi {
     webhooks: [],
     serverOptions: undefined,
     nodeOptions: undefined,
+    experimentalConfig: undefined,
   };
 }
 
@@ -3649,6 +3665,9 @@ export const UserDefinedApi = {
         : [],
       serverOptions: isSet(object.serverOptions) ? ServerOptions.fromJSON(object.serverOptions) : undefined,
       nodeOptions: isSet(object.nodeOptions) ? NodeOptions.fromJSON(object.nodeOptions) : undefined,
+      experimentalConfig: isSet(object.experimentalConfig)
+        ? ExperimentalConfiguration.fromJSON(object.experimentalConfig)
+        : undefined,
     };
   },
 
@@ -3695,6 +3714,9 @@ export const UserDefinedApi = {
       (obj.serverOptions = message.serverOptions ? ServerOptions.toJSON(message.serverOptions) : undefined);
     message.nodeOptions !== undefined &&
       (obj.nodeOptions = message.nodeOptions ? NodeOptions.toJSON(message.nodeOptions) : undefined);
+    message.experimentalConfig !== undefined && (obj.experimentalConfig = message.experimentalConfig
+      ? ExperimentalConfiguration.toJSON(message.experimentalConfig)
+      : undefined);
     return obj;
   },
 
@@ -3722,6 +3744,31 @@ export const UserDefinedApi = {
     message.nodeOptions = (object.nodeOptions !== undefined && object.nodeOptions !== null)
       ? NodeOptions.fromPartial(object.nodeOptions)
       : undefined;
+    message.experimentalConfig = (object.experimentalConfig !== undefined && object.experimentalConfig !== null)
+      ? ExperimentalConfiguration.fromPartial(object.experimentalConfig)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseExperimentalConfiguration(): ExperimentalConfiguration {
+  return { orm: false };
+}
+
+export const ExperimentalConfiguration = {
+  fromJSON(object: any): ExperimentalConfiguration {
+    return { orm: isSet(object.orm) ? Boolean(object.orm) : false };
+  },
+
+  toJSON(message: ExperimentalConfiguration): unknown {
+    const obj: any = {};
+    message.orm !== undefined && (obj.orm = message.orm);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<ExperimentalConfiguration>, I>>(object: I): ExperimentalConfiguration {
+    const message = createBaseExperimentalConfiguration();
+    message.orm = object.orm ?? false;
     return message;
   },
 };
