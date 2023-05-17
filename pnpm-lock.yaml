@@ -165,7 +165,7 @@ importers:
       '@types/node': ^17.0.32
       '@types/object-hash': ^1.3.4
       '@wundergraph/protobuf': workspace:^0.112.0
-      '@wundergraph/sdk': workspace:^0.158.0
+      '@wundergraph/sdk': workspace:^0.158.1
       execa: 5.1.1
       handlebars: ^4.7.7
       json-schema: ^0.4.0
@@ -425,7 +425,7 @@ importers:
       '@wundergraph/orm': workspace:*
       '@wundergraph/protobuf': workspace:^0.112.0
       '@wundergraph/straightforward': ^4.2.5
-      '@wundergraph/wunderctl': workspace:^0.152.0
+      '@wundergraph/wunderctl': workspace:^0.152.1
       axios: ^0.26.1
       axios-retry: ^3.3.1
       chai: ^4.3.4
@@ -24780,7 +24780,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.158.0
+    version: 0.158.1
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.3.0
