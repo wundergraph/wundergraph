@@ -82,7 +82,7 @@ message Operation {
 	OperationType operationType = 3;
 	string variablesSchema = 4;
 	string responseSchema = 5;
-	OperationCacheConfig cacheConfig = 7;
+	optional OperationCacheConfig cacheConfig = 7;
 	OperationAuthenticationConfig authenticationConfig = 8;
 	OperationLiveQueryConfig liveQueryConfig = 9;
 	OperationAuthorizationConfig authorizationConfig = 10;
@@ -229,10 +229,11 @@ message OperationAuthenticationConfig {
 }
 
 message OperationCacheConfig {
-	bool enable = 1;
-	int64 maxAge = 2;
-	bool public = 3;
-	int64 staleWhileRevalidate = 4;
+	optional bool enable = 1;
+	optional int64 maxAge = 2;
+	optional bool public = 3;
+	optional int64 staleWhileRevalidate = 4;
+	optional bool mustRevalidate = 5;
 }
 
 enum OperationType {
