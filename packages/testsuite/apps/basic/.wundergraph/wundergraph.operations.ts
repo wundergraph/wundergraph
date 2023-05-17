@@ -9,12 +9,6 @@ export default configureWunderGraphOperations({
 		},
 		queries: (config) => ({
 			...config,
-			caching: {
-				enable: false,
-				staleWhileRevalidate: 60,
-				maxAge: 60,
-				public: true,
-			},
 			liveQuery: {
 				enable: true,
 				pollingIntervalSeconds: 1,
@@ -26,6 +20,22 @@ export default configureWunderGraphOperations({
 		subscriptions: (config) => ({
 			...config,
 		}),
-		custom: {},
+		custom: {
+			CountryByFilter: (config) => {
+				config.caching = {
+					maxAge: 0,
+					staleWhileRevalidate: 0,
+					mustRevalidate: false,
+				};
+				return config;
+			},
+			With_hyphenCountry_code_with_hyphen: (config) => {
+				config.caching = {
+					maxAge: 0,
+					staleWhileRevalidate: undefined,
+				};
+				return config;
+			},
+		},
 	},
 });
