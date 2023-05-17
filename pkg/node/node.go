@@ -458,6 +458,9 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 
 	hooksClient := hooks.NewClient(nodeConfig.Api.Options.ServerUrl, n.log)
 
+	// If healthchecking is enabled, wait for the hooks server to startup
+	// up to initialHealthCheckWaitTimeout. If the check fails we print
+	// a warning but we do not exit.
 	n.hooksServerInitialHealthCheck(hooksClient)
 
 	dialer := &net.Dialer{
