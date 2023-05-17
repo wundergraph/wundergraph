@@ -1,5 +1,6 @@
 import { OperationType } from '@wundergraph/protobuf';
-import { JSONSchema7 as JSONSchema } from 'json-schema';
+import { JSONSchema7 as JSONSchema, JSONSchema7Definition } from 'json-schema';
+import objectHash from 'object-hash';
 import { GraphQLOperation } from '../graphql/operations';
 import { buildPath, JSONSchemaParameterPath } from './operations';
 
@@ -204,7 +205,19 @@ export class OpenApiBuilder {
 		};
 	}
 
-	private rewriteSchemaRefs(spec: OpenApiSpec, schema: JSONSchema) {
+	private validComponentsSchemaName(name: string) {
+		// name must match this regular expression to be a valid schema name in OAS
+		if (name.match(/^[a-zA-Z0-9._-]+$/)) {
+			return name;
+		}
+		// Hash the name to make it a valid identifier
+		return objectHash(name);
+	}
+
+	private rewriteSchemaRefs(spec: OpenApiSpec, schema: JSONSchema7Definition) {
+		if (typeof schema === 'boolean') {
+			return;
+		}
 		// Move definitions to spec
 		if (schema?.definitions) {
 			if (!spec.components) {
@@ -216,39 +229,48 @@ export class OpenApiBuilder {
 			for (const key of Object.keys(schema.definitions)) {
 				const definition = schema.definitions[key];
 				if (typeof definition !== 'boolean') {
+					const name = this.validComponentsSchemaName(key);
 					this.rewriteSchemaRefs(spec, definition);
-					const prevSchema = spec.components.schemas?.[key];
+					const prevSchema = spec.components.schemas?.[name];
 					if (prevSchema && JSON.stringify(prevSchema) !== JSON.stringify(definition)) {
 						throw new Error(
-							`could not merge schemas for ${key}: ${JSON.stringify(prevSchema)} != ${JSON.stringify(definition)}`
+							`could not merge schemas for ${name}: ${JSON.stringify(prevSchema)} != ${JSON.stringify(definition)}`
 						);
 					}
-					spec.components.schemas[key] = definition;
+					spec.components.schemas[name] = definition;
 				}
 			}
 			delete schema.definitions;
 		}
 		// Rewrite references
 		if (schema?.$ref) {
+			// Replace #/definitions with #/components/schema (if needed)
 			schema.$ref = schema.$ref.replace(/#\/definitions\/([^\/])/, `#/components/schemas/$1`);
+			const componentsSchemas = '#/components/schemas/';
+			if (schema.$ref.startsWith(componentsSchemas)) {
+				const refName = schema.$ref.substring(componentsSchemas.length);
+				const renamed = this.validComponentsSchemaName(refName);
+				schema.$ref = componentsSchemas + renamed;
+			}
 		}
 		if (schema?.properties) {
 			for (const key of Object.keys(schema.properties)) {
 				const prop = schema.properties[key];
-				if (typeof prop !== 'boolean') {
-					this.rewriteSchemaRefs(spec, prop);
-				}
+				this.rewriteSchemaRefs(spec, prop);
 			}
 		}
 		if (schema?.items && typeof schema.items !== 'boolean') {
 			if (Array.isArray(schema.items)) {
 				for (const item of schema.items) {
-					if (typeof item !== 'boolean') {
-						this.rewriteSchemaRefs(spec, item);
-					}
+					this.rewriteSchemaRefs(spec, item);
 				}
 			} else {
 				this.rewriteSchemaRefs(spec, schema.items);
+			}
+		}
+		if (schema?.anyOf) {
+			for (const item of schema.anyOf) {
+				this.rewriteSchemaRefs(spec, item);
 			}
 		}
 	}
