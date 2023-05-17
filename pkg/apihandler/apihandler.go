@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
+	"github.com/dgraph-io/ristretto"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/hashicorp/go-multierror"
@@ -141,7 +142,7 @@ func NewBuilder(pool *pool.Pool,
 	}
 }
 
-func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Router, api *Api) (streamClosers []chan struct{}, err error) {
+func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Router, api *Api, planCache *ristretto.Cache) (streamClosers []chan struct{}, err error) {
 	r.api = api
 
 	r.router = r.createSubRouter(router)
@@ -324,6 +325,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			prepared:        map[uint64]planWithExtractedVariables{},
 			preparedMux:     &sync.RWMutex{},
 			renameTypeNames: r.renameTypeNames,
+			planCache:       planCache,
 		}
 		apiPath := "/graphql"
 		r.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath).Handler(graphqlHandler)
@@ -708,6 +710,8 @@ type GraphQLHandler struct {
 	preparedMux *sync.RWMutex
 
 	renameTypeNames []resolve.RenameTypeName
+
+	planCache *ristretto.Cache
 }
 
 type planWithExtractedVariables struct {
@@ -720,6 +724,11 @@ var (
 )
 
 func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	var (
+		preparedPlan planWithExtractedVariables
+	)
+
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 
 	buf := pool.GetBytesBuffer()
@@ -753,32 +762,78 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if shared.Report.HasErrors() {
 		h.logInternalErrors(shared.Report, requestLogger)
-		h.writeRequestErrors(shared.Report, w, requestLogger)
-
 		w.WriteHeader(http.StatusBadRequest)
+		h.writeRequestErrors(shared.Report, w, requestLogger)
 		return
 	}
 
-	prepared, err := h.preparePlan(requestOperationName, shared)
+	if len(requestOperationName) == 0 {
+		shared.Normalizer.NormalizeOperation(shared.Doc, h.definition, shared.Report)
+	} else {
+		shared.Normalizer.NormalizeNamedOperation(shared.Doc, h.definition, requestOperationName, shared.Report)
+	}
+	if shared.Report.HasErrors() {
+		h.logInternalErrors(shared.Report, requestLogger)
+		w.WriteHeader(http.StatusBadRequest)
+		h.writeRequestErrors(shared.Report, w, requestLogger)
+		return
+	}
+
+	// create a hash of the query to use as a key for the prepared plan cache
+	// in this hash, we include the printed operation
+	// and the extracted variables (see below)
+	err = shared.Printer.Print(shared.Doc, h.definition, shared.Hash)
 	if err != nil {
-		if shared.Report.HasErrors() {
-			h.logInternalErrors(shared.Report, requestLogger)
-			h.writeRequestErrors(shared.Report, w, requestLogger)
-		} else {
-			requestLogger.Error("prepare plan failed", zap.Error(err))
-			w.WriteHeader(http.StatusBadRequest)
-		}
-
+		requestLogger.Error("print failed", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	if len(prepared.variables) != 0 {
-		// we have to merge query variables into extracted variables to been able to override default values
-		// we make a copy of the extracted variables to not override h.extractedVariables
-		shared.Ctx.Variables = MergeJsonRightIntoLeft(shared.Ctx.Variables, prepared.variables)
+	// add the extracted variables to the hash
+	_, err = shared.Hash.Write(shared.Doc.Input.Variables)
+	if err != nil {
+		requestLogger.Error("hash write failed", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	operationID := shared.Hash.Sum64() // generate the operation ID
+	shared.Hash.Reset()
+
+	// try to get a prepared plan for this operation ID from the cache
+	cachedPlan, ok := h.planCache.Get(operationID)
+	if ok && cachedPlan != nil {
+		// re-use a prepared plan
+		preparedPlan = cachedPlan.(planWithExtractedVariables)
+	} else {
+		// prepare a new plan using single flight
+		// this ensures that we only prepare the plan once for this operation ID
+		sharedPreparedPlan, err, _ := h.sf.Do(strconv.FormatUint(operationID, 10), func() (interface{}, error) {
+			prepared, err := h.preparePlan(requestOperationName, shared)
+			if err != nil {
+				return nil, err
+			}
+			// cache the prepared plan for 1 hour
+			h.planCache.SetWithTTL(operationID, prepared, 1, time.Hour)
+			return prepared, nil
+		})
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			if shared.Report.HasErrors() {
+				h.logInternalErrors(shared.Report, requestLogger)
+				h.writeRequestErrors(shared.Report, w, requestLogger)
+			} else {
+				requestLogger.Error("prepare plan failed", zap.Error(err))
+			}
+			return
+		}
+		preparedPlan = sharedPreparedPlan.(planWithExtractedVariables)
 	}
 
-	switch p := prepared.preparedPlan.(type) {
+	if len(preparedPlan.variables) != 0 {
+		shared.Ctx.Variables = MergeJsonRightIntoLeft(shared.Ctx.Variables, preparedPlan.variables)
+	}
+
+	switch p := preparedPlan.preparedPlan.(type) {
 	case *plan.SynchronousResponsePlan:
 		w.Header().Set("Content-Type", "application/json")
 
@@ -868,28 +923,41 @@ func (h *GraphQLHandler) writeRequestErrors(report *operationreport.Report, w ht
 }
 
 func (h *GraphQLHandler) preparePlan(requestOperationName []byte, shared *pool.Shared) (planWithExtractedVariables, error) {
-	if len(requestOperationName) == 0 {
-		shared.Normalizer.NormalizeOperation(shared.Doc, h.definition, shared.Report)
-	} else {
-		shared.Normalizer.NormalizeNamedOperation(shared.Doc, h.definition, requestOperationName, shared.Report)
-	}
-	if shared.Report.HasErrors() {
-		return planWithExtractedVariables{}, fmt.Errorf(ErrMsgOperationNormalizationFailed, shared.Report)
+	// copy the extracted variables from the shared document
+	// this is necessary because the shared document is reused across requests
+	variables := make([]byte, len(shared.Doc.Input.Variables))
+	copy(variables, shared.Doc.Input.Variables)
+
+	// print the shared document into a buffer and re-parse it
+	// this is necessary because the shared document will be re-used across requests
+	// as the plan is cached, and will have references to the document, it cannot be re-used
+	buf := &bytes.Buffer{}
+	err := shared.Printer.Print(shared.Doc, h.definition, buf)
+	if err != nil {
+		return planWithExtractedVariables{}, fmt.Errorf(ErrMsgOperationParseFailed, err)
 	}
 
-	state := shared.Validation.Validate(shared.Doc, h.definition, shared.Report)
+	// parse the document again into a non-shared document, which will be used for planning
+	// this will be cached, so it's insignificant that re-parsing causes overhead
+	doc, report := astparser.ParseGraphqlDocumentBytes(buf.Bytes())
+	if report.HasErrors() {
+		return planWithExtractedVariables{}, fmt.Errorf(ErrMsgOperationParseFailed, err)
+	}
+
+	// validate the document before planning
+	state := shared.Validation.Validate(&doc, h.definition, shared.Report)
 	if state != astvalidation.Valid {
 		return planWithExtractedVariables{}, errInvalid
 	}
 
-	preparedPlan := shared.Planner.Plan(shared.Doc, h.definition, unsafebytes.BytesToString(requestOperationName), shared.Report)
+	// create and postprocess the plan
+	preparedPlan := shared.Planner.Plan(&doc, h.definition, unsafebytes.BytesToString(requestOperationName), shared.Report)
 	shared.Postprocess.Process(preparedPlan)
 
-	prepared := planWithExtractedVariables{
+	return planWithExtractedVariables{
 		preparedPlan: preparedPlan,
-		variables:    shared.Doc.Input.Variables,
-	}
-	return prepared, nil
+		variables:    variables,
+	}, nil
 }
 
 func postProcessVariables(operation *wgpb.Operation, r *http.Request, variables []byte) ([]byte, error) {

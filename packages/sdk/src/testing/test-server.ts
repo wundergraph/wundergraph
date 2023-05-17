@@ -94,8 +94,28 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		};
 	}
 
-	public url(rel?: string): string {
+	/**
+	 * Given a relative URL, url returns its absolute URL for on a running test server.
+	 * If the server is not running, an error is thrown.
+	 *
+	 * @param rel Relative URL
+	 * @returns Absolute URL pointing to the test server.
+	 */
+	url(rel?: string): string {
+		if (!this.nodeUrl) {
+			throw new Error('server is not running');
+		}
 		return this.nodeUrl + (rel || '');
+	}
+
+	/**
+	 * graphqlEndpoint returns the absolute URL to the GraphQL endpoint for a running test
+	 * server. If the server is not running, it throws an error.
+	 *
+	 * @returns Absolute URL to GraphQL endpoint
+	 */
+	graphqlEndpoint(): string {
+		return this.url('/graphql');
 	}
 
 	/**
