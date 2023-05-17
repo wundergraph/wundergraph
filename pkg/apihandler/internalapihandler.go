@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/buger/jsonparser"
+	"github.com/dgraph-io/ristretto"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 	"golang.org/x/sync/singleflight"
@@ -58,7 +59,7 @@ func NewInternalBuilder(pool *pool.Pool, log *zap.Logger, hooksClient *hooks.Cli
 	}
 }
 
-func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, router *mux.Router, api *Api) (streamClosers []chan struct{}, err error) {
+func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, router *mux.Router, api *Api, planCache *ristretto.Cache) (streamClosers []chan struct{}, err error) {
 
 	if api.EngineConfiguration == nil {
 		// engine config is nil, skipping
@@ -134,6 +135,7 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 			prepared:        map[uint64]planWithExtractedVariables{},
 			preparedMux:     &sync.RWMutex{},
 			renameTypeNames: i.renameTypeNames,
+			planCache:       planCache,
 		}
 		apiPath := "/graphql"
 		i.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath).Handler(graphqlHandler)
