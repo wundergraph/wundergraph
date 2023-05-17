@@ -381,18 +381,15 @@ func (n *Node) hooksServerInitialHealthCheck(hooksClient *hooks.Client) bool {
 		// Assume ok
 		return true
 	}
-	fmt.Println("HC START", time.Now())
 	initialHealthCheckCtx, cancel := context.WithTimeout(context.Background(), initialHealthCheckWaitTimeout)
 	defer cancel()
 	for {
 		select {
 		case <-initialHealthCheckCtx.Done():
 			n.log.Warn("hooks server didn't start after initial wait", zap.Duration("duration", initialHealthCheckWaitTimeout))
-			fmt.Println("HC CRAP", time.Now())
 			return false
 		default:
 			if n.hooksServerHealthIsOk(initialHealthCheckCtx, hooksClient) {
-				fmt.Println("HC OK", time.Now())
 				return true
 			}
 		}
