@@ -581,6 +581,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			preparedPlan:           synchronousPlan,
 			pool:                   r.pool,
 			extractedVariables:     make([]byte, len(shared.Doc.Input.Variables)),
+			cacheHeaders:           cacheheaders.New(newCacheControl(operation.CacheConfig), r.api.ApiConfigHash),
 			operation:              operation,
 			variablesValidator:     variablesValidator,
 			rbacEnforcer:           authentication.NewRBACEnforcer(operation),
@@ -624,6 +625,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			preparedPlan:           subscriptionPlan,
 			pool:                   r.pool,
 			extractedVariables:     make([]byte, len(shared.Doc.Input.Variables)),
+			cacheHeaders:           cacheheaders.New(newCacheControl(operation.CacheConfig), r.api.ApiConfigHash),
 			operation:              operation,
 			variablesValidator:     variablesValidator,
 			rbacEnforcer:           authentication.NewRBACEnforcer(operation),
@@ -1298,7 +1300,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if h.cacheHeaders != nil {
-		h.cacheHeaders.Set(w, resp.Data)
+		h.cacheHeaders.Set(r, w, resp.Data)
 		if h.cacheHeaders.NotModified(r, w) {
 			return
 		}
@@ -1454,6 +1456,7 @@ type MutationHandler struct {
 	log                    *zap.Logger
 	preparedPlan           *plan.SynchronousResponsePlan
 	extractedVariables     []byte
+	cacheHeaders           *cacheheaders.Headers
 	pool                   *pool.Pool
 	operation              *wgpb.Operation
 	variablesValidator     *inputvariables.Validator
@@ -1561,6 +1564,10 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if h.cacheHeaders != nil {
+		h.cacheHeaders.Set(r, w, resp.Data)
+	}
+
 	reader := bytes.NewReader(resp.Data)
 	_, err = reader.WriteTo(w)
 	if done := handleOperationErr(requestLogger, err, w, "writing response failed", h.operation); done {
@@ -1573,6 +1580,7 @@ type SubscriptionHandler struct {
 	log                    *zap.Logger
 	preparedPlan           *plan.SubscriptionResponsePlan
 	extractedVariables     []byte
+	cacheHeaders           *cacheheaders.Headers
 	pool                   *pool.Pool
 	operation              *wgpb.Operation
 	variablesValidator     *inputvariables.Validator
@@ -1642,6 +1650,10 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	if !ok {
 		http.Error(w, "Connection not flushable", http.StatusBadRequest)
 		return
+	}
+
+	if h.cacheHeaders != nil {
+		h.cacheHeaders.Set(r, w, nil)
 	}
 
 	_, err = h.hooksPipeline.RunSubscription(ctx, flushWriter, r)
@@ -2255,7 +2267,7 @@ func (h *FunctionsHandler) handleRequest(resolveCtx *resolve.Context, r *http.Re
 	}
 
 	if h.cacheHeaders != nil {
-		h.cacheHeaders.Set(w, out.Response)
+		h.cacheHeaders.Set(r, w, out.Response)
 		if h.cacheHeaders.NotModified(r, w) {
 			return
 		}
@@ -2471,13 +2483,65 @@ func validateInputVariables(ctx context.Context, log *zap.Logger, variables []by
 	return true
 }
 
+// cacheControlOverride performs the override of the Cache-Control header to mark
+// responses to authenticated requests as private
+func cacheControlOverride(r *http.Request, cc cacheheaders.CacheControl) cacheheaders.CacheControl {
+	if authentication.UserFromContext(r.Context()) != nil || r.Header.Get("Authorization") != "" || r.Header.Get("Cookie") != "" {
+		cc.Public = false
+	}
+	return cc
+}
+
+// newCacheControl creates a cacheheaders.CacheControl with the given operation
+// cache configuration, applying the default values if config is nil
 func newCacheControl(config *wgpb.OperationCacheConfig) *cacheheaders.CacheControl {
-	if config == nil || !config.Enable {
+	const (
+		defaultPublic               = true
+		defaultMaxAge               = 0
+		defaultStaleWhileRevalidate = -1
+		defaultMustRevalidate       = true
+	)
+	if config == nil {
+		// Return the default configuration
+		return &cacheheaders.CacheControl{
+			Public:               defaultPublic,
+			MaxAge:               defaultMaxAge,
+			StaleWhileRevalidate: defaultStaleWhileRevalidate,
+			MustRevalidate:       defaultMustRevalidate,
+			Override:             cacheControlOverride,
+		}
+	}
+	if config.Enable != nil && !*config.Enable {
+		// Explicitly disabled
 		return nil
 	}
-	return &cacheheaders.CacheControl{
-		MaxAge:               config.MaxAge,
-		Public:               config.Public,
-		StaleWhileRevalidate: config.StaleWhileRevalidate,
+	if config.MaxAge == nil && config.Public == nil && config.StaleWhileRevalidate == nil && config.MustRevalidate == nil {
+		// No configuration values provided, disable
+		return nil
 	}
+	// Some values where provided. Fill in the rest
+	cc := &cacheheaders.CacheControl{
+		Override: cacheControlOverride,
+	}
+	if config.Public != nil {
+		cc.Public = *config.Public
+	} else {
+		cc.Public = defaultPublic
+	}
+	if config.MaxAge != nil {
+		cc.MaxAge = *config.MaxAge
+	} else {
+		cc.MaxAge = defaultMaxAge
+	}
+	if config.StaleWhileRevalidate != nil {
+		cc.StaleWhileRevalidate = *config.StaleWhileRevalidate
+	} else {
+		cc.StaleWhileRevalidate = defaultStaleWhileRevalidate
+	}
+	if config.MustRevalidate != nil {
+		cc.MustRevalidate = *config.MustRevalidate
+	} else {
+		cc.MustRevalidate = defaultMustRevalidate
+	}
+	return cc
 }
