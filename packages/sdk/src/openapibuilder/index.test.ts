@@ -1,6 +1,8 @@
+import { JSONSchema7 } from 'json-schema';
+
 import { OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import { GraphQLOperation } from '../graphql/operations';
-import { OpenApiBuilder } from './index';
+import { OpenApiBuilder, isValidOpenApiSchemaName } from './index';
 
 const emptySchema = {
 	type: 'object',
@@ -52,6 +54,15 @@ const operations = [
 	},
 ] as GraphQLOperation[];
 
+const build = (operations: GraphQLOperation[]) => {
+	const builder = new OpenApiBuilder({
+		title: 'WunderGraph',
+		version: '0',
+		baseURL: 'http://localhost:9991',
+	});
+	return builder.build(operations);
+};
+
 describe('OpenAPI builder', () => {
 	test('no operations', async () => {
 		const apiTitle = 'WunderGraph';
@@ -70,11 +81,6 @@ describe('OpenAPI builder', () => {
 	});
 
 	test('operation properties', async () => {
-		const builder = new OpenApiBuilder({
-			title: 'WunderGraph',
-			version: '1.0',
-			baseURL: 'http://localhost:9991',
-		});
 		const operations = [
 			{
 				Name: 'Query',
@@ -126,7 +132,7 @@ describe('OpenAPI builder', () => {
 				},
 			},
 		] as unknown as GraphQLOperation[];
-		const result = builder.build(operations);
+		const result = build(operations);
 
 		const querySpec = result.paths['/QueryPath'];
 		expect(querySpec).toBeDefined();
@@ -164,12 +170,7 @@ describe('OpenAPI builder', () => {
 				Internal: true,
 			},
 		] as unknown as GraphQLOperation[];
-		const builder = new OpenApiBuilder({
-			title: 'WunderGraph',
-			version: '0',
-			baseURL: 'http://localhost:9991',
-		});
-		const result = builder.build(operations);
+		const result = build(operations);
 		expect(Object.keys(result.paths).length).toBe(1);
 		expect(result.paths['/QueryPath']).toBeDefined();
 		expect(result.paths['/InternalQueryPath']).toBeUndefined();
@@ -194,12 +195,8 @@ describe('OpenAPI builder', () => {
 				OperationType: OperationType.SUBSCRIPTION,
 			},
 		] as unknown as GraphQLOperation[];
-		const builder = new OpenApiBuilder({
-			title: 'WunderGraph',
-			version: '0',
-			baseURL: 'http://localhost:9991',
-		});
-		const result = builder.build(operations);
+
+		const result = build(operations);
 		expect(Object.keys(result.paths).length).toBe(3);
 		const query = result.paths['/QueryPath'].get;
 		expect(query?.['x-wundergraph-operation-type']).toBe('query');
@@ -210,6 +207,53 @@ describe('OpenAPI builder', () => {
 		const subscription = result.paths['/SubscriptionPath'].get;
 		expect(subscription?.['x-wundergraph-operation-type']).toBe('subscription');
 		expect(subscription?.['x-wundergraph-requires-authentication']).toBe(false);
+	});
+
+	test('rewrite references and generate valid names inside anyOf', () => {
+		const operations = [
+			{
+				Name: 'Weather',
+				PathName: 'weather/get',
+				OperationType: OperationType.QUERY,
+				ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+				VariablesSchema: emptySchema,
+				ResponseSchema: {
+					type: 'object',
+					properties: {
+						weather: {
+							anyOf: [
+								{
+									$ref: '#/definitions/{readonlysummary:{readonlytitle:string|null;readonlydescription:string|null;readonlyicon:string|null;}|null;}',
+								},
+								{
+									type: 'null',
+								},
+							],
+						},
+					},
+					required: ['weather'],
+					definitions: {
+						'{readonlysummary:{readonlytitle:string|null;readonlydescription:string|null;readonlyicon:string|null;}|null;}':
+							{
+								type: 'string',
+							},
+					},
+				},
+			},
+		] as unknown as GraphQLOperation[];
+
+		const result = build(operations);
+		const operation = result.paths['/weather/get'].get;
+		const responseSchema = operation?.responses?.['200']?.content?.['application/json']?.schema;
+		const weather = responseSchema?.properties?.['weather'];
+		const firstAnyOf = (weather as JSONSchema7).anyOf?.[0];
+		const firstRef = (firstAnyOf as JSONSchema7).$ref;
+		expect(firstRef).toMatch(/#\/components\/schemas\/.*/);
+
+		const refName = firstRef?.substring('#/components/schemas/'.length);
+		expect(refName).toBeDefined();
+		expect(isValidOpenApiSchemaName(refName!)).toBeTruthy();
+		expect(result.components?.schemas?.[refName!]).toBeDefined();
 	});
 
 	test('OpenAPI Builder', async () => {
