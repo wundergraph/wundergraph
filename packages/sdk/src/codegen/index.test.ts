@@ -106,6 +106,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 					},
 				},
 				serverOptions: {
+					present: true,
 					serverUrl: {
 						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
 						staticVariableContent: 'http://localhost:9992',
