@@ -35,6 +35,7 @@ export interface MandatoryServerOptions {
 }
 
 export interface ResolvedServerOptions {
+	present: boolean;
 	serverUrl: ConfigurationVariable;
 	listen: ResolvedListenOptions;
 	logger: ResolvedServerLogger;

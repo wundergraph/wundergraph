@@ -1,6 +1,6 @@
 import { EnvironmentVariable, mapInputVariable, resolveVariable } from '../configure/variables';
 import { defaultHost, defaultServerPort, isCloud, ListenOptions, LoggerLevel, WgEnv } from '../configure/options';
-import { ResolvedServerOptions, ServerOptions, MandatoryServerOptions } from './types';
+import { ResolvedServerOptions, ServerOptions, MandatoryServerOptions, WunderGraphHooksAndServerConfig } from './types';
 
 export const customGqlServerMountPath = (name: string): string => {
 	return `/gqls/${name}/graphql`;
@@ -39,8 +39,12 @@ export const serverOptionsWithDefaults = (options?: ServerOptions): MandatorySer
 		  };
 };
 
-export const resolveServerOptions = (options: MandatoryServerOptions): ResolvedServerOptions => {
+export const resolveServerOptions = (
+	options: MandatoryServerOptions,
+	server?: WunderGraphHooksAndServerConfig
+): ResolvedServerOptions => {
 	return {
+		present: server !== undefined,
 		serverUrl: mapInputVariable(options.serverUrl),
 		listen: {
 			host: mapInputVariable(options.listen.host),

@@ -2,6 +2,9 @@
 export const handlebarTemplate = `
 import { ServerOptions, WunderGraphTestServer, WunderGraphMockServer, WunderGraphTestServers } from "@wundergraph/sdk/testing";
 import { createClient, WunderGraphClient } from "./client";
+{{#if hasServer}}
+import configureWunderGraphServer from "../wundergraph.server";
+{{/if}}
 
 /**
  * Encapsulates the WunderGraphTestServers with the generated client types.
@@ -17,6 +20,9 @@ export const createTestServer = (opts?: Partial<ServerOptions<WunderGraphClient>
 	return new WunderGraphTestServer({
 		...opts,
 		createClient: opts?.createClient ?? createClient,
+		{{#if hasServer}}
+		serverConfiguration: configureWunderGraphServer,
+		{{/if}}
 	});
 }
 

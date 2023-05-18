@@ -389,7 +389,7 @@ const resolveConfig = async (
 
 	const resolvedNodeOptions = resolveNodeOptions(config.options);
 	const serverOptions = serverOptionsWithDefaults(config.server?.options);
-	const resolvedServerOptions = resolveServerOptions(serverOptions);
+	const resolvedServerOptions = resolveServerOptions(serverOptions, config.server);
 
 	const publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolvedNodeOptions.publicNodeUrl));
 

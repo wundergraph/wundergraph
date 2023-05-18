@@ -43,38 +43,6 @@ let logger: pino.Logger;
  * You need to pass START_HOOKS_SERVER=true to start the server
  */
 if (process.env.START_HOOKS_SERVER === 'true') {
-	logger = ServerLogger;
-
-	/**
-	 * The 'uncaughtExceptionMonitor' event is emitted before an 'uncaughtException' event is emitted or
-	 * a hook installed via process.setUncaughtExceptionCaptureCallback() is called. Installing an
-	 * 'uncaughtExceptionMonitor' listener does not change the behavior once an 'uncaughtException'
-	 * event is emitted. The process will still crash if no 'uncaughtException' listener is installed.
-	 */
-	process.on('uncaughtExceptionMonitor', (err, origin) => {
-		logger.error(err, `uncaught exception, origin: ${origin}`);
-	});
-
-	if (!process.env.WG_DIR_ABS) {
-		logger.fatal('The environment variable `WG_DIR_ABS` is required!');
-		process.exit(1);
-	}
-	try {
-		const configContent = fs.readFileSync(path.join(process.env.WG_DIR_ABS!, 'generated', 'wundergraph.config.json'), {
-			encoding: 'utf8',
-		});
-		WG_CONFIG = JSON.parse(configContent);
-
-		if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.nodeInternalUrl) {
-			const nodeInternalURL = resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.nodeInternalUrl);
-			clientFactory = internalClientFactory(WG_CONFIG.api.operations, nodeInternalURL);
-		} else {
-			throw new Error('User defined api is not set.');
-		}
-	} catch (err: any) {
-		logger.fatal(err, 'Could not load wundergraph.config.json. Did you forget to run `wunderctl generate` ?');
-		process.exit(1);
-	}
 }
 
 export function configureWunderGraphServer<
@@ -129,34 +97,71 @@ const _configureWunderGraphServer = <
 	 * This environment variable is used to determine if the server should start the hooks server.
 	 */
 	if (process.env.START_HOOKS_SERVER === 'true') {
-		const isProduction = process.env.NODE_ENV === 'production';
-
-		if (!isProduction) {
-			// Exit the server when wunderctl exited without the chance to kill the child processes
-			onParentProcessExit(() => {
-				process.exit(0);
-			});
-		}
-
-		logger.info('Starting WunderGraph Server');
-
-		startServer({
-			wundergraphDir: process.env.WG_DIR_ABS!,
-			config: WG_CONFIG,
-			serverConfig,
-			// only in production because it has no value in development
-			gracefulShutdown: isProduction,
-			clientFactory,
-		}).catch((err) => {
-			logger.fatal(err, 'Could not start the hook server');
-			process.exit(1);
-		});
+		runServer(serverConfig as WunderGraphHooksAndServerConfig);
 	}
 
 	return serverConfig;
 };
 
-export const startServer = async (opts: ServerRunOptions) => {
+export const runServer = async (serverConfig: WunderGraphHooksAndServerConfig) => {
+	logger = ServerLogger;
+
+	/**
+	 * The 'uncaughtExceptionMonitor' event is emitted before an 'uncaughtException' event is emitted or
+	 * a hook installed via process.setUncaughtExceptionCaptureCallback() is called. Installing an
+	 * 'uncaughtExceptionMonitor' listener does not change the behavior once an 'uncaughtException'
+	 * event is emitted. The process will still crash if no 'uncaughtException' listener is installed.
+	 */
+	process.on('uncaughtExceptionMonitor', (err, origin) => {
+		logger.error(err, `uncaught exception, origin: ${origin}`);
+	});
+
+	if (!process.env.WG_DIR_ABS) {
+		logger.fatal('The environment variable `WG_DIR_ABS` is required!');
+		process.exit(1);
+	}
+	try {
+		const configContent = fs.readFileSync(path.join(process.env.WG_DIR_ABS!, 'generated', 'wundergraph.config.json'), {
+			encoding: 'utf8',
+		});
+		WG_CONFIG = JSON.parse(configContent);
+
+		if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.nodeInternalUrl) {
+			const nodeInternalURL = resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.nodeInternalUrl);
+			clientFactory = internalClientFactory(WG_CONFIG.api.operations, nodeInternalURL);
+		} else {
+			throw new Error('User defined api is not set.');
+		}
+	} catch (err: any) {
+		logger.fatal(err, 'Could not load wundergraph.config.json. Did you forget to run `wunderctl generate` ?');
+		process.exit(1);
+	}
+
+	const isProduction = process.env.NODE_ENV === 'production';
+
+	if (!isProduction) {
+		// Exit the server when wunderctl exited without the chance to kill the child processes
+		onParentProcessExit(() => {
+			process.exit(0);
+		});
+	}
+
+	logger.info('Starting WunderGraph Server');
+
+	startServer({
+		wundergraphDir: process.env.WG_DIR_ABS!,
+		config: WG_CONFIG,
+		serverConfig,
+		// only in production because it has no value in development
+		gracefulShutdown: isProduction,
+		clientFactory,
+	}).catch((err) => {
+		logger.fatal(err, 'Could not start the hook server');
+		process.exit(1);
+	});
+};
+
+const startServer = async (opts: ServerRunOptions) => {
 	if (opts.config.api?.serverOptions?.listen?.port && !!opts.config.api?.serverOptions?.listen?.host) {
 		const portString = resolveConfigurationVariable(opts.config.api.serverOptions.listen.port);
 		const host = resolveConfigurationVariable(opts.config.api.serverOptions.listen.host);
@@ -164,8 +169,8 @@ export const startServer = async (opts: ServerRunOptions) => {
 
 		const fastify = await createServer(opts);
 		await fastify.listen({
-			port: port,
-			host: host,
+			port,
+			host,
 		});
 	} else {
 		logger.fatal('Could not start the hook server');

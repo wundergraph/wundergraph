@@ -1,9 +1,11 @@
 import { Client, CreateClientConfig } from '../client';
 import { Subprocess, wunderctl } from '../wunderctlexec';
 import { retry } from 'ts-retry-promise';
-import { join } from 'node:path';
+import path, { join } from 'node:path';
 import terminate from 'terminate/promise';
 import { freeport, fileExists } from './util';
+import { WunderGraphHooksAndServerConfig } from '../server';
+import { runServer } from '../server/server';
 
 type FetchFn = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>;
 
@@ -51,6 +53,8 @@ export interface ServerOptions<ClientType extends Client = Client> {
 	 * @default None
 	 */
 	env?: Record<string, string>;
+
+	serverConfiguration?: WunderGraphHooksAndServerConfig;
 }
 
 /**
@@ -140,8 +144,18 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		this.nodeUrl = env['WG_NODE_URL'];
 		let subprocess: Subprocess | undefined;
 		if (manageServer) {
+			const inProcessHooksServer = true;
 			let cmd = ['start'];
 			env = { ...env, ...(this.options.env ?? {}), ...(opts?.env ?? {}) };
+			if (inProcessHooksServer) {
+				cmd.push('--exclude-server');
+				console.log('USING ENV', env);
+				process.env.WG_SERVER_PORT = env.WG_SERVER_PORT;
+				process.env.WG_NODE_INTERNAL_URL = env.WG_NODE_INTERNAL_URL;
+				process.env.NODE_ENV = 'production';
+				process.env.WG_DIR_ABS = path.join(this.options.dir ?? '.', '.wundergraph');
+				runServer(this.options.serverConfiguration!);
+			}
 			if (this.options.debug || process.env.WG_TEST_DEBUG) {
 				cmd.push('--debug', '--pretty-logging');
 			} else {
