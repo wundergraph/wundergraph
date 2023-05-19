@@ -8,21 +8,22 @@ description: This guide provides a configuration for debugging your WunderGraph 
 
 ## Visual Studio Code
 
-Visual Studio code has builtin support for debugging JavaScript/TypeScript.
+Visual Studio Code includes built-in support for debugging JavaScript/TypeScript, making it convenient to debug your hooks or functions in your WunderGraph application. To utilize the `JavaScript Debug Terminal`, follow these steps:
 
-The easiest solution to debug your hooks a functions in your WunderGraph application is to use
-the `JavaScript Debug Terminal` by selecting the `TERMINAL` tab in the bottom pane, clicking
-the `+` symbol and opening a `Javascript Debug Terminal`:
+- Open Visual Studio Code and navigate to the bottom pane.
+- Select the `TERMINAL` tab.
+- Click the `+` symbol to open a new terminal.
+- Choose `Javascript Debug Terminal`.
 
 ![JavaScript Debug Terminal in Visual Studio Code](/images/debugging_vscode.png)
 
-Launch your application from this new terminal, either using `npm start` or `wunderctl up` directly,
-and execution will stop at your breakpoints.
+From the newly opened terminal, launch your application using either `npm start` or `wunderctl up`.
+This will run your JavaScript based code inside a debugger, allowing execution to halt at your
+breakpoints.
 
 # Debugging the WunderGraph server
 
-Although less common than debugging your code, sometimes it might be useful to debug the WunderGraph server,
-written in Go.
+If you need to debug the WunderGraph node, which is written in Go, you can follow these steps in Visual Studio Code:
 
 ## Visual Studio Code
 
