@@ -1,5 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import path from 'path';
+import type { ORM } from '@wundergraph/orm';
+
 import { Webhook, WebhookHeaders, WebhookQuery } from '../../webhooks/types';
 import { Headers } from '@whatwg-node/fetch';
 import type { RequestMethod } from '../types';
@@ -16,6 +18,7 @@ export interface WebHookRouteConfig {
 interface FastifyWebHooksOptions {
 	webhooks: WebhookConfiguration[];
 	internalClientFactory: InternalClientFactory;
+	orm: ORM<any>;
 	nodeURL: string;
 	globalContext: any;
 	createContext: (globalContext: any) => Promise<any>;
@@ -23,12 +26,11 @@ interface FastifyWebHooksOptions {
 }
 
 const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async (fastify, config) => {
-	await fastify.register(require('@fastify/formbody'));
-
+	await fastify.register(require('@fastify/formbody'));	
 	for (const hook of config.webhooks) {
 		try {
 			const webhookFilePath = path.join(process.env.WG_DIR_ABS!, 'generated', 'bundle', hook.filePath);
-			const webhook: Webhook = (await import(webhookFilePath)).default;
+			const webhook: Webhook<any, any, any, any, any> = (await import(webhookFilePath)).default;
 
 			fastify.route({
 				url: `/webhooks/${hook.name}`,
@@ -60,7 +62,8 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 								internalClient: config.internalClientFactory({}, clientRequest),
 								operations: operationClient,
 								clientRequest,
-								context: requestContext,
+								graph: config.orm,
+								context: requestContext
 							}
 						);
 

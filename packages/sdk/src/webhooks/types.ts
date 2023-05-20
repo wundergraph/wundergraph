@@ -7,9 +7,10 @@ export interface Webhook<
 	TInternalClient extends InternalClient = InternalClient,
 	Event extends WebhookHttpEvent = WebhookHttpEvent,
 	Response extends WebhookHttpResponse = WebhookHttpResponse,
-	TOperationsClient extends OperationsClient = OperationsClient
+	TOperationsClient extends OperationsClient = OperationsClient,
+	TypedORM = any	
 > {
-	handler: (event: Event, context: WebhookRequestContext<TInternalClient, TOperationsClient>) => Promise<Response>;
+	handler: (event: Event, context: WebhookRequestContext<TInternalClient, TOperationsClient, TypedORM>) => Promise<Response>;
 }
 export interface WebhookHttpResponse<ResponseBody = unknown, Headers extends WebhookHeaders = WebhookHeaders> {
 	statusCode?: number;
@@ -20,8 +21,9 @@ export type WebhookHeaders = Record<string, string>;
 export type WebhookQuery = Record<string, string | string[]>;
 export interface WebhookRequestContext<
 	TInternalClient extends InternalClient = InternalClient,
-	TOperationsClient extends OperationsClient = OperationsClient,
-	TCustomContext = any
+	TOperationsClient extends OperationsClient = OperationsClient,		
+	TCustomContext = any,
+	TypedORM = any
 > {
 	/**
 	 * The internal client is used to make requests to the WunderGraph API.
@@ -45,6 +47,8 @@ export interface WebhookRequestContext<
 	 * Custom context
 	 */
 	context: TCustomContext;
+
+	graph: TypedORM
 }
 interface LogFn {
 	<T extends object>(obj: T, msg?: string, ...args: any[]): void;

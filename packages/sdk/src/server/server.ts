@@ -389,44 +389,46 @@ export const createServer = async ({
 		}
 	});
 
+	const ormModulePath = path.join(wundergraphDir, 'generated', 'bundle', 'orm.cjs');
+	// the orm module simply provides (code generated) TypeScript representations of our API schemas
+	const ormModule = config.api?.experimentalConfig?.orm ? await import(ormModulePath) : null;
+	const orm = ormModule
+		? new ORM({
+				apis: ormModule.SCHEMAS,
+				executor: new NamespacingExecutor({
+					requestContext: operationsRequestContext,
+					baseUrl: nodeInternalURL,
+				}),
+			})
+		: ({
+				from() {
+					throw new Error(
+						`ORM is not enabled for your application. Set "experimental.orm" to "true" in your \`wundergraph.config.ts\` to enable.`
+					);
+				},
+			} as any);
+
+
 	if (config.api?.webhooks && config.api.webhooks.length > 0) {
 		await fastify.register(require('./plugins/webhooks'), {
 			wundergraphDir,
 			webhooks: config.api.webhooks,
-			internalClientFactory: clientFactory,
+			internalClientFactory: clientFactory,			
 			nodeURL: nodeInternalURL,
 			globalContext,
 			createContext,
 			releaseContext,
+			orm,
 		});
 		fastify.log.debug('Webhooks plugin registered');
 	}
 
 	const operationsFilePath = path.join(wundergraphDir, 'generated', 'wundergraph.operations.json');
 	const operationsFileExists = fs.existsSync(operationsFilePath);
-
+	
 	if (operationsFileExists) {
 		const operationsConfigFile = fs.readFileSync(operationsFilePath, 'utf-8');
 		const operationsConfig = JSON.parse(operationsConfigFile) as LoadOperationsOutput;
-
-		const ormModulePath = path.join(wundergraphDir, 'generated', 'bundle', 'orm.cjs');
-		// the orm module simply provides (code generated) TypeScript representations of our API schemas
-		const ormModule = config.api?.experimentalConfig?.orm ? await import(ormModulePath) : null;
-		const orm = ormModule
-			? new ORM({
-					apis: ormModule.SCHEMAS,
-					executor: new NamespacingExecutor({
-						requestContext: operationsRequestContext,
-						baseUrl: nodeInternalURL,
-					}),
-			  })
-			: ({
-					from() {
-						throw new Error(
-							`ORM is not enabled for your application. Set "experimental.orm" to "true" in your \`wundergraph.config.ts\` to enable.`
-						);
-					},
-			  } as any);
 
 		if (
 			operationsConfig &&
