@@ -120,4 +120,20 @@ describe('Operations', () => {
 		expect(result.error).toBeUndefined();
 		expect(result.data).toBe('42');
 	});
+
+	it('should allow returning falsy data from a TS operation', async () => {
+		const client = wg.client();
+
+		const stringResult = await client.query({ operationName: 'falsy/string' });
+		expect(stringResult.error).toBeUndefined();
+		expect(stringResult.data).toBe('');
+
+		const numberResult = await client.query({ operationName: 'falsy/number' });
+		expect(numberResult.error).toBeUndefined();
+		expect(numberResult.data).toBe(0);
+
+		const booleanResult = await client.query({ operationName: 'falsy/boolean' });
+		expect(booleanResult.error).toBeUndefined();
+		expect(booleanResult.data).toBe(false);
+	});
 });

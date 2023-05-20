@@ -73,7 +73,7 @@ export class Client {
 		this.csrfEnabled = options.csrfEnabled ?? true;
 	}
 
-	private readonly baseHeaders: Headers = {};
+	protected readonly baseHeaders: Headers = {};
 	private extraHeaders: Headers = {};
 	private csrfToken: string | undefined;
 	protected readonly csrfEnabled: boolean = true;
@@ -166,7 +166,7 @@ export class Client {
 			};
 		}
 
-		if (!resp.data) {
+		if (resp.data === undefined) {
 			return {
 				error: new ResponseError({
 					code: 'ResponseError',

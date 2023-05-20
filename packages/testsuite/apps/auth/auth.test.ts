@@ -392,6 +392,21 @@ describe('public claims', () => {
 	});
 });
 
+describe('carry authentication from operation from operation', () => {
+	it('propagate user from TS operation to TS operation', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.default);
+		const result = await client.query({ operationName: 'nested/UserFromTsToTs' });
+		expect(result?.data?.data?.userId).toBe('admin');
+	});
+	it('propagate user from TS operation to GraphQL operation with hook', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.default);
+		const result = await client.query({ operationName: 'nested/UserFromTsToGraphQL' });
+		expect(result?.data?.data?.userId).toBe('admin');
+	});
+});
+
 // TODO: Check error messages once we implement them instead of returning 404
 describe('user endpoints', () => {
 	it('fetchUser() with authentication and revalidation', async () => {

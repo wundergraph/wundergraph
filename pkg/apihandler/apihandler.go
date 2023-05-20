@@ -243,7 +243,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		})
 	})
 
-	if err := r.registerAuth(r.insecureCookies); err != nil {
+	if err := r.registerAuth(); err != nil {
 		if !r.devMode {
 			// If authentication fails in production, consider this a fatal error
 			return streamClosers, err
@@ -1819,71 +1819,27 @@ func MergeJsonRightIntoLeft(left, right []byte) []byte {
 }
 
 func (r *Builder) authenticationHooks() authentication.Hooks {
-	return hooks.NewAuthenticationHooks(hooks.AuthenticationConfig{
-		Client:                     r.middlewareClient,
-		Log:                        r.log,
-		PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-		MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-		PostLogout:                 r.api.AuthenticationConfig.Hooks.PostLogout,
-		Revalidate:                 r.api.AuthenticationConfig.Hooks.RevalidateAuthentication,
-	})
+	return authenticationHooks(r.api, r.middlewareClient, r.log)
 }
 
-func (r *Builder) registerAuth(insecureCookies bool) error {
+func (r *Builder) registerAuth() error {
 
-	var (
-		hashKey, blockKey, csrfSecret []byte
-		jwksProviders                 []*wgpb.JwksAuthProvider
-	)
-
-	if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
-		hashKey = []byte(h)
-	} else if fallback := r.api.CookieBasedSecrets.HashKey; fallback != nil {
-		hashKey = fallback
+	config, err := loadUserConfiguration(r.api, r.middlewareClient, r.log)
+	if err != nil {
+		return err
 	}
 
-	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
-		blockKey = []byte(b)
-	} else if fallback := r.api.CookieBasedSecrets.BlockKey; fallback != nil {
-		blockKey = fallback
-	}
-
-	if c := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); c != "" {
-		csrfSecret = []byte(c)
-	} else if fallback := r.api.CookieBasedSecrets.CsrfSecret; fallback != nil {
-		csrfSecret = fallback
-	}
-
-	if r.api == nil || r.api.HasCookieAuthEnabled() && (hashKey == nil || blockKey == nil || csrfSecret == nil) {
-		panic("API is nil or hashkey, blockkey, csrfsecret invalid: This should never have happened. Either validation didn't detect broken configuration, or someone broke the validation code")
-	}
-
-	cookie := securecookie.New(hashKey, blockKey)
-
-	if r.api.AuthenticationConfig.JwksBased != nil {
-		jwksProviders = r.api.AuthenticationConfig.JwksBased.Providers
-	}
-
-	authHooks := r.authenticationHooks()
-
-	loadUserConfig := authentication.LoadUserConfig{
-		Log:           r.log,
-		Cookie:        cookie,
-		JwksProviders: jwksProviders,
-		Hooks:         authHooks,
-	}
-
-	r.router.Use(authentication.NewLoadUserMw(loadUserConfig))
+	r.router.Use(authentication.NewLoadUserMw(config))
 	r.router.Use(authentication.NewCSRFMw(authentication.CSRFConfig{
-		InsecureCookies: insecureCookies,
-		Secret:          csrfSecret,
+		InsecureCookies: r.insecureCookies,
+		Secret:          config.CSRFSecret,
 	}))
 
 	userHandler := &authentication.UserHandler{
-		Hooks:           authHooks,
+		Hooks:           config.Hooks,
 		Log:             r.log,
-		InsecureCookies: insecureCookies,
-		Cookie:          cookie,
+		InsecureCookies: r.insecureCookies,
+		Cookie:          config.Cookie,
 		PublicClaims:    r.api.AuthenticationConfig.PublicClaims,
 	}
 
@@ -1901,7 +1857,7 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 
 	cookieBasedAuth.Path("/csrf").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.CSRFTokenHandler{})
 
-	return r.registerCookieAuthHandlers(cookieBasedAuth, cookie, authHooks)
+	return r.registerCookieAuthHandlers(cookieBasedAuth, config.Cookie, config.Hooks)
 }
 
 func (r *Builder) registerCookieAuthHandlers(router *mux.Router, cookie *securecookie.SecureCookie, authHooks authentication.Hooks) error {
@@ -2129,7 +2085,28 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := pool.GetCtx(r, r, pool.Config{})
+	clientRequest := r
+	if h.internal {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			requestLogger.Error("reading body", zap.Error(err))
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+		// We need to restore the body, since we might call r.ParseForm() later
+		r.Body = io.NopCloser(bytes.NewReader(body))
+		clientRequest, err = NewRequestFromWunderGraphClientRequest(r.Context(), body)
+		if err != nil {
+			requestLogger.Error("InternalApiHandler.ServeHTTP: Could not create request from __wg.clientRequest",
+				zap.Error(err),
+				zap.String("url", r.RequestURI),
+			)
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+	}
+
+	ctx := pool.GetCtx(r, clientRequest, pool.Config{})
 	defer pool.PutCtx(ctx)
 
 	variablesBuf := pool.GetBytesBuffer()

@@ -55,6 +55,12 @@ export default configureWunderGraphServer(() => ({
 					};
 				},
 			},
+			RequestidGraphql: {
+				mutatingPostResolve: async ({ clientRequest, response }) => {
+					response.data!.requestId!.code = clientRequest.headers.get('X-Request-ID') || '';
+					return response;
+				},
+			},
 		},
 		mutations: {},
 	},
