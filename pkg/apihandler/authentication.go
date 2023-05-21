@@ -2,11 +2,12 @@ package apihandler
 
 import (
 	"github.com/gorilla/securecookie"
+	"go.uber.org/zap"
+
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
-	"go.uber.org/zap"
 )
 
 func authenticationHooks(api *Api, client *hooks.Client, log *zap.Logger) authentication.Hooks {
