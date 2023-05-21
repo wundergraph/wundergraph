@@ -64,7 +64,7 @@ export class OperationsClient<
 		super(rest);
 
 		this.clientRequest = clientRequest;
-		if (clientRequest) {
+		if (clientRequest?.headers) {
 			for (const header of forwardedHeaders) {
 				const value = clientRequest.headers[header];
 				if (value) {
