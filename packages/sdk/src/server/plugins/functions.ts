@@ -58,6 +58,9 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 						const operationClient = new OperationsClient({
 							baseURL: nodeURL,
 							clientRequest,
+							extraHeaders: {
+								'x-request-id': request.id,
+							},
 						});
 						const ctx: HandlerContext<any, any, any, any, any, any, any> = {
 							log: fastify.log,
