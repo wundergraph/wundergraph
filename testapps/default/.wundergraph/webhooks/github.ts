@@ -27,7 +27,7 @@ const webhook = createWebhook<WebhookHttpEvent<WebhookEvent>, WebhookHttpRespons
 			body: {
 				myResponseBodyVar: 'world',
 				localImported,
-				bong
+				bong,
 			},
 		};
 	},

@@ -8,9 +8,12 @@ export interface Webhook<
 	Event extends WebhookHttpEvent = WebhookHttpEvent,
 	Response extends WebhookHttpResponse = WebhookHttpResponse,
 	TOperationsClient extends OperationsClient = OperationsClient,
-	TypedORM = any	
+	TypedORM = any
 > {
-	handler: (event: Event, context: WebhookRequestContext<TInternalClient, TOperationsClient, TypedORM>) => Promise<Response>;
+	handler: (
+		event: Event,
+		context: WebhookRequestContext<TInternalClient, TOperationsClient, TypedORM>
+	) => Promise<Response>;
 }
 export interface WebhookHttpResponse<ResponseBody = unknown, Headers extends WebhookHeaders = WebhookHeaders> {
 	statusCode?: number;
@@ -21,7 +24,7 @@ export type WebhookHeaders = Record<string, string>;
 export type WebhookQuery = Record<string, string | string[]>;
 export interface WebhookRequestContext<
 	TInternalClient extends InternalClient = InternalClient,
-	TOperationsClient extends OperationsClient = OperationsClient,		
+	TOperationsClient extends OperationsClient = OperationsClient,
 	TCustomContext = any,
 	TypedORM = any
 > {
@@ -48,7 +51,7 @@ export interface WebhookRequestContext<
 	 */
 	context: TCustomContext;
 
-	graph: TypedORM
+	graph: TypedORM;
 }
 interface LogFn {
 	<T extends object>(obj: T, msg?: string, ...args: any[]): void;

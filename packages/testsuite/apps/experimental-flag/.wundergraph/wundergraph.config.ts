@@ -28,6 +28,6 @@ configureWunderGraphApplication({
 		],
 	}),
 	experimental: {
-		orm: true
+		orm: true,
 	},
 });

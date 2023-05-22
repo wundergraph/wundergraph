@@ -6,7 +6,7 @@ export const createWebhookFactory = <
 	InternalOperations extends OperationsClient = OperationsClient,
 	TInternalClient extends InternalClient = InternalClient,
 	TCustomContext = any,
-	TypedORM = ORM<any>,
+	TypedORM = ORM<any>
 >() => {
 	return createWebhook<InternalOperations, TInternalClient, TCustomContext, TypedORM>();
 };
@@ -17,7 +17,7 @@ export interface CreateWebhookProps<
 	TOperationsClient extends OperationsClient,
 	TInternalClient extends InternalClient,
 	TCustomContext = any,
-	TypedORM = ORM<any>,
+	TypedORM = ORM<any>
 > {
 	handler: (
 		event: TEvent,

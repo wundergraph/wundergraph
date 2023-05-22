@@ -5,7 +5,7 @@ const wg = createTestServer({
 	dir: __dirname,
 });
 
-beforeAll(async () => {	
+beforeAll(async () => {
 	await wg.start();
 
 	return async () => {
@@ -26,6 +26,6 @@ describe('Server without experimental orm flag', () => {
 	// it('should return error when calling webhook that uses the graph orm', async () => {
 	// 	let error = ''
 	// 	expect(error).toBe("Graph is not defined");
-		
+
 	// });
 });

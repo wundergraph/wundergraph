@@ -399,21 +399,20 @@ export const createServer = async ({
 					requestContext: operationsRequestContext,
 					baseUrl: nodeInternalURL,
 				}),
-			})
+		  })
 		: ({
 				from() {
 					throw new Error(
 						`ORM is not enabled for your application. Set "experimental.orm" to "true" in your \`wundergraph.config.ts\` to enable.`
 					);
 				},
-			} as any);
-
+		  } as any);
 
 	if (config.api?.webhooks && config.api.webhooks.length > 0) {
 		await fastify.register(require('./plugins/webhooks'), {
 			wundergraphDir,
 			webhooks: config.api.webhooks,
-			internalClientFactory: clientFactory,			
+			internalClientFactory: clientFactory,
 			nodeURL: nodeInternalURL,
 			globalContext,
 			createContext,
@@ -425,7 +424,7 @@ export const createServer = async ({
 
 	const operationsFilePath = path.join(wundergraphDir, 'generated', 'wundergraph.operations.json');
 	const operationsFileExists = fs.existsSync(operationsFilePath);
-	
+
 	if (operationsFileExists) {
 		const operationsConfigFile = fs.readFileSync(operationsFilePath, 'utf-8');
 		const operationsConfig = JSON.parse(operationsConfigFile) as LoadOperationsOutput;

@@ -26,7 +26,7 @@ interface FastifyWebHooksOptions {
 }
 
 const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async (fastify, config) => {
-	await fastify.register(require('@fastify/formbody'));	
+	await fastify.register(require('@fastify/formbody'));
 	for (const hook of config.webhooks) {
 		try {
 			const webhookFilePath = path.join(process.env.WG_DIR_ABS!, 'generated', 'bundle', hook.filePath);
@@ -63,7 +63,7 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 								operations: operationClient,
 								clientRequest,
 								graph: config.orm,
-								context: requestContext
+								context: requestContext,
 							}
 						);
 
