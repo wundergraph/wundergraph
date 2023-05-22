@@ -17,8 +17,6 @@ const webhook = createWebhook<WebhookHttpEvent<WebhookEvent>, WebhookHttpRespons
 
 		context.log.info(event.headers);
 
-		const bong = await context.graph.from('countries').query('country').where({ code: 'DE' }).exec();
-
 		return {
 			statusCode: 200,
 			headers: {
@@ -27,7 +25,6 @@ const webhook = createWebhook<WebhookHttpEvent<WebhookEvent>, WebhookHttpRespons
 			body: {
 				myResponseBodyVar: 'world',
 				localImported,
-				bong,
 			},
 		};
 	},

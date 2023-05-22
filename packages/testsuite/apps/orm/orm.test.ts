@@ -22,4 +22,16 @@ describe('The WunderGraph ORM', () => {
 		expect(error).toBeUndefined();
 		expect(data?.code).toEqual('DE');
 	});
+
+	it('should be able to be used from a webhook', async () => {
+		const resp = await fetch(wg.url('/webhooks/country'), {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: '{"country_code":"DE"}',
+		});
+		const data = await resp.json();
+		expect(data.name).toBe('Germany');
+	});
 });
