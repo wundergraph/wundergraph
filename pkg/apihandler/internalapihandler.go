@@ -7,13 +7,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"sync"
 
 	"github.com/buger/jsonparser"
 	"github.com/dgraph-io/ristretto"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
-	"golang.org/x/sync/singleflight"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
@@ -25,7 +23,6 @@ import (
 
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
-	"github.com/wundergraph/wundergraph/pkg/graphiql"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
@@ -124,38 +121,18 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 		}
 	}
 
-	if api.EnableGraphqlEndpoint {
-		graphqlHandler := &GraphQLHandler{
-			planConfig:      i.planConfig,
-			definition:      i.definition,
-			resolver:        i.resolver,
-			log:             i.log,
-			pool:            i.pool,
-			sf:              &singleflight.Group{},
-			prepared:        map[uint64]planWithExtractedVariables{},
-			preparedMux:     &sync.RWMutex{},
-			renameTypeNames: i.renameTypeNames,
-			planCache:       planCache,
-		}
-		apiPath := "/graphql"
-		i.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath).Handler(graphqlHandler)
-		i.log.Debug("registered internal GraphQLHandler",
-			zap.String("method", http.MethodPost),
-			zap.String("path", apiPath),
-		)
-
-		graphqlPlaygroundHandler := &GraphQLPlaygroundHandler{
-			log:     i.log,
-			html:    graphiql.GetGraphiqlPlaygroundHTML(),
-			nodeUrl: fmt.Sprintf("http://%s:%d", api.Options.InternalListener.Host, api.Options.InternalListener.Port),
-		}
-		i.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath).Handler(graphqlPlaygroundHandler)
-		i.log.Debug("registered internal GraphQLPlaygroundHandler",
-			zap.String("method", http.MethodGet),
-			zap.String("path", apiPath),
-		)
-	}
-
+	// Internal GraphQL endpoint should be always enabled because it's used by the ORM
+	mountGraphQLHandler(i.router, GraphQLHandlerOptions{
+		GraphQLBaseURL:  fmt.Sprintf("http://%s:%d", api.Options.InternalListener.Host, api.Options.InternalListener.Port),
+		Internal:        true,
+		PlanConfig:      i.planConfig,
+		Definition:      i.definition,
+		Resolver:        i.resolver,
+		RenameTypeNames: i.renameTypeNames,
+		Pool:            i.pool,
+		Cache:           planCache,
+		Log:             i.log,
+	})
 	return streamClosers, err
 }
 
