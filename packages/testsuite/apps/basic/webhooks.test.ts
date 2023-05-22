@@ -68,4 +68,19 @@ describe('Webhooks', () => {
 		const resp = await fetch(wg.url('/webhooks/verified'));
 		expect(resp.status).toBe(401);
 	});
+
+	it('Should not be able to call the webhook with a verifier with a wrong signature', async () => {
+		const body = 'hello';
+		// Miscalculate the signature
+		const signedBody = body + body;
+		const signature = crypto.createHmac('sha256', WEBHOOK_SECRET).update(signedBody).digest('hex');
+		const resp = await fetch(wg.url('/webhooks/verified'), {
+			method: 'POST',
+			body,
+			headers: {
+				'X-Signature': signature,
+			},
+		});
+		expect(resp.status).toBe(401);
+	});
 });
