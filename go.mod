@@ -40,7 +40,7 @@ require (
 	github.com/prisma/prisma-client-go v0.16.2
 	github.com/qri-io/jsonschema v0.2.1
 	github.com/rs/cors v1.7.0
-	github.com/santhosh-tekuri/jsonschema/v5 v5.1.1
+	github.com/santhosh-tekuri/jsonschema/v5 v5.3.0
 	github.com/sebdah/goldie/v2 v2.5.3
 	github.com/segmentio/ksuid v1.0.4
 	github.com/smallnest/ringbuffer v0.0.0-20210227121335-0a58434b36f2
@@ -50,7 +50,7 @@ require (
 	github.com/tidwall/gjson v1.11.0
 	github.com/tidwall/sjson v1.1.5
 	github.com/valyala/fasthttp v1.44.0
-	github.com/wundergraph/graphql-go-tools v1.63.0
+	github.com/wundergraph/graphql-go-tools v1.63.1
 	go.uber.org/zap v1.24.0
 	golang.org/x/net v0.7.0
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
@@ -152,7 +152,6 @@ require (
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/cenkalti/backoff.v1 v1.1.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

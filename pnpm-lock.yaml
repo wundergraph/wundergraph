@@ -683,6 +683,7 @@ importers:
       execa: 5.1.1
       fastify: ^4.10.2
       graphql: ^16.3.0
+      graphql-request: ^6.0.0
       jose: ^4.11.1
       straightforward: ^4.2.2
       typescript: ^4.8.2
@@ -695,6 +696,7 @@ importers:
     devDependencies:
       execa: 5.1.1
       fastify: 4.10.2
+      graphql-request: 6.0.0_graphql@16.6.0
       jose: 4.11.2
       straightforward: 4.2.2
       typescript: 4.9.4
@@ -3679,7 +3681,6 @@ packages:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
       graphql: 16.6.0
-    dev: false
 
   /@graphql-yoga/common/2.12.12_graphql@16.6.0:
     resolution: {integrity: sha512-La2ygIw2qlIJZrRGT4nW70Nam7gQ2xZkOn0FDCnKWSJhQ4nHw4aFAkeHIJdZGK0u2TqtXRrNSAj5cb/TZoqUiQ==}
@@ -13022,6 +13023,18 @@ packages:
       cross-fetch: 3.1.5
       extract-files: 9.0.0
       form-data: 3.0.1
+      graphql: 16.6.0
+    transitivePeerDependencies:
+      - encoding
+    dev: true
+
+  /graphql-request/6.0.0_graphql@16.6.0:
+    resolution: {integrity: sha512-2BmHTuglonjZvmNVw6ZzCfFlW/qkIPds0f+Qdi/Lvjsl3whJg2uvHmSvHnLWhUTEw6zcxPYAHiZoPvSVKOZ7Jw==}
+    peerDependencies:
+      graphql: 14 - 16
+    dependencies:
+      '@graphql-typed-document-node/core': 3.2.0_graphql@16.6.0
+      cross-fetch: 3.1.5
       graphql: 16.6.0
     transitivePeerDependencies:
       - encoding

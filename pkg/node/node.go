@@ -11,6 +11,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/dgraph-io/ristretto"
 	"github.com/gorilla/mux"
 	"github.com/pires/go-proxyproto"
 	"github.com/rs/cors"
@@ -510,14 +511,25 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	n.builder = apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
 	internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, hooksClient, loader, n.options.enableIntrospection)
 
-	publicClosers, err := n.builder.BuildAndMountApiHandler(n.ctx, router, nodeConfig.Api)
+	// this planCache is used across both internal GraphQL handlers
+	planCache, err := ristretto.NewCache(&ristretto.Config{
+		MaxCost:     1024 * 4,      // keep 4k execution plans in the cache
+		NumCounters: 1024 * 4 * 10, // 4k * 10
+		BufferItems: 64,            // number of keys per Get buffer.
+	})
+	if err != nil {
+		n.log.Error("create plan cache failed", zap.Error(err))
+		return err
+	}
+
+	publicClosers, err := n.builder.BuildAndMountApiHandler(n.ctx, router, nodeConfig.Api, planCache)
 	if err != nil {
 		n.log.Error("BuildAndMountApiHandler", zap.Error(err))
 		return err
 	}
 	streamClosers = append(streamClosers, publicClosers...)
 
-	internalClosers, err := internalBuilder.BuildAndMountInternalApiHandler(n.ctx, internalRouter, nodeConfig.Api)
+	internalClosers, err := internalBuilder.BuildAndMountInternalApiHandler(n.ctx, internalRouter, nodeConfig.Api, planCache)
 	if err != nil {
 		n.log.Error("BuildAndMountInternalApiHandler", zap.Error(err))
 		return err
