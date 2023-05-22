@@ -49,4 +49,12 @@ export default defineWorkspace([
 			hookTimeout: 20000,
 		},
 	},
+	{
+		root: 'apps/experimental-flag',
+		test: {
+			globalSetup: 'apps/experimental-flag/test-setup.ts',
+			testTimeout: 15000,
+			hookTimeout: 20000,
+		},
+	},
 ]);
