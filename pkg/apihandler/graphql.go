@@ -16,6 +16,9 @@ import (
 	"github.com/dgraph-io/ristretto"
 	"github.com/gorilla/mux"
 	"github.com/hashicorp/go-multierror"
+	"go.uber.org/zap"
+	"golang.org/x/sync/singleflight"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
 	"github.com/wundergraph/graphql-go-tools/pkg/astvalidation"
@@ -23,12 +26,11 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 	"github.com/wundergraph/graphql-go-tools/pkg/graphql"
 	"github.com/wundergraph/graphql-go-tools/pkg/operationreport"
+
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
 	"github.com/wundergraph/wundergraph/pkg/graphiql"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
-	"go.uber.org/zap"
-	"golang.org/x/sync/singleflight"
 )
 
 type GraphQLHandlerOptions struct {
