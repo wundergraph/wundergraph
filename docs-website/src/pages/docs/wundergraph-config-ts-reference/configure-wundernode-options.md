@@ -72,7 +72,7 @@ When no options were provided you still could override default values by setting
 When using custom environment variables, you need to make sure that the environment variables are set before:
 
 - `wunderctl generate` command is executed
-- `WunderNode` starts
+- `wunderctl start` or `wunderctl node start` command is executed
 
 {% /callout %}
 
