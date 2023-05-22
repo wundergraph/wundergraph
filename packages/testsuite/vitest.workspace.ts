@@ -50,9 +50,9 @@ export default defineWorkspace([
 		},
 	},
 	{
-		root: 'apps/experimental-flag',
+		root: 'apps/orm',
 		test: {
-			globalSetup: 'apps/experimental-flag/test-setup.ts',
+			globalSetup: 'apps/orm/test-setup.ts',
 			testTimeout: 15000,
 			hookTimeout: 20000,
 		},

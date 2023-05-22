@@ -1,5 +1,4 @@
 import {
-	EnvironmentVariable,
 	configureWunderGraphApplication,
 	introspect,
 	templates,
