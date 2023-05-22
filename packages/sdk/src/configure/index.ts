@@ -86,6 +86,8 @@ import { generateOperations } from '../codegen/generateoperations';
 import { configurationHash } from '../codegen/templates/typescript/helpers';
 import templates from '../codegen/templates';
 
+export * from './define-config';
+
 const utf8 = 'utf8';
 const generated = 'generated';
 const jsonExtension = 'json';

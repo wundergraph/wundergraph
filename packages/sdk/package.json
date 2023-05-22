@@ -35,6 +35,10 @@
       "types": "./dist/orm/index.d.ts",
       "default": "./dist/orm/index.js"
     },
+    "./integrations": {
+      "types": "./dist/integrations/index.d.ts",
+      "default": "./dist/integrations/index.js"
+    },
     "./dist/*": {
       "types": "./dist/*.d.ts",
       "default": "./dist/*.js"
@@ -62,6 +66,9 @@
       ],
       "orm": [
         "./dist/orm"
+      ],
+      "integrations": [
+        "./dist/integrations"
       ]
     }
   },
