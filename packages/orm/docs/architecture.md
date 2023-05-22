@@ -1,6 +1,6 @@
 # Architecture
 
-The ORM exposes an object-relational interface over GraphQL APIs. Just like common (realtional database-backed) ORMs translate method calls to SQL queries, our ORM translates method calls to GraphQL queries.
+The ORM exposes an object-relational interface over GraphQL APIs. Just like common (relational database-backed) ORMs translate method calls to SQL queries, our ORM translates method calls to GraphQL queries.
 
 ## Type-Saftey
 
