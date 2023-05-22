@@ -108,7 +108,7 @@ export class CodeGenerator {
 		const rawOutFiles: TemplateOutputFile[] = resolved.reduce((previousValue, currentValue) => [
 			...previousValue,
 			...currentValue,
-		]);
+		], []);
 		const outFiles = mergeTemplateOutput(rawOutFiles);
 		outFiles.forEach((file) => {
 			const content = `${file.header || ''}${file.content}`;

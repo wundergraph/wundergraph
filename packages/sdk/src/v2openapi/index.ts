@@ -50,6 +50,7 @@ import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 import { Logger } from '../logger';
 import { camelCase } from 'lodash';
 import transformSchema from '../transformations/transformSchema';
+import { astFromValueUntyped } from '@graphql-tools/utils';
 
 export const openApiSpecificationToRESTApiObject = async (
 	oas: string,
@@ -282,7 +283,7 @@ class RESTApiBuilder {
 			});
 			if (this.baseUrlArgs.length) {
 				this.baseUrlArgs.forEach((arg) => {
-					this.addArgument(parentType, fieldName, arg, 'String', ['non_null']);
+					this.addArgument(parentType, fieldName, arg, 'String', ['non_null'], schema);
 				});
 			}
 		});
@@ -429,7 +430,14 @@ class RESTApiBuilder {
 
 				const isIntEnum = componentSchema.enum && componentSchema.type === 'integer';
 				if (argumentName) {
-					this.addArgument(parentTypeName, fieldName, argumentName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
+					this.addArgument(
+						parentTypeName,
+						fieldName,
+						argumentName,
+						isIntEnum ? 'Int' : fieldTypeName,
+						enclosingTypes,
+						schema
+					);
 				} else if (this.statusCodeUnions && isRootField && objectKind === 'type') {
 					fieldTypeName = this.buildFieldTypeName(ref, responseObjectDescription || '', statusCode || '');
 					this.addResponseUnionField(parentTypeName, objectKind, fieldName, fieldTypeName, statusCode || '', false);
@@ -465,7 +473,7 @@ class RESTApiBuilder {
 		if (schema.type === undefined) {
 			this.ensureType('scalar', 'JSON');
 			if (argumentName) {
-				this.addArgument(parentTypeName, fieldName, argumentName, 'JSON', enclosingTypes);
+				this.addArgument(parentTypeName, fieldName, argumentName, 'JSON', enclosingTypes, schema);
 				return;
 			}
 			this.addField(parentTypeName, objectKind, fieldName, 'JSON', enclosingTypes);
@@ -474,7 +482,7 @@ class RESTApiBuilder {
 		switch (schema.type) {
 			case 'integer':
 				if (argumentName) {
-					this.addArgument(parentTypeName, fieldName, argumentName, 'Int', enclosingTypes);
+					this.addArgument(parentTypeName, fieldName, argumentName, 'Int', enclosingTypes, schema);
 					return;
 				}
 				this.addField(parentTypeName, objectKind, fieldName, 'Int', enclosingTypes);
@@ -489,13 +497,13 @@ class RESTApiBuilder {
 						schema.enum.length !== 0 &&
 						typeof schema.enum[0] === 'number'
 					) {
-						this.addArgument(parentTypeName, fieldName, argumentName, 'Int', enclosingTypes);
+						this.addArgument(parentTypeName, fieldName, argumentName, 'Int', enclosingTypes, schema);
 						return;
 					}
 					if (argumentName) {
 						const enumName = fieldName + '_' + argumentName;
 						this.ensureType('enum', enumName);
-						this.addArgument(parentTypeName, fieldName, argumentName, enumName, enclosingTypes);
+						this.addArgument(parentTypeName, fieldName, argumentName, enumName, enclosingTypes, schema);
 						this.addEnumValues(enumName, schema.enum);
 						return;
 					}
@@ -510,21 +518,21 @@ class RESTApiBuilder {
 					return;
 				}
 				if (argumentName) {
-					this.addArgument(parentTypeName, fieldName, argumentName, 'String', enclosingTypes);
+					this.addArgument(parentTypeName, fieldName, argumentName, 'String', enclosingTypes, schema);
 					return;
 				}
 				this.addField(parentTypeName, objectKind, fieldName, 'String', enclosingTypes);
 				return;
 			case 'boolean':
 				if (argumentName) {
-					this.addArgument(parentTypeName, fieldName, argumentName, 'Boolean', enclosingTypes);
+					this.addArgument(parentTypeName, fieldName, argumentName, 'Boolean', enclosingTypes, schema);
 					return;
 				}
 				this.addField(parentTypeName, objectKind, fieldName, 'Boolean', enclosingTypes);
 				return;
 			case 'number':
 				if (argumentName) {
-					this.addArgument(parentTypeName, fieldName, argumentName, 'Int', enclosingTypes);
+					this.addArgument(parentTypeName, fieldName, argumentName, 'Int', enclosingTypes, schema);
 					return;
 				}
 				this.addField(parentTypeName, objectKind, fieldName, 'Int', enclosingTypes);
@@ -551,7 +559,7 @@ class RESTApiBuilder {
 							enclosingTypes.push('non_null');
 						}
 					}
-					this.addArgument(parentTypeName, fieldName, argumentName, argumentName, enclosingTypes);
+					this.addArgument(parentTypeName, fieldName, argumentName, argumentName, enclosingTypes, schema);
 					this.ensureType('input', argumentName);
 					Object.keys(schema.properties).forEach((prop) => {
 						this.traverseSchema({
@@ -736,9 +744,12 @@ class RESTApiBuilder {
 		fieldName: string,
 		argumentName: string,
 		argumentType: string,
-		enclosingTypes: EnclosingType[]
+		enclosingTypes: EnclosingType[],
+		schema: JSONSchema
 	) => {
 		argumentName = this.sanitizeName(argumentName);
+		const defaultValue = (schema || {}).default;
+		const isEnum = schema.enum;
 		const resolvedArgType = this.resolveTypeNode(argumentType, enclosingTypes);
 		let done = false;
 		this.graphQLSchema = visit(this.graphQLSchema, {
@@ -768,6 +779,17 @@ class RESTApiBuilder {
 									value: argumentName,
 								},
 								type: resolvedArgType,
+								defaultValue: defaultValue
+									? defaultValue && isEnum
+										? {
+												kind: Kind.ENUM_VALUE_DEFINITION,
+												name: {
+													kind: Kind.NAME,
+													value: schema.default,
+												},
+										  }
+										: (astFromValueUntyped(defaultValue) as any)
+									: undefined,
 							},
 						],
 					};
