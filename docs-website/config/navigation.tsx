@@ -116,6 +116,10 @@ const navigation = [
 						href: '/docs/examples/astro',
 					},
 					{
+						title: 'Astro + Relay',
+						href: '/docs/examples/astro-relay',
+					},
+					{
 						title: 'Vite + SWR',
 						href: '/docs/examples/vite-swr',
 					},
