@@ -51,6 +51,14 @@ async function parseDocs() {
 			},
 		});
 
+		let route = filePath.replace(/^src\/pages\/docs\//, '/docs/').replace(/\.md$/, '');
+		if (route.endsWith('/index')) {
+			const indexPosition = route.lastIndexOf('/index');
+			if (indexPosition !== -1) {
+				route = route.substring(0, indexPosition);
+			}
+		}
+
 		const structuredContent = {};
 		let prevHeadingNode;
 		let textContent = '';
@@ -59,7 +67,7 @@ async function parseDocs() {
 			children.forEach((node) => {
 				if (typeof node === 'string') {
 					textContent += node;
-				} else if (node.name === 'h2') {
+				} else if (node.name === 'h2' || node.name === 'h1') {
 					textContent = textContent
 						.trim()
 						.split('\n')
@@ -80,15 +88,14 @@ async function parseDocs() {
 			});
 		}
 
-		extract(transformedContent.children);
-
-		let route = filePath.replace(/^src\/pages\/docs\//, '/docs/').replace(/\.md$/, '');
-		if (route.endsWith('/index')) {
-			const indexPosition = route.lastIndexOf('/index');
-			if (indexPosition !== -1) {
-				route = route.substring(0, indexPosition);
-			}
-		}
+		extract([
+			...transformedContent.children,
+			{
+				name: 'h1',
+				attributes: {},
+				children: [`${frontmatter.title}`],
+			},
+		]);
 
 		const doc = {
 			title: `${frontmatter.title}`,
