@@ -82,9 +82,18 @@ async function parseDocs() {
 
 		extract(transformedContent.children);
 
+		let route = filePath.replace(/^src\/pages\/docs\//, '/docs/').replace(/\.md$/, '');
+		if (route.endsWith('/index')) {
+			const indexPosition = route.lastIndexOf('/index');
+			if (indexPosition !== -1) {
+				route = route.substring(0, indexPosition);
+				console.log(route);
+			}
+		}
+
 		const doc = {
 			title: `${frontmatter.title}`,
-			route: filePath.replace(/^src\/pages\/docs\//, '/docs/').replace(/\.md$/, ''),
+			route,
 			data: structuredContent,
 		};
 
