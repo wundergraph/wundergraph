@@ -37,6 +37,7 @@ type Options struct {
 	Logging             Logging
 	DefaultTimeout      time.Duration
 	DefaultHTTPProxyURL *url.URL
+	PrometheusPort      int
 }
 
 type CookieBasedSecrets struct {

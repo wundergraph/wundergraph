@@ -515,6 +515,10 @@ message NodeLogging {
 	ConfigurationVariable level = 1;
 }
 
+message PrometheusOptions {
+	ConfigurationVariable port = 1;
+}
+
 message NodeOptions {
 	ConfigurationVariable nodeUrl = 1;
 	ConfigurationVariable publicNodeUrl = 4;
@@ -524,6 +528,7 @@ message NodeOptions {
 	InternalListenerOptions listenInternal = 6;
 	ConfigurationVariable nodeInternalUrl = 7;
 	ConfigurationVariable defaultHttpProxyUrl = 8;
+	PrometheusOptions prometheus = 9;
 }
 
 message ServerLogging {

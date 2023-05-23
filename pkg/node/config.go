@@ -88,6 +88,14 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 		}
 	}
 
+	var prometheusPort int
+	if rawPrometheusPort := loadvariable.String(graphConfig.GetApi().GetNodeOptions().GetPrometheus().GetPort()); rawPrometheusPort != "" {
+		prometheusPort, err = strconv.Atoi(rawPrometheusPort)
+		if err != nil {
+			return nil, fmt.Errorf("can't parse node Prometheus port %q: %w", rawPrometheusPort, err)
+		}
+	}
+
 	config := WunderNodeConfig{
 		Api: &apihandler.Api{
 			PrimaryHost:           fmt.Sprintf("%s:%d", listener.Host, listener.Port),
@@ -112,6 +120,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 				},
 				DefaultTimeout:      defaultRequestTimeout,
 				DefaultHTTPProxyURL: defaultHTTPProxyURL,
+				PrometheusPort:      prometheusPort,
 			},
 		},
 		Server: &Server{
