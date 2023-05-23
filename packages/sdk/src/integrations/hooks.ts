@@ -78,7 +78,7 @@ export const runHookQueriesPreResolve = async ({
 }) => {
 	for (const integration of config.integrations) {
 		if (integration.hooks?.['hooks:queries:preResolve']) {
-			await integration.hooks['hooks:queries:preResolve'](config);
+			await integration.hooks['hooks:queries:preResolve'](context);
 		}
 	}
 };

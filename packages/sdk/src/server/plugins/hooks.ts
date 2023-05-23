@@ -297,6 +297,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			reply.type('application/json').code(200);
 			try {
 				await runHookQueriesPreResolve({
+					config: config as any,
 					context: {
 						operationName,
 						...requestContext(request),

@@ -22,6 +22,8 @@ export default createOperation.query({
 
 		const name = data?.getCityByName?.name;
 
-		return {};
+		return {
+			data,
+		};
 	},
 });

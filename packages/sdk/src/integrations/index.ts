@@ -6,7 +6,7 @@ export const graphql = (config: GraphQLIntegration) => {
 	return {
 		name: 'graphql',
 		hooks: {
-			'config:setup': (options: any) => {
+			'config:setup': async (options: any) => {
 				options.addApi(introspect.graphql(config));
 			},
 		},

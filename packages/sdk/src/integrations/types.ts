@@ -1,4 +1,5 @@
 import { AsyncApiIntrospector, CodeGen, WunderGraphConfigApplicationConfig } from '../configure';
+import { OperationsConfiguration } from '../configure/operations';
 
 export interface ConfigSetupOptions {
 	addApi: (api: AsyncApiIntrospector<any>) => void;
@@ -32,4 +33,5 @@ export type TokenAuthProvider = any;
 
 export interface UserConfig {
 	integrations: WunderGraphIntegration[];
+	operations?: Partial<OperationsConfiguration>;
 }
