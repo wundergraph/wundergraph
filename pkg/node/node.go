@@ -646,7 +646,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	}
 
 	g.Go(func() error {
-		if err := n.metrics.Serve(); err != nil && err != metrics.ErrShutdown {
+		if err := n.metrics.Serve(); err != nil && err != metrics.ErrServerClosed {
 			n.log.Error("serving metrics", zap.Error(err))
 			return err
 		}
