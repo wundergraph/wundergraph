@@ -27,7 +27,10 @@
     "autoprefixer": "^10.4.7",
     "clsx": "^1.2.0",
     "copy-to-clipboard": "^3.3.1",
+    "flexsearch": "0.7.21",
     "focus-visible": "^5.2.0",
+    "globby": "^13.1.2",
+    "js-yaml": "^4.1.0",
     "next": "^13.4.1",
     "next-seo": "^6.0.0",
     "next-sitemap": "^3.1.11",
@@ -40,9 +43,12 @@
     "react-dom": "18.2.0",
     "tailwind-scrollbar": "^2.1.0",
     "tailwindcss": "^3.1.4",
-    "tailwindcss-radix": "^1.6.0"
+    "tailwindcss-radix": "^1.6.0",
+    "webpack": "^5.83.1"
   },
   "devDependencies": {
+    "@types/flexsearch": "^0.7.3",
+    "@types/js-yaml": "^4.0.0",
     "@types/node": "^18.0.3",
     "@types/react": "^18.0.15",
     "eslint": "8.19.0",
