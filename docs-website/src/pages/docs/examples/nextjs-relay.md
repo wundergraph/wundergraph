@@ -1,3 +1,9 @@
+---
+title: Next.js + Relay Example
+pageTitle: WunderGraph - Examples - Next.js - Relay
+description:
+---
+
 The [Next.js + Relay example](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-relay) demonstrates how to use Relay with a Next.js based WunderGraph project.
 
 ## Getting Started
