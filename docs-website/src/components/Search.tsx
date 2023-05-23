@@ -26,6 +26,20 @@ export function Search() {
 		setModifierKey(/(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '⌘' : 'Ctrl ');
 	}, []);
 
+	useEffect(() => {
+		function handleKeyDown(event: any) {
+			if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+				setIsOpen(true);
+			}
+		}
+
+		document.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown);
+		};
+	}, []);
+
 	return (
 		<>
 			<button
