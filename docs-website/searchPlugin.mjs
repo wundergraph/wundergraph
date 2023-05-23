@@ -82,7 +82,7 @@ async function parseDocs() {
 					structuredContent[key] = textContent;
 					prevHeadingNode = node;
 					textContent = '';
-				} else if (node.children != undefined) {
+				} else if (node.children != undefined && node.name !== 'pre') {
 					extract(node.children);
 				}
 			});
