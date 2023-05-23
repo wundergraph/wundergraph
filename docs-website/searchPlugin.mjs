@@ -87,7 +87,6 @@ async function parseDocs() {
 			const indexPosition = route.lastIndexOf('/index');
 			if (indexPosition !== -1) {
 				route = route.substring(0, indexPosition);
-				console.log(route);
 			}
 		}
 
