@@ -273,6 +273,7 @@ export const Flexsearch = ({ close }: { close: () => void }) => {
 
 	return (
 		<Combobox
+			value={search}
 			onChange={(value: any) => {
 				close();
 				push(value);
