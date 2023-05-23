@@ -6,8 +6,6 @@ description: How to integrate WunderGraph with Vercel
 
 How to integrate WunderGraph with Vercel.
 
-{% callout title="This feature isn't publicly available yet." /%}
-
 ## How it works
 
 The WunderGraph Vercel integration allows you to sync your WunderGraph project settings with your Vercel projects.

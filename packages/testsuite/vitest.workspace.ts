@@ -49,4 +49,12 @@ export default defineWorkspace([
 			hookTimeout: 20000,
 		},
 	},
+	{
+		root: 'apps/orm',
+		test: {
+			globalSetup: 'apps/orm/test-setup.ts',
+			testTimeout: 15000,
+			hookTimeout: 20000,
+		},
+	},
 ]);
