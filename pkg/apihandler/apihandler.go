@@ -13,19 +13,17 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/buger/jsonparser"
+	"github.com/dgraph-io/ristretto"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
-	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-uuid"
 	"github.com/mattbaird/jsonpatch"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"go.uber.org/zap"
-	"golang.org/x/sync/singleflight"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
@@ -37,13 +35,11 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 	"github.com/wundergraph/graphql-go-tools/pkg/graphql"
 	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
-	"github.com/wundergraph/graphql-go-tools/pkg/operationreport"
 
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/cacheheaders"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
-	"github.com/wundergraph/wundergraph/pkg/graphiql"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
@@ -141,7 +137,7 @@ func NewBuilder(pool *pool.Pool,
 	}
 }
 
-func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Router, api *Api) (streamClosers []chan struct{}, err error) {
+func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Router, api *Api, planCache *ristretto.Cache) (streamClosers []chan struct{}, err error) {
 	r.api = api
 
 	r.router = r.createSubRouter(router)
@@ -314,35 +310,17 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	}
 
 	if api.EnableGraphqlEndpoint {
-		graphqlHandler := &GraphQLHandler{
-			planConfig:      r.planConfig,
-			definition:      r.definition,
-			resolver:        r.resolver,
-			log:             r.log,
-			pool:            r.pool,
-			sf:              &singleflight.Group{},
-			prepared:        map[uint64]planWithExtractedVariables{},
-			preparedMux:     &sync.RWMutex{},
-			renameTypeNames: r.renameTypeNames,
-		}
-		apiPath := "/graphql"
-		r.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath).Handler(graphqlHandler)
-		r.log.Debug("registered GraphQLHandler",
-			zap.String("method", http.MethodPost),
-			zap.String("path", apiPath),
-		)
-
-		graphqlPlaygroundHandler := &GraphQLPlaygroundHandler{
-			log:     r.log,
-			html:    graphiql.GetGraphiqlPlaygroundHTML(),
-			nodeUrl: api.Options.PublicNodeUrl,
-		}
-		r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath).Handler(graphqlPlaygroundHandler)
-		r.log.Debug("registered GraphQLPlaygroundHandler",
-			zap.String("method", http.MethodGet),
-			zap.String("path", apiPath),
-		)
-
+		mountGraphQLHandler(r.router, GraphQLHandlerOptions{
+			GraphQLBaseURL:  api.Options.PublicNodeUrl,
+			Internal:        false,
+			PlanConfig:      r.planConfig,
+			Definition:      r.definition,
+			Resolver:        r.resolver,
+			RenameTypeNames: r.renameTypeNames,
+			Pool:            r.pool,
+			Cache:           planCache,
+			Log:             r.log,
+		})
 	}
 
 	return streamClosers, err
@@ -681,35 +659,6 @@ func (r *Builder) Close() error {
 	return nil
 }
 
-type GraphQLPlaygroundHandler struct {
-	log     *zap.Logger
-	html    string
-	nodeUrl string
-}
-
-func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
-	tpl := strings.Replace(h.html, "{{apiURL}}", h.nodeUrl, -1)
-	resp := []byte(tpl)
-
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Content-Length", strconv.Itoa(len(resp)))
-	_, _ = w.Write(resp)
-}
-
-type GraphQLHandler struct {
-	planConfig plan.Configuration
-	definition *ast.Document
-	resolver   *resolve.Resolver
-	log        *zap.Logger
-	pool       *pool.Pool
-	sf         *singleflight.Group
-
-	prepared    map[uint64]planWithExtractedVariables
-	preparedMux *sync.RWMutex
-
-	renameTypeNames []resolve.RenameTypeName
-}
-
 type planWithExtractedVariables struct {
 	preparedPlan plan.Plan
 	variables    []byte
@@ -718,179 +667,6 @@ type planWithExtractedVariables struct {
 var (
 	errInvalid = errors.New("invalid")
 )
-
-func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
-
-	buf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(buf)
-	_, err := io.Copy(buf, r.Body)
-	if err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
-		return
-	}
-
-	body := buf.Bytes()
-
-	requestQuery, _ := jsonparser.GetString(body, "query")
-	requestOperationName, parsedOperationNameDataType, _, _ := jsonparser.Get(body, "operationName")
-	requestVariables, _, _, _ := jsonparser.Get(body, "variables")
-
-	// An operationName set to { "operationName": null } will be parsed by 'jsonparser' to "null" string
-	// and this will make the planner unable to find the operation to execute in selectOperation step.
-	// to ensure that the operationName match what planner expect we set it to null.
-	if parsedOperationNameDataType == jsonparser.Null {
-		requestOperationName = nil
-	}
-
-	shared := h.pool.GetSharedFromRequest(context.Background(), r, h.planConfig, pool.Config{
-		RenameTypeNames: h.renameTypeNames,
-	})
-	defer h.pool.PutShared(shared)
-	shared.Ctx.Variables = requestVariables
-	shared.Doc.Input.ResetInputString(requestQuery)
-	shared.Parser.Parse(shared.Doc, shared.Report)
-
-	if shared.Report.HasErrors() {
-		h.logInternalErrors(shared.Report, requestLogger)
-		h.writeRequestErrors(shared.Report, w, requestLogger)
-
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	prepared, err := h.preparePlan(requestOperationName, shared)
-	if err != nil {
-		if shared.Report.HasErrors() {
-			h.logInternalErrors(shared.Report, requestLogger)
-			h.writeRequestErrors(shared.Report, w, requestLogger)
-		} else {
-			requestLogger.Error("prepare plan failed", zap.Error(err))
-			w.WriteHeader(http.StatusBadRequest)
-		}
-
-		return
-	}
-
-	if len(prepared.variables) != 0 {
-		// we have to merge query variables into extracted variables to been able to override default values
-		// we make a copy of the extracted variables to not override h.extractedVariables
-		shared.Ctx.Variables = MergeJsonRightIntoLeft(shared.Ctx.Variables, prepared.variables)
-	}
-
-	switch p := prepared.preparedPlan.(type) {
-	case *plan.SynchronousResponsePlan:
-		w.Header().Set("Content-Type", "application/json")
-
-		executionBuf := pool.GetBytesBuffer()
-		defer pool.PutBytesBuffer(executionBuf)
-
-		err := h.resolver.ResolveGraphQLResponse(shared.Ctx, p.Response, nil, executionBuf)
-		if err != nil {
-			if errors.Is(err, context.Canceled) {
-				return
-			}
-
-			requestErrors := graphql.RequestErrors{
-				{
-					Message: "could not resolve response",
-				},
-			}
-
-			if _, err := requestErrors.WriteResponse(w); err != nil {
-				requestLogger.Error("could not write response", zap.Error(err))
-			}
-
-			requestLogger.Error("ResolveGraphQLResponse", zap.Error(err))
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		_, err = executionBuf.WriteTo(w)
-		if err != nil {
-			requestLogger.Error("respond to client", zap.Error(err))
-			return
-		}
-	case *plan.SubscriptionResponsePlan:
-		var (
-			flushWriter *httpFlushWriter
-			ok          bool
-		)
-		shared.Ctx, flushWriter, ok = getFlushWriter(shared.Ctx, shared.Ctx.Variables, r, w)
-		if !ok {
-			requestLogger.Error("connection not flushable")
-			http.Error(w, "Connection not flushable", http.StatusBadRequest)
-			return
-		}
-
-		err := h.resolver.ResolveGraphQLSubscription(shared.Ctx, p.Response, flushWriter)
-		if err != nil {
-			if errors.Is(err, context.Canceled) {
-				return
-			}
-
-			requestErrors := graphql.RequestErrors{
-				{
-					Message: "could not resolve response",
-				},
-			}
-
-			if _, err := requestErrors.WriteResponse(w); err != nil {
-				requestLogger.Error("could not write response", zap.Error(err))
-			}
-
-			requestLogger.Error("ResolveGraphQLSubscription", zap.Error(err))
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-	case *plan.StreamingResponsePlan:
-		http.Error(w, "not implemented", http.StatusNotFound)
-	}
-}
-
-func (h *GraphQLHandler) logInternalErrors(report *operationreport.Report, requestLogger *zap.Logger) {
-	var internalErr error
-	for _, err := range report.InternalErrors {
-		internalErr = multierror.Append(internalErr, err)
-	}
-
-	if internalErr != nil {
-		requestLogger.Error("internal error", zap.Error(internalErr))
-	}
-}
-
-func (h *GraphQLHandler) writeRequestErrors(report *operationreport.Report, w http.ResponseWriter, requestLogger *zap.Logger) {
-	requestErrors := graphql.RequestErrorsFromOperationReport(*report)
-	if requestErrors != nil {
-		if _, err := requestErrors.WriteResponse(w); err != nil {
-			requestLogger.Error("error writing response", zap.Error(err))
-		}
-	}
-}
-
-func (h *GraphQLHandler) preparePlan(requestOperationName []byte, shared *pool.Shared) (planWithExtractedVariables, error) {
-	if len(requestOperationName) == 0 {
-		shared.Normalizer.NormalizeOperation(shared.Doc, h.definition, shared.Report)
-	} else {
-		shared.Normalizer.NormalizeNamedOperation(shared.Doc, h.definition, requestOperationName, shared.Report)
-	}
-	if shared.Report.HasErrors() {
-		return planWithExtractedVariables{}, fmt.Errorf(ErrMsgOperationNormalizationFailed, shared.Report)
-	}
-
-	state := shared.Validation.Validate(shared.Doc, h.definition, shared.Report)
-	if state != astvalidation.Valid {
-		return planWithExtractedVariables{}, errInvalid
-	}
-
-	preparedPlan := shared.Planner.Plan(shared.Doc, h.definition, unsafebytes.BytesToString(requestOperationName), shared.Report)
-	shared.Postprocess.Process(preparedPlan)
-
-	prepared := planWithExtractedVariables{
-		preparedPlan: preparedPlan,
-		variables:    shared.Doc.Input.Variables,
-	}
-	return prepared, nil
-}
 
 func postProcessVariables(operation *wgpb.Operation, r *http.Request, variables []byte) ([]byte, error) {
 	var err error

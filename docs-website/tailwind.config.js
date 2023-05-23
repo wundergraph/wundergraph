@@ -50,5 +50,6 @@ module.exports = {
 		require('tailwindcss-radix')(),
 		require('@tailwindcss/typography'),
 		require('tailwind-scrollbar')({ nocompatible: true }),
+		require('@tailwindcss/forms'),
 	],
 };

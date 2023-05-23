@@ -10,7 +10,6 @@ import {
 	ComputerDesktopIcon,
 	CubeIcon,
 	HomeIcon,
-	LightBulbIcon,
 	ListBulletIcon,
 	LockClosedIcon,
 	QuestionMarkCircleIcon,
@@ -979,6 +978,10 @@ const navigation = [
 					{
 						title: 'Add custom domains to your deployment',
 						href: '/docs/cloud/custom-domains',
+					},
+					{
+						title: 'Redeployment',
+						href: '/docs/cloud/redeployment',
 					},
 				],
 			},
