@@ -1,17 +1,20 @@
-import type { ReactElement, ReactNode } from 'react';
-import { useState, useCallback, Fragment } from 'react';
-import { useRouter } from 'next/router';
+import { Combobox } from '@headlessui/react';
+import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
+import { BookOpenIcon, FaceFrownIcon } from '@heroicons/react/24/outline';
+import { clsx } from 'clsx';
 import FlexSearch from 'flexsearch';
-import cn from 'clsx';
+import { useRouter } from 'next/router';
+import type { ReactNode } from 'react';
+import { useCallback, useState } from 'react';
 import { HighlightMatches } from './highlight-matches';
 
 const DEFAULT_LOCALE = 'en-US';
 
 type SearchResult = {
-	children: ReactNode;
 	id: string;
 	prefix?: ReactNode;
 	route: string;
+	children: ReactNode;
 };
 
 type SectionIndex = FlexSearch.Document<
@@ -39,7 +42,7 @@ type Result = {
 	_page_rk: number;
 	_section_rk: number;
 	route: string;
-	prefix: ReactNode;
+	prefix?: ReactNode;
 	children: ReactNode;
 };
 
@@ -148,8 +151,8 @@ const loadIndexesImpl = async (basePath: string, locale: string): Promise<void> 
 	indexes[locale] = [pageIndex, sectionIndex];
 };
 
-export function Flexsearch({ className }: { className?: string }): ReactElement {
-	const { locale = DEFAULT_LOCALE, basePath } = useRouter();
+export const Flexsearch = ({ close }: { close: () => void }) => {
+	const { locale = DEFAULT_LOCALE, basePath, push } = useRouter();
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(false);
 	const [results, setResults] = useState<SearchResult[]>([]);
@@ -198,21 +201,15 @@ export function Flexsearch({ className }: { className?: string }): ReactElement 
 					_page_rk: i,
 					_section_rk: j,
 					route: url,
-					prefix: isFirstItemOfPage && (
-						<div className="w-full border-b border-gray-700 px-1 pb-2 text-xs uppercase tracking-wide text-white">
-							{result.doc.title}
-						</div>
-					),
+					prefix: isFirstItemOfPage ? result.doc.title : undefined,
 					children: (
 						<>
-							<div className="font-bold">
+							<div className="pb-2 text-sm font-semibold dark:text-white">
 								<HighlightMatches match={search} value={title} />
 							</div>
-							{content && (
-								<div className="text-xs">
-									<HighlightMatches match={search} value={content} />
-								</div>
-							)}
+							<div className="text-xs dark:text-gray-300">
+								<HighlightMatches match={search} value={content} />
+							</div>
 						</>
 					),
 				});
@@ -275,25 +272,67 @@ export function Flexsearch({ className }: { className?: string }): ReactElement 
 	};
 
 	return (
-		<div className="not-prose">
-			<input
-				value={search}
-				onChange={(e) => handleChange(e.target.value)}
-				onFocus={() => preload(true)}
-				className={className}
-			/>
-			<div className="mt-2 flex flex-col">
-				{results.length > 0 ? (
-					results.map(({ route, prefix, children, id }, i) => (
-						<div key={id} className="bg-gray-800 p-2 text-white">
-							{prefix}
-							<a href={route}>{children}</a>
-						</div>
-					))
-				) : (
-					<div>EMPTY RESULTS</div>
-				)}
+		<Combobox
+			onChange={(value: any) => {
+				close();
+				push(value);
+			}}
+		>
+			<div className="relative">
+				<MagnifyingGlassIcon
+					className="pointer-events-none absolute left-4 top-3.5 h-5 w-5 text-gray-400"
+					aria-hidden="true"
+				/>
+				<Combobox.Input
+					className="h-12 w-full border-0 bg-transparent pl-11 pr-4 text-gray-800 placeholder:text-gray-400 focus:ring-0 dark:text-gray-100 sm:text-sm"
+					placeholder="Search"
+					value={search}
+					onFocus={() => preload(true)}
+					onChange={(event) => handleChange(event.target.value)}
+				/>
 			</div>
-		</div>
+
+			{search === '' && (
+				<div className="border-t border-gray-100 px-6 py-14 text-center text-sm dark:border-gray-700 sm:px-14">
+					<BookOpenIcon className="mx-auto h-6 w-6 text-gray-400" aria-hidden="true" />
+					<p className="mt-4 font-semibold text-gray-900 dark:text-gray-100">Search the documentation</p>
+					<p className="mt-2 text-gray-500">Quickly access anything within the docs by running a global search.</p>
+				</div>
+			)}
+
+			{search !== '' && results.length > 0 && (
+				<Combobox.Options className="scrollbar-custom max-h-96 scroll-pb-2 scroll-pt-11 overflow-y-auto pb-2 overflow-x-hidden">
+					{results.map(({ route, prefix, children, id }, i) => (
+						<li key={id}>
+							{prefix && (
+								<h2 className="bg-gray-100 px-4 py-2.5 text-xs font-semibold text-gray-800 dark:bg-gray-700/30 dark:text-gray-200">
+									{prefix}
+								</h2>
+							)}
+
+							<Combobox.Option
+								value={route}
+								className={({ active }) =>
+									clsx(
+										'm-2 mr-0 flex cursor-pointer flex-col rounded-md px-4 py-2 hover:bg-gray-700/50',
+										active && 'bg-gray-700/50 text-white'
+									)
+								}
+							>
+								{children}
+							</Combobox.Option>
+						</li>
+					))}
+				</Combobox.Options>
+			)}
+
+			{search !== '' && results.length === 0 && (
+				<div className="border-t border-gray-100 px-6 py-14 text-center text-sm dark:border-gray-700 sm:px-14">
+					<FaceFrownIcon className="mx-auto h-6 w-6 text-gray-400" aria-hidden="true" />
+					<p className="mt-4 font-semibold text-gray-800 dark:text-gray-100">No results found</p>
+					<p className="mt-2 text-gray-500">We couldn’t find anything with that term. Please try again.</p>
+				</div>
+			)}
+		</Combobox>
 	);
-}
+};

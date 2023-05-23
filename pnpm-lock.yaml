@@ -42,6 +42,7 @@ importers:
       '@radix-ui/react-scroll-area': ^0.1.5-rc.44
       '@radix-ui/react-tabs': ^0.2.0-rc.21
       '@sindresorhus/slugify': ^2.1.0
+      '@tailwindcss/forms': ^0.5.3
       '@tailwindcss/typography': ^0.5.2
       '@typeform/embed-react': ^2.1.0
       '@types/flexsearch': ^0.7.3
@@ -87,6 +88,7 @@ importers:
       '@radix-ui/react-scroll-area': 0.1.5-rc.50_biqbaboplfbrettd7655fr4n2y
       '@radix-ui/react-tabs': 0.2.0-rc.27_biqbaboplfbrettd7655fr4n2y
       '@sindresorhus/slugify': 2.1.1
+      '@tailwindcss/forms': 0.5.3_tailwindcss@3.2.1
       '@tailwindcss/typography': 0.5.7_tailwindcss@3.2.1
       '@typeform/embed-react': 2.1.0_react@18.2.0
       '@vercel/og': 0.5.4
@@ -6554,6 +6556,15 @@ packages:
     dependencies:
       defer-to-connect: 2.0.1
     dev: true
+
+  /@tailwindcss/forms/0.5.3_tailwindcss@3.2.1:
+    resolution: {integrity: sha512-y5mb86JUoiUgBjY/o6FJSFZSEttfb3Q5gllE4xoKjAAD+vBrnIhE4dViwUuow3va8mpH4s9jyUbUbrRGoRdc2Q==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0 || >= 3.0.0-alpha.1'
+    dependencies:
+      mini-svg-data-uri: 1.4.4
+      tailwindcss: 3.2.1
+    dev: false
 
   /@tailwindcss/typography/0.5.7_tailwindcss@3.2.1:
     resolution: {integrity: sha512-JTTSTrgZfp6Ki4svhPA4mkd9nmQ/j9EfE7SbHJ1cLtthKkpW2OxsFXzSmxbhYbEkfNIyAyhle5p4SYyKRbz/jg==}
@@ -17935,6 +17946,11 @@ packages:
     dependencies:
       schema-utils: 4.0.1
       webpack: 5.79.0
+    dev: false
+
+  /mini-svg-data-uri/1.4.4:
+    resolution: {integrity: sha512-r9deDe9p5FJUPZAk3A59wGH7Ii9YrjjWw0jmw/liSbHl2CHiyXj6FcDXDu2K3TjVAXqiJdaw3xxwlZZr9E6nHg==}
+    hasBin: true
     dev: false
 
   /minimalistic-assert/1.0.1:
