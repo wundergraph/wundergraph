@@ -1,4 +1,7 @@
-const withMarkdoc = require('@markdoc/next.js');
+import withMarkdoc from '@markdoc/next.js';
+import { SearchPlugin } from './searchPlugin.mjs';
+
+const production = process.env.NODE_ENV === 'production';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -53,8 +56,13 @@ const nextConfig = {
 			},
 		];
 	},
+	webpack: (config, options) => {
+		if (options.nextRuntime !== 'edge' && options.isServer) {
+			config.plugins ||= [];
+			config.plugins.push(new SearchPlugin());
+		}
+		return config;
+	},
 };
 
-const production = process.env.NODE_ENV === 'production';
-
-module.exports = withMarkdoc({ mode: production ? 'static' : 'server' })(nextConfig);
+export default withMarkdoc({ mode: production ? 'static' : 'server' })(nextConfig);
