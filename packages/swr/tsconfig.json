@@ -5,9 +5,9 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "declarationDir": "./dist",
-    "jsx": "react",
     "outDir": "./dist",
-    "typeRoots": ["./node_modules/@types", "./src/typedefinitions"]
+    "typeRoots": ["./node_modules/@types", "./src/typedefinitions"],
+    "incremental": false
   },
   "include": ["src/**/*", "tests"],
   "exclude": ["node_modules", "dist"]
