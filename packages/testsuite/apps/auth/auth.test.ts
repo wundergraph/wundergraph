@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import * as jose from 'jose';
-import { ClientResponse, ResponseError } from '@wundergraph/sdk/client';
+import { AuthorizationError, ClientResponse, ResponseError } from '@wundergraph/sdk/client';
 
 const keyID = '123456';
 const keyAlgorithm = 'RS256';
@@ -447,5 +447,45 @@ describe('user endpoints', () => {
 		const client = wg.client();
 		await expect(async () => client.fetchUser()).rejects.toThrow();
 		await expect(async () => client.fetchUser({ revalidate: true })).rejects.toThrow();
+	});
+});
+
+describe('Test requireAuthentication directive', () => {
+	const input = 'hello';
+	it('rejects non-authenticated query request with directive', async () => {
+		const client = wg.client();
+		const result = await client.query({
+			operationName: 'echo/StringWithRequiredAuthentication',
+			input: {
+				input,
+			},
+		});
+		expect(result.error).toBeInstanceOf(AuthorizationError);
+		expect(result.error?.statusCode).toBe(401);
+	});
+
+	it('accepts authenticated query request with directive', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.default);
+		const result = await client.query({
+			operationName: 'echo/StringWithRequiredAuthentication',
+			input: {
+				input,
+			},
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data?.echo_string).toBe(`string: ${input}`);
+	});
+
+	it('accept non-authenticated query request without directive', async () => {
+		const client = wg.client();
+		const result = await client.query({
+			operationName: 'echo/StringWithoutRequiredAuthentication',
+			input: {
+				input,
+			},
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data?.echo_string).toBe(`string: ${input}`);
 	});
 });
