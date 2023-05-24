@@ -37,3 +37,4 @@ export { EnvironmentVariable } from './configure/variables';
 export { configureWunderGraphGeneration } from './configure/codegeneration';
 
 export { defineConfig, createWunderGraphApplication } from './configure/define-config';
+export type { WunderGraphConfig } from './integrations/types';

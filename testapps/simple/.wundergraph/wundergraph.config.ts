@@ -1,8 +1,15 @@
-import { defineConfig } from '@wundergraph/sdk';
+import type { WunderGraphConfig } from '@wundergraph/sdk';
 import { graphql } from '@wundergraph/sdk/integrations';
 import { weather } from './weather-integration';
 
-export default defineConfig({
+/**
+ * By simple annotating the export using WunderGraphConfig,
+ * We can safely import this into the server without having to
+ * import the SDK. Ideally we would support defineConfig, but
+ * that would require a lot of work (and breaking changes) to get right.
+ */
+// export default defineConfig({
+export default {
 	integrations: [
 		weather(),
 		graphql({
@@ -28,4 +35,4 @@ export default defineConfig({
 		// 	schema: ...
 		// }),
 	],
-});
+} as WunderGraphConfig;

@@ -15,6 +15,7 @@ import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/uti
 import { Headers } from '@whatwg-node/fetch';
 import { FastifyRequest } from 'fastify';
 import { runHookQueriesPreResolve } from '../../integrations/hooks';
+import { WunderGraphIntegration } from '../../integrations/types';
 
 const maximumRecursionLimit = 16;
 
@@ -30,6 +31,7 @@ export interface GraphQLError {
 
 export interface FastifyHooksOptions extends HooksConfiguration {
 	config: WunderGraphConfiguration;
+	integrations: WunderGraphIntegration[];
 }
 
 export interface HooksRouteConfig {
@@ -297,7 +299,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			reply.type('application/json').code(200);
 			try {
 				await runHookQueriesPreResolve({
-					config: config as any,
+					config,
 					context: {
 						operationName,
 						...requestContext(request),

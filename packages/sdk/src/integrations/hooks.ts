@@ -1,10 +1,58 @@
-import { AsyncApiIntrospector, CodeGen, WunderGraphConfigApplicationConfig } from '../configure';
+import { AsyncApiIntrospector, CodeGen } from '../configure';
 import { AuthenticationHookRequest } from '../server';
-import { AuthProviderConfig, AuthProviderTypes, UserConfig, WunderGraphConfig } from './types';
+import { AuthProviderConfig, AuthProviderTypes, WunderGraphConfig, WunderGraphAppConfig } from './types';
+import logger from '../logger';
+import { FastifyHooksOptions } from '../server/plugins/hooks';
 
-export const runHookConfigSetup = async ({ config }: { config: UserConfig }) => {
-	let updatedConfig = { ...config };
-	let wgConfig: WunderGraphConfigApplicationConfig = {
+async function withTakingALongTimeMsg<T>({
+	name,
+	hookResult,
+	timeoutMs = 3000,
+}: {
+	name: string;
+	hookResult: T | Promise<T>;
+	timeoutMs?: number;
+}): Promise<T> {
+	const timeout = setTimeout(() => {
+		logger.info(`Waiting for the ${name} integration...`);
+	}, timeoutMs);
+	const result = await hookResult;
+	clearTimeout(timeout);
+	return result;
+}
+
+export const runHookConfigSetup = async ({ config }: { config: WunderGraphConfig }) => {
+	let wgConfig: WunderGraphAppConfig = {
+		...config,
+		operations: {
+			// @todo these defaults and having to set them here is ugly and not intuitive
+			defaultConfig: {
+				authentication: {
+					required: false,
+				},
+			},
+			queries: (config) => ({
+				...config,
+				caching: {
+					enable: false,
+					staleWhileRevalidate: 60,
+					maxAge: 60,
+					public: true,
+				},
+				liveQuery: {
+					enable: true,
+					pollingIntervalSeconds: 1,
+				},
+			}),
+			mutations: (config) => ({
+				...config,
+			}),
+			subscriptions: (config) => ({
+				...config,
+			}),
+			custom: {},
+			...config.operations,
+		},
 		apis: [],
 		authentication: {
 			tokenBased: {
@@ -16,7 +64,7 @@ export const runHookConfigSetup = async ({ config }: { config: UserConfig }) => 
 		},
 	};
 
-	for (const integration of updatedConfig.integrations) {
+	for (const integration of config.integrations) {
 		if (integration.hooks?.['config:setup']) {
 			const options = {
 				addApi: (api: AsyncApiIntrospector<any>) => {
@@ -49,7 +97,10 @@ export const runHookConfigSetup = async ({ config }: { config: UserConfig }) => 
 					wgConfig.generate.codeGenerators?.push(codeGen);
 				},
 			};
-			await integration.hooks['config:setup'](options);
+			await withTakingALongTimeMsg({
+				name: integration.name,
+				hookResult: integration.hooks['config:setup'](options),
+			});
 		}
 	}
 
@@ -59,7 +110,10 @@ export const runHookConfigSetup = async ({ config }: { config: UserConfig }) => 
 export const runHookConfigGenerated = async ({ config }: { config: WunderGraphConfig }) => {
 	for (const integration of config.integrations) {
 		if (integration.hooks?.['config:generated']) {
-			await integration.hooks['config:generated'](config);
+			await withTakingALongTimeMsg({
+				name: integration.name,
+				hookResult: integration.hooks['config:generated'](config),
+			});
 		}
 	}
 };
@@ -73,12 +127,15 @@ export const runHookQueriesPreResolve = async ({
 	config,
 	context,
 }: {
-	config: WunderGraphConfig;
+	config: FastifyHooksOptions;
 	context: HookContext;
 }) => {
 	for (const integration of config.integrations) {
 		if (integration.hooks?.['hooks:queries:preResolve']) {
-			await integration.hooks['hooks:queries:preResolve'](context);
+			await withTakingALongTimeMsg({
+				name: integration.name,
+				hookResult: integration.hooks['hooks:queries:preResolve'](context),
+			});
 		}
 	}
 };

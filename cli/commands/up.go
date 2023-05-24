@@ -561,6 +561,9 @@ var (
 import { createWunderGraphApplication } from "@wundergraph/sdk";
 import config from '../wundergraph.config';
 import operations from '../wundergraph.operations';
+{{ if .HasWunderGraphServerTs }}
+import server from '../wundergraph.server';
+{{ end }}
 
 createWunderGraphApplication({
 	...config,
@@ -568,7 +571,7 @@ createWunderGraphApplication({
         ...operations,
         ...config?.operations
     },
-});`))
+}{{ if .HasWunderGraphServerTs }}, server{{ end }});`))
 )
 
 type wunderGraphApplicationTemplateData struct {
@@ -581,7 +584,7 @@ func IsDefineConfig(configEntry string) bool {
         return false
     }
     s := string(b)
-    return strings.Contains(s, "export default defineConfig")
+    return strings.Contains(s, "export default defineConfig") || strings.Contains(s, "WunderGraphConfig")
 }
 
 func EnsureWunderGraphApplicationTS(wunderGraphDir string) error {

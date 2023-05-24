@@ -3,13 +3,9 @@ import { WellKnownClaim } from '../graphql/operations';
 import { configureWunderGraphApplication } from '.';
 import path from 'path';
 import { runHookConfigGenerated, runHookConfigSetup } from '../integrations/hooks';
-import { UserConfig } from '../integrations/types';
-import { OperationsConfiguration } from './operations';
+import { WunderGraphConfig } from '../integrations/types';
 
-export const defineConfig = (config: UserConfig) => {
-	// @todo we should export this and generate the configureWunderGraphApplication config
-	// if wundergraph.config.ts has default export defineConfig
-	// createWunderGraphApplication(config);
+export const defineConfig = (config: WunderGraphConfig) => {
 	return config;
 };
 
@@ -17,19 +13,18 @@ export const createWunderGraphApplication = async <
 	TCustomClaim extends string,
 	TPublicClaim extends TCustomClaim | WellKnownClaim
 >(
-	config: UserConfig
+	config: WunderGraphConfig,
+	server?: WunderGraphHooksAndServerConfig
 ) => {
 	const applicationConfig = await runHookConfigSetup({ config });
 
-	applicationConfig.server = await resolveServerConfig();
+	// applicationConfig.server = await resolveServerConfig();
+	applicationConfig.server = server;
 
-	configureWunderGraphApplication(applicationConfig);
+	configureWunderGraphApplication<TCustomClaim, TPublicClaim>(applicationConfig);
 
 	await runHookConfigGenerated({
-		config: {
-			...config,
-			applicationConfig,
-		},
+		config: applicationConfig,
 	});
 };
 
