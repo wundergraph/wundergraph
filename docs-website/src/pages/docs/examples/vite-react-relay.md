@@ -1,3 +1,9 @@
+---
+title: Vite + React + Relay Example
+pageTitle: WunderGraph - Examples - Vite - React - Relay
+description:
+---
+
 The [Vite + React + Relay example](https://github.com/wundergraph/wundergraph/tree/main/examples/vite-react-relay) demonstrates how to use Relay with a Vite + React based WunderGraph project.
 
 ## Getting Started

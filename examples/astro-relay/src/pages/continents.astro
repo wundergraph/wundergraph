@@ -1,0 +1,32 @@
+---
+import type { ContinentName$data } from "../__relay__generated__/ContinentName.graphql";
+import type { ContinentsListQuery } from "../__relay__generated__/ContinentsListQuery.graphql";
+import ContinentName from "../components/ContinentName/ContinentName.astro";
+import {  fetchWunderGraphSSGQuery } from "../lib/wundergraph";
+import { ContinentsList } from "../queries/ContinentsList";
+
+const continentsListData = await fetchWunderGraphSSGQuery<ContinentsListQuery>(ContinentsList, {})
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Astro</title>
+	</head>
+	<body>
+		<h1>Continents list generated at build time using Relay</h1>
+		<ul>
+			{
+				continentsListData && continentsListData.countries_continents.map((each: ContinentName$data) => {
+					return (
+						<ContinentName continentName={each} />
+					)
+				})
+			}
+		</ul>
+		<a href="/">Back</a>
+	</body>
+</html>
