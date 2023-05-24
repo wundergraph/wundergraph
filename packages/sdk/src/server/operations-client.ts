@@ -61,7 +61,10 @@ export class OperationsClient<
 
 	constructor(options: OperationsClientConfig) {
 		const { clientRequest, customFetch = fetch, ...rest } = options;
-		super(rest);
+		super({
+			...rest,
+			customFetch,
+		});
 
 		this.clientRequest = clientRequest;
 		if (clientRequest?.headers) {
