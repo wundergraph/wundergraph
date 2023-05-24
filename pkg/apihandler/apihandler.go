@@ -46,6 +46,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/jsonpath"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/metrics"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/s3uploadclient"
@@ -105,7 +106,7 @@ type Builder struct {
 	githubAuthDemoClientID     string
 	githubAuthDemoClientSecret string
 
-	metrics OperationMetrics
+	metrics metrics.Metrics
 }
 
 type BuilderConfig struct {
@@ -116,7 +117,7 @@ type BuilderConfig struct {
 	GitHubAuthDemoClientID     string
 	GitHubAuthDemoClientSecret string
 	DevMode                    bool
-	Metrics                    OperationMetrics
+	Metrics                    metrics.Metrics
 }
 
 func NewBuilder(pool *pool.Pool,
@@ -619,8 +620,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			operationHandler = authentication.RequiresAuthentication(operationHandler)
 			route.Handler(authentication.RequiresAuthentication(operationHandler))
 		}
-
-		route.Handler(r.metrics.Handler(operation, operationHandler))
+		metrics := newOperationMetrics(r.metrics, operation)
+		route.Handler(metrics.Handler(operationHandler))
 	} else {
 		r.registerInvalidOperation(operation.Name)
 	}
@@ -1745,7 +1746,8 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 		handler = authentication.RequiresAuthentication(handler)
 	}
 
-	route.Handler(r.metrics.Handler(operation, handler))
+	metrics := newOperationMetrics(r.metrics, operation)
+	route.Handler(metrics.Handler(handler))
 
 	r.log.Debug("registered FunctionsHandler",
 		zap.String("operation", operation.Name),

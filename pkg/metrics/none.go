@@ -16,8 +16,9 @@ func (n noMetrics) NewGaugeVec(opts MetricOpts, labelNames ...string) GaugeVec  
 func (n noMetrics) NewHistogramVec(opts MetricOpts, labelNames ...string) HistogramVec {
 	return noMetric{}
 }
-func (n noMetrics) Serve() error                       { return nil }
-func (n noMetrics) Shutdown(ctx context.Context) error { return nil }
+func (n noMetrics) NewSummaryVec(opts MetricOpts, labelNames ...string) SummaryVec { return noMetric{} }
+func (n noMetrics) Serve() error                                                   { return nil }
+func (n noMetrics) Shutdown(ctx context.Context) error                             { return nil }
 
 // NewNone returns a metrics provider that does nothing
 func NewNone() Metrics {

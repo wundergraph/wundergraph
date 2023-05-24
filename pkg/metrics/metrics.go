@@ -15,14 +15,17 @@ var (
 	ErrServerClosed = http.ErrServerClosed
 )
 
+type Labels map[string]string
+
 // MetricOpts represents the options used by all types of metrics.
 // See https://prometheus.io/docs/practices/naming/ for choosing
 // a metric name.
 type MetricOpts struct {
-	Namespace string
-	Subsystem string
-	Name      string
-	Help      string
+	Namespace   string
+	Subsystem   string
+	Name        string
+	Help        string
+	ConstLabels Labels
 }
 
 // CounterVec implements a Counter which can only increase in value.
@@ -50,6 +53,10 @@ type HistogramVec interface {
 	Observe(v float64, labelValues ...string)
 }
 
+type SummaryVec interface {
+	Observe(v float64, labelValues ...string)
+}
+
 // Metrics is an interface which wraps a metrics generator. To create a Metrics
 // use one of the New*() functions in this package. After that, create any metrics
 // you need using the New*() functions in this interface. To serve the metrics call
@@ -64,6 +71,9 @@ type Metrics interface {
 	// NewHistogramVec returns a HistogramVec with the given options and labels.
 	// See HistogramVec for more information.
 	NewHistogramVec(opts MetricOpts, labelNames ...string) HistogramVec
+	// NewSummaryVec returns a HistogramVec with the given options and labels.
+	// See SummaryVec for more information.
+	NewSummaryVec(opts MetricOpts, labelNames ...string) SummaryVec
 	// Serve starts serving the metrics collected by this Metrics, in a blocking way.
 	// After shutdown, it will return ErrShutdown.
 	Serve() error

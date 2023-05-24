@@ -458,7 +458,13 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		}
 	}
 
-	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableRequestLogging)
+	transportFactory := apihandler.NewApiTransportFactory(apihandler.ApiTransportOptions{
+		API:                  nodeConfig.Api,
+		HooksClient:          hooksClient,
+		EnableRequestLogging: n.options.enableRequestLogging,
+		Metrics:              n.metrics,
+	})
+
 	n.log.Debug("http.Client.Transport",
 		zap.Bool("enableRequestLogging", n.options.enableRequestLogging),
 	)
@@ -470,8 +476,6 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		hooksClient,
 	))
 
-	operationMetrics := apihandler.NewOperationMetrics(n.metrics)
-
 	builderConfig := apihandler.BuilderConfig{
 		InsecureCookies:            n.options.insecureCookies,
 		ForceHttpsRedirects:        n.options.forceHttpsRedirects,
@@ -480,7 +484,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		GitHubAuthDemoClientID:     n.options.githubAuthDemo.ClientID,
 		GitHubAuthDemoClientSecret: n.options.githubAuthDemo.ClientSecret,
 		DevMode:                    n.options.devMode,
-		Metrics:                    operationMetrics,
+		Metrics:                    n.metrics,
 	}
 
 	n.builder = apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
@@ -490,7 +494,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		Client:              hooksClient,
 		Loader:              loader,
 		EnableIntrospection: n.options.enableIntrospection,
-		Metrics:             operationMetrics,
+		Metrics:             n.metrics,
 		InsecureCookies:     n.options.insecureCookies,
 		Log:                 n.log,
 	}

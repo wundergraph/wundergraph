@@ -27,6 +27,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/metrics"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -44,8 +45,8 @@ type InternalBuilder struct {
 	renameTypeNames     []resolve.RenameTypeName
 	middlewareClient    *hooks.Client
 	enableIntrospection bool
-	metrics             OperationMetrics
 	insecureCookies     bool
+	metrics             metrics.Metrics
 }
 
 type InternalBuilderConfig struct {
@@ -53,8 +54,8 @@ type InternalBuilderConfig struct {
 	Client              *hooks.Client
 	Loader              *engineconfigloader.EngineConfigLoader
 	EnableIntrospection bool
-	Metrics             OperationMetrics
 	InsecureCookies     bool
+	Metrics             metrics.Metrics
 	Log                 *zap.Logger
 }
 
@@ -65,8 +66,8 @@ func NewInternalBuilder(config InternalBuilderConfig) *InternalBuilder {
 		loader:              config.Loader,
 		middlewareClient:    config.Client,
 		enableIntrospection: config.EnableIntrospection,
-		metrics:             config.Metrics,
 		insecureCookies:     config.InsecureCookies,
+		metrics:             config.Metrics,
 	}
 }
 
@@ -281,7 +282,8 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		}
 	}
 
-	i.router.Methods(http.MethodPost).Path(apiPath).Handler(i.metrics.Handler(operation, handler))
+	metrics := newOperationMetrics(i.metrics, operation)
+	i.router.Methods(http.MethodPost).Path(apiPath).Handler(metrics.Handler(handler))
 
 	return nil
 }
@@ -314,7 +316,8 @@ func (i *InternalBuilder) registerNodeJsOperation(operation *wgpb.Operation, api
 		internal: true,
 	}
 
-	route.Handler(handler)
+	metrics := newOperationMetrics(i.metrics, operation)
+	route.Handler(metrics.Handler(handler))
 	return nil
 }
 

@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -45,6 +46,14 @@ func (h *prometheusHistogramVec) Observe(v float64, labels ...string) {
 	h.histogramVec.WithLabelValues(labels...).Observe(v)
 }
 
+type prometheusSummaryVec struct {
+	summaryVec *prometheus.SummaryVec
+}
+
+func (s *prometheusSummaryVec) Observe(v float64, labels ...string) {
+	s.summaryVec.WithLabelValues(labels...).Observe(v)
+}
+
 type prometheusMetrics struct {
 	server     *http.Server
 	registerer prometheus.Registerer
@@ -53,13 +62,22 @@ type prometheusMetrics struct {
 
 func (m *prometheusMetrics) NewCounterVec(opts MetricOpts, labelNames ...string) CounterVec {
 	counterVec := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: opts.Namespace,
-		Subsystem: opts.Subsystem,
-		Name:      opts.Name,
-		Help:      opts.Help,
+		Namespace:   opts.Namespace,
+		Subsystem:   opts.Subsystem,
+		Name:        opts.Name,
+		Help:        opts.Help,
+		ConstLabels: prometheus.Labels(opts.ConstLabels),
 	}, labelNames)
-	m.registerer.MustRegister(counterVec)
-	m.collectors = append(m.collectors, counterVec)
+	if err := m.registerer.Register(counterVec); err != nil {
+		var regErr prometheus.AlreadyRegisteredError
+		if errors.As(err, &regErr) {
+			counterVec = regErr.ExistingCollector.(*prometheus.CounterVec)
+		} else {
+			panic(err)
+		}
+	} else {
+		m.collectors = append(m.collectors, counterVec)
+	}
 	return &prometheusCounterVec{
 		counterVec: counterVec,
 	}
@@ -67,13 +85,22 @@ func (m *prometheusMetrics) NewCounterVec(opts MetricOpts, labelNames ...string)
 
 func (m *prometheusMetrics) NewGaugeVec(opts MetricOpts, labelNames ...string) GaugeVec {
 	gaugeVec := prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: opts.Namespace,
-		Subsystem: opts.Subsystem,
-		Name:      opts.Name,
-		Help:      opts.Help,
+		Namespace:   opts.Namespace,
+		Subsystem:   opts.Subsystem,
+		Name:        opts.Name,
+		Help:        opts.Help,
+		ConstLabels: prometheus.Labels(opts.ConstLabels),
 	}, labelNames)
-	m.registerer.MustRegister(gaugeVec)
-	m.collectors = append(m.collectors, gaugeVec)
+	if err := m.registerer.Register(gaugeVec); err != nil {
+		var regErr prometheus.AlreadyRegisteredError
+		if errors.As(err, &regErr) {
+			gaugeVec = regErr.ExistingCollector.(*prometheus.GaugeVec)
+		} else {
+			panic(err)
+		}
+	} else {
+		m.collectors = append(m.collectors, gaugeVec)
+	}
 	return &prometheusGaugeVec{
 		gaugeVec: gaugeVec,
 	}
@@ -81,15 +108,48 @@ func (m *prometheusMetrics) NewGaugeVec(opts MetricOpts, labelNames ...string) G
 
 func (m *prometheusMetrics) NewHistogramVec(opts MetricOpts, labelNames ...string) HistogramVec {
 	histogramVec := prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: opts.Namespace,
-		Subsystem: opts.Subsystem,
-		Name:      opts.Name,
-		Help:      opts.Help,
+		Namespace:   opts.Namespace,
+		Subsystem:   opts.Subsystem,
+		Name:        opts.Name,
+		Help:        opts.Help,
+		ConstLabels: prometheus.Labels(opts.ConstLabels),
 	}, labelNames)
-	m.registerer.MustRegister(histogramVec)
-	m.collectors = append(m.collectors, histogramVec)
+	if err := m.registerer.Register(histogramVec); err != nil {
+		var regErr prometheus.AlreadyRegisteredError
+		if errors.As(err, &regErr) {
+			histogramVec = regErr.ExistingCollector.(*prometheus.HistogramVec)
+		} else {
+			panic(err)
+		}
+	} else {
+		m.collectors = append(m.collectors, histogramVec)
+	}
 	return &prometheusHistogramVec{
 		histogramVec: histogramVec,
+	}
+}
+
+func (m *prometheusMetrics) NewSummaryVec(opts MetricOpts, labelNames ...string) SummaryVec {
+	summaryVec := prometheus.NewSummaryVec(prometheus.SummaryOpts{
+		Namespace:   opts.Namespace,
+		Subsystem:   opts.Subsystem,
+		Name:        opts.Name,
+		Help:        opts.Help,
+		ConstLabels: prometheus.Labels(opts.ConstLabels),
+	}, labelNames)
+
+	if err := m.registerer.Register(summaryVec); err != nil {
+		var regErr prometheus.AlreadyRegisteredError
+		if errors.As(err, &regErr) {
+			summaryVec = regErr.ExistingCollector.(*prometheus.SummaryVec)
+		} else {
+			panic(err)
+		}
+	} else {
+		m.collectors = append(m.collectors, summaryVec)
+	}
+	return &prometheusSummaryVec{
+		summaryVec: summaryVec,
 	}
 }
 
