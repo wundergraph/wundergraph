@@ -1,0 +1,10 @@
+query CountriesListQuery {
+  countries_countries {
+    ...CountryName
+  }
+}
+
+fragment CountryName on countries_Country {
+  code
+  name
+}

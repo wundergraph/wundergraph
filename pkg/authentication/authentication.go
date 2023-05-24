@@ -615,6 +615,7 @@ func (e *RBACEnforcer) containsOne(slice []string, one string) bool {
 type LoadUserConfig struct {
 	Log           *zap.Logger
 	Cookie        *securecookie.SecureCookie
+	CSRFSecret    []byte
 	JwksProviders []*wgpb.JwksAuthProvider
 	Hooks         Hooks
 }

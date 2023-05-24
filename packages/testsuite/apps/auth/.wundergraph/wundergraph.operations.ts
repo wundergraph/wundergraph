@@ -26,6 +26,13 @@ export default configureWunderGraphOperations({
 		subscriptions: (config) => ({
 			...config,
 		}),
-		custom: {},
+		custom: {
+			NestedUserID: (config) => {
+				config.authentication = {
+					required: true,
+				};
+				return config;
+			},
+		},
 	},
 });

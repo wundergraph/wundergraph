@@ -45,6 +45,7 @@ type InternalBuilder struct {
 	middlewareClient    *hooks.Client
 	enableIntrospection bool
 	metrics             OperationMetrics
+	insecureCookies     bool
 }
 
 type InternalBuilderConfig struct {
@@ -53,6 +54,7 @@ type InternalBuilderConfig struct {
 	Loader              *engineconfigloader.EngineConfigLoader
 	EnableIntrospection bool
 	Metrics             OperationMetrics
+	InsecureCookies     bool
 	Log                 *zap.Logger
 }
 
@@ -64,6 +66,7 @@ func NewInternalBuilder(config InternalBuilderConfig) *InternalBuilder {
 		middlewareClient:    config.Client,
 		enableIntrospection: config.EnableIntrospection,
 		metrics:             config.Metrics,
+		insecureCookies:     config.InsecureCookies,
 	}
 }
 
@@ -115,6 +118,10 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 	route := router.NewRoute()
 	i.router = route.Subrouter()
 
+	if err := i.registerAuth(); err != nil {
+		i.log.Error("registering auth", zap.Error(err))
+	}
+
 	// RenameTo is the correct name for the origin
 	// for the downstream (client), we have to reverse the __typename fields
 	// this is why Types.RenameTo is assigned to rename.From
@@ -145,6 +152,20 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 		Log:             i.log,
 	})
 	return streamClosers, err
+}
+
+func (i *InternalBuilder) registerAuth() error {
+	config, err := loadUserConfiguration(i.api, i.middlewareClient, i.log)
+	if err != nil {
+		return err
+	}
+
+	i.router.Use(authentication.NewLoadUserMw(config))
+	i.router.Use(authentication.NewCSRFMw(authentication.CSRFConfig{
+		InsecureCookies: i.insecureCookies,
+		Secret:          config.CSRFSecret,
+	}))
+	return nil
 }
 
 func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {

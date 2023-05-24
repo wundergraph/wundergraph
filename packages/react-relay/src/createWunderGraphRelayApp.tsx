@@ -263,9 +263,36 @@ export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOpti
 		};
 	};
 
+	/**
+	 * Experimental utility to fetch queries at build time
+	 * This function doesn't use Relay store & should be only used when you don't have Relay on the client side (working with frameworks like Astro or 11ty)
+	 */
+	const fetchWunderGraphSSGQuery = async <T extends OperationType>(
+		query: GraphQLTaggedNode,
+		variables: T['variables']
+	): Promise<Awaited<T['response']>> => {
+		const concreteRequest = getRequest(query);
+
+		const operationDescriptor = createOperationDescriptor(concreteRequest, variables);
+
+		const id = operationDescriptor?.request?.node?.params?.id;
+
+		const { data, error } = await client.query({
+			operationName: `relay/${id}`,
+			input: variables,
+		});
+
+		if (error) {
+			throw Error(error);
+		}
+
+		return data;
+	};
+
 	return {
 		WunderGraphRelayProvider,
 		fetchWunderGraphSSRQuery,
+		fetchWunderGraphSSGQuery,
 		useLiveQuery,
 		getEnvironment,
 	};

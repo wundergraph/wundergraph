@@ -1,4 +1,9 @@
-import { configureWunderGraphServer } from '@wundergraph/sdk/server';
+import {
+	CreateWebhookVerifier,
+	EnvironmentVariable,
+	WebhookVerifierKind,
+	configureWunderGraphServer,
+} from '@wundergraph/sdk/server';
 import { GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql/index';
 import { GraphQLExecutionContext } from './generated/wundergraph.server';
 
@@ -53,6 +58,12 @@ export default configureWunderGraphServer(() => ({
 							embedded_fromCustomContext: `fromHook: ${context.hello()}`,
 						},
 					};
+				},
+			},
+			RequestidGraphql: {
+				mutatingPostResolve: async ({ clientRequest, response }) => {
+					response.data!.requestId!.code = clientRequest.headers.get('X-Request-ID') || '';
+					return response;
 				},
 			},
 		},
@@ -123,4 +134,14 @@ export default configureWunderGraphServer(() => ({
 			}),
 		},
 	],
+	webhooks: {
+		verified: {
+			verifier: CreateWebhookVerifier({
+				kind: WebhookVerifierKind.HMAC_SHA256,
+				signatureHeaderPrefix: 'sha1=',
+				secret: new EnvironmentVariable('WEBHOOK_SECRET'),
+				signatureHeader: 'X-Signature',
+			}),
+		},
+	},
 }));
