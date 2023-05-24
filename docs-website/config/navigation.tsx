@@ -430,6 +430,10 @@ const navigation = [
 						title: 'Extend the WunderGraph server context',
 						href: '/docs/guides/context-factory',
 					},
+					{
+						title: 'Monitoring and observability',
+						href: '/docs/guides/monitoring-and-observability',
+					},
 				],
 			},
 		],
