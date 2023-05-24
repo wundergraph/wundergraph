@@ -467,7 +467,15 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	}
 
 	n.builder = apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
-	internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, hooksClient, loader, n.options.enableIntrospection)
+	internalBuilderConfig := apihandler.InternalBuilderConfig{
+		Pool:                n.pool,
+		Client:              hooksClient,
+		Loader:              loader,
+		EnableIntrospection: n.options.enableIntrospection,
+		InsecureCookies:     n.options.insecureCookies,
+		Log:                 n.log,
+	}
+	internalBuilder := apihandler.NewInternalBuilder(internalBuilderConfig)
 
 	// this planCache is used across both internal GraphQL handlers
 	planCache, err := ristretto.NewCache(&ristretto.Config{

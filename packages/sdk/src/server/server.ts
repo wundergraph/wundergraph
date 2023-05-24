@@ -173,6 +173,30 @@ export const startServer = async (opts: ServerRunOptions) => {
 	}
 };
 
+/**
+ * createClientRequest returns a decoded client request, used for passing it to user code
+ * @param body Request body
+ * @returns Decoded client request
+ */
+export const createClientRequest = (body: FastifyRequestBody) => {
+	// clientRequest represents the original client request that was sent initially to the WunderNode.
+	const raw = rawClientRequest(body);
+	return {
+		headers: new Headers(raw?.headers),
+		requestURI: raw?.requestURI || '',
+		method: raw?.method || 'GET',
+	};
+};
+
+/**
+ * rawClientRequest returns the raw JSON encoded client request
+ * @param body Request body
+ * @returns Client request as raw JSON, as received in the request body
+ */
+export const rawClientRequest = (body: FastifyRequestBody) => {
+	return body.__wg.clientRequest;
+};
+
 export const createServer = async ({
 	wundergraphDir,
 	serverConfig,
@@ -274,11 +298,7 @@ export const createServer = async ({
 		 */
 		fastify.addHook<{ Body: FastifyRequestBody }>('preHandler', async (req, reply) => {
 			// clientRequest represents the original client request that was sent initially to the WunderNode.
-			const clientRequest = {
-				headers: new Headers(req.body.__wg.clientRequest?.headers),
-				requestURI: req.body.__wg.clientRequest?.requestURI || '',
-				method: req.body.__wg.clientRequest?.method || 'GET',
-			};
+			const clientRequest = createClientRequest(req.body);
 			req.ctx = {
 				log: req.log,
 				user: req.body.__wg.user!,

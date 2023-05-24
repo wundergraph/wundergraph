@@ -44,15 +44,26 @@ type InternalBuilder struct {
 	renameTypeNames     []resolve.RenameTypeName
 	middlewareClient    *hooks.Client
 	enableIntrospection bool
+	insecureCookies     bool
 }
 
-func NewInternalBuilder(pool *pool.Pool, log *zap.Logger, hooksClient *hooks.Client, loader *engineconfigloader.EngineConfigLoader, enableIntrospection bool) *InternalBuilder {
+type InternalBuilderConfig struct {
+	Pool                *pool.Pool
+	Client              *hooks.Client
+	Loader              *engineconfigloader.EngineConfigLoader
+	EnableIntrospection bool
+	InsecureCookies     bool
+	Log                 *zap.Logger
+}
+
+func NewInternalBuilder(config InternalBuilderConfig) *InternalBuilder {
 	return &InternalBuilder{
-		pool:                pool,
-		log:                 log,
-		loader:              loader,
-		middlewareClient:    hooksClient,
-		enableIntrospection: enableIntrospection,
+		pool:                config.Pool,
+		log:                 config.Log,
+		loader:              config.Loader,
+		middlewareClient:    config.Client,
+		enableIntrospection: config.EnableIntrospection,
+		insecureCookies:     config.InsecureCookies,
 	}
 }
 
@@ -104,6 +115,10 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 	route := router.NewRoute()
 	i.router = route.Subrouter()
 
+	if err := i.registerAuth(); err != nil {
+		i.log.Error("registering auth", zap.Error(err))
+	}
+
 	// RenameTo is the correct name for the origin
 	// for the downstream (client), we have to reverse the __typename fields
 	// this is why Types.RenameTo is assigned to rename.From
@@ -134,6 +149,20 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 		Log:             i.log,
 	})
 	return streamClosers, err
+}
+
+func (i *InternalBuilder) registerAuth() error {
+	config, err := loadUserConfiguration(i.api, i.middlewareClient, i.log)
+	if err != nil {
+		return err
+	}
+
+	i.router.Use(authentication.NewLoadUserMw(config))
+	i.router.Use(authentication.NewCSRFMw(authentication.CSRFConfig{
+		InsecureCookies: i.insecureCookies,
+		Secret:          config.CSRFSecret,
+	}))
+	return nil
 }
 
 func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {

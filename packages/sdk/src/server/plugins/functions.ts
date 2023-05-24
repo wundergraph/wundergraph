@@ -11,6 +11,8 @@ import { OperationsClient } from '../operations-client';
 import { InternalError, OperationError } from '../../client/errors';
 import { Logger } from '../../logger';
 import type { AsyncStore, OperationsAsyncContext } from '../operations-context';
+import { createClientRequest, rawClientRequest } from '../server';
+import { FastifyRequestBody } from '../types';
 
 interface FastifyFunctionsOptions {
 	operationsRequestContext: OperationsAsyncContext;
@@ -43,7 +45,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 			if (!maybeImplementation) {
 				continue;
 			}
-			fastify.route({
+			fastify.route<{ Body: FastifyRequestBody }>({
 				url: routeUrl,
 				method: ['POST'],
 				config: {},
@@ -52,16 +54,19 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 					const implementation = maybeImplementation!;
 					try {
 						requestContext = await config.createContext(config.globalContext);
-						const clientRequest = (request.body as any)?.__wg.clientRequest;
+						const clientRequest = rawClientRequest(request.body);
 						const operationClient = new OperationsClient({
 							baseURL: nodeURL,
 							clientRequest,
+							extraHeaders: {
+								'x-request-id': request.id,
+							},
 						});
 						const ctx: HandlerContext<any, any, any, any, any, any, any> = {
 							log: fastify.log,
 							user: (request.body as any)?.__wg.user!,
 							internalClient: internalClientFactory(undefined, clientRequest),
-							clientRequest,
+							clientRequest: createClientRequest(request.body),
 							input: (request.body as any)?.input,
 							operations: operationClient,
 							context: requestContext,
