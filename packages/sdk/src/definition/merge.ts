@@ -463,8 +463,8 @@ directive @transform(
 
 const requireAuthenticationSchema = `
 """
-The @requireAuthentication Directive marks an Operation as requiring authentication.
-Without authentication, the operation will return an error with a status code of 401.
+The @requireAuthentication Directive marks an Operation to require authentication.
+Without authentication, the operation will return an Unauthorized error with status code 401.
 """
 directive @requireAuthentication on QUERY | MUTATION | SUBSCRIPTION 
 `;
