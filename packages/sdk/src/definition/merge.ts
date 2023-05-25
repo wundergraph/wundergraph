@@ -461,6 +461,14 @@ directive @transform(
 ) on FIELD
 `;
 
+const requireAuthenticationSchema = `
+"""
+The @requireAuthentication Directive marks an Operation to require authentication.
+Without authentication, the operation will return an Unauthorized error with status code 401.
+"""
+directive @requireAuthentication on QUERY | MUTATION | SUBSCRIPTION 
+`;
+
 const mergeApiSchemas = <T extends {} = {}>(
 	roles: string[],
 	customClaims: string[],
@@ -499,6 +507,7 @@ const mergeApiSchemas = <T extends {} = {}>(
 	graphQLSchemas.push(buildSchema(injectEnvironmentVariableSchema, options));
 	graphQLSchemas.push(buildSchema(exportSchema, options));
 	graphQLSchemas.push(buildSchema(transformSchema, options));
+	graphQLSchemas.push(buildSchema(requireAuthenticationSchema, options));
 
 	let mergedGraphQLSchema: GraphQLSchema;
 	try {

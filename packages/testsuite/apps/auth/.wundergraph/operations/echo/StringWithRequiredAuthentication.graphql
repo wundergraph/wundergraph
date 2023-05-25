@@ -1,0 +1,3 @@
+query ($input: String!) @requireAuthentication {
+	echo_string(input: $input)
+}

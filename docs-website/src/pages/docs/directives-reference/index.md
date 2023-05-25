@@ -20,4 +20,5 @@ isIndexFile: true
 {% quick-link title="@internal directive" icon="core" href="/docs/directives-reference/internal-directive" description="Hide a variable from the external API" /%}
 {% quick-link title="@transform directive" icon="core" href="/docs/directives-reference/transform-directive" description="Lodash style response transformations" /%}
 {% quick-link title="@removeNullVariables directive" icon="core" href="/docs/directives-reference/remove-null-variables-directive" description="Removes null variables query" /%}
+{% quick-link title="@requireAuthentication directive" icon="core" href="/docs/directives-reference/require-authentication-directive" description="Configure an operation to require authentication" /%}
 {% /quick-links %}

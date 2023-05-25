@@ -278,6 +278,10 @@ export const parseGraphQLOperations = (
 						operation.Internal =
 							internalOperationDirective || isInternalOperationByAPIMountPath(operationFile.api_mount_path);
 
+						if (node.directives?.find((d) => d.name.value === 'requireAuthentication') !== undefined) {
+							operation.AuthenticationConfig.required = true;
+						}
+
 						if (wgRoleEnum && wgRoleEnum.kind === 'EnumTypeDefinition') {
 							const rbac = node.directives?.find((d) => d.name.value === 'rbac');
 							rbac?.arguments?.forEach((arg) => {

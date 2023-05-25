@@ -1366,6 +1366,14 @@ const navigation = [
 						title: '@transform directive',
 						href: '/docs/directives-reference/transform-directive',
 					},
+					{
+						title: '@removeNullVariables directive',
+						href: '/docs/directives-reference/remove-null-variables-directive',
+					},
+					{
+						title: '@requireAuthentication directive',
+						href: '/docs/directives-reference/require-authentication-directive',
+					},
 				],
 			},
 			{
