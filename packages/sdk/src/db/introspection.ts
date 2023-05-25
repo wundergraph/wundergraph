@@ -195,6 +195,7 @@ export const cleanupPrismaSchema = (
 
 	const document = parse(result.graphql_schema);
 	const cleaned = visit(document, {
+		// TODO replaceScalarsWithCustomScalars
 		ObjectTypeDefinition: {
 			enter: (node) => {
 				introspection.replaceCustomScalarTypeFields?.forEach((replace) => {

@@ -11,7 +11,8 @@ export const replaceCustomScalars = (
 	schemaSDL: string,
 	introspection: GraphQLIntrospection | OpenAPIIntrospection
 ): ReplaceCustomScalarsResult => {
-	if (introspection.replaceCustomScalarTypeFields?.length === 0) {
+	const replacements = introspection.replaceCustomScalarTypeFields;
+	if (!replacements || replacements.length === 0) {
 		return { schemaSDL, customScalarTypeFields: [] };
 	}
 	let insideCustomScalarType = false;
@@ -25,7 +26,7 @@ export const replaceCustomScalars = (
 	const cleanAst = visit(ast, {
 		ObjectTypeDefinition: {
 			enter: (node) => {
-				introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
+				replacements.forEach((replace) => {
 					if (node.name.value.match(replace.entityName)) {
 						insideCustomScalarType = true;
 						currentTypeName = node.name.value;
@@ -40,7 +41,7 @@ export const replaceCustomScalars = (
 		FieldDefinition: {
 			enter: (node) => {
 				if (insideCustomScalarType) {
-					introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
+					replacements.forEach((replace) => {
 						if (node.name.value.match(replace.fieldName)) {
 							insideCustomScalarField = true;
 							replaceCustomScalarType = replace;
@@ -64,7 +65,7 @@ export const replaceCustomScalars = (
 		},
 		InputObjectTypeDefinition: {
 			enter: (node) => {
-				introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
+				replacements.forEach((replace) => {
 					if (node.name.value.match(replace.entityName)) {
 						insideCustomScalarType = true;
 						currentTypeName = node.name.value;
@@ -79,7 +80,7 @@ export const replaceCustomScalars = (
 		InputValueDefinition: {
 			enter: (node) => {
 				if (insideCustomScalarType) {
-					introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
+					replacements.forEach((replace) => {
 						if (node.name.value.match(replace.fieldName) && replace.inputTypeReplacement) {
 							insideCustomScalarField = true;
 							replaceCustomScalarType = replace;

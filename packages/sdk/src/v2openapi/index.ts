@@ -143,6 +143,7 @@ class RESTApiBuilder {
 			print(filtered) + '\n' + (this.introspection.schemaExtension || ''),
 			this.introspection
 		);
+		// TODO replaceScalarsWithCustomScalars
 		const schema = buildASTSchema(parse(replaced));
 		const schemaString = printSchema(schema);
 		const dataSources = this.dataSources.map((ds) => {

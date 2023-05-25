@@ -257,6 +257,7 @@ interface GraphQLIntrospectionOptions {
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
+	replaceScalarsWithCustomScalars?: ReplaceScalarsWithCustomScalarsConfiguration[];
 }
 
 export interface GraphQLIntrospection extends GraphQLUpstream, GraphQLIntrospectionOptions {
@@ -281,6 +282,12 @@ export interface ReplaceCustomScalarTypeFieldConfiguration {
 	responseTypeReplacement: string;
 }
 
+export interface ReplaceScalarsWithCustomScalarsConfiguration {
+	exactParentTypeName: string;
+	exactFieldName: string;
+	exactReplacementScalarName: string;
+}
+
 export interface DatabaseIntrospection extends IntrospectionConfiguration {
 	databaseURL: InputVariable;
 	apiNamespace?: string;
@@ -288,6 +295,7 @@ export interface DatabaseIntrospection extends IntrospectionConfiguration {
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
+	replaceScalarsWithCustomScalars?: ReplaceScalarsWithCustomScalarsConfiguration[];
 }
 
 export interface PrismaIntrospection extends IntrospectionConfiguration {
@@ -297,6 +305,7 @@ export interface PrismaIntrospection extends IntrospectionConfiguration {
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
+	replaceScalarsWithCustomScalars?: ReplaceScalarsWithCustomScalarsConfiguration[];
 }
 
 export interface IntrospectionFetchOptions {
@@ -412,6 +421,7 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
+	replaceScalarsWithCustomScalars?: ReplaceScalarsWithCustomScalarsConfiguration[];
 }
 
 export interface StaticApiCustom {
