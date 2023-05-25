@@ -248,7 +248,7 @@ importers:
       react: ^18.1.0
       react-dom: ^18.1.0
       react-ssr-prepass: ^1.5.0
-      swr: ^2.0.0
+      swr: ^2.1.5
       tsup: ^6.7.0
       typescript: ^4.8.2
     dependencies:
@@ -275,7 +275,7 @@ importers:
       node-fetch: 2.6.7
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
-      swr: 2.0.0_react@18.2.0
+      swr: 2.1.5_react@18.2.0
       tsup: 6.7.0_ldaqumno46ke76prz5kcgkjhhy
       typescript: 4.8.4
 
@@ -823,7 +823,7 @@ importers:
       react-dom: 18.2.0
       react-native: 0.71.7
       react-native-web: ~0.18.7
-      swr: ^2.0.0
+      swr: ^2.1.5
       typescript: ^4.6.3
     dependencies:
       '@babel/runtime': 7.21.0
@@ -838,7 +838,7 @@ importers:
       react-dom: 18.2.0_react@18.2.0
       react-native: 0.71.7_2exiyaescjxorpwwmy4ejghgte
       react-native-web: 0.18.12_biqbaboplfbrettd7655fr4n2y
-      swr: 2.0.0_react@18.2.0
+      swr: 2.1.5_react@18.2.0
     devDependencies:
       '@babel/core': 7.20.12
       '@types/react': 18.0.35
@@ -902,7 +902,7 @@ importers:
       react: ^18.2.0
       react-dom: ^18.2.0
       stripe: ^11.12.0
-      swr: ^2.0.0
+      swr: ^2.1.5
       typescript: ^4.8.2
       wait-on: ^6.0.0
       zod: ^3.21.4
@@ -917,7 +917,7 @@ importers:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       stripe: 11.12.0
-      swr: 2.0.0_react@18.2.0
+      swr: 2.1.5_react@18.2.0
       zod: 3.21.4
     devDependencies:
       '@types/node': 18.16.0
@@ -952,7 +952,7 @@ importers:
       relay-compiler: ^15.0.0
       relay-runtime: ^15.0.0
       stripe: ^11.12.0
-      swr: ^2.0.0
+      swr: ^2.1.5
       typescript: ^4.8.2
       wait-on: ^6.0.0
       zod: ^3.21.4
@@ -970,7 +970,7 @@ importers:
       react-relay: 15.0.0_react@18.2.0
       relay-runtime: 15.0.0
       stripe: 11.12.0
-      swr: 2.0.0_react@18.2.0
+      swr: 2.1.5_react@18.2.0
       zod: 3.21.4
     devDependencies:
       '@types/node': 18.16.0
@@ -1025,7 +1025,7 @@ importers:
       react: ^18.1.0
       react-dom: ^18.1.0
       react-router-dom: ^6.4.3
-      swr: ^2.0.0
+      swr: ^2.1.5
       typescript: ^4.6.4
       vite: ^3.0.0
       wait-on: ^6.0.0
@@ -1034,7 +1034,7 @@ importers:
       '@wundergraph/swr': link:../../packages/swr
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
-      swr: 2.0.0_react@18.2.0
+      swr: 2.1.5_react@18.2.0
     devDependencies:
       '@types/react': 18.0.24
       '@types/react-dom': 18.0.8
@@ -22633,6 +22633,7 @@ packages:
     dependencies:
       react: 18.2.0
       use-sync-external-store: 1.2.0_react@18.2.0
+    dev: false
 
   /swr/2.1.5_react@18.2.0:
     resolution: {integrity: sha512-/OhfZMcEpuz77KavXST5q6XE9nrOBOVcBLWjMT+oAE/kQHyE3PASrevXCtQDZ8aamntOfFkbVJp7Il9tNBQWrw==}
@@ -22641,7 +22642,6 @@ packages:
     dependencies:
       react: 18.2.0
       use-sync-external-store: 1.2.0_react@18.2.0
-    dev: true
 
   /symbol-tree/3.2.4:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
