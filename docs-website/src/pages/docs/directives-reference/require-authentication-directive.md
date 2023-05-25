@@ -4,7 +4,7 @@ description: Configure an operation to require authentication
 ---
 
 {% callout type="warning" %}
-This directive takes priority over all other operation authentication configs.
+This directive takes priority over all other operation authentication configurations.
 {% /callout %}
 
 The `@requireAuthentication` directive configures an operation to require authentication.
