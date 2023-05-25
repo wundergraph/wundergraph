@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"github.com/wundergraph/wundergraph/pkg/metrics"
 )
 
