@@ -10,50 +10,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type prometheusCounterVec struct {
-	counterVec *prometheus.CounterVec
-}
-
-func (c *prometheusCounterVec) Inc(labels ...string) {
-	c.counterVec.WithLabelValues(labels...).Inc()
-}
-
-func (c *prometheusCounterVec) Add(v float64, labels ...string) {
-	c.counterVec.WithLabelValues(labels...).Add(v)
-}
-
-type prometheusGaugeVec struct {
-	gaugeVec *prometheus.GaugeVec
-}
-
-func (g *prometheusGaugeVec) Set(v float64, labels ...string) {
-	g.gaugeVec.WithLabelValues(labels...).Set(v)
-}
-
-func (g *prometheusGaugeVec) Inc(labels ...string) {
-	g.gaugeVec.WithLabelValues(labels...).Inc()
-}
-
-func (g *prometheusGaugeVec) Add(v float64, labels ...string) {
-	g.gaugeVec.WithLabelValues(labels...).Add(v)
-}
-
-type prometheusHistogramVec struct {
-	histogramVec *prometheus.HistogramVec
-}
-
-func (h *prometheusHistogramVec) Observe(v float64, labels ...string) {
-	h.histogramVec.WithLabelValues(labels...).Observe(v)
-}
-
-type prometheusSummaryVec struct {
-	summaryVec *prometheus.SummaryVec
-}
-
-func (s *prometheusSummaryVec) Observe(v float64, labels ...string) {
-	s.summaryVec.WithLabelValues(labels...).Observe(v)
-}
-
 type prometheusMetrics struct {
 	server     *http.Server
 	registerer prometheus.Registerer
