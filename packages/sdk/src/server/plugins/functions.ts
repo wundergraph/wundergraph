@@ -4,13 +4,14 @@ import type { ORM } from '@wundergraph/orm';
 
 import { InternalClientFactory } from '../internal-client';
 import type { TypeScriptOperationFile } from '../../graphql/operations';
-import type { NodeJSOperation } from '../../operations/operations';
-import { HandlerContext } from '../../operations/operations';
+import type { NodeJSOperation } from '../../operations';
+import { HandlerContext } from '../../operations';
 import process from 'node:process';
 import { OperationsClient } from '../operations-client';
 import { InternalError, OperationError } from '../../client/errors';
 import { Logger } from '../../logger';
 import type { AsyncStore, OperationsAsyncContext } from '../operations-context';
+import { propagation } from '@opentelemetry/api';
 
 interface FastifyFunctionsOptions {
 	operationsRequestContext: OperationsAsyncContext;
@@ -47,22 +48,33 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 				url: routeUrl,
 				method: ['POST'],
 				config: {},
-				handler: async (request, reply) => {
+				handler: async (req, reply) => {
 					let requestContext;
 					const implementation = maybeImplementation!;
 					try {
+						const headers: { [key: string]: string } = {
+							'x-request-id': req.id,
+						};
+
+						if (req.telemetry) {
+							propagation.inject(req.telemetry.context, headers);
+						}
+
 						requestContext = await config.createContext(config.globalContext);
-						const clientRequest = (request.body as any)?.__wg.clientRequest;
+						const clientRequest = (req.body as any)?.__wg.clientRequest;
 						const operationClient = new OperationsClient({
 							baseURL: nodeURL,
 							clientRequest,
+							extraHeaders: headers,
+							tracer: fastify.tracer,
+							traceContext: req.telemetry?.context,
 						});
 						const ctx: HandlerContext<any, any, any, any, any, any, any> = {
 							log: fastify.log,
-							user: (request.body as any)?.__wg.user!,
-							internalClient: internalClientFactory(undefined, clientRequest),
+							user: (req.body as any)?.__wg.user!,
+							internalClient: internalClientFactory(headers, clientRequest),
 							clientRequest,
-							input: (request.body as any)?.input,
+							input: (req.body as any)?.input,
 							operations: operationClient,
 							context: requestContext,
 							graph: orm,
@@ -71,7 +83,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 						switch (implementation.type) {
 							case 'subscription':
 								// @note this is used by the `orm` to record operations
-								// initiated in the context of this request (so that we
+								// initiated in the context of this req (so that we
 								// can implement cancellation/cleanup)
 								const context: AsyncStore = { ormOperationControllers: [] };
 
@@ -83,7 +95,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 
 									reply.hijack();
 
-									const subscribeOnce = request.headers['x-wg-subscribe-once'] === 'true';
+									const subscribeOnce = req.headers['x-wg-subscribe-once'] === 'true';
 									const gen = implementation.subscriptionHandler(ctx);
 
 									reply.raw.once('close', async () => {
@@ -91,7 +103,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 										await gen.return(0);
 										// Cancel operations created by the ORM for this operation
 										context.ormOperationControllers.forEach((controller) => controller.abort());
-										// @todo move to tracking in-flight operations via. our request context like we do with the ORM
+										// @todo move to tracking in-flight operations via. our req context like we do with the ORM
 										operationClient.cancelSubscriptions();
 										Logger.debug('Canceling operations created by operation.');
 									});

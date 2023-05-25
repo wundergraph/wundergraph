@@ -6,6 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/wundergraph/wundergraph/pkg/operation"
+	"github.com/wundergraph/wundergraph/pkg/trace"
+	"go.opentelemetry.io/otel/attribute"
+	oteltrace "go.opentelemetry.io/otel/trace"
 	"io"
 	"net"
 	"net/http"
@@ -142,6 +146,10 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 
 	r.router = r.createSubRouter(router)
 
+	if r.enableRequestLogging {
+		r.router.Use(logRequestMiddleware(os.Stderr))
+	}
+
 	for _, webhook := range api.Webhooks {
 		err = r.registerWebhook(webhook)
 		if err != nil {
@@ -187,43 +195,9 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		r.planConfig.DataSources = append(r.planConfig.DataSources, dataSource)
 	}
 
-	// limiter := rate.NewLimiter(rate.Every(time.Second), 10)
-
 	r.log.Debug("configuring API",
 		zap.Int("numOfOperations", len(api.Operations)),
 	)
-
-	// Redirect from old-style URL, for temporary backwards compatibility
-	r.router.MatcherFunc(func(r *http.Request, rm *mux.RouteMatch) bool {
-		components := strings.Split(r.URL.Path, "/")
-		return len(components) > 2 && components[2] == "main"
-	}).HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		components := strings.Split(req.URL.Path, "/")
-		prefix := strings.Join(components[:3], "/")
-		const format = "URLs with the %q prefix are deprecated and will be removed in a future release, " +
-			"see https://github.com/wundergraph/wundergraph/blob/main/docs/migrations/sdk-0.122.0-0.123.0.md"
-		r.log.Warn(fmt.Sprintf(format, prefix), zap.String("URL", req.URL.Path))
-		req.URL.Path = "/" + strings.Join(components[3:], "/")
-		r.router.ServeHTTP(w, req)
-	})
-
-	if len(api.Hosts) > 0 {
-		r.router.Use(func(handler http.Handler) http.Handler {
-			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				for i := range api.Hosts {
-					if r.Host == api.Hosts[i] {
-						handler.ServeHTTP(w, r)
-						return
-					}
-				}
-				http.Error(w, fmt.Sprintf("Host not found: %s", r.Host), http.StatusNotFound)
-			})
-		})
-	}
-
-	if r.enableRequestLogging {
-		r.router.Use(logRequestMiddleware(os.Stderr))
-	}
 
 	r.router.Use(func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, request *http.Request) {
@@ -234,6 +208,18 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			}
 
 			request = request.WithContext(context.WithValue(request.Context(), logging.RequestIDKey{}, requestID))
+
+			if len(api.Hosts) > 0 {
+				for i := range api.Hosts {
+					if request.Host == api.Hosts[i] {
+						handler.ServeHTTP(w, request)
+						return
+					}
+				}
+				http.Error(w, fmt.Sprintf("Host not found: %s", request.Host), http.StatusNotFound)
+				return
+			}
+
 			handler.ServeHTTP(w, request)
 		})
 	})
@@ -932,7 +918,13 @@ type QueryHandler struct {
 
 func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
-	r = setOperationMetaData(r, h.operation)
+	r = operation.SetOperationMetaData(r, h.operation)
+
+	span := oteltrace.SpanFromContext(r.Context())
+	span.SetAttributes(attribute.String(trace.WgComponentName, "query-handler"))
+
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -944,36 +936,36 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	ctx := pool.GetCtx(r, r, pool.Config{
+	resolveCtx := pool.GetCtx(r, r, pool.Config{
 		RenameTypeNames: h.renameTypeNames,
 	})
-	defer pool.PutCtx(ctx)
+	defer pool.PutCtx(resolveCtx)
 
-	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
-	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
+	resolveCtx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
+	resolveCtx.Variables = h.stringInterpolator.Interpolate(resolveCtx.Variables)
 
-	if !validateInputVariables(ctx.Context(), requestLogger, ctx.Variables, h.variablesValidator, w) {
+	if !validateInputVariables(resolveCtx.Context(), requestLogger, resolveCtx.Variables, h.variablesValidator, w) {
 		return
 	}
 
 	compactBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(compactBuf)
-	err := json.Compact(compactBuf, ctx.Variables)
+	err := json.Compact(compactBuf, resolveCtx.Variables)
 	if err != nil {
 		requestLogger.Error("Could not compact variables in query handler", zap.Bool("isLive", isLive), zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	ctx.Variables = compactBuf.Bytes()
+	resolveCtx.Variables = compactBuf.Bytes()
 
-	ctx.Variables = h.jsonStringInterpolator.Interpolate(ctx.Variables)
+	resolveCtx.Variables = h.jsonStringInterpolator.Interpolate(resolveCtx.Variables)
 
 	if len(h.extractedVariables) != 0 {
 		// we make a copy of the extracted variables to not override h.extractedVariables
-		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
+		resolveCtx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, resolveCtx.Variables)
 	}
 
-	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
+	resolveCtx.Variables, err = postProcessVariables(h.operation, r, resolveCtx.Variables)
 	if err != nil {
 		if done := handleOperationErr(requestLogger, err, w, "postProcessVariables failed", h.operation); done {
 			return
@@ -994,11 +986,11 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if isLive {
-		h.handleLiveQuery(r, w, ctx, buf, flusher, requestLogger)
+		h.handleLiveQuery(r, w, resolveCtx, buf, flusher, requestLogger)
 		return
 	}
 
-	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
+	resp, err := h.hooksPipeline.Run(resolveCtx, w, r, buf)
 	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
 		return
 	}
@@ -1196,7 +1188,10 @@ func (h *MutationHandler) parseFormVariables(r *http.Request) []byte {
 
 func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
-	r = setOperationMetaData(r, h.operation)
+	r = operation.SetOperationMetaData(r, h.operation)
+
+	span := oteltrace.SpanFromContext(r.Context())
+	span.SetAttributes(attribute.String(trace.WgComponentName, "mutation-handler"))
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -1303,7 +1298,10 @@ type SubscriptionHandler struct {
 
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
-	r = setOperationMetaData(r, h.operation)
+	r = operation.SetOperationMetaData(r, h.operation)
+
+	span := oteltrace.SpanFromContext(r.Context())
+	span.SetAttributes(attribute.String(trace.WgComponentName, "subscription-handler"))
 
 	// recover from panic if one occured. Set err to nil otherwise.
 	defer func() {
@@ -1830,7 +1828,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
 
-	r = setOperationMetaData(r, h.operation)
+	r = operation.SetOperationMetaData(r, h.operation)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -2033,47 +2031,6 @@ type EndpointUnavailableHandler struct {
 func (m *EndpointUnavailableHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	m.Logger.Error("operation not available", zap.String("operationName", m.OperationName), zap.String("URL", r.URL.Path))
 	http.Error(w, fmt.Sprintf("Endpoint not available for Operation: %s, please check the logs.", m.OperationName), http.StatusServiceUnavailable)
-}
-
-type OperationMetaData struct {
-	OperationName string
-	OperationType wgpb.OperationType
-}
-
-func (o *OperationMetaData) GetOperationTypeString() string {
-	switch o.OperationType {
-	case wgpb.OperationType_MUTATION:
-		return "mutation"
-	case wgpb.OperationType_QUERY:
-		return "query"
-	case wgpb.OperationType_SUBSCRIPTION:
-		return "subscription"
-	default:
-		return "unknown"
-	}
-}
-
-func setOperationMetaData(r *http.Request, operation *wgpb.Operation) *http.Request {
-	metaData := &OperationMetaData{
-		OperationName: operation.Name,
-		OperationType: operation.OperationType,
-	}
-	return r.WithContext(context.WithValue(r.Context(), "operationMetaData", metaData))
-}
-
-func getOperationMetaData(r *http.Request) *OperationMetaData {
-	if r == nil {
-		return nil
-	}
-	ctx := r.Context()
-	if ctx == nil {
-		return nil
-	}
-	maybeMetaData := r.Context().Value("operationMetaData")
-	if maybeMetaData == nil {
-		return nil
-	}
-	return maybeMetaData.(*OperationMetaData)
 }
 
 func setSubscriptionHeaders(w http.ResponseWriter) {

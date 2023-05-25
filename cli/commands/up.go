@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/wundergraph/wundergraph/pkg/trace"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -471,6 +472,16 @@ var upCmd = &cobra.Command{
 				node.WithIntrospection(true),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
 				node.WithRequestLogging(rootFlags.DebugMode),
+				node.WithTracer(&trace.Config{
+					Name:     "wundernode",
+					Endpoint: "localhost:4318",
+					Batcher:  "otlphttp",
+					Sampler:  1.0,
+					OtlpHeaders: map[string]string{
+						"Authorization": "Bearer token",
+					},
+					OtlpHttpPath: "/v1/traces",
+				}),
 				node.WithDevMode(),
 			}
 

@@ -14,6 +14,7 @@ import { OperationType, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/utils';
 import { Headers } from '@whatwg-node/fetch';
 import { FastifyRequest } from 'fastify';
+import { trace } from '@opentelemetry/api';
 
 const maximumRecursionLimit = 16;
 
@@ -33,7 +34,8 @@ export interface FastifyHooksOptions extends HooksConfiguration {
 
 export interface HooksRouteConfig {
 	kind: 'hook';
-	operationName?: string;
+	operationName: string;
+	hookName: string;
 }
 
 const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fastify, config) => {
@@ -438,7 +440,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			if (mockResolveOp) {
 				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/mockResolve`,
-					{ config: { operationName, kind: 'hook' } },
+					{ config: { operationName, kind: 'hook', hookName: 'mockResolve' } },
 					mockResolve(operationName, mockResolveOp)
 				);
 			}
@@ -447,7 +449,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			if (preResolveOp) {
 				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/preResolve`,
-					{ config: { operationName, kind: 'hook' } },
+					{ config: { operationName, kind: 'hook', hookName: 'preResolve' } },
 					preResolve(operationName, preResolveOp)
 				);
 			}
@@ -456,7 +458,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			if (postResolveOp) {
 				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/postResolve`,
-					{ config: { operationName, kind: 'hook' } },
+					{ config: { operationName, kind: 'hook', hookName: 'postResolve' } },
 					postResolve(operationName, postResolveOp)
 				);
 			}
@@ -465,7 +467,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			if (mutatingPreResolveOp) {
 				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/mutatingPreResolve`,
-					{ config: { operationName, kind: 'hook' } },
+					{ config: { operationName, kind: 'hook', hookName: 'mutatingPreResolve' } },
 					mutatingPreResolve(operationName, mutatingPreResolveOp)
 				);
 			}
@@ -474,7 +476,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			if (mutatingPostResolveOp) {
 				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/mutatingPostResolve`,
-					{ config: { operationName, kind: 'hook' } },
+					{ config: { operationName, kind: 'hook', hookName: 'mutatingPostResolve' } },
 					mutatingPostResolve(operationName, mutatingPostResolveOp)
 				);
 			}
@@ -483,7 +485,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			if (customResolveOp) {
 				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/customResolve`,
-					{ config: { operationName, kind: 'hook' } },
+					{ config: { operationName, kind: 'hook', hookName: 'customResolve' } },
 					customResolve(operationName, customResolveOp)
 				);
 			}
@@ -584,6 +586,19 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		const registered = registerUploadHooks(uploadOperations);
 		fastify.log.debug(`Registered (${registered}) upload hooks`);
 	}
+
+	fastify.addHook('onRequest', async (req, resp) => {
+		if (req.telemetry) {
+			const routeConfig = req.routeConfig as HooksRouteConfig | undefined;
+			const span = trace.getSpan(req.telemetry.context);
+			if (span && routeConfig?.kind === 'hook') {
+				span.setAttributes({
+					'wg.hook.name': routeConfig.hookName,
+					'wg.hook.operation': routeConfig.operationName,
+				});
+			}
+		}
+	});
 };
 
 export default FastifyHooksPlugin;

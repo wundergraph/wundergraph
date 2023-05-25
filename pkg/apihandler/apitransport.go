@@ -5,6 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/wundergraph/wundergraph/pkg/operation"
+	"github.com/wundergraph/wundergraph/pkg/trace"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/attribute"
+	otrace "go.opentelemetry.io/otel/trace"
 	"io"
 	"net/http"
 	"net/http/httputil"
@@ -117,7 +122,12 @@ func NewApiTransport(httpTransport *http.Transport, enableStreamingMode bool, op
 		}
 	}
 
-	return transport
+	return trace.NewTransport(transport,
+		otelhttp.WithSpanOptions(otrace.WithAttributes(attribute.String(trace.WgComponentName, "api-transport"))),
+		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
+			return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
+		}),
+	)
 }
 
 type Claims struct {
@@ -155,7 +165,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 	// if you're doing this after calling the onRequest hook, it won't work
 	isUpgradeRequest := websocket.IsWebSocketUpgrade(request)
 
-	metaData := getOperationMetaData(request)
+	metaData := operation.GetOperationMetaData(request.Context())
 	if metaData != nil {
 		_, onRequestHook = t.onRequestHook[metaData.OperationName]
 		_, onResponseHook = t.onResponseHook[metaData.OperationName]
@@ -277,7 +287,7 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 	return t.httpTransport.RoundTrip(req)
 }
 
-func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationMetaData, buf *bytes.Buffer) (*http.Request, error) {
+func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *operation.OperationMetaData, buf *bytes.Buffer) (*http.Request, error) {
 	var (
 		body []byte
 		err  error
@@ -336,7 +346,7 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 	return r, nil
 }
 
-func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *OperationMetaData, buf *bytes.Buffer) (*http.Response, error) {
+func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *operation.OperationMetaData, buf *bytes.Buffer) (*http.Response, error) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err

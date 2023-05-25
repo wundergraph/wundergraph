@@ -33,6 +33,8 @@ import { OpenApiServerConfig } from './plugins/omnigraphOAS';
 import { SoapServerConfig } from './plugins/omnigraphSOAP';
 import { NamespacingExecutor } from '../orm';
 import type { OperationsAsyncContext } from './operations-context';
+import configureTracerProvider from './trace/trace';
+import { propagation } from '@opentelemetry/api';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -144,6 +146,11 @@ const _configureWunderGraphServer = <
 			wundergraphDir: process.env.WG_DIR_ABS!,
 			config: WG_CONFIG,
 			serverConfig,
+			tracerConfig: {
+				enabled: true,
+				httpEndpoint: 'http://localhost:4318',
+				authToken: 'test',
+			},
 			// only in production because it has no value in development
 			gracefulShutdown: isProduction,
 			clientFactory,
@@ -179,6 +186,7 @@ export const createServer = async ({
 	config,
 	gracefulShutdown,
 	clientFactory,
+	tracerConfig,
 }: ServerRunOptions): Promise<FastifyInstance> => {
 	if (config.api?.serverOptions?.logger?.level && process.env.WG_DEBUG_MODE !== 'true') {
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
@@ -265,6 +273,22 @@ export const createServer = async ({
 	});
 
 	/**
+	 * Enable telemetry
+	 */
+
+	if (tracerConfig.enabled) {
+		const tracerProvider = configureTracerProvider(
+			{
+				httpEndpoint: tracerConfig.httpEndpoint,
+				authToken: tracerConfig.authToken,
+			},
+			logger
+		);
+
+		await fastify.register(require('./plugins/telemetry'), tracerProvider);
+	}
+
+	/**
 	 * We encapsulate the preHandler with a fastify plugin "register" to not apply it on other routes.
 	 */
 	await fastify.register(async (fastify) => {
@@ -279,17 +303,25 @@ export const createServer = async ({
 				requestURI: req.body.__wg.clientRequest?.requestURI || '',
 				method: req.body.__wg.clientRequest?.method || 'GET',
 			};
+
+			const headers: { [key: string]: string } = {
+				'x-request-id': req.id,
+			};
+			if (req.telemetry) {
+				propagation.inject(req.telemetry.context, headers);
+			}
+
 			req.ctx = {
 				log: req.log,
 				user: req.body.__wg.user!,
 				clientRequest,
-				internalClient: clientFactory({ 'x-request-id': req.id }, req.body.__wg.clientRequest),
+				internalClient: clientFactory(headers, req.body.__wg.clientRequest),
 				operations: new OperationsClient({
 					baseURL: nodeInternalURL,
 					clientRequest: req.body.__wg.clientRequest,
-					extraHeaders: {
-						'x-request-id': req.id,
-					},
+					extraHeaders: headers,
+					tracer: fastify.tracer,
+					traceContext: req.telemetry?.context,
 				}),
 				context: await createContext(globalContext),
 			};

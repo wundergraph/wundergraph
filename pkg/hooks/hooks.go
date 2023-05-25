@@ -6,6 +6,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/wundergraph/wundergraph/pkg/trace"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/attribute"
+	otrace "go.opentelemetry.io/otel/trace"
 	"io"
 	"io/ioutil"
 	"log"
@@ -171,6 +175,12 @@ func NewClient(serverUrl string, logger *zap.Logger) *Client {
 
 func buildClient(requestTimeout time.Duration) *retryablehttp.Client {
 	httpClient := retryablehttp.NewClient()
+	httpClient.HTTPClient.Transport = trace.NewTransport(http.DefaultTransport,
+		otelhttp.WithSpanOptions(otrace.WithAttributes(attribute.String(trace.WgComponentName, "hooks-client"))),
+		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
+			return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
+		}),
+	)
 	// we will try 40 times with a constant delay of 50ms after max 2s we will give up
 	httpClient.RetryMax = 40
 	// keep it low and linear to increase the chance
@@ -179,7 +189,7 @@ func buildClient(requestTimeout time.Duration) *retryablehttp.Client {
 	httpClient.RetryWaitMax = 50 * time.Millisecond
 	httpClient.RetryWaitMin = 50 * time.Millisecond
 	httpClient.HTTPClient.Timeout = requestTimeout
-	httpClient.Logger = log.New(ioutil.Discard, "", log.LstdFlags)
+	httpClient.Logger = log.New(io.Discard, "", log.LstdFlags)
 	httpClient.CheckRetry = func(ctx context.Context, resp *http.Response, err error) (bool, error) {
 		if resp != nil && resp.StatusCode == http.StatusInternalServerError {
 			return false, nil

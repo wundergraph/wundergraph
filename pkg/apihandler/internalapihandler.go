@@ -5,6 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/wundergraph/wundergraph/pkg/operation"
+	"github.com/wundergraph/wundergraph/pkg/trace"
+	"go.opentelemetry.io/otel/attribute"
+	oteltrace "go.opentelemetry.io/otel/trace"
 	"io"
 	"net/http"
 
@@ -298,8 +302,10 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reqID := r.Header.Get(logging.RequestIDHeader)
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
+	r = operation.SetOperationMetaData(r, h.operation)
 
-	r = setOperationMetaData(r, h.operation)
+	span := oteltrace.SpanFromContext(r.Context())
+	span.SetAttributes(attribute.String(trace.WgComponentName, "internal-api-handler"))
 
 	bodyBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(bodyBuf)
@@ -383,8 +389,10 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 	reqID := r.Header.Get(logging.RequestIDHeader)
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
+	r = operation.SetOperationMetaData(r, h.operation)
 
-	r = setOperationMetaData(r, h.operation)
+	span := oteltrace.SpanFromContext(r.Context())
+	span.SetAttributes(attribute.String(trace.WgComponentName, "internal-subscription-handler"))
 
 	bodyBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(bodyBuf)

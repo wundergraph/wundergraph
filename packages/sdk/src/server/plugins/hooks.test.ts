@@ -50,6 +50,10 @@ export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) 
 			configHash: '',
 			environmentIds: [],
 		},
+		tracerConfig: {
+			httpEndpoint: '',
+			enabled: false,
+		},
 		serverConfig,
 		gracefulShutdown: false,
 		clientFactory,

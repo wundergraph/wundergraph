@@ -8,6 +8,7 @@ import type { InputVariable } from '../configure/variables';
 import type { ListenOptions, LoggerLevel, ResolvedListenOptions } from '../configure/options';
 import { OperationsClient } from './operations-client';
 import { GraphQLError } from '../client';
+import { TelemetryOptions } from './trace/trace';
 
 declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
@@ -221,12 +222,17 @@ export interface WunderGraphUser<Role extends string = any, CustomClaims extends
 	rawIdToken?: string;
 }
 
+export interface TracerConfig extends TelemetryOptions {
+	enabled: boolean;
+}
+
 export interface ServerRunOptions {
 	wundergraphDir: string;
 	serverConfig: WunderGraphHooksAndServerConfig<any, any, any, any>;
 	config: WunderGraphConfiguration;
 	gracefulShutdown: boolean;
 	clientFactory: InternalClientFactory;
+	tracerConfig: TracerConfig;
 }
 
 /***
