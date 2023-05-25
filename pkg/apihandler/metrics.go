@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	metricsNamespace = "wunderctl"
+	metricsNamespace = "wundernode"
 )
 
 var (
