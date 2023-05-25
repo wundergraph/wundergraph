@@ -103,7 +103,7 @@ export const mapInputVariable = <T extends string | number | boolean>(valueOrEnv
 		kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
 		staticVariableContent: '',
 		placeholderVariableName: '',
-		environmentVariableDefaultValue: environmentVariable.defaultValue || '',
+		environmentVariableDefaultValue: environmentVariable.defaultValue?.toString() || '',
 		environmentVariableName: environmentVariable.name,
 	};
 	return variable;
