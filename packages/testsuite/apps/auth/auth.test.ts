@@ -477,7 +477,7 @@ describe('Test requireAuthentication directive', () => {
 		expect(result.data?.echo_string).toBe(`string: ${input}`);
 	});
 
-	it('accept non-authenticated query request without directive', async () => {
+	it('accepts non-authenticated query request without directive', async () => {
 		const client = wg.client();
 		const result = await client.query({
 			operationName: 'echo/StringWithoutRequiredAuthentication',
