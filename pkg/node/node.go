@@ -399,9 +399,10 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	router := mux.NewRouter()
 	internalRouter := mux.NewRouter()
 
-	if nodeConfig.Api.Options.PrometheusPort > 0 {
-		n.log.Debug("serving Prometheus metrics", zap.Int("port", nodeConfig.Api.Options.PrometheusPort))
-		n.metrics = metrics.NewPrometheus(nodeConfig.Api.Options.PrometheusPort)
+	if nodeConfig.Api.Options.Prometheus.Enabled {
+		port := nodeConfig.Api.Options.Prometheus.Port
+		n.log.Debug("serving Prometheus metrics", zap.Int("port", port))
+		n.metrics = metrics.NewPrometheus(port)
 	} else {
 		n.metrics = metrics.NewNone()
 	}

@@ -2,7 +2,7 @@ import process from 'node:process';
 import { ConfigurationVariable, ConfigurationVariableKind } from '@wundergraph/protobuf';
 import { Logger } from '../logger';
 
-export class EnvironmentVariable<DefaultValue = string> {
+export class EnvironmentVariable<DefaultValue extends string | number | boolean = string> {
 	constructor(name: string, defaultValue?: DefaultValue) {
 		this.name = name;
 		this.defaultValue = defaultValue;
@@ -21,7 +21,7 @@ export class PlaceHolder {
 	public readonly _identifier = 'placeholder';
 }
 
-export type InputVariable<T = string> = T | EnvironmentVariable<T> | PlaceHolder;
+export type InputVariable<T extends string | number | boolean = string> = T | EnvironmentVariable<T> | PlaceHolder;
 
 /**
  * resolveVariable resolves a variable to a string. Whereby it can fetch the value from an environment variable,
@@ -67,34 +67,38 @@ export const resolveConfigurationVariable = (variable: ConfigurationVariable): s
  * mapInputVariable converts user InputVariable to a ConfigurationVariable stored in config.
  * Throws an error if the variable is undefined.
  */
-export const mapInputVariable = (stringOrEnvironmentVariable: InputVariable) => {
-	if (stringOrEnvironmentVariable === undefined) {
+export const mapInputVariable = <T extends string | number | boolean>(valueOrEnvironmentVariable: InputVariable<T>) => {
+	if (valueOrEnvironmentVariable === undefined) {
 		Logger.error('unable to load environment variable');
 		Logger.info('make sure to replace \'process.env...\' with new EnvironmentVariable("%VARIABLE_NAME%")');
 		Logger.info('or ensure that all environment variables are defined\n');
 		throw new Error('InputVariable is undefined');
 	}
-	if (typeof stringOrEnvironmentVariable === 'string') {
+	if (
+		typeof valueOrEnvironmentVariable === 'string' ||
+		typeof valueOrEnvironmentVariable == 'number' ||
+		typeof valueOrEnvironmentVariable == 'boolean'
+	) {
 		const configVariable: ConfigurationVariable = {
 			kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
 			environmentVariableDefaultValue: '',
 			environmentVariableName: '',
 			placeholderVariableName: '',
-			staticVariableContent: stringOrEnvironmentVariable,
+			staticVariableContent: valueOrEnvironmentVariable.toString(),
 		};
 		return configVariable;
 	}
-	if ((stringOrEnvironmentVariable as PlaceHolder)._identifier === 'placeholder') {
+	if ((valueOrEnvironmentVariable as PlaceHolder)._identifier === 'placeholder') {
 		const variable: ConfigurationVariable = {
 			kind: ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE,
 			staticVariableContent: '',
-			placeholderVariableName: (stringOrEnvironmentVariable as PlaceHolder).name,
+			placeholderVariableName: (valueOrEnvironmentVariable as PlaceHolder).name,
 			environmentVariableDefaultValue: '',
 			environmentVariableName: '',
 		};
 		return variable;
 	}
-	const environmentVariable = stringOrEnvironmentVariable as EnvironmentVariable;
+	const environmentVariable = valueOrEnvironmentVariable as EnvironmentVariable;
 	const variable: ConfigurationVariable = {
 		kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
 		staticVariableContent: '',

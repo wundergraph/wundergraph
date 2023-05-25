@@ -18,8 +18,8 @@ application's performance. The following metrics are available:
 
 ## Prometheus
 
-By default, Prometheus is enabled and serves its metrics on `http://<host>:8881/metrics`. To use
-a custom port or to disable it, use the `prometheus` field when calling `configureWunderGraphApplication()`:
+By default, Prometheus is enabled and serves its metrics on `http://<host>:8881/metrics`. To disable it
+or to use a custom port, use the `prometheus` field when calling `configureWunderGraphApplication()`:
 
 ```typescript
 // wundergraph.config.ts
@@ -28,7 +28,8 @@ configureWunderGraphApplication({
     ...
     options: {
         prometheus: {
-            port: 8881, // Set to zero to disable
+            enabled: true, // Set to false to disable
+            port: 8881, // Defaults to 8881
         }
     },
     ...

@@ -516,7 +516,8 @@ message NodeLogging {
 }
 
 message PrometheusOptions {
-	ConfigurationVariable port = 1;
+	ConfigurationVariable enabled = 1;
+	ConfigurationVariable port = 2;
 }
 
 message NodeOptions {

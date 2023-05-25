@@ -1136,6 +1136,7 @@ export interface NodeLogging {
 }
 
 export interface PrometheusOptions {
+  enabled: ConfigurationVariable | undefined;
   port: ConfigurationVariable | undefined;
 }
 
@@ -3859,22 +3860,30 @@ export const NodeLogging = {
 };
 
 function createBasePrometheusOptions(): PrometheusOptions {
-  return { port: undefined };
+  return { enabled: undefined, port: undefined };
 }
 
 export const PrometheusOptions = {
   fromJSON(object: any): PrometheusOptions {
-    return { port: isSet(object.port) ? ConfigurationVariable.fromJSON(object.port) : undefined };
+    return {
+      enabled: isSet(object.enabled) ? ConfigurationVariable.fromJSON(object.enabled) : undefined,
+      port: isSet(object.port) ? ConfigurationVariable.fromJSON(object.port) : undefined,
+    };
   },
 
   toJSON(message: PrometheusOptions): unknown {
     const obj: any = {};
+    message.enabled !== undefined &&
+      (obj.enabled = message.enabled ? ConfigurationVariable.toJSON(message.enabled) : undefined);
     message.port !== undefined && (obj.port = message.port ? ConfigurationVariable.toJSON(message.port) : undefined);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<PrometheusOptions>, I>>(object: I): PrometheusOptions {
     const message = createBasePrometheusOptions();
+    message.enabled = (object.enabled !== undefined && object.enabled !== null)
+      ? ConfigurationVariable.fromPartial(object.enabled)
+      : undefined;
     message.port = (object.port !== undefined && object.port !== null)
       ? ConfigurationVariable.fromPartial(object.port)
       : undefined;
