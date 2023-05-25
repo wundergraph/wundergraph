@@ -282,7 +282,7 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		}
 	}
 
-	metrics := newOperationMetrics(i.metrics, operation)
+	metrics := newOperationMetrics(i.metrics, operation.Name)
 	i.router.Methods(http.MethodPost).Path(apiPath).Handler(metrics.Handler(handler))
 
 	return nil
@@ -316,7 +316,7 @@ func (i *InternalBuilder) registerNodeJsOperation(operation *wgpb.Operation, api
 		internal: true,
 	}
 
-	metrics := newOperationMetrics(i.metrics, operation)
+	metrics := newOperationMetrics(i.metrics, operation.Name)
 	route.Handler(metrics.Handler(handler))
 	return nil
 }

@@ -620,7 +620,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			operationHandler = authentication.RequiresAuthentication(operationHandler)
 			route.Handler(authentication.RequiresAuthentication(operationHandler))
 		}
-		metrics := newOperationMetrics(r.metrics, operation)
+		metrics := newOperationMetrics(r.metrics, operation.Name)
 		route.Handler(metrics.Handler(operationHandler))
 	} else {
 		r.registerInvalidOperation(operation.Name)
@@ -1746,7 +1746,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 		handler = authentication.RequiresAuthentication(handler)
 	}
 
-	metrics := newOperationMetrics(r.metrics, operation)
+	metrics := newOperationMetrics(r.metrics, operation.Name)
 	route.Handler(metrics.Handler(handler))
 
 	r.log.Debug("registered FunctionsHandler",

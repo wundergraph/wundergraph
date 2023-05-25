@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/wundergraph/wundergraph/pkg/metrics"
-	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 const (
@@ -130,7 +129,7 @@ func (h *operationMetricsHandler) Handler(operationHandler http.Handler) http.Ha
 		operationHandler.ServeHTTP(ww, r)
 		elapsed := time.Since(start)
 
-		// XXX: Must match the number of labels used at creation
+		// XXX: Must match the number of dynamic labels used at creation
 		h.counter.Inc(strconv.Itoa(ww.statusCode))
 		h.requestDuration.Observe(elapsed.Seconds())
 		h.requestSize.Observe(float64(h.estimateRequestSize(r)))
@@ -138,13 +137,11 @@ func (h *operationMetricsHandler) Handler(operationHandler http.Handler) http.Ha
 	})
 }
 
-// NewRequestMetrics returns a new RequestMetrics which can count requests.
-// XXX: Do NOT create more than one of these because the metric names will conflict.
-func newOperationMetrics(m metrics.Metrics, operation *wgpb.Operation) operationMetrics {
-	// XXX: Must match the number of dynamic labels used in inc()
+// newOperationMetrics returns a new operationMetrics which can count requests.
+func newOperationMetrics(m metrics.Metrics, operationName string) operationMetrics {
+	// XXX: Dynamic label counts must match between here and their uses in Handler()
 	constLabels := metrics.Labels{
-		"operationName": operation.Name,
-		"operationType": operation.OperationType.String(),
+		"operationName": operationName,
 	}
 	counter := m.NewCounterVec(metrics.MetricOpts{
 		Namespace:   metricsNamespace,
