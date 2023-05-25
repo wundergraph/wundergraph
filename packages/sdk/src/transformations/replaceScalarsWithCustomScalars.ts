@@ -25,7 +25,6 @@ export const replaceScalarsWithCustomScalars = (
 		return { schemaSDL, replacementScalarFields: [] };
 	}
 	const replacementsByParentName = getCustomScalarReplacementsByParent(replacements);
-	let isInsideValidParent = false;
 	let currentValidParentTypeName = '';
 	let customScalarReplacementName = '';
 	const replacementScalars: Set<SingleTypeField> = new Set<SingleTypeField>();
@@ -35,12 +34,10 @@ export const replaceScalarsWithCustomScalars = (
 		ObjectTypeDefinition: {
 			enter: (node) => {
 				if (replacementsByParentName.get(node.name.value)) {
-					isInsideValidParent = true;
 					currentValidParentTypeName = node.name.value;
 				}
 			},
 			leave: (_) => {
-				isInsideValidParent = false;
 				currentValidParentTypeName = '';
 				customScalarReplacementName = '';
 			},
@@ -48,7 +45,7 @@ export const replaceScalarsWithCustomScalars = (
 		FieldDefinition: {
 			enter: (node) => {
 				const value = replacementsByParentName.get(currentValidParentTypeName);
-				if (isInsideValidParent && value && value.fieldName === node.name.value) {
+				if (value && value.fieldName === node.name.value) {
 					customScalarReplacementName = value.replacementScalarName;
 					replacementScalars.add({
 						typeName: currentValidParentTypeName,
@@ -60,12 +57,10 @@ export const replaceScalarsWithCustomScalars = (
 		InputObjectTypeDefinition: {
 			enter: (node) => {
 				if (replacementsByParentName.get(node.name.value)) {
-					isInsideValidParent = true;
 					currentValidParentTypeName = node.name.value;
 				}
 			},
 			leave: (_) => {
-				isInsideValidParent = false;
 				currentValidParentTypeName = '';
 				customScalarReplacementName = '';
 			},
@@ -73,7 +68,7 @@ export const replaceScalarsWithCustomScalars = (
 		InputValueDefinition: {
 			enter: (node) => {
 				const value = replacementsByParentName.get(currentValidParentTypeName);
-				if (isInsideValidParent && value && value.fieldName === node.name.value) {
+				if (value && value.fieldName === node.name.value) {
 					customScalarReplacementName = value.replacementScalarName;
 					replacementScalars.add({
 						typeName: currentValidParentTypeName,
