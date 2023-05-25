@@ -16,7 +16,7 @@ export const useAuthMiddleware: AuthMiddleware = (useSWRNext, getToken) => {
 	return (key, fetcher, config) => {
 		const context = useWunderGraphContext();
 
-		const fetcherWithAuth: BareFetcher<Promise<unknown>> = async (...args) => {
+		const fetcherWithAuth: BareFetcher<unknown> = async (...args) => {
 			try {
 				const token = await getToken();
 				if (token) {
@@ -32,6 +32,6 @@ export const useAuthMiddleware: AuthMiddleware = (useSWRNext, getToken) => {
 			return fetcher?.(...args);
 		};
 
-		return useSWRNext(key, fetcherWithAuth, config);
+		return useSWRNext(key, fetcherWithAuth, config) as any;
 	};
 };

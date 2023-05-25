@@ -7,7 +7,8 @@
     "declarationDir": "./dist",
     "jsx": "react",
     "outDir": "./dist",
-    "typeRoots": ["./node_modules/@types", "./src/typedefinitions"]
+    "typeRoots": ["./node_modules/@types", "./src/typedefinitions"],
+    "incremental": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
