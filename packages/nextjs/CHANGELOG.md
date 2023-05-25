@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.10.29...@wundergraph/nextjs@0.11.0) (2023-05-25)
+
+### Features
+
+* add tsup to build nextjs and swr packages ([#993](https://github.com/wundergraph/wundergraph/issues/993)) ([2685e03](https://github.com/wundergraph/wundergraph/commit/2685e03cf7e103ed634fc98963ce622cf700b398)) (@Pagebakers)
+
 ## [0.10.29](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.10.28...@wundergraph/nextjs@0.10.29) (2023-05-16)
 
 **Note:** Version bump only for package @wundergraph/nextjs

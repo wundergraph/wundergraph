@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.2.8...@wundergraph/react-relay@0.3.0) (2023-05-25)
+
+### Features
+
+* relay experimental Astro / SSG support ([#971](https://github.com/wundergraph/wundergraph/issues/971)) ([7d632fe](https://github.com/wundergraph/wundergraph/commit/7d632fef37fd46282d8de3005a3a12c3bd908e49)) (@DaniAkash)
+
 ## [0.2.8](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.2.7...@wundergraph/react-relay@0.2.8) (2023-05-16)
 
 **Note:** Version bump only for package @wundergraph/react-relay

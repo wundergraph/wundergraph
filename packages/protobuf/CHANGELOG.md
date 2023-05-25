@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.113.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.112.0...@wundergraph/protobuf@0.113.0) (2023-05-25)
+
+### Features
+
+* improve Cache-Control support ([#959](https://github.com/wundergraph/wundergraph/issues/959)) ([1b330d5](https://github.com/wundergraph/wundergraph/commit/1b330d5c0207264ae0f3868276011ff9a8d83a67)) (@fiam)
+
 ## [0.112.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.111.0...@wundergraph/protobuf@0.112.0) (2023-05-15)
 
 ### Features
