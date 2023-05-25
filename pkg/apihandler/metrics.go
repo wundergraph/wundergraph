@@ -100,10 +100,6 @@ type operationMetricsHandler struct {
 	responseSize    metrics.SummaryVec
 }
 
-func (h *operationMetricsHandler) inc(statusCode int) {
-	h.counter.Inc(strconv.Itoa(statusCode))
-}
-
 func (h *operationMetricsHandler) estimateRequestSize(r *http.Request) int {
 	s := len(r.Method) + len(r.Proto)
 	for name, values := range r.Header {
