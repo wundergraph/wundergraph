@@ -1,4 +1,4 @@
-import { configureWunderGraphOperations } from '@wundergraph/sdk';
+import { BaseOperationConfiguration, configureWunderGraphOperations } from '@wundergraph/sdk';
 
 export default configureWunderGraphOperations({
 	operations: {
@@ -27,9 +27,21 @@ export default configureWunderGraphOperations({
 			...config,
 		}),
 		custom: {
-			NestedUserID: (config) => {
+			NestedUserID: (config: BaseOperationConfiguration) => {
 				config.authentication = {
 					required: true,
+				};
+				return config;
+			},
+			EchoStringWithRequiredAuthentication: (config: BaseOperationConfiguration) => {
+				config.authentication = {
+					required: false,
+				};
+				return config;
+			},
+			EchoStringWithoutRequiredAuthentication: (config: BaseOperationConfiguration) => {
+				config.authentication = {
+					required: false,
 				};
 				return config;
 			},
