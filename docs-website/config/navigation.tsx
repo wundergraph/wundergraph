@@ -983,6 +983,10 @@ const navigation = [
 						title: 'Redeployment',
 						href: '/docs/cloud/redeployment',
 					},
+					{
+						title: 'Private NPM dependencies',
+						href: '/docs/cloud/private-npm-dependencies',
+					},
 				],
 			},
 			{
