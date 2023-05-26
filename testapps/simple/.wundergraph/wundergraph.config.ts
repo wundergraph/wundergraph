@@ -15,6 +15,7 @@ configureWunderGraphApplication({
 	options: {
 		openTelemetry: {
 			enabled: true,
+			authToken: '123',
 		},
 		prometheus: {
 			enabled: true,

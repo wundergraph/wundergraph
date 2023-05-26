@@ -66,9 +66,24 @@ export interface ListenOptions {
 }
 
 export interface TelemetryOptions {
+	/**
+	 * Enable OpenTelemetry tracing.
+	 */
 	enabled: InputVariable<boolean>;
+	/**
+	 * OpenTelemetry exporter HTTP endpoint.
+	 * Defaults to `http://localhost:4318`.
+	 */
 	exporterHttpEndpoint?: InputVariable;
+	/**
+	 * OpenTelemetry sampler.
+	 * Defaults to `1.0`. Trace every request.
+	 */
 	sampler?: InputVariable<number>;
+	/**
+	 * OpenTelemetry JWT token.
+	 * Attach this token to every request in form of a Bearer token.
+	 */
 	authToken?: InputVariable;
 }
 

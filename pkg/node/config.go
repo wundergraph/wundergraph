@@ -129,7 +129,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 					Enabled: prometheusEnabled,
 					Port:    prometheusPort,
 				},
-				OpenTelemetry: &apihandler.OpenTelemetry{
+				OpenTelemetry: apihandler.OpenTelemetry{
 					Enabled:              otelEnabled,
 					AuthToken:            loadvariable.String(graphConfig.Api.NodeOptions.OpenTelemetry.AuthToken),
 					ExporterHTTPEndpoint: loadvariable.String(graphConfig.Api.NodeOptions.OpenTelemetry.ExporterHttpEndpoint),

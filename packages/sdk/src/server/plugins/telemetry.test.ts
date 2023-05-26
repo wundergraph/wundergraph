@@ -29,7 +29,7 @@ describe('Telemetry plugin', () => {
 		const spans = tp.exporter.getFinishedSpans();
 
 		expect(spans.length).toBe(1);
-		expect(spans[0].status).toBe({ code: SpanStatusCode.UNSET });
+		expect(spans[0].status).toEqual({ code: SpanStatusCode.UNSET });
 		expect(spans[0].attributes).toEqual({
 			'http.flavor': '1.1',
 			'http.method': 'GET',

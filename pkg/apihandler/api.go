@@ -50,7 +50,7 @@ type Options struct {
 	DefaultTimeout      time.Duration
 	DefaultHTTPProxyURL *url.URL
 	Prometheus          PrometheusOptions
-	OpenTelemetry       *OpenTelemetry
+	OpenTelemetry       OpenTelemetry
 }
 
 type CookieBasedSecrets struct {
