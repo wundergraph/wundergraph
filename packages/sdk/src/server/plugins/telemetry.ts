@@ -21,12 +21,6 @@ declare module 'fastify' {
 	}
 }
 
-export interface TelemetryInstance {
-	span: Span | undefined;
-	context?: Context;
-	tracer?: Tracer;
-}
-
 export interface TelemetryPluginOptions {
 	provider: NodeTracerProvider;
 }

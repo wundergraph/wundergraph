@@ -15,6 +15,10 @@ export enum WgEnv {
 	ServerHost = 'WG_SERVER_HOST',
 	ServerPort = 'WG_SERVER_PORT',
 	HttpProxyUrl = 'WG_HTTP_PROXY',
+	OtelEnabled = 'WG_OTEL_ENABLED',
+	OtelExporterHttpEndpoint = 'WG_OTEL_EXPORTER_HTTP_ENDPOINT',
+	OtelSampler = 'WG_OTEL_SAMPLER',
+	OtelJwt = 'WG_OTEL_JWT',
 }
 
 export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'debug';
@@ -32,6 +36,12 @@ const DefaultNodeOptions = {
 	listenInternal: {
 		port: new EnvironmentVariable(WgEnv.NodeInternalPort, defaultNodeInternalPort),
 	},
+	openTelemetry: {
+		enabled: new EnvironmentVariable<boolean>(WgEnv.OtelEnabled, false),
+		exporterHttpEndpoint: new EnvironmentVariable(WgEnv.OtelExporterHttpEndpoint, 'http://localhost:4318'),
+		sampler: new EnvironmentVariable(WgEnv.OtelSampler, '1.0'),
+		authToken: new EnvironmentVariable(WgEnv.OtelJwt, ''),
+	},
 	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, `http://${defaultHost}:${defaultNodePort}`),
 	nodeInternalUrl: new EnvironmentVariable(WgEnv.NodeInternalUrl, `http://${defaultHost}:${defaultNodeInternalPort}`),
 	publicNodeUrl: new EnvironmentVariable(WgEnv.PublicNodeUrl, `http://${defaultHost}:${defaultNodePort}`),
@@ -45,6 +55,20 @@ const DefaultNodeOptions = {
 export interface ListenOptions {
 	host?: InputVariable;
 	port?: InputVariable;
+}
+
+export interface TelemetryOptions {
+	enabled: InputVariable<boolean>;
+	exporterHttpEndpoint?: InputVariable;
+	sampler?: InputVariable<number>;
+	authToken?: InputVariable;
+}
+
+export interface ResolvedTelemetryOptions {
+	enabled: ConfigurationVariable;
+	exporterHttpEndpoint: ConfigurationVariable;
+	sampler: ConfigurationVariable;
+	authToken: ConfigurationVariable;
 }
 
 export interface ListenInternalOptions extends Omit<ListenOptions, 'host'> {}
@@ -61,6 +85,7 @@ export interface NodeOptions {
 	publicNodeUrl?: InputVariable;
 	listen?: ListenOptions;
 	listenInternal?: ListenInternalOptions;
+	openTelemetry?: TelemetryOptions;
 	logger?: {
 		level?: InputVariable<LoggerLevel>;
 	};
@@ -88,6 +113,7 @@ export interface ResolvedNodeOptions {
 	publicNodeUrl: ConfigurationVariable;
 	listen: ResolvedListenOptions;
 	listenInternal: ResolvedListenInternalOptions;
+	openTelemetry: ResolvedTelemetryOptions;
 	logger: {
 		level: ConfigurationVariable;
 	};
@@ -127,6 +153,13 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 				logger: {
 					level: options?.logger?.level || DefaultNodeOptions.logger.level,
 				},
+				openTelemetry: {
+					enabled: options?.openTelemetry?.enabled || DefaultNodeOptions.openTelemetry.enabled,
+					sampler: options?.openTelemetry?.sampler || DefaultNodeOptions.openTelemetry.sampler,
+					exporterHttpEndpoint:
+						options?.openTelemetry?.exporterHttpEndpoint || DefaultNodeOptions.openTelemetry.exporterHttpEndpoint,
+					authToken: options?.openTelemetry?.authToken || DefaultNodeOptions.openTelemetry.authToken,
+				},
 				defaultRequestTimeoutSeconds:
 					options?.defaultRequestTimeoutSeconds || DefaultNodeOptions.defaultRequestTimeoutSeconds,
 				defaultHttpProxyUrl: options?.defaultHttpProxyUrl || DefaultNodeOptions.defaultHttpProxyUrl,
@@ -139,6 +172,12 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 		listen: {
 			host: mapInputVariable(nodeOptions.listen.host),
 			port: mapInputVariable(nodeOptions.listen.port),
+		},
+		openTelemetry: {
+			enabled: mapInputVariable(nodeOptions.openTelemetry.enabled),
+			exporterHttpEndpoint: mapInputVariable(nodeOptions.openTelemetry.exporterHttpEndpoint),
+			sampler: mapInputVariable(nodeOptions.openTelemetry.sampler),
+			authToken: mapInputVariable(nodeOptions.openTelemetry?.authToken),
 		},
 		listenInternal: {
 			port: mapInputVariable(nodeOptions.listenInternal.port),

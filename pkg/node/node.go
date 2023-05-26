@@ -94,7 +94,6 @@ type options struct {
 	healthCheckTimeout      time.Duration
 	onServerConfigLoad      func(config *WunderNodeConfig)
 	onServerError           func(err error)
-	traceConfig             *trace.Config
 }
 
 type Option func(options *options)
@@ -151,12 +150,6 @@ func WithIntrospection(enable bool) Option {
 	}
 }
 
-func WithTracer(config *trace.Config) Option {
-	return func(options *options) {
-		options.traceConfig = config
-	}
-}
-
 func WithGlobalRateLimit(requests int, perDuration time.Duration) Option {
 	return func(options *options) {
 		options.globalRateLimit.enable = true
@@ -208,8 +201,6 @@ func (n *Node) StartBlocking(opts ...Option) error {
 
 	n.options = options
 
-	n.startTracer()
-
 	g := errgroup.Group{}
 
 	switch {
@@ -260,15 +251,8 @@ func (n *Node) StartBlocking(opts ...Option) error {
 	return g.Wait()
 }
 
-func (n *Node) startTracer() {
-	if n.options.traceConfig != nil {
-		n.log.Info("Tracing enabled",
-			zap.String("name", n.options.traceConfig.Name),
-			zap.String("endpoint", n.options.traceConfig.Endpoint),
-			zap.Float64("sampler", n.options.traceConfig.Sampler),
-		)
-		trace.StartAgent(n.log, *n.options.traceConfig)
-	}
+func (n *Node) startTracer(traceConfig *trace.Config) error {
+	return trace.StartAgent(n.log, *traceConfig)
 }
 
 func (n *Node) Shutdown(ctx context.Context) error {
@@ -282,6 +266,11 @@ func (n *Node) Shutdown(ctx context.Context) error {
 			return err
 		}
 	}
+
+	if err := trace.StopAgent(ctx); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -411,13 +400,37 @@ func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (
 }
 
 func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
+
+	if nodeConfig.Api.Options.OpenTelemetry.Enabled {
+		endpoint := nodeConfig.Api.Options.OpenTelemetry.ExporterHTTPEndpoint
+		sampler := nodeConfig.Api.Options.OpenTelemetry.Sampler
+
+		n.log.Info("OpenTelemetry enabled",
+			zap.String("endpoint", endpoint),
+			zap.Float64("sampler", sampler),
+		)
+
+		if err := n.startTracer(&trace.Config{
+			Name:         "wundernode",
+			Endpoint:     endpoint,
+			Batcher:      "otlphttp",
+			OtlpHttpPath: "/v1/traces",
+			Sampler:      sampler,
+			OtlpHeaders: map[string]string{
+				"Authorization": fmt.Sprintf("Bearer %s", nodeConfig.Api.Options.OpenTelemetry.AuthToken),
+			},
+		}); err != nil {
+			return err
+		}
+	}
+
 	router := mux.NewRouter()
-	router.Use(otelmux.Middleware("node", otelmux.WithSpanNameFormatter(func(routeName string, r *http.Request) string {
+	router.Use(otelmux.Middleware("wundernode", otelmux.WithSpanNameFormatter(func(routeName string, r *http.Request) string {
 		return fmt.Sprintf("%s %s", r.Method, routeName)
 	})))
 
 	internalRouter := mux.NewRouter()
-	internalRouter.Use(otelmux.Middleware("node", otelmux.WithSpanNameFormatter(func(routeName string, r *http.Request) string {
+	internalRouter.Use(otelmux.Middleware("wundernode", otelmux.WithSpanNameFormatter(func(routeName string, r *http.Request) string {
 		return fmt.Sprintf("%s %s", r.Method, routeName)
 	})))
 

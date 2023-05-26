@@ -29,6 +29,13 @@ type Logging struct {
 	Level zapcore.Level
 }
 
+type OpenTelemetry struct {
+	Enabled              bool
+	ExporterHTTPEndpoint string
+	AuthToken            string
+	Sampler              float64
+}
+
 type Options struct {
 	ServerUrl           string
 	PublicNodeUrl       string
@@ -37,6 +44,7 @@ type Options struct {
 	Logging             Logging
 	DefaultTimeout      time.Duration
 	DefaultHTTPProxyURL *url.URL
+	OpenTelemetry       *OpenTelemetry
 }
 
 type CookieBasedSecrets struct {

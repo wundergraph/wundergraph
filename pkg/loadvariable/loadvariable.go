@@ -112,3 +112,24 @@ func Int(variable *wgpb.ConfigurationVariable) int {
 		return 0
 	}
 }
+
+func Float64(variable *wgpb.ConfigurationVariable) float64 {
+	if variable == nil {
+		return 0
+	}
+	switch variable.GetKind() {
+	case wgpb.ConfigurationVariableKind_ENV_CONFIGURATION_VARIABLE:
+		value := os.Getenv(variable.GetEnvironmentVariableName())
+		if value != "" {
+			i, _ := strconv.ParseFloat(value, 64)
+			return i
+		}
+		i, _ := strconv.ParseFloat(variable.GetEnvironmentVariableDefaultValue(), 64)
+		return i
+	case wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE:
+		i, _ := strconv.ParseFloat(variable.GetStaticVariableContent(), 64)
+		return i
+	default:
+		return 0
+	}
+}

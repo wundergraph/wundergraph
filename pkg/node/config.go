@@ -7,17 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docker/go-units"
-
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
-)
-
-const (
-	defaultInMemoryCacheSize    = int64(128 * units.MB)
-	wgInMemoryCacheConfigEnvKey = "WG_IN_MEMORY_CACHE"
 )
 
 type Server struct {
@@ -112,6 +105,12 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 				},
 				DefaultTimeout:      defaultRequestTimeout,
 				DefaultHTTPProxyURL: defaultHTTPProxyURL,
+				OpenTelemetry: &apihandler.OpenTelemetry{
+					Enabled:              loadvariable.Bool(graphConfig.Api.NodeOptions.OpenTelemetry.Enabled),
+					AuthToken:            loadvariable.String(graphConfig.Api.NodeOptions.OpenTelemetry.AuthToken),
+					ExporterHTTPEndpoint: loadvariable.String(graphConfig.Api.NodeOptions.OpenTelemetry.ExporterHttpEndpoint),
+					Sampler:              loadvariable.Float64(graphConfig.Api.NodeOptions.OpenTelemetry.Sampler),
+				},
 			},
 		},
 		Server: &Server{

@@ -20,16 +20,13 @@ var (
 )
 
 // StartAgent starts an opentelemetry agent.
-func StartAgent(log *zap.Logger, c Config) {
-	// if error happens, let later calls run.
-	if err := startAgent(log, c); err != nil {
-		return
-	}
+func StartAgent(log *zap.Logger, c Config) error {
+	return startAgent(log, c)
 }
 
 // StopAgent shuts down the span processors in the order they were registered.
-func StopAgent() {
-	_ = tp.Shutdown(context.Background())
+func StopAgent(ctx context.Context) error {
+	return tp.Shutdown(ctx)
 }
 
 func createExporter(c Config) (sdktrace.SpanExporter, error) {
