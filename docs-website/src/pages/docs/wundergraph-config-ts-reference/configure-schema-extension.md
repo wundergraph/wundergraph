@@ -156,6 +156,11 @@ type GymLeader implements Human & Trainer {
   data: Data
   team: TrainerAce
 }
+
+type Friend implements Human {
+  id: ID!
+  data: Data
+}
 ```
 
 `TrainerAce` and `Data` are custom scalars that also exist on an interface.
@@ -193,28 +198,53 @@ const spacex = introspect.graphql({
       fieldName: 'data',
       responseTypeReplacement: 'HumanData',
     },
+    {
+      entityName: 'Friend',
+      fieldName: 'data',
+      responseTypeReplacement: 'HumanData',
+    },
   ],
 });
 ```
 
-Now the operation might look like:
+Now the operation might look like this:
 
 ```graphql
 query {
   gymleader(id: "1") {
     id
-    ... on Trainer {
-      ace {
-        name
-        power
-      }
+    ace {
+      name
+      power
     }
-    ... on Human {
-      data {
-        age
-      }
+    data {
+      age
     }
   }
+}
+```
+
+And a snippet of the new schema:
+
+```graphql
+# rest omitted for brevity
+interface Human {
+  data: HumanData
+}
+
+interface Trainer {
+  ace: AceData
+}
+
+type GymLeader implements Human & Trainer {
+  id: ID!
+  data: HumanData
+  team: AceData
+}
+
+type Friend implements Human {
+  id: ID!
+  data: HumanData
 }
 ```
 
