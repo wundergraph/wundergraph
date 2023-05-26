@@ -64,7 +64,7 @@ You can also use the [OpenTelemetry Collector](https://opentelemetry.io/docs/col
 ### Authentication
 
 If you have the need to authenticate with the OpenTelemetry endpoint, you can do so by providing an `authToken`.
-The strategy is currently only supported in combination with our custom [JWT authenticator](https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/20524) plugin.
+Currently, we only support JWT authentication in combination with our [JWT authenticator](https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/20524) plugin.
 
 ```typescript
 // wundergraph.config.ts
@@ -73,12 +73,13 @@ configureWunderGraphApplication({
   options: {
     openTelemetry: {
       enabled: true,
-      authToken: 'my-secret-token', // Used to authenticate with the OpenTelemetry endpoint in form of a Bearer token
+      exporterHttpEndpoint: 'https://your-collector-endpoint.com',
+      authToken: 'jwt-token', // Used to authenticate with the OpenTelemetry endpoint in form of a Bearer token
     },
   },
 });
 ```
 
 {% callout type="note" %}
-Please let us know if you can't find the metrics, attributes you are looking for. We are happy to add them for you.
+Please let us know if you can't find the metrics, attributes you are looking for. We are happy to help you out!
 {% /callout %}
