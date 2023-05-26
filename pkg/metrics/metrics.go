@@ -77,6 +77,10 @@ type Metrics interface {
 	// Serve starts serving the metrics collected by this Metrics, in a blocking way.
 	// After shutdown, it will return ErrShutdown.
 	Serve() error
-	// Shutdown stops serving the metrics
+	// Close stops serving the metrics immediately and invalidates all previously
+	// create metrics (counters, gauges, etc...)
+	Close() error
+	// Shutdown works like Close(), but it awaits for any clients reading the
+	// metrics to be done
 	Shutdown(ctx context.Context) error
 }

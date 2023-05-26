@@ -299,6 +299,10 @@ func (n *Node) Shutdown(ctx context.Context) error {
 // Close closes the node and all its dependencies.
 // It is doing that without waiting for the node to shutdown properly.
 func (n *Node) Close() error {
+	if n.metrics != nil {
+		n.metrics.Close()
+		n.metrics = nil
+	}
 	if n.builder != nil {
 		if err := n.builder.Close(); err != nil {
 			return err

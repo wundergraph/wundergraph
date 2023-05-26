@@ -415,20 +415,13 @@ importers:
     specifiers:
       '@fastify/formbody': ^7.3.0
       '@graphql-mesh/cross-helpers': ^0.3.4
-      '@graphql-mesh/types': ^0.91.12
-      '@graphql-mesh/utils': ^0.43.20
-      '@graphql-tools/schema': ^8.3.10
+      '@graphql-mesh/types': 0.93.1
+      '@graphql-mesh/utils': 0.93.1
+      '@graphql-tools/schema': ^8.5.1
       '@graphql-tools/utils': ^9.2.1
-      '@omnigraph/json-schema': ^0.38.24
-      '@omnigraph/openapi': ^0.19.26
-      '@omnigraph/soap': ^0.93.1
-      '@opentelemetry/api': ^1.4.1
-      '@opentelemetry/core': ^1.13.0
-      '@opentelemetry/exporter-trace-otlp-http': ^0.39.1
-      '@opentelemetry/resources': ^1.13.0
-      '@opentelemetry/sdk-trace-base': ^1.13.0
-      '@opentelemetry/sdk-trace-node': ^1.13.0
-      '@opentelemetry/semantic-conventions': ^1.13.0
+      '@omnigraph/json-schema': 0.93.2
+      '@omnigraph/openapi': 0.93.2
+      '@omnigraph/soap': 0.93.2
       '@prisma/generator-helper': ^3.9.2
       '@types/chai': ^4.2.22
       '@types/cors': ^2.8.10
@@ -495,20 +488,13 @@ importers:
     dependencies:
       '@fastify/formbody': 7.3.0
       '@graphql-mesh/cross-helpers': 0.3.4_pgitk55pksmh724wxkovid65ci
-      '@graphql-mesh/types': 0.91.12_uoeeqqlv6c6lhv3gqe7g3h6vhq
-      '@graphql-mesh/utils': 0.43.20_v3a6cfexazovcqdusp5gotjnd4
+      '@graphql-mesh/types': 0.93.1_uoeeqqlv6c6lhv3gqe7g3h6vhq
+      '@graphql-mesh/utils': 0.93.1_okhidrftli3kjbj7qxt5j6p67e
       '@graphql-tools/schema': 8.5.1_graphql@16.6.0
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
-      '@omnigraph/json-schema': 0.38.24_a3jmoj4zm6ie4hyd74ois3xtgm
-      '@omnigraph/openapi': 0.19.26_a3jmoj4zm6ie4hyd74ois3xtgm
-      '@omnigraph/soap': 0.93.1_xld6wysqa4wpgtzuq5ms4lirwu
-      '@opentelemetry/api': 1.4.1
-      '@opentelemetry/core': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/exporter-trace-otlp-http': 0.39.1_@opentelemetry+api@1.4.1
-      '@opentelemetry/resources': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/sdk-trace-base': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/sdk-trace-node': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/semantic-conventions': 1.13.0
+      '@omnigraph/json-schema': 0.93.2_t7asz5fkfrpxryphxikbdab6ku
+      '@omnigraph/openapi': 0.93.2_t7asz5fkfrpxryphxikbdab6ku
+      '@omnigraph/soap': 0.93.2_pzyiin7nclyqejukz64hf2um5q
       '@prisma/generator-helper': 3.15.2
       '@web-std/fetch': 4.1.0
       '@whatwg-node/fetch': 0.8.8
@@ -3486,8 +3472,8 @@ packages:
       - react-native-windows
     dev: false
 
-  /@graphql-mesh/string-interpolation/0.4.3_graphql@16.6.0+tslib@2.5.0:
-    resolution: {integrity: sha512-snrlsJa7rXwyxQObLWQLU3I1eYX3YdFbYgnrJYaoc5NVTkgY/TbG3P8vt2mZnpOHokMukIr3TOVVwg7gUD3cDQ==}
+  /@graphql-mesh/string-interpolation/0.4.4_graphql@16.6.0+tslib@2.5.0:
+    resolution: {integrity: sha512-IotswBYZRaPswOebcr2wuOFuzD3dHIJxVEkPiiQubqjUIR8HhQI22XHJv0WNiQZ65z8NR9+GYWwEDIc2JRCNfQ==}
     peerDependencies:
       graphql: '*'
       tslib: ^2.4.0
@@ -3499,35 +3485,35 @@ packages:
       tslib: 2.5.0
     dev: false
 
-  /@graphql-mesh/types/0.91.12_uoeeqqlv6c6lhv3gqe7g3h6vhq:
-    resolution: {integrity: sha512-9vvETkeSd5prZWGlC3jR6JM+HRqPim6elJfhUEKH4t5TC5asjiCG17HjUdVALWmcEFrtPXxLHTjMLqTrC1yQ/w==}
+  /@graphql-mesh/types/0.93.1_uoeeqqlv6c6lhv3gqe7g3h6vhq:
+    resolution: {integrity: sha512-TxbbLN3Q2GioiOYWqcKDFwMhRya0IP7U5KzPNR4d0263kXRzycshtU2jsKDe3kkLPfZgpxftP2IrL6sbpTIjKg==}
     peerDependencies:
-      '@graphql-mesh/store': ^0.9.20
+      '@graphql-mesh/store': ^0.93.1
       '@graphql-tools/utils': ^9.2.1
       graphql: '*'
       tslib: ^2.4.0
     dependencies:
-      '@graphql-tools/batch-delegate': 8.4.21_graphql@16.6.0
-      '@graphql-tools/delegate': 9.0.28_graphql@16.6.0
+      '@graphql-tools/batch-delegate': 8.4.27_graphql@16.6.0
+      '@graphql-tools/delegate': 9.0.35_graphql@16.6.0
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       '@graphql-typed-document-node/core': 3.2.0_graphql@16.6.0
       graphql: 16.6.0
       tslib: 2.5.0
     dev: false
 
-  /@graphql-mesh/utils/0.43.20_v3a6cfexazovcqdusp5gotjnd4:
-    resolution: {integrity: sha512-XDccNle+unlG7oHQ//FnNtBLTZkKWzrVni5hk8h61NkUkLSzEmAf4yn3g12MNU/vzTBks0ABnOrdqLcDdbIIYQ==}
+  /@graphql-mesh/utils/0.93.1_okhidrftli3kjbj7qxt5j6p67e:
+    resolution: {integrity: sha512-KJiltAtlvVu9PbCvxqRggLf6P046FeArXQKGCr/BRkSm5uT0CYYN+Tvv6lCYXwdi5cQlhwsSK3A5FwtWixAxjw==}
     peerDependencies:
       '@graphql-mesh/cross-helpers': ^0.3.4
-      '@graphql-mesh/types': ^0.91.12
+      '@graphql-mesh/types': ^0.93.1
       '@graphql-tools/utils': ^9.2.1
       graphql: '*'
       tslib: ^2.4.0
     dependencies:
       '@graphql-mesh/cross-helpers': 0.3.4_pgitk55pksmh724wxkovid65ci
-      '@graphql-mesh/string-interpolation': 0.4.3_graphql@16.6.0+tslib@2.5.0
-      '@graphql-mesh/types': 0.91.12_uoeeqqlv6c6lhv3gqe7g3h6vhq
-      '@graphql-tools/delegate': 9.0.28_graphql@16.6.0
+      '@graphql-mesh/string-interpolation': 0.4.4_graphql@16.6.0+tslib@2.5.0
+      '@graphql-mesh/types': 0.93.1_uoeeqqlv6c6lhv3gqe7g3h6vhq
+      '@graphql-tools/delegate': 9.0.35_graphql@16.6.0
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       dset: 3.1.2
       graphql: 16.6.0
@@ -3538,20 +3524,21 @@ packages:
       tslib: 2.5.0
     dev: false
 
-  /@graphql-tools/batch-delegate/8.4.21_graphql@16.6.0:
-    resolution: {integrity: sha512-NrnMGF6SHv7b0OWSyPUURZDoPGKEFTmTyYwVQ+iM950ZPBx3gOUPODZaXWpFVlFK2UGVNk6atvbigPDHnwSZnw==}
+  /@graphql-tools/batch-delegate/8.4.27_graphql@16.6.0:
+    resolution: {integrity: sha512-efgDDJhljma9d3Ky/LswIu1xm/if2oS27XA1sOcxcShW+Ze+Qxi0hZZ6iyI4eQxVDX5Lyy/n+NvQEZAK1riqnQ==}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
-      '@graphql-tools/delegate': 9.0.28_graphql@16.6.0
+      '@graphql-tools/delegate': 9.0.35_graphql@16.6.0
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       dataloader: 2.2.2
       graphql: 16.6.0
       tslib: 2.5.0
+      value-or-promise: 1.0.12
     dev: false
 
-  /@graphql-tools/batch-execute/8.5.18_graphql@16.6.0:
-    resolution: {integrity: sha512-mNv5bpZMLLwhkmPA6+RP81A6u3KF4CSKLf3VX9hbomOkQR4db8pNs8BOvpZU54wKsUzMzdlws/2g/Dabyb2Vsg==}
+  /@graphql-tools/batch-execute/8.5.22_graphql@16.6.0:
+    resolution: {integrity: sha512-hcV1JaY6NJQFQEwCKrYhpfLK8frSXDbtNMoTur98u10Cmecy1zrqNKSqhEyGetpgHxaJRqszGzKeI3RuroDN6A==}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
@@ -3562,14 +3549,14 @@ packages:
       value-or-promise: 1.0.12
     dev: false
 
-  /@graphql-tools/delegate/9.0.28_graphql@16.6.0:
-    resolution: {integrity: sha512-8j23JCs2mgXqnp+5K0v4J3QBQU/5sXd9miaLvMfRf/6963DznOXTECyS9Gcvj1VEeR5CXIw6+aX/BvRDKDdN1g==}
+  /@graphql-tools/delegate/9.0.35_graphql@16.6.0:
+    resolution: {integrity: sha512-jwPu8NJbzRRMqi4Vp/5QX1vIUeUPpWmlQpOkXQD2r1X45YsVceyUUBnktCrlJlDB4jPRVy7JQGwmYo3KFiOBMA==}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
-      '@graphql-tools/batch-execute': 8.5.18_graphql@16.6.0
-      '@graphql-tools/executor': 0.0.15_graphql@16.6.0
-      '@graphql-tools/schema': 9.0.17_graphql@16.6.0
+      '@graphql-tools/batch-execute': 8.5.22_graphql@16.6.0
+      '@graphql-tools/executor': 0.0.20_graphql@16.6.0
+      '@graphql-tools/schema': 9.0.19_graphql@16.6.0
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       dataloader: 2.2.2
       graphql: 16.6.0
@@ -3577,13 +3564,13 @@ packages:
       value-or-promise: 1.0.12
     dev: false
 
-  /@graphql-tools/executor/0.0.15_graphql@16.6.0:
-    resolution: {integrity: sha512-6U7QLZT8cEUxAMXDP4xXVplLi6RBwx7ih7TevlBto66A/qFp3PDb6o/VFo07yBKozr8PGMZ4jMfEWBGxmbGdxA==}
+  /@graphql-tools/executor/0.0.20_graphql@16.6.0:
+    resolution: {integrity: sha512-GdvNc4vszmfeGvUqlcaH1FjBoguvMYzxAfT6tDd4/LgwymepHhinqLNA5otqwVLW+JETcDaK7xGENzFomuE6TA==}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
-      '@graphql-typed-document-node/core': 3.1.2_graphql@16.6.0
+      '@graphql-typed-document-node/core': 3.2.0_graphql@16.6.0
       '@repeaterjs/repeater': 3.0.4
       graphql: 16.6.0
       tslib: 2.5.0
@@ -3610,6 +3597,16 @@ packages:
       tslib: 2.5.0
     dev: false
 
+  /@graphql-tools/merge/8.4.2_graphql@16.6.0:
+    resolution: {integrity: sha512-XbrHAaj8yDuINph+sAfuq3QCZ/tKblrTLOpirK0+CAgNlZUCHs0Fa+xtMUURgwCVThLle1AF7svJCxFizygLsw==}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+    dependencies:
+      '@graphql-tools/utils': 9.2.1_graphql@16.6.0
+      graphql: 16.6.0
+      tslib: 2.5.0
+    dev: false
+
   /@graphql-tools/schema/8.5.1_graphql@16.6.0:
     resolution: {integrity: sha512-0Esilsh0P/qYcB5DKQpiKeQs/jevzIadNTaT0jeWklPMwNbT7yMX4EqZany7mbeRRlSRwMzNzL5olyFdffHBZg==}
     peerDependencies:
@@ -3628,6 +3625,18 @@ packages:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
       '@graphql-tools/merge': 8.4.0_graphql@16.6.0
+      '@graphql-tools/utils': 9.2.1_graphql@16.6.0
+      graphql: 16.6.0
+      tslib: 2.5.0
+      value-or-promise: 1.0.12
+    dev: false
+
+  /@graphql-tools/schema/9.0.19_graphql@16.6.0:
+    resolution: {integrity: sha512-oBRPoNBtCkk0zbUsyP4GaIzCt8C0aCI4ycIRUL67KK5pOHljKLBBtGT+Jr6hkzA74C8Gco8bpZPe7aWFjiaK2w==}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+    dependencies:
+      '@graphql-tools/merge': 8.4.2_graphql@16.6.0
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       graphql: 16.6.0
       tslib: 2.5.0
@@ -3668,14 +3677,6 @@ packages:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       graphql: 16.6.0
-
-  /@graphql-typed-document-node/core/3.1.2_graphql@16.6.0:
-    resolution: {integrity: sha512-9anpBMM9mEgZN4wr2v8wHJI2/u5TnnggewRN6OlvXTTnuVyoY19X6rOv9XTqKRw6dcGKwZsBi8n0kDE2I5i4VA==}
-    peerDependencies:
-      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-    dependencies:
-      graphql: 16.6.0
-    dev: false
 
   /@graphql-typed-document-node/core/3.2.0_graphql@15.8.0:
     resolution: {integrity: sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==}
@@ -5499,20 +5500,20 @@ packages:
     resolution: {integrity: sha512-lDNv83BeEyxxukdQ0UttiUXawk9+6DkdjjFtm2GFED+24IQhTVaoSbwV9vWWKONyGLzRmCQqZmoEWkDhkEmPlw==}
     dev: false
 
-  /@omnigraph/json-schema/0.38.24_a3jmoj4zm6ie4hyd74ois3xtgm:
-    resolution: {integrity: sha512-9oL5sguntQwyPPsLfONUpYYT45/8492oqsT6JPDGyvY98Ei7Fp+3qCXH/Y2OcLxNu9uim0kwc7OB0DV1epdndw==}
+  /@omnigraph/json-schema/0.93.2_t7asz5fkfrpxryphxikbdab6ku:
+    resolution: {integrity: sha512-Y3m3gF6GHUOEjdY56GAwl4m6D/x2gkcZK4MbD+yHu23xUjb51UIap3zneZuWfjvYCxn60gXKI33mpDAs6SYc2w==}
     peerDependencies:
       '@graphql-mesh/cross-helpers': ^0.3.4
-      '@graphql-mesh/types': ^0.91.12
-      '@graphql-mesh/utils': ^0.43.20
+      '@graphql-mesh/types': ^0.93.1
+      '@graphql-mesh/utils': ^0.93.1
       '@graphql-tools/utils': ^9.2.1
       graphql: '*'
       tslib: ^2.4.0
     dependencies:
       '@graphql-mesh/cross-helpers': 0.3.4_pgitk55pksmh724wxkovid65ci
-      '@graphql-mesh/string-interpolation': 0.4.3_graphql@16.6.0+tslib@2.5.0
-      '@graphql-mesh/types': 0.91.12_uoeeqqlv6c6lhv3gqe7g3h6vhq
-      '@graphql-mesh/utils': 0.43.20_v3a6cfexazovcqdusp5gotjnd4
+      '@graphql-mesh/string-interpolation': 0.4.4_graphql@16.6.0+tslib@2.5.0
+      '@graphql-mesh/types': 0.93.1_uoeeqqlv6c6lhv3gqe7g3h6vhq
+      '@graphql-mesh/utils': 0.93.1_okhidrftli3kjbj7qxt5j6p67e
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       '@json-schema-tools/meta-schema': 1.7.0
       '@whatwg-node/fetch': 0.8.8
@@ -5522,47 +5523,47 @@ packages:
       graphql: 16.6.0
       graphql-compose: 9.0.10_graphql@16.6.0
       graphql-scalars: 1.21.3_graphql@16.6.0
-      json-machete: 0.18.20_a3jmoj4zm6ie4hyd74ois3xtgm
+      json-machete: 0.93.1_t7asz5fkfrpxryphxikbdab6ku
       pascal-case: 3.1.2
-      qs: 6.11.1
+      qs: 6.11.2
       to-json-schema: 0.2.5
       tslib: 2.5.0
       url-join: 4.0.1
     dev: false
 
-  /@omnigraph/openapi/0.19.26_a3jmoj4zm6ie4hyd74ois3xtgm:
-    resolution: {integrity: sha512-EGUxU/VslbFLWA60M2hbreLsDvck/yUbuh5AHcKln6Pzvtwv8iuyeWytcCne+0y51jeYdjZFUVoCjkoe46msMg==}
+  /@omnigraph/openapi/0.93.2_t7asz5fkfrpxryphxikbdab6ku:
+    resolution: {integrity: sha512-UlwWTlW5DWtf3O1OgP8yE9hY4CI7z+9yjw+Yz0MUPIpbwxr7v8C6BYMApysbK7Won1mGQKEQhMlNm40Vuu2v4w==}
     peerDependencies:
       '@graphql-mesh/cross-helpers': ^0.3.4
-      '@graphql-mesh/types': ^0.91.12
-      '@graphql-mesh/utils': ^0.43.20
+      '@graphql-mesh/types': ^0.93.1
+      '@graphql-mesh/utils': ^0.93.1
       graphql: '*'
       tslib: ^2.4.0
     dependencies:
       '@graphql-mesh/cross-helpers': 0.3.4_pgitk55pksmh724wxkovid65ci
-      '@graphql-mesh/string-interpolation': 0.4.3_graphql@16.6.0+tslib@2.5.0
-      '@graphql-mesh/types': 0.91.12_uoeeqqlv6c6lhv3gqe7g3h6vhq
-      '@graphql-mesh/utils': 0.43.20_v3a6cfexazovcqdusp5gotjnd4
-      '@omnigraph/json-schema': 0.38.24_a3jmoj4zm6ie4hyd74ois3xtgm
+      '@graphql-mesh/string-interpolation': 0.4.4_graphql@16.6.0+tslib@2.5.0
+      '@graphql-mesh/types': 0.93.1_uoeeqqlv6c6lhv3gqe7g3h6vhq
+      '@graphql-mesh/utils': 0.93.1_okhidrftli3kjbj7qxt5j6p67e
+      '@omnigraph/json-schema': 0.93.2_t7asz5fkfrpxryphxikbdab6ku
       change-case: 4.1.2
       graphql: 16.6.0
-      json-machete: 0.18.20_a3jmoj4zm6ie4hyd74ois3xtgm
+      json-machete: 0.93.1_t7asz5fkfrpxryphxikbdab6ku
       openapi-types: 12.1.0
       tslib: 2.5.0
     transitivePeerDependencies:
       - '@graphql-tools/utils'
     dev: false
 
-  /@omnigraph/soap/0.93.1_xld6wysqa4wpgtzuq5ms4lirwu:
-    resolution: {integrity: sha512-GiGWgeUHyXI5+/51A19ygPOPz49bLM7WMIRsKW4G+UjfBcB2wUeI2q//pK2yqIFWeT71tKxvg9hIcDh7hdYacg==}
+  /@omnigraph/soap/0.93.2_pzyiin7nclyqejukz64hf2um5q:
+    resolution: {integrity: sha512-m1DXmdNn07VjrZd3WH//hmJkJ6cmvSGpzEB8oNinvrcNaSySLfaicKBIge16rOXQnewUZZ4JilOSvqvbyrFBjw==}
     peerDependencies:
       '@graphql-mesh/types': ^0.93.1
       '@graphql-mesh/utils': ^0.93.1
       '@graphql-tools/utils': ^9.2.1
       graphql: '*'
     dependencies:
-      '@graphql-mesh/types': 0.91.12_uoeeqqlv6c6lhv3gqe7g3h6vhq
-      '@graphql-mesh/utils': 0.43.20_v3a6cfexazovcqdusp5gotjnd4
+      '@graphql-mesh/types': 0.93.1_uoeeqqlv6c6lhv3gqe7g3h6vhq
+      '@graphql-mesh/utils': 0.93.1_okhidrftli3kjbj7qxt5j6p67e
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       fast-xml-parser: 4.2.2
       graphql: 16.6.0
@@ -5581,177 +5582,6 @@ packages:
       secure-json-parse: 2.5.0
     transitivePeerDependencies:
       - supports-color
-    dev: false
-
-  /@opentelemetry/api-logs/0.39.1:
-    resolution: {integrity: sha512-9BJ8lMcOzEN0lu+Qji801y707oFO4xT3db6cosPvl+k7ItUHKN5ofWqtSbM9gbt1H4JJ/4/2TVrqI9Rq7hNv6Q==}
-    engines: {node: '>=14'}
-    dependencies:
-      '@opentelemetry/api': 1.4.1
-    dev: false
-
-  /@opentelemetry/api/1.4.1:
-    resolution: {integrity: sha512-O2yRJce1GOc6PAy3QxFM4NzFiWzvScDC1/5ihYBL6BUEVdq0XMWN01sppE+H6bBXbaFYipjwFLEWLg5PaSOThA==}
-    engines: {node: '>=8.0.0'}
-    dev: false
-
-  /@opentelemetry/context-async-hooks/1.13.0_@opentelemetry+api@1.4.1:
-    resolution: {integrity: sha512-pS5fU4lrRjOIPZQqA2V1SUM9QUFXbO+8flubAiy6ntLjnAjJJUdRFOUOxK6v86ZHI2p2S8A0vD0BTu95FZYvjA==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.5.0'
-    dependencies:
-      '@opentelemetry/api': 1.4.1
-    dev: false
-
-  /@opentelemetry/core/1.13.0_@opentelemetry+api@1.4.1:
-    resolution: {integrity: sha512-2dBX3Sj99H96uwJKvc2w9NOiNgbvAO6mOFJFramNkKfS9O4Um+VWgpnlAazoYjT6kUJ1MP70KQ5ngD4ed+4NUw==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.5.0'
-    dependencies:
-      '@opentelemetry/api': 1.4.1
-      '@opentelemetry/semantic-conventions': 1.13.0
-    dev: false
-
-  /@opentelemetry/exporter-jaeger/1.13.0_@opentelemetry+api@1.4.1:
-    resolution: {integrity: sha512-ke/STs/erRDqKmNv6Dv+5SetXsVD+Zm1/Wo8cLdAGrZn6kG6Fyp5EXVO/BJuzx6q+jHCdODm8jV4veXl4m71nQ==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': ^1.0.0
-    dependencies:
-      '@opentelemetry/api': 1.4.1
-      '@opentelemetry/core': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/sdk-trace-base': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/semantic-conventions': 1.13.0
-      jaeger-client: 3.19.0
-    dev: false
-
-  /@opentelemetry/exporter-trace-otlp-http/0.39.1_@opentelemetry+api@1.4.1:
-    resolution: {integrity: sha512-AEhnJfVmo1g+7NxszAuf3c6vddld2DGH2+IM4XrPxCklucCsIpuStuC5EVZbCXXXBMpAY+n3t04QMxIQqNrcSw==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': ^1.0.0
-    dependencies:
-      '@opentelemetry/api': 1.4.1
-      '@opentelemetry/core': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/otlp-exporter-base': 0.39.1_@opentelemetry+api@1.4.1
-      '@opentelemetry/otlp-transformer': 0.39.1_@opentelemetry+api@1.4.1
-      '@opentelemetry/resources': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/sdk-trace-base': 1.13.0_@opentelemetry+api@1.4.1
-    dev: false
-
-  /@opentelemetry/otlp-exporter-base/0.39.1_@opentelemetry+api@1.4.1:
-    resolution: {integrity: sha512-Pv5X8fbi6jD/RJBePyn7MnCSuE6MbPB6dl+7YYBWJ5RcMGYMwvLXjd4h2jWsPV2TSUg38H/RoSP0aXvQ06Y7iw==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': ^1.0.0
-    dependencies:
-      '@opentelemetry/api': 1.4.1
-      '@opentelemetry/core': 1.13.0_@opentelemetry+api@1.4.1
-    dev: false
-
-  /@opentelemetry/otlp-transformer/0.39.1_@opentelemetry+api@1.4.1:
-    resolution: {integrity: sha512-0hgVnXXz5efI382B/24NxD4b6Zxlh7nxCdJkxkdmQMbn0yRiwoq/ZT+QG8eUL6JNzsBAV1WJlF5aJNsL8skHvw==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.3.0 <1.5.0'
-    dependencies:
-      '@opentelemetry/api': 1.4.1
-      '@opentelemetry/api-logs': 0.39.1
-      '@opentelemetry/core': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/resources': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/sdk-logs': 0.39.1_mcbg7hm3nijtxggv62vosf4qd4
-      '@opentelemetry/sdk-metrics': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/sdk-trace-base': 1.13.0_@opentelemetry+api@1.4.1
-    dev: false
-
-  /@opentelemetry/propagator-b3/1.13.0_@opentelemetry+api@1.4.1:
-    resolution: {integrity: sha512-HOo91EI4UbuG8xQVLFziTzrcIn0MJQhy8m9jorh8aonb94jFVFi3CFNIiAnIGOabmnshJLOABxpYXsiPB8Xnzg==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.5.0'
-    dependencies:
-      '@opentelemetry/api': 1.4.1
-      '@opentelemetry/core': 1.13.0_@opentelemetry+api@1.4.1
-    dev: false
-
-  /@opentelemetry/propagator-jaeger/1.13.0_@opentelemetry+api@1.4.1:
-    resolution: {integrity: sha512-IV9TO+u1Jzm9mUDAD3gyXf89eyvgEJUY1t+GB5QmS4wjVeWrSMUtD0JjH3yG9SNqkrQOqOGJq7YUSSetW+Lf5Q==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.5.0'
-    dependencies:
-      '@opentelemetry/api': 1.4.1
-      '@opentelemetry/core': 1.13.0_@opentelemetry+api@1.4.1
-    dev: false
-
-  /@opentelemetry/resources/1.13.0_@opentelemetry+api@1.4.1:
-    resolution: {integrity: sha512-euqjOkiN6xhjE//0vQYGvbStxoD/WWQRhDiO0OTLlnLBO9Yw2Gd/VoSx2H+svsebjzYk5OxLuREBmcdw6rbUNg==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.5.0'
-    dependencies:
-      '@opentelemetry/api': 1.4.1
-      '@opentelemetry/core': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/semantic-conventions': 1.13.0
-    dev: false
-
-  /@opentelemetry/sdk-logs/0.39.1_mcbg7hm3nijtxggv62vosf4qd4:
-    resolution: {integrity: sha512-/gmgKfZ1ZVFporKuwsewqIyvaUIGpv76JZ7lBpHQQPb37IMpaXO6pdqFI4ebHAWfNIm3akMyhmdtzivcgF3lgw==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.4.0 <1.5.0'
-      '@opentelemetry/api-logs': '>=0.38.0'
-    dependencies:
-      '@opentelemetry/api': 1.4.1
-      '@opentelemetry/api-logs': 0.39.1
-      '@opentelemetry/core': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/resources': 1.13.0_@opentelemetry+api@1.4.1
-    dev: false
-
-  /@opentelemetry/sdk-metrics/1.13.0_@opentelemetry+api@1.4.1:
-    resolution: {integrity: sha512-MOjZX6AnSOqLliCcZUrb+DQKjAWXBiGeICGbHAGe5w0BB18PJIeIo995lO5JSaFfHpmUMgJButTPfJJD27W3Vg==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.3.0 <1.5.0'
-    dependencies:
-      '@opentelemetry/api': 1.4.1
-      '@opentelemetry/core': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/resources': 1.13.0_@opentelemetry+api@1.4.1
-      lodash.merge: 4.6.2
-    dev: false
-
-  /@opentelemetry/sdk-trace-base/1.13.0_@opentelemetry+api@1.4.1:
-    resolution: {integrity: sha512-moTiQtc0uPR1hQLt6gLDJH9IIkeBhgRb71OKjNHZPE1VF45fHtD6nBDi5J/DkTHTwYP5X3kBJLa3xN7ub6J4eg==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.5.0'
-    dependencies:
-      '@opentelemetry/api': 1.4.1
-      '@opentelemetry/core': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/resources': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/semantic-conventions': 1.13.0
-    dev: false
-
-  /@opentelemetry/sdk-trace-node/1.13.0_@opentelemetry+api@1.4.1:
-    resolution: {integrity: sha512-FXA85lXKTsnbOflA/TBuBf2pmhD3c8uDjNjG0YqK+ap8UayfALmfJhf+aG1yBOUHevCY0JXJ4/xtbXExxpsMog==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.5.0'
-    dependencies:
-      '@opentelemetry/api': 1.4.1
-      '@opentelemetry/context-async-hooks': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/core': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/propagator-b3': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/propagator-jaeger': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/sdk-trace-base': 1.13.0_@opentelemetry+api@1.4.1
-      semver: 7.3.8
-    dev: false
-
-  /@opentelemetry/semantic-conventions/1.13.0:
-    resolution: {integrity: sha512-LMGqfSZkaMQXqewO0o1wvWr/2fQdCh4a3Sqlxka/UsJCe0cfLulh6x2aqnKLnsrSGiCq5rSCwvINd152i0nCqw==}
-    engines: {node: '>=14'}
     dev: false
 
   /@panva/hkdf/1.0.2:
@@ -8333,10 +8163,6 @@ packages:
       string-width: 4.2.3
     dev: true
 
-  /ansi-color/0.2.1:
-    resolution: {integrity: sha512-bF6xLaZBLpOQzgYUtYEhJx090nPSZk1BQ/q2oyBK9aMMcJHzx9uXGCjI2Y+LebsN4Jwoykr0V9whbPiogdyHoQ==}
-    dev: false
-
   /ansi-escapes/3.2.0:
     resolution: {integrity: sha512-cBhpre4ma+U0T1oM5fXg7Dy1Jw7zzwv7lt/GoCpr+hDQJoYnKVPLL4dCvSEFMmQurOQvSrwT7SL/DAlhBI97RQ==}
     engines: {node: '>=4'}
@@ -9284,16 +9110,6 @@ packages:
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
-
-  /bufrw/1.3.0:
-    resolution: {integrity: sha512-jzQnSbdJqhIltU9O5KUiTtljP9ccw2u5ix59McQy4pV2xGhVLhRZIndY8GIrgh5HjXa6+QJ9AQhOd2QWQizJFQ==}
-    engines: {node: '>= 0.10.x'}
-    dependencies:
-      ansi-color: 0.2.1
-      error: 7.0.2
-      hexer: 1.5.0
-      xtend: 4.0.2
-    dev: false
 
   /builtins/1.0.3:
     resolution: {integrity: sha512-uYBjakWipfaO/bXI7E8rq6kpwHRZK5cNYrUv2OzZSI/FvmdMyXJ2tG9dKcjEC5YHmHpUAwsargWIZNWdxb/bnQ==}
@@ -11290,13 +11106,6 @@ packages:
     resolution: {integrity: sha512-Sk5V6wVazPhq5MhpO+AUxJn5x7XSXGl1R93Vn7i+zS15KDVxQijejNCrz8340/2bgLBjR9GtEG8ZVKONDjcqGQ==}
     dependencies:
       stackframe: 1.3.4
-    dev: false
-
-  /error/7.0.2:
-    resolution: {integrity: sha512-UtVv4l5MhijsYUxPJo4390gzfZvAnTHreNnDjnTZaKIiZ/SemXxAhBkYSKtWa5RtBXbLP8tMgn/n0RUa/H7jXw==}
-    dependencies:
-      string-template: 0.2.1
-      xtend: 4.0.2
     dev: false
 
   /errorhandler/1.5.1:
@@ -13559,17 +13368,6 @@ packages:
     engines: {node: '>=6'}
     dev: false
 
-  /hexer/1.5.0:
-    resolution: {integrity: sha512-dyrPC8KzBzUJ19QTIo1gXNqIISRXQ0NwteW6OeQHRN4ZuZeHkdODfj0zHBdOlHbRY8GqbqK57C9oWSvQZizFsg==}
-    engines: {node: '>= 0.10.x'}
-    hasBin: true
-    dependencies:
-      ansi-color: 0.2.1
-      minimist: 1.2.7
-      process: 0.10.1
-      xtend: 4.0.2
-    dev: false
-
   /hosted-git-info/2.8.9:
     resolution: {integrity: sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==}
     dev: true
@@ -14559,17 +14357,6 @@ packages:
     dependencies:
       '@types/node': 13.13.52
       tslib: 2.5.0
-    dev: false
-
-  /jaeger-client/3.19.0:
-    resolution: {integrity: sha512-M0c7cKHmdyEUtjemnJyx/y9uX16XHocL46yQvyqDlPdvAcwPDbHrIbKjQdBqtiE4apQ/9dmr+ZLJYYPGnurgpw==}
-    engines: {node: '>=10'}
-    dependencies:
-      node-int64: 0.4.0
-      opentracing: 0.14.7
-      thriftrw: 3.12.0
-      uuid: 8.3.2
-      xorshift: 1.2.0
     dev: false
 
   /jest-changed-files/29.2.0:
@@ -16787,19 +16574,19 @@ packages:
   /json-buffer/3.0.1:
     resolution: {integrity: sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==}
 
-  /json-machete/0.18.20_a3jmoj4zm6ie4hyd74ois3xtgm:
-    resolution: {integrity: sha512-64n+/mdjRLV2O1Vx/7+SUjdjNcZP3nsfBVSpH7bTkjl3o7rKMDUyc/bLoLGWt5DAezPkve2l2tq8Pp1/QV+4ow==}
+  /json-machete/0.93.1_t7asz5fkfrpxryphxikbdab6ku:
+    resolution: {integrity: sha512-j7b3IAtUfrLxT0SPMukrkeZEKihtGWMyEW3aflYLzgfWh+79CLVK73rJLNPvkdT1zLjdacSYNiJ7WQxc/b442w==}
     peerDependencies:
       '@graphql-mesh/cross-helpers': ^0.3.4
-      '@graphql-mesh/types': ^0.91.12
-      '@graphql-mesh/utils': ^0.43.20
+      '@graphql-mesh/types': ^0.93.1
+      '@graphql-mesh/utils': ^0.93.1
       '@graphql-tools/utils': ^9.2.1
       graphql: '*'
       tslib: ^2.4.0
     dependencies:
       '@graphql-mesh/cross-helpers': 0.3.4_pgitk55pksmh724wxkovid65ci
-      '@graphql-mesh/types': 0.91.12_uoeeqqlv6c6lhv3gqe7g3h6vhq
-      '@graphql-mesh/utils': 0.43.20_v3a6cfexazovcqdusp5gotjnd4
+      '@graphql-mesh/types': 0.93.1_uoeeqqlv6c6lhv3gqe7g3h6vhq
+      '@graphql-mesh/utils': 0.93.1_okhidrftli3kjbj7qxt5j6p67e
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       '@json-schema-tools/meta-schema': 1.7.0
       '@whatwg-node/fetch': 0.8.8
@@ -17331,11 +17118,6 @@ packages:
       ansi-fragments: 0.2.1
       dayjs: 1.11.7
       yargs: 15.4.1
-    dev: false
-
-  /long/2.4.0:
-    resolution: {integrity: sha512-ijUtjmO/n2A5PaosNG9ZGDsQ3vxJg7ZW8vsY8Kp0f2yIZWhSJvjmegV7t+9RPQKxKrvj8yKGehhS+po14hPLGQ==}
-    engines: {node: '>=0.6'}
     dev: false
 
   /long/4.0.0:
@@ -19289,11 +19071,6 @@ packages:
       oidc-token-hash: 5.0.1
     dev: false
 
-  /opentracing/0.14.7:
-    resolution: {integrity: sha512-vz9iS7MJ5+Bp1URw8Khvdyw1H/hGvzHWlKQ7eRrQojSCDL1/SrWfrY9QebLw97n2deyRtzHRC3MkQfVNUCo91Q==}
-    engines: {node: '>=0.10'}
-    dev: false
-
   /optionator/0.8.3:
     resolution: {integrity: sha512-+IW9pACdk3XWmmTXG8m3upGUJst5XRGzxMRjXzAuJ1XnIFNvfhjjIuYkDvysnPQ7qzqVzLt78BCruntqRhWQbA==}
     engines: {node: '>= 0.8.0'}
@@ -20641,11 +20418,6 @@ packages:
   /process-warning/2.0.0:
     resolution: {integrity: sha512-+MmoAXoUX+VTHAlwns0h+kFUWFs/3FZy+ZuchkgjyOu3oioLAo2LB5aCfKPh2+P9O18i3m43tUEv3YqttSy0Ww==}
 
-  /process/0.10.1:
-    resolution: {integrity: sha512-dyIett8dgGIZ/TXKUzeYExt7WA6ldDzys9vTDU/cCA9L17Ypme+KzS+NjQCjpn9xsvi/shbMC+yP/BcFMBz0NA==}
-    engines: {node: '>= 0.6.0'}
-    dev: false
-
   /process/0.11.10:
     resolution: {integrity: sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==}
     engines: {node: '>= 0.6.0'}
@@ -20846,8 +20618,8 @@ packages:
       side-channel: 1.0.4
     dev: false
 
-  /qs/6.11.1:
-    resolution: {integrity: sha512-0wsrzgTz/kAVIeuxSjnpGC56rzYtr6JT/2BwEvMaPhFIoYa1aGO8LbzuU1R0uUYQkLpWBTOj0l/CLAJB64J6nQ==}
+  /qs/6.11.2:
+    resolution: {integrity: sha512-tDNIz22aBzCDxLtVH++VnTfzxlfeK5CbqohpSqpJgj1Wg/cQbStNAz3NuqCs5vV+pjBsK4x4pN9HlVh7rcYRiA==}
     engines: {node: '>=0.6'}
     dependencies:
       side-channel: 1.0.4
@@ -22531,10 +22303,6 @@ packages:
       strip-ansi: 6.0.1
     dev: true
 
-  /string-template/0.2.1:
-    resolution: {integrity: sha512-Yptehjogou2xm4UJbxJ4CxgZx12HBfeystp0y3x7s4Dj32ltVVG1Gg8YhKjHZkHicuKpZX/ffilA8505VbUbpw==}
-    dev: false
-
   /string-width/4.2.3:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}
     engines: {node: '>=8'}
@@ -23126,16 +22894,6 @@ packages:
     resolution: {integrity: sha512-rUkv4/fnb4rqy/gGy7VuqK6wE1+1DOCOWy4RMeaV69ZHMP11tQKZvZSip1yTgrKCMZzEMcCL/bKfHvSfDHx+iQ==}
     dependencies:
       real-require: 0.2.0
-
-  /thriftrw/3.12.0:
-    resolution: {integrity: sha512-4YZvR4DPEI41n4Opwr4jmrLGG4hndxr7387kzRFIIzxHQjarPusH4lGXrugvgb7TtPrfZVTpZCVe44/xUxowEw==}
-    engines: {node: '>= 0.10.x'}
-    hasBin: true
-    dependencies:
-      bufrw: 1.3.0
-      error: 7.0.2
-      long: 2.4.0
-    dev: false
 
   /throat/5.0.0:
     resolution: {integrity: sha512-fcwX4mndzpLQKBS1DVYhGAcYaYt7vsHNIvQV+WXMvnow5cgjPphq5CaayLaGsjRdSCKZFNGt7/GYAuXaNOiYCA==}
@@ -25154,10 +24912,6 @@ packages:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
     dev: true
 
-  /xorshift/1.2.0:
-    resolution: {integrity: sha512-iYgNnGyeeJ4t6U11NpA/QiKy+PXn5Aa3Azg5qkwIFz1tBLllQrjjsk9yzD7IAK0naNU4JxdeDgqW9ov4u/hc4g==}
-    dev: false
-
   /xregexp/2.0.0:
     resolution: {integrity: sha512-xl/50/Cf32VsGq/1R8jJE5ajH1yMCQkpmoS10QbFZWl2Oor4H0Me64Pu2yxvsRWK3m6soJbmGfzSR7BYmDcWAA==}
     dev: true
@@ -25296,21 +25050,13 @@ packages:
     dependencies:
       '@fastify/formbody': 7.3.0
       '@graphql-mesh/cross-helpers': 0.3.4_pgitk55pksmh724wxkovid65ci
-      '@graphql-mesh/types': 0.91.12_uoeeqqlv6c6lhv3gqe7g3h6vhq
-      '@graphql-mesh/utils': 0.43.20_v3a6cfexazovcqdusp5gotjnd4
+      '@graphql-mesh/types': 0.93.1_uoeeqqlv6c6lhv3gqe7g3h6vhq
+      '@graphql-mesh/utils': 0.93.1_okhidrftli3kjbj7qxt5j6p67e
       '@graphql-tools/schema': 8.5.1_graphql@16.6.0
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
-      '@omnigraph/json-schema': 0.38.24_a3jmoj4zm6ie4hyd74ois3xtgm
-      '@omnigraph/openapi': 0.19.26_a3jmoj4zm6ie4hyd74ois3xtgm
-      '@omnigraph/soap': 0.93.1_xld6wysqa4wpgtzuq5ms4lirwu
-      '@opentelemetry/api': 1.4.1
-      '@opentelemetry/core': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/exporter-jaeger': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/exporter-trace-otlp-http': 0.39.1_@opentelemetry+api@1.4.1
-      '@opentelemetry/resources': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/sdk-trace-base': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/sdk-trace-node': 1.13.0_@opentelemetry+api@1.4.1
-      '@opentelemetry/semantic-conventions': 1.13.0
+      '@omnigraph/json-schema': 0.93.2_t7asz5fkfrpxryphxikbdab6ku
+      '@omnigraph/openapi': 0.93.2_t7asz5fkfrpxryphxikbdab6ku
+      '@omnigraph/soap': 0.93.2_pzyiin7nclyqejukz64hf2um5q
       '@prisma/generator-helper': 3.15.2
       '@web-std/fetch': 4.1.0
       '@whatwg-node/fetch': 0.8.8

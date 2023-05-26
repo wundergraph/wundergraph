@@ -117,14 +117,27 @@ func (m *prometheusMetrics) Serve() error {
 	return err
 }
 
+func (m *prometheusMetrics) Close() error {
+	if err := m.server.Close(); err != nil {
+		return err
+	}
+	m.unregisterCollectors()
+	return nil
+}
+
 func (m *prometheusMetrics) Shutdown(ctx context.Context) error {
 	if err := m.server.Shutdown(ctx); err != nil {
 		return err
 	}
+	m.unregisterCollectors()
+	return nil
+}
+
+func (m *prometheusMetrics) unregisterCollectors() {
 	for _, collector := range m.collectors {
 		m.registerer.Unregister(collector)
 	}
-	return nil
+	m.collectors = nil
 }
 
 // NewPrometheus returns a metrics provider that exposes the metrics via Prometheus
