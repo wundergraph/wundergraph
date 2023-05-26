@@ -66,6 +66,7 @@ export const introspectOpenApiV2 = async (introspection: OpenAPIIntrospectionV2)
 
 interface OpenApiOptions {
 	source: string;
+	cwd: string;
 	endpoint?: string;
 	name: string;
 	operationHeaders: Record<string, string>;
@@ -92,6 +93,7 @@ export const openApiSpecificationToGraphQLApi = async (
 
 	const options: OpenApiOptions = {
 		source,
+		cwd: process.cwd(),
 		name: introspection.apiNamespace || 'api',
 		operationHeaders,
 	};
