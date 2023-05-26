@@ -88,6 +88,10 @@ const navigation = [
 						href: '/docs/examples/nextjs',
 					},
 					{
+						title: 'Next.js with App Directory',
+						href: '/docs/examples/nextjs-app-dir',
+					},
+					{
 						title: 'Next.js TypeScript Operations',
 						href: '/docs/examples/nextjs-typescript-operations',
 					},

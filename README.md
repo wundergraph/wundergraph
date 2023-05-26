@@ -217,6 +217,7 @@ The best way to try them out is by cloning the mono-repo.
 - [Learn WUnderGraph](examples/learn-wundergraph)
 - [Migrate from Apollo](examples/migrate-from-apollo)
 - [Next.js](examples/nextjs)
+- [Next.js app directory](examples/nextjs-app-dir)
 - [Next.js file upload](examples/nextjs-file-upload)
 - [Next.js PostgresSQL Prisma](examples/nextjs-postgres-prisma)
 - [Next.js PostgresQL user filters](examples/nextjs-postgres-user-filters)

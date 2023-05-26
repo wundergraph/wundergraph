@@ -1,8 +1,14 @@
+---
+title: Next.js with App Directory Example
+pageTitle: WunderGraph - Examples - Next.js - App Directory
+description: An example that demonstrates how to integrate WunderGraph with Next.js and App Directory
+---
+
 # WunderGraph Next.js with App Directory Starter
 
-This example demonstrates how to use WunderGraph with Next.js App Directory. We are going to make your data-source accessible through JSON-RPC to your Next.js app.
+[The NextJS App Directory example](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-app-dir) demonstrates the power of code generation, when it comes to integrating WunderGraph with frontend frameworks like Next.js.
 
-## Getting Started
+## Configuration
 
 1. Install the dependencies and run the complete example in one command:
 
