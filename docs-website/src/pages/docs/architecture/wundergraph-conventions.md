@@ -100,7 +100,8 @@ By default, when no options are passed to `wundergraph.config.ts` or `wundergrap
 | `WG_SERVER_URL`         | The URL of the `WunderGraph Server`.                               | `http://localhost:9992` |
 | `WG_SERVER_HOST`        | The host of the `WunderGraph Server`.                              | `localhost`             |
 | `WG_SERVER_PORT`        | The port of the `WunderGraph Server`.                              | `9992`                  |
-| `WG_IN_MEMORY_CACHE`    | Size of the in-memory cache (number + suffix) or `off`.            | `128MB`                 |
+| `WG_PROMETHEUS_ENABLED` | Whether to enable Prometheus metrics.                              | `true`                  |
+| `WG_PROMETHEUS_PORT`    | Port used to serve Prometheus metrics.                             | `8881`                  |
 
 ### Available log levels
 

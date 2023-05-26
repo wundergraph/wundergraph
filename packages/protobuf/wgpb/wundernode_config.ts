@@ -1135,6 +1135,11 @@ export interface NodeLogging {
   level: ConfigurationVariable | undefined;
 }
 
+export interface PrometheusOptions {
+  enabled: ConfigurationVariable | undefined;
+  port: ConfigurationVariable | undefined;
+}
+
 export interface NodeOptions {
   nodeUrl: ConfigurationVariable | undefined;
   publicNodeUrl: ConfigurationVariable | undefined;
@@ -1144,6 +1149,7 @@ export interface NodeOptions {
   listenInternal: InternalListenerOptions | undefined;
   nodeInternalUrl: ConfigurationVariable | undefined;
   defaultHttpProxyUrl: ConfigurationVariable | undefined;
+  prometheus: PrometheusOptions | undefined;
 }
 
 export interface ServerLogging {
@@ -3853,6 +3859,38 @@ export const NodeLogging = {
   },
 };
 
+function createBasePrometheusOptions(): PrometheusOptions {
+  return { enabled: undefined, port: undefined };
+}
+
+export const PrometheusOptions = {
+  fromJSON(object: any): PrometheusOptions {
+    return {
+      enabled: isSet(object.enabled) ? ConfigurationVariable.fromJSON(object.enabled) : undefined,
+      port: isSet(object.port) ? ConfigurationVariable.fromJSON(object.port) : undefined,
+    };
+  },
+
+  toJSON(message: PrometheusOptions): unknown {
+    const obj: any = {};
+    message.enabled !== undefined &&
+      (obj.enabled = message.enabled ? ConfigurationVariable.toJSON(message.enabled) : undefined);
+    message.port !== undefined && (obj.port = message.port ? ConfigurationVariable.toJSON(message.port) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<PrometheusOptions>, I>>(object: I): PrometheusOptions {
+    const message = createBasePrometheusOptions();
+    message.enabled = (object.enabled !== undefined && object.enabled !== null)
+      ? ConfigurationVariable.fromPartial(object.enabled)
+      : undefined;
+    message.port = (object.port !== undefined && object.port !== null)
+      ? ConfigurationVariable.fromPartial(object.port)
+      : undefined;
+    return message;
+  },
+};
+
 function createBaseNodeOptions(): NodeOptions {
   return {
     nodeUrl: undefined,
@@ -3863,6 +3901,7 @@ function createBaseNodeOptions(): NodeOptions {
     listenInternal: undefined,
     nodeInternalUrl: undefined,
     defaultHttpProxyUrl: undefined,
+    prometheus: undefined,
   };
 }
 
@@ -3885,6 +3924,7 @@ export const NodeOptions = {
       defaultHttpProxyUrl: isSet(object.defaultHttpProxyUrl)
         ? ConfigurationVariable.fromJSON(object.defaultHttpProxyUrl)
         : undefined,
+      prometheus: isSet(object.prometheus) ? PrometheusOptions.fromJSON(object.prometheus) : undefined,
     };
   },
 
@@ -3909,6 +3949,8 @@ export const NodeOptions = {
     message.defaultHttpProxyUrl !== undefined && (obj.defaultHttpProxyUrl = message.defaultHttpProxyUrl
       ? ConfigurationVariable.toJSON(message.defaultHttpProxyUrl)
       : undefined);
+    message.prometheus !== undefined &&
+      (obj.prometheus = message.prometheus ? PrometheusOptions.toJSON(message.prometheus) : undefined);
     return obj;
   },
 
@@ -3935,6 +3977,9 @@ export const NodeOptions = {
       : undefined;
     message.defaultHttpProxyUrl = (object.defaultHttpProxyUrl !== undefined && object.defaultHttpProxyUrl !== null)
       ? ConfigurationVariable.fromPartial(object.defaultHttpProxyUrl)
+      : undefined;
+    message.prometheus = (object.prometheus !== undefined && object.prometheus !== null)
+      ? PrometheusOptions.fromPartial(object.prometheus)
       : undefined;
     return message;
   },

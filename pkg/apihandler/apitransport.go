@@ -19,6 +19,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/metrics"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
@@ -54,15 +55,12 @@ type ApiTransport struct {
 	onResponseHook             map[string]struct{}
 	hooksClient                *hooks.Client
 	enableStreamingMode        bool
+	requestCounter             *outgoingRequestCounter
 }
 
-func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, enableRequestLogging bool) ApiTransportFactory {
+func NewApiTransportFactory(opts ApiTransportOptions) ApiTransportFactory {
 	return &apiTransportFactory{
-		opts: ApiTransportOptions{
-			API:                  api,
-			HooksClient:          hooksClient,
-			EnableRequestLogging: enableRequestLogging,
-		},
+		opts: opts,
 	}
 }
 
@@ -70,9 +68,11 @@ type ApiTransportOptions struct {
 	API                  *Api
 	HooksClient          *hooks.Client
 	EnableRequestLogging bool
+	Metrics              metrics.Metrics
 }
 
 func NewApiTransport(httpTransport *http.Transport, enableStreamingMode bool, opts ApiTransportOptions) http.RoundTripper {
+
 	transport := &ApiTransport{
 		httpTransport:              httpTransport,
 		enableRequestLogging:       opts.EnableRequestLogging,
@@ -82,6 +82,7 @@ func NewApiTransport(httpTransport *http.Transport, enableStreamingMode bool, op
 		onRequestHook:              map[string]struct{}{},
 		hooksClient:                opts.HooksClient,
 		enableStreamingMode:        enableStreamingMode,
+		requestCounter:             newOutgoingRequestCounter(opts.Metrics),
 	}
 
 	if dataSourceConfigurations := opts.API.EngineConfiguration.GetDatasourceConfigurations(); dataSourceConfigurations != nil {
@@ -179,7 +180,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 
 	start := time.Now()
 	res, err = t.httpTransport.RoundTrip(request)
-	duration := time.Since(start).Milliseconds()
+	duration := time.Since(start)
 	if err != nil {
 		return nil, err
 	}
@@ -190,11 +191,13 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 		if t.enableRequestLogging {
 			fmt.Printf("\n\n--- DebugTransport ---\n\nRequest:\n\n%s\n\nDuration: %d ms\n\n--- DebugTransport\n\n",
 				string(requestDump),
-				duration,
+				duration.Milliseconds(),
 			)
 		}
 		return
 	}
+
+	t.requestCounter.Inc(request, res, duration)
 
 	if t.enableRequestLogging {
 		var responseDump []byte
