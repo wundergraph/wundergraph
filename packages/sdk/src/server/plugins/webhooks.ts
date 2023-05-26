@@ -10,6 +10,7 @@ import type { InternalClientFactory } from '../internal-client';
 import process from 'node:process';
 import { OperationsClient } from '../operations-client';
 import { propagation, trace } from '@opentelemetry/api';
+import { Attributes } from '../trace/attributes';
 
 export interface WebHookRouteConfig {
 	kind: 'webhook';
@@ -104,7 +105,7 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 			const span = trace.getSpan(req.telemetry.context);
 			if (span && routeConfig?.kind === 'webhook') {
 				span.setAttributes({
-					'wg.webhook.name': routeConfig.webhookName,
+					[Attributes.WgWebhookName]: routeConfig.webhookName,
 				});
 			}
 		}

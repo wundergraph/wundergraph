@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/trace"
-	"go.opentelemetry.io/otel/attribute"
 	oteltrace "go.opentelemetry.io/otel/trace"
 	"io"
 	"net"
@@ -911,7 +910,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r = operation.SetOperationMetaData(r, h.operation)
 
 	span := oteltrace.SpanFromContext(r.Context())
-	span.SetAttributes(attribute.String(trace.WgComponentName, "query-handler"))
+	span.SetAttributes(trace.WgComponentName.String("query-handler"))
 
 	// Set trace attributes based on the current operation
 	trace.SetOperationAttributes(r.Context())
@@ -1181,7 +1180,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r = operation.SetOperationMetaData(r, h.operation)
 
 	span := oteltrace.SpanFromContext(r.Context())
-	span.SetAttributes(attribute.String(trace.WgComponentName, "mutation-handler"))
+	span.SetAttributes(trace.WgComponentName.String("mutation-handler"))
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -1291,7 +1290,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	r = operation.SetOperationMetaData(r, h.operation)
 
 	span := oteltrace.SpanFromContext(r.Context())
-	span.SetAttributes(attribute.String(trace.WgComponentName, "subscription-handler"))
+	span.SetAttributes(trace.WgComponentName.String("subscription-handler"))
 
 	// recover from panic if one occured. Set err to nil otherwise.
 	defer func() {

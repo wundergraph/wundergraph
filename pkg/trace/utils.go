@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/wundergraph/wundergraph/pkg/operation"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 	"net/http"
@@ -28,8 +27,8 @@ func SetOperationAttributes(ctx context.Context) {
 		metaData := operation.GetOperationMetaData(ctx)
 		if metaData != nil {
 			span.SetAttributes(
-				attribute.String(WgOperationName, metaData.OperationName),
-				attribute.String(WgOperationType, strings.ToUpper(metaData.OperationType.String())),
+				WgOperationName.String(metaData.OperationName),
+				WgOperationType.String(strings.ToUpper(metaData.OperationType.String())),
 			)
 		}
 	}

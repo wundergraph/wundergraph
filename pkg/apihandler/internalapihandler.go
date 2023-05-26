@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/trace"
-	"go.opentelemetry.io/otel/attribute"
 	oteltrace "go.opentelemetry.io/otel/trace"
 	"io"
 	"net/http"
@@ -342,7 +341,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r = operation.SetOperationMetaData(r, h.operation)
 
 	span := oteltrace.SpanFromContext(r.Context())
-	span.SetAttributes(attribute.String(trace.WgComponentName, "internal-api-handler"))
+	span.SetAttributes(trace.WgComponentName.String("internal-api-handler"))
 
 	bodyBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(bodyBuf)
@@ -429,7 +428,7 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 	r = operation.SetOperationMetaData(r, h.operation)
 
 	span := oteltrace.SpanFromContext(r.Context())
-	span.SetAttributes(attribute.String(trace.WgComponentName, "internal-subscription-handler"))
+	span.SetAttributes(trace.WgComponentName.String("internal-subscription-handler"))
 
 	bodyBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(bodyBuf)

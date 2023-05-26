@@ -6,6 +6,7 @@ import { FastifyRequestContext } from '../types';
 import { WgEnv } from '../../configure/options';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { setStatus } from '../trace/util';
+import { Attributes } from '../trace/attributes';
 
 export interface FastifyTelemetry {
 	context: Context;
@@ -72,8 +73,8 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async
 			});
 			req.telemetry.parentSpan.setAttributes({
 				[SemanticAttributes.HTTP_STATUS_CODE]: err.message,
-				'error.stack': err.stack,
-				'error.name': err.name,
+				[Attributes.ErrorName]: err.name,
+				[Attributes.ErrorStack]: err.stack,
 			});
 		}
 	});

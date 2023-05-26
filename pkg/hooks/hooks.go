@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/wundergraph/wundergraph/pkg/trace"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/otel/attribute"
 	otrace "go.opentelemetry.io/otel/trace"
 	"io"
 	"io/ioutil"
@@ -176,7 +175,7 @@ func NewClient(serverUrl string, logger *zap.Logger) *Client {
 func buildClient(requestTimeout time.Duration) *retryablehttp.Client {
 	httpClient := retryablehttp.NewClient()
 	httpClient.HTTPClient.Transport = trace.NewTransport(http.DefaultTransport,
-		otelhttp.WithSpanOptions(otrace.WithAttributes(attribute.String(trace.WgComponentName, "hooks-client"))),
+		otelhttp.WithSpanOptions(otrace.WithAttributes(trace.WgComponentName.String("hooks-client"))),
 		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
 			return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
 		}),

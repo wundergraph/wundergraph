@@ -15,6 +15,7 @@ import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/uti
 import { Headers } from '@whatwg-node/fetch';
 import { FastifyRequest } from 'fastify';
 import { trace } from '@opentelemetry/api';
+import { Attributes } from '../trace/attributes';
 
 const maximumRecursionLimit = 16;
 
@@ -597,8 +598,8 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			const span = trace.getSpan(req.telemetry.context);
 			if (span && routeConfig?.kind === 'hook') {
 				span.setAttributes({
-					'wg.hook.name': routeConfig.hookName,
-					'wg.hook.operation': routeConfig.operationName,
+					[Attributes.WgHookName]: routeConfig.hookName,
+					[Attributes.WgOperationName]: routeConfig.operationName,
 				});
 			}
 		}

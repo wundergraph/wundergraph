@@ -8,7 +8,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/trace"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/otel/attribute"
 	otrace "go.opentelemetry.io/otel/trace"
 	"io"
 	"net/http"
@@ -124,7 +123,7 @@ func NewApiTransport(httpTransport *http.Transport, enableStreamingMode bool, op
 	}
 
 	return trace.NewTransport(transport,
-		otelhttp.WithSpanOptions(otrace.WithAttributes(attribute.String(trace.WgComponentName, "api-transport"))),
+		otelhttp.WithSpanOptions(otrace.WithAttributes(trace.WgComponentName.String("api-transport"))),
 		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
 			return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
 		}),

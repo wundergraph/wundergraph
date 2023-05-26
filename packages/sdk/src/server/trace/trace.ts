@@ -56,9 +56,9 @@ const configureTracerProvider = (config: TelemetryOptions, logger: pino.Logger):
 	});
 
 	provider.addSpanProcessor(getSpanProcessor(config, logger));
-	provider.register({});
+	provider.register();
 
-	return { provider: provider };
+	return { provider };
 };
 
 function getExporter(config: TelemetryOptions, logger: pino.Logger): SpanExporter {
@@ -68,15 +68,15 @@ function getExporter(config: TelemetryOptions, logger: pino.Logger): SpanExporte
 		throw new Error('OTLP http endpoint can not be empty');
 	}
 
-	const [authHeader, hasAuthHeader] = getAuthHeader(config);
+	const hasAuthHeader = !!config?.authToken;
 	logger.debug(`configuring OTLPTraceExporter with auth header: ${hasAuthHeader} and endpoint: ${httpEndpoint}`);
 
 	const headers: Record<string, string> = {};
 	if (hasAuthHeader) {
-		headers['Authorization'] = authHeader;
+		headers['Authorization'] = config?.authToken!;
 	}
 
-	const collectorUrl = normalizeURL(httpEndpoint, defaultOTLPTraceExporterPath);
+	const collectorUrl = normalizeURL(httpEndpoint);
 
 	return new OTLPTraceExporter({
 		url: collectorUrl,
@@ -85,15 +85,19 @@ function getExporter(config: TelemetryOptions, logger: pino.Logger): SpanExporte
 }
 
 // normalize the endpoint URL, because of the inconsistency in Go and Node.js exporters implementations
-function normalizeURL(endpoint: string, defaultPath: string): string {
+export function normalizeURL(endpoint: string): string {
 	try {
 		const url = new URL(endpoint);
+
+		if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+			throw new Error(`invalid protocol: ${url.protocol}`);
+		}
 
 		url.pathname = defaultOTLPTraceExporterPath;
 
 		return url.toString();
 	} catch (e) {
-		throw new Error(`invalid URL: ${endpoint}, error: ${e}`);
+		throw new Error(`invalid OTLP endpoint: ${endpoint}, error: ${e}`);
 	}
 }
 
@@ -104,17 +108,6 @@ function getSpanProcessor(config: TelemetryOptions, logger: pino.Logger): SpanPr
 		// The interval between two consecutive exports
 		scheduledDelayMillis: 2500,
 	});
-}
-
-function getAuthHeader(config: TelemetryOptions): [string, boolean] {
-	if (config.authToken) {
-		const token = config.authToken;
-		if (token !== '') {
-			return [token, true];
-		}
-	}
-
-	return ['', false];
 }
 
 export default configureTracerProvider;

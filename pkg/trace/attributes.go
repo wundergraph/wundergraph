@@ -1,7 +1,9 @@
 package trace
 
+import "go.opentelemetry.io/otel/attribute"
+
 const (
-	WgOperationName = "wg.operation.name"
-	WgOperationType = "wg.operation.type"
-	WgComponentName = "wg.component.name"
+	WgOperationName = attribute.Key("wg.operation.name")
+	WgOperationType = attribute.Key("wg.operation.type")
+	WgComponentName = attribute.Key("wg.component.name")
 )
