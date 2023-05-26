@@ -35,7 +35,16 @@ configureWunderGraphApplication({
 ## OpenTelemetry
 
 WunderGraph supports OpenTelemetry out of the box. OpenTelemetry is a collection of tools, APIs, and SDKs used to instrument, generate, collect, and export telemetry data (metrics, logs, and traces) for analysis in order to understand your software's performance and behavior.
-With the help of OpenTelemetry, you can monitor your WunderGraph nodes and get a better understanding of your application's performance. If you are not familiar with OpenTelemetry, you can read more about it [here](https://opentelemetry.io/).
+With the help of OpenTelemetry, you can monitor your WunderGraph nodes and get a better understanding of your application's performance. We instrument all outgoing HTTP requests and inner service calls with OpenTelemetry. This includes:
+
+- All Hooks
+- TypeScript functions
+- GraphQL Operations
+- Webhooks
+- Calls made with the Operations Client
+- Origin requests
+
+If you are not familiar with OpenTelemetry, you can read more about it [here](https://opentelemetry.io/).
 The OpenTelemetry integration is disabled by default. To enable it, set `enabled` to `true` and optionally configure the endpoint and sampling rate:
 
 ```typescript
