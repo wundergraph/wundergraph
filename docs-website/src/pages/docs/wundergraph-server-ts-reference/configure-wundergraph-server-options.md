@@ -27,16 +27,27 @@ If no value is provided, `listen.host` and `listen.port` will be used to generat
 
 This option allows you to configure the logger level of WunderGraph Server.
 
+### `prometheus.enabled` (optional)
+
+This option indicates whether Prometheus metrics collection and exposure should be enabled.
+
+### `prometheus.port` (optional)
+
+This option controls the port used to listen on for serving Prometheus metrics. The metrics
+are available at `http://<host>:<prometheus.port>/metrics`.
+
 ## Options default values
 
 Each option when unset will get a value from the `Default Environment Variables` or from the default value of that variable.
 
-| Option         | Default Value           | Default Environment Variable |
-| -------------- | ----------------------- | ---------------------------- |
-| `listen.host`  | `localhost`             | `WG_SERVER_HOST`             |
-| `listen.port`  | `9992`                  | `WG_SERVER_PORT`             |
-| `serverUrl`    | `http://localhost:9992` | `WG_SERVER_URL`              |
-| `logger.level` | `info`                  | `WG_LOG_LEVEL`               |
+| Option               | Default Value           | Default Environment Variable |
+| -------------------- | ----------------------- | ---------------------------- |
+| `listen.host`        | `localhost`             | `WG_SERVER_HOST`             |
+| `listen.port`        | `9992`                  | `WG_SERVER_PORT`             |
+| `serverUrl`          | `http://localhost:9992` | `WG_SERVER_URL`              |
+| `logger.level`       | `info`                  | `WG_LOG_LEVEL`               |
+| `prometheus.enabled` | `true`                  | `WG_PROMETHEUS_ENABLED`      |
+| `prometheus.port`    | `8881`                  | `WG_PROMETHEUS_PORT`         |
 
 ## Running in production
 

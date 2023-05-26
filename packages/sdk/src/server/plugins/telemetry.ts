@@ -28,7 +28,6 @@ export interface TelemetryPluginOptions {
 const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async (fastify, options) => {
 	const tracer = options.provider.getTracer('hook-server', '0.0.1');
 
-	fastify.decorateRequest<FastifyTelemetry | {}>('telemetry', {});
 	fastify.decorate<Tracer>('tracer', tracer);
 
 	fastify.addHook('onRequest', async (req, resp) => {
@@ -80,6 +79,7 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async
 	});
 
 	fastify.addHook('onClose', async () => {
+		await options.provider.forceFlush();
 		await options.provider.shutdown();
 	});
 };

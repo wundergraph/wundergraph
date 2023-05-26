@@ -1,14 +1,15 @@
 import { Resource } from '@opentelemetry/resources';
-import { NodeTracerProvider, SpanProcessor } from '@opentelemetry/sdk-trace-node';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import {
-	AlwaysOnSampler,
-	BatchSpanProcessor,
 	SpanExporter,
-	BasicTracerProvider,
+	NodeTracerProvider,
+	SpanProcessor,
+	TraceIdRatioBasedSampler,
 	InMemorySpanExporter,
+	BatchSpanProcessor,
+	BasicTracerProvider,
 	SimpleSpanProcessor,
-} from '@opentelemetry/sdk-trace-base';
+} from '@opentelemetry/sdk-trace-node';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { pino } from 'pino';
 import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
@@ -30,6 +31,7 @@ export interface TelemetryTestTracerProvider {
 export interface TelemetryOptions {
 	httpEndpoint: string;
 	authToken?: string;
+	sampler?: number;
 }
 
 export const getTestTracerProvider = (): TelemetryTestTracerProvider => {
@@ -50,7 +52,7 @@ const configureTracerProvider = (config: TelemetryOptions, logger: pino.Logger):
 
 	const provider = new NodeTracerProvider({
 		resource,
-		sampler: new AlwaysOnSampler(),
+		sampler: new TraceIdRatioBasedSampler(config.sampler),
 	});
 
 	provider.addSpanProcessor(getSpanProcessor(config, logger));
@@ -74,8 +76,10 @@ function getExporter(config: TelemetryOptions, logger: pino.Logger): SpanExporte
 		headers['Authorization'] = authHeader;
 	}
 
+	const collectorUrl = normalizeURL(httpEndpoint, defaultOTLPTraceExporterPath);
+
 	return new OTLPTraceExporter({
-		url: normalizeURL(httpEndpoint, defaultOTLPTraceExporterPath),
+		url: collectorUrl,
 		headers,
 	});
 }
@@ -83,16 +87,9 @@ function getExporter(config: TelemetryOptions, logger: pino.Logger): SpanExporte
 // normalize the endpoint URL, because of the inconsistency in Go and Node.js exporters implementations
 function normalizeURL(endpoint: string, defaultPath: string): string {
 	try {
-		if (!/^https?:\/\//i.test(endpoint)) {
-			endpoint = 'https://' + endpoint;
-		}
-
 		const url = new URL(endpoint);
 
-		// Set the default path if it's missing or empty
-		if (!url.pathname || url.pathname === '/') {
-			url.pathname = defaultPath;
-		}
+		url.pathname = defaultOTLPTraceExporterPath;
 
 		return url.toString();
 	} catch (e) {

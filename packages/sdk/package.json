@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.158.1",
+  "version": "0.159.0",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -106,7 +106,8 @@
     "watch": "tsc -w",
     "test": "jest && npm run test:types",
     "test:types": "tsd --typings ./tsconfig.json",
-    "test:int": "TEST_INTEGRATION=true jest"
+    "test:int": "TEST_INTEGRATION=true jest",
+    "test:update-snapshots": "jest -u"
   },
   "devDependencies": {
     "@types/chai": "^4.2.22",
@@ -145,9 +146,9 @@
     "@web-std/fetch": "^4.1.0",
     "@whatwg-node/fetch": "^0.8.8",
     "@wundergraph/orm": "workspace:*",
-    "@wundergraph/protobuf": "workspace:^0.112.0",
+    "@wundergraph/protobuf": "workspace:^0.113.0",
     "@wundergraph/straightforward": "^4.2.5",
-    "@wundergraph/wunderctl": "workspace:^0.152.1",
+    "@wundergraph/wunderctl": "workspace:^0.153.0",
     "@opentelemetry/api": "^1.4.1",
     "@opentelemetry/core": "^1.13.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.39.1",

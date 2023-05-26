@@ -50,6 +50,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/jsonpath"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/metrics"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/s3uploadclient"
@@ -108,6 +109,8 @@ type Builder struct {
 
 	githubAuthDemoClientID     string
 	githubAuthDemoClientSecret string
+
+	metrics metrics.Metrics
 }
 
 type BuilderConfig struct {
@@ -118,6 +121,7 @@ type BuilderConfig struct {
 	GitHubAuthDemoClientID     string
 	GitHubAuthDemoClientSecret string
 	DevMode                    bool
+	Metrics                    metrics.Metrics
 }
 
 func NewBuilder(pool *pool.Pool,
@@ -138,6 +142,7 @@ func NewBuilder(pool *pool.Pool,
 		githubAuthDemoClientID:     config.GitHubAuthDemoClientID,
 		githubAuthDemoClientSecret: config.GitHubAuthDemoClientSecret,
 		devMode:                    config.DevMode,
+		metrics:                    config.Metrics,
 	}
 }
 
@@ -224,7 +229,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		})
 	})
 
-	if err := r.registerAuth(r.insecureCookies); err != nil {
+	if err := r.registerAuth(); err != nil {
 		if !r.devMode {
 			// If authentication fails in production, consider this a fatal error
 			return streamClosers, err
@@ -410,16 +415,6 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		return r.registerNodejsOperation(operation, apiPath)
 	}
 
-	var (
-		operationIsConfigured bool
-	)
-
-	defer func() {
-		if !operationIsConfigured {
-			r.registerInvalidOperation(operation.Name)
-		}
-	}()
-
 	shared := r.pool.GetShared(context.Background(), r.planConfig, pool.Config{})
 
 	shared.Doc.Input.ResetInputString(operation.Content)
@@ -471,6 +466,9 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		Logger:      r.log,
 	}
 
+	var operationHandler http.Handler
+	var route *mux.Route
+
 	switch operation.OperationType {
 	case wgpb.OperationType_QUERY:
 		synchronousPlan, ok := preparedPlan.(*plan.SynchronousResponsePlan)
@@ -510,14 +508,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
 
-		route := r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
-		if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
-			route.Handler(authentication.RequiresAuthentication(handler))
-		} else {
-			route.Handler(handler)
-		}
-
-		operationIsConfigured = true
+		route = r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
+		operationHandler = handler
 
 		r.log.Debug("registered QueryHandler",
 			zap.String("method", http.MethodGet),
@@ -554,15 +546,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			hooksPipeline:          hooksPipeline,
 		}
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
-		route := r.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath)
-
-		if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
-			route.Handler(authentication.RequiresAuthentication(handler))
-		} else {
-			route.Handler(handler)
-		}
-
-		operationIsConfigured = true
+		route = r.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath)
+		operationHandler = handler
 
 		r.log.Debug("registered MutationHandler",
 			zap.String("method", http.MethodPost),
@@ -599,15 +584,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			hooksPipeline:          hooksPipeline,
 		}
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
-		route := r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
-
-		if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
-			route.Handler(authentication.RequiresAuthentication(handler))
-		} else {
-			route.Handler(handler)
-		}
-
-		operationIsConfigured = true
+		route = r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
+		operationHandler = handler
 
 		r.log.Debug("registered SubscriptionHandler",
 			zap.String("method", http.MethodGet),
@@ -620,6 +598,18 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			zap.String("name", operation.Name),
 			zap.String("content", operation.Content),
 		)
+	}
+
+	if route != nil && operationHandler != nil {
+
+		if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
+			operationHandler = authentication.RequiresAuthentication(operationHandler)
+			route.Handler(authentication.RequiresAuthentication(operationHandler))
+		}
+		metrics := newOperationMetrics(r.metrics, operation.Name)
+		route.Handler(metrics.Handler(operationHandler))
+	} else {
+		r.registerInvalidOperation(operation.Name)
 	}
 
 	return nil
@@ -1525,71 +1515,27 @@ func MergeJsonRightIntoLeft(left, right []byte) []byte {
 }
 
 func (r *Builder) authenticationHooks() authentication.Hooks {
-	return hooks.NewAuthenticationHooks(hooks.AuthenticationConfig{
-		Client:                     r.middlewareClient,
-		Log:                        r.log,
-		PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-		MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-		PostLogout:                 r.api.AuthenticationConfig.Hooks.PostLogout,
-		Revalidate:                 r.api.AuthenticationConfig.Hooks.RevalidateAuthentication,
-	})
+	return authenticationHooks(r.api, r.middlewareClient, r.log)
 }
 
-func (r *Builder) registerAuth(insecureCookies bool) error {
+func (r *Builder) registerAuth() error {
 
-	var (
-		hashKey, blockKey, csrfSecret []byte
-		jwksProviders                 []*wgpb.JwksAuthProvider
-	)
-
-	if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
-		hashKey = []byte(h)
-	} else if fallback := r.api.CookieBasedSecrets.HashKey; fallback != nil {
-		hashKey = fallback
+	config, err := loadUserConfiguration(r.api, r.middlewareClient, r.log)
+	if err != nil {
+		return err
 	}
 
-	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
-		blockKey = []byte(b)
-	} else if fallback := r.api.CookieBasedSecrets.BlockKey; fallback != nil {
-		blockKey = fallback
-	}
-
-	if c := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); c != "" {
-		csrfSecret = []byte(c)
-	} else if fallback := r.api.CookieBasedSecrets.CsrfSecret; fallback != nil {
-		csrfSecret = fallback
-	}
-
-	if r.api == nil || r.api.HasCookieAuthEnabled() && (hashKey == nil || blockKey == nil || csrfSecret == nil) {
-		panic("API is nil or hashkey, blockkey, csrfsecret invalid: This should never have happened. Either validation didn't detect broken configuration, or someone broke the validation code")
-	}
-
-	cookie := securecookie.New(hashKey, blockKey)
-
-	if r.api.AuthenticationConfig.JwksBased != nil {
-		jwksProviders = r.api.AuthenticationConfig.JwksBased.Providers
-	}
-
-	authHooks := r.authenticationHooks()
-
-	loadUserConfig := authentication.LoadUserConfig{
-		Log:           r.log,
-		Cookie:        cookie,
-		JwksProviders: jwksProviders,
-		Hooks:         authHooks,
-	}
-
-	r.router.Use(authentication.NewLoadUserMw(loadUserConfig))
+	r.router.Use(authentication.NewLoadUserMw(config))
 	r.router.Use(authentication.NewCSRFMw(authentication.CSRFConfig{
-		InsecureCookies: insecureCookies,
-		Secret:          csrfSecret,
+		InsecureCookies: r.insecureCookies,
+		Secret:          config.CSRFSecret,
 	}))
 
 	userHandler := &authentication.UserHandler{
-		Hooks:           authHooks,
+		Hooks:           config.Hooks,
 		Log:             r.log,
-		InsecureCookies: insecureCookies,
-		Cookie:          cookie,
+		InsecureCookies: r.insecureCookies,
+		Cookie:          config.Cookie,
 		PublicClaims:    r.api.AuthenticationConfig.PublicClaims,
 	}
 
@@ -1607,7 +1553,7 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 
 	cookieBasedAuth.Path("/csrf").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.CSRFTokenHandler{})
 
-	return r.registerCookieAuthHandlers(cookieBasedAuth, cookie, authHooks)
+	return r.registerCookieAuthHandlers(cookieBasedAuth, config.Cookie, config.Hooks)
 }
 
 func (r *Builder) registerCookieAuthHandlers(router *mux.Router, cookie *securecookie.SecureCookie, authHooks authentication.Hooks) error {
@@ -1778,7 +1724,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 		return err
 	}
 
-	handler := &FunctionsHandler{
+	var handler http.Handler = &FunctionsHandler{
 		operation:            operation,
 		log:                  r.log,
 		cacheHeaders:         cacheheaders.New(newCacheControl(operation.CacheConfig), r.api.ApiConfigHash),
@@ -1795,10 +1741,11 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 	}
 
 	if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
-		route.Handler(authentication.RequiresAuthentication(handler))
-	} else {
-		route.Handler(handler)
+		handler = authentication.RequiresAuthentication(handler)
 	}
+
+	metrics := newOperationMetrics(r.metrics, operation.Name)
+	route.Handler(metrics.Handler(handler))
 
 	r.log.Debug("registered FunctionsHandler",
 		zap.String("operation", operation.Name),
@@ -1835,7 +1782,28 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := pool.GetCtx(r, r, pool.Config{})
+	clientRequest := r
+	if h.internal {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			requestLogger.Error("reading body", zap.Error(err))
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+		// We need to restore the body, since we might call r.ParseForm() later
+		r.Body = io.NopCloser(bytes.NewReader(body))
+		clientRequest, err = NewRequestFromWunderGraphClientRequest(r.Context(), body)
+		if err != nil {
+			requestLogger.Error("InternalApiHandler.ServeHTTP: Could not create request from __wg.clientRequest",
+				zap.Error(err),
+				zap.String("url", r.RequestURI),
+			)
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+	}
+
+	ctx := pool.GetCtx(r, clientRequest, pool.Config{})
 	defer pool.PutCtx(ctx)
 
 	variablesBuf := pool.GetBytesBuffer()

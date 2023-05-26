@@ -31,6 +31,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/metrics"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -48,15 +49,29 @@ type InternalBuilder struct {
 	renameTypeNames     []resolve.RenameTypeName
 	middlewareClient    *hooks.Client
 	enableIntrospection bool
+	insecureCookies     bool
+	metrics             metrics.Metrics
 }
 
-func NewInternalBuilder(pool *pool.Pool, log *zap.Logger, hooksClient *hooks.Client, loader *engineconfigloader.EngineConfigLoader, enableIntrospection bool) *InternalBuilder {
+type InternalBuilderConfig struct {
+	Pool                *pool.Pool
+	Client              *hooks.Client
+	Loader              *engineconfigloader.EngineConfigLoader
+	EnableIntrospection bool
+	InsecureCookies     bool
+	Metrics             metrics.Metrics
+	Log                 *zap.Logger
+}
+
+func NewInternalBuilder(config InternalBuilderConfig) *InternalBuilder {
 	return &InternalBuilder{
-		pool:                pool,
-		log:                 log,
-		loader:              loader,
-		middlewareClient:    hooksClient,
-		enableIntrospection: enableIntrospection,
+		pool:                config.Pool,
+		log:                 config.Log,
+		loader:              config.Loader,
+		middlewareClient:    config.Client,
+		enableIntrospection: config.EnableIntrospection,
+		insecureCookies:     config.InsecureCookies,
+		metrics:             config.Metrics,
 	}
 }
 
@@ -108,6 +123,10 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 	route := router.NewRoute()
 	i.router = route.Subrouter()
 
+	if err := i.registerAuth(); err != nil {
+		i.log.Error("registering auth", zap.Error(err))
+	}
+
 	// RenameTo is the correct name for the origin
 	// for the downstream (client), we have to reverse the __typename fields
 	// this is why Types.RenameTo is assigned to rename.From
@@ -138,6 +157,20 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 		Log:             i.log,
 	})
 	return streamClosers, err
+}
+
+func (i *InternalBuilder) registerAuth() error {
+	config, err := loadUserConfiguration(i.api, i.middlewareClient, i.log)
+	if err != nil {
+		return err
+	}
+
+	i.router.Use(authentication.NewLoadUserMw(config))
+	i.router.Use(authentication.NewCSRFMw(authentication.CSRFConfig{
+		InsecureCookies: i.insecureCookies,
+		Secret:          config.CSRFSecret,
+	}))
+	return nil
 }
 
 func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
@@ -180,6 +213,8 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		Logger:      i.log,
 	}
 
+	var handler http.Handler
+
 	switch operation.OperationType {
 	case wgpb.OperationType_QUERY,
 		wgpb.OperationType_MUTATION:
@@ -198,7 +233,7 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		}
 		hooksPipeline := hooks.NewSynchonousOperationPipeline(hooksPipelineConfig)
 
-		handler := &InternalApiHandler{
+		handler = &InternalApiHandler{
 			preparedPlan:       p,
 			operation:          operation,
 			extractedVariables: extractedVariables,
@@ -208,7 +243,6 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 			hooksPipeline:      hooksPipeline,
 		}
 
-		i.router.Methods(http.MethodPost).Path(apiPath).Handler(handler)
 		// Don't log for every operation because public ones are
 		// registered twice in the public and the internal router
 		if operation.Internal {
@@ -233,7 +267,7 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		}
 		hooksPipeline := hooks.NewSubscriptionOperationPipeline(hooksPipelineConfig)
 
-		handler := &InternalSubscriptionApiHandler{
+		handler = &InternalSubscriptionApiHandler{
 			preparedPlan:       p,
 			operation:          operation,
 			extractedVariables: extractedVariables,
@@ -243,7 +277,6 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 			hooksPipeline:      hooksPipeline,
 		}
 
-		i.router.Methods(http.MethodPost).Path(apiPath).Handler(handler)
 		// See comment checking operation.Internal above
 		if operation.Internal {
 			i.log.Debug("registered internal subscription handler",
@@ -252,6 +285,9 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 			)
 		}
 	}
+
+	metrics := newOperationMetrics(i.metrics, operation.Name)
+	i.router.Methods(http.MethodPost).Path(apiPath).Handler(metrics.Handler(handler))
 
 	return nil
 }
@@ -284,7 +320,8 @@ func (i *InternalBuilder) registerNodeJsOperation(operation *wgpb.Operation, api
 		internal: true,
 	}
 
-	route.Handler(handler)
+	metrics := newOperationMetrics(i.metrics, operation.Name)
+	route.Handler(metrics.Handler(handler))
 	return nil
 }
 

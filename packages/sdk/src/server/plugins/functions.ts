@@ -12,6 +12,8 @@ import { InternalError, OperationError } from '../../client/errors';
 import { Logger } from '../../logger';
 import type { AsyncStore, OperationsAsyncContext } from '../operations-context';
 import { propagation } from '@opentelemetry/api';
+import { createClientRequest, rawClientRequest } from '../server';
+import { FastifyRequestBody } from '../types';
 
 interface FastifyFunctionsOptions {
 	operationsRequestContext: OperationsAsyncContext;
@@ -44,7 +46,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 			if (!maybeImplementation) {
 				continue;
 			}
-			fastify.route({
+			fastify.route<{ Body: FastifyRequestBody }>({
 				url: routeUrl,
 				method: ['POST'],
 				config: {},
@@ -61,7 +63,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 						}
 
 						requestContext = await config.createContext(config.globalContext);
-						const clientRequest = (req.body as any)?.__wg.clientRequest;
+						const clientRequest = rawClientRequest(req.body);
 						const operationClient = new OperationsClient({
 							baseURL: nodeURL,
 							clientRequest,
@@ -73,7 +75,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							log: fastify.log,
 							user: (req.body as any)?.__wg.user!,
 							internalClient: internalClientFactory(headers, clientRequest),
-							clientRequest,
+							clientRequest: createClientRequest(req.body),
 							input: (req.body as any)?.input,
 							operations: operationClient,
 							context: requestContext,
@@ -83,7 +85,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 						switch (implementation.type) {
 							case 'subscription':
 								// @note this is used by the `orm` to record operations
-								// initiated in the context of this req (so that we
+								// initiated in the context of this request (so that we
 								// can implement cancellation/cleanup)
 								const context: AsyncStore = { ormOperationControllers: [] };
 
@@ -103,7 +105,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 										await gen.return(0);
 										// Cancel operations created by the ORM for this operation
 										context.ormOperationControllers.forEach((controller) => controller.abort());
-										// @todo move to tracking in-flight operations via. our req context like we do with the ORM
+										// @todo move to tracking in-flight operations via. our request context like we do with the ORM
 										operationClient.cancelSubscriptions();
 										Logger.debug('Canceling operations created by operation.');
 									});

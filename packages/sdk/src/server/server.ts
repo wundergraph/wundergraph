@@ -35,6 +35,8 @@ import { NamespacingExecutor } from '../orm';
 import type { OperationsAsyncContext } from './operations-context';
 import configureTracerProvider from './trace/trace';
 import { propagation } from '@opentelemetry/api';
+import { TracerConfig } from './types';
+import { loadTraceConfigFromWgConfig } from './trace/config';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -146,11 +148,6 @@ const _configureWunderGraphServer = <
 			wundergraphDir: process.env.WG_DIR_ABS!,
 			config: WG_CONFIG,
 			serverConfig,
-			tracerConfig: {
-				enabled: true,
-				httpEndpoint: 'http://localhost:4318',
-				authToken: 'test',
-			},
 			// only in production because it has no value in development
 			gracefulShutdown: isProduction,
 			clientFactory,
@@ -170,6 +167,7 @@ export const startServer = async (opts: ServerRunOptions) => {
 		const port = parseInt(portString, 10);
 
 		const fastify = await createServer(opts);
+
 		await fastify.listen({
 			port: port,
 			host: host,
@@ -180,13 +178,36 @@ export const startServer = async (opts: ServerRunOptions) => {
 	}
 };
 
+/**
+ * createClientRequest returns a decoded client request, used for passing it to user code
+ * @param body Request body
+ * @returns Decoded client request
+ */
+export const createClientRequest = (body: FastifyRequestBody) => {
+	// clientRequest represents the original client request that was sent initially to the WunderNode.
+	const raw = rawClientRequest(body);
+	return {
+		headers: new Headers(raw?.headers),
+		requestURI: raw?.requestURI || '',
+		method: raw?.method || 'GET',
+	};
+};
+
+/**
+ * rawClientRequest returns the raw JSON encoded client request
+ * @param body Request body
+ * @returns Client request as raw JSON, as received in the request body
+ */
+export const rawClientRequest = (body: FastifyRequestBody) => {
+	return body.__wg.clientRequest;
+};
+
 export const createServer = async ({
 	wundergraphDir,
 	serverConfig,
 	config,
 	gracefulShutdown,
 	clientFactory,
-	tracerConfig,
 }: ServerRunOptions): Promise<FastifyInstance> => {
 	if (config.api?.serverOptions?.logger?.level && process.env.WG_DEBUG_MODE !== 'true') {
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
@@ -276,16 +297,23 @@ export const createServer = async ({
 	 * Enable telemetry
 	 */
 
-	if (tracerConfig.enabled) {
-		const tracerProvider = configureTracerProvider(
-			{
-				httpEndpoint: tracerConfig.httpEndpoint,
-				authToken: tracerConfig.authToken,
-			},
-			logger
-		);
+	if (config.api?.nodeOptions?.openTelemetry) {
+		const tracerConfig: TracerConfig = loadTraceConfigFromWgConfig(config.api?.nodeOptions.openTelemetry);
 
-		await fastify.register(require('./plugins/telemetry'), tracerProvider);
+		if (tracerConfig.enabled) {
+			fastify.log.info({ endpoint: tracerConfig.httpEndpoint, sampler: tracerConfig.sampler }, 'OpenTelemetry enabled');
+
+			const tracerProvider = configureTracerProvider(
+				{
+					httpEndpoint: tracerConfig.httpEndpoint,
+					authToken: tracerConfig.authToken,
+					sampler: tracerConfig.sampler,
+				},
+				logger
+			);
+
+			await fastify.register(require('./plugins/telemetry'), tracerProvider);
+		}
 	}
 
 	/**
@@ -298,11 +326,7 @@ export const createServer = async ({
 		 */
 		fastify.addHook<{ Body: FastifyRequestBody }>('preHandler', async (req, reply) => {
 			// clientRequest represents the original client request that was sent initially to the WunderNode.
-			const clientRequest = {
-				headers: new Headers(req.body.__wg.clientRequest?.headers),
-				requestURI: req.body.__wg.clientRequest?.requestURI || '',
-				method: req.body.__wg.clientRequest?.method || 'GET',
-			};
+			const clientRequest = createClientRequest(req.body);
 
 			const headers: { [key: string]: string } = {
 				'x-request-id': req.id,

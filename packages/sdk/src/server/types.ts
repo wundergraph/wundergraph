@@ -224,6 +224,7 @@ export interface WunderGraphUser<Role extends string = any, CustomClaims extends
 
 export interface TracerConfig extends TelemetryOptions {
 	enabled: boolean;
+	sampler: number;
 }
 
 export interface ServerRunOptions {
@@ -232,7 +233,6 @@ export interface ServerRunOptions {
 	config: WunderGraphConfiguration;
 	gracefulShutdown: boolean;
 	clientFactory: InternalClientFactory;
-	tracerConfig: TracerConfig;
 }
 
 /***

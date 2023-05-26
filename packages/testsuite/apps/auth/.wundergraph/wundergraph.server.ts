@@ -12,7 +12,16 @@ import { AuthenticationResponse, configureWunderGraphServer } from '@wundergraph
 
 export default configureWunderGraphServer(() => ({
 	hooks: {
-		queries: {},
+		queries: {
+			NestedUserID: {
+				mutatingPostResolve: async ({ response, user }) => {
+					response.data!.userId = user?.userId;
+					return {
+						...response,
+					};
+				},
+			},
+		},
 		mutations: {},
 		authentication: {
 			postAuthentication: async (hook) => {},

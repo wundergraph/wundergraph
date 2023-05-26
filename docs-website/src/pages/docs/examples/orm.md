@@ -1,3 +1,9 @@
+---
+title: WunderGraph ORM
+pageTitle: WunderGraph - ORM
+description:
+---
+
 # WunderGraph ORM example
 
 This example shows how to use the WunderGraph ORM to query and combine multiple external APIs.

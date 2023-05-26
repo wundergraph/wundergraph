@@ -29,6 +29,9 @@ export interface Options {
 }
 
 export interface OperationsClientConfig extends Omit<ClientConfig, 'csrfEnabled'> {
+	/**
+	 * raw JSON encoded client request
+	 */
 	clientRequest: any;
 	tracer?: Tracer;
 	traceContext?: Context;
@@ -53,6 +56,8 @@ export type InternalOperationsDefinition<
 	subscriptions: Subscriptions;
 };
 
+const forwardedHeaders = ['Authorization', 'X-Request-Id'];
+
 export class OperationsClient<
 	Operations extends InternalOperationsDefinition = InternalOperationsDefinition
 > extends Client {
@@ -64,9 +69,20 @@ export class OperationsClient<
 
 	constructor(options: OperationsClientConfig) {
 		const { clientRequest, customFetch = fetch, ...rest } = options;
-		super(rest);
+		super({
+			...rest,
+			customFetch,
+		});
 
 		this.clientRequest = clientRequest;
+		if (clientRequest?.headers) {
+			for (const header of forwardedHeaders) {
+				const value = clientRequest.headers[header];
+				if (value) {
+					this.baseHeaders[header] = value;
+				}
+			}
+		}
 		this.tracer = options.tracer;
 		this.traceContext = options.traceContext;
 	}

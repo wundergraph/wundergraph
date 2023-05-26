@@ -1,0 +1,18 @@
+query ContinentsListQuery {
+  countries_continents {
+    ...ContinentName
+    countries {
+      ...CountryName
+    }
+  }
+}
+
+fragment ContinentName on countries_Continent {
+  code
+  name
+}
+
+fragment CountryName on countries_Country {
+  code
+  name
+}

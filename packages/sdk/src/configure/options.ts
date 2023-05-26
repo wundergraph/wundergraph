@@ -15,6 +15,8 @@ export enum WgEnv {
 	ServerHost = 'WG_SERVER_HOST',
 	ServerPort = 'WG_SERVER_PORT',
 	HttpProxyUrl = 'WG_HTTP_PROXY',
+	PrometheusEnabled = 'WG_PROMETHEUS_ENABLED',
+	PrometheusPort = 'WG_PROMETHEUS_PORT',
 	OtelEnabled = 'WG_OTEL_ENABLED',
 	OtelExporterHttpEndpoint = 'WG_OTEL_EXPORTER_HTTP_ENDPOINT',
 	OtelSampler = 'WG_OTEL_SAMPLER',
@@ -27,6 +29,8 @@ export const defaultHost = 'localhost';
 export const defaultNodePort = '9991';
 export const defaultNodeInternalPort = '9993';
 export const defaultServerPort = '9992';
+export const defaultPrometheusEnabled = true;
+export const defaultPrometheusPort = 8881;
 
 const DefaultNodeOptions = {
 	listen: {
@@ -50,6 +54,10 @@ const DefaultNodeOptions = {
 	},
 	defaultRequestTimeoutSeconds: 0,
 	defaultHttpProxyUrl: new EnvironmentVariable(WgEnv.HttpProxyUrl, ''),
+	prometheus: {
+		enabled: new EnvironmentVariable(WgEnv.PrometheusEnabled, defaultPrometheusEnabled),
+		port: new EnvironmentVariable(WgEnv.PrometheusPort, defaultPrometheusPort),
+	},
 };
 
 export interface ListenOptions {
@@ -105,6 +113,17 @@ export interface NodeOptions {
 	 * @defaultValue Use the WG_HTTP_PROXY environment variable
 	 */
 	defaultHttpProxyUrl?: InputVariable;
+
+	/** Options for exposing metrics via Prometheus  */
+	prometheus?: {
+		/** Whether to enable Prometheus metrics collection and exposure */
+		enabled?: InputVariable<boolean>;
+		/**
+		 * Port to listen on for exposing metrics via Prometheus. The endpoint
+		 * is available at http://<host>:port/metrics. Set to zero to disable.
+		 */
+		port?: InputVariable<number>;
+	};
 }
 
 export interface ResolvedNodeOptions {
@@ -119,6 +138,10 @@ export interface ResolvedNodeOptions {
 	};
 	defaultRequestTimeoutSeconds: number;
 	defaultHttpProxyUrl: ConfigurationVariable;
+	prometheus: {
+		enabled: ConfigurationVariable;
+		port: ConfigurationVariable;
+	};
 }
 
 export const fallbackNodeUrl = (listenOptions: ListenOptions | undefined) => {
@@ -163,6 +186,10 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 				defaultRequestTimeoutSeconds:
 					options?.defaultRequestTimeoutSeconds || DefaultNodeOptions.defaultRequestTimeoutSeconds,
 				defaultHttpProxyUrl: options?.defaultHttpProxyUrl || DefaultNodeOptions.defaultHttpProxyUrl,
+				prometheus: {
+					enabled: options?.prometheus?.enabled || DefaultNodeOptions.prometheus.enabled,
+					port: options?.prometheus?.port || DefaultNodeOptions.prometheus.port,
+				},
 		  };
 
 	return {
@@ -176,7 +203,7 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 		openTelemetry: {
 			enabled: mapInputVariable(nodeOptions.openTelemetry.enabled),
 			exporterHttpEndpoint: mapInputVariable(nodeOptions.openTelemetry.exporterHttpEndpoint),
-			sampler: mapInputVariable(nodeOptions.openTelemetry.sampler),
+			sampler: mapInputVariable<number | string>(nodeOptions.openTelemetry.sampler),
 			authToken: mapInputVariable(nodeOptions.openTelemetry?.authToken),
 		},
 		listenInternal: {
@@ -187,5 +214,9 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 		},
 		defaultRequestTimeoutSeconds: nodeOptions.defaultRequestTimeoutSeconds,
 		defaultHttpProxyUrl: mapInputVariable(nodeOptions.defaultHttpProxyUrl),
+		prometheus: {
+			enabled: mapInputVariable(nodeOptions.prometheus.enabled),
+			port: mapInputVariable(nodeOptions.prometheus.port),
+		},
 	};
 };

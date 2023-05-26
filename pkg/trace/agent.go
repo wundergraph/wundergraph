@@ -9,6 +9,7 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.uber.org/zap"
+	"net/url"
 )
 
 const (
@@ -20,24 +21,28 @@ var (
 )
 
 // StartAgent starts an opentelemetry agent.
-func StartAgent(log *zap.Logger, c Config) error {
+func StartAgent(log *zap.Logger, c Config) (*sdktrace.TracerProvider, error) {
 	return startAgent(log, c)
-}
-
-// StopAgent shuts down the span processors in the order they were registered.
-func StopAgent(ctx context.Context) error {
-	return tp.Shutdown(ctx)
 }
 
 func createExporter(c Config) (sdktrace.SpanExporter, error) {
 	// Just support jaeger and zipkin now, more for later
 	switch c.Batcher {
 	case kindOtlpHttp:
-		// Not support flexible configuration now.
-		opts := []otlptracehttp.Option{
-			otlptracehttp.WithInsecure(),
-			otlptracehttp.WithEndpoint(c.Endpoint),
+		u, err := url.Parse(c.Endpoint)
+		if err != nil {
+			return nil, fmt.Errorf("invalid OpenTelemetry endpoint: %w", err)
 		}
+
+		opts := []otlptracehttp.Option{
+			// Includes host and port
+			otlptracehttp.WithEndpoint(u.Host),
+		}
+
+		if u.Scheme != "https" {
+			opts = append(opts, otlptracehttp.WithInsecure())
+		}
+
 		if len(c.OtlpHeaders) > 0 {
 			opts = append(opts, otlptracehttp.WithHeaders(c.OtlpHeaders))
 		}
@@ -53,7 +58,7 @@ func createExporter(c Config) (sdktrace.SpanExporter, error) {
 	}
 }
 
-func startAgent(log *zap.Logger, c Config) error {
+func startAgent(log *zap.Logger, c Config) (*sdktrace.TracerProvider, error) {
 	opts := []sdktrace.TracerProviderOption{
 		// Set the sampling rate based on the parent span to 100%
 		sdktrace.WithSampler(sdktrace.ParentBased(sdktrace.TraceIDRatioBased(c.Sampler))),
@@ -65,18 +70,18 @@ func startAgent(log *zap.Logger, c Config) error {
 		exp, err := createExporter(c)
 		if err != nil {
 			log.Error("create exporter error", zap.Error(err))
-			return err
+			return nil, err
 		}
 
 		// Always be sure to batch in production.
 		opts = append(opts, sdktrace.WithBatcher(exp))
 	}
 
-	tp = sdktrace.NewTracerProvider(opts...)
+	tp := sdktrace.NewTracerProvider(opts...)
 	otel.SetTracerProvider(tp)
 	otel.SetErrorHandler(otel.ErrorHandlerFunc(func(err error) {
 		log.Error("otel error", zap.Error(err))
 	}))
 
-	return nil
+	return tp, nil
 }

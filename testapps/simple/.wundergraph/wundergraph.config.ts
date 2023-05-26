@@ -12,17 +12,12 @@ configureWunderGraphApplication({
 	apis: [weather],
 	server,
 	operations,
-	generate: {
-		codeGenerators: [],
-	},
-	cors: {
-		...cors.allowAll,
-		allowedOrigins: ['http://localhost:9991', 'http://127.0.0.1:9991'],
-	},
-	dotGraphQLConfig: {
-		hasDotWunderGraphDirectory: false,
-	},
-	security: {
-		enableGraphQLEndpoint: true,
+	options: {
+		openTelemetry: {
+			enabled: true,
+		},
+		prometheus: {
+			enabled: true,
+		},
 	},
 });

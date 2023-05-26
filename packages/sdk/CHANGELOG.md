@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.159.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.158.1...@wundergraph/sdk@0.159.0) (2023-05-25)
+
+### Features
+
+* add orm client to typescript webhooks ([#978](https://github.com/wundergraph/wundergraph/issues/978)) ([a45e3d0](https://github.com/wundergraph/wundergraph/commit/a45e3d0d3cf6eda738e4349c86dd6e5f1915f38e)) (@leoalves)
+* add requireAuthentication directive ([#994](https://github.com/wundergraph/wundergraph/issues/994)) ([cef2382](https://github.com/wundergraph/wundergraph/commit/cef238285425df4c4bf97de95566ba0e2367da40)) (@Aenimus)
+* improve Cache-Control support ([#959](https://github.com/wundergraph/wundergraph/issues/959)) ([1b330d5](https://github.com/wundergraph/wundergraph/commit/1b330d5c0207264ae0f3868276011ff9a8d83a67)) (@fiam)
+* propagate authentication, client request and key headers between operations ([#982](https://github.com/wundergraph/wundergraph/issues/982)) ([53b513f](https://github.com/wundergraph/wundergraph/commit/53b513f8508aa5d7996ee0fb4150bd4c0fc10269)) (@fiam)
+* re-enable plan cache for graphql handler ([#947](https://github.com/wundergraph/wundergraph/issues/947)) ([fe33fcd](https://github.com/wundergraph/wundergraph/commit/fe33fcd406ab914fa7e0a7b9c8fbf353bd8807c1)) (@jensneuse)
+
+### Bug Fixes
+
+* handle anyOf and types with unrepresentable names in OAS ([#975](https://github.com/wundergraph/wundergraph/issues/975)) ([1142eec](https://github.com/wundergraph/wundergraph/commit/1142eec17e3c8b5dd9724589620619a947315258)) (@fiam)
+* pass customFetch down to base client ([#992](https://github.com/wundergraph/wundergraph/issues/992)) ([f91e334](https://github.com/wundergraph/wundergraph/commit/f91e33421307974d63fb83b3a408ab4f191c2b27)) (@Pagebakers)
+
 ## [0.158.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.158.0...@wundergraph/sdk@0.158.1) (2023-05-16)
 
 **Note:** Version bump only for package @wundergraph/sdk

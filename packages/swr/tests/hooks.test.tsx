@@ -1,6 +1,6 @@
 import { act, waitFor, screen, render } from '@testing-library/react';
 import React from 'react';
-import { SWRConfig } from 'swr';
+import { SWRConfig, unstable_serialize } from 'swr';
 
 import { Client, ClientConfig } from '@wundergraph/sdk/client';
 import nock from 'nock';
@@ -8,6 +8,7 @@ import fetch from 'node-fetch';
 
 import { createHooks } from '../src';
 import { InputValidationError } from '@wundergraph/sdk/client';
+import { serialize } from '@wundergraph/sdk/internal';
 
 export function sleep(time: number) {
 	return new Promise<void>((resolve) => setTimeout(resolve, time));
@@ -114,6 +115,14 @@ const nockMutation = (operationName = 'SetName', wgParams = {}, authenticated = 
 		mutation,
 	};
 };
+
+describe('SWR - serialize', () => {
+	it('should serialize equally', async () => {
+		const key = unstable_serialize({ operationName: 'Weather' });
+
+		expect(key).toBe(serialize({ operationName: 'Weather' }));
+	});
+});
 
 describe('SWR - createHooks', () => {
 	const client = createClient();

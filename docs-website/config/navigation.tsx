@@ -116,6 +116,10 @@ const navigation = [
 						href: '/docs/examples/astro',
 					},
 					{
+						title: 'Astro + Relay',
+						href: '/docs/examples/astro-relay',
+					},
+					{
 						title: 'Vite + SWR',
 						href: '/docs/examples/vite-swr',
 					},
@@ -425,6 +429,10 @@ const navigation = [
 					{
 						title: 'Extend the WunderGraph server context',
 						href: '/docs/guides/context-factory',
+					},
+					{
+						title: 'Monitoring and observability',
+						href: '/docs/guides/monitoring-and-observability',
 					},
 				],
 			},
@@ -979,6 +987,10 @@ const navigation = [
 						title: 'Redeployment',
 						href: '/docs/cloud/redeployment',
 					},
+					{
+						title: 'Private NPM dependencies',
+						href: '/docs/cloud/private-npm-dependencies',
+					},
 				],
 			},
 			{
@@ -1361,6 +1373,14 @@ const navigation = [
 					{
 						title: '@transform directive',
 						href: '/docs/directives-reference/transform-directive',
+					},
+					{
+						title: '@removeNullVariables directive',
+						href: '/docs/directives-reference/remove-null-variables-directive',
+					},
+					{
+						title: '@requireAuthentication directive',
+						href: '/docs/directives-reference/require-authentication-directive',
 					},
 				],
 			},
