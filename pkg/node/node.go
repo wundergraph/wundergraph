@@ -271,6 +271,10 @@ func (n *Node) Shutdown(ctx context.Context) error {
 }
 
 func (n *Node) Close() error {
+	if n.metrics != nil {
+		n.metrics.Close()
+		n.metrics = nil
+	}
 	if n.builder != nil {
 		if err := n.builder.Close(); err != nil {
 			return err
