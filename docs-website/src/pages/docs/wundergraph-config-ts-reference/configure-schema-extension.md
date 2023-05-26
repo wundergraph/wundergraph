@@ -5,10 +5,13 @@ description: How to extend the GraphQL Schema of an origin and replace specific 
 
 WunderGraph allows you to extend the GraphQL Schema of an origin and replace specific fields with a custom type.
 This is useful when you're integrating with a GraphQL API that uses custom scalars.
-Instead of using a generic `JSON` scalar, you can replace it with a dedicated type definition to improve type-safety and create a better developer experience.
+Instead of using a generic `JSON` scalar, you can replace it with a dedicated type definition to improve type-safety
+and create a better developer experience.
 
-WunderGraph allows you to directly integrate with Databases like PostgreSQL, MySQL or MongoDB who support JSON data types.
-Thanks to custom schema extensions, you can give these `JSON` scalars much more meaning and make them more intuitive to use.
+WunderGraph allows you to directly integrate with Databases like PostgreSQL, MySQL, or MongoDB,
+all of which support JSON data types.
+Thanks to custom schema extensions, you can give these `JSON` scalars much more meaning and make them more intuitive
+to use.
 
 But that's not all. As we're defining more specific types for the input type as well,
 we automatically get input validation.
@@ -21,19 +24,30 @@ Custom Schema Extensions are supported for GraphQL, REST (OAS) and Database-gene
 To enable Schema Extensions, you need to set the `schemaExtension` property in the introspection configuration for a data source in the `wundergraph.config.ts` file.
 Additionally, you need to specify which fields should be replaced with a custom type, using the `replaceCustomScalarTypeFields` property.
 
+{% callout type="warning" %}
+As of wundergraph/sdk 0.160.0, `inputTypeReplacement` has been deprecated and will be ignored.
+Moreover, `entityName` and `fieldName` are exact matching (and case-sensitive).
+Please create a separate configuration for all fields you wish to change, including Inputs.
+{% /callout %}
+
+If the field whose type you wish to replace exists on an interface that the parent implements, the interface field
+response type will also be replaced.
+Consequently, when replacing a field that exists on an interface, configurations for all objects that implement that
+interface must be added to the `replaceCustomScalarTypeFields` array.
+
 `schemaExtension` defines the new type and input type that will be added to the GraphQL schema.
 
 `replaceCustomScalarTypeFields` defines which fields should be replaced with the new type.
 
-`entityName` is the name of the GraphQL type either database table or object.
+`entityName` is the exact, case-sensitive name of the GraphQL type; database table, object or Input.
 
-`fieldName` is the name of the field that should be replaced.
+`fieldName` is the exact, case-sensitive name of the field whose type should be replaced.
 
-`responseTypeReplacement` is the name of the type that should be used as the response type replacement. This type must be defined in the `schemaExtension`.
+`responseTypeReplacement` is the exact, case-sensitive name of the type that should be used as the response or input
+type replacement.
+This type must be defined in the `schemaExtension`.
 
-`inputTypeReplacement` (optional) is the name of the type that should be used as the input type replacement. This type must be defined in the `schemaExtension`.
-
-Let's have a look at an examples.
+Let's have a look at some examples.
 
 ## GraphQL data-source with custom scalar
 
@@ -88,7 +102,11 @@ const spacex = introspect.graphql({
       entityName: 'Landpad',
       fieldName: 'location',
       responseTypeReplacement: 'Location',
-      inputTypeReplacement: 'LocationInput',
+    },
+    {
+      entityName: 'LandpadInput',
+      fieldName: 'location',
+      responseTypeReplacement: 'LocationInput',
     },
   ],
 });
@@ -105,6 +123,96 @@ query {
       region
       latitude
       longitude
+    }
+  }
+}
+```
+
+## GraphQL data-source with custom scalar and interfaces
+
+```graphql
+schema {
+  query: Query
+}
+
+type Query {
+  gymleader(id: ID!): GymLeader
+}
+
+scalar Data
+
+interface Human {
+  data: Data
+}
+
+scalar TrainerAce
+
+interface Trainer {
+  ace: TrainerAce
+}
+
+type GymLeader implements Human & Trainer {
+  id: ID!
+  data: Data
+  team: TrainerAce
+}
+```
+
+`TrainerAce` and `Data` are custom scalars that also exist on an interface.
+{% callout type="warning" %}
+If an object implements one or more interfaces, and you are replacing a field's response type that exists on one of
+those interfaces, you must add replacement configurations for all other objects that implement those interfaces.
+{% /callout %}
+
+```typescript
+// wundergraph.config.ts
+const spacex = introspect.graphql({
+  apiNamespace: 'gymleaders',
+  loadSchemaFromString: schema,
+  url: 'http:/localhost.com/1234/gymleaders',
+  schemaExtension: `
+    type HumanData {
+        name: String
+        Age: Int
+    }
+    type AceData {
+        name: String
+        level: Int
+        signatureMove: String
+        power: Int
+    }
+  `,
+  replaceCustomScalarTypeFields: [
+    {
+      entityName: 'GymLeader',
+      fieldName: 'ace',
+      responseTypeReplacement: 'AceData',
+    },
+    {
+      entityName: 'GymLeader',
+      fieldName: 'data',
+      responseTypeReplacement: 'HumanData',
+    },
+  ],
+});
+```
+
+Now the operation might look like:
+
+```graphql
+query {
+  gymleader(id: "1") {
+    id
+    ... on Trainer {
+      ace {
+        name
+        power
+      }
+    }
+    ... on Human {
+      data {
+        age
+      }
     }
   }
 }
@@ -162,7 +270,11 @@ const db = introspect.postgresql({
       entityName: `users`,
       fieldName: `contact`,
       responseTypeReplacement: `Contact`,
-      inputTypeReplacement: `ContactInput`,
+    },
+    {
+      entityName: `usersCreateInput`,
+      fieldName: `contact`,
+      responseTypeReplacement: `ContactInput`,
     },
   ],
 });
@@ -183,8 +295,7 @@ query {
 }
 ```
 
-Without the Custom Schema Extension,
-you couldn't be able to select the `phone` and `type` fields.
+Without the Custom Schema Extension, you wouldn't be able to select the `phone` and `type` fields.
 
 Mutation:
 
@@ -203,8 +314,7 @@ mutation ($email: String! @fromClaim(name: EMAIL), $name: String! @fromClaim(nam
 }
 ```
 
-As we're generating an input type as well (`db_ContactInput`),
-users cannot use any arbitrary JSON data as input,
+As we're generating an input type as well (`db_ContactInput`), users cannot use any arbitrary JSON data as input
 but need to specify the `phone` and `type` fields.
 
 ## REST API with arbitrary JSON type

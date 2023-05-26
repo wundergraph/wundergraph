@@ -40,7 +40,36 @@ test('cleanupPrismaSchema', async () => {
 				entityName: `users`,
 				fieldName: `contact`,
 				responseTypeReplacement: `Contact`,
-				inputTypeReplacement: `ContactInput`,
+			},
+			{
+				entityName: `usersCreateWithoutMessagesInput`,
+				fieldName: `contact`,
+				responseTypeReplacement: `ContactInput`,
+			},
+			{
+				entityName: `usersUpdateWithoutMessagesInput`,
+				fieldName: `contact`,
+				responseTypeReplacement: `ContactInput`,
+			},
+			{
+				entityName: `usersCreateInput`,
+				fieldName: `contact`,
+				responseTypeReplacement: `ContactInput`,
+			},
+			{
+				entityName: `usersUpdateInput`,
+				fieldName: `contact`,
+				responseTypeReplacement: `ContactInput`,
+			},
+			{
+				entityName: `usersCreateManyInput`,
+				fieldName: `contact`,
+				responseTypeReplacement: `ContactInput`,
+			},
+			{
+				entityName: `usersUpdateManyMutationInput`,
+				fieldName: `contact`,
+				responseTypeReplacement: `ContactInput`,
 			},
 		],
 	};

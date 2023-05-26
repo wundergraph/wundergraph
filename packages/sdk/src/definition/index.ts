@@ -257,7 +257,6 @@ interface GraphQLIntrospectionOptions {
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
-	replaceScalarsWithCustomScalars?: ReplaceScalarsWithCustomScalarsConfiguration[];
 }
 
 export interface GraphQLIntrospection extends GraphQLUpstream, GraphQLIntrospectionOptions {
@@ -276,16 +275,26 @@ export interface GraphQLFederationIntrospection extends IntrospectionConfigurati
 }
 
 export interface ReplaceCustomScalarTypeFieldConfiguration {
+	/**
+	 * entityName is the type name for the parent of the field whose response type you wish to replace
+	 * entityName must match exactly (including case)
+	 **/
 	entityName: string;
+	/**
+	 * fieldName is the type name for the field whose response type you wish to replace
+	 * fieldName must match exactly (including case)
+	 **/
 	fieldName: string;
+	/**
+	 * inputTypeReplacement is deprecated
+	 * If you wish to replace Input types, add an entire new configuration object into the array
+	 **/
 	inputTypeReplacement?: string;
+	/**
+	 * responseTypeRepalcement is the replacement response type for fieldName
+	 * responseTypeReplacement must match exactly (including case)
+	 **/
 	responseTypeReplacement: string;
-}
-
-export interface ReplaceScalarsWithCustomScalarsConfiguration {
-	exactParentTypeName: string;
-	exactFieldName: string;
-	exactReplacementScalarName: string;
 }
 
 export interface DatabaseIntrospection extends IntrospectionConfiguration {
@@ -295,7 +304,6 @@ export interface DatabaseIntrospection extends IntrospectionConfiguration {
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
-	replaceScalarsWithCustomScalars?: ReplaceScalarsWithCustomScalarsConfiguration[];
 }
 
 export interface PrismaIntrospection extends IntrospectionConfiguration {
@@ -305,7 +313,6 @@ export interface PrismaIntrospection extends IntrospectionConfiguration {
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
-	replaceScalarsWithCustomScalars?: ReplaceScalarsWithCustomScalarsConfiguration[];
 }
 
 export interface IntrospectionFetchOptions {
@@ -421,7 +428,6 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
-	replaceScalarsWithCustomScalars?: ReplaceScalarsWithCustomScalarsConfiguration[];
 }
 
 export interface StaticApiCustom {
