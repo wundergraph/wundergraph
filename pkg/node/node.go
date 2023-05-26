@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 	"net"
 	"net/http"
 	"net/url"
@@ -16,7 +17,6 @@ import (
 	"github.com/pires/go-proxyproto"
 	"github.com/rs/cors"
 	"github.com/valyala/fasthttp"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
@@ -438,6 +438,8 @@ func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (
 
 func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 
+	var middlewares []mux.MiddlewareFunc
+
 	if nodeConfig.Api.Options.OpenTelemetry.Enabled {
 		endpoint := nodeConfig.Api.Options.OpenTelemetry.ExporterHTTPEndpoint
 		sampler := nodeConfig.Api.Options.OpenTelemetry.Sampler
@@ -459,17 +461,17 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		}); err != nil {
 			return err
 		}
+
+		middlewares = append(middlewares, otelmux.Middleware("wundernode", otelmux.WithSpanNameFormatter(func(routeName string, r *http.Request) string {
+			return fmt.Sprintf("%s %s", r.Method, routeName)
+		})))
 	}
 
 	router := mux.NewRouter()
-	router.Use(otelmux.Middleware("wundernode", otelmux.WithSpanNameFormatter(func(routeName string, r *http.Request) string {
-		return fmt.Sprintf("%s %s", r.Method, routeName)
-	})))
+	router.Use(middlewares...)
 
 	internalRouter := mux.NewRouter()
-	internalRouter.Use(otelmux.Middleware("wundernode", otelmux.WithSpanNameFormatter(func(routeName string, r *http.Request) string {
-		return fmt.Sprintf("%s %s", r.Method, routeName)
-	})))
+	internalRouter.Use(middlewares...)
 
 	if nodeConfig.Api.Options.Prometheus.Enabled {
 		port := nodeConfig.Api.Options.Prometheus.Port
@@ -507,7 +509,11 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		return errors.New("API config invalid")
 	}
 
-	hooksClient := hooks.NewClient(nodeConfig.Api.Options.ServerUrl, n.log)
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		EnableTracing: nodeConfig.Api.Options.OpenTelemetry.Enabled,
+		ServerURL:     nodeConfig.Api.Options.ServerUrl,
+		Logger:        n.log,
+	})
 
 	dialer := &net.Dialer{
 		Timeout:   10 * time.Second,
@@ -535,6 +541,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		API:                  nodeConfig.Api,
 		HooksClient:          hooksClient,
 		EnableRequestLogging: n.options.enableRequestLogging,
+		EnableTracing:        nodeConfig.Api.Options.OpenTelemetry.Enabled,
 		Metrics:              n.metrics,
 	})
 

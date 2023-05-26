@@ -163,23 +163,36 @@ type Client struct {
 	log                 *zap.Logger
 }
 
-func NewClient(serverUrl string, logger *zap.Logger) *Client {
+type ClientOptions struct {
+	ServerURL     string
+	EnableTracing bool
+	Logger        *zap.Logger
+}
+
+func NewClient(opts *ClientOptions) *Client {
+
+	rt := http.DefaultTransport
+
+	if opts.EnableTracing {
+		rt = trace.NewTransport(rt,
+			otelhttp.WithSpanOptions(otrace.WithAttributes(trace.WgComponentName.String("hooks-client"))),
+			otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
+				return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
+			}),
+		)
+	}
+
 	return &Client{
-		serverUrl:           serverUrl,
-		httpClient:          buildClient(60 * time.Second),
-		subscriptionsClient: buildClient(0),
-		log:                 logger,
+		serverUrl:           opts.ServerURL,
+		httpClient:          buildClient(60*time.Second, rt),
+		subscriptionsClient: buildClient(0, rt),
+		log:                 opts.Logger,
 	}
 }
 
-func buildClient(requestTimeout time.Duration) *retryablehttp.Client {
+func buildClient(requestTimeout time.Duration, rt http.RoundTripper) *retryablehttp.Client {
 	httpClient := retryablehttp.NewClient()
-	httpClient.HTTPClient.Transport = trace.NewTransport(http.DefaultTransport,
-		otelhttp.WithSpanOptions(otrace.WithAttributes(trace.WgComponentName.String("hooks-client"))),
-		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
-			return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
-		}),
-	)
+	httpClient.HTTPClient.Transport = rt
 	// we will try 40 times with a constant delay of 50ms after max 2s we will give up
 	httpClient.RetryMax = 40
 	// keep it low and linear to increase the chance

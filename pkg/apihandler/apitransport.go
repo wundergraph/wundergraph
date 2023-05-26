@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/wundergraph/wundergraph/pkg/trace"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	otrace "go.opentelemetry.io/otel/trace"
 	"io"
 	"net/http"
 	"net/http/httputil"
@@ -14,9 +17,6 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/websocket"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	otrace "go.opentelemetry.io/otel/trace"
-
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
@@ -24,7 +24,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/metrics"
 	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/pool"
-	"github.com/wundergraph/wundergraph/pkg/trace"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -39,7 +38,19 @@ type apiTransportFactory struct {
 }
 
 func (f *apiTransportFactory) RoundTripper(transport *http.Transport, enableStreamingMode bool) http.RoundTripper {
-	return NewApiTransport(transport, enableStreamingMode, f.opts)
+	rt := NewApiTransport(transport, enableStreamingMode, f.opts)
+
+	if f.opts.EnableTracing {
+		return trace.NewTransport(
+			rt,
+			otelhttp.WithSpanOptions(otrace.WithAttributes(trace.WgComponentName.String("api-transport"))),
+			otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
+				return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
+			}),
+		)
+	}
+
+	return rt
 }
 
 func (f *apiTransportFactory) DefaultTransportTimeout() time.Duration {
@@ -72,6 +83,7 @@ type ApiTransportOptions struct {
 	API                  *Api
 	HooksClient          *hooks.Client
 	EnableRequestLogging bool
+	EnableTracing        bool
 	Metrics              metrics.Metrics
 }
 
@@ -122,12 +134,7 @@ func NewApiTransport(httpTransport *http.Transport, enableStreamingMode bool, op
 		}
 	}
 
-	return trace.NewTransport(transport,
-		otelhttp.WithSpanOptions(otrace.WithAttributes(trace.WgComponentName.String("api-transport"))),
-		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
-			return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
-		}),
-	)
+	return transport
 }
 
 type Claims struct {

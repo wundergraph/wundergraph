@@ -39,7 +39,6 @@ export const getTestTracerProvider = (): TelemetryTestTracerProvider => {
 	const provider = new BasicTracerProvider();
 
 	provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
-	provider.register();
 
 	return { provider, exporter };
 };

@@ -27,9 +27,13 @@ type transport struct {
 func (t *transport) RoundTrip(r *http.Request) (*http.Response, error) {
 	span := trace.SpanFromContext(r.Context())
 
+	// Set the operation name and type
 	SetOperationAttributes(r.Context())
 
 	res, err := t.rt.RoundTrip(r)
+
+	// In case of an error the span status is set to error
+	// by the otelhttp.RoundTrip function
 
 	SetStatus(span, res.StatusCode)
 
