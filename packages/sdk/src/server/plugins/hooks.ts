@@ -104,7 +104,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 
 		if (config.authentication?.revalidate) {
 			fastify.post<any, GlobalHooksRouteConfig>(
-				'/authentication/postLogout',
+				'/authentication/revalidateAuthentication',
 				{ config: { kind: 'global-hook', category: 'authentication', hookName: 'postLogout' } },
 				async (request, reply) => {
 					try {
