@@ -147,7 +147,7 @@ export class OperationsClient<
 					attributes: {
 						[SemanticAttributes.HTTP_METHOD]: method,
 						[SemanticAttributes.HTTP_URL]: url,
-						[Attributes.Component]: 'OperationsClient',
+						[Attributes.WG_COMPONENT_NAME]: 'operations-client',
 					},
 				},
 				this.traceContext

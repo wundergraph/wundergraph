@@ -340,8 +340,8 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
 	r = operation.SetOperationMetaData(r, h.operation)
 
-	span := oteltrace.SpanFromContext(r.Context())
-	span.SetAttributes(trace.WgComponentName.String("internal-api-handler"))
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	bodyBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(bodyBuf)

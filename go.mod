@@ -14,6 +14,7 @@ require (
 	github.com/dgraph-io/ristretto v0.0.3
 	github.com/evanw/esbuild v0.16.10
 	github.com/fatih/color v1.13.0
+	github.com/felixge/httpsnoop v1.0.3
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/gavv/httpexpect/v2 v2.3.0
 	github.com/go-cmd/cmd v1.4.1
@@ -51,7 +52,6 @@ require (
 	github.com/tidwall/sjson v1.1.5
 	github.com/valyala/fasthttp v1.44.0
 	github.com/wundergraph/graphql-go-tools v1.63.1
-	go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.42.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.42.0
 	go.opentelemetry.io/otel v1.16.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.16.0
@@ -83,7 +83,6 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.2.0 // indirect
 	github.com/evanphx/json-patch v0.5.2 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
-	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/gin-gonic/gin v1.8.2 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect

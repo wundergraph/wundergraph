@@ -42,6 +42,7 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async
 		};
 
 		req.telemetry.parentSpan.setAttributes({
+			[Attributes.WG_COMPONENT_NAME]: 'hooks-server',
 			[SemanticAttributes.HTTP_FLAVOR]: req.raw.httpVersion,
 			[SemanticAttributes.HTTP_METHOD]: req.raw.method,
 			[SemanticAttributes.HTTP_ROUTE]: req.routerPath,
@@ -73,8 +74,8 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async
 			});
 			req.telemetry.parentSpan.setAttributes({
 				[SemanticAttributes.HTTP_STATUS_CODE]: err.message,
-				[Attributes.ErrorName]: err.name,
-				[Attributes.ErrorStack]: err.stack,
+				[Attributes.ERROR_NAME]: err.name,
+				[Attributes.ERROR_STACK]: err.stack,
 			});
 		}
 	});

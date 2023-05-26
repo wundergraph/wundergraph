@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 	"net"
 	"net/http"
 	"net/url"
@@ -437,9 +436,6 @@ func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (
 }
 
 func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
-
-	var middlewares []mux.MiddlewareFunc
-
 	if nodeConfig.Api.Options.OpenTelemetry.Enabled {
 		endpoint := nodeConfig.Api.Options.OpenTelemetry.ExporterHTTPEndpoint
 		sampler := nodeConfig.Api.Options.OpenTelemetry.Sampler
@@ -461,17 +457,10 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		}); err != nil {
 			return err
 		}
-
-		middlewares = append(middlewares, otelmux.Middleware("wundernode", otelmux.WithSpanNameFormatter(func(routeName string, r *http.Request) string {
-			return fmt.Sprintf("%s %s", r.Method, routeName)
-		})))
 	}
 
 	router := mux.NewRouter()
-	router.Use(middlewares...)
-
 	internalRouter := mux.NewRouter()
-	internalRouter.Use(middlewares...)
 
 	if nodeConfig.Api.Options.Prometheus.Enabled {
 		port := nodeConfig.Api.Options.Prometheus.Port
@@ -644,10 +633,15 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	}))
 
 	handler := n.setupGlobalMiddlewares(router, nodeConfig)
-	internalHandler := http.HandlerFunc(internalRouter.ServeHTTP)
+	internalHandler := http.Handler(internalRouter)
 
 	connContext := func(ctx context.Context, c net.Conn) context.Context {
 		return context.WithValue(ctx, "conn", c)
+	}
+
+	if nodeConfig.Api.Options.OpenTelemetry.Enabled {
+		handler = trace.WrapHandler(handler, "public-server")
+		internalHandler = trace.WrapHandler(internalHandler, "internal-server")
 	}
 
 	n.server = &http.Server{

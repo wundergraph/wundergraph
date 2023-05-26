@@ -11,9 +11,11 @@ import { OperationsClient } from '../operations-client';
 import { InternalError, OperationError } from '../../client/errors';
 import { Logger } from '../../logger';
 import type { AsyncStore, OperationsAsyncContext } from '../operations-context';
-import { propagation } from '@opentelemetry/api';
+import { propagation, trace } from '@opentelemetry/api';
 import { createClientRequest, rawClientRequest } from '../server';
 import { FastifyRequestBody } from '../types';
+import { Attributes } from '../trace/attributes';
+import { GlobalHooksRouteConfig, HooksRouteConfig } from './hooks';
 
 interface FastifyFunctionsOptions {
 	operationsRequestContext: OperationsAsyncContext;
@@ -24,6 +26,11 @@ interface FastifyFunctionsOptions {
 	globalContext: any;
 	createContext: (globalContext: any) => Promise<any>;
 	releaseContext: (requestContext: any) => Promise<void>;
+}
+
+interface FunctionRouteConfig {
+	kind: 'function';
+	functionName?: string;
 }
 
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {
@@ -46,10 +53,13 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 			if (!maybeImplementation) {
 				continue;
 			}
-			fastify.route<{ Body: FastifyRequestBody }>({
+			fastify.route<{ Body: FastifyRequestBody }, FunctionRouteConfig>({
 				url: routeUrl,
 				method: ['POST'],
-				config: {},
+				config: {
+					kind: 'function',
+					functionName: operation.operation_name,
+				},
 				handler: async (req, reply) => {
 					let requestContext;
 					const implementation = maybeImplementation!;
@@ -187,6 +197,20 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 			fastify.log.error(err, `Failed to register function at ${operation.module_path}`);
 		}
 	}
+
+	fastify.addHook('onRequest', async (req, resp) => {
+		if (req.telemetry) {
+			const routeConfig = req.routeConfig as FunctionRouteConfig;
+			const span = trace.getSpan(req.telemetry.context);
+			if (span) {
+				if (routeConfig?.kind === 'function') {
+					span.setAttributes({
+						[Attributes.WG_FUNCTION_NAME]: routeConfig.functionName,
+					});
+				}
+			}
+		}
+	});
 };
 
 export default FastifyFunctionsPlugin;

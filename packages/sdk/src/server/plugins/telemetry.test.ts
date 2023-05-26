@@ -39,6 +39,7 @@ describe('Telemetry plugin', () => {
 			'http.status_code': 200,
 			'http.url': '/',
 			'http.user_agent': 'lightMyRequest',
+			'wg.component.name': 'hooks-server',
 		});
 
 		expect(fastify.tracer).toBeDefined();
@@ -68,8 +69,8 @@ describe('Telemetry plugin', () => {
 
 		expect(spans.length).toBe(1);
 		expect(spans[0].status).toEqual({ code: SpanStatusCode.ERROR });
-		expect(spans[0].attributes[Attributes.ErrorName]).toBe('Error');
-		expect(spans[0].attributes[Attributes.ErrorStack]).toContain('Error: test');
+		expect(spans[0].attributes[Attributes.ERROR_NAME]).toBe('Error');
+		expect(spans[0].attributes[Attributes.ERROR_STACK]).toContain('Error: test');
 		expect(spans[0].attributes[SemanticAttributes.HTTP_STATUS_CODE]).toBe(500);
 
 		expect(fastify.tracer).toBeDefined();

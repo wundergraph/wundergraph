@@ -105,7 +105,7 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 			const span = trace.getSpan(req.telemetry.context);
 			if (span && routeConfig?.kind === 'webhook') {
 				span.setAttributes({
-					[Attributes.WgWebhookName]: routeConfig.webhookName,
+					[Attributes.WG_WEBHOOK_NAME]: routeConfig.webhookName,
 				});
 			}
 		}

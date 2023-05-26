@@ -646,13 +646,13 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			if (span) {
 				if (routeConfig?.kind === 'hook') {
 					span.setAttributes({
-						[Attributes.WgHookName]: routeConfig.hookName,
-						[Attributes.WgOperationName]: routeConfig.operationName,
+						[Attributes.WG_HOOK_NAME]: routeConfig.hookName,
+						[Attributes.WG_OPERATION_NAME]: routeConfig.operationName,
 					});
 				} else if (routeConfig?.kind === 'global-hook') {
 					span.setAttributes({
-						[Attributes.WgHookName]: routeConfig.hookName,
-						[Attributes.WgHookCategory]: routeConfig.category,
+						[Attributes.WG_HOOK_NAME]: routeConfig.hookName,
+						[Attributes.WG_HOOK_CATEGORY]: routeConfig.category,
 					});
 				}
 			}

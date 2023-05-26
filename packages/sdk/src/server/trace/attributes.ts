@@ -1,9 +1,10 @@
 export const Attributes = {
-	Component: 'component',
-	WgHookName: 'wg.hook.name',
-	WgHookCategory: 'wg.hook.category',
-	WgWebhookName: 'wg.webhook.name',
-	WgOperationName: 'wg.operation.name',
-	ErrorName: 'error.name',
-	ErrorStack: 'error.stack',
+	WG_COMPONENT_NAME: 'wg.component.name',
+	WG_HOOK_NAME: 'wg.hook.name',
+	WG_FUNCTION_NAME: 'wg.function.name',
+	WG_HOOK_CATEGORY: 'wg.hook.category',
+	WG_WEBHOOK_NAME: 'wg.webhook.name',
+	WG_OPERATION_NAME: 'wg.operation.name',
+	ERROR_NAME: 'error.name',
+	ERROR_STACK: 'error.stack',
 };

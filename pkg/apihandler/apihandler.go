@@ -23,7 +23,6 @@ import (
 	"github.com/mattbaird/jsonpatch"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	oteltrace "go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
@@ -909,9 +908,6 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = operation.SetOperationMetaData(r, h.operation)
 
-	span := oteltrace.SpanFromContext(r.Context())
-	span.SetAttributes(trace.WgComponentName.String("query-handler"))
-
 	// Set trace attributes based on the current operation
 	trace.SetOperationAttributes(r.Context())
 
@@ -1179,8 +1175,8 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = operation.SetOperationMetaData(r, h.operation)
 
-	span := oteltrace.SpanFromContext(r.Context())
-	span.SetAttributes(trace.WgComponentName.String("mutation-handler"))
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -1289,8 +1285,8 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = operation.SetOperationMetaData(r, h.operation)
 
-	span := oteltrace.SpanFromContext(r.Context())
-	span.SetAttributes(trace.WgComponentName.String("subscription-handler"))
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	// recover from panic if one occured. Set err to nil otherwise.
 	defer func() {
@@ -1775,6 +1771,9 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
 
 	r = operation.SetOperationMetaData(r, h.operation)
+
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
