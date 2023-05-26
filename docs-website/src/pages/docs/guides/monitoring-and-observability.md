@@ -90,5 +90,5 @@ configureWunderGraphApplication({
 ```
 
 {% callout type="note" %}
-Please let us know if you can't find the metrics, attributes you are looking for. We are happy to help you out!
+If you can't find the metrics, attributes you are looking for. We are happy to help you out! Please [contact us](https://wundergraph.com/discord).  
 {% /callout %}
