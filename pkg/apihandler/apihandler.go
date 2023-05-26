@@ -46,6 +46,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/jsonpath"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/metrics"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/s3uploadclient"
@@ -104,6 +105,8 @@ type Builder struct {
 
 	githubAuthDemoClientID     string
 	githubAuthDemoClientSecret string
+
+	metrics metrics.Metrics
 }
 
 type BuilderConfig struct {
@@ -114,6 +117,7 @@ type BuilderConfig struct {
 	GitHubAuthDemoClientID     string
 	GitHubAuthDemoClientSecret string
 	DevMode                    bool
+	Metrics                    metrics.Metrics
 }
 
 func NewBuilder(pool *pool.Pool,
@@ -134,6 +138,7 @@ func NewBuilder(pool *pool.Pool,
 		githubAuthDemoClientID:     config.GitHubAuthDemoClientID,
 		githubAuthDemoClientSecret: config.GitHubAuthDemoClientSecret,
 		devMode:                    config.DevMode,
+		metrics:                    config.Metrics,
 	}
 }
 
@@ -424,16 +429,6 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		return r.registerNodejsOperation(operation, apiPath)
 	}
 
-	var (
-		operationIsConfigured bool
-	)
-
-	defer func() {
-		if !operationIsConfigured {
-			r.registerInvalidOperation(operation.Name)
-		}
-	}()
-
 	shared := r.pool.GetShared(context.Background(), r.planConfig, pool.Config{})
 
 	shared.Doc.Input.ResetInputString(operation.Content)
@@ -485,6 +480,9 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		Logger:      r.log,
 	}
 
+	var operationHandler http.Handler
+	var route *mux.Route
+
 	switch operation.OperationType {
 	case wgpb.OperationType_QUERY:
 		synchronousPlan, ok := preparedPlan.(*plan.SynchronousResponsePlan)
@@ -524,14 +522,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
 
-		route := r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
-		if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
-			route.Handler(authentication.RequiresAuthentication(handler))
-		} else {
-			route.Handler(handler)
-		}
-
-		operationIsConfigured = true
+		route = r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
+		operationHandler = handler
 
 		r.log.Debug("registered QueryHandler",
 			zap.String("method", http.MethodGet),
@@ -568,15 +560,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			hooksPipeline:          hooksPipeline,
 		}
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
-		route := r.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath)
-
-		if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
-			route.Handler(authentication.RequiresAuthentication(handler))
-		} else {
-			route.Handler(handler)
-		}
-
-		operationIsConfigured = true
+		route = r.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath)
+		operationHandler = handler
 
 		r.log.Debug("registered MutationHandler",
 			zap.String("method", http.MethodPost),
@@ -613,15 +598,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			hooksPipeline:          hooksPipeline,
 		}
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
-		route := r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
-
-		if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
-			route.Handler(authentication.RequiresAuthentication(handler))
-		} else {
-			route.Handler(handler)
-		}
-
-		operationIsConfigured = true
+		route = r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
+		operationHandler = handler
 
 		r.log.Debug("registered SubscriptionHandler",
 			zap.String("method", http.MethodGet),
@@ -634,6 +612,18 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			zap.String("name", operation.Name),
 			zap.String("content", operation.Content),
 		)
+	}
+
+	if route != nil && operationHandler != nil {
+
+		if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
+			operationHandler = authentication.RequiresAuthentication(operationHandler)
+			route.Handler(authentication.RequiresAuthentication(operationHandler))
+		}
+		metrics := newOperationMetrics(r.metrics, operation.Name)
+		route.Handler(metrics.Handler(operationHandler))
+	} else {
+		r.registerInvalidOperation(operation.Name)
 	}
 
 	return nil
@@ -1736,7 +1726,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 		return err
 	}
 
-	handler := &FunctionsHandler{
+	var handler http.Handler = &FunctionsHandler{
 		operation:            operation,
 		log:                  r.log,
 		cacheHeaders:         cacheheaders.New(newCacheControl(operation.CacheConfig), r.api.ApiConfigHash),
@@ -1753,10 +1743,11 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 	}
 
 	if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
-		route.Handler(authentication.RequiresAuthentication(handler))
-	} else {
-		route.Handler(handler)
+		handler = authentication.RequiresAuthentication(handler)
 	}
+
+	metrics := newOperationMetrics(r.metrics, operation.Name)
+	route.Handler(metrics.Handler(handler))
 
 	r.log.Debug("registered FunctionsHandler",
 		zap.String("operation", operation.Name),

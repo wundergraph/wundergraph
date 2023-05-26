@@ -43,4 +43,6 @@ Here's an overview of all the available guides.
 
 {% quick-link title="Extend the WunderGraph server context" icon="core" href="/docs/guides/context-factory" description="Use a context factory to extend the WunderGraph server context." /%}
 
+{% quick-link title="Monitoring and observability" icon="core" href="/docs/guides/monitoring-and-observability" description="Learn how to monitor your WunderGraph application." /%}
+
 {% /quick-links %}

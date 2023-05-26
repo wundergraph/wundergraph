@@ -27,6 +27,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/metrics"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -45,6 +46,7 @@ type InternalBuilder struct {
 	middlewareClient    *hooks.Client
 	enableIntrospection bool
 	insecureCookies     bool
+	metrics             metrics.Metrics
 }
 
 type InternalBuilderConfig struct {
@@ -53,6 +55,7 @@ type InternalBuilderConfig struct {
 	Loader              *engineconfigloader.EngineConfigLoader
 	EnableIntrospection bool
 	InsecureCookies     bool
+	Metrics             metrics.Metrics
 	Log                 *zap.Logger
 }
 
@@ -64,6 +67,7 @@ func NewInternalBuilder(config InternalBuilderConfig) *InternalBuilder {
 		middlewareClient:    config.Client,
 		enableIntrospection: config.EnableIntrospection,
 		insecureCookies:     config.InsecureCookies,
+		metrics:             config.Metrics,
 	}
 }
 
@@ -205,6 +209,8 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		Logger:      i.log,
 	}
 
+	var handler http.Handler
+
 	switch operation.OperationType {
 	case wgpb.OperationType_QUERY,
 		wgpb.OperationType_MUTATION:
@@ -223,7 +229,7 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		}
 		hooksPipeline := hooks.NewSynchonousOperationPipeline(hooksPipelineConfig)
 
-		handler := &InternalApiHandler{
+		handler = &InternalApiHandler{
 			preparedPlan:       p,
 			operation:          operation,
 			extractedVariables: extractedVariables,
@@ -233,7 +239,6 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 			hooksPipeline:      hooksPipeline,
 		}
 
-		i.router.Methods(http.MethodPost).Path(apiPath).Handler(handler)
 		// Don't log for every operation because public ones are
 		// registered twice in the public and the internal router
 		if operation.Internal {
@@ -258,7 +263,7 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		}
 		hooksPipeline := hooks.NewSubscriptionOperationPipeline(hooksPipelineConfig)
 
-		handler := &InternalSubscriptionApiHandler{
+		handler = &InternalSubscriptionApiHandler{
 			preparedPlan:       p,
 			operation:          operation,
 			extractedVariables: extractedVariables,
@@ -268,7 +273,6 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 			hooksPipeline:      hooksPipeline,
 		}
 
-		i.router.Methods(http.MethodPost).Path(apiPath).Handler(handler)
 		// See comment checking operation.Internal above
 		if operation.Internal {
 			i.log.Debug("registered internal subscription handler",
@@ -277,6 +281,9 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 			)
 		}
 	}
+
+	metrics := newOperationMetrics(i.metrics, operation.Name)
+	i.router.Methods(http.MethodPost).Path(apiPath).Handler(metrics.Handler(handler))
 
 	return nil
 }
@@ -309,7 +316,8 @@ func (i *InternalBuilder) registerNodeJsOperation(operation *wgpb.Operation, api
 		internal: true,
 	}
 
-	route.Handler(handler)
+	metrics := newOperationMetrics(i.metrics, operation.Name)
+	route.Handler(metrics.Handler(handler))
 	return nil
 }
 

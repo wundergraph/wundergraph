@@ -29,6 +29,11 @@ type Logging struct {
 	Level zapcore.Level
 }
 
+type PrometheusOptions struct {
+	Enabled bool
+	Port    int
+}
+
 type Options struct {
 	ServerUrl           string
 	PublicNodeUrl       string
@@ -37,6 +42,7 @@ type Options struct {
 	Logging             Logging
 	DefaultTimeout      time.Duration
 	DefaultHTTPProxyURL *url.URL
+	Prometheus          PrometheusOptions
 }
 
 type CookieBasedSecrets struct {

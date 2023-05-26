@@ -25,6 +25,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/httpidletimeout"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
+	"github.com/wundergraph/wundergraph/pkg/metrics"
 	"github.com/wundergraph/wundergraph/pkg/node/nodetemplates"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/validate"
@@ -63,6 +64,7 @@ type Node struct {
 	builder        *apihandler.Builder
 	server         *http.Server
 	internalServer *http.Server
+	metrics        metrics.Metrics
 	pool           *pool.Pool
 	log            *zap.Logger
 	apiClient      *fasthttp.Client
@@ -250,6 +252,11 @@ func (n *Node) StartBlocking(opts ...Option) error {
 }
 
 func (n *Node) Shutdown(ctx context.Context) error {
+	if n.metrics != nil {
+		if err := n.metrics.Shutdown(ctx); err != nil {
+			return err
+		}
+	}
 	if n.server != nil {
 		if err := n.server.Shutdown(ctx); err != nil {
 			return err
@@ -264,6 +271,10 @@ func (n *Node) Shutdown(ctx context.Context) error {
 }
 
 func (n *Node) Close() error {
+	if n.metrics != nil {
+		n.metrics.Close()
+		n.metrics = nil
+	}
 	if n.builder != nil {
 		if err := n.builder.Close(); err != nil {
 			return err
@@ -392,6 +403,14 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	router := mux.NewRouter()
 	internalRouter := mux.NewRouter()
 
+	if nodeConfig.Api.Options.Prometheus.Enabled {
+		port := nodeConfig.Api.Options.Prometheus.Port
+		n.log.Debug("serving Prometheus metrics", zap.Int("port", port))
+		n.metrics = metrics.NewPrometheus(port)
+	} else {
+		n.metrics = metrics.NewNone()
+	}
+
 	if n.options.globalRateLimit.enable {
 		limiter := rate.NewLimiter(rate.Every(n.options.globalRateLimit.perDuration), n.options.globalRateLimit.requests)
 		handler := func(handler http.Handler) http.Handler {
@@ -444,7 +463,13 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		}
 	}
 
-	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableRequestLogging)
+	transportFactory := apihandler.NewApiTransportFactory(apihandler.ApiTransportOptions{
+		API:                  nodeConfig.Api,
+		HooksClient:          hooksClient,
+		EnableRequestLogging: n.options.enableRequestLogging,
+		Metrics:              n.metrics,
+	})
+
 	n.log.Debug("http.Client.Transport",
 		zap.Bool("enableRequestLogging", n.options.enableRequestLogging),
 	)
@@ -464,14 +489,17 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		GitHubAuthDemoClientID:     n.options.githubAuthDemo.ClientID,
 		GitHubAuthDemoClientSecret: n.options.githubAuthDemo.ClientSecret,
 		DevMode:                    n.options.devMode,
+		Metrics:                    n.metrics,
 	}
 
 	n.builder = apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
+
 	internalBuilderConfig := apihandler.InternalBuilderConfig{
 		Pool:                n.pool,
 		Client:              hooksClient,
 		Loader:              loader,
 		EnableIntrospection: n.options.enableIntrospection,
+		Metrics:             n.metrics,
 		InsecureCookies:     n.options.insecureCookies,
 		Log:                 n.log,
 	}
@@ -626,6 +654,14 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 			return err
 		})
 	}
+
+	g.Go(func() error {
+		if err := n.metrics.Serve(); err != nil && err != metrics.ErrServerClosed {
+			n.log.Error("serving metrics", zap.Error(err))
+			return err
+		}
+		return nil
+	})
 
 	n.log.Debug("public node url",
 		zap.String("publicNodeUrl", nodeConfig.Api.Options.PublicNodeUrl),

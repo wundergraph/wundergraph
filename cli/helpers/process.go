@@ -37,7 +37,7 @@ func ServerPortFromConfig(configJsonPath string) (int, error) {
 	if graphConfig.Api != nil && graphConfig.Api.ServerOptions != nil {
 		variable := graphConfig.Api.ServerOptions.GetListen().GetPort()
 		if variable != nil {
-			return loadvariable.Int(variable), nil
+			return loadvariable.Int(variable)
 		}
 	}
 	return 0, errors.New("configuration is invalid")

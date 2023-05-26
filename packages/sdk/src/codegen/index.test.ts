@@ -104,6 +104,22 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						environmentVariableDefaultValue: '',
 						placeholderVariableName: '',
 					},
+					prometheus: {
+						enabled: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						port: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
 				},
 				serverOptions: {
 					serverUrl: {
