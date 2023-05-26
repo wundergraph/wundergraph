@@ -88,6 +88,17 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 		}
 	}
 
+	prometheusConfig := graphConfig.GetApi().GetNodeOptions().GetPrometheus()
+
+	prometheusEnabled, err := loadvariable.Bool(prometheusConfig.GetEnabled())
+	if err != nil {
+		return nil, err
+	}
+	prometheusPort, err := loadvariable.Int(prometheusConfig.GetPort())
+	if err != nil {
+		return nil, err
+	}
+
 	config := WunderNodeConfig{
 		Api: &apihandler.Api{
 			PrimaryHost:           fmt.Sprintf("%s:%d", listener.Host, listener.Port),
@@ -112,6 +123,10 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 				},
 				DefaultTimeout:      defaultRequestTimeout,
 				DefaultHTTPProxyURL: defaultHTTPProxyURL,
+				Prometheus: apihandler.PrometheusOptions{
+					Enabled: prometheusEnabled,
+					Port:    prometheusPort,
+				},
 			},
 		},
 		Server: &Server{

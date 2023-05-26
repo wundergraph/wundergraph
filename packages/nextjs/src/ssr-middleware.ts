@@ -14,12 +14,23 @@ const isOperation = (key: Key): key is Operation => {
 	return !!(key && !Array.isArray(key) && typeof key === 'object' && 'operationName' in key);
 };
 
-interface SSRConfig extends PublicConfiguration {
+interface SSRConfig<
+	Data = any,
+	Error = any,
+	Fn extends
+		| ((arg: string) => unknown)
+		| ((arg: [any, ...unknown[]]) => unknown)
+		| ((arg: readonly [any, ...unknown[]]) => unknown)
+		| ((arg: Record<any, any>) => unknown)
+		| ((
+				arg: string | [any, ...unknown[]] | readonly [any, ...unknown[]] | Record<any, any>
+		  ) => unknown) = BareFetcher<unknown>
+> extends PublicConfiguration<Data, Error, Fn> {
 	ssr?: boolean;
 }
 
 export const SSRMiddleWare = ((useSWRNext: SWRHook) => {
-	return (key: Key, fetcher: BareFetcher<Promise<unknown>> | null, config: SSRConfig) => {
+	return (key: Key, fetcher: BareFetcher<unknown> | null, config: SSRConfig) => {
 		const swr = useSWRNext(key, fetcher, config);
 
 		const context = useWunderGraphContext();
