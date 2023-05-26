@@ -148,7 +148,7 @@
     "@wundergraph/orm": "workspace:*",
     "@wundergraph/protobuf": "workspace:^0.113.0",
     "@wundergraph/straightforward": "^4.2.5",
-    "@wundergraph/wunderctl": "workspace:^0.153.0",
+    "@wundergraph/wunderctl": "workspace:^0.154.0",
     "@opentelemetry/api": "^1.4.1",
     "@opentelemetry/core": "^1.13.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.39.1",
