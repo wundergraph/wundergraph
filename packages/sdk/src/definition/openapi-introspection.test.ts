@@ -1,5 +1,5 @@
-import { introspectOpenApiV2 } from './openapi-introspection';
 import path from 'path';
+import { introspectOpenApiV2 } from './openapi-introspection';
 
 describe('introspectOpenApiV2', () => {
 	describe('introspection kind:file', function () {
