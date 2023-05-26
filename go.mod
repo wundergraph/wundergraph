@@ -1,6 +1,6 @@
 module github.com/wundergraph/wundergraph
 
-go 1.18
+go 1.19
 
 require (
 	github.com/MicahParks/keyfunc v1.9.0

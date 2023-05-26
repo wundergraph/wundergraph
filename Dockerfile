@@ -1,4 +1,4 @@
-FROM golang:1.18 as builder
+FROM golang:1.19 as builder
 
 ARG COMMIT
 ARG VERSION
@@ -12,7 +12,7 @@ RUN go mod download
 
 RUN make build
 
-from golang:1.18-alpine as runner
+from golang:1.19-alpine as runner
 
 WORKDIR /usr/src/app
 
