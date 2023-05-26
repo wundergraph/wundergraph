@@ -2,12 +2,14 @@ package trace
 
 import (
 	"context"
-	"github.com/wundergraph/wundergraph/pkg/operation"
+	"net/http"
+	"strings"
+
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
-	"net/http"
-	"strings"
+
+	"github.com/wundergraph/wundergraph/pkg/operation"
 )
 
 // TracerFromContext returns a tracer in ctx, otherwise returns a global tracer.

@@ -6,9 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/wundergraph/wundergraph/pkg/trace"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	otrace "go.opentelemetry.io/otel/trace"
 	"io"
 	"io/ioutil"
 	"log"
@@ -21,11 +18,14 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/mattbaird/jsonpatch"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	otrace "go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/trace"
 )
 
 type WunderGraphRequest struct {

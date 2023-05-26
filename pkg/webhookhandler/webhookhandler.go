@@ -6,18 +6,18 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/wundergraph/wundergraph/pkg/trace"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	otrace "go.opentelemetry.io/otel/trace"
 	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	otrace "go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
+	"github.com/wundergraph/wundergraph/pkg/trace"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 

@@ -1,9 +1,10 @@
 package trace
 
 import (
+	"net/http"
+
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/trace"
-	"net/http"
 )
 
 // NewTransport wraps the provided http.RoundTripper with one that

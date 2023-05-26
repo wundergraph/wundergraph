@@ -5,10 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/wundergraph/wundergraph/pkg/operation"
-	"github.com/wundergraph/wundergraph/pkg/trace"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	otrace "go.opentelemetry.io/otel/trace"
 	"io"
 	"net/http"
 	"net/http/httputil"
@@ -18,13 +14,17 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/websocket"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	otrace "go.opentelemetry.io/otel/trace"
 
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/metrics"
+	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/trace"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 

@@ -2,8 +2,9 @@ package operation
 
 import (
 	"context"
-	"github.com/wundergraph/wundergraph/pkg/wgpb"
 	"net/http"
+
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 var key = "operationMetaData"

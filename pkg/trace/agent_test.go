@@ -1,8 +1,9 @@
 package trace
 
 import (
-	"go.uber.org/zap"
 	"testing"
+
+	"go.uber.org/zap"
 )
 
 func TestStartAgent(t *testing.T) {

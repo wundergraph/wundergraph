@@ -5,15 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/wundergraph/wundergraph/pkg/operation"
-	"github.com/wundergraph/wundergraph/pkg/trace"
-	oteltrace "go.opentelemetry.io/otel/trace"
 	"io"
 	"net/http"
 
 	"github.com/buger/jsonparser"
 	"github.com/dgraph-io/ristretto"
 	"github.com/gorilla/mux"
+	oteltrace "go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
@@ -31,8 +29,10 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/metrics"
+	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
+	"github.com/wundergraph/wundergraph/pkg/trace"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
