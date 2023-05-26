@@ -133,6 +133,8 @@ const getSource = (source: OpenAPIIntrospectionSource): string => {
 			return JSON.stringify(source.openAPIObject);
 		case 'string':
 			return tryReadSpec(source.openAPISpec);
+		default:
+			throw new Error('unknown OAS source');
 	}
 };
 
