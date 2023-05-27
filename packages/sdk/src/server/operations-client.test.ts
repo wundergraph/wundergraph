@@ -1,6 +1,16 @@
 import { OperationsClient } from './operations-client';
 import { createServer } from 'http';
 import { AddressInfo } from 'net';
+import { Agent, setGlobalDispatcher } from 'undici';
+
+// Avoid persistent connections which leads to hanging tests
+// because close event is not emitted
+setGlobalDispatcher(
+	new Agent({
+		keepAliveTimeout: 1,
+		keepAliveMaxTimeout: 1,
+	})
+);
 
 describe('Operations Client', () => {
 	test('Should be able to make a request with default fetch implementation', (done) => {
@@ -26,8 +36,6 @@ describe('Operations Client', () => {
 
 			expect(data).toEqual(mock.data);
 			expect(error).toBeUndefined();
-
-			server.closeAllConnections();
 
 			server.close(done);
 		});
@@ -58,8 +66,6 @@ describe('Operations Client', () => {
 				expect(data).toEqual(mock.data);
 				expect(error).toBeUndefined();
 			}
-
-			server.closeAllConnections();
 
 			server.close(done);
 		});
