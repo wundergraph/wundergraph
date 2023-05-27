@@ -68,16 +68,19 @@ export interface ListenOptions {
 export interface TelemetryOptions {
 	/**
 	 * Enable OpenTelemetry tracing.
+	 * Defaults to `false`.
 	 */
 	enabled: InputVariable<boolean>;
 	/**
 	 * OpenTelemetry exporter HTTP endpoint.
 	 * Defaults to `http://localhost:4318`.
+	 * We only support v1 of the OpenTelemetry protocol.
 	 */
 	exporterHttpEndpoint?: InputVariable;
 	/**
 	 * OpenTelemetry sampler.
-	 * Defaults to `1.0`. Trace every request.
+	 * Defaults to `1.0` (always sample).
+	 * The value must be a number between 0 and 1. 0 means never sample, 1 means always sample.
 	 */
 	sampler?: InputVariable<number>;
 	/**
