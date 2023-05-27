@@ -30,4 +30,34 @@ describe('Operations Client', () => {
 			done();
 		});
 	});
+
+	test('Should be able to make a subscription request (web-streams)', (done) => {
+		const mock = {
+			data: {
+				id: '1',
+			},
+		};
+
+		const server = createServer((req, res) => {
+			expect(req.url).toEqual('/operations/Events');
+			res.end(JSON.stringify(mock) + '\n\n');
+		});
+
+		server.listen(0, async () => {
+			const client = new OperationsClient({
+				baseURL: `http://localhost:${(server.address() as AddressInfo).port}`,
+				clientRequest: {},
+			});
+			const updates = await client.subscribe({
+				operationName: 'Events',
+			});
+
+			for await (const { data, error } of updates) {
+				expect(data).toEqual(mock.data);
+				expect(error).toBeUndefined();
+			}
+
+			done();
+		});
+	});
 });
