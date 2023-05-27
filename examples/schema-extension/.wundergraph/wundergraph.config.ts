@@ -1,4 +1,4 @@
-import { configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
+import { configureWunderGraphApplication, cors, introspect } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
@@ -30,6 +30,7 @@ const gallery = introspect.graphql({
 		  longitude: Float
 		}
 	`,
+	customJSONScalars: ['Geography'],
 	replaceCustomScalarTypeFields: [
 		{
 			entityName: 'Image',
@@ -52,6 +53,7 @@ const db = introspect.postgresql({
 					phone: String
 				}
 				`,
+	customJSONScalars: ['Contact', 'ContactInput'],
 	replaceCustomScalarTypeFields: [
 		{
 			entityName: `users`,
