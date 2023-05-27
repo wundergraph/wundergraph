@@ -2,10 +2,11 @@ package trace
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/felixge/httpsnoop"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/trace"
-	"net/http"
 )
 
 // WrapHandler wraps a http.Handler and instruments it using the given operation name.

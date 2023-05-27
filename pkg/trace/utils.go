@@ -2,10 +2,11 @@ package trace
 
 import (
 	"context"
+	"net/http"
+
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
-	"net/http"
 
 	"github.com/wundergraph/wundergraph/pkg/operation"
 )

@@ -1,16 +1,17 @@
 package trace
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/wundergraph/wundergraph/pkg/trace/tracetest"
-	"go.opentelemetry.io/otel/codes"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/otel/codes"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/wundergraph/wundergraph/pkg/trace/tracetest"
 )
 
 func TestWrapHttpHandler(t *testing.T) {
