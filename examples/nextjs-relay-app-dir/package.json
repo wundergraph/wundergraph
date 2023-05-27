@@ -1,0 +1,55 @@
+{
+  "name": "wundergraph-nextjs-app-dir",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "npm run build:wundergraph && concurrently \"npm run wundergraph\" \"npm run relay\" \"next dev --port 3000\"",
+    "wundergraph": "wunderctl up --debug",
+    "build": "npm run build:wundergraph && relay-compiler && next build",
+    "lint": "next lint",
+    "relay": "relay-compiler --watch",
+    "build:wundergraph": "wunderctl generate"
+  },
+  "dependencies": {
+    "@graphql-yoga/node": "^2.13.13",
+    "@types/node": "20.2.4",
+    "@types/react": "18.2.7",
+    "@types/react-dom": "18.2.4",
+    "@wundergraph/react-relay": "file:/Users/dani/Documents/GitHub/wundergraph/wundergraph/packages/react-relay/wundergraph-react-relay-0.3.0.tgz",
+    "@wundergraph/sdk": "^0.159.0",
+    "autoprefixer": "10.4.14",
+    "graphql": "^16.6.0",
+    "next": "13.4.4",
+    "postcss": "8.4.23",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-relay": "^15.0.0",
+    "relay-runtime": "^15.0.0",
+    "tailwindcss": "3.3.2",
+    "typescript": "5.0.4"
+  },
+  "relay": {
+    "src": "./src",
+    "artifactDirectory": "./src/__relay__generated__",
+    "language": "typescript",
+    "schema": "./.wundergraph/generated/wundergraph.schema.graphql",
+    "exclude": [
+      "**/node_modules/**",
+      "**/__mocks__/**",
+      "**/__generated__/**",
+      "**/.wundergraph/generated/**"
+    ],
+    "persistConfig": {
+      "file": "./.wundergraph/operations/relay/persisted.json"
+    },
+    "eagerEsModules": true
+  },
+  "devDependencies": {
+    "@types/react-relay": "^14.1.4",
+    "@types/relay-runtime": "^14.1.10",
+    "babel-plugin-relay": "^15.0.0",
+    "concurrently": "^8.0.1",
+    "relay-compiler": "^15.0.0"
+  }
+}

@@ -1,0 +1,3 @@
+{
+  "6dc98b91e0f73f84e44e58184ee19888": "mutation TodoListUpdateTodoMutation(\n  $todo: todos_TodoInput!\n) {\n  todos_updateTodo(todo: $todo) {\n    id\n    text\n    isCompleted\n  }\n}\n"
+}
