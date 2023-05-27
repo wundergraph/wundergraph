@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.114.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.113.0...@wundergraph/protobuf@0.114.0) (2023-05-26)
+
+### Features
+
+* use Prometheus to track and expose operation and API request counts ([#991](https://github.com/wundergraph/wundergraph/issues/991)) ([f949398](https://github.com/wundergraph/wundergraph/commit/f94939864c9ce7c3a9623fd5141fa486c4c9a55c)) (@fiam)
+
 ## [0.113.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.112.0...@wundergraph/protobuf@0.113.0) (2023-05-25)
 
 ### Features
