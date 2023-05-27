@@ -11,6 +11,7 @@ describe('Operations Client', () => {
 		};
 
 		const server = createServer((req, res) => {
+			expect(req.url).toEqual('/operations/Weather');
 			res.end(JSON.stringify(mock));
 		});
 
