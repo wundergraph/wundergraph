@@ -9,3 +9,8 @@ export const Attributes = {
 	ERROR_MSG: 'error.message',
 	ERROR_STACK: 'error.stack',
 };
+
+export const Components = {
+	OPERATIONS_CLIENT: 'operations-client',
+	HOOKS_SERVER: 'hooks-server',
+};

@@ -640,8 +640,8 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	}
 
 	if nodeConfig.Api.Options.OpenTelemetry.Enabled {
-		handler = trace.WrapHandler(handler, "public-server")
-		internalHandler = trace.WrapHandler(internalHandler, "internal-server")
+		handler = trace.WrapHandler(handler, trace.PublicServerAttribute)
+		internalHandler = trace.WrapHandler(internalHandler, trace.InternalServerAttribute)
 	}
 
 	n.server = &http.Server{

@@ -2,6 +2,7 @@ package trace
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"go.opentelemetry.io/otel"
@@ -43,4 +44,9 @@ func SetStatus(span trace.Span, statusCode int) {
 	if statusCode >= 400 {
 		span.SetStatus(codes.Error, http.StatusText(statusCode))
 	}
+}
+
+// SpanNameFormatter formats the span name based on the http request
+func SpanNameFormatter(_operation string, r *http.Request) string {
+	return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
 }

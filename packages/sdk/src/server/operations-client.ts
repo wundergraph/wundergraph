@@ -8,9 +8,9 @@ import {
 	QueryRequestOptions,
 	SubscriptionRequestOptions,
 } from '../client';
-import { SpanKind, SpanStatusCode, Tracer, trace, Context, propagation, Span } from '@opentelemetry/api';
+import { SpanKind, Tracer, trace, Context, propagation, Span } from '@opentelemetry/api';
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
-import { Attributes } from './trace/attributes';
+import { Attributes, Components } from './trace/attributes';
 import { attachErrorToSpan, setStatusFromResponseCode } from './trace/util';
 
 export interface Operation<Input extends object, Response> {
@@ -147,7 +147,7 @@ export class OperationsClient<
 					attributes: {
 						[SemanticAttributes.HTTP_METHOD]: method,
 						[SemanticAttributes.HTTP_URL]: url,
-						[Attributes.WG_COMPONENT_NAME]: 'operations-client',
+						[Attributes.WG_COMPONENT_NAME]: Components.OPERATIONS_CLIENT,
 					},
 				},
 				this.traceContext
@@ -173,6 +173,7 @@ export class OperationsClient<
 				// Mark the request as errored and attach information about the error
 				attachErrorToSpan(span, err);
 			}
+			// Rethrow the error, we don't want to change the error handling
 			throw err;
 		} finally {
 			span?.end();

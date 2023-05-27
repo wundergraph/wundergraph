@@ -6,7 +6,7 @@ import { FastifyRequestContext } from '../types';
 import { WgEnv } from '../../configure/options';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { attachErrorToSpan, setStatusFromResponseCode } from '../trace/util';
-import { Attributes } from '../trace/attributes';
+import { Attributes, Components } from '../trace/attributes';
 
 export interface FastifyTelemetry {
 	context: Context;
@@ -42,7 +42,7 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async
 		};
 
 		req.telemetry.parentSpan.setAttributes({
-			[Attributes.WG_COMPONENT_NAME]: 'hooks-server',
+			[Attributes.WG_COMPONENT_NAME]: Components.HOOKS_SERVER,
 			[SemanticAttributes.HTTP_FLAVOR]: req.raw.httpVersion,
 			[SemanticAttributes.HTTP_METHOD]: req.raw.method,
 			[SemanticAttributes.HTTP_ROUTE]: req.routerPath,

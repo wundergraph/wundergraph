@@ -5,7 +5,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httputil"
@@ -28,10 +27,8 @@ func New(config *wgpb.WebhookConfiguration, hooksServerURL string, log *zap.Logg
 	}
 	proxy := httputil.NewSingleHostReverseProxy(u)
 	proxy.Transport = trace.NewTransport(http.DefaultTransport,
-		otelhttp.WithSpanOptions(otrace.WithAttributes(trace.WgComponentName.String("webhook-transport"))),
-		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
-			return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
-		}),
+		otelhttp.WithSpanOptions(otrace.WithAttributes(trace.WebhookTransportAttribute)),
+		otelhttp.WithSpanNameFormatter(trace.SpanNameFormatter),
 	)
 	handler := &webhookHandler{
 		webhookName: config.Name,

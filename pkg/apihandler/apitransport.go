@@ -44,10 +44,8 @@ func (f *apiTransportFactory) RoundTripper(transport *http.Transport, enableStre
 	if f.opts.EnableTracing {
 		return trace.NewTransport(
 			rt,
-			otelhttp.WithSpanOptions(otrace.WithAttributes(trace.WgComponentName.String("api-transport"))),
-			otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
-				return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
-			}),
+			otelhttp.WithSpanOptions(otrace.WithAttributes(trace.ApiTransportAttribute)),
+			otelhttp.WithSpanNameFormatter(trace.SpanNameFormatter),
 		)
 	}
 

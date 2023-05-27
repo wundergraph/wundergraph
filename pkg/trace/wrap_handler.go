@@ -1,7 +1,7 @@
 package trace
 
 import (
-	"fmt"
+	"go.opentelemetry.io/otel/attribute"
 	"net/http"
 
 	"github.com/felixge/httpsnoop"
@@ -12,18 +12,24 @@ import (
 // WrapHandler wraps a http.Handler and instruments it using the given operation name.
 // Internally it uses otelhttp.NewHandler and set the span status based on the http response status code.
 // It uses a response writer wrapper to get the status code.
-func WrapHandler(wrappedHandler http.Handler, operation string, opts ...otelhttp.Option) http.Handler {
-	opts = append(opts, otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
-		return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
+func WrapHandler(wrappedHandler http.Handler, componentName attribute.KeyValue, opts ...otelhttp.Option) http.Handler {
+	// Don't trace health check requests or favicon browser requests
+	opts = append(opts, otelhttp.WithFilter(func(req *http.Request) bool {
+		if req.URL.Path == "/health" || req.URL.Path == "/" || req.URL.Path == "/favicon.ico" {
+			return false
+		}
+		return true
 	}))
+
+	opts = append(opts, otelhttp.WithSpanNameFormatter(SpanNameFormatter))
 
 	setSpanStatusHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		span := trace.SpanFromContext(req.Context())
-		span.SetAttributes(WgComponentName.String(operation))
+		span.SetAttributes(componentName)
 
 		m := httpsnoop.CaptureMetrics(wrappedHandler, w, req)
 
 		SetStatus(span, m.Code)
 	})
-	return otelhttp.NewHandler(setSpanStatusHandler, operation, opts...)
+	return otelhttp.NewHandler(setSpanStatusHandler, "", opts...)
 }

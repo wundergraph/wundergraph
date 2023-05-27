@@ -11,7 +11,6 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/dgraph-io/ristretto"
 	"github.com/gorilla/mux"
-	oteltrace "go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
@@ -427,8 +426,8 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
 	r = operation.SetOperationMetaData(r, h.operation)
 
-	span := oteltrace.SpanFromContext(r.Context())
-	span.SetAttributes(trace.WgComponentName.String("internal-subscription-handler"))
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	bodyBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(bodyBuf)

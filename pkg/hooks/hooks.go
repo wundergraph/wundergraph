@@ -175,10 +175,8 @@ func NewClient(opts *ClientOptions) *Client {
 
 	if opts.EnableTracing {
 		rt = trace.NewTransport(rt,
-			otelhttp.WithSpanOptions(otrace.WithAttributes(trace.WgComponentName.String("hooks-client"))),
-			otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
-				return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
-			}),
+			otelhttp.WithSpanOptions(otrace.WithAttributes(trace.HooksClientAttribute)),
+			otelhttp.WithSpanNameFormatter(trace.SpanNameFormatter),
 		)
 	}
 
