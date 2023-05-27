@@ -25,6 +25,7 @@ import {
 	ValidationResponseJSON,
 	ClientOperationErrorCodes,
 } from './errors';
+import { loadFile } from '../codegen/templates/typescript';
 
 // We follow https://docs.wundergraph.com/docs/architecture/wundergraph-rpc-protocol-explained
 

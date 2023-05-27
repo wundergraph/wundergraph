@@ -8,6 +8,10 @@ import {
 	SubscriptionRequestOptions,
 } from '../client';
 
+// undici fetch supports Node.js 16.8. It's the same implementation as the built-in fetch since Node.js 18.
+// We can switch to the built-in fetch once we drop support for Node.js 16.
+import { fetch } from 'undici';
+
 export interface Operation<Input extends object, Response> {
 	input: Input;
 	response: Response;
@@ -51,6 +55,11 @@ export type InternalOperationsDefinition<
 
 const forwardedHeaders = ['Authorization', 'X-Request-Id'];
 
+/**
+ * This client is used to execute custom operations on the Hooks server (server side only).
+ * The implementation is based on the `Client` class which is used on the web and server side.
+ * The implementation is an implementation detail and should not be used directly as a public API.
+ */
 export class OperationsClient<
 	Operations extends InternalOperationsDefinition = InternalOperationsDefinition
 > extends Client {
@@ -59,8 +68,10 @@ export class OperationsClient<
 	protected readonly clientRequest: any;
 
 	constructor(options: OperationsClientConfig) {
-		const { clientRequest, ...rest } = options;
+		const { clientRequest, customFetch = fetch, ...rest } = options;
+
 		super({
+			customFetch: customFetch as any,
 			...rest,
 		});
 
