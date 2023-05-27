@@ -1,4 +1,3 @@
-import fetch from 'cross-fetch';
 import {
 	Client,
 	ClientConfig,
@@ -60,10 +59,9 @@ export class OperationsClient<
 	protected readonly clientRequest: any;
 
 	constructor(options: OperationsClientConfig) {
-		const { clientRequest, customFetch = fetch, ...rest } = options;
+		const { clientRequest, ...rest } = options;
 		super({
 			...rest,
-			customFetch,
 		});
 
 		this.clientRequest = clientRequest;
@@ -158,7 +156,9 @@ export class OperationsClient<
 		return sub as any;
 	};
 
-	protected async fetchSubscription<Data = any, Error = any>(subscription: SubscriptionRequestOptions) {
+	protected async fetchSubscription<Data = any, Error = any>(
+		subscription: SubscriptionRequestOptions
+	): Promise<Response> {
 		const searchParams = this.searchParams();
 		const params: any = { input: subscription.input, __wg: { clientRequest: this.clientRequest } };
 
@@ -167,7 +167,7 @@ export class OperationsClient<
 		}
 
 		const url = this.addUrlParams(this.operationUrl(subscription.operationName), searchParams);
-		return await this.fetchJson(url, {
+		return this.fetchJson(url, {
 			method: 'POST',
 			body: this.stringifyInput(params),
 			signal: subscription.abortSignal,
