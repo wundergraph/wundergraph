@@ -27,7 +27,9 @@ describe('Operations Client', () => {
 			expect(data).toEqual(mock.data);
 			expect(error).toBeUndefined();
 
-			done();
+			server.closeAllConnections();
+
+			server.close(done);
 		});
 	});
 
@@ -57,7 +59,9 @@ describe('Operations Client', () => {
 				expect(error).toBeUndefined();
 			}
 
-			done();
+			server.closeAllConnections();
+
+			server.close(done);
 		});
 	});
 });
