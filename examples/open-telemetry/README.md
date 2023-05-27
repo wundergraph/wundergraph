@@ -6,7 +6,7 @@
 npm i && npm start
 ```
 
-After you have made a few requests, you can check the tracing data in Jaeger. Open the Jaeger UI at [http://localhost:16686](http://localhost:16686) and select the service `wundernode`. You should see a few traces. Click on one of them and you should see the following:
+After you have made a few requests, you can check the tracing data in Jaeger. Open the Jaeger UI at [http://localhost:16686](http://localhost:16686) and select the service `wundernode`. You should see a few traces. Click on one of them and you should see all the spans.
 Configure hooks in the `wundergraph.server.ts` and check how the tracing data changes.
 
 #### Get all Continents (GraphQL Operation)
