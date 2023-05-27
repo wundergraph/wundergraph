@@ -71,6 +71,7 @@ export class OperationsClient<
 		const { clientRequest, customFetch = fetch, ...rest } = options;
 
 		super({
+			// fetch compatible but not the exact same type
 			customFetch: customFetch as any,
 			...rest,
 		});
