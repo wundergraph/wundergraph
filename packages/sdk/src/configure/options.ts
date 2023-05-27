@@ -20,7 +20,7 @@ export enum WgEnv {
 	OtelEnabled = 'WG_OTEL_ENABLED',
 	OtelExporterHttpEndpoint = 'WG_OTEL_EXPORTER_HTTP_ENDPOINT',
 	OtelSampler = 'WG_OTEL_SAMPLER',
-	OtelJwt = 'WG_OTEL_JWT',
+	OtelAuthToken = 'WG_OTEL_AUTH_TOKEN',
 }
 
 export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'debug';
@@ -44,7 +44,7 @@ const DefaultNodeOptions = {
 		enabled: new EnvironmentVariable<boolean>(WgEnv.OtelEnabled, false),
 		exporterHttpEndpoint: new EnvironmentVariable(WgEnv.OtelExporterHttpEndpoint, 'http://localhost:4318'),
 		sampler: new EnvironmentVariable(WgEnv.OtelSampler, '1.0'),
-		authToken: new EnvironmentVariable(WgEnv.OtelJwt, ''),
+		authToken: new EnvironmentVariable(WgEnv.OtelAuthToken, ''),
 	},
 	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, `http://${defaultHost}:${defaultNodePort}`),
 	nodeInternalUrl: new EnvironmentVariable(WgEnv.NodeInternalUrl, `http://${defaultHost}:${defaultNodeInternalPort}`),

@@ -11,7 +11,7 @@ import {
 import { SpanKind, SpanStatusCode, Tracer, trace, Context, propagation, Span } from '@opentelemetry/api';
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
 import { Attributes } from './trace/attributes';
-import { setStatus } from './trace/util';
+import { attachErrorToSpan, setStatusFromResponseCode } from './trace/util';
 
 export interface Operation<Input extends object, Response> {
 	input: Input;
@@ -160,7 +160,7 @@ export class OperationsClient<
 			const res = await this.fetchJson(url, init);
 
 			if (span) {
-				setStatus(span, res.status);
+				setStatusFromResponseCode(span, res.status);
 				span.setAttributes({
 					[SemanticAttributes.HTTP_STATUS_CODE]: res.status,
 					[SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH]: res.headers.get('content-length') ?? 0,
@@ -168,12 +168,12 @@ export class OperationsClient<
 			}
 
 			return res;
-		} catch (e: any) {
-			span?.setStatus({
-				code: SpanStatusCode.ERROR,
-				message: e instanceof Error ? e.message : e.toString(),
-			});
-			throw e;
+		} catch (err: any) {
+			if (span) {
+				// Mark the request as errored and attach information about the error
+				attachErrorToSpan(span, err);
+			}
+			throw err;
 		} finally {
 			span?.end();
 		}
@@ -227,7 +227,7 @@ export class OperationsClient<
 		}
 
 		const url = this.addUrlParams(this.operationUrl(subscription.operationName), searchParams);
-		return await this.fetchJson(url, {
+		return await this.makeRequest(url, {
 			method: 'POST',
 			body: this.stringifyInput(params),
 			signal: subscription.abortSignal,

@@ -6,5 +6,6 @@ export const Attributes = {
 	WG_WEBHOOK_NAME: 'wg.webhook.name',
 	WG_OPERATION_NAME: 'wg.operation.name',
 	ERROR_NAME: 'error.name',
+	ERROR_MSG: 'error.message',
 	ERROR_STACK: 'error.stack',
 };

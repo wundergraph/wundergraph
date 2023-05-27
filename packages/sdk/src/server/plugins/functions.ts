@@ -15,7 +15,7 @@ import { propagation, trace } from '@opentelemetry/api';
 import { createClientRequest, rawClientRequest } from '../server';
 import { FastifyRequestBody } from '../types';
 import { Attributes } from '../trace/attributes';
-import { GlobalHooksRouteConfig, HooksRouteConfig } from './hooks';
+import { attachErrorToSpan } from '../trace/util';
 
 interface FastifyFunctionsOptions {
 	operationsRequestContext: OperationsAsyncContext;
@@ -157,24 +157,29 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 						}
 
 						return;
-					} catch (e: any) {
+					} catch (err: any) {
+						// Mark the request as errored and attach information about the error
+						if (req.telemetry) {
+							attachErrorToSpan(req.telemetry.parentSpan, err);
+						}
+
 						let statusCode: number = 500;
 						const response: { errors: OperationError[] } = {
 							errors: [],
 						};
 
-						if (e instanceof OperationError) {
-							if (e.statusCode) {
-								statusCode = e.statusCode;
+						if (err instanceof OperationError) {
+							if (err.statusCode) {
+								statusCode = err.statusCode;
 							}
-							response.errors.push(e);
-						} else if (e instanceof Error) {
-							response.errors.push(new InternalError({ message: e.message }));
+							response.errors.push(err);
+						} else if (err instanceof Error) {
+							response.errors.push(new InternalError({ message: err.message }));
 						} else {
 							response.errors.push(new InternalError());
 						}
 
-						fastify.log.error(e);
+						fastify.log.error(err);
 
 						if (implementation.type === 'subscription') {
 							// Raw write because we hijacked the reply

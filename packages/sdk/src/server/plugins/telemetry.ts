@@ -1,11 +1,11 @@
 import { FastifyPluginAsync } from 'fastify';
-import { propagation, Span, SpanStatusCode, trace, Context, Tracer, ROOT_CONTEXT } from '@opentelemetry/api';
+import { propagation, Span, trace, Context, Tracer, ROOT_CONTEXT } from '@opentelemetry/api';
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
 import fp from 'fastify-plugin';
 import { FastifyRequestContext } from '../types';
 import { WgEnv } from '../../configure/options';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { setStatus } from '../trace/util';
+import { attachErrorToSpan, setStatusFromResponseCode } from '../trace/util';
 import { Attributes } from '../trace/attributes';
 
 export interface FastifyTelemetry {
@@ -61,22 +61,14 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async
 				[SemanticAttributes.HTTP_STATUS_CODE]: resp.statusCode,
 				[SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH]: resp.getHeader('content-length'),
 			});
-			setStatus(req.telemetry.parentSpan, resp.statusCode);
+			setStatusFromResponseCode(req.telemetry.parentSpan, resp.statusCode);
 			req.telemetry.parentSpan.end();
 		}
 	});
 
 	fastify.addHook('onError', async (req, resp, err) => {
 		if (req.telemetry) {
-			req.telemetry.parentSpan.setStatus({
-				message: err.message,
-				code: SpanStatusCode.ERROR,
-			});
-			req.telemetry.parentSpan.setAttributes({
-				[SemanticAttributes.HTTP_STATUS_CODE]: err.message,
-				[Attributes.ERROR_NAME]: err.name,
-				[Attributes.ERROR_STACK]: err.stack,
-			});
+			attachErrorToSpan(req.telemetry.parentSpan, err);
 		}
 	});
 

@@ -34,18 +34,50 @@ It is used for example in the generated clients, in the GraphQL playground, Open
 
 This option allows you to configure the logger level of WunderNode.
 
+### `prometheus.enabled` (optional)
+
+This option indicates whether Prometheus metrics collection and exposure should be enabled.
+
+### `prometheus.port` (optional)
+
+This option controls the port used to listen on for serving Prometheus metrics. The metrics
+are available at `http://<host>:<prometheus.port>/metrics`.
+
+### `openTelemetry.enabled` (optional)
+
+This option indicates whether OpenTelemetry tracing should be enabled.
+
+### `openTelemetry.sampler` (optional)
+
+This option allows you to configure the OpenTelemetry sampler. The default sampler is 1.0, which means that all requests will be sampled.
+You need to provide a number between 0.0 and 1.0 to configure the sampler.
+
+### `openTelemetry.exporterHttpEndpoint` (optional)
+
+This option allows you to configure the OpenTelemetry HTTP exporter endpoint. The default endpoint is `http://localhost:4318`. The current supported OTLP endpoint is set fixed to `/v1/tracer`.
+
+### `openTelemetry.authToken` (optional)
+
+This option allows you to configure the OpenTelemetry HTTP exporter with an authentication token. Currently, we only support JWT authentication in combination with our [JWT authenticator](https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/20524) plugin.
+
 ## Options default values
 
 Each option when unset will get a value from the `Default Environment Variables` or from the default value of that variable.
 
-| Option                | Default Value           | Default Environment Variable |
-| --------------------- | ----------------------- | ---------------------------- |
-| `listen.host`         | `localhost`             | `WG_NODE_HOST`               |
-| `listen.port`         | `9991`                  | `WG_NODE_PORT`               |
-| `listenInternal.port` | `9993`                  | `WG_NODE_INTERNAL_PORT`      |
-| `nodeUrl`             | `http://localhost:9991` | `WG_NODE_URL`                |
-| `publicNodeUrl`       | `http://localhost:9991` | `WG_PUBLIC_NODE_URL`         |
-| `logger.level`        | `info`                  | `WG_LOG_LEVEL`               |
+| Option                               | Default Value           | Default Environment Variable     |
+| ------------------------------------ | ----------------------- | -------------------------------- |
+| `listen.host`                        | `localhost`             | `WG_NODE_HOST`                   |
+| `listen.port`                        | `9991`                  | `WG_NODE_PORT`                   |
+| `listenInternal.port`                | `9993`                  | `WG_NODE_INTERNAL_PORT`          |
+| `nodeUrl`                            | `http://localhost:9991` | `WG_NODE_URL`                    |
+| `publicNodeUrl`                      | `http://localhost:9991` | `WG_PUBLIC_NODE_URL`             |
+| `logger.level`                       | `info`                  | `WG_LOG_LEVEL`                   |
+| `prometheus.enabled`                 | `true`                  | `WG_PROMETHEUS_ENABLED`          |
+| `prometheus.port`                    | `8881`                  | `WG_PROMETHEUS_PORT`             |
+| `openTelemetry.enabled`              | `false`                 | `WG_OTEL_ENABLED`                |
+| `openTelemetry.sampler`              | `1.0`                   | `WG_OTEL_SAMPLER`                |
+| `openTelemetry.exporterHttpEndpoint` | `http://localhost:4318` | `WG_OTEL_EXPORTER_HTTP_ENDPOINT` |
+| `openTelemetry.authToken`            | ``                      | `WG_OTEL_AUTH_TOKEN`             |
 
 In case in options only `listen.port` is provided, the `nodeUrl` and `publicNodeUrl` will be set to `http://localhost:<port>`
 

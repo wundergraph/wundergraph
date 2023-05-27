@@ -11,6 +11,7 @@ import process from 'node:process';
 import { OperationsClient } from '../operations-client';
 import { propagation, trace } from '@opentelemetry/api';
 import { Attributes } from '../trace/attributes';
+import { attachErrorToSpan } from '../trace/util';
 
 export interface WebHookRouteConfig {
 	kind: 'webhook';
@@ -86,8 +87,13 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 							reply.send(eventResponse.body);
 						}
 						reply.code(eventResponse.statusCode || 200);
-					} catch (e) {
-						req.log.child({ webhook: hook.name }).error(e, 'Webhook handler threw an error');
+					} catch (err: any) {
+						// Mark the request as errored and attach information about the error
+						if (req.telemetry) {
+							attachErrorToSpan(req.telemetry.parentSpan, err);
+						}
+
+						req.log.child({ webhook: hook.name }).error(err, 'Webhook handler threw an error');
 						reply.code(500);
 					} finally {
 						await config.releaseContext(requestContext);

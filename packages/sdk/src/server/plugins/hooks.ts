@@ -16,6 +16,7 @@ import { Headers } from '@whatwg-node/fetch';
 import { FastifyRequest } from 'fastify';
 import { trace } from '@opentelemetry/api';
 import { Attributes } from '../trace/attributes';
+import { attachErrorToSpan } from '../trace/util';
 
 const maximumRecursionLimit = 16;
 
@@ -72,6 +73,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					try {
 						await config.authentication?.postAuthentication?.(request.ctx);
 					} catch (err) {
+						// Mark the request as errored and attach information about the error
+						if (request.telemetry) {
+							attachErrorToSpan(request.telemetry.parentSpan, err);
+						}
+
 						request.log.error(err);
 						reply.code(500).send({ hook: 'postAuthentication', error: err });
 					}
@@ -95,6 +101,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 							setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 						});
 					} catch (err) {
+						// Mark the request as errored and attach information about the error
+						if (request.telemetry) {
+							attachErrorToSpan(request.telemetry.parentSpan, err);
+						}
+
 						request.log.error(err);
 						reply.code(500).send({ hook: 'mutatingPostAuthentication', error: err });
 					}
@@ -115,6 +126,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 							setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 						});
 					} catch (err) {
+						// Mark the request as errored and attach information about the error
+						if (request.telemetry) {
+							attachErrorToSpan(request.telemetry.parentSpan, err);
+						}
+
 						request.log.error(err);
 						reply.code(500).send({ hook: 'revalidateAuthentication', error: err });
 					}
@@ -135,6 +151,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 							setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 						});
 					} catch (err) {
+						// Mark the request as errored and attach information about the error
+						if (request.telemetry) {
+							attachErrorToSpan(request.telemetry.parentSpan, err);
+						}
+
 						request.log.error(err);
 						reply.code(500).send({ hook: 'postLogout', error: err });
 					}
@@ -187,6 +208,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					},
 				};
 			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
 				request.log.error(err);
 				reply.code(500);
 				return { hook: 'onOriginRequest', error: err };
@@ -234,6 +260,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					},
 				};
 			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
 				request.log.error(err);
 				reply.code(500);
 				return { hook: 'onOriginResponse', error: err };
@@ -270,6 +301,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 						response: resp,
 					};
 				} catch (err) {
+					// Mark the request as errored and attach information about the error
+					if (request.telemetry) {
+						attachErrorToSpan(request.telemetry.parentSpan, err);
+					}
+
 					request.log.error(err);
 					reply.code(504).send({ hook: 'onConnectionInit', error: err });
 				}
@@ -330,6 +366,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
 				request.log.error(err);
 				reply.code(500);
 				return { op: operationName, hook: 'mock', error: err };
@@ -359,6 +400,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
 				request.log.error(err);
 				reply.code(500);
 				return { op: operationName, hook: 'preResolve', error: err };
@@ -389,6 +435,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
 				request.log.error(err);
 				reply.code(500);
 				return { op: operationName, hook: 'postResolve', error: err };
@@ -419,6 +470,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
 				request.log.error(err);
 				reply.code(500);
 				return { op: operationName, hook: 'mutatingPreResolve', error: err };
@@ -450,6 +506,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
 				request.log.error(err);
 				reply.code(500);
 				return { op: operationName, hook: 'mutatingPostResolve', error: err };
@@ -480,6 +541,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
 				request.log.error(err);
 				reply.code(500);
 				return { op: operationName, hook: 'customResolve', error: err };
