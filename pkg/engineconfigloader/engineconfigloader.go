@@ -17,7 +17,6 @@ import (
 
 	"github.com/buger/jsonparser"
 	"go.uber.org/zap"
-
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/graphql_datasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/staticdatasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
