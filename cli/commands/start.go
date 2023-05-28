@@ -2,12 +2,13 @@ package commands
 
 import (
 	"context"
-	"github.com/spf13/cobra"
-	"go.uber.org/zap"
-	"golang.org/x/sync/errgroup"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/spf13/cobra"
+	"go.uber.org/zap"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
 )
