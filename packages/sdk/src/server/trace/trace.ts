@@ -10,7 +10,7 @@ import {
 	SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-node';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { pino } from 'pino';
 import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
 // use for debugging e.g. check if the exporter is called, spans are created etc.
@@ -32,6 +32,7 @@ export interface TelemetryOptions {
 	httpEndpoint: string;
 	authToken?: string;
 	sampler?: number;
+	batchTimeoutMs?: number;
 }
 
 export const getTestTracerProvider = (): TelemetryTestTracerProvider => {
@@ -103,9 +104,9 @@ export function normalizeURL(endpoint: string): string {
 function getSpanProcessor(config: TelemetryOptions, logger: pino.Logger): SpanProcessor {
 	return new BatchSpanProcessor(getExporter(config, logger), {
 		// The maximum queue size. After the size is reached spans are dropped.
-		maxQueueSize: 1000,
+		maxQueueSize: 2048,
 		// The interval between two consecutive exports
-		scheduledDelayMillis: 2500,
+		scheduledDelayMillis: config.batchTimeoutMs,
 	});
 }
 

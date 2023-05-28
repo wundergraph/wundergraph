@@ -38,6 +38,7 @@ import { propagation } from '@opentelemetry/api';
 import { TracerConfig } from './types';
 import { loadTraceConfigFromWgConfig } from './trace/config';
 
+const isProduction = process.env.NODE_ENV === 'production';
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
 let logger: pino.Logger;
@@ -133,8 +134,6 @@ const _configureWunderGraphServer = <
 	 * This environment variable is used to determine if the server should start the hooks server.
 	 */
 	if (process.env.START_HOOKS_SERVER === 'true') {
-		const isProduction = process.env.NODE_ENV === 'production';
-
 		if (!isProduction) {
 			// Exit the server when wunderctl exited without the chance to kill the child processes
 			onParentProcessExit(() => {
@@ -301,13 +300,23 @@ export const createServer = async ({
 		const tracerConfig: TracerConfig = loadTraceConfigFromWgConfig(config.api?.nodeOptions.openTelemetry);
 
 		if (tracerConfig.enabled) {
-			fastify.log.info({ endpoint: tracerConfig.httpEndpoint, sampler: tracerConfig.sampler }, 'OpenTelemetry enabled');
+			let batchTimeoutMs = isProduction ? 3000 : 1000;
+			const batchTimeoutMsEnv = process.env[WgEnv.OtelBatchTimeoutMs];
+			if (batchTimeoutMsEnv) {
+				batchTimeoutMs = parseInt(batchTimeoutMsEnv);
+			}
+
+			fastify.log.info(
+				{ endpoint: tracerConfig.httpEndpoint, sampler: tracerConfig.sampler, batchTimeoutMs },
+				'OpenTelemetry enabled'
+			);
 
 			const tracerProvider = configureTracerProvider(
 				{
 					httpEndpoint: tracerConfig.httpEndpoint,
 					authToken: tracerConfig.authToken,
 					sampler: tracerConfig.sampler,
+					batchTimeoutMs,
 				},
 				logger
 			);

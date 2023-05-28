@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/fatih/color"
@@ -41,6 +42,7 @@ var (
 	cmdDurationMetric     telemetry.DurationMetric
 	zapLogLevel           zapcore.Level
 	_wunderGraphDirConfig string
+	otelBatchTimeout      time.Duration
 
 	rootFlags helpers.RootFlags
 
@@ -267,6 +269,12 @@ func init() {
 	_, isTelemetryDisabled := os.LookupEnv("WG_TELEMETRY_DISABLED")
 	_, isTelemetryDebugEnabled := os.LookupEnv("WG_TELEMETRY_DEBUG")
 	telemetryAnonymousID := os.Getenv("WG_TELEMETRY_ANONYMOUS_ID")
+
+	if otelBatchTimeoutEnv, ok := os.LookupEnv("WG_OTEL_BATCH_TIMEOUT_MS"); ok {
+		if ms, err := strconv.Atoi(otelBatchTimeoutEnv); err == nil {
+			otelBatchTimeout = time.Duration(ms) * time.Millisecond
+		}
+	}
 
 	config.InitConfig(config.Options{
 		TelemetryEnabled:     !isTelemetryDisabled,

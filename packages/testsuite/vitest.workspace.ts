@@ -18,6 +18,14 @@ export default defineWorkspace([
 		},
 	},
 	{
+		root: 'apps/opentelemetry',
+		test: {
+			globalSetup: 'apps/opentelemetry/test-setup.ts',
+			testTimeout: 15000,
+			hookTimeout: 20000,
+		},
+	},
+	{
 		root: 'apps/hooks',
 		test: {
 			globalSetup: 'apps/hooks/test-setup.ts',

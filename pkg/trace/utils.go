@@ -39,3 +39,10 @@ func SetOperationAttributes(ctx context.Context) {
 func SpanNameFormatter(_operation string, r *http.Request) string {
 	return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
 }
+
+func RequestFilter(req *http.Request) bool {
+	if req.URL.Path == "/health" || req.URL.Path == "/favicon.ico" {
+		return false
+	}
+	return true
+}

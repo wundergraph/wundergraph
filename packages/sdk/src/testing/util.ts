@@ -24,6 +24,10 @@ export function getJSONBody<Body = any>(req: Request): Promise<Body> {
 	});
 }
 
+export function getBody(req: Request): Promise<Buffer> {
+	return getRawBody(req);
+}
+
 export function getTextBody(req: Request): Promise<string> {
 	return new Promise((resolve, reject) => {
 		getRawBody(req, (err, body) => {

@@ -97,6 +97,7 @@ type options struct {
 	healthCheckTimeout      time.Duration
 	onServerConfigLoad      func(config *WunderNodeConfig)
 	onServerError           func(err error)
+	traceBatchTimeout       time.Duration
 }
 
 type Option func(options *options)
@@ -158,6 +159,17 @@ func WithGlobalRateLimit(requests int, perDuration time.Duration) Option {
 		options.globalRateLimit.enable = true
 		options.globalRateLimit.requests = requests
 		options.globalRateLimit.perDuration = perDuration
+	}
+}
+
+// WithTraceBatchTimeout sets the timeout for the trace batch exporter
+// If the timeout is less or equal than 0, the default value of 5 seconds will be used
+func WithTraceBatchTimeout(batchTimeout time.Duration) Option {
+	return func(options *options) {
+		if batchTimeout <= 0 {
+			batchTimeout = 3000 * time.Millisecond
+		}
+		options.traceBatchTimeout = batchTimeout
 	}
 }
 
@@ -443,6 +455,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		n.log.Info("OpenTelemetry enabled",
 			zap.String("endpoint", endpoint),
 			zap.Float64("sampler", sampler),
+			zap.String("batchTimeout", n.options.traceBatchTimeout.String()),
 		)
 
 		if err := n.startTracer(&trace.Config{
@@ -450,6 +463,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 			Endpoint:     endpoint,
 			Batcher:      "otlphttp",
 			OtlpHttpPath: "/v1/traces",
+			BatchTimeout: n.options.traceBatchTimeout,
 			Sampler:      sampler,
 			OtlpHeaders: map[string]string{
 				"Authorization": fmt.Sprintf("Bearer %s", nodeConfig.Api.Options.OpenTelemetry.AuthToken),

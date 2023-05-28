@@ -17,13 +17,13 @@ describe('Telemetry plugin', () => {
 
 		fastify.register(require('./telemetry'), tp);
 
-		fastify.get('/', async (request, reply) => {
+		fastify.get('/test', async (request, reply) => {
 			return 'hello world';
 		});
 
 		await fastify.inject({
 			method: 'GET',
-			url: '/',
+			url: '/test',
 		});
 
 		const spans = tp.exporter.getFinishedSpans();
@@ -34,10 +34,10 @@ describe('Telemetry plugin', () => {
 			'http.flavor': '1.1',
 			'http.method': 'GET',
 			'http.response_content_length': '11',
-			'http.route': '/',
+			'http.route': '/test',
 			'http.scheme': 'http',
 			'http.status_code': 200,
-			'http.url': '/',
+			'http.url': '/test',
 			'http.user_agent': 'lightMyRequest',
 			'wg.component.name': 'hooks-server',
 		});

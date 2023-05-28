@@ -21,6 +21,7 @@ export enum WgEnv {
 	OtelExporterHttpEndpoint = 'WG_OTEL_EXPORTER_HTTP_ENDPOINT',
 	OtelSampler = 'WG_OTEL_SAMPLER',
 	OtelAuthToken = 'WG_OTEL_AUTH_TOKEN',
+	OtelBatchTimeoutMs = 'WG_OTEL_BATCH_TIMEOUT_MS',
 }
 
 export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'debug';

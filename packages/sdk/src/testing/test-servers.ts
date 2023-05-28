@@ -27,7 +27,7 @@ export class WunderGraphTestServers<ClientType extends Client = Client> {
 		await this.mockServer.start();
 
 		const msUrl = this.mockServer.url();
-		const env: Record<string, string> = { WG_HTTP_PROXY: this.mockServer.url(), ...options?.env };
+		const env: Record<string, string> = { ...options?.env };
 
 		if (options?.mockURLEnvs) {
 			for (const envVar of options.mockURLEnvs) {

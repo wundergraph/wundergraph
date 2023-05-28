@@ -7,6 +7,7 @@ import { WgEnv } from '../../configure/options';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { attachErrorToSpan, setStatusFromResponseCode } from '../trace/util';
 import { Attributes, Components } from '../trace/attributes';
+import uri, { URIComponent } from 'fast-uri';
 
 export interface FastifyTelemetry {
 	context: Context;
@@ -31,7 +32,17 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async
 
 	fastify.decorate<Tracer>('tracer', tracer);
 
+	const filter = (url: URIComponent): boolean => {
+		return url.path === '/health' || url.path === '/favicon.ico';
+	};
+
 	fastify.addHook('onRequest', async (req, resp) => {
+		const url = uri.parse(req.url);
+
+		if (filter(url)) {
+			return;
+		}
+
 		const activeContext = propagation.extract(ROOT_CONTEXT, req.headers);
 		const span = tracer.startSpan(`${req.method} ${req.url}`, { startTime: performance.now() }, activeContext);
 
