@@ -271,7 +271,10 @@ func init() {
 	telemetryAnonymousID := os.Getenv("WG_TELEMETRY_ANONYMOUS_ID")
 
 	if otelBatchTimeoutEnv, ok := os.LookupEnv("WG_OTEL_BATCH_TIMEOUT_MS"); ok {
-		if ms, err := strconv.Atoi(otelBatchTimeoutEnv); err == nil {
+		ms, err := strconv.Atoi(otelBatchTimeoutEnv)
+		if err != nil {
+			log.Error("Value behind WG_OTEL_BATCH_TIMEOUT_MS could not be parsed as integer", zap.Error(err))
+		} else {
 			otelBatchTimeout = time.Duration(ms) * time.Millisecond
 		}
 	}
