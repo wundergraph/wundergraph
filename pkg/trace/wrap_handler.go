@@ -3,7 +3,6 @@ package trace
 import (
 	"net/http"
 
-	"github.com/felixge/httpsnoop"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -11,7 +10,6 @@ import (
 
 // WrapHandler wraps a http.Handler and instruments it using the given operation name.
 // Internally it uses otelhttp.NewHandler and set the span status based on the http response status code.
-// It uses a response writer wrapper to get the status code.
 func WrapHandler(wrappedHandler http.Handler, componentName attribute.KeyValue, opts ...otelhttp.Option) http.Handler {
 	// Don't trace health check requests or favicon browser requests
 	opts = append(opts, otelhttp.WithFilter(func(req *http.Request) bool {
@@ -26,10 +24,7 @@ func WrapHandler(wrappedHandler http.Handler, componentName attribute.KeyValue, 
 	setSpanStatusHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		span := trace.SpanFromContext(req.Context())
 		span.SetAttributes(componentName)
-
-		m := httpsnoop.CaptureMetrics(wrappedHandler, w, req)
-
-		SetStatus(span, m.Code)
+		wrappedHandler.ServeHTTP(w, req)
 	})
 	return otelhttp.NewHandler(setSpanStatusHandler, "", opts...)
 }

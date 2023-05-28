@@ -7,7 +7,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
@@ -26,7 +25,7 @@ func TestWrapHttpHandler(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		h := WrapHandler(router, attribute.String("", ""))
+		h := WrapHandler(router, WgComponentName.String("test"))
 
 		req := httptest.NewRequest("GET", "/test", nil)
 		w := httptest.NewRecorder()
@@ -43,27 +42,47 @@ func TestWrapHttpHandler(t *testing.T) {
 	})
 
 	t.Run("set span status to error", func(t *testing.T) {
+		var statusCodeTests = []struct {
+			statusCode int             // input
+			expected   sdktrace.Status // expected result
+		}{
+			{200, sdktrace.Status{Code: codes.Unset, Description: ""}},
+			{201, sdktrace.Status{Code: codes.Unset, Description: ""}},
+			{300, sdktrace.Status{Code: codes.Unset, Description: ""}},
+			{301, sdktrace.Status{Code: codes.Unset, Description: ""}},
+			{400, sdktrace.Status{Code: codes.Unset, Description: ""}},
+			{404, sdktrace.Status{Code: codes.Unset, Description: ""}},
+			{500, sdktrace.Status{Code: codes.Error, Description: ""}},
+		}
+
 		exporter := tracetest.NewInMemoryExporter(t)
 
-		router := mux.NewRouter()
+		for _, test := range statusCodeTests {
+			router := mux.NewRouter()
 
-		router.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-		})
+			statusCode := test.statusCode
 
-		h := WrapHandler(router, attribute.String("", ""))
+			router.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(statusCode)
+			})
 
-		req := httptest.NewRequest("GET", "/test", nil)
-		w := httptest.NewRecorder()
-		h.ServeHTTP(w, req)
+			h := WrapHandler(router, WgComponentName.String("test"))
 
-		assert.Equal(t, http.StatusBadRequest, w.Code)
+			req := httptest.NewRequest("GET", "/test", nil)
+			w := httptest.NewRecorder()
 
-		sn := exporter.GetSpans().Snapshots()
-		assert.Len(t, sn, 1)
-		assert.Equal(t, "GET /test", sn[0].Name())
-		assert.Equal(t, sdktrace.Status{Code: codes.Error, Description: "Bad Request"}, sn[0].Status())
-		assert.Equal(t, trace.SpanKindServer, sn[0].SpanKind())
-		assert.Len(t, sn[0].Attributes(), 8)
+			h.ServeHTTP(w, req)
+
+			assert.Equal(t, statusCode, w.Code)
+
+			sn := exporter.GetSpans().Snapshots()
+
+			assert.Len(t, sn, 1)
+			assert.Equal(t, "GET /test", sn[0].Name())
+			assert.Equal(t, test.expected, sn[0].Status())
+			assert.Equal(t, trace.SpanKindServer, sn[0].SpanKind())
+
+			exporter.Reset()
+		}
 	})
 }

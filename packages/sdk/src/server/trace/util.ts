@@ -2,9 +2,9 @@ import { Span, SpanStatusCode } from '@opentelemetry/api';
 import { Attributes } from './attributes';
 
 // setStatus is a helper function to set the status of a span based on the status code of the response
-// if the status code is >= 400 the span status is set to error
+// if the status code is >= 500 the span status is set to error
 export const setStatusFromResponseCode = (span: Span, statusCode: number) => {
-	if (statusCode >= 400) {
+	if (statusCode >= 500) {
 		span.setStatus({ code: SpanStatusCode.ERROR });
 	}
 };
