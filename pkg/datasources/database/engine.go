@@ -18,8 +18,8 @@ import (
 
 	"github.com/gofrs/flock"
 	"github.com/phayes/freeport"
-	"github.com/prisma/prisma-client-go/binaries"
-	"github.com/prisma/prisma-client-go/binaries/platform"
+	"https://github.com/rnbokade/prisma-client-go/binaries"
+	"https://github.com/rnbokade/prisma-client-go/platform"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/repair"
