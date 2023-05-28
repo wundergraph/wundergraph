@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
@@ -25,7 +26,7 @@ func TestWrapHttpHandler(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		h := WrapHandler(router, "")
+		h := WrapHandler(router, attribute.String("", ""))
 
 		req := httptest.NewRequest("GET", "/test", nil)
 		w := httptest.NewRecorder()
@@ -50,7 +51,7 @@ func TestWrapHttpHandler(t *testing.T) {
 			w.WriteHeader(http.StatusBadRequest)
 		})
 
-		h := WrapHandler(router, "")
+		h := WrapHandler(router, attribute.String("", ""))
 
 		req := httptest.NewRequest("GET", "/test", nil)
 		w := httptest.NewRecorder()

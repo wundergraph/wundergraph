@@ -1,11 +1,11 @@
 package trace
 
 import (
-	"go.opentelemetry.io/otel/attribute"
 	"net/http"
 
 	"github.com/felixge/httpsnoop"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
 
