@@ -2,6 +2,12 @@
 
 set -e
 
-for run in {1..100} ; do
+COUNTER=1
+
+for run in {1..30} ; do
+	echo "!-----------------------!"
+	echo "Round $COUNTER of 30"
+	echo "!-----------------------!"
   pnpm run --filter ./packages/testsuite test
+  COUNTER=$[$COUNTER +1]
 done

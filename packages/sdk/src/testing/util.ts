@@ -2,16 +2,11 @@ import net from 'net';
 import { Request } from '@wundergraph/straightforward';
 import getRawBody from 'raw-body';
 import { access } from 'node:fs/promises';
+import getPort from 'get-port';
 
 export async function freeport(): Promise<number> {
-	return new Promise((resolve, reject) => {
-		const server = net.createServer();
-		server.once('error', reject);
-		server.listen(0, () => {
-			const address = server.address() as net.AddressInfo;
-			const port = address.port;
-			server.close(() => resolve(port));
-		});
+	return getPort({
+		host: '127.0.0.1',
 	});
 }
 

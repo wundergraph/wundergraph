@@ -459,6 +459,7 @@ importers:
       fast-uri: ^2.2.0
       fastify: ^4.10.2
       fastify-plugin: ^4.4.0
+      get-port: ^5.1.1
       graphql: ^16.6.0
       graphql-helix: ^1.13.0
       handlebars: ^4.7.7
@@ -526,6 +527,7 @@ importers:
       fast-uri: 2.2.0
       fastify: 4.10.2
       fastify-plugin: 4.4.0
+      get-port: 5.1.1
       graphql: 16.6.0
       graphql-helix: 1.13.0_graphql@16.6.0
       handlebars: 4.7.7
@@ -13093,6 +13095,11 @@ packages:
     engines: {node: '>=4'}
     dev: false
 
+  /get-port/5.1.1:
+    resolution: {integrity: sha512-g/Q1aTSDOxFpchXC4i8ZWvxA1lnPqx/JHqcpIw0/LX9T8x/GBbi6YnlN5nhaKIFkT8oFsscUKgDJYxfwfS6QsQ==}
+    engines: {node: '>=8'}
+    dev: false
+
   /get-stdin/8.0.0:
     resolution: {integrity: sha512-sY22aA6xchAzprjyqmSEQv4UbAAzRN0L2dQB0NlN5acTTK9Don6nhoc3eAbUnpZiCANAMfd/+40kVdKfFygohg==}
     engines: {node: '>=10'}
@@ -25384,6 +25391,7 @@ packages:
       fastify: 4.10.2
       fastify-graceful-shutdown: 3.4.0
       fastify-plugin: 4.4.0
+      get-port: 5.1.1
       graphql: 16.6.0
       graphql-helix: 1.13.0_graphql@16.6.0
       handlebars: 4.7.7
