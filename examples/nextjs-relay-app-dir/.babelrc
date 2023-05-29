@@ -1,0 +1,14 @@
+{
+  "presets": ["next/babel"],
+  "plugins": [
+    "relay",
+    [
+      "@babel/plugin-transform-regenerator",
+      {
+        "asyncGenerators": true,
+        "generators": true,
+        "async": true
+      }
+    ]
+  ]
+}
