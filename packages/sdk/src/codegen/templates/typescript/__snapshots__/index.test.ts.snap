@@ -20,7 +20,7 @@ export const Planets = {
 	earth: "earth",
 } as const;
 
-export type PlanetsValues = keyof typeof Planets;
+export type PlanetsValues = (typeof Planets)[keyof typeof Planets];
 
 export interface CreatePetInput {
 	petInput: PetInput;
@@ -55,7 +55,7 @@ export const Planets = {
 	earth: "earth",
 } as const;
 
-export type PlanetsValues = keyof typeof Planets;
+export type PlanetsValues = (typeof Planets)[keyof typeof Planets];
 
 export interface ClosestPlanetsResponse {
 	data: ClosestPlanetsResponseData;
