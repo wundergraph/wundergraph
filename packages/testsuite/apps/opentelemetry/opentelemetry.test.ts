@@ -59,7 +59,9 @@ describe('OpenTelemetry', () => {
 		});
 
 		// wait until the spans were exported
-		await wait(2000);
+		// even though the batch timeout is 100ms, it can take a bit longer
+		// until the spans are actually exported and received by the mock server
+		await wait(3000);
 
 		scope.done();
 
