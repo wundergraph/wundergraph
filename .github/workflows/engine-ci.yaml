@@ -73,7 +73,8 @@ jobs:
       - name: Linters
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.50
+          # keep in sync with local version
+          version: v1.52.2
           args: --timeout 2m
 
       - name: Run unit and integration tests
