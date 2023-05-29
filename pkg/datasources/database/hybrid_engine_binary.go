@@ -17,7 +17,7 @@ func NewHybridEngine(prismaSchema, wundergraphDir string, log *zap.Logger) (Hybr
 		Timeout: time.Second * 5,
 	}
 	engine := NewEngine(client, log, wundergraphDir)
-	err := engine.StartQueryEngine(prismaSchema)
+	_, err := engine.StartQueryEngine(prismaSchema)
 	if err != nil {
 		return nil, err
 	}

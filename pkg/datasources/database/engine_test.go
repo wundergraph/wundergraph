@@ -61,7 +61,7 @@ func TestIntrospect(t *testing.T) {
 
 	schema, err = engine.IntrospectPrismaDatabaseSchema(schema)
 	assert.NoError(t, err)
-	err = engine.StartQueryEngine(schema)
+	schemaFile, err := engine.StartQueryEngine(schema)
 	assert.NoError(t, err)
 	defer engine.StopQueryEngine()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -105,7 +105,7 @@ func TestIntrospectPlanetScale(t *testing.T) {
 
 	schema, err = engine.IntrospectPrismaDatabaseSchema(schema)
 	assert.NoError(t, err)
-	err = engine.StartQueryEngine(schema)
+	schemaFile, err := engine.StartQueryEngine(schema)
 	assert.NoError(t, err)
 	defer engine.StopQueryEngine()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
