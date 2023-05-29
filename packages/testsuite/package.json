@@ -4,7 +4,8 @@
   "version": "0.0.1",
   "description": "Integration tests for WunderGraph SDK",
   "scripts": {
-    "test": "vitest run",
+    "test": "VITEST_MIN_THREADS=2 VITEST_MAX_THREADS=4 vitest run",
+    "test:ci": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage"
   },

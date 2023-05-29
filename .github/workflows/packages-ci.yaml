@@ -78,7 +78,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run testsuite
-        run: pnpm test:suite
+        run: pnpm test:suite:ci
 
       - name: Determine changed files
         id: changed
