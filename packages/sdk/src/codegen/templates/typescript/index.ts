@@ -178,6 +178,48 @@ export class TypeScriptResponseDataModels implements Template {
 	}
 }
 
+export class TypeScriptEnumModels implements Template {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		let enumMap: Map<string, Set<string>> = new Map();
+
+		generationConfig.config.application.Operations.forEach((op, index) => {
+			const schemas: JSONSchema[] = [
+				op.VariablesSchema,
+				op.InjectedVariablesSchema,
+				op.InternalVariablesSchema,
+				op.ResponseSchema,
+				op.InterpolationVariablesSchema,
+			];
+
+			for (const index in schemas) {
+				enumMap = extractEnums(schemas[index], enumMap);
+			}
+		});
+
+		const content = Array.from(enumMap.entries())
+			.map(([name, set]) => {
+				const values = Array.from(set.keys());
+				const enumValues = values.map((value: string) => `'${value}'`).join(' | ');
+				return `export const ${name} = {\n  ${values
+					.map((value: string) => `${value}: '${value}'`)
+					.join(',\n  ')}\n} as const;\n\nexport type ${name}Values = keyof typeof ${name};\n`;
+			})
+			.join('\n\n');
+
+		return Promise.resolve([
+			{
+				path: 'models.ts',
+				content: formatTypeScript(content),
+				header: doNotEditHeader,
+			},
+		]);
+	}
+
+	dependencies(): Template[] {
+		return [new BaseTypeScriptDataModel()];
+	}
+}
+
 export class BaseTypeScriptDataModel implements Template {
 	precedence = 10;
 
@@ -311,6 +353,9 @@ const JSONSchemaToTypescriptInterface = (
 	const writeType = (name: string, isRequired: boolean, typeName: string) => {
 		out += `${name + (isRequired ? '' : '?')}: ${typeName}\n`;
 	};
+	const writeEnumType = (enumName: string) => {
+		out += `${enumName}Values`;
+	};
 	visitJSONSchema(schema, {
 		root: {
 			enter: () => {
@@ -345,9 +390,18 @@ const JSONSchemaToTypescriptInterface = (
 				out += name === '' ? '[]' : '[],';
 			},
 		},
-		string: (name, isRequired, isArray, enumValues) => {
+		string: (name, isRequired, isArray, enumValues, enumName) => {
 			if (enumValues !== undefined) {
 				const values = enumValues.map((v) => `"${v}"`).join(' | ');
+
+				if (enumName && name) {
+					writeType(name, isRequired, enumName + 'Values');
+					return;
+				} else if (enumName) {
+					writeEnumType(enumName);
+					return;
+				}
+
 				if (isArray) {
 					out += ' (' + values + ') ';
 				} else {
@@ -414,4 +468,40 @@ export const loadFile = (file: string | (() => string)): string => {
 	} catch (e) {
 		return file as string;
 	}
+};
+
+export const extractEnums = (schema: JSONSchema, enumMap: Map<string, any>): Map<string, any> => {
+	const tempMap = enumMap;
+
+	const traverseSchema = (obj: any) => {
+		if (obj.enum && obj['x-graphql-enum-name']) {
+			const name = obj['x-graphql-enum-name'];
+			if (!tempMap.get(name)) {
+				tempMap.set(name, []);
+			}
+			const entry = tempMap.get(name);
+			tempMap.set(name, new Set([...entry, ...obj.enum]));
+		}
+
+		if (obj.$ref) {
+			const refSchema = schema.definitions?.[obj.$ref.split('/').pop()];
+			if (refSchema) {
+				traverseSchema(refSchema);
+			}
+		}
+
+		if (obj.properties) {
+			for (const prop in obj.properties) {
+				traverseSchema(obj.properties[prop]);
+			}
+		}
+
+		if (obj.items && typeof obj.items !== 'boolean') {
+			traverseSchema(obj.items);
+		}
+	};
+
+	traverseSchema(schema);
+
+	return tempMap;
 };

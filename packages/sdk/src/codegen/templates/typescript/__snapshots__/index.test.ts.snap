@@ -14,6 +14,14 @@ export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue
 export type JSONObject = { [key: string]: JSONValue };
 import type { GraphQLError } from "@wundergraph/sdk/client";
 
+export const Planets = {
+	mercury: "mercury",
+	venus: "venus",
+	earth: "earth",
+} as const;
+
+export type PlanetsValues = keyof typeof Planets;
+
 export interface CreatePetInput {
 	petInput: PetInput;
 }
@@ -41,6 +49,19 @@ export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue
 export type JSONObject = { [key: string]: JSONValue };
 import type { GraphQLError } from "@wundergraph/sdk/client";
 
+export const Planets = {
+	mercury: "mercury",
+	venus: "venus",
+	earth: "earth",
+} as const;
+
+export type PlanetsValues = keyof typeof Planets;
+
+export interface ClosestPlanetsResponse {
+	data: ClosestPlanetsResponseData;
+	errors?: GraphQLError[];
+}
+
 export interface MyReviewsResponse {
 	data: MyReviewsResponseData;
 	errors?: GraphQLError[];
@@ -54,6 +75,10 @@ export interface CreatePetResponse {
 export interface NewPetsResponse {
 	data: NewPetsResponseData;
 	errors?: GraphQLError[];
+}
+
+export interface ClosestPlanetsResponseData {
+	name?: PlanetsValues[];
 }
 
 export interface MyReviewsResponseData {

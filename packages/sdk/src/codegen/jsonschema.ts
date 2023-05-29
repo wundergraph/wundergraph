@@ -11,7 +11,8 @@ export type StringVisitorCallBack = (
 	name: string,
 	isRequired: boolean,
 	isArray: boolean,
-	enumValues?: string[]
+	enumValues?: string[],
+	enumName?: string
 ) => void;
 
 export interface VisitorCallBacks {
@@ -81,7 +82,14 @@ const visitSchema = (
 			visitor.object && visitor.object.leave && visitor.object.leave(propertyName, isRequired, isArray);
 			break;
 		case 'string':
-			visitor.string && visitor.string(propertyName, isRequired, isArray, schema.enum as string[]);
+			visitor.string &&
+				visitor.string(
+					propertyName,
+					isRequired,
+					isArray,
+					schema.enum as string[],
+					(schema as any)['x-graphql-enum-name']
+				);
 			break;
 		case 'array':
 			visitor.array && visitor.array.enter && visitor.array.enter(propertyName, isRequired, isArray);

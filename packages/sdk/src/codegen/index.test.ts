@@ -162,6 +162,83 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 					S3UploadProvider: [],
 					Operations: [
 						{
+							Name: 'ClosestPlanets',
+							PathName: 'ClosestPlanets',
+							Content: 'query ClosestPlanets {\n name \n}',
+							OperationType: OperationType.QUERY,
+							ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+							VariablesSchema: {
+								type: 'object',
+								properties: {},
+								additionalProperties: false,
+							},
+							InterpolationVariablesSchema: {
+								type: 'object',
+								properties: {},
+								additionalProperties: false,
+							},
+							InternalVariablesSchema: {
+								type: 'object',
+								properties: {},
+								additionalProperties: false,
+							},
+							InjectedVariablesSchema: {
+								type: 'object',
+								properties: {},
+								additionalProperties: false,
+							},
+							ResponseSchema: {
+								type: 'object',
+								properties: {
+									data: {
+										type: 'object',
+										properties: {
+											name: {
+												type: 'array',
+												items: {
+													type: 'string',
+													'x-graphql-enum-name': 'Planets',
+													enum: ['mercury', 'venus', 'earth'],
+												} as any,
+											},
+										},
+										additionalProperties: false,
+									},
+								},
+								additionalProperties: false,
+								required: ['data'],
+							},
+							AuthenticationConfig: {
+								required: false,
+							},
+							AuthorizationConfig: {
+								claims: [],
+								roleConfig: {
+									requireMatchAll: [],
+									requireMatchAny: [],
+									denyMatchAll: [],
+									denyMatchAny: [],
+								},
+							},
+							HooksConfiguration: {
+								preResolve: false,
+								postResolve: false,
+								mutatingPreResolve: false,
+								mutatingPostResolve: false,
+								mockResolve: {
+									enable: false,
+									subscriptionPollingIntervalMillis: 0,
+								},
+								httpTransportOnResponse: false,
+								httpTransportOnRequest: false,
+								customResolve: false,
+							},
+							VariablesConfiguration: {
+								injectVariables: [],
+							},
+							Internal: false,
+						},
+						{
 							Name: 'MyReviews',
 							PathName: 'MyReviews',
 							Content: 'query MyReviews {\n  me {\n    name\n    reviews {\n      id\n      body\n    }\n  }\n}',
