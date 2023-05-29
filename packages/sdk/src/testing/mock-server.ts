@@ -145,6 +145,13 @@ export class WunderGraphMockServer {
 
 		let scope: Scope | undefined = undefined;
 
+		let requestMocks = this.mocks.filter((mock) => mock.type === 'request');
+
+		if (requestMocks.length === 0) {
+			log('you did not define any request mocks for: %s %s', req.method, req.url);
+			return;
+		}
+
 		for (let mock of this.mocks) {
 			scope = mock.scope;
 
@@ -259,7 +266,14 @@ export class WunderGraphMockServer {
 
 		let scope: Scope | undefined = undefined;
 
-		for (let mock of this.mocks) {
+		let connectMocks = this.mocks.filter((mock) => mock.type === 'connect');
+
+		if (connectMocks.length === 0) {
+			log('you did not define any connect mocks for: %s %s', req.method, req.url);
+			return;
+		}
+
+		for (let mock of connectMocks) {
 			scope = mock.scope;
 
 			if (mock.type !== 'connect') {

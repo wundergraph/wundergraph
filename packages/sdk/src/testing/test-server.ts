@@ -129,7 +129,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		if (!this.nodeUrl) {
 			throw new Error('server is not running');
 		}
-		return `http://0.0.0.0:${this.promPort}/metrics`;
+		return `http://127.0.0.1:${this.promPort}/metrics`;
 	}
 
 	/**
@@ -200,6 +200,8 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 				} else {
 					throw new Error(`server is not yet ready`);
 				}
+			} catch (e) {
+				throw e;
 			} finally {
 				clearTimeout(id);
 			}
@@ -283,15 +285,15 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			manageServer: true,
 			env: {
 				WG_CLOUD: 'true',
-				WG_NODE_URL: `http://0.0.0.0:${nodePort}`,
-				WG_NODE_INTERNAL_URL: `http://0.0.0.0:${nodeInternalPort}`,
-				WG_PUBLIC_NODE_URL: `http://0.0.0.0:${nodePort}`,
+				WG_NODE_URL: `http://127.0.0.1:${nodePort}`,
+				WG_NODE_INTERNAL_URL: `http://127.0.0.1:${nodeInternalPort}`,
+				WG_PUBLIC_NODE_URL: `http://127.0.0.1:${nodePort}`,
 				WG_PROMETHEUS_PORT: `${prometheusPort}`,
-				WG_NODE_HOST: '0.0.0.0',
+				WG_NODE_HOST: '127.0.0.1',
 				WG_NODE_PORT: nodePort.toString(),
 				WG_NODE_INTERNAL_PORT: nodeInternalPort.toString(),
-				WG_SERVER_URL: `http://0.0.0.0:${serverPort}`,
-				WG_SERVER_HOST: '0.0.0.0',
+				WG_SERVER_URL: `http://127.0.0.1:${serverPort}`,
+				WG_SERVER_HOST: '127.0.0.1',
 				WG_SERVER_PORT: serverPort.toString(),
 			},
 		};
