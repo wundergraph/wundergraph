@@ -1,4 +1,10 @@
-import { BaseTypeScriptDataModel, CodeGenerationConfig, Template, TemplateOutputFile } from '@wundergraph/sdk';
+import {
+	BaseTypeScriptDataModel,
+	CodeGenerationConfig,
+	Template,
+	TemplateOutputFile,
+	TypeScriptEnumModels,
+} from '@wundergraph/sdk';
 import { hasInput, visitJSONSchema } from '@wundergraph/sdk/internal';
 import { JSONSchema7 as JSONSchema, JSONSchema7 } from 'json-schema';
 import execa from 'execa';
@@ -142,10 +148,6 @@ export class GolangResponseDataModels implements Template {
 			},
 		]);
 	}
-
-	dependencies(): Template[] {
-		return [new BaseTypeScriptDataModel()];
-	}
 }
 
 export class GolangBaseDataModel implements Template {
@@ -202,6 +204,10 @@ export class GolangModelsBase implements Template {
 				content: gofmt(golangModelsBase),
 			},
 		]);
+	}
+
+	dependencies(): Template[] {
+		return [new BaseTypeScriptDataModel(), new TypeScriptEnumModels()];
 	}
 }
 
@@ -308,6 +314,16 @@ const JSONSchemaToGolangStruct = (schema: JSONSchema, structName: string, withEr
 	});
 	return out;
 };
+
+/* 
+	-------------------------------------
+	Dependencies
+	-------------------------------------
+	GolangModelsBase => BaseTypeScriptDataModel + TypeScriptEnumModels ===> models.go
+	GolangInputModels => GolangModelsBase ===> models.go
+	GolangResponseModels => GolangModelsBase + GolangResponseDataModels + GolangBaseDataModels ===> models.go
+	GolangClient => None ===> client.go
+*/
 
 export const golangClient = {
 	all: (config: GolangClientTemplateConfig = defaultTemplateConfig) => [
