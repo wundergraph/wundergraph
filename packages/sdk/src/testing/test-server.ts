@@ -200,8 +200,6 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 				} else {
 					throw new Error(`server is not yet ready`);
 				}
-			} catch (e) {
-				throw e;
 			} finally {
 				clearTimeout(id);
 			}
