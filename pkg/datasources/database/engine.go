@@ -275,7 +275,27 @@ func (e *Engine) StartQueryEngine(schema string) error {
 	// append all environment variables, as demonstrated in the following:
 	// https://github.com/prisma/prisma/blob/304c54c732921c88bfb57f5730c7f81405ca83ea/packages/engine-core/src/binary/BinaryEngine.ts#L479
 	e.cmd.Env = append(e.cmd.Env, os.Environ()...)
-	e.cmd.Env = append(e.cmd.Env, "PRISMA_DML="+schema)
+
+	// calculate the ARG_MAX limit, minus a safety buffer
+	const safetyBuffer = 2048
+	argMax := 1048576 - safetyBuffer // or however you get the value of ARG_MAX
+
+	if len(schema) < argMax {
+		e.cmd.Env = append(e.cmd.Env, "PRISMA_DML="+schema)
+	} else {
+		// schema is too big, write it to a temp file
+		temporaryFile, err := ioutil.TempFile("", "prisma.*.dml")
+		if err != nil {
+			return err
+		}
+		tempFilePath := temporaryFile.Name()
+		defer os.Remove(tempFilePath)
+		if _, err := temporaryFile.Write([]byte(schema)); err != nil { // ignore the error, we're already handling an error
+			return err
+		}
+
+		e.cmd.Env = append(e.cmd.Env, "PRISMA_DML_PATH="+tempFilePath)
+	}
 
 	e.cmd.Stdout = os.Stdout
 	e.cmd.Stderr = os.Stderr
