@@ -83,13 +83,7 @@ const visitSchema = (
 			break;
 		case 'string':
 			visitor.string &&
-				visitor.string(
-					propertyName,
-					isRequired,
-					isArray,
-					schema.enum as string[],
-					(schema as any)['x-graphql-enum-name']
-				);
+				visitor.string(propertyName, isRequired, isArray, schema.enum as string[], schema['x-graphql-enum-name']);
 			break;
 		case 'array':
 			visitor.array && visitor.array.enter && visitor.array.enter(propertyName, isRequired, isArray);
