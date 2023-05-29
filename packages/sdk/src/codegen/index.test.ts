@@ -199,7 +199,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 													type: 'string',
 													'x-graphql-enum-name': 'Planets',
 													enum: ['mercury', 'venus', 'earth'],
-												} as any,
+												},
 											},
 										},
 										additionalProperties: false,

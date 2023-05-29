@@ -1,7 +1,7 @@
 import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { CodeGenerationConfig } from '../../../configure';
 import prettier from 'prettier';
-import { JSONSchema7, JSONSchema7 as JSONSchema } from 'json-schema';
+import { JSONSchema7, JSONSchema7 as JSONSchema, JSONSchema7Type } from 'json-schema';
 import {
 	hasInjectedInput,
 	hasInput,
@@ -18,6 +18,12 @@ import { visitJSONSchema } from '../../jsonschema';
 import { OperationExecutionEngine } from '@wundergraph/protobuf';
 import { GraphQLOperation } from '../../../graphql/operations';
 import { TypeScriptOperationErrors } from './ts-operation-errors';
+
+declare module 'json-schema' {
+	export interface JSONSchema7 {
+		'x-graphql-enum-name'?: string;
+	}
+}
 
 export const formatTypeScript = (input: string): string => {
 	return prettier.format(input, {
@@ -180,7 +186,7 @@ export class TypeScriptResponseDataModels implements Template {
 
 export class TypeScriptEnumModels implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
-		let enumMap: Map<string, Set<string>> = new Map();
+		let enumMap: Map<string, Set<JSONSchema7Type>> = new Map();
 
 		generationConfig.config.application.Operations.forEach((op, index) => {
 			const schemas: JSONSchema[] = [
@@ -199,9 +205,9 @@ export class TypeScriptEnumModels implements Template {
 		const content = Array.from(enumMap.entries())
 			.map(([name, set]) => {
 				const values = Array.from(set.keys());
-				const enumValues = values.map((value: string) => `'${value}'`).join(' | ');
+				const enumValues = values.map((value) => `'${value}'`).join(' | ');
 				return `export const ${name} = {\n  ${values
-					.map((value: string) => `${value}: '${value}'`)
+					.map((value) => `${value}: '${value}'`)
 					.join(',\n  ')}\n} as const;\n\nexport type ${name}Values = keyof typeof ${name};\n`;
 			})
 			.join('\n\n');
@@ -470,33 +476,39 @@ export const loadFile = (file: string | (() => string)): string => {
 	}
 };
 
-export const extractEnums = (schema: JSONSchema, enumMap: Map<string, any>): Map<string, any> => {
+export const extractEnums = (schema: JSONSchema, enumMap: Map<string, Set<JSONSchema7Type>>): Map<string, any> => {
 	const tempMap = enumMap;
 
-	const traverseSchema = (obj: any) => {
+	const traverseSchema = (obj: JSONSchema) => {
 		if (obj.enum && obj['x-graphql-enum-name']) {
 			const name = obj['x-graphql-enum-name'];
 			if (!tempMap.get(name)) {
-				tempMap.set(name, []);
+				tempMap.set(name, new Set());
 			}
 			const entry = tempMap.get(name);
-			tempMap.set(name, new Set([...entry, ...obj.enum]));
+			if (entry) {
+				const values = Array.from(entry.keys());
+				tempMap.set(name, new Set([...values, ...obj.enum]));
+			}
 		}
 
 		if (obj.$ref) {
-			const refSchema = schema.definitions?.[obj.$ref.split('/').pop()];
-			if (refSchema) {
+			const refSchema = schema.definitions?.[obj.$ref.split('/').pop() as string];
+			if (refSchema && typeof refSchema !== 'boolean') {
 				traverseSchema(refSchema);
 			}
 		}
 
 		if (obj.properties) {
 			for (const prop in obj.properties) {
-				traverseSchema(obj.properties[prop]);
+				const property = obj.properties[prop];
+				if (typeof property !== 'boolean') {
+					traverseSchema(property);
+				}
 			}
 		}
 
-		if (obj.items && typeof obj.items !== 'boolean') {
+		if (obj.items && typeof obj.items !== 'boolean' && !Array.isArray(obj.items)) {
 			traverseSchema(obj.items);
 		}
 	};

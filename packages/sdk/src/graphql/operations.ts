@@ -1024,7 +1024,7 @@ const typeSchema = (
 							};
 						case 'EnumTypeDefinition':
 							schema.type = nonNull ? 'string' : ['string', 'null'];
-							(schema as any)['x-graphql-enum-name'] = namedType.name;
+							schema['x-graphql-enum-name'] = namedType.name;
 							schema.enum = (namedType.astNode.values || []).map((e) => {
 								return e.name.value;
 							});
