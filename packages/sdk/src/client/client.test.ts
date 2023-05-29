@@ -7,7 +7,7 @@ import {
 	ResponseError,
 } from './index';
 import nock from 'nock';
-import fetch from '@whatwg-node/fetch';
+import { fetch } from '@whatwg-node/fetch';
 import { QueryRequestOptions } from './types';
 
 const newClient = (overrides?: Partial<ClientConfig>) => {
