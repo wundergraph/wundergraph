@@ -3,7 +3,7 @@ description: 'This action install go and cache modules and build dependencies'
 inputs:
   go-version:
     description: 'The go version to install'
-    default: '1.19'
+    default: '1.20'
     required: false
   working-directory:
     description: 'The working directory of your go module'
