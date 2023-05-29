@@ -205,7 +205,6 @@ export class TypeScriptEnumModels implements Template {
 		const content = Array.from(enumMap.entries())
 			.map(([name, set]) => {
 				const values = Array.from(set.keys());
-				const enumValues = values.map((value) => `'${value}'`).join(' | ');
 				return `export const ${name} = {\n  ${values
 					.map((value) => `${value}: '${value}'`)
 					.join(',\n  ')}\n} as const;\n\nexport type ${name}Values = typeof ${name}[keyof typeof ${name}];\n`;

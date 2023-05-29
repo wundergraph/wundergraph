@@ -1,11 +1,10 @@
 import { RunTemplateTest } from '../../index.test';
 import {
+	TypeScriptEnumModels,
 	TypeScriptInputModels,
 	TypeScriptResponseDataModels,
 	TypeScriptResponseModels,
-	TypeScriptEnumModels,
 } from './index';
-import {} from 'json-schema';
 
 test('TypeScriptInputModels', async () => {
 	const out = await RunTemplateTest(new TypeScriptEnumModels(), new TypeScriptInputModels());
