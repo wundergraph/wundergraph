@@ -13,7 +13,24 @@ const testEnum = new GraphQLEnumType({
 	},
 });
 
+export class MyContext {
+	cleanup() {
+		console.log('cleaning up');
+	}
+	hello() {
+		return 'world';
+	}
+	greet() {
+		console.log(`say hello ${this.hello()}`);
+	}
+}
+
 export default configureWunderGraphServer(() => ({
+	context: {
+		request: {
+			create: async () => new MyContext(),
+		},
+	},
 	hooks: {
 		authentication: {
 			mutatingPostAuthentication: async (hook) => {
@@ -44,13 +61,13 @@ export default configureWunderGraphServer(() => ({
 				},
 				mutatingPostResolve: async (hook) => {
 					console.log('###mutatingPostResolve', hook);
-
 					return {
 						data: {
 							gql_hello: hook.input.hello,
 						},
 					};
 				},
+				customResolve: async (hook) => {},
 			},
 			FakeWeather: {
 				mockResolve: async (hook) => {
