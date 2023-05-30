@@ -695,6 +695,7 @@ importers:
 
   packages/testsuite:
     specifiers:
+      '@graphql-yoga/node': ^2.13.13
       '@opensearch-project/opensearch': ^2.2.1
       '@wundergraph/sdk': workspace:*
       '@wundergraph/wunderctl': workspace:*
@@ -712,6 +713,7 @@ importers:
       '@wundergraph/wunderctl': link:../wunderctl
       graphql: 16.6.0
     devDependencies:
+      '@graphql-yoga/node': 2.13.13_graphql@16.6.0
       execa: 5.1.1
       fastify: 4.10.2
       graphql-request: 6.0.0_graphql@16.6.0
@@ -2730,7 +2732,6 @@ packages:
       '@envelop/types': 2.4.0_graphql@16.6.0
       graphql: 16.6.0
       tslib: 2.4.0
-    dev: false
 
   /@envelop/parser-cache/4.7.0_4hr55tbjlvoppd2sokdhrbpreq:
     resolution: {integrity: sha512-63NfXDcW/vGn4U6NFxaZ0JbYWAcJb9A6jhTvghsSz1ZS+Dny/ci8bVSgVmM1q+N56hPyGsVPuyI+rIc71mPU5g==}
@@ -2742,7 +2743,6 @@ packages:
       graphql: 16.6.0
       lru-cache: 6.0.0
       tslib: 2.5.0
-    dev: false
 
   /@envelop/types/2.4.0_graphql@16.6.0:
     resolution: {integrity: sha512-pjxS98cDQBS84X29VcwzH3aJ/KiLCGwyMxuj7/5FkdiaCXAD1JEvKEj9LARWlFYj1bY43uII4+UptFebrhiIaw==}
@@ -2751,7 +2751,6 @@ packages:
     dependencies:
       graphql: 16.6.0
       tslib: 2.5.0
-    dev: false
 
   /@envelop/validation-cache/4.7.0_4hr55tbjlvoppd2sokdhrbpreq:
     resolution: {integrity: sha512-PzL+GfWJRT+JjsJqZAIxHKEkvkM3hxkeytS5O0QLXT8kURNBV28r+Kdnn2RCF5+6ILhyGpiDb60vaquBi7g4lw==}
@@ -2763,7 +2762,6 @@ packages:
       graphql: 16.6.0
       lru-cache: 6.0.0
       tslib: 2.5.0
-    dev: false
 
   /@esbuild/android-arm/0.15.13:
     resolution: {integrity: sha512-RY2fVI8O0iFUNvZirXaQ1vMvK0xhCcl0gqRj74Z6yEiO1zAUa7hbsdwZM1kzqbxHK7LFyMizipfXT3JME+12Hw==}
@@ -3595,7 +3593,6 @@ packages:
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       graphql: 16.6.0
       tslib: 2.5.0
-    dev: false
 
   /@graphql-tools/merge/8.4.2_graphql@16.6.0:
     resolution: {integrity: sha512-XbrHAaj8yDuINph+sAfuq3QCZ/tKblrTLOpirK0+CAgNlZUCHs0Fa+xtMUURgwCVThLle1AF7svJCxFizygLsw==}
@@ -3629,7 +3626,6 @@ packages:
       graphql: 16.6.0
       tslib: 2.5.0
       value-or-promise: 1.0.12
-    dev: false
 
   /@graphql-tools/schema/9.0.19_graphql@16.6.0:
     resolution: {integrity: sha512-oBRPoNBtCkk0zbUsyP4GaIzCt8C0aCI4ycIRUL67KK5pOHljKLBBtGT+Jr6hkzA74C8Gco8bpZPe7aWFjiaK2w==}
@@ -3650,7 +3646,6 @@ packages:
     dependencies:
       graphql: 16.6.0
       tslib: 2.5.0
-    dev: false
 
   /@graphql-tools/utils/8.9.0_graphql@16.6.0:
     resolution: {integrity: sha512-pjJIWH0XOVnYGXCqej8g/u/tsfV4LvLlj0eATKQu5zwnxd/TiTHq7Cg313qUPTFFHZ3PP5wJ15chYVtLDwaymg==}
@@ -3669,7 +3664,6 @@ packages:
       '@graphql-typed-document-node/core': 3.1.1_graphql@16.6.0
       graphql: 16.6.0
       tslib: 2.5.0
-    dev: false
 
   /@graphql-typed-document-node/core/3.1.1_graphql@16.6.0:
     resolution: {integrity: sha512-NQ17ii0rK1b34VZonlmT2QMJFI70m0TRwbknO/ihlbatXyaktDhN/98vBiUU6kNBPljqGqyIrl2T4nY2RpFANg==}
@@ -3711,7 +3705,6 @@ packages:
       tslib: 2.5.0
     transitivePeerDependencies:
       - encoding
-    dev: false
 
   /@graphql-yoga/node/2.13.13_graphql@16.6.0:
     resolution: {integrity: sha512-3NmdEq3BkuVLRbo5yUi401sBiwowSKgY8O1DN1RwYdHRr0nu2dXzlYEETf4XLymyP6mKsVfQgsy7HQjwsc1oNw==}
@@ -3727,7 +3720,6 @@ packages:
       tslib: 2.5.0
     transitivePeerDependencies:
       - encoding
-    dev: false
 
   /@graphql-yoga/subscription/2.2.3:
     resolution: {integrity: sha512-It/Dfh+nW2ClTtmOylAa+o7fbKIRYRTH6jfKLj3YB75tkv/rFZ70bjlChDCrEMa46I+zDMg7+cdkrQOXov2fDg==}
@@ -3735,14 +3727,12 @@ packages:
       '@graphql-yoga/typed-event-target': 0.1.1
       '@repeaterjs/repeater': 3.0.4
       tslib: 2.5.0
-    dev: false
 
   /@graphql-yoga/typed-event-target/0.1.1:
     resolution: {integrity: sha512-l23kLKHKhfD7jmv4OUlzxMTihSqgIjGWCSb0KdlLkeiaF2jjuo8pRhX200hFTrtjRHGSYS1fx2lltK/xWci+vw==}
     dependencies:
       '@repeaterjs/repeater': 3.0.4
       tslib: 2.5.0
-    dev: false
 
   /@hapi/hoek/9.3.0:
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
@@ -5594,14 +5584,12 @@ packages:
       asn1js: 3.0.5
       pvtsutils: 1.3.2
       tslib: 2.5.0
-    dev: false
 
   /@peculiar/json-schema/1.1.12:
     resolution: {integrity: sha512-coUfuoMeIB7B8/NMekxaDzLhaYmp0HZNPEjYRm9goRou8UZIC3z21s0sL9AWoCw4EG876QyO3kYrc61WNF9B/w==}
     engines: {node: '>=8.0.0'}
     dependencies:
       tslib: 2.5.0
-    dev: false
 
   /@peculiar/webcrypto/1.4.0:
     resolution: {integrity: sha512-U58N44b2m3OuTgpmKgf0LPDOmP3bhwNz01vAnj1mBwxBASRhptWYK+M3zG+HBkDqGQM+bFsoIihTW8MdmPXEqg==}
@@ -5612,7 +5600,6 @@ packages:
       pvtsutils: 1.3.2
       tslib: 2.5.0
       webcrypto-core: 1.7.5
-    dev: false
 
   /@pnpm/network.ca-file/1.0.1:
     resolution: {integrity: sha512-gkINruT2KUhZLTaiHxwCOh1O4NVnFT0wLjWFBHmTz9vpKag/C/noIMJXBxFe4F0mYpUVX2puLwAieLYFg2NvoA==}
@@ -6101,7 +6088,6 @@ packages:
 
   /@repeaterjs/repeater/3.0.4:
     resolution: {integrity: sha512-AW8PKd6iX3vAZ0vA43nOUOnbq/X5ihgU+mSXXqunMkeQADGiqw/PY0JNeYtD5sr0PAy51YPgAPbDoeapv9r8WA==}
-    dev: false
 
   /@resvg/resvg-wasm/2.4.1:
     resolution: {integrity: sha512-yi6R0HyHtsoWTRA06Col4WoDs7SvlXU3DLMNP2bdAgs7HK18dTEVl1weXgxRzi8gwLteGUbIg29zulxIB3GSdg==}
@@ -7906,7 +7892,6 @@ packages:
       web-streams-polyfill: 3.2.1
     transitivePeerDependencies:
       - encoding
-    dev: false
 
   /@whatwg-node/fetch/0.8.8:
     resolution: {integrity: sha512-CdcjGC2vdKhc13KKxgsc6/616BQ7ooDIgPeTuAiE8qfCnS0mGzcfCOoZXypQSz73nxI+GWc7ZReIAVhxoE1KCg==}
@@ -8419,7 +8404,6 @@ packages:
       pvtsutils: 1.3.2
       pvutils: 1.1.3
       tslib: 2.5.0
-    dev: false
 
   /assert-plus/1.0.0:
     resolution: {integrity: sha512-NfJ4UzBCcQGLDlQq7nHxH+tv3kyZ0hHQqF5BO6J7tNJeP5do1llPr8dZ8zHonfhAu0PHAdMkSo+8o0wxg9lZWw==}
@@ -9146,7 +9130,6 @@ packages:
     engines: {node: '>=10.16.0'}
     dependencies:
       streamsearch: 1.1.0
-    dev: false
 
   /byte-size/7.0.1:
     resolution: {integrity: sha512-crQdqyCwhokxwV1UyDzLZanhkugAgft7vt0qbbdt60C6Zf3CAiGmtUCylbtYwrU6loOUw3euGrNtW1J651ot1A==}
@@ -10983,7 +10966,6 @@ packages:
   /dset/3.1.2:
     resolution: {integrity: sha512-g/M9sqy3oHe477Ar4voQxWtaPIFw1jTdKZuomOjhCcBx9nHUNn0pu6NopuFFrTh/TRZIKEj+76vLWFu9BNKk+Q==}
     engines: {node: '>=4'}
-    dev: false
 
   /duplexer/0.1.2:
     resolution: {integrity: sha512-jtD6YG370ZCIi/9GTaJKQxWTZD045+4R4hTk/x1UyoqadyJ9x9CgSi1RlVDQF8U2sxLLSnFkCaMihqljHIWgMg==}
@@ -11853,7 +11835,6 @@ packages:
 
   /event-target-polyfill/0.0.3:
     resolution: {integrity: sha512-ZMc6UuvmbinrCk4RzGyVmRyIsAyxMRlp4CqSrcQRO8Dy0A9ldbiRy5kdtBj4OtP7EClGdqGfIqo9JmOClMsGLQ==}
-    dev: false
 
   /event-target-shim/5.0.1:
     resolution: {integrity: sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==}
@@ -12598,7 +12579,6 @@ packages:
 
   /form-data-encoder/1.7.2:
     resolution: {integrity: sha512-qfqtYan3rxrnCk1VYaA4H+Ms9xdpPqvLZa6xmMgFvhO32x7/3J/ExcTd6qpxM0vH2GdMI+poehyBZvqfMTto8A==}
-    dev: false
 
   /form-data-encoder/2.1.3:
     resolution: {integrity: sha512-KqU0nnPMgIJcCOFTNJFEA8epcseEaoox4XZffTgy8jlI6pL/5EFyR54NRG7CnCJN0biY7q52DO3MH6/sJ/TKlQ==}
@@ -12628,7 +12608,6 @@ packages:
     dependencies:
       node-domexception: 1.0.0
       web-streams-polyfill: 4.0.0-beta.3
-    dev: false
 
   /formdata-polyfill/4.0.10:
     resolution: {integrity: sha512-buewHzMvYL29jdeQTVILecSaZKnt/RJWjoZCF5OW60Z67/GmSLBkOFM7qh1PI3zFNtJbaZL5eQu1vLfazOwj4g==}
@@ -20594,12 +20573,10 @@ packages:
     resolution: {integrity: sha512-+Ipe2iNUyrZz+8K/2IOo+kKikdtfhRKzNpQbruF2URmqPtoqAs8g3xS7TJvFF2GcPXjh7DkqMnpVveRFq4PgEQ==}
     dependencies:
       tslib: 2.5.0
-    dev: false
 
   /pvutils/1.1.3:
     resolution: {integrity: sha512-pMpnA0qRdFp32b1sJl1wOJNxZLQ2cbQx+k6tjNtZ8CpvVhNqEPRgivZ2WOUev2YMajecdH7ctUPDvEe87nariQ==}
     engines: {node: '>=6.0.0'}
-    dev: false
 
   /q/1.5.1:
     resolution: {integrity: sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw==}
@@ -22288,7 +22265,6 @@ packages:
   /streamsearch/1.1.0:
     resolution: {integrity: sha512-Mcc5wHehp9aXz1ax6bZUyY5afg9u2rv5cqQI3mRrYkGC8rW2hM02jWuwjtL++LS5qinSyhj2QfLyNsuc+VsExg==}
     engines: {node: '>=10.0.0'}
-    dev: false
 
   /string-argv/0.3.1:
     resolution: {integrity: sha512-a1uQGz7IyVy9YwhqjZIZu1c8JO8dNIe20xBmSS6qu9kv++k3JGzCVmprbNN5Kn+BgzD5E7YYwg1CcjuJMRNsvg==}
@@ -23393,7 +23369,6 @@ packages:
 
   /tslib/2.4.0:
     resolution: {integrity: sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==}
-    dev: false
 
   /tslib/2.5.0:
     resolution: {integrity: sha512-336iVw3rtn2BUK7ORdIAHTyxHGRIHVReokCR3XjbckJMK7ms8FysBfhLR8IXnAgy7T0PTPNBWKiH514FOW/WSg==}
@@ -23770,7 +23745,6 @@ packages:
     engines: {node: '>=12.18'}
     dependencies:
       busboy: 1.6.0
-    dev: false
 
   /unicode-canonical-property-names-ecmascript/2.0.0:
     resolution: {integrity: sha512-yY5PpDlfVIU5+y/BSCxAJRBIS1Zc2dDG3Ujq+sR0U+JjUevW2JhocOF+soROYDSaAezOzOKuyyixhD6mBknSmQ==}
@@ -24124,7 +24098,6 @@ packages:
   /value-or-promise/1.0.12:
     resolution: {integrity: sha512-Z6Uz+TYwEqE7ZN50gwn+1LCVo9ZVrpxRPOhOLnncYkY1ZzOYtrX8Fwf/rFktZ8R5mJms6EZf5TqNOMeZmnPq9Q==}
     engines: {node: '>=12'}
-    dev: false
 
   /vary/1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
@@ -24386,7 +24359,6 @@ packages:
   /web-streams-polyfill/4.0.0-beta.3:
     resolution: {integrity: sha512-QW95TCTaHmsYfHDybGMwO5IJIM93I/6vTRk+daHTWFPhwh+C8Cg7j7XyKrwrj8Ib6vYXe0ocYNrmzY4xAAN6ug==}
     engines: {node: '>= 14'}
-    dev: false
 
   /webcrypto-core/1.7.5:
     resolution: {integrity: sha512-gaExY2/3EHQlRNNNVSrbG2Cg94Rutl7fAaKILS1w8ZDhGxdFOaw6EbCfHIxPy9vt/xwp5o0VQAx9aySPF6hU1A==}
@@ -24396,7 +24368,6 @@ packages:
       asn1js: 3.0.5
       pvtsutils: 1.3.2
       tslib: 2.5.0
-    dev: false
 
   /webidl-conversions/3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
