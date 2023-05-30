@@ -186,7 +186,7 @@ export class TypeScriptResponseDataModels implements Template {
 
 export class TypeScriptEnumModels implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
-		let enumMap: Map<string, Set<JSONSchema7Type>> = new Map();
+		let enumMap: Map<string, Array<JSONSchema7Type>> = new Map();
 
 		generationConfig.config.application.Operations.forEach((op, index) => {
 			const schemas: JSONSchema[] = [
@@ -203,8 +203,7 @@ export class TypeScriptEnumModels implements Template {
 		});
 
 		const content = Array.from(enumMap.entries())
-			.map(([name, set]) => {
-				const values = Array.from(set.keys());
+			.map(([name, values]) => {
 				return `export const ${name} = {\n  ${values
 					.map((value) => `${value}: '${value}'`)
 					.join(',\n  ')}\n} as const;\n\nexport type ${name}Values = typeof ${name}[keyof typeof ${name}];\n`;
@@ -475,19 +474,12 @@ export const loadFile = (file: string | (() => string)): string => {
 	}
 };
 
-export const extractEnums = (schema: JSONSchema, enumMap: Map<string, Set<JSONSchema7Type>>): Map<string, any> => {
-	const tempMap = enumMap;
-
+export const extractEnums = (schema: JSONSchema, enumMap: Map<string, Array<JSONSchema7Type>>): Map<string, any> => {
 	const traverseSchema = (obj: JSONSchema) => {
 		if (obj.enum && obj['x-graphql-enum-name']) {
 			const name = obj['x-graphql-enum-name'];
-			if (!tempMap.get(name)) {
-				tempMap.set(name, new Set());
-			}
-			const entry = tempMap.get(name);
-			if (entry) {
-				const values = Array.from(entry.keys());
-				tempMap.set(name, new Set([...values, ...obj.enum]));
+			if (!enumMap.get(name)) {
+				enumMap.set(name, obj.enum);
 			}
 		}
 
@@ -514,5 +506,5 @@ export const extractEnums = (schema: JSONSchema, enumMap: Map<string, Set<JSONSc
 
 	traverseSchema(schema);
 
-	return tempMap;
+	return enumMap;
 };
