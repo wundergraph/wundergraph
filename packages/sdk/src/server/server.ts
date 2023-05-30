@@ -83,9 +83,9 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 }
 
 export function configureWunderGraphServer<
-	GeneratedHooksConfig = HooksConfiguration,
+	GeneratedHooksConfig extends HooksConfiguration = HooksConfiguration,
 	GeneratedInternalClient = InternalClient,
-	GeneratedWebhooksConfig = WebhooksConfig,
+	GeneratedWebhooksConfig extends HooksConfiguration = WebhooksConfig,
 	TRequestContext = any,
 	TGlobalContext = any
 >(
