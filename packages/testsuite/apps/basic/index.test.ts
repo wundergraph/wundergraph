@@ -1,5 +1,6 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { assertType, beforeAll, describe, expect, it } from 'vitest';
 import { createTestServer } from './.wundergraph/generated/testing';
+import { weather_ConfigInput, weather_LanguageValues } from './.wundergraph/generated/models';
 
 const wg = createTestServer({
 	dir: __dirname,
@@ -135,5 +136,14 @@ describe('Operations', () => {
 		const booleanResult = await client.query({ operationName: 'falsy/boolean' });
 		expect(booleanResult.error).toBeUndefined();
 		expect(booleanResult.data).toBe(false);
+	});
+
+	it('should have the types generated from graphql enum', () => {
+		const weatherInput: weather_ConfigInput = {
+			lang: 'af',
+			units: 'imperial',
+		};
+
+		assertType<weather_LanguageValues | undefined>(weatherInput.lang);
 	});
 });
