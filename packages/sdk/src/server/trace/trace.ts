@@ -69,11 +69,14 @@ function getExporter(config: TelemetryOptions, logger: pino.Logger): SpanExporte
 	}
 
 	const hasAuthHeader = !!config?.authToken;
-	logger.debug(`configuring OTLPTraceExporter with auth header: ${hasAuthHeader} and endpoint: ${httpEndpoint}`);
+
+	if (hasAuthHeader) {
+		logger.debug(`configuring OTLPTraceExporter with auth header and endpoint: ${httpEndpoint}`);
+	}
 
 	const headers: Record<string, string> = {};
 	if (hasAuthHeader) {
-		headers['Authorization'] = config?.authToken!;
+		headers['Authorization'] = `Bearer ${config.authToken}`;
 	}
 
 	const collectorUrl = normalizeURL(httpEndpoint);
@@ -90,7 +93,7 @@ export function normalizeURL(endpoint: string): string {
 		const url = new URL(endpoint);
 
 		if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-			throw new Error(`invalid protocol: ${url.protocol}`);
+			throw new Error(`invalid protocol: ${url.protocol}. Please use http:// or https://`);
 		}
 
 		url.pathname = defaultOTLPTraceExporterPath;

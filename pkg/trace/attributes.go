@@ -5,7 +5,7 @@ import "go.opentelemetry.io/otel/attribute"
 const (
 	WgOperationName = attribute.Key("wg.operation.name")
 	WgOperationType = attribute.Key("wg.operation.type")
-	WgComponentName = attribute.Key("w.component.name")
+	WgComponentName = attribute.Key("wg.component.name")
 )
 
 var (
