@@ -1,6 +1,8 @@
 import { GraphQLIntrospection, OpenAPIIntrospection, ReplaceCustomScalarTypeFieldConfiguration } from '../definition';
-import { parse, print, visit } from 'graphql';
+import { parse, visit } from 'graphql';
 import { SingleTypeField } from '@wundergraph/protobuf';
+import { printSchemaWithDirectives } from '@graphql-tools/utils';
+import { buildASTSchema } from 'graphql/index';
 
 export interface ReplaceCustomScalarsResult {
 	schemaSDL: string;
@@ -105,7 +107,7 @@ export const replaceCustomScalars = (
 		},
 	});
 
-	const schema = print(cleanAst);
+	const schema = printSchemaWithDirectives(buildASTSchema(cleanAst));
 
 	return { schemaSDL: schema, customScalarTypeFields: customScalarTypeFields };
 };

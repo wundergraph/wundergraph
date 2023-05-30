@@ -1,5 +1,4 @@
 import {
-	ASTNode,
 	buildASTSchema,
 	buildSchema,
 	BuildSchemaOptions,
@@ -10,7 +9,6 @@ import {
 	parse,
 	ParseOptions,
 	print,
-	printSchema,
 	visit,
 } from 'graphql';
 import { mergeSchemas } from '@graphql-tools/schema';
