@@ -120,8 +120,7 @@ export const openApiSpecificationToGraphQLApi = async (
 			headers: introspection.headers,
 			customIntScalars: ['BigInt'],
 		},
-		{},
-		true
+		{}
 	);
 };
 

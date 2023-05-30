@@ -11,6 +11,8 @@ import {
 	StringValueNode,
 	visit,
 } from 'graphql';
+import { printSchemaWithDirectives } from '@graphql-tools/utils';
+import { buildASTSchema } from 'graphql/index';
 
 /*
 	cleanupSchema - cleans up the upstream schema by removing service fields, federation directives,
@@ -168,11 +170,21 @@ export const cleanupSchema = (schema: GraphQLSchema): string => {
 		},
 		DirectiveDefinition: (node) => {
 			switch (node.name.value) {
+				// federation directives:
 				case 'key':
 				case 'extends':
 				case 'external':
 				case 'requires':
 				case 'provides':
+				// omnigraph/openapi directives:
+				case 'enum':
+				case 'example':
+				case 'globalOptions':
+				case 'httpOperation':
+				case 'resolveRoot':
+				case 'typescript':
+				// omnigraph/soap directives:
+				case 'soap':
 					return null;
 			}
 		},
@@ -238,5 +250,5 @@ export const cleanupSchema = (schema: GraphQLSchema): string => {
 		},
 	});
 
-	return print(cleanAst);
+	return printSchemaWithDirectives(buildASTSchema(cleanAst));
 };

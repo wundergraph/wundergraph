@@ -1,7 +1,9 @@
 import {
 	ASTNode,
+	buildASTSchema,
 	buildSchema,
 	BuildSchemaOptions,
+	DocumentNode,
 	GraphQLSchema,
 	Kind,
 	ObjectTypeDefinitionNode,
@@ -20,6 +22,7 @@ import {
 } from '@wundergraph/protobuf';
 import { Api, DataSource, StaticApiCustom } from './index';
 import { WellKnownClaim, WellKnownClaimValues } from '../graphql/operations';
+import { printSchemaWithDirectives } from '@graphql-tools/utils';
 
 export const mergeApis = <T extends {} = {}>(roles: string[], customClaims: string[], ...apis: Api<T>[]): Api<T> => {
 	const dataSources: DataSource<T>[] = apis
@@ -538,7 +541,7 @@ const mergeApiSchemas = <T extends {} = {}>(
 		rootTypeNames.push(subscriptionTypeName);
 	}
 
-	const printed = printSchema(mergedGraphQLSchema);
+	const printed = printSchemaWithDirectives(mergedGraphQLSchema);
 
 	const ast = parse(printed);
 	const filtered = visit(ast, {
@@ -638,10 +641,10 @@ const mergeApiSchemas = <T extends {} = {}>(
 		},
 	});
 	const withoutEmptyDescription = removeEmptyDescriptions(filtered);
-	return print(withoutEmptyDescription);
+	return printSchemaWithDirectives(buildASTSchema(withoutEmptyDescription));
 };
 
-const removeEmptyDescriptions = (astNode: ASTNode): ASTNode => {
+const removeEmptyDescriptions = (astNode: DocumentNode): DocumentNode => {
 	return visit(astNode, {
 		enter: (node) => {
 			switch (node.kind) {
