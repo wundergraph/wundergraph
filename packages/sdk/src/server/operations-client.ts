@@ -1,4 +1,3 @@
-import fetch from 'cross-fetch';
 import {
 	Client,
 	ClientConfig,
@@ -8,6 +7,9 @@ import {
 	QueryRequestOptions,
 	SubscriptionRequestOptions,
 } from '../client';
+
+// Web API compatible fetch API for nodejs.
+import { fetch } from '@whatwg-node/fetch';
 
 export interface Operation<Input extends object, Response> {
 	input: Input;
@@ -52,6 +54,11 @@ export type InternalOperationsDefinition<
 
 const forwardedHeaders = ['Authorization', 'X-Request-Id'];
 
+/**
+ * This client is used to execute custom operations on the Hooks server (server side only).
+ * The implementation is based on the `Client` class which is used on the web and server side.
+ * The implementation is an implementation detail and should not be used directly as a public API.
+ */
 export class OperationsClient<
 	Operations extends InternalOperationsDefinition = InternalOperationsDefinition
 > extends Client {
@@ -61,9 +68,11 @@ export class OperationsClient<
 
 	constructor(options: OperationsClientConfig) {
 		const { clientRequest, customFetch = fetch, ...rest } = options;
+
 		super({
+			// fetch compatible but not the exact same type
+			customFetch: customFetch as any,
 			...rest,
-			customFetch,
 		});
 
 		this.clientRequest = clientRequest;
@@ -158,7 +167,9 @@ export class OperationsClient<
 		return sub as any;
 	};
 
-	protected async fetchSubscription<Data = any, Error = any>(subscription: SubscriptionRequestOptions) {
+	protected async fetchSubscription<Data = any, Error = any>(
+		subscription: SubscriptionRequestOptions
+	): Promise<Response> {
 		const searchParams = this.searchParams();
 		const params: any = { input: subscription.input, __wg: { clientRequest: this.clientRequest } };
 
@@ -167,7 +178,7 @@ export class OperationsClient<
 		}
 
 		const url = this.addUrlParams(this.operationUrl(subscription.operationName), searchParams);
-		return await this.fetchJson(url, {
+		return this.fetchJson(url, {
 			method: 'POST',
 			body: this.stringifyInput(params),
 			signal: subscription.abortSignal,
