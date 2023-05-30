@@ -266,20 +266,20 @@ export class BaseTypeScriptDataModel implements Template {
 				});
 		});
 
-		const graphQLTypeImport = "import type { GraphQLError } from '@wundergraph/sdk/client';";
-
 		const models = Array.from(definitions.entries())
 			.map(([definitionName, definition]) => JSONSchemaToTypescriptInterface(definition, definitionName, false))
 			.join('\n\n');
 
 		const functionImports = typescriptFunctionsImports(generationConfig);
+		const graphQLTypeImport = "import type { GraphQLError } from '@wundergraph/sdk/client';";
+		const imports = functionImports + graphQLTypeImport;
 
-		const content = functionImports + models;
+		const content = '\n' + imports + '\n\n' + models + '\n\n' + typeScriptJsonDefinition + '\n';
 
 		return Promise.resolve([
 			{
 				path: 'models.ts',
-				content: formatTypeScript('\n' + content + '\n\n' + typeScriptJsonDefinition + '\n' + graphQLTypeImport),
+				content: formatTypeScript(content),
 				header: doNotEditHeader,
 			},
 		]);
@@ -308,8 +308,7 @@ const typescriptFunctionsImports = (generationConfig: CodeGenerationConfig): str
 	return (
 		ops.map((op) => `import type function_${op.Name} from '${relImport(op)}';\n`).join('') +
 		'import type {ExtractInput,ExtractResponse} from "@wundergraph/sdk/operations";\n' +
-		'import type { OperationErrors } from "./ts-operation-errors";\n' +
-		'\n'
+		'import type { OperationErrors } from "./ts-operation-errors";\n'
 	);
 };
 
