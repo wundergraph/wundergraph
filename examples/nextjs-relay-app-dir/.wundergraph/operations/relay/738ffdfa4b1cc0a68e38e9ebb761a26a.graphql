@@ -1,0 +1,11 @@
+query TodoListAllTodosQuery {
+  todos_todos {
+    ...Todo_todo
+  }
+}
+
+fragment Todo_todo on todos_Todo {
+  todoID: id
+  text
+  isCompleted
+}

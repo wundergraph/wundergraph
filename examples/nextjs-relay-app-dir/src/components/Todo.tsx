@@ -2,8 +2,9 @@
 
 import { AllTodosResponseData } from '../../.wundergraph/generated/models';
 import { toggleTodo } from '@/app/actions';
-import { useTransition } from 'react';
-import { graphql } from 'react-relay';
+import { wunderGraphRelayClientWrapper } from '@/lib/wundergraph/client';
+import { FC, useTransition } from 'react';
+import { graphql, useFragment } from 'react-relay';
 
 const UpdateTodoMutation = graphql`
 	mutation TodoListUpdateTodoMutation($todo: todos_TodoInput!) {
@@ -23,7 +24,11 @@ const TodoFragment = graphql`
 	}
 `;
 
-export const Todo = ({ data }: { data: NonNullable<AllTodosResponseData['todos_todos']>[0] }) => {
+export const Todo = ({ data }) => {
+	const todo = useFragment(TodoFragment, data);
+
+	console.log({ todo, data });
+
 	const [, startTransition] = useTransition();
 
 	return (

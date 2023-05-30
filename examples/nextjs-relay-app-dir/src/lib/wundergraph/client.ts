@@ -1,3 +1,4 @@
-import { createClient } from '../../../.wundergraph/generated/client';
+import { createWunderGraphRelayClientApp } from '@wundergraph/react-relay/next/client';
+import { client } from './';
 
-export const client = createClient();
+export const { wunderGraphRelayClientWrapper } = createWunderGraphRelayClientApp({ client });

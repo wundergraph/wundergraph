@@ -1,12 +1,13 @@
-import { Todo } from '@/components/Todo';
-import { fetchWunderGraphSSRQuery } from '@/lib/wundergraph';
-import { client } from '@/lib/wundergraph/client';
+import { client } from '@/lib/wundergraph';
+import { fetchWunderGraphServerQuery } from '@/lib/wundergraph/server';
 import { revalidatePath } from 'next/cache';
+import TodoListAllTodosQuery from '../__relay__generated__/TodoListAllTodosQuery.graphql';
+import { TodoListWithWrapper } from '@/components/TodoList';
 
 export default async function Home() {
-	const todos = await client.query({
-		operationName: 'allTodos',
-	});
+	// const todos = await client.query({
+	// 	operationName: 'allTodos',
+	// });
 
 	const addTodo = async (data: FormData) => {
 		'use server';
@@ -23,6 +24,10 @@ export default async function Home() {
 		revalidatePath('/');
 	};
 
+	const { queryResponse: todosQueryResponse, initialRecords } = await fetchWunderGraphServerQuery(
+		TodoListAllTodosQuery
+	);
+
 	return (
 		<main>
 			<div className="bg-gray-100 min-h-screen py-6">
@@ -30,7 +35,7 @@ export default async function Home() {
 					<h1 className="text-4xl font-bold text-center mb-6 text-gray-800">WunderGraph TodoList</h1>
 					<div className="bg-white rounded-lg shadow p-6">
 						<h1 className="text-2xl font-semibold mb-4 text-gray-700">Todo List</h1>
-						{todos?.data?.todos_todos?.map((todo) => (todo ? <Todo key={todo.id} data={todo} /> : null))}
+						<TodoListWithWrapper initialRecords={initialRecords} todosQueryResponse={todosQueryResponse} />
 						<div className="flex items-center">
 							<form action={addTodo}>
 								<input

@@ -16,7 +16,7 @@
     "@types/node": "20.2.4",
     "@types/react": "18.2.7",
     "@types/react-dom": "18.2.4",
-    "@wundergraph/react-relay": "file:/Users/dani/Documents/GitHub/wundergraph/wundergraph/packages/react-relay/wundergraph-react-relay-0.3.0.tgz",
+    "@wundergraph/react-relay": "file:/Users/dani/Documents/GitHub/wundergraph/wundergraph/packages/react-relay/wundergraph-react-relay-0.3.0-5.tgz",
     "@wundergraph/sdk": "^0.159.0",
     "autoprefixer": "10.4.14",
     "graphql": "^16.6.0",
@@ -24,8 +24,8 @@
     "postcss": "8.4.23",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-relay": "^15.0.0",
-    "relay-runtime": "^15.0.0",
+    "react-relay": "15.0.0",
+    "relay-runtime": "15.0.0",
     "tailwindcss": "3.3.2",
     "typescript": "5.0.4"
   },
@@ -48,8 +48,7 @@
   "devDependencies": {
     "@types/react-relay": "^14.1.4",
     "@types/relay-runtime": "^14.1.10",
-    "babel-plugin-relay": "^15.0.0",
     "concurrently": "^8.0.1",
-    "relay-compiler": "^15.0.0"
+    "relay-compiler": "15.0.0"
   }
 }

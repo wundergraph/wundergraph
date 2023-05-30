@@ -1,0 +1,11 @@
+subscription pagesOnTodoChangesSubscription {
+  todos_TodoChanges {
+    ...Todo_todo
+  }
+}
+
+fragment Todo_todo on todos_Todo {
+  todoID: id
+  text
+  isCompleted
+}

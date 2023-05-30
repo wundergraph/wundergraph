@@ -9,13 +9,21 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./next/server": {
+      "types": "./dist/next/server.d.ts",
+      "default": "./dist/next/server.js"
+    },
+    "./next/client": {
+      "types": "./dist/next/client.d.ts",
+      "default": "./dist/next/client.js"
     }
   },
   "tsd": {
     "directory": "tests"
   },
   "scripts": {
-    "build": "tsc --noEmit && tsup src/index.ts --dts --format cjs",
+    "build": "tsc --noEmit && tsup src/** --dts --format cjs",
     "test": "jest --passWithNoTests && tsd"
   },
   "publishConfig": {
