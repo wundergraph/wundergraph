@@ -12,9 +12,9 @@ type Config struct {
 	Sampler      float64
 	Batcher      string
 	BatchTimeout time.Duration
-	// OtlpHeaders represents the headers for OTLP gRPC or HTTP transport.
+	// OtlpHeaders represents the headers for HTTP transport.
 	// For example:
-	//  uptrace-dsn: 'http://project2_secret_token@localhost:14317/2'
+	//  Authorization: 'Bearer <token>'
 	OtlpHeaders map[string]string
 	// OtlpHttpPath represents the path for OTLP HTTP transport.
 	// For example
