@@ -438,13 +438,11 @@ importers:
       '@types/json-schema': ^7.0.6
       '@types/lodash': ^4.14.178
       '@types/node': ^18.14.4
-      '@types/node-fetch': ^2.6.2
       '@types/object-hash': ^1.3.4
       '@types/prettier': ^2.7.2
       '@types/traverse': ^0.6.32
       '@types/write-file-atomic': ^4.0.0
-      '@web-std/fetch': ^4.1.0
-      '@whatwg-node/fetch': ^0.8.8
+      '@whatwg-node/fetch': ^0.9.0
       '@wundergraph/orm': workspace:*
       '@wundergraph/protobuf': workspace:^0.114.0
       '@wundergraph/straightforward': ^4.2.5
@@ -472,7 +470,6 @@ importers:
       lodash: ^4.17.21
       long: ^5.2.0
       nock: ^13.2.9
-      node-fetch: ^2.6.7
       object-hash: ^2.2.0
       openapi-types: ^10.0.0
       pino: ^8.11.0
@@ -490,7 +487,6 @@ importers:
       type-fest: ^3.5.2
       typescript: ^4.8.2
       typescript-json-schema: ^0.55.0
-      undici: ^5.22.1
       write-file-atomic: ^5.0.0
       zod: ^3.21.4
       zod-to-json-schema: ^3.20.2
@@ -512,8 +508,7 @@ importers:
       '@opentelemetry/sdk-trace-node': 1.13.0_@opentelemetry+api@1.4.1
       '@opentelemetry/semantic-conventions': 1.13.0
       '@prisma/generator-helper': 3.15.2
-      '@web-std/fetch': 4.1.0
-      '@whatwg-node/fetch': 0.8.8
+      '@whatwg-node/fetch': 0.9.0
       '@wundergraph/orm': link:../orm
       '@wundergraph/protobuf': link:../protobuf
       '@wundergraph/straightforward': 4.2.5
@@ -551,7 +546,6 @@ importers:
       ts-retry-promise: 0.7.0
       tslib: 2.5.0
       typescript-json-schema: 0.55.0
-      undici: 5.22.1
       write-file-atomic: 5.0.0
       zod: 3.21.4
       zod-to-json-schema: 3.20.2_zod@3.21.4
@@ -564,7 +558,6 @@ importers:
       '@types/json-schema': 7.0.11
       '@types/lodash': 4.14.187
       '@types/node': 18.14.4
-      '@types/node-fetch': 2.6.2
       '@types/object-hash': 1.3.4
       '@types/prettier': 2.7.2
       '@types/traverse': 0.6.32
@@ -572,7 +565,6 @@ importers:
       chai: 4.3.6
       jest: 29.2.2_@types+node@18.14.4
       nock: 13.2.9
-      node-fetch: 2.6.7
       ts-jest: 29.0.3_r7gdwuj75x2gz25bauak3xcnbm
       tsd: 0.24.1
       type-fest: 3.5.2
@@ -6371,6 +6363,38 @@ packages:
     engines: {node: '>=14'}
     dev: true
 
+  /@remix-run/web-blob/3.0.4:
+    resolution: {integrity: sha512-AfegzZvSSDc+LwnXV+SwROTrDtoLiPxeFW+jxgvtDAnkuCX1rrzmVJ6CzqZ1Ai0bVfmJadkG5GxtAfYclpPmgw==}
+    dependencies:
+      '@remix-run/web-stream': 1.0.3
+      web-encoding: 1.1.5
+    dev: false
+
+  /@remix-run/web-fetch/4.3.4:
+    resolution: {integrity: sha512-AUM1XBa4hcgeNt2CD86OlB5aDLlqdMl0uJ+89R8dPGx07I5BwMXnbopCaPAkvSBIoHeT/IoLWIuZrLi7RvXS+Q==}
+    engines: {node: ^10.17 || >=12.3}
+    dependencies:
+      '@remix-run/web-blob': 3.0.4
+      '@remix-run/web-form-data': 3.0.4
+      '@remix-run/web-stream': 1.0.3
+      '@web3-storage/multipart-parser': 1.0.0
+      abort-controller: 3.0.0
+      data-uri-to-buffer: 3.0.1
+      mrmime: 1.0.1
+    dev: false
+
+  /@remix-run/web-form-data/3.0.4:
+    resolution: {integrity: sha512-UMF1jg9Vu9CLOf8iHBdY74Mm3PUvMW8G/XZRJE56SxKaOFWGSWlfxfG+/a3boAgHFLTkP7K4H1PxlRugy1iQtw==}
+    dependencies:
+      web-encoding: 1.1.5
+    dev: false
+
+  /@remix-run/web-stream/1.0.3:
+    resolution: {integrity: sha512-wlezlJaA5NF6SsNMiwQnnAW6tnPzQ5I8qk0Y0pSohm0eHKa2FQ1QhEKLVVcDDu02TmkfHgnux0igNfeYhDOXiA==}
+    dependencies:
+      web-streams-polyfill: 3.2.1
+    dev: false
+
   /@repeaterjs/repeater/3.0.4:
     resolution: {integrity: sha512-AW8PKd6iX3vAZ0vA43nOUOnbq/X5ihgU+mSXXqunMkeQADGiqw/PY0JNeYtD5sr0PAy51YPgAPbDoeapv9r8WA==}
     dev: false
@@ -8167,6 +8191,11 @@ packages:
     resolution: {integrity: sha512-IqnKIDWfXBJkvy/k6tzskWTc2NK3LcqHlb+KHGCrjOCH4jfQckRX0NAiIcC/vIqQkzLYw2r2CTSwAxcrtcD6lA==}
     dev: false
 
+  /@whatwg-node/events/0.1.1:
+    resolution: {integrity: sha512-AyQEn5hIPV7Ze+xFoXVU3QTHXVbWPrzaOkxtENMPMuNL6VVHrp4hHfDt9nrQpjO7BgvuM95dMtkycX5M/DZR3w==}
+    engines: {node: '>=16.0.0'}
+    dev: false
+
   /@whatwg-node/fetch/0.3.2:
     resolution: {integrity: sha512-Bs5zAWQs0tXsLa4mRmLw7Psps1EN78vPtgcLpw3qPY8s6UYPUM67zFZ9cy+7tZ64PXhfwzxJn+m7RH2Lq48RNQ==}
     dependencies:
@@ -8193,10 +8222,29 @@ packages:
       web-streams-polyfill: 3.2.1
     dev: false
 
+  /@whatwg-node/fetch/0.9.0:
+    resolution: {integrity: sha512-zEyXaoz5w6BpKYKyZLTwBA41fqGuscOvSoPHytADRo1FY/s/fmjwiKq4QGmB88DlNuQ8e57s6AgWqIYyAT0Zmg==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@whatwg-node/node-fetch': 0.4.0
+      urlpattern-polyfill: 8.0.2
+    dev: false
+
   /@whatwg-node/node-fetch/0.3.6:
     resolution: {integrity: sha512-w9wKgDO4C95qnXZRwZTfCmLWqyRnooGjcIwG0wADWjw9/HN0p7dtvtgSvItZtUyNteEvgTrd8QojNEqV6DAGTA==}
     dependencies:
       '@whatwg-node/events': 0.0.3
+      busboy: 1.6.0
+      fast-querystring: 1.1.1
+      fast-url-parser: 1.1.3
+      tslib: 2.5.0
+    dev: false
+
+  /@whatwg-node/node-fetch/0.4.0:
+    resolution: {integrity: sha512-aFfJNTMwkWrkl8I9nTkslVjPlkL+zb/Z71ng+71UbYYm1gPHfltHHXBiM99aZgUCaqyvaR5XzzwyCL6m0ikqsA==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@whatwg-node/events': 0.1.1
       busboy: 1.6.0
       fast-querystring: 1.1.1
       fast-url-parser: 1.1.3
@@ -25372,8 +25420,9 @@ packages:
       '@opentelemetry/sdk-trace-node': 1.13.0_@opentelemetry+api@1.4.1
       '@opentelemetry/semantic-conventions': 1.13.0
       '@prisma/generator-helper': 3.15.2
+      '@remix-run/web-fetch': 4.3.4
       '@web-std/fetch': 4.1.0
-      '@whatwg-node/fetch': 0.8.8
+      '@whatwg-node/fetch': 0.9.0
       '@wundergraph/orm': link:packages/orm
       '@wundergraph/protobuf': link:packages/protobuf
       '@wundergraph/straightforward': 4.2.5

@@ -12,9 +12,8 @@ import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
 import { Attributes, Components } from './trace/attributes';
 import { attachErrorToSpan, setStatusFromResponseCode } from './trace/util';
 
-// undici fetch supports Node.js 16.8. It's the same implementation as the built-in fetch since Node.js 18.
-// We can switch to the built-in fetch once we drop support for Node.js 16.
-import { fetch } from 'undici';
+// Web API compatible fetch API for nodejs.
+import { fetch } from '@whatwg-node/fetch';
 
 export interface Operation<Input extends object, Response> {
 	input: Input;
