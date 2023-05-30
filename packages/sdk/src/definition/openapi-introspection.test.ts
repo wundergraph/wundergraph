@@ -25,7 +25,8 @@ describe('introspectOpenApiV2', () => {
 			it(`should introspect ${file} succesfully`, async () => {
 				const filePath = path.join(fixturePath, file);
 				const result = await (await runTest(filePath))({});
-				expect(result.Schema).toMatchSnapshot();
+				expect(result.DataSources[0].Custom.UpstreamSchema).toMatchSnapshot();
+				expect(result.Schema).toMatchSnapshot('wg_schema');
 			});
 		});
 	});
@@ -57,7 +58,8 @@ paths:
 				})
 			)({});
 
-			expect(result.Schema).toMatchSnapshot();
+			expect(result.DataSources[0].Custom.UpstreamSchema).toMatchSnapshot();
+			expect(result.Schema).toMatchSnapshot('wg_schema');
 		});
 
 		it('should introspect json string succesfully', async () => {
@@ -96,7 +98,8 @@ paths:
 				})
 			)({});
 
-			expect(result.Schema).toMatchSnapshot();
+			expect(result.DataSources[0].Custom.UpstreamSchema).toMatchSnapshot();
+			expect(result.Schema).toMatchSnapshot('wg_schema');
 		});
 	});
 
@@ -136,7 +139,8 @@ paths:
 				})
 			)({});
 
-			expect(result.Schema).toMatchSnapshot();
+			expect(result.DataSources[0].Custom.UpstreamSchema).toMatchSnapshot();
+			expect(result.Schema).toMatchSnapshot('wg_schema');
 		});
 	});
 });
