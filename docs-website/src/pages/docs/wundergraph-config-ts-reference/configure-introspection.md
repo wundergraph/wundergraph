@@ -23,19 +23,21 @@ but doesn't really scale.
 That's why we've introduced introspection caching.
 
 {% callout type="warning" %}
-By default, every data source is introspected exactly once.
-The result is cached in the `.wundergraph/cache/introspection` directory.
+By default, during development every remote data source is introspected exactly once.
+The result is cached in the `node_modules/.cache/wundergraph/introspection` directory.
 {% /callout %}
 
 When caching is enabled, if a cache entry is found for a data source,
 it's always used instead of introspecting the data source again. Cache is
 optional and might be turned off globally using the `--no-cache` flag.
 
+For production deployments, we prioritize retrieving fresh data over using cached results.
+This means, we will initially try to refresh the data from the remote upstreams and we'll
+only use the cache if that fails.
+
 ## Clearing the Cache
 
-Cache can be emptied when `wunderctl` starts by using the `--clear-cache`
-flag. Additionally, `wunderctl up` will automatically clear the cache
-when it starts up. To clear the cache again, just restart it.
+To clear the cache, removing all its data, run `wunderctl clean`.
 
 ## Pregenerating the Cache
 
@@ -44,7 +46,7 @@ useful to generate the cache contents and make the tests run offline.
 
 To populate the cache contents run `wunderctl generate --clear-cache`.
 This will delete any previous cache, introspect the data sources, and
-finally write the cache entries. `.wunderctl/cache` can then be stored
+finally write the cache entries. `node_modules/.cache/wundergraph/introspection` can then be stored
 and deployed to CI runners.
 
 To verify that your tests can run without fetching data from the network

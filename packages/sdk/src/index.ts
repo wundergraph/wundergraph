@@ -30,6 +30,7 @@ export {
 	TypeScriptInputModels,
 	TypeScriptResponseDataModels,
 	TypeScriptResponseModels,
+	TypeScriptEnumModels,
 } from './codegen/templates/typescript/index';
 export { TypeScriptClient } from './codegen/templates/typescript/client';
 export { PlaceHolder } from './configure/variables';
