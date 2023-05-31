@@ -30,6 +30,11 @@ export interface NamespacingExecutorConfig {
 	fetch?: typeof globalThis.fetch;
 }
 
+interface FetchOptions {
+	signal?: AbortSignal;
+	extraHeaders?: Record<string, string>;
+}
+
 // @note this is just a POC implementation meant to be used for
 // testing the WunderGraph integration. It needs a lot of work
 // before it could be used in production.
@@ -50,7 +55,8 @@ export class NamespacingExecutor implements Executor {
 		operation: OperationTypeNode,
 		document: DocumentNode,
 		variables?: Record<string, unknown> | undefined,
-		namespace?: string
+		namespace?: string,
+		extraHeaders?: Record<string, string> | undefined
 	): Promise<T> {
 		const transformedDocument = namespace ? this.#namespaceOperation(document, namespace) : document;
 		const body = JSON.stringify(this.#buildOperationPayload(transformedDocument, variables));
@@ -59,7 +65,7 @@ export class NamespacingExecutor implements Executor {
 			// we create an abort signal to manage request cancellation
 			// upon disconnect from the initiating WunderGraph custom operation
 			const controller = new AbortController();
-			const generator = from(this.#fetchMany(body, controller.signal)).pipe(
+			const generator = from(this.#fetchMany(body, { signal: controller.signal, extraHeaders })).pipe(
 				map((result) => this.#processJson(result, namespace))
 			);
 			// hook into our server's request context
@@ -67,7 +73,7 @@ export class NamespacingExecutor implements Executor {
 
 			return generator as any;
 		} else {
-			const response = await this.#fetch(body);
+			const response = await this.#fetch(body, { extraHeaders });
 			const json = await response.json();
 			return this.#processJson(json, namespace);
 		}
@@ -177,8 +183,8 @@ export class NamespacingExecutor implements Executor {
 	// @todo error handling
 	// @note we can copy `graphql-request`'s implementation (or just use them)
 	// https://github.com/jasonkuhrt/graphql-request/blob/main/src/index.ts
-	async *#fetchMany(body: any, signal?: AbortSignal) {
-		const response = await this.#fetch(body, signal);
+	async *#fetchMany(body: any, opts: FetchOptions) {
+		const response = await this.#fetch(body, opts);
 		//
 		// `@whatwg-node/fetch` implementation (better since it implements a standard / doesn't rely on Node's custom implementation)
 		//
@@ -230,12 +236,14 @@ export class NamespacingExecutor implements Executor {
 		}
 	}
 
-	async #fetch(body: globalThis.BodyInit, signal?: AbortSignal) {
+	async #fetch(body: globalThis.BodyInit, opts: FetchOptions) {
+		const { signal, extraHeaders = {} } = opts;
 		const fetchImp = this.config.fetch ?? fetch;
 
 		const headers = {
 			'Content-Type': 'application/json',
 			Accept: 'text/event-stream',
+			...extraHeaders,
 		};
 
 		// @todo check `res.ok` before requesting JSON w/ `res.json`
