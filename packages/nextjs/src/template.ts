@@ -11,6 +11,7 @@ import {
 	TypeScriptInputModels,
 	TypeScriptResponseDataModels,
 	TypeScriptResponseModels,
+	TypeScriptEnumModels,
 } from '@wundergraph/sdk';
 import { modelImports } from '@wundergraph/sdk/internal';
 import hash from 'object-hash';
@@ -71,6 +72,7 @@ export class NextJsTemplate implements Template {
 			new TypeScriptInputModels(),
 			new TypeScriptResponseModels(),
 			new TypeScriptResponseDataModels(),
+			new TypeScriptEnumModels(),
 			new BaseTypeScriptDataModel(),
 		];
 	}
