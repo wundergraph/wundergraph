@@ -49,8 +49,8 @@ This option indicates whether OpenTelemetry tracing should be enabled.
 
 ### `openTelemetry.sampler` (optional)
 
-This option allows you to configure the OpenTelemetry sampler. The default sampler is 1.0, which means that all requests will be sampled.
-You need to provide a number between 0.0 and 1.0 to configure the sampler.
+This option defines the sampling rate of traces. Must be a value between 0 and 1. For example, a value of 0.1 means 10% of traces are sampled.
+Don't set this to 1 in production, unless you want to trace every request.
 
 ### `openTelemetry.exporterHttpEndpoint` (optional)
 
