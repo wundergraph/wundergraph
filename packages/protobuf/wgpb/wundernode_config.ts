@@ -746,6 +746,7 @@ export interface CookieBasedAuthentication {
   hashKey: ConfigurationVariable | undefined;
   blockKey: ConfigurationVariable | undefined;
   csrfSecret: ConfigurationVariable | undefined;
+  timeoutSeconds: ConfigurationVariable | undefined;
 }
 
 export interface AuthProvider {
@@ -1435,6 +1436,7 @@ function createBaseCookieBasedAuthentication(): CookieBasedAuthentication {
     hashKey: undefined,
     blockKey: undefined,
     csrfSecret: undefined,
+    timeoutSeconds: undefined,
   };
 }
 
@@ -1451,6 +1453,7 @@ export const CookieBasedAuthentication = {
       hashKey: isSet(object.hashKey) ? ConfigurationVariable.fromJSON(object.hashKey) : undefined,
       blockKey: isSet(object.blockKey) ? ConfigurationVariable.fromJSON(object.blockKey) : undefined,
       csrfSecret: isSet(object.csrfSecret) ? ConfigurationVariable.fromJSON(object.csrfSecret) : undefined,
+      timeoutSeconds: isSet(object.timeoutSeconds) ? ConfigurationVariable.fromJSON(object.timeoutSeconds) : undefined,
     };
   },
 
@@ -1481,6 +1484,8 @@ export const CookieBasedAuthentication = {
       (obj.blockKey = message.blockKey ? ConfigurationVariable.toJSON(message.blockKey) : undefined);
     message.csrfSecret !== undefined &&
       (obj.csrfSecret = message.csrfSecret ? ConfigurationVariable.toJSON(message.csrfSecret) : undefined);
+    message.timeoutSeconds !== undefined &&
+      (obj.timeoutSeconds = message.timeoutSeconds ? ConfigurationVariable.toJSON(message.timeoutSeconds) : undefined);
     return obj;
   },
 
@@ -1499,6 +1504,9 @@ export const CookieBasedAuthentication = {
       : undefined;
     message.csrfSecret = (object.csrfSecret !== undefined && object.csrfSecret !== null)
       ? ConfigurationVariable.fromPartial(object.csrfSecret)
+      : undefined;
+    message.timeoutSeconds = (object.timeoutSeconds !== undefined && object.timeoutSeconds !== null)
+      ? ConfigurationVariable.fromPartial(object.timeoutSeconds)
       : undefined;
     return message;
   },
