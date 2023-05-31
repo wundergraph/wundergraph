@@ -2,7 +2,7 @@
 
 exports[`Introspection introspect GraphQL API with interface type definitions 1`] = `
 GraphQLApi {
-  "CustomJsonScalars": undefined,
+  "CustomJsonScalars": [],
   "DataSources": [
     {
       "ChildNodes": [

@@ -1197,7 +1197,7 @@ const navigation = [
 					},
 					{
 						title: 'Schema extension',
-						href: '/docs/wundergraph-config-ts-reference/configure-schema-extension',
+						href: '/docs/wundergraph-config-ts-reference/schema-extension-configuration',
 					},
 					{
 						title: 'WunderNode Options',
