@@ -194,13 +194,28 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						{
 							Name: 'ClosestPlanets',
 							PathName: 'ClosestPlanets',
-							Content: 'query ClosestPlanets {\n name \n}',
+							Content: 'query ClosestPlanets ($where: db_NodeWhereInput) {\n name \n}',
 							OperationType: OperationType.QUERY,
 							ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
 							VariablesSchema: {
 								type: 'object',
-								properties: {},
+								properties: {
+									where: {
+										$ref: '#/definitions/db_NodeWhereInput',
+									},
+								},
 								additionalProperties: false,
+								definitions: {
+									db_NodeWhereInput: {
+										additionalProperties: false,
+										type: ['object', 'null'],
+										properties: {
+											AND: {
+												$ref: '#/definitions/db_NodeWhereInput',
+											},
+										},
+									},
+								},
 							},
 							InterpolationVariablesSchema: {
 								type: 'object',
