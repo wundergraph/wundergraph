@@ -1,0 +1,13 @@
+mutation ($id: Int!, $preferences: prisma_PreferencesInput!) {
+	prisma_upsertOneUser(
+		where: { id: $id }
+		update: { preferences: $preferences }
+		create: { preferences: $preferences }
+	) {
+		id
+		preferences {
+			likes
+			dislikes
+		}
+	}
+}
