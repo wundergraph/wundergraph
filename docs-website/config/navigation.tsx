@@ -991,6 +991,10 @@ const navigation = [
 						title: 'Private NPM dependencies',
 						href: '/docs/cloud/private-npm-dependencies',
 					},
+					{
+						title: 'Preview environments',
+						href: '/docs/cloud/preview-environments',
+					},
 				],
 			},
 			{
