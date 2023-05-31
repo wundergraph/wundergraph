@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "@prisma/client": "^4.11.0",
-    "@wundergraph/nextjs": "^0.11.2",
-    "@wundergraph/sdk": "^0.161.0",
+    "@wundergraph/nextjs": "^0.11.3",
+    "@wundergraph/sdk": "^0.162.0",
     "graphql": "^16.3.0",
     "next": "^13.1.1",
     "react": "^18.0.0",
