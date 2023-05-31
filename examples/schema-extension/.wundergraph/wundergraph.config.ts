@@ -30,7 +30,6 @@ const gallery = introspect.graphql({
 		  longitude: Float
 		}
 	`,
-	customJSONScalars: ['Geography'],
 	replaceCustomScalarTypeFields: [
 		{
 			entityName: 'Image',
@@ -53,13 +52,11 @@ const db = introspect.postgresql({
 					phone: String
 				}
 				`,
-	customJSONScalars: ['Contact', 'ContactInput'],
 	replaceCustomScalarTypeFields: [
 		{
 			entityName: `users`,
 			fieldName: `contact`,
 			responseTypeReplacement: `Contact`,
-			inputTypeReplacement: `ContactInput`,
 		},
 	],
 });

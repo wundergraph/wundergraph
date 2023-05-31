@@ -277,6 +277,7 @@ export const cleanupPrismaSchema = (
 				if (replacementScalarName && typeName !== replacementScalarName) {
 					customScalarReplacementName = replacementScalarName;
 				}
+				replacementScalars.add({ typeName: currentInputObjectTypeName, fieldName: fieldName });
 
 				if (listInputFields.includes(node.name.value)) {
 					// potential list input field

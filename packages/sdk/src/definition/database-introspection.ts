@@ -48,10 +48,14 @@ const introspectDatabase = async (
 	}
 	const schemaDocumentNode = parse(graphql_schema);
 	const schema = print(schemaDocumentNode);
-	const { RootNodes, ChildNodes, Fields } = configuration(schemaDocumentNode, {
-		url: '',
-		schemaExtension: introspection.schemaExtension,
-	});
+	const { RootNodes, ChildNodes, Fields } = configuration(
+		schemaDocumentNode,
+		{
+			url: '',
+			schemaExtension: introspection.schemaExtension,
+		},
+		[]
+	);
 	const jsonFields = [...jsonTypeFields, ...jsonResponseFields];
 	jsonFields.forEach((field) => {
 		const fieldConfig = Fields.find((f) => f.typeName == field.typeName && f.fieldName == field.fieldName);
@@ -311,7 +315,16 @@ export const introspectMongoDB = introspectDatabaseWithCache(
 	mongodb
 );
 
-export const introspectPrisma = async (introspection: PrismaIntrospection) => {
+export const introspectPrisma = async (introspection: {
+	apiNamespace?: string;
+	replaceCustomScalarTypeFields?: {
+		fieldName: string;
+		entityName: string;
+		responseTypeReplacement: string;
+	}[];
+	schemaExtension?: string;
+	prismaFilePath: string;
+}) => {
 	const cacheConfig: IntrospectionCacheConfiguration = {
 		keyInput: await fileHash(introspection.prismaFilePath),
 		dataSource: 'localFilesystem',

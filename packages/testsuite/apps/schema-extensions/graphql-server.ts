@@ -34,13 +34,19 @@ const typeDefs = /* GraphQL */ `
 
 	union Character = Friend | Rival | GymLeader
 
-	type Query {
-		gymleader: GymLeader!
+	input FriendInput {
+		id: ID!
+		details: HumanJSON!
 	}
 
 	type Query {
+		gymleader: GymLeader!
 		characters: [Character!]!
 		character(id: ID!): Character!
+	}
+
+	type Mutation {
+		createFriend(input: FriendInput!): Friend!
 	}
 `;
 
@@ -91,6 +97,14 @@ const resolvers = {
 				default:
 					return oak;
 			}
+		},
+	},
+	Mutation: {
+		createFriend: (obj: any, args: any) => {
+			return {
+				id: args.input.id,
+				details: args.input.details,
+			};
 		},
 	},
 	Character: {

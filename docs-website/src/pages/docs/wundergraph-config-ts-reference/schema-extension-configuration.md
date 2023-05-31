@@ -19,7 +19,7 @@ store the same value in a JSON/JSONB column.
 
 ## Enabling Schema Extensions
 
-There are three mandatory steps to enabling Schema Extensions.
+There are two mandatory steps to enabling Schema Extensions.
 First, you must provide the `schemaExtension` itself in your `wundergraph.config.ts` file.
 Add the `schemaExtension` property to the introspection configuration for a data source.
 Inside this property, provide the GraphQL schema that will extend your original schema.
@@ -29,13 +29,7 @@ the original schema.
 `schemaExtension` is a string representation of the GraphQL schema defining the new custom types that will be added to
 the original GraphQL schema.
 
-Next, add the `customJSONscalars` property.
-Inside this property, provide the type names for the custom types you just added to the `schemeExtension` property.
-
-`customJSONscalars` is a string array that declares the type names of the new custom types that were defined in the
-`schemaExtension`.
-
-Lastly, add the `replaceCustomScalarTypeFields` property.
+Next, add the `replaceCustomScalarTypeFields` property.
 Inside this property, you will need to add a separate definition object for each and every replacement.
 
 `replaceCustomScalarTypeFields` is an object array that defines where and what replacements should happen.
@@ -57,7 +51,7 @@ For database-generated APIs, it may represent a database table.
 `fieldName` is the exact, case-sensitive name of the field whose type should be replaced.
 
 `responseTypeReplacement` is the exact, case-sensitive name of the type that should be used as the response or input.
-This type must be defined in `schemExtension` and declared in `customJSONscalars`.
+This type must be defined in `schemExtension`.
 
 ### An important note on interfaces
 
@@ -118,7 +112,6 @@ const spacex = introspect.graphql({
         region: String
     }
   `,
-  customJSONscalars: ['Location', 'LocationInput'],
   replaceCustomScalarTypeFields: [
     {
       entityName: 'Landpad',
@@ -211,7 +204,6 @@ const gymLeaders = introspect.graphql({
         typeSpeciality: String
     }
   `,
-  customJSONscalars: ['Details', 'TeamData'],
   replaceCustomScalarTypeFields: [
     {
       entityName: 'GymLeader',
@@ -323,7 +315,6 @@ const db = introspect.postgresql({
         phone: String
     }
     `,
-  customJSONscalars: ['Contact', 'ContactInput'],
   replaceCustomScalarTypeFields: [
     {
       entityName: `users`,
@@ -541,7 +532,6 @@ const users = introspect.openApi({
         phone: String
     }
     `,
-  customJSONscalars: ['Contact'],
   replaceCustomScalarTypeFields: [
     {
       entityName: `users`,

@@ -247,6 +247,9 @@ interface GraphQLIntrospectionOptions {
 	loadSchemaFromString?: string | (() => string);
 	customFloatScalars?: string[];
 	customIntScalars?: string[];
+	/*
+		customJSONScalars is deprecated; the types are now detected automatically.
+	 */
 	customJSONScalars?: string[];
 	// switching internal to true will mark the origin as an internal GraphQL API
 	// this will forward the original request and user info to the internal upstream

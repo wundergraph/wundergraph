@@ -6,7 +6,10 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "start:services": "docker-compose up -d",
+    "cleanup": "docker-compose down -v",
+    "prisma:migrate": "prisma migrate dev --name init-db --schema ./apps/schema-extensions/schema.prisma"
   },
   "keywords": [
     "sdk",
@@ -25,6 +28,7 @@
     "fastify": "^4.10.2",
     "graphql-request": "^6.0.0",
     "jose": "^4.11.1",
+    "prisma": "^4.0.0",
     "straightforward": "^4.2.2",
     "typescript": "^4.8.2",
     "vitest": "^0.31.0"

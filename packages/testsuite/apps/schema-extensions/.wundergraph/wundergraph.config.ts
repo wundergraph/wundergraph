@@ -2,6 +2,48 @@ import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect 
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
+const prisma = introspect.prisma({
+	apiNamespace: 'prisma',
+	prismaFilePath: '../schema.prisma',
+	schemaExtension: `
+	type Preferences {
+			likes: [String]
+			dislikes: [String]
+	}
+	input PreferencesInput {
+			likes: [String]
+			dislikes: [String]
+	}
+	`,
+	replaceCustomScalarTypeFields: [
+		{
+			entityName: 'User',
+			fieldName: 'preferences',
+			responseTypeReplacement: 'Preferences',
+		},
+		{
+			entityName: 'UserCreateInput',
+			fieldName: 'preferences',
+			responseTypeReplacement: 'PreferencesInput',
+		},
+		{
+			entityName: 'UserUpdateInput',
+			fieldName: 'preferences',
+			responseTypeReplacement: 'PreferencesInput',
+		},
+		{
+			entityName: 'UserCreateManyInput',
+			fieldName: 'preferences',
+			responseTypeReplacement: 'PreferencesInput',
+		},
+		{
+			entityName: 'UserUpdateManyMutationInput',
+			fieldName: 'preferences',
+			responseTypeReplacement: 'PreferencesInput',
+		},
+	],
+});
+
 const pocket = introspect.graphql({
 	apiNamespace: 'pocket',
 	url: 'http://0.0.0.0:4000/graphql',
@@ -10,12 +52,15 @@ const pocket = introspect.graphql({
 			name: String
 			age: Int
 	}
+	input DetailsInput {
+			name: String
+			age: Int
+	}
 	type TeamData {
 			highestLevel: Int
 			typeSpeciality: String
 	}
 	`,
-	customJSONScalars: ['Details', 'TeamData'],
 	replaceCustomScalarTypeFields: [
 		{
 			entityName: 'GymLeader',
@@ -42,12 +87,17 @@ const pocket = introspect.graphql({
 			fieldName: 'details',
 			responseTypeReplacement: 'Details',
 		},
+		{
+			entityName: 'FriendInput',
+			fieldName: 'details',
+			responseTypeReplacement: 'DetailsInput',
+		},
 	],
 });
 
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [pocket],
+	apis: [pocket, prisma],
 	server,
 	operations,
 	generate: {

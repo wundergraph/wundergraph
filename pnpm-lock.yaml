@@ -696,6 +696,7 @@ importers:
       graphql: ^16.3.0
       graphql-request: ^6.0.0
       jose: ^4.11.1
+      prisma: ^4.0.0
       straightforward: ^4.2.2
       typescript: ^4.8.2
       vitest: ^0.31.0
@@ -710,6 +711,7 @@ importers:
       fastify: 4.10.2
       graphql-request: 6.0.0_graphql@16.6.0
       jose: 4.11.2
+      prisma: 4.14.1
       straightforward: 4.2.2
       typescript: 4.9.4
       vitest: 0.31.0
@@ -5597,6 +5599,11 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: false
+
+  /@prisma/engines/4.14.1:
+    resolution: {integrity: sha512-APqFddPVHYmWNKqc+5J5SqrLFfOghKOLZxobmguDUacxOwdEutLsbXPVhNnpFDmuQWQFbXmrTTPoRrrF6B1MWA==}
+    requiresBuild: true
+    dev: true
 
   /@prisma/generator-helper/3.15.2:
     resolution: {integrity: sha512-G6oKBowE+IwBdQUL5pOHuDrOgVQZVcsA3w1E52P5MeUqWhOtvtrewNBlqvsgyX9IiE35bzHQWIwxGfc0gzPUng==}
@@ -20408,6 +20415,15 @@ packages:
     dependencies:
       react: 18.2.0
     dev: false
+
+  /prisma/4.14.1:
+    resolution: {integrity: sha512-z6hxzTMYqT9SIKlzD08dhzsLUpxjFKKsLpp5/kBDnSqiOjtUyyl/dC5tzxLcOa3jkEHQ8+RpB/fE3w8bgNP51g==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+    requiresBuild: true
+    dependencies:
+      '@prisma/engines': 4.14.1
+    dev: true
 
   /proc-log/2.0.1:
     resolution: {integrity: sha512-Kcmo2FhfDTXdcbfDH76N7uBYHINxc/8GW7UAVuVP9I+Va3uHSerrnKV6dLooga/gh7GlgzuCCr/eoldnL1muGw==}

@@ -121,7 +121,7 @@ describe('replaceCustomScalars Tests', () => {
 			],
 		};
 
-		const { schemaSDL, customScalarTypeFields } = replaceCustomScalars(schema, introspection);
+		const { schemaSDL, customScalarTypeFields, customScalarTypeNames } = replaceCustomScalars(schema, introspection);
 		console.log(schemaSDL);
 		assert.equal(customScalarTypeFields.length, 6);
 		assert.deepEqual(customScalarTypeFields, [
@@ -149,6 +149,13 @@ describe('replaceCustomScalars Tests', () => {
 				typeName: 'LandpadInput',
 				fieldName: 'geo',
 			},
+		]);
+		assert.deepEqual(customScalarTypeNames, [
+			'Location',
+			'Geography',
+			'AnotherGeography',
+			'LocationInput',
+			'GeographyInput',
 		]);
 	});
 
@@ -231,6 +238,11 @@ describe('replaceCustomScalars Tests', () => {
 			level: Int
 			hasMaxEVs: Boolean
 		}
+		
+		input PowerInput {
+			level: Int
+			hasMaxEVs: Boolean
+		}
 		`,
 			replaceCustomScalarTypeFields: [
 				{
@@ -246,7 +258,7 @@ describe('replaceCustomScalars Tests', () => {
 				{
 					entityName: 'PokemonInput',
 					fieldName: 'baseStats',
-					responseTypeReplacement: 'BaseStats',
+					responseTypeReplacement: 'BaseStatsInput',
 				},
 				{
 					entityName: 'PokemonInput',
@@ -256,7 +268,7 @@ describe('replaceCustomScalars Tests', () => {
 			],
 		};
 
-		const { schemaSDL, customScalarTypeFields } = replaceCustomScalars(schema, introspection);
+		const { schemaSDL, customScalarTypeFields, customScalarTypeNames } = replaceCustomScalars(schema, introspection);
 		console.log(schemaSDL);
 		assert.equal(customScalarTypeFields.length, 6);
 		assert.deepEqual(customScalarTypeFields, [
@@ -285,6 +297,7 @@ describe('replaceCustomScalars Tests', () => {
 				fieldName: 'baseStats',
 			},
 		]);
+		assert.deepEqual(customScalarTypeNames, ['BaseStats', 'Power', 'BaseStatsInput', 'PowerInput']);
 	});
 
 	test('that non-changes are ignored', async () => {
@@ -329,9 +342,10 @@ describe('replaceCustomScalars Tests', () => {
 			],
 		};
 
-		const { schemaSDL, customScalarTypeFields } = replaceCustomScalars(schema, introspection);
+		const { schemaSDL, customScalarTypeFields, customScalarTypeNames } = replaceCustomScalars(schema, introspection);
 		console.log(schemaSDL);
 		assert.equal(customScalarTypeFields.length, 0);
 		assert.deepEqual(customScalarTypeFields, []);
+		assert.deepEqual(customScalarTypeNames, []);
 	});
 });

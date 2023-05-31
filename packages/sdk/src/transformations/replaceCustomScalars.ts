@@ -5,6 +5,7 @@ import { SingleTypeField } from '@wundergraph/protobuf';
 export interface ReplaceCustomScalarsResult {
 	schemaSDL: string;
 	customScalarTypeFields: SingleTypeField[];
+	customScalarTypeNames: string[];
 }
 
 export const replaceCustomScalars = (
@@ -13,7 +14,7 @@ export const replaceCustomScalars = (
 ): ReplaceCustomScalarsResult => {
 	const replacements = introspection.replaceCustomScalarTypeFields;
 	if (!replacements || replacements.length < 1) {
-		return { schemaSDL, customScalarTypeFields: [] };
+		return { schemaSDL, customScalarTypeFields: [], customScalarTypeNames: [] };
 	}
 	const replacementsByParentName = getCustomScalarReplacementsByParent(replacements);
 	const replacementsByInterfaceName = new Map<string, Map<string, string>>();
@@ -21,6 +22,7 @@ export const replaceCustomScalars = (
 	let currentValidParentTypeName = '';
 	let customScalarReplacementName = '';
 	const replacementScalars: Set<SingleTypeField> = new Set<SingleTypeField>();
+	const replacementScalarTypeNames: Set<string> = new Set<string>();
 
 	const ast = parse(schemaSDL);
 	const astWithReplacements = visit(ast, {
@@ -59,6 +61,7 @@ export const replaceCustomScalars = (
 				}
 				customScalarReplacementName = replacementScalarName;
 				replacementScalars.add({ typeName: currentValidParentTypeName, fieldName: fieldName });
+				replacementScalarTypeNames.add(replacementScalarName);
 			},
 			leave: (_) => {
 				customScalarReplacementName = '';
@@ -92,6 +95,7 @@ export const replaceCustomScalars = (
 					typeName: currentValidParentTypeName,
 					fieldName: fieldName,
 				});
+				replacementScalarTypeNames.add(replacementScalarName);
 			},
 			leave: (_) => {
 				customScalarReplacementName = '';
@@ -106,7 +110,11 @@ export const replaceCustomScalars = (
 
 	if (replacementsByInterfaceName.size < 1) {
 		const schema = print(astWithReplacements);
-		return { schemaSDL: schema, customScalarTypeFields: Array.from(replacementScalars) };
+		return {
+			schemaSDL: schema,
+			customScalarTypeFields: Array.from(replacementScalars),
+			customScalarTypeNames: Array.from(replacementScalarTypeNames),
+		};
 	}
 
 	const astWithInterfaceReplacements = visit(astWithReplacements, {
@@ -134,6 +142,7 @@ export const replaceCustomScalars = (
 				}
 				customScalarReplacementName = replacementScalarName;
 				replacementScalars.add({ typeName: currentValidParentTypeName, fieldName: node.name.value });
+				// Interfaces will have the same fields as objects, so need to attempt to add to replacementScalarTypeNames
 			},
 			leave: (_) => {
 				customScalarReplacementName = '';
@@ -148,7 +157,11 @@ export const replaceCustomScalars = (
 
 	const schema = print(astWithInterfaceReplacements);
 
-	return { schemaSDL: schema, customScalarTypeFields: Array.from(replacementScalars) };
+	return {
+		schemaSDL: schema,
+		customScalarTypeFields: Array.from(replacementScalars),
+		customScalarTypeNames: Array.from(replacementScalarTypeNames),
+	};
 };
 
 export const getCustomScalarReplacementsByParent = (
