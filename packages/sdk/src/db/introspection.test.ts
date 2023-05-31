@@ -85,7 +85,7 @@ test('cleanupPrismaSchema', async () => {
 
 	const cleanedSchema = cleanupPrismaSchema(introspection, result);
 
-	assert.equal(result.jsonTypeFields.length, 1);
+	assert.equal(result.jsonTypeFields.length, 7);
 	assert.equal(result.jsonResponseFields.length, 0);
 	assert.equal(result.interpolateVariableDefinitionAsJSON.length, 2);
 
