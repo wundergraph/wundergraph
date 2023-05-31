@@ -1,5 +1,6 @@
 import { createServer, YogaNodeServerInstance } from '@graphql-yoga/node';
 
+// You can run locally with npx ts-node apps/schema-extensions/graphql-server.ts
 const typeDefs = /* GraphQL */ `
 	scalar HumanJSON
 

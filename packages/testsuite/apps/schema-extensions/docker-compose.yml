@@ -5,4 +5,4 @@ services:
     ports:
       - '54322:5432'
     env_file:
-      - database.env
+      - ../../database.env

@@ -315,16 +315,7 @@ export const introspectMongoDB = introspectDatabaseWithCache(
 	mongodb
 );
 
-export const introspectPrisma = async (introspection: {
-	apiNamespace?: string;
-	replaceCustomScalarTypeFields?: {
-		fieldName: string;
-		entityName: string;
-		responseTypeReplacement: string;
-	}[];
-	schemaExtension?: string;
-	prismaFilePath: string;
-}) => {
+export const introspectPrisma = async (introspection: PrismaIntrospection) => {
 	const cacheConfig: IntrospectionCacheConfiguration = {
 		keyInput: await fileHash(introspection.prismaFilePath),
 		dataSource: 'localFilesystem',
