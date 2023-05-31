@@ -16,8 +16,6 @@ build-docs:
 engine-dev: codegen
 	go mod tidy
 	go mod download
-# Install current binary in the pnpm workspace
-	make wunderctl
 
 check-setup:
 	$(shell ./scripts/check-setup.sh)
