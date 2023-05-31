@@ -44,6 +44,7 @@ message CookieBasedAuthentication {
 	ConfigurationVariable hashKey = 4;
 	ConfigurationVariable blockKey = 5;
 	ConfigurationVariable csrfSecret = 6;
+	ConfigurationVariable timeoutSeconds = 7;
 }
 
 message AuthProvider {

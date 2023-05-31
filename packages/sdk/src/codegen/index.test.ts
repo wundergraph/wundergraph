@@ -606,6 +606,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						secureCookieBlockKey: mapInputVariable(''),
 						csrfTokenSecret: mapInputVariable(''),
 					},
+					timeoutSeconds: mapInputVariable(0),
 					customClaims: {},
 					publicClaims: [],
 				},

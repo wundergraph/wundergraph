@@ -55,6 +55,7 @@ type OpenIDConnectConfig struct {
 	InsecureCookies    bool
 	ForceRedirectHttps bool
 	Cookie             *securecookie.SecureCookie
+	AuthTimeout        time.Duration
 }
 
 type ClaimsInfo struct {
@@ -198,7 +199,7 @@ func (h *OpenIDConnectCookieHandler) authorize(_ context.Context, w http.Respons
 	stateCookie := &http.Cookie{
 		Name:     "state",
 		Value:    state,
-		MaxAge:   int(time.Minute.Seconds()),
+		MaxAge:   int(config.AuthTimeout.Seconds()),
 		Secure:   r.TLS != nil,
 		HttpOnly: true,
 		Path:     cookiePath,
@@ -210,7 +211,7 @@ func (h *OpenIDConnectCookieHandler) authorize(_ context.Context, w http.Respons
 	redirectURICookie := &http.Cookie{
 		Name:     oidcRedirectURICookieName,
 		Value:    redirectURI,
-		MaxAge:   int(time.Minute.Seconds()),
+		MaxAge:   int(config.AuthTimeout.Seconds()),
 		Secure:   r.TLS != nil,
 		HttpOnly: true,
 		Path:     cookiePath,
@@ -223,7 +224,7 @@ func (h *OpenIDConnectCookieHandler) authorize(_ context.Context, w http.Respons
 		redirectOnSucessURICookie := &http.Cookie{
 			Name:     oidcRedirectOnCompletionURICookieName,
 			Value:    redirectOnCompletionURI,
-			MaxAge:   int(time.Minute.Seconds()),
+			MaxAge:   int(config.AuthTimeout.Seconds()),
 			Secure:   r.TLS != nil,
 			HttpOnly: true,
 			Path:     cookiePath,

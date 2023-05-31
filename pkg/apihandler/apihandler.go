@@ -63,6 +63,8 @@ const (
 	WgJsonPatchParam     = WgPrefix + "json_patch"
 	WgSseParam           = WgPrefix + "sse"
 	WgSubscribeOnceParam = WgPrefix + "subscribe_once"
+
+	defaultAuthTimeoutSeconds = 600 // 10 minutes
 )
 
 type WgRequestParams struct {
@@ -1576,8 +1578,19 @@ func (r *Builder) registerCookieAuthHandlers(router *mux.Router, cookie *securec
 		return nil
 	}
 
+	timeoutSeconds, err := loadvariable.Int(r.api.AuthenticationConfig.GetCookieBased().GetTimeoutSeconds())
+	if err != nil {
+		return err
+	}
+
+	if timeoutSeconds <= 0 {
+		timeoutSeconds = defaultAuthTimeoutSeconds
+	}
+
+	authTimeout := time.Second * time.Duration(timeoutSeconds)
+
 	for _, provider := range r.api.AuthenticationConfig.CookieBased.Providers {
-		r.configureCookieProvider(router, provider, cookie)
+		r.configureCookieProvider(router, provider, cookie, authTimeout)
 	}
 
 	return nil
@@ -1623,7 +1636,7 @@ func (r *Builder) configureOpenIDConnectProviders() (*authentication.OpenIDConne
 	return &providers, nil
 }
 
-func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.AuthProvider, cookie *securecookie.SecureCookie) {
+func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.AuthProvider, cookie *securecookie.SecureCookie, authTimeout time.Duration) {
 
 	router.Use(authentication.RedirectAlreadyAuthenticatedUsers(
 		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUris),
@@ -1661,6 +1674,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			InsecureCookies:    r.insecureCookies,
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
+			AuthTimeout:        authTimeout,
 		}, r.authenticationHooks())
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "github"),
@@ -1692,6 +1706,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			InsecureCookies:    r.insecureCookies,
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
+			AuthTimeout:        authTimeout,
 		}, r.authenticationHooks())
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "oidc"),

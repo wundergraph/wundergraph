@@ -156,6 +156,11 @@ export interface WunderGraphConfigApplicationConfig<
 			secureCookieBlockKey?: InputVariable;
 			// csrfTokenSecret is the secret to enable the csrf middleware, should be 32 bytes
 			csrfTokenSecret?: InputVariable;
+			/**
+			 * Optional timeout used for storing temporary data during authentication
+			 * @default 600 (10 minutes)
+			 */
+			timeoutSeconds?: InputVariable<number>;
 		};
 		tokenBased?: {
 			providers: TokenAuthProvider[];
@@ -341,6 +346,7 @@ export interface ResolvedWunderGraphConfig {
 			secureCookieBlockKey: ConfigurationVariable;
 			csrfTokenSecret: ConfigurationVariable;
 		};
+		timeoutSeconds: ConfigurationVariable;
 	};
 	enableGraphQLEndpoint: boolean;
 	security: {
@@ -522,6 +528,7 @@ const resolveConfig = async (
 				secureCookieBlockKey: mapInputVariable(config.authentication?.cookieBased?.secureCookieBlockKey || ''),
 				csrfTokenSecret: mapInputVariable(config.authentication?.cookieBased?.csrfTokenSecret || ''),
 			},
+			timeoutSeconds: mapInputVariable(config?.authentication?.cookieBased?.timeoutSeconds ?? 0),
 		},
 		enableGraphQLEndpoint: config.security?.enableGraphQLEndpoint === true,
 		security: {
@@ -1231,6 +1238,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 					blockKey: config.authentication.cookieSecurity.secureCookieBlockKey,
 					hashKey: config.authentication.cookieSecurity.secureCookieHashKey,
 					csrfSecret: config.authentication.cookieSecurity.csrfTokenSecret,
+					timeoutSeconds: config.authentication.timeoutSeconds,
 				},
 				hooks: config.authentication.hooks,
 				jwksBased: {
