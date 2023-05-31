@@ -39,7 +39,7 @@ to which the field belongs, and the name of a replacement custom type that was d
 The three properties that comprise the object are further defined below:
 
 {% callout type="warning" %}
-From wundergraph/sdk version 0.161.0, `inputTypeReplacement` has been deprecated and will be ignored.
+From wundergraph/sdk version 0.162.0, `inputTypeReplacement` has been deprecated and will be ignored.
 Moreover, `entityName` and `fieldName` are exact matching (and case-sensitive).
 Please create a separate replacement definition object for each and every field you wish to replace
 (including GraphQL Inputs).
