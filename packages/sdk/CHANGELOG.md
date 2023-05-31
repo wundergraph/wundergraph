@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.161.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.160.0...@wundergraph/sdk@0.161.0) (2023-05-31)
+
+### Features
+
+* add graphql enums to generated typescript model ([#1015](https://github.com/wundergraph/wundergraph/issues/1015)) ([845f036](https://github.com/wundergraph/wundergraph/commit/845f03608d13bc86e19c21769cb67a157232c3bf)) (@thisisnithin)
+* use one web compatible fetch implementation on the server ([#1016](https://github.com/wundergraph/wundergraph/issues/1016)) ([784eddb](https://github.com/wundergraph/wundergraph/commit/784eddb209098a5bbd78c814aa9ccfed85c726b3)) (@StarpTech)
+
+### Bug Fixes
+
+* hook server strictness ([#1013](https://github.com/wundergraph/wundergraph/issues/1013)) ([f2608e5](https://github.com/wundergraph/wundergraph/commit/f2608e5ed9ac7f30c417e0a036e346d33d1c991f)) (@Pagebakers)
+* infinite recursion when extracting enums ([#1022](https://github.com/wundergraph/wundergraph/issues/1022)) ([6e58da6](https://github.com/wundergraph/wundergraph/commit/6e58da63c1ba5d0e835c4dbd0d4ccebcc2220273)) (@thisisnithin)
+* use Node.js fetch that supports web stream api ([#1007](https://github.com/wundergraph/wundergraph/issues/1007)) ([7977c79](https://github.com/wundergraph/wundergraph/commit/7977c79dc5dc9484c2412622828ac3a1380422fd)) (@StarpTech)
+
 ## [0.160.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.159.0...@wundergraph/sdk@0.160.0) (2023-05-26)
 
 ### Features
