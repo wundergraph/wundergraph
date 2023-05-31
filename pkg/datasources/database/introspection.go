@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"go.uber.org/zap"
@@ -32,14 +31,10 @@ func IntrospectPrismaDatabase(ctx context.Context, introspectionSchema, wundergr
 	} else {
 		prismaSchema = introspectionSchema
 	}
-	schemaFile, err := engine.StartQueryEngine(prismaSchema)
+	err = engine.StartQueryEngine(prismaSchema)
 	if err != nil {
-		if schemaFile != "" {
-			os.Remove(schemaFile)
-		}
 		return "", "", "", err
 	}
-	defer os.Remove(schemaFile)
 	graphqlSDL, err = engine.IntrospectGraphQLSchema(ctx)
 	if err != nil {
 		return "", "", "", err

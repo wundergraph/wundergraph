@@ -69,6 +69,7 @@ type Engine struct {
 	cancel                  func()
 	client                  *http.Client
 	log                     *zap.Logger
+	schemaFile              *os.File
 }
 
 func NewEngine(client *http.Client, log *zap.Logger, wundergraphDir string) *Engine {
@@ -252,16 +253,16 @@ func (e *Engine) Request(ctx context.Context, request []byte, rw io.Writer) (err
 	return
 }
 
-func (e *Engine) StartQueryEngine(schema string) (schemaFile string, err error) {
+func (e *Engine) StartQueryEngine(schema string) error {
 
-	err = e.ensurePrisma()
+	err := e.ensurePrisma()
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	freePort, err := freeport.GetFreePort()
 	if err != nil {
-		return "", err
+		return err
 	}
 	port := strconv.Itoa(freePort)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -279,33 +280,23 @@ func (e *Engine) StartQueryEngine(schema string) (schemaFile string, err error) 
 	//create temporary file
 	temporaryFile, err := ioutil.TempFile("", "t*.prisma")
 	if err != nil {
-		return "", err
+		return err
 	}
-
-	// calculate the ARG_MAX limit, minus a safety buffer
-	const safetyBuffer = 2048
-	argMax := 1048576 - safetyBuffer // or however you get the value of ARG_MAX
-
-	if len(schema) < argMax {
-		e.cmd.Env = append(e.cmd.Env, "PRISMA_DML="+schema)
-		e.log.Info("Schema size found in range.")
-	} else {
-		// schema is too big, write it to a temp file
-		if _, err := temporaryFile.Write([]byte(schema)); err != nil { // ignore the error, we're already handling an error
-			return temporaryFile.Name(), err
-		}
-
-		e.cmd.Env = append(e.cmd.Env, "PRISMA_DML_PATH="+temporaryFile.Name())
+	//write schema to the file
+	if _, err := temporaryFile.Write([]byte(schema)); err != nil {
+		return err
 	}
+	e.cmd.Env = append(e.cmd.Env, "PRISMA_DML_PATH="+temporaryFile.Name())
+	e.schemaFile = temporaryFile
 
 	e.cmd.Stdout = os.Stdout
 	e.cmd.Stderr = os.Stderr
 	e.url = "http://localhost:" + port
 	if err := e.cmd.Start(); err != nil {
 		e.StopQueryEngine()
-		return temporaryFile.Name(), err
+		return err
 	}
-	return temporaryFile.Name(), nil
+	return nil
 }
 
 func (e *Engine) ensurePrisma() error {
@@ -390,6 +381,13 @@ func (e *Engine) StopQueryEngine() {
 		}
 	}
 	close(exitCh)
+	if e.schemaFile != nil {
+		err := os.Remove(e.schemaFile.Name())
+		if err != nil {
+			e.log.Error("Deleting temporary schema file", zap.Error(err))
+		}
+		e.schemaFile = nil
+	}
 	e.cmd = nil
 	e.cancel = nil
 }
