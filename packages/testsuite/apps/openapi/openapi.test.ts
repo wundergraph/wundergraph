@@ -4,16 +4,19 @@ import { createTestServer } from './.wundergraph/generated/testing';
 import { createOpenAPITestServer } from './test-server';
 import { ResponseError, getHttpResponseError } from '@wundergraph/sdk/client';
 
+const httpServer = createOpenAPITestServer(8090);
 const wg = createTestServer({
 	dir: __dirname,
 });
 
 beforeAll(async () => {
-	createOpenAPITestServer(8090);
 	await wg.start();
 });
 
-afterAll(() => wg.stop());
+afterAll(async () => {
+	await httpServer.close();
+	await wg.stop();
+});
 
 const expectHttpStatusCodeInQuery = async (statusCode: number) => {
 	const result = await wg.client().query({

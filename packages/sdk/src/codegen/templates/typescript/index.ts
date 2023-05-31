@@ -474,6 +474,8 @@ export const loadFile = (file: string | (() => string)): string => {
 };
 
 export const extractEnums = (schema: JSONSchema, enumMap: Map<string, Array<JSONSchema7Type>>): Map<string, any> => {
+	const visitedRefs: string[] = [];
+
 	const traverseSchema = (obj: JSONSchema) => {
 		if (obj.enum && obj['x-graphql-enum-name']) {
 			const name = obj['x-graphql-enum-name'];
@@ -483,8 +485,10 @@ export const extractEnums = (schema: JSONSchema, enumMap: Map<string, Array<JSON
 		}
 
 		if (obj.$ref) {
-			const refSchema = schema.definitions?.[obj.$ref.split('/').pop() as string];
-			if (refSchema && typeof refSchema !== 'boolean') {
+			const refName = obj.$ref.split('/').pop() as string;
+			const refSchema = schema.definitions?.[refName];
+			if (refSchema && typeof refSchema !== 'boolean' && !visitedRefs.includes(refName)) {
+				visitedRefs.push(refName);
 				traverseSchema(refSchema);
 			}
 		}

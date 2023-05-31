@@ -1,0 +1,32 @@
+query {
+	pocket_characters {
+		... on pocket_GymLeader {
+			badgeNumber
+			details {
+				name
+				age
+			}
+			teamData {
+				highestLevel
+				typeSpeciality
+			}
+		}
+		... on pocket_Rival {
+			starter
+			details {
+				name
+				age
+			}
+			teamData {
+				highestLevel
+				typeSpeciality
+			}
+		}
+		... on pocket_Friend {
+			details {
+				name
+				age
+			}
+		}
+	}
+}
