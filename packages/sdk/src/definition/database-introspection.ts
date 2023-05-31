@@ -48,10 +48,14 @@ const introspectDatabase = async (
 	}
 	const schemaDocumentNode = parse(graphql_schema);
 	const schema = print(schemaDocumentNode);
-	const { RootNodes, ChildNodes, Fields } = configuration(schemaDocumentNode, {
-		url: '',
-		schemaExtension: introspection.schemaExtension,
-	});
+	const { RootNodes, ChildNodes, Fields } = configuration(
+		schemaDocumentNode,
+		{
+			url: '',
+			schemaExtension: introspection.schemaExtension,
+		},
+		[]
+	);
 	const jsonFields = [...jsonTypeFields, ...jsonResponseFields];
 	jsonFields.forEach((field) => {
 		const fieldConfig = Fields.find((f) => f.typeName == field.typeName && f.fieldName == field.fieldName);

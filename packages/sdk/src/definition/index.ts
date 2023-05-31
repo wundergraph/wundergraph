@@ -247,6 +247,9 @@ interface GraphQLIntrospectionOptions {
 	loadSchemaFromString?: string | (() => string);
 	customFloatScalars?: string[];
 	customIntScalars?: string[];
+	/*
+		customJSONScalars is deprecated; the types are now detected automatically.
+	 */
 	customJSONScalars?: string[];
 	// switching internal to true will mark the origin as an internal GraphQL API
 	// this will forward the original request and user info to the internal upstream
@@ -275,9 +278,25 @@ export interface GraphQLFederationIntrospection extends IntrospectionConfigurati
 }
 
 export interface ReplaceCustomScalarTypeFieldConfiguration {
+	/**
+	 * entityName is the type name for the parent of the field whose response type you wish to replace
+	 * entityName must match exactly (including case)
+	 **/
 	entityName: string;
+	/**
+	 * fieldName is the type name for the field whose response type you wish to replace
+	 * fieldName must match exactly (including case)
+	 **/
 	fieldName: string;
+	/**
+	 * inputTypeReplacement is deprecated
+	 * If you wish to replace Input types, add an entire new configuration object into the array
+	 **/
 	inputTypeReplacement?: string;
+	/**
+	 * responseTypeRepalcement is the replacement response type for fieldName
+	 * responseTypeReplacement must match exactly (including case)
+	 **/
 	responseTypeReplacement: string;
 }
 
