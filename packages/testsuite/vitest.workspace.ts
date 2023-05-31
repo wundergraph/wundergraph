@@ -57,4 +57,12 @@ export default defineWorkspace([
 			hookTimeout: 20000,
 		},
 	},
+	{
+		root: 'apps/schema-extensions',
+		test: {
+			globalSetup: 'apps/schema-extensions/test-setup.ts',
+			testTimeout: 15000,
+			hookTimeout: 20000,
+		},
+	},
 ]);

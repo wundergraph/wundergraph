@@ -40,7 +40,36 @@ test('cleanupPrismaSchema', async () => {
 				entityName: `users`,
 				fieldName: `contact`,
 				responseTypeReplacement: `Contact`,
-				inputTypeReplacement: `ContactInput`,
+			},
+			{
+				entityName: `usersCreateWithoutMessagesInput`,
+				fieldName: `contact`,
+				responseTypeReplacement: `ContactInput`,
+			},
+			{
+				entityName: `usersUpdateWithoutMessagesInput`,
+				fieldName: `contact`,
+				responseTypeReplacement: `ContactInput`,
+			},
+			{
+				entityName: `usersCreateInput`,
+				fieldName: `contact`,
+				responseTypeReplacement: `ContactInput`,
+			},
+			{
+				entityName: `usersUpdateInput`,
+				fieldName: `contact`,
+				responseTypeReplacement: `ContactInput`,
+			},
+			{
+				entityName: `usersCreateManyInput`,
+				fieldName: `contact`,
+				responseTypeReplacement: `ContactInput`,
+			},
+			{
+				entityName: `usersUpdateManyMutationInput`,
+				fieldName: `contact`,
+				responseTypeReplacement: `ContactInput`,
 			},
 		],
 	};
@@ -56,7 +85,7 @@ test('cleanupPrismaSchema', async () => {
 
 	const cleanedSchema = cleanupPrismaSchema(introspection, result);
 
-	assert.equal(result.jsonTypeFields.length, 1);
+	assert.equal(result.jsonTypeFields.length, 7);
 	assert.equal(result.jsonResponseFields.length, 0);
 	assert.equal(result.interpolateVariableDefinitionAsJSON.length, 2);
 

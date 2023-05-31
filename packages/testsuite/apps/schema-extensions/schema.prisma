@@ -1,0 +1,13 @@
+datasource db {
+		provider = "postgresql"
+		url      = "postgresql://admin:admin@localhost:54322/schema-extensions?schema=public"
+}
+
+generator client {
+	provider = "prisma-client-js"
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+	preferences Json
+}
