@@ -162,7 +162,8 @@ func WithGlobalRateLimit(requests int, perDuration time.Duration) Option {
 	}
 }
 
-// WithTraceBatchTimeout sets the timeout for the trace batch exporter
+// WithTraceBatchTimeout sets the timeout for the trace batch exporter.
+// It defines how long the exporter will wait for a batch to be filled before sending it.
 // If the timeout is less or equal than 0, the default value of 5 seconds will be used
 func WithTraceBatchTimeout(batchTimeout time.Duration) Option {
 	return func(options *options) {

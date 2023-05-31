@@ -42,7 +42,9 @@ var (
 	cmdDurationMetric     telemetry.DurationMetric
 	zapLogLevel           zapcore.Level
 	_wunderGraphDirConfig string
-	otelBatchTimeout      time.Duration
+	// otelBatchTimeout is the maximum timeout before a batch of otel data is sent
+	// By default it is 5 seconds but for CI and debugging purposes it should be set much lower
+	otelBatchTimeout time.Duration
 
 	rootFlags helpers.RootFlags
 

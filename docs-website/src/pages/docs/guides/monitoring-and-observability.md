@@ -53,9 +53,13 @@ The OpenTelemetry integration is disabled by default. To enable it, set `enabled
 configureWunderGraphApplication({
   options: {
     openTelemetry: {
-      enabled: true, // Disabled by default
-      sampler: 1, // Defaults to 1 (every trace request). Samples a given fraction of traces. Must be a value between 0 and 1.
-      exporterHttpEndpoint: 'http://localhost:4318', // Endpoint to the OTLP http endpoint. Defaults to http://localhost:4318
+      // Disabled by default
+      enabled: true,
+      // Defaults to 1 (every trace request). Samples a given fraction of traces. Must be a value between 0 and 1.
+      // For example, a value of 0.1 means 10% of traces are sampled. Don't set this to 1 in production, unless you want to trace every request.
+      sampler: 1,
+      // Endpoint to the OTLP http endpoint. Defaults to http://localhost:4318
+      exporterHttpEndpoint: 'http://localhost:4318',
     },
   },
 });
