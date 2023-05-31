@@ -13,9 +13,9 @@ describe('replaceCustomScalars Tests', () => {
 		await wg.start();
 	});
 
-	afterAll(() => {
-		yogaServer.stop();
-		wg.stop();
+	afterAll(async () => {
+		await yogaServer.stop();
+		await wg.stop();
 	});
 
 	describe('GraphQL Introspection Tests', () => {
