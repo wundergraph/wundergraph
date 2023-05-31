@@ -1,5 +1,5 @@
 import { GraphQLIntrospection, OpenAPIIntrospection, ReplaceCustomScalarTypeFieldConfiguration } from '../definition';
-import { parse, print, visit } from 'graphql';
+import { FieldDefinitionNode, InputValueDefinitionNode, parse, print, visit } from 'graphql';
 import { SingleTypeField } from '@wundergraph/protobuf';
 
 export interface ReplaceCustomScalarsResult {
@@ -21,8 +21,8 @@ export const replaceCustomScalars = (
 	let currentParentInterfaces: string[] = [];
 	let currentValidParentTypeName = '';
 	let customScalarReplacementName = '';
-	const replacementScalars: Set<SingleTypeField> = new Set<SingleTypeField>();
-	const replacementScalarTypeNames: Set<string> = new Set<string>();
+	const replacementScalars = new Set<SingleTypeField>();
+	const replacementScalarTypeNames = new Set<string>();
 
 	const ast = parse(schemaSDL);
 	const astWithReplacements = visit(ast, {
@@ -48,20 +48,15 @@ export const replaceCustomScalars = (
 		},
 		FieldDefinition: {
 			enter: (node) => {
-				const fieldName = node.name.value;
-				const replacementScalarName = replacementsByParentName.get(currentValidParentTypeName)?.get(fieldName);
-				// If no change is required, ignore
-				const typeName = 'name' in node.type ? node.type.name.value : '';
-				if (!replacementScalarName || typeName === replacementScalarName) {
-					return;
-				}
-				// We don't know which interface the field belongs to, if any, so add to them all
-				for (const interfaceName of currentParentInterfaces) {
-					addToOrInitializeMap(replacementsByInterfaceName, interfaceName, fieldName, replacementScalarName);
-				}
-				customScalarReplacementName = replacementScalarName;
-				replacementScalars.add({ typeName: currentValidParentTypeName, fieldName: fieldName });
-				replacementScalarTypeNames.add(replacementScalarName);
+				customScalarReplacementName = handleScalarReplacementForChild(
+					node,
+					replacementsByParentName,
+					currentValidParentTypeName,
+					replacementScalars,
+					replacementScalarTypeNames,
+					currentParentInterfaces,
+					replacementsByInterfaceName
+				);
 			},
 			leave: (_) => {
 				customScalarReplacementName = '';
@@ -69,8 +64,9 @@ export const replaceCustomScalars = (
 		},
 		InputObjectTypeDefinition: {
 			enter: (node) => {
-				if (replacementsByParentName.get(node.name.value)) {
-					currentValidParentTypeName = node.name.value;
+				const nodeName = node.name.value;
+				if (replacementsByParentName.get(nodeName)) {
+					currentValidParentTypeName = nodeName;
 				} else {
 					// Skip this parent
 					return false;
@@ -83,19 +79,13 @@ export const replaceCustomScalars = (
 		},
 		InputValueDefinition: {
 			enter: (node) => {
-				const fieldName = node.name.value;
-				const replacementScalarName = replacementsByParentName.get(currentValidParentTypeName)?.get(fieldName);
-				// If no change is required, ignore
-				const typeName = 'name' in node.type ? node.type.name.value : '';
-				if (!replacementScalarName || typeName === replacementScalarName) {
-					return;
-				}
-				customScalarReplacementName = replacementScalarName;
-				replacementScalars.add({
-					typeName: currentValidParentTypeName,
-					fieldName: fieldName,
-				});
-				replacementScalarTypeNames.add(replacementScalarName);
+				customScalarReplacementName = handleScalarReplacementForChild(
+					node,
+					replacementsByParentName,
+					currentValidParentTypeName,
+					replacementScalars,
+					replacementScalarTypeNames
+				);
 			},
 			leave: (_) => {
 				customScalarReplacementName = '';
@@ -134,15 +124,13 @@ export const replaceCustomScalars = (
 		},
 		FieldDefinition: {
 			enter: (node) => {
-				const replacementScalarName = replacementsByInterfaceName.get(currentValidParentTypeName)?.get(node.name.value);
-				// If no change is required, ignore
-				const typeName = 'name' in node.type ? node.type.name.value : '';
-				if (!replacementScalarName || typeName === replacementScalarName) {
-					return;
-				}
-				customScalarReplacementName = replacementScalarName;
-				replacementScalars.add({ typeName: currentValidParentTypeName, fieldName: node.name.value });
 				// Interfaces will have the same fields as objects, so need to attempt to add to replacementScalarTypeNames
+				customScalarReplacementName = handleScalarReplacementForChild(
+					node,
+					replacementsByInterfaceName,
+					currentValidParentTypeName,
+					replacementScalars
+				);
 			},
 			leave: (_) => {
 				customScalarReplacementName = '';
@@ -164,9 +152,11 @@ export const replaceCustomScalars = (
 	};
 };
 
+export type ReplacementScalarMap = Map<string, Map<string, string>>;
+
 export const getCustomScalarReplacementsByParent = (
 	replacements: ReplaceCustomScalarTypeFieldConfiguration[]
-): Map<string, Map<string, string>> => {
+): ReplacementScalarMap => {
 	const replacementsByParent = new Map<string, Map<string, string>>();
 	replacements.forEach((replacement) => {
 		addToOrInitializeMap(
@@ -179,8 +169,8 @@ export const getCustomScalarReplacementsByParent = (
 	return replacementsByParent;
 };
 
-export const addToOrInitializeMap = (
-	map: Map<string, Map<string, string>>,
+const addToOrInitializeMap = (
+	map: ReplacementScalarMap,
 	typeName: string,
 	fieldName: string,
 	replacementScalarName: string
@@ -191,4 +181,33 @@ export const addToOrInitializeMap = (
 	} else {
 		map.set(typeName, new Map<string, string>([[fieldName, replacementScalarName]]));
 	}
+};
+
+export const handleScalarReplacementForChild = (
+	node: FieldDefinitionNode | InputValueDefinitionNode,
+	replacementScalarMap: ReplacementScalarMap,
+	currentValidParentTypeName: string,
+	replacementScalars: Set<SingleTypeField>,
+	replacementScalarTypeNames?: Set<string>,
+	currentParentInterfaces?: string[],
+	replacementsByInterfaceName?: ReplacementScalarMap
+): string => {
+	const fieldName = node.name.value;
+	const replacementScalarName = replacementScalarMap.get(currentValidParentTypeName)?.get(fieldName);
+	// If no change is required, ignore
+	const typeName = 'name' in node.type ? node.type.name.value : '';
+	if (!replacementScalarName || typeName === replacementScalarName) {
+		return '';
+	}
+	if (currentParentInterfaces && replacementsByInterfaceName) {
+		// We don't know which interface the field belongs to, if any, so add to them all
+		for (const interfaceName of currentParentInterfaces) {
+			addToOrInitializeMap(replacementsByInterfaceName, interfaceName, fieldName, replacementScalarName);
+		}
+	}
+	replacementScalars.add({ typeName: currentValidParentTypeName, fieldName: fieldName });
+	if (replacementScalarTypeNames) {
+		replacementScalarTypeNames.add(replacementScalarName);
+	}
+	return replacementScalarName;
 };

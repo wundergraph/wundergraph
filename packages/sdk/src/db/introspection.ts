@@ -11,7 +11,10 @@ import path from 'path';
 import { resolveVariable } from '../configure/variables';
 import { Logger } from '../logger';
 import { DatabaseSchema, prisma } from './types';
-import { addToOrInitializeMap, getCustomScalarReplacementsByParent } from '../transformations/replaceCustomScalars';
+import {
+	getCustomScalarReplacementsByParent,
+	handleScalarReplacementForChild,
+} from '../transformations/replaceCustomScalars';
 
 export interface PrismaDatabaseIntrospectionResult {
 	success: boolean;
@@ -237,19 +240,15 @@ export const cleanupPrismaSchema = (
 		},
 		FieldDefinition: {
 			enter: (node) => {
-				const fieldName = node.name.value;
-				const replacementScalarName = replacementsByParentName.get(currentValidParentTypeName)?.get(fieldName);
-				// If no change is required, ignore
-				const typeName = 'name' in node.type ? node.type.name.value : '';
-				if (!replacementScalarName || typeName === replacementScalarName) {
-					return;
-				}
-				// We don't know which interface the field belongs to, if any, so add to them all
-				for (const interfaceName of currentParentInterfaces) {
-					addToOrInitializeMap(replacementsByInterfaceName, interfaceName, fieldName, replacementScalarName);
-				}
-				customScalarReplacementName = replacementScalarName;
-				replacementScalars.add({ typeName: currentValidParentTypeName, fieldName: fieldName });
+				customScalarReplacementName = handleScalarReplacementForChild(
+					node,
+					replacementsByParentName,
+					currentValidParentTypeName,
+					replacementScalars,
+					undefined,
+					currentParentInterfaces,
+					replacementsByInterfaceName
+				);
 			},
 			leave: (_) => {
 				customScalarReplacementName = '';
@@ -270,14 +269,12 @@ export const cleanupPrismaSchema = (
 		},
 		InputValueDefinition: {
 			enter: (node) => {
-				const fieldName = node.name.value;
-				const replacementScalarName = replacementsByParentName.get(currentValidParentTypeName)?.get(fieldName);
-				// If no change is required, ignore
-				const typeName = 'name' in node.type ? node.type.name.value : '';
-				if (replacementScalarName && typeName !== replacementScalarName) {
-					customScalarReplacementName = replacementScalarName;
-					replacementScalars.add({ typeName: currentInputObjectTypeName, fieldName: fieldName });
-				}
+				customScalarReplacementName = handleScalarReplacementForChild(
+					node,
+					replacementsByParentName,
+					currentValidParentTypeName,
+					replacementScalars
+				);
 
 				if (listInputFields.includes(node.name.value)) {
 					// potential list input field
@@ -398,14 +395,12 @@ export const cleanupPrismaSchema = (
 		},
 		FieldDefinition: {
 			enter: (node) => {
-				const replacementScalarName = replacementsByInterfaceName.get(currentValidParentTypeName)?.get(node.name.value);
-				// If no change is required, ignore
-				const typeName = 'name' in node.type ? node.type.name.value : '';
-				if (!replacementScalarName || typeName === replacementScalarName) {
-					return;
-				}
-				customScalarReplacementName = replacementScalarName;
-				replacementScalars.add({ typeName: currentValidParentTypeName, fieldName: node.name.value });
+				customScalarReplacementName = handleScalarReplacementForChild(
+					node,
+					replacementsByInterfaceName,
+					currentValidParentTypeName,
+					replacementScalars
+				);
 			},
 			leave: (_) => {
 				customScalarReplacementName = '';
