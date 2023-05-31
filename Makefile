@@ -16,6 +16,8 @@ build-docs:
 engine-dev: codegen
 	go mod tidy
 	go mod download
+# Install current binary in the pnpm workspace
+	make wunderctl
 
 check-setup:
 	$(shell ./scripts/check-setup.sh)
@@ -50,7 +52,7 @@ codegen: install-proto codegen-go
 	pnpm codegen
 
 build: codegen
-	cd cmd/wunderctl && go build -o ../../wunderctl -ldflags "-X 'main.commit=$(shell git rev-parse --short HEAD)' -X 'main.builtBy=dev' -X 'main.version=dev' -X 'main.date=$(shell date)'" -trimpath
+	cd cmd/wunderctl && CGO_ENABLED=0 go build -o ../../wunderctl -ldflags "-X 'main.commit=$(shell git rev-parse --short HEAD)' -X 'main.builtBy=dev' -X 'main.version=dev' -X 'main.date=$(shell date)'" -trimpath
 
 # This command builds the wunderctl binary and copies it into the nodejs wunderctl wrapper
 wunderctl: build

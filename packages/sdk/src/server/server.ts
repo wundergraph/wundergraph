@@ -309,7 +309,6 @@ export const createServer = async ({
 			fastify.log.info(
 				{
 					endpoint: tracerConfig.httpEndpoint,
-					sampler: tracerConfig.sampler,
 					batchTimeoutMs,
 				},
 				'OpenTelemetry enabled'
@@ -319,7 +318,6 @@ export const createServer = async ({
 				{
 					httpEndpoint: tracerConfig.httpEndpoint,
 					authToken: tracerConfig.authToken,
-					sampler: tracerConfig.sampler,
 					batchTimeoutMs,
 				},
 				logger

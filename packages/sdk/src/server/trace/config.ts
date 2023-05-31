@@ -8,10 +8,8 @@ export const loadTraceConfigFromWgConfig = (config: TelemetryOptions): TracerCon
 	const exporterHttpEndpoint = config.exporterHttpEndpoint
 		? resolveConfigurationVariable(config.exporterHttpEndpoint)
 		: '';
-	const sampler = config.sampler ? parseFloat(resolveConfigurationVariable(config.sampler)) : 1.0;
 
 	return {
-		sampler,
 		enabled,
 		authToken,
 		httpEndpoint: exporterHttpEndpoint,

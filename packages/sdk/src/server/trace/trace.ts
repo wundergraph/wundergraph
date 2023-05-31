@@ -3,11 +3,12 @@ import {
 	SpanExporter,
 	NodeTracerProvider,
 	SpanProcessor,
-	TraceIdRatioBasedSampler,
+	AlwaysOnSampler,
 	InMemorySpanExporter,
 	BatchSpanProcessor,
 	BasicTracerProvider,
 	SimpleSpanProcessor,
+	ParentBasedSampler,
 } from '@opentelemetry/sdk-trace-node';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
@@ -31,7 +32,6 @@ export interface TelemetryTestTracerProvider {
 export interface TelemetryOptions {
 	httpEndpoint: string;
 	authToken?: string;
-	sampler?: number;
 	batchTimeoutMs?: number;
 }
 
@@ -52,7 +52,11 @@ const configureTracerProvider = (config: TelemetryOptions, logger: pino.Logger):
 
 	const provider = new NodeTracerProvider({
 		resource,
-		sampler: new TraceIdRatioBasedSampler(config.sampler),
+		// Because the hooks server is never the root of the trace,
+		// we always want to sample when the parent is sampled.
+		sampler: new ParentBasedSampler({
+			root: new AlwaysOnSampler(),
+		}),
 	});
 
 	provider.addSpanProcessor(getSpanProcessor(config, logger));

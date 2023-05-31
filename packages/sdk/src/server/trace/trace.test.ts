@@ -5,7 +5,6 @@ describe('Trace', () => {
 	test('Should be able to create a trace provider', async () => {
 		const tp = configureTracerProvider(
 			{
-				sampler: 1,
 				authToken: '123',
 				httpEndpoint: 'http://localhost:4317',
 			},

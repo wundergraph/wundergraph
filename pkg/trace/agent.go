@@ -61,8 +61,15 @@ func createExporter(c Config) (sdktrace.SpanExporter, error) {
 
 func startAgent(log *zap.Logger, c Config) (*sdktrace.TracerProvider, error) {
 	opts := []sdktrace.TracerProviderOption{
-		// Set the sampling rate based on the parent span to 100%
-		sdktrace.WithSampler(sdktrace.ParentBased(sdktrace.TraceIDRatioBased(c.Sampler))),
+		// IMPORTANT: Don't sample based on the parent span (Sampled Flag) because
+		// we sample all requests at the cloud edge for exact analytics purposes.
+		// This configures the default sampler to perform trace ID ratio sampling on all traces.
+		sdktrace.WithSampler(
+			sdktrace.ParentBased(
+				sdktrace.TraceIDRatioBased(c.Sampler),
+				sdktrace.WithRemoteParentSampled(sdktrace.TraceIDRatioBased(c.Sampler)),
+			),
+		),
 		// Record information about this application in a Resource.
 		sdktrace.WithResource(resource.NewSchemaless(semconv.ServiceNameKey.String(c.Name))),
 	}
