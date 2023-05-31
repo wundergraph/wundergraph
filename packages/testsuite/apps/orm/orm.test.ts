@@ -34,4 +34,13 @@ describe('The WunderGraph ORM', () => {
 		const data = await resp.json();
 		expect(data.name).toBe('Germany');
 	});
+
+	it('should add custom headers', async () => {
+		const client = wg.client();
+		const { data, error } = await client.query({
+			operationName: 'ts/with-headers',
+		});
+		expect(error).toBeUndefined();
+		expect(data).toEqual('test');
+	});
 });
