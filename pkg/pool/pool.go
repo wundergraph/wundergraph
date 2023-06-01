@@ -122,7 +122,7 @@ func (p *Pool) GetSharedFromRequest(ctx context.Context, r *http.Request, planCo
 	if shared != nil {
 		s := shared.(*Shared)
 		s.Planner.SetConfig(planConfig)
-		s.Ctx = s.Ctx.WithContext(ctx)
+		s.Ctx = s.Ctx.WithContext(c)
 		s.Ctx.Request.Header = r.Header
 		s.Ctx.RenameTypeNames = cfg.RenameTypeNames
 		return s
