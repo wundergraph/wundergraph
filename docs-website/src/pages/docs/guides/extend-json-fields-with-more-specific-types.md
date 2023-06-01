@@ -209,7 +209,7 @@ We must select the `extra` field that provides us type safety for the client.
 }
 ```
 
-## Type-Safety for the Client
+### Type-Safety for the Client
 
 With everything in place, we're now able to store our custom message extension using a JSON column but leverage the
 GraphQL type system for type-safe field access.
