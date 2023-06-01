@@ -1,5 +1,4 @@
 import { FastifyPluginAsync } from 'fastify';
-import { GraphQLSchema } from 'graphql';
 import { getGraphQLParameters, processRequest, sendResult } from 'graphql-helix';
 import { buildSchema, GraphQLResolveInfo } from 'graphql/index';
 import { fetch } from '@whatwg-node/fetch';

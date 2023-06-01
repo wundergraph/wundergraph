@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/react-relay",
-  "version": "0.3.1",
+  "version": "0.3.3",
   "license": "Apache-2.0",
   "description": "WunderGraph Relay Integration",
   "main": "./dist/index.js",

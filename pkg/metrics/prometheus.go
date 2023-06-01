@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -13,6 +14,8 @@ import (
 type prometheusMetrics struct {
 	server     *http.Server
 	registerer prometheus.Registerer
+	// Guards collectors
+	mu         sync.Mutex
 	collectors []prometheus.Collector
 }
 
@@ -32,7 +35,7 @@ func (m *prometheusMetrics) NewCounterVec(opts MetricOpts, labelNames ...string)
 			panic(err)
 		}
 	} else {
-		m.collectors = append(m.collectors, counterVec)
+		m.addCollector(counterVec)
 	}
 	return &prometheusCounterVec{
 		counterVec: counterVec,
@@ -55,7 +58,7 @@ func (m *prometheusMetrics) NewGaugeVec(opts MetricOpts, labelNames ...string) G
 			panic(err)
 		}
 	} else {
-		m.collectors = append(m.collectors, gaugeVec)
+		m.addCollector(gaugeVec)
 	}
 	return &prometheusGaugeVec{
 		gaugeVec: gaugeVec,
@@ -78,7 +81,7 @@ func (m *prometheusMetrics) NewHistogramVec(opts MetricOpts, labelNames ...strin
 			panic(err)
 		}
 	} else {
-		m.collectors = append(m.collectors, histogramVec)
+		m.addCollector(histogramVec)
 	}
 	return &prometheusHistogramVec{
 		histogramVec: histogramVec,
@@ -102,7 +105,7 @@ func (m *prometheusMetrics) NewSummaryVec(opts MetricOpts, labelNames ...string)
 			panic(err)
 		}
 	} else {
-		m.collectors = append(m.collectors, summaryVec)
+		m.addCollector(summaryVec)
 	}
 	return &prometheusSummaryVec{
 		summaryVec: summaryVec,
@@ -118,22 +121,30 @@ func (m *prometheusMetrics) Serve() error {
 }
 
 func (m *prometheusMetrics) Close() error {
+	m.unregisterCollectors()
 	if err := m.server.Close(); err != nil {
 		return err
 	}
-	m.unregisterCollectors()
 	return nil
 }
 
 func (m *prometheusMetrics) Shutdown(ctx context.Context) error {
+	m.unregisterCollectors()
 	if err := m.server.Shutdown(ctx); err != nil {
 		return err
 	}
-	m.unregisterCollectors()
 	return nil
 }
 
+func (m *prometheusMetrics) addCollector(collector prometheus.Collector) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.collectors = append(m.collectors, collector)
+}
+
 func (m *prometheusMetrics) unregisterCollectors() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	for _, collector := range m.collectors {
 		m.registerer.Unregister(collector)
 	}

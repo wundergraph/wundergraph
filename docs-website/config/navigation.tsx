@@ -431,7 +431,7 @@ const navigation = [
 						href: '/docs/guides/context-factory',
 					},
 					{
-						title: 'Monitoring and observability',
+						title: 'Monitoring and Observability',
 						href: '/docs/guides/monitoring-and-observability',
 					},
 				],
@@ -991,6 +991,10 @@ const navigation = [
 						title: 'Private NPM dependencies',
 						href: '/docs/cloud/private-npm-dependencies',
 					},
+					{
+						title: 'Preview environments',
+						href: '/docs/cloud/preview-environments',
+					},
 				],
 			},
 			{
@@ -1193,7 +1197,7 @@ const navigation = [
 					},
 					{
 						title: 'Schema extension',
-						href: '/docs/wundergraph-config-ts-reference/configure-schema-extension',
+						href: '/docs/wundergraph-config-ts-reference/schema-extension-configuration',
 					},
 					{
 						title: 'WunderNode Options',

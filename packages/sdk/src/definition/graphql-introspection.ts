@@ -122,10 +122,11 @@ export const introspectGraphql = async (
 	const printedUpstreamSchemaWithDirectives = printSchemaWithDirectives(upstreamSchema);
 	const cleanUpstreamSchema = cleanupSchema(upstreamSchema);
 
-	const { schemaSDL: schemaSDLWithCustomScalars, customScalarTypeFields } = transformSchema.replaceCustomScalars(
-		cleanUpstreamSchema,
-		introspection
-	);
+	const {
+		schemaSDL: schemaSDLWithCustomScalars,
+		customScalarTypeFields,
+		customScalarTypeNames, // Remove the necessity to manually provide custom scalar types
+	} = transformSchema.replaceCustomScalars(cleanUpstreamSchema, introspection);
 
 	const { schemaSDL, argumentReplacements } = transformSchema.replaceCustomNumericScalars(
 		schemaSDLWithCustomScalars,
@@ -151,6 +152,7 @@ export const introspectGraphql = async (
 	const { RootNodes, ChildNodes, Fields } = configuration(
 		schemaDocumentNode,
 		introspection,
+		customScalarTypeNames,
 		serviceDocumentNode,
 		argumentReplacements
 	);
@@ -223,7 +225,7 @@ export const introspectGraphql = async (
 		applyNameSpaceToFieldConfigurations(Fields, graphQLSchema, skipRenameRootFields, introspection.apiNamespace),
 		generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
 		[],
-		introspection.customJSONScalars
+		customScalarTypeNames
 	);
 };
 

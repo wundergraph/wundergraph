@@ -9,6 +9,9 @@ import type { WebhookConfiguration } from '@wundergraph/protobuf';
 import type { InternalClientFactory } from '../internal-client';
 import process from 'node:process';
 import { OperationsClient } from '../operations-client';
+import { propagation, trace } from '@opentelemetry/api';
+import { Attributes } from '../trace/attributes';
+import { attachErrorToSpan } from '../trace/util';
 
 export interface WebHookRouteConfig {
 	kind: 'webhook';
@@ -36,33 +39,40 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 				url: `/webhooks/${hook.name}`,
 				method: ['GET', 'POST'],
 				config: { webhookName: hook.name, kind: 'webhook' },
-				handler: async (request, reply) => {
+				handler: async (req, reply) => {
 					let requestContext;
 					try {
+						const headers: { [key: string]: string } = {
+							'x-request-id': req.id,
+						};
+						if (req.telemetry) {
+							propagation.inject(req.telemetry.context, headers);
+						}
+
 						requestContext = await config.createContext(config.globalContext);
 						const clientRequest = {
-							headers: new Headers(request.headers as Record<string, string>),
-							method: request.method as RequestMethod,
-							requestURI: request.url,
+							headers: new Headers(req.headers as Record<string, string>),
+							method: req.method as RequestMethod,
+							requestURI: req.url,
 						};
 						const operationClient = new OperationsClient({
 							baseURL: config.nodeURL,
 							clientRequest,
-							extraHeaders: {
-								'x-request-id': request.id,
-							},
+							extraHeaders: headers,
+							tracer: fastify.tracer,
+							traceContext: req.telemetry?.context,
 						});
 						const eventResponse = await webhook.handler(
 							{
-								method: request.method as RequestMethod,
-								url: request.url,
-								body: request.body,
-								headers: (request.headers as WebhookHeaders) || {},
-								query: (request.query as WebhookQuery) || {},
+								method: req.method as RequestMethod,
+								url: req.url,
+								body: req.body,
+								headers: (req.headers as WebhookHeaders) || {},
+								query: (req.query as WebhookQuery) || {},
 							},
 							{
-								log: request.log.child({ webhook: hook.name }),
-								internalClient: config.internalClientFactory({}, clientRequest),
+								log: req.log.child({ webhook: hook.name }),
+								internalClient: config.internalClientFactory(headers, clientRequest),
 								operations: operationClient,
 								clientRequest,
 								graph: config.orm,
@@ -77,8 +87,13 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 							reply.send(eventResponse.body);
 						}
 						reply.code(eventResponse.statusCode || 200);
-					} catch (e) {
-						request.log.child({ webhook: hook.name }).error(e, 'Webhook handler threw an error');
+					} catch (err: any) {
+						// Mark the request as errored and attach information about the error
+						if (req.telemetry) {
+							attachErrorToSpan(req.telemetry.parentSpan, err);
+						}
+
+						req.log.child({ webhook: hook.name }).error(err, 'Webhook handler threw an error');
 						reply.code(500);
 					} finally {
 						await config.releaseContext(requestContext);
@@ -89,6 +104,18 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 			fastify.log.child({ webhook: hook.name }).error(err, 'Could not load webhook function');
 		}
 	}
+
+	fastify.addHook('onRequest', async (req, resp) => {
+		if (req.telemetry) {
+			const routeConfig = req.routeConfig as WebHookRouteConfig | undefined;
+			const span = trace.getSpan(req.telemetry.context);
+			if (span && routeConfig?.kind === 'webhook') {
+				span.setAttributes({
+					[Attributes.WG_WEBHOOK_NAME]: routeConfig.webhookName,
+				});
+			}
+		}
+	});
 };
 
 export default FastifyWebhooksPlugin;

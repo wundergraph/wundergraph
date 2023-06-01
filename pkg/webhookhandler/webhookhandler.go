@@ -5,15 +5,18 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	otrace "go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
+	"github.com/wundergraph/wundergraph/pkg/trace"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -23,6 +26,10 @@ func New(config *wgpb.WebhookConfiguration, hooksServerURL string, log *zap.Logg
 		return nil, err
 	}
 	proxy := httputil.NewSingleHostReverseProxy(u)
+	proxy.Transport = trace.NewTransport(http.DefaultTransport,
+		otelhttp.WithSpanOptions(otrace.WithAttributes(trace.WebhookTransportAttribute)),
+		otelhttp.WithSpanNameFormatter(trace.SpanNameFormatter),
+	)
 	handler := &webhookHandler{
 		webhookName: config.Name,
 		log:         log,
@@ -91,8 +98,8 @@ func (v *sha256HMACVerifier) Kind() string {
 }
 
 func (v *sha256HMACVerifier) Verify(r *http.Request) bool {
-	body, err := ioutil.ReadAll(r.Body)
-	r.Body = ioutil.NopCloser(bytes.NewReader(body))
+	body, err := io.ReadAll(r.Body)
+	r.Body = io.NopCloser(bytes.NewReader(body))
 	if err != nil {
 		return false
 	}

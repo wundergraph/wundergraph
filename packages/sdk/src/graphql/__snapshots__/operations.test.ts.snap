@@ -211,6 +211,7 @@ exports[`complex operations with variables: testCase_1_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "QueryMode",
           "enum": [
             "default",
             "insensitive"
@@ -508,6 +509,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "QueryMode",
           "enum": [
             "default",
             "insensitive"
@@ -1865,6 +1867,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "QueryMode",
           "enum": [
             "default",
             "insensitive"
@@ -2070,6 +2073,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "membership",
           "enum": [
             "owner",
             "maintainer",
@@ -2087,6 +2091,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
               "string",
               "null"
             ],
+            "x-graphql-enum-name": "membership",
             "enum": [
               "owner",
               "maintainer",
@@ -2105,6 +2110,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
               "string",
               "null"
             ],
+            "x-graphql-enum-name": "membership",
             "enum": [
               "owner",
               "maintainer",
@@ -2118,6 +2124,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "membership",
           "enum": [
             "owner",
             "maintainer",
@@ -2202,6 +2209,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "user_role",
           "enum": [
             "user",
             "admin"
@@ -2217,6 +2225,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
               "string",
               "null"
             ],
+            "x-graphql-enum-name": "user_role",
             "enum": [
               "user",
               "admin"
@@ -2233,6 +2242,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
               "string",
               "null"
             ],
+            "x-graphql-enum-name": "user_role",
             "enum": [
               "user",
               "admin"
@@ -2244,6 +2254,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "user_role",
           "enum": [
             "user",
             "admin"
@@ -2542,6 +2553,7 @@ exports[`operationVariablesToJSONSchema: testCase_1_variablesJSONSchema 1`] = `
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "EnumInput",
           "enum": [
             "A",
             "B"
@@ -2549,6 +2561,7 @@ exports[`operationVariablesToJSONSchema: testCase_1_variablesJSONSchema 1`] = `
         },
         "nonNullEnum": {
           "type": "string",
+          "x-graphql-enum-name": "EnumInput",
           "enum": [
             "A",
             "B"
