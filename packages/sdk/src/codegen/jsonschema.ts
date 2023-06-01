@@ -19,6 +19,10 @@ export interface VisitorCallBacks {
 	leave?: VisitorCallBack;
 }
 
+export interface OneOfVisitorCallBacks {
+	afterEach?: (index: number, count: number) => void;
+}
+
 export interface SchemaVisitor {
 	root?: {
 		enter?: () => void;
@@ -31,12 +35,25 @@ export interface SchemaVisitor {
 	array?: VisitorCallBacks;
 	any?: VisitorCallBack;
 	customType?: CustomTypeVisitorCallBack;
+	oneOf?: OneOfVisitorCallBacks;
 }
 
 export const visitJSONSchema = (schema: JSONSchema, visitor: SchemaVisitor) => {
 	visitor.root && visitor.root.enter && visitor.root.enter();
 	visitProperties(schema, visitor);
+	visitOneOf(schema, visitor);
 	visitor.root && visitor.root.leave && visitor.root.leave();
+};
+
+const visitOneOf = (schema: JSONSchema, visitor: SchemaVisitor) => {
+	if (!schema.oneOf) {
+		return;
+	}
+	const count = schema.oneOf.length;
+	schema.oneOf.forEach((oneOfSchema, index) => {
+		visitSchema(oneOfSchema as JSONSchema, visitor, '', false, false);
+		visitor.oneOf && visitor.oneOf.afterEach && visitor.oneOf.afterEach(index, count);
+	});
 };
 
 const visitProperties = (schema: JSONSchema, visitor: SchemaVisitor) => {

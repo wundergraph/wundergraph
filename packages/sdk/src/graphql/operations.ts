@@ -40,6 +40,7 @@ import * as fs from 'fs';
 import process from 'node:process';
 import { OperationError } from '../client';
 import { QueryCacheConfiguration } from '../operations';
+import { getDirectives } from '@graphql-tools/utils';
 
 export const isInternalOperationByAPIMountPath = (path: string) => {
 	// Split the file path by the path separator
@@ -1029,6 +1030,9 @@ const typeSchema = (
 							});
 							break;
 						case 'InputObjectTypeDefinition':
+							const directives = getDirectives(graphQLSchema, namedType);
+							const hasOneOfDirective = directives.some((directive) => directive.name === 'oneOf');
+
 							const typeName = namedType.name;
 							if (!root.definitions) {
 								root.definitions = {};
@@ -1043,24 +1047,56 @@ const typeSchema = (
 							};
 							schema.additionalProperties = false;
 							schema.type = nonNull ? 'object' : ['object', 'null'];
-							schema.properties = {};
-							(namedType.astNode.fields || []).forEach((f) => {
-								const name = f.name.value;
-								let fieldType = f.type;
-								if (f.defaultValue !== undefined && fieldType.kind === 'NonNullType') {
-									fieldType = fieldType.type;
-								}
-								schema.properties![name] = typeSchema(
-									root,
-									schema,
-									graphQLSchema,
-									interpolateVariableDefinitionAsJSON,
-									fieldType,
-									name,
-									false,
-									customJsonScalars
-								);
-							});
+
+							if (hasOneOfDirective) {
+								schema.oneOf = [];
+
+								(namedType.astNode.fields || []).forEach((f) => {
+									const name = f.name.value;
+									let fieldType = f.type;
+									if (f.defaultValue !== undefined && fieldType.kind === 'NonNullType') {
+										fieldType = fieldType.type;
+									}
+
+									const fieldSchema: JSONSchema = {
+										type: 'object',
+										properties: {
+											[name]: typeSchema(
+												root,
+												schema,
+												graphQLSchema,
+												interpolateVariableDefinitionAsJSON,
+												fieldType,
+												name,
+												false,
+												customJsonScalars
+											),
+										},
+									};
+
+									schema.oneOf!.push(fieldSchema);
+								});
+							} else {
+								schema.properties = {};
+								(namedType.astNode.fields || []).forEach((f) => {
+									const name = f.name.value;
+									let fieldType = f.type;
+									if (f.defaultValue !== undefined && fieldType.kind === 'NonNullType') {
+										fieldType = fieldType.type;
+									}
+									schema.properties![name] = typeSchema(
+										root,
+										schema,
+										graphQLSchema,
+										interpolateVariableDefinitionAsJSON,
+										fieldType,
+										name,
+										false,
+										customJsonScalars
+									);
+								});
+							}
+
 							root.definitions![typeName] = schema;
 							return {
 								$ref: '#/definitions/' + typeName,

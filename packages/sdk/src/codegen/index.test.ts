@@ -477,6 +477,266 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							},
 							Internal: false,
 						},
+						{
+							AuthenticationConfig: {
+								required: false,
+							},
+							AuthorizationConfig: {
+								claims: [],
+								roleConfig: {
+									denyMatchAll: [],
+									denyMatchAny: [],
+									requireMatchAll: [],
+									requireMatchAny: [],
+								},
+							},
+							Content: 'mutation MutationWithUnionInput($input:UnionInput!){mutationWithUnionInput(input:$input)}',
+							ExecutionEngine: 0,
+							HooksConfiguration: {
+								customResolve: false,
+								httpTransportOnRequest: false,
+								httpTransportOnResponse: false,
+								mockResolve: {
+									enable: false,
+									subscriptionPollingIntervalMillis: 0,
+								},
+								mutatingPostResolve: false,
+								mutatingPreResolve: false,
+								postResolve: false,
+								preResolve: false,
+							},
+							InjectedVariablesSchema: {
+								additionalProperties: false,
+								definitions: {
+									UnionInput: {
+										additionalProperties: false,
+										oneOf: [
+											{
+												properties: {
+													a: {
+														$ref: '#/definitions/UnionInputA',
+													},
+												},
+												type: 'object',
+											},
+											{
+												properties: {
+													b: {
+														$ref: '#/definitions/UnionInputB',
+													},
+												},
+												type: 'object',
+											},
+										],
+										type: 'object',
+									},
+									UnionInputA: {
+										additionalProperties: false,
+										properties: {
+											a: {
+												type: ['string', 'null'],
+											},
+										},
+										type: ['object', 'null'],
+									},
+									UnionInputB: {
+										additionalProperties: false,
+										properties: {
+											b: {
+												type: ['string', 'null'],
+											},
+										},
+										type: ['object', 'null'],
+									},
+								},
+								properties: {
+									input: {
+										$ref: '#/definitions/UnionInput',
+									},
+								},
+								required: ['input'],
+								type: 'object',
+							},
+							Internal: false,
+							InternalVariablesSchema: {
+								additionalProperties: false,
+								definitions: {
+									UnionInput: {
+										additionalProperties: false,
+										oneOf: [
+											{
+												properties: {
+													a: {
+														$ref: '#/definitions/UnionInputA',
+													},
+												},
+												type: 'object',
+											},
+											{
+												properties: {
+													b: {
+														$ref: '#/definitions/UnionInputB',
+													},
+												},
+												type: 'object',
+											},
+										],
+										type: 'object',
+									},
+									UnionInputA: {
+										additionalProperties: false,
+										properties: {
+											a: {
+												type: ['string', 'null'],
+											},
+										},
+										type: ['object', 'null'],
+									},
+									UnionInputB: {
+										additionalProperties: false,
+										properties: {
+											b: {
+												type: ['string', 'null'],
+											},
+										},
+										type: ['object', 'null'],
+									},
+								},
+								properties: {
+									input: {
+										$ref: '#/definitions/UnionInput',
+									},
+								},
+								required: ['input'],
+								type: 'object',
+							},
+							InterpolationVariablesSchema: {
+								additionalProperties: false,
+								definitions: {
+									UnionInput: {
+										additionalProperties: false,
+										oneOf: [
+											{
+												properties: {
+													a: {
+														$ref: '#/definitions/UnionInputA',
+													},
+												},
+												type: 'object',
+											},
+											{
+												properties: {
+													b: {
+														$ref: '#/definitions/UnionInputB',
+													},
+												},
+												type: 'object',
+											},
+										],
+										type: 'object',
+									},
+									UnionInputA: {
+										additionalProperties: false,
+										properties: {
+											a: {
+												type: ['string', 'null'],
+											},
+										},
+										type: ['object', 'null'],
+									},
+									UnionInputB: {
+										additionalProperties: false,
+										properties: {
+											b: {
+												type: ['string', 'null'],
+											},
+										},
+										type: ['object', 'null'],
+									},
+								},
+								properties: {
+									input: {
+										$ref: '#/definitions/UnionInput',
+									},
+								},
+								required: ['input'],
+								type: 'object',
+							},
+							Name: 'MutationWithUnionInput',
+							OperationType: 1,
+							PathName: 'MutationWithUnionInput',
+							PostResolveTransformations: undefined,
+							ResponseSchema: {
+								additionalProperties: false,
+								properties: {
+									data: {
+										additionalProperties: false,
+										properties: {
+											mutationWithUnionInput: {
+												type: 'string',
+											},
+										},
+										type: 'object',
+									},
+								},
+								type: 'object',
+							},
+							VariablesConfiguration: {
+								injectVariables: [],
+							},
+							VariablesSchema: {
+								additionalProperties: false,
+								definitions: {
+									UnionInput: {
+										additionalProperties: false,
+										oneOf: [
+											{
+												properties: {
+													a: {
+														$ref: '#/definitions/UnionInputA',
+													},
+												},
+												type: 'object',
+											},
+											{
+												properties: {
+													b: {
+														$ref: '#/definitions/UnionInputB',
+													},
+												},
+												type: 'object',
+											},
+										],
+										type: 'object',
+									},
+									UnionInputA: {
+										additionalProperties: false,
+										properties: {
+											a: {
+												type: ['string', 'null'],
+											},
+										},
+										type: ['object', 'null'],
+									},
+									UnionInputB: {
+										additionalProperties: false,
+										properties: {
+											b: {
+												type: ['string', 'null'],
+											},
+										},
+										type: ['object', 'null'],
+									},
+								},
+								properties: {
+									input: {
+										$ref: '#/definitions/UnionInput',
+									},
+								},
+								required: ['input'],
+								type: 'object',
+							},
+						},
 					],
 					InvalidOperationNames: [],
 					CorsConfiguration: {
