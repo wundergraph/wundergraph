@@ -28,8 +28,10 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/metrics"
+	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
+	"github.com/wundergraph/wundergraph/pkg/trace"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -335,8 +337,10 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reqID := r.Header.Get(logging.RequestIDHeader)
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
+	r = operation.SetOperationMetaData(r, h.operation)
 
-	r = setOperationMetaData(r, h.operation)
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	bodyBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(bodyBuf)
@@ -420,8 +424,10 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 	reqID := r.Header.Get(logging.RequestIDHeader)
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
+	r = operation.SetOperationMetaData(r, h.operation)
 
-	r = setOperationMetaData(r, h.operation)
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	bodyBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(bodyBuf)

@@ -530,7 +530,15 @@ message NodeOptions {
 	InternalListenerOptions listenInternal = 6;
 	ConfigurationVariable nodeInternalUrl = 7;
 	ConfigurationVariable defaultHttpProxyUrl = 8;
-	PrometheusOptions prometheus = 9;
+	TelemetryOptions openTelemetry = 9;
+	PrometheusOptions prometheus = 10;
+}
+
+message TelemetryOptions {
+	ConfigurationVariable enabled = 1;
+	ConfigurationVariable exporterHttpEndpoint = 2;
+	ConfigurationVariable sampler = 3;
+	ConfigurationVariable authToken = 4;
 }
 
 message ServerLogging {

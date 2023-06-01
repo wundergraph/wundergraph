@@ -369,7 +369,10 @@ func TestQueryHandler_SubscriptionJsonPatch(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient("http://localhost:8080", zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: "http://localhost:8080",
+		Logger:    zap.NewNop(),
+	})
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
 		Client:    hooksClient,
 		Operation: operation,
@@ -449,7 +452,10 @@ func TestQueryHandler_Subscription(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient("http://localhost:8080", zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: "http://localhost:8080",
+		Logger:    zap.NewNop(),
+	})
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
 		Client:    hooksClient,
 		Operation: operation,
@@ -527,7 +533,10 @@ func TestFunctionsHandler_Default(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -592,7 +601,10 @@ func TestFunctionsHandler_Live(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -658,7 +670,10 @@ func TestFunctionsHandler_Live_JSONPatch(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -729,7 +744,10 @@ func TestFunctionsHandler_Subscription(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_SUBSCRIPTION,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -798,7 +816,10 @@ func TestFunctionsHandler_Subscription_JSONPatch(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_SUBSCRIPTION,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -868,7 +889,10 @@ func TestFunctionsHandler_Subscription_JSONPatch_SSE(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_SUBSCRIPTION,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,

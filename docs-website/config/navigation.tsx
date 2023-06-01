@@ -431,7 +431,7 @@ const navigation = [
 						href: '/docs/guides/context-factory',
 					},
 					{
-						title: 'Monitoring and observability',
+						title: 'Monitoring and Observability',
 						href: '/docs/guides/monitoring-and-observability',
 					},
 				],

@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/hashicorp/go-multierror"
@@ -471,6 +472,7 @@ var upCmd = &cobra.Command{
 				node.WithIntrospection(true),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
 				node.WithRequestLogging(rootFlags.DebugMode),
+				node.WithTraceBatchTimeout(1000 * time.Millisecond),
 				node.WithDevMode(),
 			}
 

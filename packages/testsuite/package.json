@@ -4,7 +4,8 @@
   "version": "0.0.1",
   "description": "Integration tests for WunderGraph SDK",
   "scripts": {
-    "test": "vitest run",
+    "test": "VITEST_MIN_THREADS=2 VITEST_MAX_THREADS=4 vitest run",
+    "test:ci": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage"
   },
@@ -15,6 +16,8 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@opensearch-project/opensearch": "^2.2.1",
+    "@opentelemetry/otlp-proto-exporter-base": "^0.39.1",
+    "@opentelemetry/otlp-transformer": "^0.39.1",
     "@wundergraph/sdk": "workspace:*",
     "@wundergraph/wunderctl": "workspace:*",
     "graphql": "^16.3.0"
@@ -29,7 +32,7 @@
     "prisma": "^4.0.0",
     "straightforward": "^4.2.2",
     "typescript": "^4.8.2",
-    "vitest": "^0.31.0",
+    "vitest": "^0.31.1",
     "wait-on": "^7.0.1"
   }
 }

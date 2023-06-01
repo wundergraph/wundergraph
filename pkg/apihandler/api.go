@@ -29,6 +29,13 @@ type Logging struct {
 	Level zapcore.Level
 }
 
+type OpenTelemetry struct {
+	Enabled              bool
+	ExporterHTTPEndpoint string
+	AuthToken            string
+	Sampler              float64
+}
+
 type PrometheusOptions struct {
 	Enabled bool
 	Port    int
@@ -43,6 +50,7 @@ type Options struct {
 	DefaultTimeout      time.Duration
 	DefaultHTTPProxyURL *url.URL
 	Prometheus          PrometheusOptions
+	OpenTelemetry       OpenTelemetry
 }
 
 type CookieBasedSecrets struct {

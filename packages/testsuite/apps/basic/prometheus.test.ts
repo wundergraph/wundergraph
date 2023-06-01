@@ -15,8 +15,12 @@ beforeAll(async () => {
 
 describe('Prometheus', () => {
 	it('should include operation metrics', async () => {
-		await wg.client().query({ operationName: 'countries/Continent', input: { code: 'EU' } });
-		const resp = await fetch('http://localhost:8881/metrics');
+		const { error, data } = await wg.client().query({ operationName: 'countries/Continent', input: { code: 'EU' } });
+
+		expect(data).toBeDefined();
+		expect(error).toBeUndefined();
+
+		const resp = await fetch(wg.promMetricEndpoint());
 		const metrics = await resp.text();
 
 		// Outgoing request to countries.trevorblades.com

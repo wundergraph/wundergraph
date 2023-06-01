@@ -151,6 +151,7 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 		node.WithStaticWunderNodeConfig(wunderNodeConfig),
 		node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
 		node.WithIntrospection(enableIntrospection),
+		node.WithTraceBatchTimeout(otelBatchTimeout),
 	}
 
 	if shutdownAfterIdle > 0 {
