@@ -1,3 +1,4 @@
+import { format } from 'node:util';
 import { ConfigurationVariable, LogLevel, logLevelFromJSON } from '@wundergraph/protobuf';
 import { resolveConfigurationVariable } from '../configure/variables';
 import { DestinationStream, pino } from 'pino';
@@ -54,6 +55,29 @@ const initLogger = (destination: DestinationStream): pino.Logger => {
 		formatters: {
 			level(label, number) {
 				return { level: label };
+			},
+		},
+		hooks: {
+			logMethod(inputArgs, method) {
+				// unlike console.{log,debug,error}(), pino's formatter omits extra arguments
+				// that are not used (e.g. log('foo:%s', 'bar', 'baz')) will print 'foo:bar'
+				// but console.log will emit 'foo:bar baz'. To make the logger work like other
+				// logging functions, format the string using util.format and pass only the final
+				// string to pino.
+				//
+				// Since pino also supports structured logging, we need to look for the first string
+				// in the inputArgs and apply for formatting from there.
+				let logMethodArgs: any[];
+				const firstStringIndex = inputArgs.findIndex((v) => typeof v === 'string');
+				if (firstStringIndex >= 0) {
+					const rawArgs = inputArgs.slice(0, firstStringIndex);
+					const toFormat = inputArgs.slice(firstStringIndex);
+					const formatted = format(...toFormat);
+					logMethodArgs = [...rawArgs, formatted];
+				} else {
+					logMethodArgs = inputArgs;
+				}
+				return method.apply(this, logMethodArgs as [string, ...any[]]);
 			},
 		},
 	};
