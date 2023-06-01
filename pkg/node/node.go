@@ -11,10 +11,12 @@ import (
 	"os"
 	"time"
 
+	"github.com/dgraph-io/ristretto"
 	"github.com/gorilla/mux"
 	"github.com/pires/go-proxyproto"
 	"github.com/rs/cors"
 	"github.com/valyala/fasthttp"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/time/rate"
@@ -24,8 +26,10 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/httpidletimeout"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
+	"github.com/wundergraph/wundergraph/pkg/metrics"
 	"github.com/wundergraph/wundergraph/pkg/node/nodetemplates"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/trace"
 	"github.com/wundergraph/wundergraph/pkg/validate"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
@@ -62,11 +66,13 @@ type Node struct {
 	builder        *apihandler.Builder
 	server         *http.Server
 	internalServer *http.Server
+	metrics        metrics.Metrics
 	pool           *pool.Pool
 	log            *zap.Logger
 	apiClient      *fasthttp.Client
 	options        options
 	WundergraphDir string
+	tracer         *sdktrace.TracerProvider
 }
 
 type options struct {
@@ -91,6 +97,7 @@ type options struct {
 	healthCheckTimeout      time.Duration
 	onServerConfigLoad      func(config *WunderNodeConfig)
 	onServerError           func(err error)
+	traceBatchTimeout       time.Duration
 }
 
 type Option func(options *options)
@@ -152,6 +159,18 @@ func WithGlobalRateLimit(requests int, perDuration time.Duration) Option {
 		options.globalRateLimit.enable = true
 		options.globalRateLimit.requests = requests
 		options.globalRateLimit.perDuration = perDuration
+	}
+}
+
+// WithTraceBatchTimeout sets the timeout for the trace batch exporter.
+// It defines how long the exporter will wait for a batch to be filled before sending it.
+// If the timeout is less or equal than 0, the default value of 5 seconds will be used
+func WithTraceBatchTimeout(batchTimeout time.Duration) Option {
+	return func(options *options) {
+		if batchTimeout <= 0 {
+			batchTimeout = 3000 * time.Millisecond
+		}
+		options.traceBatchTimeout = batchTimeout
 	}
 }
 
@@ -248,39 +267,81 @@ func (n *Node) StartBlocking(opts ...Option) error {
 	return g.Wait()
 }
 
+func (n *Node) startTracer(traceConfig *trace.Config) error {
+	tp, err := trace.StartAgent(n.log, *traceConfig)
+	if err != nil {
+		return err
+	}
+	n.tracer = tp
+
+	return nil
+}
+
 func (n *Node) Shutdown(ctx context.Context) error {
+	if n.metrics != nil {
+		if err := n.metrics.Shutdown(ctx); err != nil {
+			return err
+		}
+	}
+
 	if n.server != nil {
 		if err := n.server.Shutdown(ctx); err != nil {
 			return err
 		}
 	}
+
 	if n.internalServer != nil {
 		if err := n.internalServer.Shutdown(ctx); err != nil {
 			return err
 		}
 	}
+
+	if n.tracer != nil {
+		if err := n.tracer.ForceFlush(ctx); err != nil {
+			n.log.Error("could not force flush tracer", zap.Error(err))
+		}
+		if err := n.tracer.Shutdown(ctx); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
+// Close closes the node and all its dependencies.
+// It is doing that without waiting for the node to shutdown properly.
 func (n *Node) Close() error {
+	if n.metrics != nil {
+		n.metrics.Close()
+		n.metrics = nil
+	}
 	if n.builder != nil {
 		if err := n.builder.Close(); err != nil {
 			return err
 		}
 		n.builder = nil
 	}
+
 	if n.server != nil {
 		if err := n.server.Close(); err != nil {
 			return err
 		}
 		n.server = nil
 	}
+
 	if n.internalServer != nil {
 		if err := n.internalServer.Close(); err != nil {
 			return err
 		}
 		n.internalServer = nil
 	}
+
+	if n.tracer != nil {
+		if err := n.tracer.Shutdown(context.Background()); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -388,8 +449,41 @@ func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (
 }
 
 func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
+	if nodeConfig.Api.Options.OpenTelemetry.Enabled {
+		endpoint := nodeConfig.Api.Options.OpenTelemetry.ExporterHTTPEndpoint
+		sampler := nodeConfig.Api.Options.OpenTelemetry.Sampler
+
+		n.log.Info("OpenTelemetry enabled",
+			zap.String("endpoint", endpoint),
+			zap.Float64("sampler", sampler),
+			zap.String("batchTimeout", n.options.traceBatchTimeout.String()),
+		)
+
+		if err := n.startTracer(&trace.Config{
+			Name:         "wundernode",
+			Endpoint:     endpoint,
+			Batcher:      "otlphttp",
+			OtlpHttpPath: "/v1/traces",
+			BatchTimeout: n.options.traceBatchTimeout,
+			Sampler:      sampler,
+			OtlpHeaders: map[string]string{
+				"Authorization": fmt.Sprintf("Bearer %s", nodeConfig.Api.Options.OpenTelemetry.AuthToken),
+			},
+		}); err != nil {
+			return err
+		}
+	}
+
 	router := mux.NewRouter()
 	internalRouter := mux.NewRouter()
+
+	if nodeConfig.Api.Options.Prometheus.Enabled {
+		port := nodeConfig.Api.Options.Prometheus.Port
+		n.log.Debug("serving Prometheus metrics", zap.Int("port", port))
+		n.metrics = metrics.NewPrometheus(port)
+	} else {
+		n.metrics = metrics.NewNone()
+	}
 
 	if n.options.globalRateLimit.enable {
 		limiter := rate.NewLimiter(rate.Every(n.options.globalRateLimit.perDuration), n.options.globalRateLimit.requests)
@@ -419,7 +513,11 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		return errors.New("API config invalid")
 	}
 
-	hooksClient := hooks.NewClient(nodeConfig.Api.Options.ServerUrl, n.log)
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		EnableTracing: nodeConfig.Api.Options.OpenTelemetry.Enabled,
+		ServerURL:     nodeConfig.Api.Options.ServerUrl,
+		Logger:        n.log,
+	})
 
 	dialer := &net.Dialer{
 		Timeout:   10 * time.Second,
@@ -443,7 +541,14 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		}
 	}
 
-	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableRequestLogging)
+	transportFactory := apihandler.NewApiTransportFactory(apihandler.ApiTransportOptions{
+		API:                  nodeConfig.Api,
+		HooksClient:          hooksClient,
+		EnableRequestLogging: n.options.enableRequestLogging,
+		EnableTracing:        nodeConfig.Api.Options.OpenTelemetry.Enabled,
+		Metrics:              n.metrics,
+	})
+
 	n.log.Debug("http.Client.Transport",
 		zap.Bool("enableRequestLogging", n.options.enableRequestLogging),
 	)
@@ -463,19 +568,41 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		GitHubAuthDemoClientID:     n.options.githubAuthDemo.ClientID,
 		GitHubAuthDemoClientSecret: n.options.githubAuthDemo.ClientSecret,
 		DevMode:                    n.options.devMode,
+		Metrics:                    n.metrics,
 	}
 
 	n.builder = apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
-	internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, hooksClient, loader, n.options.enableIntrospection)
 
-	publicClosers, err := n.builder.BuildAndMountApiHandler(n.ctx, router, nodeConfig.Api)
+	internalBuilderConfig := apihandler.InternalBuilderConfig{
+		Pool:                n.pool,
+		Client:              hooksClient,
+		Loader:              loader,
+		EnableIntrospection: n.options.enableIntrospection,
+		Metrics:             n.metrics,
+		InsecureCookies:     n.options.insecureCookies,
+		Log:                 n.log,
+	}
+	internalBuilder := apihandler.NewInternalBuilder(internalBuilderConfig)
+
+	// this planCache is used across both internal GraphQL handlers
+	planCache, err := ristretto.NewCache(&ristretto.Config{
+		MaxCost:     1024 * 4,      // keep 4k execution plans in the cache
+		NumCounters: 1024 * 4 * 10, // 4k * 10
+		BufferItems: 64,            // number of keys per Get buffer.
+	})
+	if err != nil {
+		n.log.Error("create plan cache failed", zap.Error(err))
+		return err
+	}
+
+	publicClosers, err := n.builder.BuildAndMountApiHandler(n.ctx, router, nodeConfig.Api, planCache)
 	if err != nil {
 		n.log.Error("BuildAndMountApiHandler", zap.Error(err))
 		return err
 	}
 	streamClosers = append(streamClosers, publicClosers...)
 
-	internalClosers, err := internalBuilder.BuildAndMountInternalApiHandler(n.ctx, internalRouter, nodeConfig.Api)
+	internalClosers, err := internalBuilder.BuildAndMountInternalApiHandler(n.ctx, internalRouter, nodeConfig.Api, planCache)
 	if err != nil {
 		n.log.Error("BuildAndMountInternalApiHandler", zap.Error(err))
 		return err
@@ -521,10 +648,15 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	}))
 
 	handler := n.setupGlobalMiddlewares(router, nodeConfig)
-	internalHandler := http.HandlerFunc(internalRouter.ServeHTTP)
+	internalHandler := http.Handler(internalRouter)
 
 	connContext := func(ctx context.Context, c net.Conn) context.Context {
 		return context.WithValue(ctx, "conn", c)
+	}
+
+	if nodeConfig.Api.Options.OpenTelemetry.Enabled {
+		handler = trace.WrapHandler(handler, trace.PublicServerAttribute)
+		internalHandler = trace.WrapHandler(internalHandler, trace.InternalServerAttribute)
 	}
 
 	n.server = &http.Server{
@@ -606,6 +738,14 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 			return err
 		})
 	}
+
+	g.Go(func() error {
+		if err := n.metrics.Serve(); err != nil && err != metrics.ErrServerClosed {
+			n.log.Error("serving metrics", zap.Error(err))
+			return err
+		}
+		return nil
+	})
 
 	n.log.Debug("public node url",
 		zap.String("publicNodeUrl", nodeConfig.Api.Options.PublicNodeUrl),

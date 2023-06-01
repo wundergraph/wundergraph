@@ -33,7 +33,12 @@ import { OpenApiServerConfig } from './plugins/omnigraphOAS';
 import { SoapServerConfig } from './plugins/omnigraphSOAP';
 import { NamespacingExecutor } from '../orm';
 import type { OperationsAsyncContext } from './operations-context';
+import configureTracerProvider from './trace/trace';
+import { propagation } from '@opentelemetry/api';
+import { TracerConfig } from './types';
+import { loadTraceConfigFromWgConfig } from './trace/config';
 
+const isProduction = process.env.NODE_ENV === 'production';
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
 let logger: pino.Logger;
@@ -78,9 +83,9 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 }
 
 export function configureWunderGraphServer<
-	GeneratedHooksConfig = HooksConfiguration,
+	GeneratedHooksConfig extends HooksConfiguration = HooksConfiguration,
 	GeneratedInternalClient = InternalClient,
-	GeneratedWebhooksConfig = WebhooksConfig,
+	GeneratedWebhooksConfig extends HooksConfiguration = WebhooksConfig,
 	TRequestContext = any,
 	TGlobalContext = any
 >(
@@ -129,8 +134,6 @@ const _configureWunderGraphServer = <
 	 * This environment variable is used to determine if the server should start the hooks server.
 	 */
 	if (process.env.START_HOOKS_SERVER === 'true') {
-		const isProduction = process.env.NODE_ENV === 'production';
-
 		if (!isProduction) {
 			// Exit the server when wunderctl exited without the chance to kill the child processes
 			onParentProcessExit(() => {
@@ -163,6 +166,7 @@ export const startServer = async (opts: ServerRunOptions) => {
 		const port = parseInt(portString, 10);
 
 		const fastify = await createServer(opts);
+
 		await fastify.listen({
 			port: port,
 			host: host,
@@ -171,6 +175,30 @@ export const startServer = async (opts: ServerRunOptions) => {
 		logger.fatal('Could not start the hook server');
 		process.exit(1);
 	}
+};
+
+/**
+ * createClientRequest returns a decoded client request, used for passing it to user code
+ * @param body Request body
+ * @returns Decoded client request
+ */
+export const createClientRequest = (body: FastifyRequestBody) => {
+	// clientRequest represents the original client request that was sent initially to the WunderNode.
+	const raw = rawClientRequest(body);
+	return {
+		headers: new Headers(raw?.headers),
+		requestURI: raw?.requestURI || '',
+		method: raw?.method || 'GET',
+	};
+};
+
+/**
+ * rawClientRequest returns the raw JSON encoded client request
+ * @param body Request body
+ * @returns Client request as raw JSON, as received in the request body
+ */
+export const rawClientRequest = (body: FastifyRequestBody) => {
+	return body.__wg.clientRequest;
 };
 
 export const createServer = async ({
@@ -265,6 +293,41 @@ export const createServer = async ({
 	});
 
 	/**
+	 * Enable telemetry
+	 */
+
+	if (config.api?.nodeOptions?.openTelemetry) {
+		const tracerConfig: TracerConfig = loadTraceConfigFromWgConfig(config.api?.nodeOptions.openTelemetry);
+
+		if (tracerConfig.enabled) {
+			let batchTimeoutMs = isProduction ? 3000 : 1000;
+			const batchTimeoutMsEnv = process.env[WgEnv.OtelBatchTimeoutMs];
+			if (batchTimeoutMsEnv) {
+				batchTimeoutMs = parseInt(batchTimeoutMsEnv);
+			}
+
+			fastify.log.info(
+				{
+					endpoint: tracerConfig.httpEndpoint,
+					batchTimeoutMs,
+				},
+				'OpenTelemetry enabled'
+			);
+
+			const tracerProvider = configureTracerProvider(
+				{
+					httpEndpoint: tracerConfig.httpEndpoint,
+					authToken: tracerConfig.authToken,
+					batchTimeoutMs,
+				},
+				logger
+			);
+
+			await fastify.register(require('./plugins/telemetry'), tracerProvider);
+		}
+	}
+
+	/**
 	 * We encapsulate the preHandler with a fastify plugin "register" to not apply it on other routes.
 	 */
 	await fastify.register(async (fastify) => {
@@ -274,22 +337,26 @@ export const createServer = async ({
 		 */
 		fastify.addHook<{ Body: FastifyRequestBody }>('preHandler', async (req, reply) => {
 			// clientRequest represents the original client request that was sent initially to the WunderNode.
-			const clientRequest = {
-				headers: new Headers(req.body.__wg.clientRequest?.headers),
-				requestURI: req.body.__wg.clientRequest?.requestURI || '',
-				method: req.body.__wg.clientRequest?.method || 'GET',
+			const clientRequest = createClientRequest(req.body);
+
+			const headers: { [key: string]: string } = {
+				'x-request-id': req.id,
 			};
+			if (req.telemetry) {
+				propagation.inject(req.telemetry.context, headers);
+			}
+
 			req.ctx = {
 				log: req.log,
 				user: req.body.__wg.user!,
 				clientRequest,
-				internalClient: clientFactory({ 'x-request-id': req.id }, req.body.__wg.clientRequest),
+				internalClient: clientFactory(headers, req.body.__wg.clientRequest),
 				operations: new OperationsClient({
 					baseURL: nodeInternalURL,
 					clientRequest: req.body.__wg.clientRequest,
-					extraHeaders: {
-						'x-request-id': req.id,
-					},
+					extraHeaders: headers,
+					tracer: fastify.tracer,
+					traceContext: req.telemetry?.context,
 				}),
 				context: await createContext(globalContext),
 			};
@@ -389,6 +456,25 @@ export const createServer = async ({
 		}
 	});
 
+	const ormModulePath = path.join(wundergraphDir, 'generated', 'bundle', 'orm.cjs');
+	// the orm module simply provides (code generated) TypeScript representations of our API schemas
+	const ormModule = config.api?.experimentalConfig?.orm ? await import(ormModulePath) : null;
+	const orm = ormModule
+		? new ORM({
+				apis: ormModule.SCHEMAS,
+				executor: new NamespacingExecutor({
+					requestContext: operationsRequestContext,
+					baseUrl: nodeInternalURL,
+				}),
+		  })
+		: ({
+				from() {
+					throw new Error(
+						`ORM is not enabled for your application. Set "experimental.orm" to "true" in your \`wundergraph.config.ts\` to enable.`
+					);
+				},
+		  } as any);
+
 	if (config.api?.webhooks && config.api.webhooks.length > 0) {
 		await fastify.register(require('./plugins/webhooks'), {
 			wundergraphDir,
@@ -398,6 +484,7 @@ export const createServer = async ({
 			globalContext,
 			createContext,
 			releaseContext,
+			orm,
 		});
 		fastify.log.debug('Webhooks plugin registered');
 	}
@@ -408,25 +495,6 @@ export const createServer = async ({
 	if (operationsFileExists) {
 		const operationsConfigFile = fs.readFileSync(operationsFilePath, 'utf-8');
 		const operationsConfig = JSON.parse(operationsConfigFile) as LoadOperationsOutput;
-
-		const ormModulePath = path.join(wundergraphDir, 'generated', 'bundle', 'orm.cjs');
-		// the orm module simply provides (code generated) TypeScript representations of our API schemas
-		const ormModule = config.api?.experimentalConfig?.orm ? await import(ormModulePath) : null;
-		const orm = ormModule
-			? new ORM({
-					apis: ormModule.SCHEMAS,
-					executor: new NamespacingExecutor({
-						requestContext: operationsRequestContext,
-						baseUrl: nodeInternalURL,
-					}),
-			  })
-			: ({
-					from() {
-						throw new Error(
-							`ORM is not enabled for your application. Set "experimental.orm" to "true" in your \`wundergraph.config.ts\` to enable.`
-						);
-					},
-			  } as any);
 
 		if (
 			operationsConfig &&

@@ -28,7 +28,7 @@ class FakeFileSystem implements CodeGenOutWriter {
 test('GenerateCode', async () => {
 	const out = await RunTemplateTest(new FakeTemplate(), new FakeTemplate());
 	expect(out).toEqual({
-		'generated/testFile.txt': 'MyReviews+CreatePet+NewPets',
+		'generated/testFile.txt': 'ClosestPlanets+MyReviews+CreatePet+NewPets',
 	});
 });
 
@@ -104,6 +104,52 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						environmentVariableDefaultValue: '',
 						placeholderVariableName: '',
 					},
+					prometheus: {
+						enabled: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						port: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
+					openTelemetry: {
+						enabled: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						sampler: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						authToken: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						exporterHttpEndpoint: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
 				},
 				serverOptions: {
 					serverUrl: {
@@ -145,6 +191,98 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 					EnableSingleFlight: true,
 					S3UploadProvider: [],
 					Operations: [
+						{
+							Name: 'ClosestPlanets',
+							PathName: 'ClosestPlanets',
+							Content: 'query ClosestPlanets ($where: db_NodeWhereInput) {\n name \n}',
+							OperationType: OperationType.QUERY,
+							ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+							VariablesSchema: {
+								type: 'object',
+								properties: {
+									where: {
+										$ref: '#/definitions/db_NodeWhereInput',
+									},
+								},
+								additionalProperties: false,
+								definitions: {
+									db_NodeWhereInput: {
+										additionalProperties: false,
+										type: ['object', 'null'],
+										properties: {
+											AND: {
+												$ref: '#/definitions/db_NodeWhereInput',
+											},
+										},
+									},
+								},
+							},
+							InterpolationVariablesSchema: {
+								type: 'object',
+								properties: {},
+								additionalProperties: false,
+							},
+							InternalVariablesSchema: {
+								type: 'object',
+								properties: {},
+								additionalProperties: false,
+							},
+							InjectedVariablesSchema: {
+								type: 'object',
+								properties: {},
+								additionalProperties: false,
+							},
+							ResponseSchema: {
+								type: 'object',
+								properties: {
+									data: {
+										type: 'object',
+										properties: {
+											name: {
+												type: 'array',
+												items: {
+													type: 'string',
+													'x-graphql-enum-name': 'Planets',
+													enum: ['mercury', 'venus', 'earth'],
+												},
+											},
+										},
+										additionalProperties: false,
+									},
+								},
+								additionalProperties: false,
+								required: ['data'],
+							},
+							AuthenticationConfig: {
+								required: false,
+							},
+							AuthorizationConfig: {
+								claims: [],
+								roleConfig: {
+									requireMatchAll: [],
+									requireMatchAny: [],
+									denyMatchAll: [],
+									denyMatchAny: [],
+								},
+							},
+							HooksConfiguration: {
+								preResolve: false,
+								postResolve: false,
+								mutatingPreResolve: false,
+								mutatingPostResolve: false,
+								mockResolve: {
+									enable: false,
+									subscriptionPollingIntervalMillis: 0,
+								},
+								httpTransportOnResponse: false,
+								httpTransportOnRequest: false,
+								customResolve: false,
+							},
+							VariablesConfiguration: {
+								injectVariables: [],
+							},
+							Internal: false,
+						},
 						{
 							Name: 'MyReviews',
 							PathName: 'MyReviews',
@@ -498,6 +636,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						secureCookieBlockKey: mapInputVariable(''),
 						csrfTokenSecret: mapInputVariable(''),
 					},
+					timeoutSeconds: mapInputVariable(0),
 					customClaims: {},
 					publicClaims: [],
 				},

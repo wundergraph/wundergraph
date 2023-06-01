@@ -6,14 +6,14 @@
     "@babel/runtime": "^7.21.0",
     "@expo/webpack-config": "^18.0.1",
     "@wundergraph/metro-config": "^0.0.1",
-    "@wundergraph/sdk": "^0.158.0",
-    "@wundergraph/swr": "^0.14.32",
+    "@wundergraph/sdk": "^0.162.0",
+    "@wundergraph/swr": "^0.15.3",
     "expo": "^48.0.11",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.71.6",
     "react-native-web": "~0.18.7",
-    "swr": "^2.0.0"
+    "swr": "^2.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",

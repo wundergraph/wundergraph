@@ -10,7 +10,6 @@ import {
 	ComputerDesktopIcon,
 	CubeIcon,
 	HomeIcon,
-	LightBulbIcon,
 	ListBulletIcon,
 	LockClosedIcon,
 	QuestionMarkCircleIcon,
@@ -115,6 +114,10 @@ const navigation = [
 					{
 						title: 'Astro',
 						href: '/docs/examples/astro',
+					},
+					{
+						title: 'Astro + Relay',
+						href: '/docs/examples/astro-relay',
 					},
 					{
 						title: 'Vite + SWR',
@@ -426,6 +429,10 @@ const navigation = [
 					{
 						title: 'Extend the WunderGraph server context',
 						href: '/docs/guides/context-factory',
+					},
+					{
+						title: 'Monitoring and Observability',
+						href: '/docs/guides/monitoring-and-observability',
 					},
 				],
 			},
@@ -976,6 +983,18 @@ const navigation = [
 						title: 'Add custom domains to your deployment',
 						href: '/docs/cloud/custom-domains',
 					},
+					{
+						title: 'Redeployment',
+						href: '/docs/cloud/redeployment',
+					},
+					{
+						title: 'Private NPM dependencies',
+						href: '/docs/cloud/private-npm-dependencies',
+					},
+					{
+						title: 'Preview environments',
+						href: '/docs/cloud/preview-environments',
+					},
 				],
 			},
 			{
@@ -1178,7 +1197,7 @@ const navigation = [
 					},
 					{
 						title: 'Schema extension',
-						href: '/docs/wundergraph-config-ts-reference/configure-schema-extension',
+						href: '/docs/wundergraph-config-ts-reference/schema-extension-configuration',
 					},
 					{
 						title: 'WunderNode Options',
@@ -1358,6 +1377,14 @@ const navigation = [
 					{
 						title: '@transform directive',
 						href: '/docs/directives-reference/transform-directive',
+					},
+					{
+						title: '@removeNullVariables directive',
+						href: '/docs/directives-reference/remove-null-variables-directive',
+					},
+					{
+						title: '@requireAuthentication directive',
+						href: '/docs/directives-reference/require-authentication-directive',
 					},
 				],
 			},

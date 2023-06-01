@@ -24,6 +24,7 @@ export interface GraphQLConfiguration {
 export const configuration = (
 	schema: DocumentNode,
 	introspection: GraphQLIntrospection,
+	customJSONScalars: string[],
 	serviceSDL?: DocumentNode,
 	argumentReplacements?: ArgumentReplacement[]
 ): GraphQLConfiguration => {
@@ -35,9 +36,9 @@ export const configuration = (
 	};
 	const replacements = argumentReplacements || [];
 	if (serviceSDL !== undefined) {
-		visitSchema(serviceSDL, config, introspection.customJSONScalars || [], true, replacements);
+		visitSchema(serviceSDL, config, customJSONScalars, true, replacements);
 	} else {
-		visitSchema(schema, config, introspection.customJSONScalars || [], false, replacements);
+		visitSchema(schema, config, customJSONScalars, false, replacements);
 	}
 	if (introspection.schemaExtension) {
 		applySchemaExtension(config, introspection.schemaExtension);
@@ -98,7 +99,7 @@ const visitSchema = (
 	let isEntity = false;
 	let isExternalField = false;
 	let entityFields: string[] = [];
-	let jsonFields: JsonTypeField[] = [];
+	const jsonFields: JsonTypeField[] = [];
 
 	const jsonScalars = [DefaultJsonType];
 	jsonScalars.push(...customJsonScalars);

@@ -1,0 +1,11 @@
+---
+import type { ContinentName$data } from '../../__relay__generated__/ContinentName.graphql';
+
+interface Props {
+	continentName: ContinentName$data
+}
+
+const { continentName } = Astro.props
+---
+
+<li>{continentName.name} ({continentName.code})</li>

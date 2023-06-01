@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.115.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.114.0...@wundergraph/protobuf@0.115.0) (2023-05-31)
+
+### Features
+
+* make timeout during authentication configurable ([#1018](https://github.com/wundergraph/wundergraph/issues/1018)) ([b5f6b74](https://github.com/wundergraph/wundergraph/commit/b5f6b744cd4efef456b9004b4109f7624e467f41)) (@fiam)
+
+## [0.114.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.113.0...@wundergraph/protobuf@0.114.0) (2023-05-26)
+
+### Features
+
+* use Prometheus to track and expose operation and API request counts ([#991](https://github.com/wundergraph/wundergraph/issues/991)) ([f949398](https://github.com/wundergraph/wundergraph/commit/f94939864c9ce7c3a9623fd5141fa486c4c9a55c)) (@fiam)
+
+## [0.113.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.112.0...@wundergraph/protobuf@0.113.0) (2023-05-25)
+
+### Features
+
+* improve Cache-Control support ([#959](https://github.com/wundergraph/wundergraph/issues/959)) ([1b330d5](https://github.com/wundergraph/wundergraph/commit/1b330d5c0207264ae0f3868276011ff9a8d83a67)) (@fiam)
+
 ## [0.112.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.111.0...@wundergraph/protobuf@0.112.0) (2023-05-15)
 
 ### Features

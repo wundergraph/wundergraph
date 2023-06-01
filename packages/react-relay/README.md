@@ -69,7 +69,13 @@ import { createClient } from '../generated/client';
 const client = createClient(); // Typesafe WunderGraph client
 
 // These utility functions needs to be imported into your app
-export const { WunderGraphRelayProvider, useLiveQuery, fetchWunderGraphSSRQuery } = createWunderGraphRelayApp({
+export const {
+  WunderGraphRelayProvider,
+  useLiveQuery,
+  getEnvironment,
+  fetchWunderGraphSSRQuery,
+  fetchWunderGraphSSGQuery,
+} = createWunderGraphRelayApp({
   client,
 });
 ```
@@ -99,6 +105,41 @@ const { data, isLoading, isSubscribed, error } = useLiveQuery<QueryType>({
 
 The `useLiveQuery` hook syncs with the Relay store which means if the query is already fetched in SSR, it will render immediately.
 
+## Render As You Fetch
+
+To implement the Render-As-You-Fetch pattern for your queries in React, you can use the Relay's `loadQuery` utility along with the `getEnvironment` utility function provided by WunderGraph.
+
+```tsx
+const AppDragonsQuery = graphql`
+  query DragonsListDragonsQuery {
+    spacex_dragons {
+      ...Dragons_display_details
+    }
+  }
+`;
+
+const dragonsListQueryReference = loadQuery<DragonsListDragonsQueryType>(getEnvironment(), AppDragonsQuery, {});
+
+export const DragonsList = () => {
+  const { data } = useLiveQuery<DragonsListDragonsQueryType>({
+    query: AppDragonsQuery,
+    queryReference: dragonsListQueryReference,
+  });
+
+  return (
+    <div>
+      <p>Dragons:</p>
+      {data?.spacex_dragons?.map((dragon, dragonIndex) => {
+        if (dragon) return <Dragon key={dragonIndex.toString()} dragon={dragon} />;
+        return null;
+      })}
+    </div>
+  );
+};
+```
+
+As shown in the above example, the `loadQuery` function has to be called outside of the React Component to ensure the fetching happens as soon as the component is loaded into memory. Works well when prefetching pages using React Router or Next Link components.
+
 ## SSR Support
 
 The `fetchWunderGraphSSRQuery` lets you fetch queries on the serverside and hydrate your Relay store on the client using the `WunderGraphRelayProvider`
@@ -125,23 +166,27 @@ const App = () => {
 };
 ```
 
-or You can also use the `queryResponse` directly (useful for SSG projects, especially frameworks like [Astro](https://astro.build/) or [11ty](https://www.11ty.dev/)):
+## SSG Support (Experimental)
 
-```tsx
-export default function MyWeatherApp({ queryResponse }) {
-  return (
-    <div className={styles.container}>
-      <main className={styles.main}>
-        {queryResponse?.weather_getCityByName?.weather?.summary && (
-          <Weather weather={queryResponse.weather_getCityByName.weather.summary} />
-        )}
-        {queryResponse?.weather_getCityByName?.weather?.temperature && (
-          <TemperatureDetails weather={queryResponse.weather_getCityByName.weather.temperature} />
-        )}
-      </main>
-    </div>
-  );
-}
+If you are planning to use Relay for SSG projects where pages are generated only on build time & doesn't have a Relay client on the generated pages (SSG projects created with frameworks like [Astro](https://astro.build/) or [11ty](https://www.11ty.dev/)), you can use the `fetchWunderGraphSSGQuery` which will make the API calls during builds & completely bypasses the need for Relay Store by directly returning the JSON data.
+
+```astro
+---
+const weatherData = await fetchWunderGraphSSGQuery<QueryType>(/** Query */, {
+  /** Query Variables */
+});
+---
+
+<div class={styles.container}>
+  <main class={styles.main}>
+    {weatherData?.weather_getCityByName?.weather?.summary && (
+      <Weather weather={weatherData.weather_getCityByName.weather.summary} />
+    )}
+    {weatherData?.weather_getCityByName?.weather?.temperature && (
+      <TemperatureDetails weather={weatherData.weather_getCityByName.weather.temperature} />
+    )}
+  </main>
+</div>
 ```
 
 ## Learn more

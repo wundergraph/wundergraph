@@ -62,6 +62,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 	private nodeUrl: string = '';
 	private stopped = false;
 	private subprocess?: Subprocess;
+	private promPort: string = '';
 
 	/**
 	 * Initialize a Server instance. Typically, a shared Server will
@@ -94,8 +95,41 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		};
 	}
 
-	public url(rel?: string): string {
+	/**
+	 * Given a relative URL, url returns its absolute URL for on a running test server.
+	 * If the server is not running, an error is thrown.
+	 *
+	 * @param rel Relative URL
+	 * @returns Absolute URL pointing to the test server.
+	 */
+	url(rel?: string): string {
+		if (!this.nodeUrl) {
+			throw new Error('server is not running');
+		}
 		return this.nodeUrl + (rel || '');
+	}
+
+	/**
+	 * graphqlEndpoint returns the absolute URL to the GraphQL endpoint for a running test
+	 * server. If the server is not running, it throws an error.
+	 *
+	 * @returns Absolute URL to GraphQL endpoint
+	 */
+	graphqlEndpoint(): string {
+		return this.url('/graphql');
+	}
+
+	/**
+	 * promMetricEndpoint returns the absolute URL to the Prometheus metric endpoint.
+	 * If the server is not running, an error is thrown.
+	 *
+	 * @returns Absolute URL to Prometheus metric endpoint
+	 */
+	promMetricEndpoint(): string {
+		if (!this.nodeUrl) {
+			throw new Error('server is not running');
+		}
+		return `http://127.0.0.1:${this.promPort}/metrics`;
 	}
 
 	/**
@@ -118,6 +152,8 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		}
 		let { manageServer, env } = await this.setupEnvironment();
 		this.nodeUrl = env['WG_NODE_URL'];
+		this.promPort = env['WG_PROMETHEUS_PORT'];
+
 		let subprocess: Subprocess | undefined;
 		if (manageServer) {
 			let cmd = ['start'];
@@ -156,7 +192,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		const health = this.url('/health');
 		const checkHealth = async () => {
 			const controller = new AbortController();
-			const id = setTimeout(() => controller.abort(), 2000);
+			const id = setTimeout(() => controller.abort(), 3000);
 			try {
 				const resp = await this.options.fetch(health, { signal: controller.signal });
 				if (resp.status == 200) {
@@ -236,20 +272,26 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		}
 
 		// Generate random ports
-		const [nodePort, nodeInternalPort, serverPort] = await Promise.all([freeport(), freeport(), freeport()]);
+		const [nodePort, nodeInternalPort, serverPort, prometheusPort] = await Promise.all([
+			freeport(),
+			freeport(),
+			freeport(),
+			freeport(),
+		]);
 
 		return {
 			manageServer: true,
 			env: {
 				WG_CLOUD: 'true',
-				WG_NODE_URL: `http://0.0.0.0:${nodePort}`,
-				WG_NODE_INTERNAL_URL: `http://0.0.0.0:${nodeInternalPort}`,
-				WG_PUBLIC_NODE_URL: `http://0.0.0.0:${nodePort}`,
-				WG_NODE_HOST: '0.0.0.0',
+				WG_NODE_URL: `http://127.0.0.1:${nodePort}`,
+				WG_NODE_INTERNAL_URL: `http://127.0.0.1:${nodeInternalPort}`,
+				WG_PUBLIC_NODE_URL: `http://127.0.0.1:${nodePort}`,
+				WG_PROMETHEUS_PORT: `${prometheusPort}`,
+				WG_NODE_HOST: '127.0.0.1',
 				WG_NODE_PORT: nodePort.toString(),
 				WG_NODE_INTERNAL_PORT: nodeInternalPort.toString(),
-				WG_SERVER_URL: `http://0.0.0.0:${serverPort}`,
-				WG_SERVER_HOST: '0.0.0.0',
+				WG_SERVER_URL: `http://127.0.0.1:${serverPort}`,
+				WG_SERVER_HOST: '127.0.0.1',
 				WG_SERVER_PORT: serverPort.toString(),
 			},
 		};

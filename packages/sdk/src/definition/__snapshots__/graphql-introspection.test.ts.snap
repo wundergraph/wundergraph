@@ -1177,6 +1177,12 @@ directive @transform(
   get: String
 ) on FIELD
 
+"""
+The @requireAuthentication Directive marks an Operation to require authentication.
+Without authentication, the operation will return an Unauthorized error with status code 401.
+"""
+directive @requireAuthentication on QUERY | MUTATION | SUBSCRIPTION
+
 type Query {
   federated_me: federated_User
   federated_topProducts(first: Int = 5, random: Boolean): [federated_Product]
@@ -2482,6 +2488,12 @@ directive @transform(
   """
   get: String
 ) on FIELD
+
+"""
+The @requireAuthentication Directive marks an Operation to require authentication.
+Without authentication, the operation will return an Unauthorized error with status code 401.
+"""
+directive @requireAuthentication on QUERY | MUTATION | SUBSCRIPTION
 
 type Query {
   federated_me: federated_User

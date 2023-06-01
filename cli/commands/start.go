@@ -66,7 +66,7 @@ var startCmd = &cobra.Command{
 		// Only exit with error code 1 when the server was not stopped by the signal
 		if err := g.Wait(); sigCtx.Err() == nil && err != nil {
 			// Exit with error code 1 to indicate failure and restart
-			log.Error("WunderGraph start process shutdown: %w", zap.Error(err))
+			log.Error("WunderGraph start process shutdown", zap.Error(err))
 			return err
 		}
 

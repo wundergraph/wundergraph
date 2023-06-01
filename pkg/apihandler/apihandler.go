@@ -13,19 +13,17 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/buger/jsonparser"
+	"github.com/dgraph-io/ristretto"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
-	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-uuid"
 	"github.com/mattbaird/jsonpatch"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"go.uber.org/zap"
-	"golang.org/x/sync/singleflight"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
@@ -37,22 +35,23 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 	"github.com/wundergraph/graphql-go-tools/pkg/graphql"
 	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
-	"github.com/wundergraph/graphql-go-tools/pkg/operationreport"
 
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/cacheheaders"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
-	"github.com/wundergraph/wundergraph/pkg/graphiql"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/jsonpath"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/metrics"
+	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/s3uploadclient"
+	"github.com/wundergraph/wundergraph/pkg/trace"
 	"github.com/wundergraph/wundergraph/pkg/webhookhandler"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
@@ -66,6 +65,8 @@ const (
 	WgJsonPatchParam     = WgPrefix + "json_patch"
 	WgSseParam           = WgPrefix + "sse"
 	WgSubscribeOnceParam = WgPrefix + "subscribe_once"
+
+	defaultAuthTimeoutSeconds = 600 // 10 minutes
 )
 
 type WgRequestParams struct {
@@ -108,6 +109,8 @@ type Builder struct {
 
 	githubAuthDemoClientID     string
 	githubAuthDemoClientSecret string
+
+	metrics metrics.Metrics
 }
 
 type BuilderConfig struct {
@@ -118,6 +121,7 @@ type BuilderConfig struct {
 	GitHubAuthDemoClientID     string
 	GitHubAuthDemoClientSecret string
 	DevMode                    bool
+	Metrics                    metrics.Metrics
 }
 
 func NewBuilder(pool *pool.Pool,
@@ -138,13 +142,18 @@ func NewBuilder(pool *pool.Pool,
 		githubAuthDemoClientID:     config.GitHubAuthDemoClientID,
 		githubAuthDemoClientSecret: config.GitHubAuthDemoClientSecret,
 		devMode:                    config.DevMode,
+		metrics:                    config.Metrics,
 	}
 }
 
-func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Router, api *Api) (streamClosers []chan struct{}, err error) {
+func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Router, api *Api, planCache *ristretto.Cache) (streamClosers []chan struct{}, err error) {
 	r.api = api
 
 	r.router = r.createSubRouter(router)
+
+	if r.enableRequestLogging {
+		r.router.Use(logRequestMiddleware(os.Stderr))
+	}
 
 	for _, webhook := range api.Webhooks {
 		err = r.registerWebhook(webhook)
@@ -191,43 +200,9 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		r.planConfig.DataSources = append(r.planConfig.DataSources, dataSource)
 	}
 
-	// limiter := rate.NewLimiter(rate.Every(time.Second), 10)
-
 	r.log.Debug("configuring API",
 		zap.Int("numOfOperations", len(api.Operations)),
 	)
-
-	// Redirect from old-style URL, for temporary backwards compatibility
-	r.router.MatcherFunc(func(r *http.Request, rm *mux.RouteMatch) bool {
-		components := strings.Split(r.URL.Path, "/")
-		return len(components) > 2 && components[2] == "main"
-	}).HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		components := strings.Split(req.URL.Path, "/")
-		prefix := strings.Join(components[:3], "/")
-		const format = "URLs with the %q prefix are deprecated and will be removed in a future release, " +
-			"see https://github.com/wundergraph/wundergraph/blob/main/docs/migrations/sdk-0.122.0-0.123.0.md"
-		r.log.Warn(fmt.Sprintf(format, prefix), zap.String("URL", req.URL.Path))
-		req.URL.Path = "/" + strings.Join(components[3:], "/")
-		r.router.ServeHTTP(w, req)
-	})
-
-	if len(api.Hosts) > 0 {
-		r.router.Use(func(handler http.Handler) http.Handler {
-			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				for i := range api.Hosts {
-					if r.Host == api.Hosts[i] {
-						handler.ServeHTTP(w, r)
-						return
-					}
-				}
-				http.Error(w, fmt.Sprintf("Host not found: %s", r.Host), http.StatusNotFound)
-			})
-		})
-	}
-
-	if r.enableRequestLogging {
-		r.router.Use(logRequestMiddleware(os.Stderr))
-	}
 
 	r.router.Use(func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, request *http.Request) {
@@ -238,11 +213,23 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			}
 
 			request = request.WithContext(context.WithValue(request.Context(), logging.RequestIDKey{}, requestID))
+
+			if len(api.Hosts) > 0 {
+				for i := range api.Hosts {
+					if request.Host == api.Hosts[i] {
+						handler.ServeHTTP(w, request)
+						return
+					}
+				}
+				http.Error(w, fmt.Sprintf("Host not found: %s", request.Host), http.StatusNotFound)
+				return
+			}
+
 			handler.ServeHTTP(w, request)
 		})
 	})
 
-	if err := r.registerAuth(r.insecureCookies); err != nil {
+	if err := r.registerAuth(); err != nil {
 		if !r.devMode {
 			// If authentication fails in production, consider this a fatal error
 			return streamClosers, err
@@ -314,35 +301,17 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	}
 
 	if api.EnableGraphqlEndpoint {
-		graphqlHandler := &GraphQLHandler{
-			planConfig:      r.planConfig,
-			definition:      r.definition,
-			resolver:        r.resolver,
-			log:             r.log,
-			pool:            r.pool,
-			sf:              &singleflight.Group{},
-			prepared:        map[uint64]planWithExtractedVariables{},
-			preparedMux:     &sync.RWMutex{},
-			renameTypeNames: r.renameTypeNames,
-		}
-		apiPath := "/graphql"
-		r.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath).Handler(graphqlHandler)
-		r.log.Debug("registered GraphQLHandler",
-			zap.String("method", http.MethodPost),
-			zap.String("path", apiPath),
-		)
-
-		graphqlPlaygroundHandler := &GraphQLPlaygroundHandler{
-			log:     r.log,
-			html:    graphiql.GetGraphiqlPlaygroundHTML(),
-			nodeUrl: api.Options.PublicNodeUrl,
-		}
-		r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath).Handler(graphqlPlaygroundHandler)
-		r.log.Debug("registered GraphQLPlaygroundHandler",
-			zap.String("method", http.MethodGet),
-			zap.String("path", apiPath),
-		)
-
+		mountGraphQLHandler(r.router, GraphQLHandlerOptions{
+			GraphQLBaseURL:  api.Options.PublicNodeUrl,
+			Internal:        false,
+			PlanConfig:      r.planConfig,
+			Definition:      r.definition,
+			Resolver:        r.resolver,
+			RenameTypeNames: r.renameTypeNames,
+			Pool:            r.pool,
+			Cache:           planCache,
+			Log:             r.log,
+		})
 	}
 
 	return streamClosers, err
@@ -446,16 +415,6 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		return r.registerNodejsOperation(operation, apiPath)
 	}
 
-	var (
-		operationIsConfigured bool
-	)
-
-	defer func() {
-		if !operationIsConfigured {
-			r.registerInvalidOperation(operation.Name)
-		}
-	}()
-
 	shared := r.pool.GetShared(context.Background(), r.planConfig, pool.Config{})
 
 	shared.Doc.Input.ResetInputString(operation.Content)
@@ -507,6 +466,9 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		Logger:      r.log,
 	}
 
+	var operationHandler http.Handler
+	var route *mux.Route
+
 	switch operation.OperationType {
 	case wgpb.OperationType_QUERY:
 		synchronousPlan, ok := preparedPlan.(*plan.SynchronousResponsePlan)
@@ -546,14 +508,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
 
-		route := r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
-		if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
-			route.Handler(authentication.RequiresAuthentication(handler))
-		} else {
-			route.Handler(handler)
-		}
-
-		operationIsConfigured = true
+		route = r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
+		operationHandler = handler
 
 		r.log.Debug("registered QueryHandler",
 			zap.String("method", http.MethodGet),
@@ -590,15 +546,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			hooksPipeline:          hooksPipeline,
 		}
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
-		route := r.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath)
-
-		if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
-			route.Handler(authentication.RequiresAuthentication(handler))
-		} else {
-			route.Handler(handler)
-		}
-
-		operationIsConfigured = true
+		route = r.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath)
+		operationHandler = handler
 
 		r.log.Debug("registered MutationHandler",
 			zap.String("method", http.MethodPost),
@@ -635,15 +584,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			hooksPipeline:          hooksPipeline,
 		}
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
-		route := r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
-
-		if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
-			route.Handler(authentication.RequiresAuthentication(handler))
-		} else {
-			route.Handler(handler)
-		}
-
-		operationIsConfigured = true
+		route = r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
+		operationHandler = handler
 
 		r.log.Debug("registered SubscriptionHandler",
 			zap.String("method", http.MethodGet),
@@ -656,6 +598,18 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			zap.String("name", operation.Name),
 			zap.String("content", operation.Content),
 		)
+	}
+
+	if route != nil && operationHandler != nil {
+
+		if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
+			operationHandler = authentication.RequiresAuthentication(operationHandler)
+			route.Handler(authentication.RequiresAuthentication(operationHandler))
+		}
+		metrics := newOperationMetrics(r.metrics, operation.Name)
+		route.Handler(metrics.Handler(operationHandler))
+	} else {
+		r.registerInvalidOperation(operation.Name)
 	}
 
 	return nil
@@ -681,35 +635,6 @@ func (r *Builder) Close() error {
 	return nil
 }
 
-type GraphQLPlaygroundHandler struct {
-	log     *zap.Logger
-	html    string
-	nodeUrl string
-}
-
-func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
-	tpl := strings.Replace(h.html, "{{apiURL}}", h.nodeUrl, -1)
-	resp := []byte(tpl)
-
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Content-Length", strconv.Itoa(len(resp)))
-	_, _ = w.Write(resp)
-}
-
-type GraphQLHandler struct {
-	planConfig plan.Configuration
-	definition *ast.Document
-	resolver   *resolve.Resolver
-	log        *zap.Logger
-	pool       *pool.Pool
-	sf         *singleflight.Group
-
-	prepared    map[uint64]planWithExtractedVariables
-	preparedMux *sync.RWMutex
-
-	renameTypeNames []resolve.RenameTypeName
-}
-
 type planWithExtractedVariables struct {
 	preparedPlan plan.Plan
 	variables    []byte
@@ -718,179 +643,6 @@ type planWithExtractedVariables struct {
 var (
 	errInvalid = errors.New("invalid")
 )
-
-func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
-
-	buf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(buf)
-	_, err := io.Copy(buf, r.Body)
-	if err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
-		return
-	}
-
-	body := buf.Bytes()
-
-	requestQuery, _ := jsonparser.GetString(body, "query")
-	requestOperationName, parsedOperationNameDataType, _, _ := jsonparser.Get(body, "operationName")
-	requestVariables, _, _, _ := jsonparser.Get(body, "variables")
-
-	// An operationName set to { "operationName": null } will be parsed by 'jsonparser' to "null" string
-	// and this will make the planner unable to find the operation to execute in selectOperation step.
-	// to ensure that the operationName match what planner expect we set it to null.
-	if parsedOperationNameDataType == jsonparser.Null {
-		requestOperationName = nil
-	}
-
-	shared := h.pool.GetSharedFromRequest(context.Background(), r, h.planConfig, pool.Config{
-		RenameTypeNames: h.renameTypeNames,
-	})
-	defer h.pool.PutShared(shared)
-	shared.Ctx.Variables = requestVariables
-	shared.Doc.Input.ResetInputString(requestQuery)
-	shared.Parser.Parse(shared.Doc, shared.Report)
-
-	if shared.Report.HasErrors() {
-		h.logInternalErrors(shared.Report, requestLogger)
-		h.writeRequestErrors(shared.Report, w, requestLogger)
-
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	prepared, err := h.preparePlan(requestOperationName, shared)
-	if err != nil {
-		if shared.Report.HasErrors() {
-			h.logInternalErrors(shared.Report, requestLogger)
-			h.writeRequestErrors(shared.Report, w, requestLogger)
-		} else {
-			requestLogger.Error("prepare plan failed", zap.Error(err))
-			w.WriteHeader(http.StatusBadRequest)
-		}
-
-		return
-	}
-
-	if len(prepared.variables) != 0 {
-		// we have to merge query variables into extracted variables to been able to override default values
-		// we make a copy of the extracted variables to not override h.extractedVariables
-		shared.Ctx.Variables = MergeJsonRightIntoLeft(shared.Ctx.Variables, prepared.variables)
-	}
-
-	switch p := prepared.preparedPlan.(type) {
-	case *plan.SynchronousResponsePlan:
-		w.Header().Set("Content-Type", "application/json")
-
-		executionBuf := pool.GetBytesBuffer()
-		defer pool.PutBytesBuffer(executionBuf)
-
-		err := h.resolver.ResolveGraphQLResponse(shared.Ctx, p.Response, nil, executionBuf)
-		if err != nil {
-			if errors.Is(err, context.Canceled) {
-				return
-			}
-
-			requestErrors := graphql.RequestErrors{
-				{
-					Message: "could not resolve response",
-				},
-			}
-
-			if _, err := requestErrors.WriteResponse(w); err != nil {
-				requestLogger.Error("could not write response", zap.Error(err))
-			}
-
-			requestLogger.Error("ResolveGraphQLResponse", zap.Error(err))
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		_, err = executionBuf.WriteTo(w)
-		if err != nil {
-			requestLogger.Error("respond to client", zap.Error(err))
-			return
-		}
-	case *plan.SubscriptionResponsePlan:
-		var (
-			flushWriter *httpFlushWriter
-			ok          bool
-		)
-		shared.Ctx, flushWriter, ok = getFlushWriter(shared.Ctx, shared.Ctx.Variables, r, w)
-		if !ok {
-			requestLogger.Error("connection not flushable")
-			http.Error(w, "Connection not flushable", http.StatusBadRequest)
-			return
-		}
-
-		err := h.resolver.ResolveGraphQLSubscription(shared.Ctx, p.Response, flushWriter)
-		if err != nil {
-			if errors.Is(err, context.Canceled) {
-				return
-			}
-
-			requestErrors := graphql.RequestErrors{
-				{
-					Message: "could not resolve response",
-				},
-			}
-
-			if _, err := requestErrors.WriteResponse(w); err != nil {
-				requestLogger.Error("could not write response", zap.Error(err))
-			}
-
-			requestLogger.Error("ResolveGraphQLSubscription", zap.Error(err))
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-	case *plan.StreamingResponsePlan:
-		http.Error(w, "not implemented", http.StatusNotFound)
-	}
-}
-
-func (h *GraphQLHandler) logInternalErrors(report *operationreport.Report, requestLogger *zap.Logger) {
-	var internalErr error
-	for _, err := range report.InternalErrors {
-		internalErr = multierror.Append(internalErr, err)
-	}
-
-	if internalErr != nil {
-		requestLogger.Error("internal error", zap.Error(internalErr))
-	}
-}
-
-func (h *GraphQLHandler) writeRequestErrors(report *operationreport.Report, w http.ResponseWriter, requestLogger *zap.Logger) {
-	requestErrors := graphql.RequestErrorsFromOperationReport(*report)
-	if requestErrors != nil {
-		if _, err := requestErrors.WriteResponse(w); err != nil {
-			requestLogger.Error("error writing response", zap.Error(err))
-		}
-	}
-}
-
-func (h *GraphQLHandler) preparePlan(requestOperationName []byte, shared *pool.Shared) (planWithExtractedVariables, error) {
-	if len(requestOperationName) == 0 {
-		shared.Normalizer.NormalizeOperation(shared.Doc, h.definition, shared.Report)
-	} else {
-		shared.Normalizer.NormalizeNamedOperation(shared.Doc, h.definition, requestOperationName, shared.Report)
-	}
-	if shared.Report.HasErrors() {
-		return planWithExtractedVariables{}, fmt.Errorf(ErrMsgOperationNormalizationFailed, shared.Report)
-	}
-
-	state := shared.Validation.Validate(shared.Doc, h.definition, shared.Report)
-	if state != astvalidation.Valid {
-		return planWithExtractedVariables{}, errInvalid
-	}
-
-	preparedPlan := shared.Planner.Plan(shared.Doc, h.definition, unsafebytes.BytesToString(requestOperationName), shared.Report)
-	shared.Postprocess.Process(preparedPlan)
-
-	prepared := planWithExtractedVariables{
-		preparedPlan: preparedPlan,
-		variables:    shared.Doc.Input.Variables,
-	}
-	return prepared, nil
-}
 
 func postProcessVariables(operation *wgpb.Operation, r *http.Request, variables []byte) ([]byte, error) {
 	var err error
@@ -1156,7 +908,10 @@ type QueryHandler struct {
 
 func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
-	r = setOperationMetaData(r, h.operation)
+	r = operation.SetOperationMetaData(r, h.operation)
+
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -1168,36 +923,36 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	ctx := pool.GetCtx(r, r, pool.Config{
+	resolveCtx := pool.GetCtx(r, r, pool.Config{
 		RenameTypeNames: h.renameTypeNames,
 	})
-	defer pool.PutCtx(ctx)
+	defer pool.PutCtx(resolveCtx)
 
-	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
-	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
+	resolveCtx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
+	resolveCtx.Variables = h.stringInterpolator.Interpolate(resolveCtx.Variables)
 
-	if !validateInputVariables(ctx.Context(), requestLogger, ctx.Variables, h.variablesValidator, w) {
+	if !validateInputVariables(resolveCtx.Context(), requestLogger, resolveCtx.Variables, h.variablesValidator, w) {
 		return
 	}
 
 	compactBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(compactBuf)
-	err := json.Compact(compactBuf, ctx.Variables)
+	err := json.Compact(compactBuf, resolveCtx.Variables)
 	if err != nil {
 		requestLogger.Error("Could not compact variables in query handler", zap.Bool("isLive", isLive), zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	ctx.Variables = compactBuf.Bytes()
+	resolveCtx.Variables = compactBuf.Bytes()
 
-	ctx.Variables = h.jsonStringInterpolator.Interpolate(ctx.Variables)
+	resolveCtx.Variables = h.jsonStringInterpolator.Interpolate(resolveCtx.Variables)
 
 	if len(h.extractedVariables) != 0 {
 		// we make a copy of the extracted variables to not override h.extractedVariables
-		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
+		resolveCtx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, resolveCtx.Variables)
 	}
 
-	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
+	resolveCtx.Variables, err = postProcessVariables(h.operation, r, resolveCtx.Variables)
 	if err != nil {
 		if done := handleOperationErr(requestLogger, err, w, "postProcessVariables failed", h.operation); done {
 			return
@@ -1218,11 +973,11 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if isLive {
-		h.handleLiveQuery(r, w, ctx, buf, flusher, requestLogger)
+		h.handleLiveQuery(r, w, resolveCtx, buf, flusher, requestLogger)
 		return
 	}
 
-	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
+	resp, err := h.hooksPipeline.Run(resolveCtx, w, r, buf)
 	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
 		return
 	}
@@ -1420,7 +1175,10 @@ func (h *MutationHandler) parseFormVariables(r *http.Request) []byte {
 
 func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
-	r = setOperationMetaData(r, h.operation)
+	r = operation.SetOperationMetaData(r, h.operation)
+
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -1527,7 +1285,10 @@ type SubscriptionHandler struct {
 
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
-	r = setOperationMetaData(r, h.operation)
+	r = operation.SetOperationMetaData(r, h.operation)
+
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	// recover from panic if one occured. Set err to nil otherwise.
 	defer func() {
@@ -1751,71 +1512,27 @@ func MergeJsonRightIntoLeft(left, right []byte) []byte {
 }
 
 func (r *Builder) authenticationHooks() authentication.Hooks {
-	return hooks.NewAuthenticationHooks(hooks.AuthenticationConfig{
-		Client:                     r.middlewareClient,
-		Log:                        r.log,
-		PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-		MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-		PostLogout:                 r.api.AuthenticationConfig.Hooks.PostLogout,
-		Revalidate:                 r.api.AuthenticationConfig.Hooks.RevalidateAuthentication,
-	})
+	return authenticationHooks(r.api, r.middlewareClient, r.log)
 }
 
-func (r *Builder) registerAuth(insecureCookies bool) error {
+func (r *Builder) registerAuth() error {
 
-	var (
-		hashKey, blockKey, csrfSecret []byte
-		jwksProviders                 []*wgpb.JwksAuthProvider
-	)
-
-	if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
-		hashKey = []byte(h)
-	} else if fallback := r.api.CookieBasedSecrets.HashKey; fallback != nil {
-		hashKey = fallback
+	config, err := loadUserConfiguration(r.api, r.middlewareClient, r.log)
+	if err != nil {
+		return err
 	}
 
-	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
-		blockKey = []byte(b)
-	} else if fallback := r.api.CookieBasedSecrets.BlockKey; fallback != nil {
-		blockKey = fallback
-	}
-
-	if c := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); c != "" {
-		csrfSecret = []byte(c)
-	} else if fallback := r.api.CookieBasedSecrets.CsrfSecret; fallback != nil {
-		csrfSecret = fallback
-	}
-
-	if r.api == nil || r.api.HasCookieAuthEnabled() && (hashKey == nil || blockKey == nil || csrfSecret == nil) {
-		panic("API is nil or hashkey, blockkey, csrfsecret invalid: This should never have happened. Either validation didn't detect broken configuration, or someone broke the validation code")
-	}
-
-	cookie := securecookie.New(hashKey, blockKey)
-
-	if r.api.AuthenticationConfig.JwksBased != nil {
-		jwksProviders = r.api.AuthenticationConfig.JwksBased.Providers
-	}
-
-	authHooks := r.authenticationHooks()
-
-	loadUserConfig := authentication.LoadUserConfig{
-		Log:           r.log,
-		Cookie:        cookie,
-		JwksProviders: jwksProviders,
-		Hooks:         authHooks,
-	}
-
-	r.router.Use(authentication.NewLoadUserMw(loadUserConfig))
+	r.router.Use(authentication.NewLoadUserMw(config))
 	r.router.Use(authentication.NewCSRFMw(authentication.CSRFConfig{
-		InsecureCookies: insecureCookies,
-		Secret:          csrfSecret,
+		InsecureCookies: r.insecureCookies,
+		Secret:          config.CSRFSecret,
 	}))
 
 	userHandler := &authentication.UserHandler{
-		Hooks:           authHooks,
+		Hooks:           config.Hooks,
 		Log:             r.log,
-		InsecureCookies: insecureCookies,
-		Cookie:          cookie,
+		InsecureCookies: r.insecureCookies,
+		Cookie:          config.Cookie,
 		PublicClaims:    r.api.AuthenticationConfig.PublicClaims,
 	}
 
@@ -1833,7 +1550,7 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 
 	cookieBasedAuth.Path("/csrf").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.CSRFTokenHandler{})
 
-	return r.registerCookieAuthHandlers(cookieBasedAuth, cookie, authHooks)
+	return r.registerCookieAuthHandlers(cookieBasedAuth, config.Cookie, config.Hooks)
 }
 
 func (r *Builder) registerCookieAuthHandlers(router *mux.Router, cookie *securecookie.SecureCookie, authHooks authentication.Hooks) error {
@@ -1854,8 +1571,19 @@ func (r *Builder) registerCookieAuthHandlers(router *mux.Router, cookie *securec
 		return nil
 	}
 
+	timeoutSeconds, err := loadvariable.Int(r.api.AuthenticationConfig.GetCookieBased().GetTimeoutSeconds())
+	if err != nil {
+		return err
+	}
+
+	if timeoutSeconds <= 0 {
+		timeoutSeconds = defaultAuthTimeoutSeconds
+	}
+
+	authTimeout := time.Second * time.Duration(timeoutSeconds)
+
 	for _, provider := range r.api.AuthenticationConfig.CookieBased.Providers {
-		r.configureCookieProvider(router, provider, cookie)
+		r.configureCookieProvider(router, provider, cookie, authTimeout)
 	}
 
 	return nil
@@ -1901,7 +1629,7 @@ func (r *Builder) configureOpenIDConnectProviders() (*authentication.OpenIDConne
 	return &providers, nil
 }
 
-func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.AuthProvider, cookie *securecookie.SecureCookie) {
+func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.AuthProvider, cookie *securecookie.SecureCookie, authTimeout time.Duration) {
 
 	router.Use(authentication.RedirectAlreadyAuthenticatedUsers(
 		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUris),
@@ -1939,6 +1667,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			InsecureCookies:    r.insecureCookies,
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
+			AuthTimeout:        authTimeout,
 		}, r.authenticationHooks())
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "github"),
@@ -1970,6 +1699,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			InsecureCookies:    r.insecureCookies,
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
+			AuthTimeout:        authTimeout,
 		}, r.authenticationHooks())
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "oidc"),
@@ -2004,7 +1734,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 		return err
 	}
 
-	handler := &FunctionsHandler{
+	var handler http.Handler = &FunctionsHandler{
 		operation:            operation,
 		log:                  r.log,
 		cacheHeaders:         cacheheaders.New(newCacheControl(operation.CacheConfig), r.api.ApiConfigHash),
@@ -2021,10 +1751,11 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 	}
 
 	if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
-		route.Handler(authentication.RequiresAuthentication(handler))
-	} else {
-		route.Handler(handler)
+		handler = authentication.RequiresAuthentication(handler)
 	}
+
+	metrics := newOperationMetrics(r.metrics, operation.Name)
+	route.Handler(metrics.Handler(handler))
 
 	r.log.Debug("registered FunctionsHandler",
 		zap.String("operation", operation.Name),
@@ -2054,14 +1785,38 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
 
-	r = setOperationMetaData(r, h.operation)
+	r = operation.SetOperationMetaData(r, h.operation)
+
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	ctx := pool.GetCtx(r, r, pool.Config{})
+	clientRequest := r
+	if h.internal {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			requestLogger.Error("reading body", zap.Error(err))
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+		// We need to restore the body, since we might call r.ParseForm() later
+		r.Body = io.NopCloser(bytes.NewReader(body))
+		clientRequest, err = NewRequestFromWunderGraphClientRequest(r.Context(), body)
+		if err != nil {
+			requestLogger.Error("InternalApiHandler.ServeHTTP: Could not create request from __wg.clientRequest",
+				zap.Error(err),
+				zap.String("url", r.RequestURI),
+			)
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+	}
+
+	ctx := pool.GetCtx(r, clientRequest, pool.Config{})
 	defer pool.PutCtx(ctx)
 
 	variablesBuf := pool.GetBytesBuffer()
@@ -2257,47 +2012,6 @@ type EndpointUnavailableHandler struct {
 func (m *EndpointUnavailableHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	m.Logger.Error("operation not available", zap.String("operationName", m.OperationName), zap.String("URL", r.URL.Path))
 	http.Error(w, fmt.Sprintf("Endpoint not available for Operation: %s, please check the logs.", m.OperationName), http.StatusServiceUnavailable)
-}
-
-type OperationMetaData struct {
-	OperationName string
-	OperationType wgpb.OperationType
-}
-
-func (o *OperationMetaData) GetOperationTypeString() string {
-	switch o.OperationType {
-	case wgpb.OperationType_MUTATION:
-		return "mutation"
-	case wgpb.OperationType_QUERY:
-		return "query"
-	case wgpb.OperationType_SUBSCRIPTION:
-		return "subscription"
-	default:
-		return "unknown"
-	}
-}
-
-func setOperationMetaData(r *http.Request, operation *wgpb.Operation) *http.Request {
-	metaData := &OperationMetaData{
-		OperationName: operation.Name,
-		OperationType: operation.OperationType,
-	}
-	return r.WithContext(context.WithValue(r.Context(), "operationMetaData", metaData))
-}
-
-func getOperationMetaData(r *http.Request) *OperationMetaData {
-	if r == nil {
-		return nil
-	}
-	ctx := r.Context()
-	if ctx == nil {
-		return nil
-	}
-	maybeMetaData := r.Context().Value("operationMetaData")
-	if maybeMetaData == nil {
-		return nil
-	}
-	return maybeMetaData.(*OperationMetaData)
 }
 
 func setSubscriptionHeaders(w http.ResponseWriter) {

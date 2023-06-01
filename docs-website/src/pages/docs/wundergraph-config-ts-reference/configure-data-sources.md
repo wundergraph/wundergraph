@@ -63,7 +63,6 @@ const countries = introspect.graphql({
 | `loadSchemaFromString`          | A function that returns the schema as a string. This is useful if you want to use a local schema file. |
 | `customFloatScalars`            | An array of custom float scalars.                                                                      |
 | `customIntScalars`              | An array of custom int scalars.                                                                        |
-| `customJSONScalars`             | An array of custom JSON scalars.                                                                       |
 | `internal`                      | Whether the GraphQL service is internal. Defaults to `false`                                           |
 | `skipRenameRootFields`          | An array of root fields to skip renaming.                                                              |
 | `schemaExtension`               | A string that is appended to the schema. Useful for adding custom scalars.                             |
