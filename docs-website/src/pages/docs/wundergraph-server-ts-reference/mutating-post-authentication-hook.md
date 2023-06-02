@@ -4,7 +4,7 @@ description: Reference documentation for the mutatingPostAuthentication hook
 ---
 
 The `mutatingPostAuthentication` hook can be used to allow or deny the user to be authenticated,
-and to modify the user object.
+and to modify the user object, allowing also to set the session duration.
 
 After the authentication flow with a configured authentication provider, e.g. GitHub or Keycloak, is finished,
 the `mutatingPostAuthentication` hook is called.
@@ -44,6 +44,7 @@ export default configureWunderGraphServer(() => ({
         return {
           user: {
             name: 'John Doe',
+            expires: Date.now() + 10 * 60 * 1000, // Make the session last 10 minutes
           },
           status: 'ok',
         };
