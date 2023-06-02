@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.163.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.162.0...@wundergraph/sdk@0.163.0) (2023-06-01)
+
+### Features
+
+* otel instrumentation of wundernode and server ([#1004](https://github.com/wundergraph/wundergraph/issues/1004)) ([7b45975](https://github.com/wundergraph/wundergraph/commit/7b45975ca8fb41ff03cbcc84c42ec3536ad6db13)) (@StarpTech)
+
+## [0.162.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.161.0...@wundergraph/sdk@0.162.0) (2023-05-31)
+
+### Features
+
+* fix replaceCustomScalars and add interface support ([#1000](https://github.com/wundergraph/wundergraph/issues/1000)) ([fa00db4](https://github.com/wundergraph/wundergraph/commit/fa00db471f7b9ef0d7372fbe7a5dec100bf62a50)) (@Aenimus)
+* make timeout during authentication configurable ([#1018](https://github.com/wundergraph/wundergraph/issues/1018)) ([b5f6b74](https://github.com/wundergraph/wundergraph/commit/b5f6b744cd4efef456b9004b4109f7624e467f41)) (@fiam)
+
 ## [0.161.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.160.0...@wundergraph/sdk@0.161.0) (2023-05-31)
 
 ### Features

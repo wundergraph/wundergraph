@@ -111,6 +111,22 @@ export default configureWunderGraphServer(() => ({
 }));
 ```
 
+## Authentication timeout
+
+Some temporary data is stored while the user performs the required steps to authenticate. By
+default, this temporary data has a timeout of 10 minutes. If needed, this can be increased using
+the `timeoutSeconds` field:
+
+```typescript {% filename=".wundergraph/wundergraph.config.ts" %}
+// ...
+authentication: {
+  cookieBased: {
+    timeoutSeconds: 3600,
+  }
+}
+// ...
+```
+
 ## Learn more
 
 - [Configuration reference](/docs/wundergraph-config-ts-reference/configure-cookie-based-authentication)

@@ -120,6 +120,36 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							placeholderVariableName: '',
 						},
 					},
+					openTelemetry: {
+						enabled: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						sampler: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						authToken: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						exporterHttpEndpoint: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
 				},
 				serverOptions: {
 					serverUrl: {
@@ -606,6 +636,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						secureCookieBlockKey: mapInputVariable(''),
 						csrfTokenSecret: mapInputVariable(''),
 					},
+					timeoutSeconds: mapInputVariable(0),
 					customClaims: {},
 					publicClaims: [],
 				},
