@@ -34,4 +34,17 @@ describe('The WunderGraph ORM', () => {
 		const data = await resp.json();
 		expect(data.name).toBe('Germany');
 	});
+
+	it('it should pass a clientRequest to the internal GraphQL server', async () => {
+		const client = wg.client();
+		// This needs to be run in a loop because we need to reuse a resolve.Context
+		// to trigger the bug
+		for (let ii = 0; ii < 100; ii++) {
+			const { data, error } = await client.query({
+				operationName: 'clientRequestContentLength',
+			});
+			expect(error).toBeUndefined();
+			expect(parseInt(data?.length ?? '', 10)).toBeGreaterThan(0);
+		}
+	});
 });

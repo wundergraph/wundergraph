@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.116.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.115.0...@wundergraph/protobuf@0.116.0) (2023-06-01)
+
+### Features
+
+* otel instrumentation of wundernode and server ([#1004](https://github.com/wundergraph/wundergraph/issues/1004)) ([7b45975](https://github.com/wundergraph/wundergraph/commit/7b45975ca8fb41ff03cbcc84c42ec3536ad6db13)) (@StarpTech)
+
 ## [0.115.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.114.0...@wundergraph/protobuf@0.115.0) (2023-05-31)
 
 ### Features

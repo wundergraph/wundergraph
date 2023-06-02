@@ -242,6 +242,11 @@ export interface ServerRunOptions {
 	clientFactory: InternalClientFactory;
 }
 
+export interface CreateServerOptions extends ServerRunOptions {
+	serverHost: string;
+	serverPort: number;
+}
+
 /***
  * WunderGraphServerContext encapsulates the available functions for
  * creating and release global and per request custom contexts.
