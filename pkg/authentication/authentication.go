@@ -29,6 +29,13 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
+const (
+	userCookieName = "user"
+	idCookieName   = "id"
+
+	authenticationCookieMaxAge = int((time.Hour * 24 * 365 * 10) / time.Second)
+)
+
 func init() {
 	gob.Register(User{})
 	gob.Register(map[string]interface{}(nil))
@@ -180,6 +187,10 @@ type User struct {
 	ZoneInfo          string `json:"zoneInfo,omitempty"`
 	Locale            string `json:"locale,omitempty"`
 	Location          string `json:"location,omitempty"`
+	// Expires indicate the unix timestamp in milliseconds when this User is
+	// considered as expired. This can only be set from the authentication
+	// hooks.
+	Expires *int64 `json:"expires,omitempty"`
 
 	CustomClaims     map[string]interface{} `json:"customClaims,omitempty"`
 	CustomAttributes []string               `json:"customAttributes,omitempty"`
@@ -263,6 +274,12 @@ func (u *User) copyWellKnownClaim(claim string, from *User) bool {
 	return true
 }
 
+// HasExpired returns true iff the user has expired, as configured by the
+// authentication hooks (via User.Expired)
+func (u *User) HasExpired() bool {
+	return u != nil && u.Expires != nil && *u.Expires > 0 && time.UnixMilli(*u.Expires).Before(time.Now())
+}
+
 func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http.Request, domain string, insecureCookies bool) error {
 
 	rawIdToken := u.RawIDToken
@@ -281,17 +298,17 @@ func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http
 
 	u.ETag = fmt.Sprintf("W/\"%d\"", hash.Sum64())
 
-	encoded, err := s.Encode("user", *u)
+	encoded, err := s.Encode(userCookieName, *u)
 	if err != nil {
 		return err
 	}
 
 	cookie := &http.Cookie{
-		Name:     "user",
+		Name:     userCookieName,
 		Value:    encoded,
 		Path:     "/",
 		Domain:   removeSubdomain(sanitizeDomain(domain)),
-		MaxAge:   int((time.Hour * 24 * 30).Seconds()),
+		MaxAge:   authenticationCookieMaxAge,
 		Secure:   !insecureCookies,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
@@ -305,11 +322,11 @@ func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http
 	}
 
 	cookie = &http.Cookie{
-		Name:     "id",
+		Name:     idCookieName,
 		Value:    encoded,
 		Path:     "/",
 		Domain:   removeSubdomain(sanitizeDomain(domain)),
-		MaxAge:   int((time.Hour * 24 * 30).Seconds()),
+		MaxAge:   authenticationCookieMaxAge,
 		Secure:   !insecureCookies,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
@@ -321,7 +338,25 @@ func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http
 }
 
 func (u *User) Load(loader *UserLoader, r *http.Request) error {
+	if err := u.loadUser(loader, r); err != nil {
+		return err
+	}
+	if u.HasExpired() {
+		loader.log.Debug("user has expired, revalidating")
+		revalidated, err := loader.hooks.RevalidateAuthentication(r.Context(), u)
+		if err != nil {
+			loader.log.Error("revalidating authentication", zap.Error(err))
+			return err
+		}
+		if revalidated.HasExpired() {
+			return errors.New("user has expired")
+		}
+		*u = *revalidated
+	}
+	return nil
+}
 
+func (u *User) loadUser(loader *UserLoader, r *http.Request) error {
 	authorizationHeader := r.Header.Get("Authorization")
 	// If the request is tagged as an attempt to load the userInfo for a token, don't
 	// do anything. Otherwise setting an operation as the endPoint causes an infinite
@@ -361,19 +396,19 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 		}
 	}
 
-	cookie, err := r.Cookie("user")
+	cookie, err := r.Cookie(userCookieName)
 	if err != nil {
 		return err
 	}
-	err = loader.s.Decode("user", cookie.Value, u)
+	err = loader.s.Decode(userCookieName, cookie.Value, u)
 	if err == nil {
 		u.FromCookie = true
 	}
-	cookie, err = r.Cookie("id")
+	cookie, err = r.Cookie(idCookieName)
 	if err != nil {
 		return err
 	}
-	err = loader.s.Decode("id", cookie.Value, &u.RawIDToken)
+	err = loader.s.Decode(idCookieName, cookie.Value, &u.RawIDToken)
 	u.IdToken = tryParseJWT(u.RawIDToken)
 	return err
 }
@@ -908,7 +943,7 @@ func RequiresAuthentication(handler http.Handler) http.Handler {
 }
 
 func resetUserCookies(w http.ResponseWriter, r *http.Request, secure bool) {
-	for _, name := range []string{"user", "id"} {
+	for _, name := range []string{"user", idCookieName} {
 		userCookie := &http.Cookie{
 			Name:     name,
 			Value:    "",

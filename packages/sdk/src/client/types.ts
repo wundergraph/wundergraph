@@ -168,6 +168,7 @@ export interface User<Role extends string = any, CustomClaims extends {} = {}> {
 	provider?: string;
 	providerId?: string;
 	userId?: string;
+	expires?: number;
 	name?: string;
 	firstName?: string;
 	lastName?: string;
