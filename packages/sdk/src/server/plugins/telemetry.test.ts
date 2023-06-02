@@ -4,6 +4,7 @@ import { getTestTracerProvider } from '../trace/trace';
 import { SpanStatusCode } from '@opentelemetry/api';
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
 import { Attributes } from '../trace/attributes';
+import { TelemetryPluginOptions } from './telemetry';
 
 describe('Telemetry plugin', () => {
 	test('Should be able to instrument every request', async () => {
@@ -15,7 +16,13 @@ describe('Telemetry plugin', () => {
 			}),
 		});
 
-		fastify.register(require('./telemetry'), tp);
+		fastify.register<TelemetryPluginOptions>(require('./telemetry'), {
+			provider: tp.provider,
+			serverInfo: {
+				host: 'localhost',
+				port: 9992,
+			},
+		});
 
 		fastify.get('/test', async (request, reply) => {
 			return 'hello world';
@@ -37,7 +44,9 @@ describe('Telemetry plugin', () => {
 			'http.route': '/test',
 			'http.scheme': 'http',
 			'http.status_code': 200,
-			'http.url': '/test',
+			'http.url': 'http://localhost:9992/test',
+			'net.peer.name': 'localhost',
+			'net.peer.port': 9992,
 			'http.user_agent': 'lightMyRequest',
 			'wg.component.name': 'hooks-server',
 		});
@@ -54,7 +63,13 @@ describe('Telemetry plugin', () => {
 			}),
 		});
 
-		fastify.register(require('./telemetry'), tp);
+		fastify.register<TelemetryPluginOptions>(require('./telemetry'), {
+			provider: tp.provider,
+			serverInfo: {
+				host: 'localhost',
+				port: 9992,
+			},
+		});
 
 		fastify.get('/', async (request, reply) => {
 			throw new Error('test');
