@@ -494,7 +494,7 @@ describe('Test requireAuthentication directive', () => {
 	});
 });
 
-describe.only('test session expiration', () => {
+describe('test session expiration', () => {
 	it('should have a default of never expiring', async () => {
 		const client = wg.client();
 		client.setAuthorizationToken(tokens!.default);
