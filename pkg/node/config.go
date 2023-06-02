@@ -92,12 +92,12 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 		return nil, err
 	}
 
-	getOpenTelemetryOptions := graphConfig.Api.GetNodeOptions().GetOpenTelemetry()
-	otelEnabled, err := loadvariable.Bool(getOpenTelemetryOptions.GetEnabled())
+	openTelemetryOptions := graphConfig.Api.GetNodeOptions().GetOpenTelemetry()
+	otelEnabled, err := loadvariable.Bool(openTelemetryOptions.GetEnabled())
 	if err != nil {
 		return nil, err
 	}
-	otelSampler, err := loadvariable.Float64(getOpenTelemetryOptions.GetSampler())
+	otelSampler, err := loadvariable.Float64(openTelemetryOptions.GetSampler())
 	if err != nil {
 		return nil, err
 	}
@@ -132,8 +132,8 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 				},
 				OpenTelemetry: apihandler.OpenTelemetry{
 					Enabled:              otelEnabled,
-					AuthToken:            loadvariable.String(getOpenTelemetryOptions.GetAuthToken()),
-					ExporterHTTPEndpoint: loadvariable.String(getOpenTelemetryOptions.GetExporterHttpEndpoint()),
+					AuthToken:            loadvariable.String(openTelemetryOptions.GetAuthToken()),
+					ExporterHTTPEndpoint: loadvariable.String(openTelemetryOptions.GetExporterHttpEndpoint()),
 					Sampler:              otelSampler,
 				},
 			},
