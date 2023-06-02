@@ -213,6 +213,7 @@ func (u *User) ToPublic(publicClaims []string) *User {
 		return u
 	}
 	cpy := &User{
+		Expires:          u.Expires,
 		CustomAttributes: u.CustomAttributes,
 		Roles:            u.Roles,
 	}
