@@ -13,8 +13,8 @@
     "wundergraph": "wunderctl up --debug"
   },
   "dependencies": {
-    "@wundergraph/react-relay": "^0.3.3",
-    "@wundergraph/sdk": "^0.162.0",
+    "@wundergraph/react-relay": "^0.3.4",
+    "@wundergraph/sdk": "^0.163.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-relay": "^15.0.0",
