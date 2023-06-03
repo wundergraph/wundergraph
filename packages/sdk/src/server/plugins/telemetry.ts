@@ -55,14 +55,12 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async
 			context: trace.setSpan(activeContext, span),
 		};
 
-		const requestURL = new URL(req.url, `${req.protocol}://${options.serverInfo.host}:${options.serverInfo.port}`);
-
 		req.telemetry.parentSpan.setAttributes({
 			[Attributes.WG_COMPONENT_NAME]: Components.HOOKS_SERVER,
 			[SemanticAttributes.HTTP_FLAVOR]: req.raw.httpVersion,
 			[SemanticAttributes.HTTP_METHOD]: req.raw.method,
 			[SemanticAttributes.HTTP_ROUTE]: req.routerPath,
-			[SemanticAttributes.HTTP_URL]: requestURL.toString(),
+			[SemanticAttributes.HTTP_TARGET]: req.url,
 			[SemanticAttributes.NET_PEER_NAME]: options.serverInfo.host,
 			[SemanticAttributes.NET_PEER_PORT]: options.serverInfo.port,
 			[SemanticAttributes.HTTP_USER_AGENT]: req.headers['user-agent'],

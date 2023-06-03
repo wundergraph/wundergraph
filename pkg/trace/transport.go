@@ -15,6 +15,7 @@ func NewTransport(base http.RoundTripper, opts ...otelhttp.Option) http.RoundTri
 	}
 	// ignore health check requests or favicon browser requests
 	opts = append(opts, otelhttp.WithFilter(RequestFilter))
+	opts = append(opts, otelhttp.WithSpanNameFormatter(SpanNameFormatter))
 
 	return otelhttp.NewTransport(
 		transport, opts...,
