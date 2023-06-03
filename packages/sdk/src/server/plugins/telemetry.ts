@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from 'fastify';
-import { propagation, Span, trace, Context, Tracer, ROOT_CONTEXT } from '@opentelemetry/api';
+import { Context, propagation, ROOT_CONTEXT, Span, SpanKind, trace, Tracer } from '@opentelemetry/api';
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
 import fp from 'fastify-plugin';
 import { FastifyRequestContext } from '../types';
@@ -47,7 +47,11 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async
 		}
 
 		const activeContext = propagation.extract(ROOT_CONTEXT, req.headers);
-		const span = tracer.startSpan(`${req.method} ${req.routerPath}`, { startTime: performance.now() }, activeContext);
+		const span = tracer.startSpan(
+			`${req.method} ${req.routerPath}`,
+			{ startTime: performance.now(), kind: SpanKind.SERVER },
+			activeContext
+		);
 
 		// Overwrite decorator per request to ensure encapsulation
 		req.telemetry = {
