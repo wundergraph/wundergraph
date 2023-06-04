@@ -30,7 +30,7 @@ describe('Telemetry plugin', () => {
 
 		await fastify.inject({
 			method: 'GET',
-			url: '/test',
+			url: '/test?a=b',
 		});
 
 		const spans = tp.exporter.getFinishedSpans();
@@ -44,11 +44,12 @@ describe('Telemetry plugin', () => {
 			'http.route': '/test',
 			'http.scheme': 'http',
 			'http.status_code': 200,
-			'http.url': 'http://localhost:9992/test',
+			'http.target': '/test?a=b',
 			'net.peer.name': 'localhost',
 			'net.peer.port': 9992,
 			'http.user_agent': 'lightMyRequest',
 			'wg.component.name': 'hooks-server',
+			'http.host': 'localhost:80',
 		});
 
 		expect(fastify.tracer).toBeDefined();
@@ -87,6 +88,8 @@ describe('Telemetry plugin', () => {
 		expect(spans[0].attributes[Attributes.ERROR_NAME]).toBe('Error');
 		expect(spans[0].attributes[Attributes.ERROR_STACK]).toContain('Error: test');
 		expect(spans[0].attributes[SemanticAttributes.HTTP_STATUS_CODE]).toBe(500);
+		expect(spans[0].attributes[SemanticAttributes.HTTP_TARGET]).toBe('/');
+		expect(spans[0].attributes[SemanticAttributes.HTTP_HOST]).toBe('localhost:80');
 
 		expect(fastify.tracer).toBeDefined();
 	});
