@@ -68,6 +68,7 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async
 			[SemanticAttributes.NET_PEER_NAME]: options.serverInfo.host,
 			[SemanticAttributes.NET_PEER_PORT]: options.serverInfo.port,
 			[SemanticAttributes.HTTP_USER_AGENT]: req.headers['user-agent'],
+			[SemanticAttributes.HTTP_HOST]: req.hostname,
 			[SemanticAttributes.HTTP_REQUEST_CONTENT_LENGTH]: req.headers['content-length'],
 			[SemanticAttributes.HTTP_SCHEME]: req.protocol,
 		});

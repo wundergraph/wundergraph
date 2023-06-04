@@ -49,6 +49,7 @@ describe('Telemetry plugin', () => {
 			'net.peer.port': 9992,
 			'http.user_agent': 'lightMyRequest',
 			'wg.component.name': 'hooks-server',
+			'http.host': 'localhost:80',
 		});
 
 		expect(fastify.tracer).toBeDefined();
@@ -88,6 +89,7 @@ describe('Telemetry plugin', () => {
 		expect(spans[0].attributes[Attributes.ERROR_STACK]).toContain('Error: test');
 		expect(spans[0].attributes[SemanticAttributes.HTTP_STATUS_CODE]).toBe(500);
 		expect(spans[0].attributes[SemanticAttributes.HTTP_TARGET]).toBe('/');
+		expect(spans[0].attributes[SemanticAttributes.HTTP_HOST]).toBe('localhost:80');
 
 		expect(fastify.tracer).toBeDefined();
 	});

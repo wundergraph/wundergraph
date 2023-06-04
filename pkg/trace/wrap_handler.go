@@ -5,7 +5,8 @@ import (
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/attribute"
-	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+	semconv12 "go.opentelemetry.io/otel/semconv/v1.12.0"
+	semconv17 "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -25,7 +26,9 @@ func WrapHandler(wrappedHandler http.Handler, componentName attribute.KeyValue, 
 		span.SetAttributes(componentName)
 
 		// Add request target as attribute so we can filter by path and query
-		span.SetAttributes(semconv.HTTPTarget(req.RequestURI))
+		span.SetAttributes(semconv17.HTTPTarget(req.RequestURI))
+		// Add the host request header to the span
+		span.SetAttributes(semconv12.HTTPHostKey.String(req.Host))
 
 		wrappedHandler.ServeHTTP(w, req)
 	})
