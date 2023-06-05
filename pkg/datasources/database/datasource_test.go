@@ -160,7 +160,7 @@ func TestDatabaseDataSource(t *testing.T) {
 					Nullable: false,
 					Fetch: &resolve.SingleFetch{
 						BufferId:   0,
-						Input:      `{"query":"{findFirstUser(id: $$0$$){id}}","variables":{"unnull_variables":true}}`,
+						Input:      `{"query":"{findFirstUser(id: $$0$$){id}}","variables":null,"unnull_variables":true}`,
 						DataSource: &Source{},
 						Variables: resolve.NewVariables(
 							&resolve.ContextVariable{

@@ -187,10 +187,6 @@ func (p *Planner) ConfigureFetch() plan.FetchConfiguration {
 		Variables: p.upstreamVariables,
 	}
 
-	if p.unNullVariables {
-		input.Variables = httpclient.SetInputFlag(input.Variables, httpclient.UNNULLVARIABLES)
-	}
-
 	for _, inlinedVariable := range p.inlinedVariables {
 		currentName := "$" + inlinedVariable.name
 		var (
@@ -227,6 +223,10 @@ func (p *Planner) ConfigureFetch() plan.FetchConfiguration {
 	rawInput, err := json.Marshal(input)
 	if err != nil {
 		rawInput = []byte(`{"error":` + err.Error() + `}`)
+	}
+
+	if p.unNullVariables {
+		rawInput = httpclient.SetInputFlag(rawInput, httpclient.UNNULLVARIABLES)
 	}
 
 	var engine *LazyEngine
@@ -1098,10 +1098,10 @@ func max(start1 int, start2 int, start3 int, start4 int) int {
 }
 
 func (s *Source) Load(ctx context.Context, input []byte, w io.Writer) (err error) {
-	variables, _, _, err := jsonparser.Get(input, "variables")
-	if err == nil && httpclient.IsInputFlagSet(variables, httpclient.UNNULLVARIABLES) {
+	if err == nil && httpclient.IsInputFlagSet(input, httpclient.UNNULLVARIABLES) {
 		input = s.unNullRequest(input)
 	}
+	// Prisma does not support variables, and it MUST be set to "{}"
 	request, _ := jsonparser.Set(input, []byte("{}"), "variables")
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
