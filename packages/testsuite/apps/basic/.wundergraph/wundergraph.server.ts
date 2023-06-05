@@ -1,4 +1,3 @@
-import { expectTypeOf } from 'vitest';
 import {
 	CreateWebhookVerifier,
 	EnvironmentVariable,
@@ -7,8 +6,6 @@ import {
 } from '@wundergraph/sdk/server';
 import { GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql/index';
 import { GraphQLExecutionContext } from './generated/wundergraph.server';
-import { RequestLogger } from '@wundergraph/sdk';
-
 class GlobalContext {
 	constructor() {
 		console.log('create GlobalContext');
@@ -59,7 +56,6 @@ export default configureWunderGraphServer(() => ({
 			},
 			RequestidGraphql: {
 				mutatingPostResolve: async ({ clientRequest, response, log }) => {
-					expectTypeOf(log).toMatchTypeOf<RequestLogger>();
 					response.data!.requestId!.code = clientRequest.headers.get('X-Request-ID') || '';
 					return response;
 				},
