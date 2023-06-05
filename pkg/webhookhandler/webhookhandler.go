@@ -28,7 +28,6 @@ func New(config *wgpb.WebhookConfiguration, hooksServerURL string, log *zap.Logg
 	proxy := httputil.NewSingleHostReverseProxy(u)
 	proxy.Transport = trace.NewTransport(http.DefaultTransport,
 		otelhttp.WithSpanOptions(otrace.WithAttributes(trace.WebhookTransportAttribute)),
-		otelhttp.WithSpanNameFormatter(trace.SpanNameFormatter),
 	)
 	handler := &webhookHandler{
 		webhookName: config.Name,
