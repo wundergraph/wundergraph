@@ -1,6 +1,6 @@
 import { Straightforward, Request, RequestContext, ConnectContext, Next } from '@wundergraph/straightforward';
 import debug from 'debug';
-import { freeport, getJSONBody, getTextBody } from './util';
+import { freeport, getBody, getJSONBody, getTextBody } from './util';
 import { IncomingHttpHeaders } from 'http';
 import { PublicScope, Scope } from './scope';
 
@@ -88,6 +88,11 @@ export interface InternalMockRequest {
 	text(): Promise<string>;
 
 	/**
+	 * Return the raw request buffer.
+	 */
+	raw(): Promise<Buffer>;
+
+	/**
 	 * The parsed request body.
 	 */
 	_body?: any;
@@ -118,8 +123,12 @@ export class WunderGraphMockServer {
 				await this.handleRequest(ctx, next);
 			},
 			async (ctx, next) => {
-				ctx.res.writeHead(404);
-				ctx.res.end();
+				let req: Request = ctx.req;
+				let res = ctx.res;
+
+				res.writeHead(404);
+				res.write(`Mock not found, method: ${req.method} url: ${req.url}`);
+				res.end();
 			}
 		);
 
@@ -136,6 +145,13 @@ export class WunderGraphMockServer {
 
 		let scope: Scope | undefined = undefined;
 
+		let requestMocks = this.mocks.filter((mock) => mock.type === 'request');
+
+		if (requestMocks.length === 0) {
+			log('you did not define any request mocks for: %s %s', req.method, req.url);
+			return;
+		}
+
 		for (let mock of this.mocks) {
 			scope = mock.scope;
 
@@ -144,7 +160,7 @@ export class WunderGraphMockServer {
 			}
 
 			try {
-				const mockReq: Omit<InternalMockRequest, 'json' | 'text'> = {
+				const mockReq: Omit<InternalMockRequest, 'json' | 'text' | 'raw'> = {
 					headers: req.headers,
 					url: req.locals.urlParts,
 					method: req.method as HTTPMethod,
@@ -169,6 +185,7 @@ export class WunderGraphMockServer {
 					...mockReq,
 					json,
 					text,
+					raw: () => getBody(req),
 				};
 
 				// Skip if the request does not match, try the next mock
@@ -249,7 +266,14 @@ export class WunderGraphMockServer {
 
 		let scope: Scope | undefined = undefined;
 
-		for (let mock of this.mocks) {
+		let connectMocks = this.mocks.filter((mock) => mock.type === 'connect');
+
+		if (connectMocks.length === 0) {
+			log('you did not define any connect mocks for: %s %s', req.method, req.url);
+			return;
+		}
+
+		for (let mock of connectMocks) {
 			scope = mock.scope;
 
 			if (mock.type !== 'connect') {

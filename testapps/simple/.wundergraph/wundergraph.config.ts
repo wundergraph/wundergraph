@@ -1,4 +1,4 @@
-import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect, templates } from '@wundergraph/sdk';
+import { configureWunderGraphApplication, introspect } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
@@ -12,17 +12,12 @@ configureWunderGraphApplication({
 	apis: [weather],
 	server,
 	operations,
-	generate: {
-		codeGenerators: [],
-	},
-	cors: {
-		...cors.allowAll,
-		allowedOrigins: ['http://localhost:9991', 'http://127.0.0.1:9991'],
-	},
-	dotGraphQLConfig: {
-		hasDotWunderGraphDirectory: false,
-	},
-	security: {
-		enableGraphQLEndpoint: true,
+	options: {
+		openTelemetry: {
+			enabled: true,
+		},
+		prometheus: {
+			enabled: true,
+		},
 	},
 });

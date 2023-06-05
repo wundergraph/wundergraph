@@ -45,13 +45,15 @@ export const createOpenAPITestServer = (port: number) => {
 		reply.code(200).header('content-type', 'application/json; charset=utf-8').send({ id, text });
 	});
 
-	return server.listen({ port: port }, (err, address) => {
+	server.listen({ port: port }, (err, address) => {
 		if (err) {
 			console.error(err);
 			process.exit(1);
 		}
 		console.log(`OpenAPI server listening at ${address}`);
 	});
+
+	return server;
 };
 
 if (require.main === module) {

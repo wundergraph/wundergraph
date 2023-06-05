@@ -1,0 +1,9 @@
+query ($id: Int!) {
+	prisma_findUniqueUser(where: { id: $id }) {
+		id
+		preferences {
+			likes
+			dislikes
+		}
+	}
+}

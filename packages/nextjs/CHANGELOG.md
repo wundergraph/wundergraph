@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.8](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.7...@wundergraph/nextjs@0.11.8) (2023-06-05)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.7](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.6...@wundergraph/nextjs@0.11.7) (2023-06-04)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.6](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.5...@wundergraph/nextjs@0.11.6) (2023-06-02)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.4...@wundergraph/nextjs@0.11.5) (2023-06-02)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.3...@wundergraph/nextjs@0.11.4) (2023-06-01)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.2...@wundergraph/nextjs@0.11.3) (2023-05-31)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.1...@wundergraph/nextjs@0.11.2) (2023-05-31)
+
+### Bug Fixes
+
+* missing ts generator in nextjs package ([#1021](https://github.com/wundergraph/wundergraph/issues/1021)) ([06d6107](https://github.com/wundergraph/wundergraph/commit/06d610726d8096508dcd779913c7b1da9559c656)) (@thisisnithin)
+
 ## [0.11.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.0...@wundergraph/nextjs@0.11.1) (2023-05-26)
 
 **Note:** Version bump only for package @wundergraph/nextjs
