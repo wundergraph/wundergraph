@@ -47,4 +47,13 @@ describe('The WunderGraph ORM', () => {
 			expect(parseInt(data?.length ?? '', 10)).toBeGreaterThan(0);
 		}
 	});
+
+	it('should add custom headers', async () => {
+		const client = wg.client();
+		const { data, error } = await client.query({
+			operationName: 'ts/with-headers',
+		});
+		expect(error).toBeUndefined();
+		expect(data).toEqual('test');
+	});
 });
