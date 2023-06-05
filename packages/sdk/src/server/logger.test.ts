@@ -25,7 +25,7 @@ const expectLog = (fn: (logger: RequestLogger) => void) => {
 	return expect(destination.messages[destination.messages.length - 1]);
 };
 
-describe.only('Logger', () => {
+describe('Logger', () => {
 	test('log string', async () => {
 		expectLog((logger) => {
 			logger.debug('a');
