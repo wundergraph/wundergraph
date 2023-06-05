@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.163.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.163.2...@wundergraph/sdk@0.163.3) (2023-06-04)
+
+### Bug Fixes
+
+* align otel attributes ([#1042](https://github.com/wundergraph/wundergraph/issues/1042)) ([106fbfd](https://github.com/wundergraph/wundergraph/commit/106fbfd671e16d2f4137c685e67e0a083f521b15)) (@StarpTech)
+
+## [0.163.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.163.1...@wundergraph/sdk@0.163.2) (2023-06-02)
+
+### Bug Fixes
+
+* pass correct url to http.url otel attribute ([#1039](https://github.com/wundergraph/wundergraph/issues/1039)) ([a5adc66](https://github.com/wundergraph/wundergraph/commit/a5adc6640a657ab9a9e1027723f718583c42df93)) (@StarpTech)
+
+## [0.163.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.163.0...@wundergraph/sdk@0.163.1) (2023-06-02)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
 ## [0.163.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.162.0...@wundergraph/sdk@0.163.0) (2023-06-01)
 
 ### Features
