@@ -277,8 +277,8 @@ func (e *Engine) StartQueryEngine(schema string) error {
 	// https://github.com/prisma/prisma/blob/304c54c732921c88bfb57f5730c7f81405ca83ea/packages/engine-core/src/binary/BinaryEngine.ts#L479
 	e.cmd.Env = append(e.cmd.Env, os.Environ()...)
 
-	//create temporary file
-	temporaryFile, err := ioutil.TempFile("", "t*.prisma")
+	// create temporary file in the default temporary directory, * is replaced by a random pattern
+	temporaryFile, err := os.CreateTemp("", "t*.prisma")
 	if err != nil {
 		return err
 	}
