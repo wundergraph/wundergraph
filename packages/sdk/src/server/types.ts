@@ -197,7 +197,7 @@ export interface WunderGraphUser<Role extends string = any, CustomClaims extends
 	/**
 	 * expires indicates the Unix timestamp in milliseconds when the user expires. After that,
 	 * if needs to be revalidated (via the revalidate hook) in order to take effect. If expires
-	 * is < 0 or undefined, the session lasts forever.
+	 * is <= 0 or undefined, the session lasts forever.
 	 *
 	 * @default undefined
 	 */
