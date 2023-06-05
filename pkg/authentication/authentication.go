@@ -278,7 +278,11 @@ func (u *User) copyWellKnownClaim(claim string, from *User) bool {
 // HasExpired returns true iff the user has expired, as configured by the
 // authentication hooks (via User.Expired)
 func (u *User) HasExpired() bool {
-	return u != nil && u.Expires != nil && *u.Expires > 0 && time.UnixMilli(*u.Expires).Before(time.Now())
+	if u != nil && u.Expires != nil {
+		expires := *u.Expires
+		return expires > 0 && time.UnixMilli(expires).Before(time.Now())
+	}
+	return false
 }
 
 func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http.Request, domain string, insecureCookies bool) error {
