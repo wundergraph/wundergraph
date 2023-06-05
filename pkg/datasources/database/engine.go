@@ -69,7 +69,7 @@ type Engine struct {
 	cancel                  func()
 	client                  *http.Client
 	log                     *zap.Logger
-	schemaFile              *os.File
+	schemaFilePath          string
 }
 
 func NewEngine(client *http.Client, log *zap.Logger, wundergraphDir string) *Engine {
@@ -286,8 +286,13 @@ func (e *Engine) StartQueryEngine(schema string) error {
 	if _, err := temporaryFile.Write([]byte(schema)); err != nil {
 		return err
 	}
+	err = temporaryFile.Close()
+	if err != nil {
+		os.Remove(temporaryFile.Name())
+		return err
+	}
 	e.cmd.Env = append(e.cmd.Env, "PRISMA_DML_PATH="+temporaryFile.Name())
-	e.schemaFile = temporaryFile
+	e.schemaFilePath = temporaryFile.Name()
 
 	e.cmd.Stdout = os.Stdout
 	e.cmd.Stderr = os.Stderr
@@ -381,12 +386,12 @@ func (e *Engine) StopQueryEngine() {
 		}
 	}
 	close(exitCh)
-	if e.schemaFile != nil {
-		err := os.Remove(e.schemaFile.Name())
+	if e.schemaFilePath != "" {
+		err := os.Remove(e.schemaFilePath)
 		if err != nil {
 			e.log.Error("Deleting temporary schema file", zap.Error(err))
 		}
-		e.schemaFile = nil
+		e.schemaFilePath = ""
 	}
 	e.cmd = nil
 	e.cancel = nil
