@@ -94,7 +94,7 @@ export class NamespacingExecutor implements Executor {
 		// @todo make this runtime safe
 		const result = json as GraphQLResult;
 
-		if (typeof result.data !== 'object') {
+		if (typeof result.data !== 'object' || result.data === null) {
 			const errorMessage = result.errors?.map((error) => error.message).join('. ') ?? '';
 			throw new Error(`Operation execution did not return a successful result. Received errors: "${errorMessage}".`);
 		}
