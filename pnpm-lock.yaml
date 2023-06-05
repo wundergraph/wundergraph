@@ -179,7 +179,7 @@ importers:
       '@types/node': ^17.0.32
       '@types/object-hash': ^1.3.4
       '@wundergraph/protobuf': workspace:^0.116.0
-      '@wundergraph/sdk': workspace:^0.163.3
+      '@wundergraph/sdk': workspace:^0.164.0
       execa: 5.1.1
       handlebars: ^4.7.7
       json-schema: ^0.4.0
@@ -25430,7 +25430,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.163.3
+    version: 0.164.0
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.3.0
