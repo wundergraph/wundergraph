@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from 'fastify';
-import { propagation, Span, trace, Context, Tracer, ROOT_CONTEXT } from '@opentelemetry/api';
+import { Context, propagation, ROOT_CONTEXT, Span, SpanKind, trace, Tracer } from '@opentelemetry/api';
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
 import fp from 'fastify-plugin';
 import { FastifyRequestContext } from '../types';
@@ -47,7 +47,11 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async
 		}
 
 		const activeContext = propagation.extract(ROOT_CONTEXT, req.headers);
-		const span = tracer.startSpan(`${req.method} ${req.routerPath}`, { startTime: performance.now() }, activeContext);
+		const span = tracer.startSpan(
+			`${req.method} ${req.routerPath}`,
+			{ startTime: performance.now(), kind: SpanKind.SERVER },
+			activeContext
+		);
 
 		// Overwrite decorator per request to ensure encapsulation
 		req.telemetry = {
@@ -55,17 +59,16 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async
 			context: trace.setSpan(activeContext, span),
 		};
 
-		const requestURL = new URL(req.url, `${req.protocol}://${options.serverInfo.host}:${options.serverInfo.port}`);
-
 		req.telemetry.parentSpan.setAttributes({
 			[Attributes.WG_COMPONENT_NAME]: Components.HOOKS_SERVER,
 			[SemanticAttributes.HTTP_FLAVOR]: req.raw.httpVersion,
 			[SemanticAttributes.HTTP_METHOD]: req.raw.method,
 			[SemanticAttributes.HTTP_ROUTE]: req.routerPath,
-			[SemanticAttributes.HTTP_URL]: requestURL.toString(),
+			[SemanticAttributes.HTTP_TARGET]: req.url,
 			[SemanticAttributes.NET_PEER_NAME]: options.serverInfo.host,
 			[SemanticAttributes.NET_PEER_PORT]: options.serverInfo.port,
 			[SemanticAttributes.HTTP_USER_AGENT]: req.headers['user-agent'],
+			[SemanticAttributes.HTTP_HOST]: req.hostname,
 			[SemanticAttributes.HTTP_REQUEST_CONTENT_LENGTH]: req.headers['content-length'],
 			[SemanticAttributes.HTTP_SCHEME]: req.protocol,
 		});

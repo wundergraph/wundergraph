@@ -9,6 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/codes"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv12 "go.opentelemetry.io/otel/semconv/v1.12.0"
+	semconv17 "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/wundergraph/wundergraph/pkg/trace/tracetest"
@@ -27,7 +29,7 @@ func TestWrapHttpHandler(t *testing.T) {
 
 		h := WrapHandler(router, WgComponentName.String("test"))
 
-		req := httptest.NewRequest("GET", "/test", nil)
+		req := httptest.NewRequest("GET", "/test?a=b", nil)
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, req)
 
@@ -38,7 +40,15 @@ func TestWrapHttpHandler(t *testing.T) {
 		assert.Equal(t, "GET /test", sn[0].Name())
 		assert.Equal(t, trace.SpanKindServer, sn[0].SpanKind())
 		assert.Equal(t, sdktrace.Status{Code: codes.Unset}, sn[0].Status())
-		assert.Len(t, sn[0].Attributes(), 8)
+		assert.Len(t, sn[0].Attributes(), 10)
+
+		assert.Contains(t, sn[0].Attributes(), semconv17.HTTPMethodKey.String("GET"))
+		assert.Contains(t, sn[0].Attributes(), semconv17.HTTPScheme("http"))
+		assert.Contains(t, sn[0].Attributes(), semconv17.HTTPFlavorKey.String("1.1"))
+		assert.Contains(t, sn[0].Attributes(), semconv17.HTTPTarget("/test?a=b"))
+		assert.Contains(t, sn[0].Attributes(), semconv17.HTTPStatusCode(200))
+		assert.Contains(t, sn[0].Attributes(), WgComponentName.String("test"))
+		assert.Contains(t, sn[0].Attributes(), semconv12.HTTPHostKey.String("example.com"))
 	})
 
 	t.Run("set span status to error", func(t *testing.T) {
@@ -68,7 +78,7 @@ func TestWrapHttpHandler(t *testing.T) {
 
 			h := WrapHandler(router, WgComponentName.String("test"))
 
-			req := httptest.NewRequest("GET", "/test", nil)
+			req := httptest.NewRequest("GET", "/test?a=b", nil)
 			w := httptest.NewRecorder()
 
 			h.ServeHTTP(w, req)
@@ -81,6 +91,13 @@ func TestWrapHttpHandler(t *testing.T) {
 			assert.Equal(t, "GET /test", sn[0].Name())
 			assert.Equal(t, test.expected, sn[0].Status())
 			assert.Equal(t, trace.SpanKindServer, sn[0].SpanKind())
+
+			assert.Contains(t, sn[0].Attributes(), semconv17.HTTPMethodKey.String("GET"))
+			assert.Contains(t, sn[0].Attributes(), semconv17.HTTPScheme("http"))
+			assert.Contains(t, sn[0].Attributes(), semconv17.HTTPFlavorKey.String("1.1"))
+			assert.Contains(t, sn[0].Attributes(), semconv17.HTTPTarget("/test?a=b"))
+			assert.Contains(t, sn[0].Attributes(), semconv17.HTTPStatusCode(statusCode))
+			assert.Contains(t, sn[0].Attributes(), WgComponentName.String("test"))
 
 			exporter.Reset()
 		}
