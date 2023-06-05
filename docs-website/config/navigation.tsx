@@ -387,6 +387,19 @@ const navigation = [
 				],
 			},
 			{
+				title: 'Logging and Monitoring',
+				links: [
+					{
+						title: 'Logging',
+						href: '/docs/guides/logging',
+					},
+					{
+						title: 'Monitoring and Observability',
+						href: '/docs/guides/monitoring-and-observability',
+					},
+				],
+			},
+			{
 				title: 'Security',
 				links: [
 					{
@@ -429,10 +442,6 @@ const navigation = [
 					{
 						title: 'Extend the WunderGraph server context',
 						href: '/docs/guides/context-factory',
-					},
-					{
-						title: 'Monitoring and Observability',
-						href: '/docs/guides/monitoring-and-observability',
 					},
 				],
 			},
