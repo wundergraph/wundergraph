@@ -1,12 +1,18 @@
+import { FastifyBaseLogger } from 'fastify';
 import { pino } from 'pino';
 
 /**
  * LogObject specifies the interface that optional structured objects
- * passed to logging functions must conform to.
+ * passed to logging functions must conform to. Additionally, if LogObject
+ * is an instance of Error, its field will be expanded into the log message.
  */
 interface LogObject extends Object {
+	/**
+	 * Optional Error instance to unwrap when formatting the log message.
+	 * See also LogObject for some particularities on how Error instances
+	 * are handled.
+	 */
 	error?: Error;
-	// XXX: This differs from the "err" default in pino and needs to be configured in sdk/src/logger/index.ts
 }
 
 /** LogFn represents the function type for logging messages. Each
@@ -49,25 +55,26 @@ export interface RequestLogger {
 	fatal: LogFn;
 
 	/**
-	 * Returns a child logger with the provided bindings attached to its log messages
+	 * Returns a logger with the provided bindings attached to its log messages
 	 * @param bindings Key-value pairs to attach to all messages
-	 * @returns The child logger
+	 * @returns The new logger instance
 	 */
-	child: <T extends LogObject>(bindings: T) => RequestLogger;
+	withFields: <T extends LogObject>(bindings: T) => RequestLogger;
 }
 
+type ParentLogger = pino.Logger | FastifyBaseLogger;
+
 /** createLogger returns a logger used for hooks, functions and webhooks */
-export const createLogger = (logger: pino.Logger): RequestLogger => new WunderGraphRequestLogger(logger);
+export const createLogger = (logger: ParentLogger): RequestLogger => new WunderGraphRequestLogger(logger);
 
 class WunderGraphRequestLogger {
-	constructor(private logger: pino.Logger) {}
+	constructor(private logger: ParentLogger) {}
 
 	private log<T extends LogObject>(fn: pino.LogFn, msg: string, obj?: T): void {
-		const pinoMsg = msg.replace('%', '%%');
 		if (obj) {
-			(fn as (obj: unknown, msg?: string, ...args: any[]) => void).call(this.logger, obj, pinoMsg);
+			(fn as (obj: unknown, msg?: string, ...args: any[]) => void).call(this.logger, obj, msg);
 		} else {
-			fn.call(this.logger, pinoMsg);
+			fn.call(this.logger, msg);
 		}
 	}
 
@@ -95,7 +102,22 @@ class WunderGraphRequestLogger {
 		this.log(this.logger.fatal, msg, obj);
 	}
 
-	child<T extends LogObject>(bindings: T): RequestLogger {
+	withFields<T extends LogObject>(bindings: T): RequestLogger {
 		return new WunderGraphRequestLogger(this.logger.child(bindings));
 	}
 }
+
+/**
+ * Returns the configuration options used by the WunderGraph SDK to configure pino in several places.
+ * This is only exposed for sharing code between modules and it might go away at any time.
+ * */
+export const pinoOptions = (): pino.LoggerOptions => {
+	return {
+		formatters: {
+			level: (label) => {
+				return { level: label };
+			},
+		},
+		errorKey: 'error',
+	};
+};
