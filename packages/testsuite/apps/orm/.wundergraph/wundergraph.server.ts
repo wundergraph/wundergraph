@@ -1,5 +1,5 @@
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
-import { GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
+import { buildSchema, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
 
 export default configureWunderGraphServer(() => ({
 	hooks: {
@@ -7,6 +7,21 @@ export default configureWunderGraphServer(() => ({
 		mutations: {},
 	},
 	graphqlServers: [
+		{
+			apiNamespace: 'sdl',
+			serverName: 'sdl',
+			schema: buildSchema(`
+                type Query {
+                    sdlField(sdl: String!): String!
+                }
+            `),
+			customResolverFactory: async (ctx) => {
+				const value = ctx.request.body.__wg.clientRequest.headers['Wg-Test'];
+				return {
+					sdlField: (args: any) => value,
+				};
+			},
+		},
 		{
 			serverName: 'echo',
 			apiNamespace: 'echo',
