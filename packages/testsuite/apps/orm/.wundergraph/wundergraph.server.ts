@@ -16,8 +16,9 @@ export default configureWunderGraphServer(() => ({
                 }
             `),
 			customResolverFactory: async (ctx) => {
+				const value = ctx.request.body.__wg.clientRequest.headers['Wg-Test'];
 				return {
-					sdlField: (args: any) => ctx.wundergraph?.clientRequest?.headers.get('Wg-Test') || '',
+					sdlField: (args: any) => value,
 				};
 			},
 		},
