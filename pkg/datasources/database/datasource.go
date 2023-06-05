@@ -1098,7 +1098,7 @@ func max(start1 int, start2 int, start3 int, start4 int) int {
 }
 
 func (s *Source) Load(ctx context.Context, input []byte, w io.Writer) (err error) {
-	if err == nil && httpclient.IsInputFlagSet(input, httpclient.UNNULLVARIABLES) {
+	if httpclient.IsInputFlagSet(input, httpclient.UNNULLVARIABLES) {
 		input = s.unNullRequest(input)
 	}
 	// Prisma does not support variables, and it MUST be set to "{}"
