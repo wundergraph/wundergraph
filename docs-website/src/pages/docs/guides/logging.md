@@ -13,19 +13,26 @@ This interface provides logging through functions with the given prototype:
 	<T extends LogObject>(msg: string, obj?: T): void;
 ```
 
-This means every logging function accepts a `string` as a first argument, optionally followed
-by an object with additional properties to be logged as JSON. For example, calling
-`logger.debug('hello', { a: 1, b: 2 });` will produce `{"level":"debug","a":1,"b":2,"msg":"hello"}`
+This means every logging function accepts a `string` as a first argument that represents the
+log message, optionally followed by an object with additional properties to be logged as JSON.
+For example, calling `logger.debug('hello', { a: 1, b: 2 });` will produce
+`{"level":"debug","a":1,"b":2,"msg":"hello"}`
 
 ## Error handling
 
 If the second argument passed to a logging function is an `Error` or if it contains an `error` property,
 it will be interpreted as an error to be unwrapped, logging its message and stack too.
 
+```typescript
+logger.warn('something bad happened', new Error('unexpected'));
+// prints  "{\"level\":\"warn\",\"error\":{\"type\":\"Error\",\"message\":\"unexpected\",\"stack\":\"Error: unexpected\\n    at /path/to/your/file.ts:42
+```
+
 ## Attaching additional properties to a `RequestLogger`
 
 `RequestLogger` implements also a `withFields()` function, which allows creating a new logger with the
-same level but with additional properties attached. This means, these two blocks are equivalent:
+same level but with additional properties attached, avoiding repeating the same arguments multiple times.
+This means, these two blocks are equivalent:
 
 ```typescript
 // Pass additional properties every time
