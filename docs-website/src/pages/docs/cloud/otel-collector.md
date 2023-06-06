@@ -23,7 +23,7 @@ You can obtain your WunderGraph API-Token from the WunderGraph Cloud dashboard. 
 
 ## Export to WunderGraph Cloud Collector from your own OpenTelemetry Collector
 
-If you already have your own OpenTelemetry Collector and want to export your traces to WunderGraph, you'd need to add a new `otltphttp` exporter in your config.yml, with WunderGraph API-Token as your Authorization header:
+If you already have your own OpenTelemetry Collector and want to export your traces to WunderGraph, you'd need to add a new `otlphttp` exporter in your config.yml, with WunderGraph API-Token as your Authorization header:
 
 ```shell
 exporters:
@@ -42,7 +42,7 @@ service:
 
 ## Export to WunderGraph Cloud Collector from your own OpenTelemetry SDK
 
-If you already have your own OpenTelemetry SDK and want to export your traces to WunderGraph, you'd need to use the `otltphttp` exporter, with WunderGraph API-Token as your Authorization header:
+If you already have your own OpenTelemetry SDK and want to export your traces to WunderGraph, you'd need to use the `otlphttp` exporter, with WunderGraph API-Token as your Authorization header:
 
 ```typescript
 ctx := context.Background()
