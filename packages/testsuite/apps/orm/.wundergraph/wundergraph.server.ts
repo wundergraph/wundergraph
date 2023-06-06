@@ -29,12 +29,6 @@ export default configureWunderGraphServer(() => ({
 				query: new GraphQLObjectType({
 					name: 'RootQueryType',
 					fields: {
-						clientRequestContentLength: {
-							type: GraphQLString,
-							resolve(obj, args, context, info) {
-								return context.wundergraph.clientRequest.headers.get('Content-Length');
-							},
-						},
 						clientRequestHeader: {
 							type: GraphQLString,
 							args: {

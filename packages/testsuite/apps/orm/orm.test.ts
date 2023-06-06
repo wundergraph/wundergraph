@@ -37,14 +37,19 @@ describe('The WunderGraph ORM', () => {
 
 	it('it should pass a clientRequest to the internal GraphQL server', async () => {
 		const client = wg.client();
+		const headerValue = 'Bar';
+		client.setExtraHeaders({ 'X-Foo': headerValue });
 		// This needs to be run in a loop because we need to reuse a resolve.Context
 		// to trigger the bug
 		for (let ii = 0; ii < 100; ii++) {
 			const { data, error } = await client.query({
-				operationName: 'clientRequestContentLength',
+				operationName: 'clientRequestHeader',
+				input: {
+					header: 'X-Foo',
+				},
 			});
 			expect(error).toBeUndefined();
-			expect(parseInt(data?.length ?? '', 10)).toBeGreaterThan(0);
+			expect(data?.value).toBe(headerValue);
 		}
 	});
 
