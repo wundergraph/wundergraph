@@ -11,6 +11,7 @@ There are different ways to push your traces to the collector, depending on your
 
 - Endpoint: `https://otel.wundergraph.com`
 - Endpoint Version: `v1`
+- Authentication method: Bearer Token
 - Supported Protocol: `OTLP/HTTP` (gRPC is not supported)
 
 {% callout type="warning" %}
@@ -30,7 +31,7 @@ exporters:
   otlphttp:
     endpoint: https://otel.wundergraph.com
     headers:
-      Authorization: <wundergraph-telemetry-token>
+      Authorization: Bearer <wundergraph-telemetry-token>
 
 service:
   pipelines:
