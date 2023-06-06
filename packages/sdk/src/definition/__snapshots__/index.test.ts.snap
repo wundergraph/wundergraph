@@ -2,7 +2,7 @@
 
 exports[`Introspection introspect GraphQL API with interface type definitions 1`] = `
 GraphQLApi {
-  "CustomJsonScalars": undefined,
+  "CustomJsonScalars": [],
   "DataSources": [
     {
       "ChildNodes": [
@@ -46,6 +46,7 @@ GraphQLApi {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -125,6 +126,7 @@ interface User {
       "unescapeResponseJson": false,
     },
   ],
+  "Namespace": "api",
   "Schema": "type Query {
   api_user: api_User
 }

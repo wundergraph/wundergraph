@@ -1,6 +1,5 @@
 ---
-title: Node.js / TypeScript
-pageTitle: WunderGraph - Node.js / TypeScript
+title: Node.js / TypeScript support
 description: WunderGraph is the easiest way to consume (GraphQL, REST, ...) APIs in Node.js / TypeScript.
 ---
 
@@ -34,10 +33,10 @@ and generate a TypeScript client for you,
 which we can call from our Node.js application.
 
 ```ts
-import { createClient } from '../components/generated/client'
+import { createClient } from '../components/generated/client';
 
 const createUser = async () => {
-  const client = createClient()
+  const client = createClient();
   const out = await client.mutate({
     operationName: 'CreateUser',
     input: {
@@ -45,9 +44,9 @@ const createUser = async () => {
       bio: 'Founder@WunderGraph',
       email: 'jens@wundergraph.com',
     },
-  })
-  console.dir(out)
-}
+  });
+  console.dir(out);
+};
 
-createUser()
+createUser();
 ```

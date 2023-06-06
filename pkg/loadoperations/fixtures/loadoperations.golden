@@ -28,6 +28,7 @@
     }
   ],
   "info": [
+    "skipping file LevelChat.ts. Operation name collides with operation defined in: LevelChat.graphql",
     "skipping file level/Chat.graphql. Operation name collides with operation defined in: LevelChat.graphql",
     "skipping file level/nested/one.ts. Operation name collides with operation defined in: LevelNestedOne.ts"
   ]

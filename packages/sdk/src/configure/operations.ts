@@ -3,7 +3,7 @@ export interface OperationsConfiguration {
 	queries: ConfigureQuery;
 	mutations: ConfigureMutation;
 	subscriptions: ConfigureSubscription;
-	custom?: any;
+	custom?: Record<string, CustomizeQuery | CustomizeMutation | CustomizeSubscription>;
 }
 
 export interface BaseOperationConfiguration {
@@ -12,17 +12,48 @@ export interface BaseOperationConfiguration {
 	};
 }
 
+export interface QueryCacheConfiguration {
+	/**
+	 * Wether to enable the cache headers.
+	 *
+	 * @default true if any other field is defined, false otherwise.
+	 */
+	enable?: boolean;
+	/**
+	 * Mark responses as public or private. Set to undefined to omit. Notice that
+	 * any authenticated operation will override this header and set it to private.
+	 *
+	 * @default Public for operations without authentication, private otherwise
+	 */
+	public?: boolean;
+	/**
+	 * max-age component of the Cache-Control header.
+	 * Set to undefined to omit this component.
+	 *
+	 * @default undefined
+	 */
+	maxAge?: number;
+	/**
+	 * stale-while-revalidate component of the Cache-Control header.
+	 * Set to undefined to omit this component.
+	 *
+	 * @default undefined
+	 */
+	staleWhileRevalidate?: number;
+	/**
+	 * Wether to include must-revalidate in the Cache-Control header
+	 *
+	 * @default false
+	 */
+	mustRevalidate?: boolean;
+}
+export interface LiveQueryConfiguration {
+	enable: boolean;
+	pollingIntervalSeconds: number;
+}
 export interface QueryConfiguration extends BaseOperationConfiguration {
-	caching: {
-		enable: boolean;
-		public: boolean;
-		maxAge: number;
-		staleWhileRevalidate: number;
-	};
-	liveQuery: {
-		enable: boolean;
-		pollingIntervalSeconds: number;
-	};
+	caching?: QueryCacheConfiguration;
+	liveQuery: LiveQueryConfiguration;
 }
 
 export interface MutationConfiguration extends BaseOperationConfiguration {}
@@ -47,9 +78,11 @@ export interface WunderGraphOperationsConfig<T extends OperationsConfiguration> 
 	operations?: T;
 }
 
-export const configureWunderGraphOperations = <GeneratedOperationConfiguration extends OperationsConfiguration>(
+export function configureWunderGraphOperations<GeneratedOperationConfiguration extends OperationsConfiguration>(
 	config: WunderGraphOperationsConfig<GeneratedOperationConfiguration>
-) => config.operations;
+): WunderGraphOperationsConfig<GeneratedOperationConfiguration>['operations'] {
+	return config.operations;
+}
 
 export const disableAuth = <Configs extends QueryConfiguration | MutationConfiguration | SubscriptionConfiguration>(
 	config: Configs

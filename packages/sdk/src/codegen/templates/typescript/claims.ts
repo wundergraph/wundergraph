@@ -1,14 +1,14 @@
+import Handlebars from 'handlebars';
 import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { CodeGenerationConfig } from '../../../configure';
+import { isWellKnownClaim } from '../../../graphql/operations';
 import { formatTypeScript } from './index';
-import Handlebars from 'handlebars';
 import { handlebarTemplate } from './claims.template';
-
 export class TypeScriptClaims implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(handlebarTemplate);
-		const customClaims = Object.keys(generationConfig.config.authentication.customClaims ?? []).map((key) => {
-			const claim = generationConfig.config.authentication.customClaims[key];
+		const claims = generationConfig.config.authentication.customClaims;
+		const customClaims = Object.entries(claims).map(([key, claim]) => {
 			let claimType: string;
 			switch (claim.type ?? 'string') {
 				case 'string':
@@ -23,6 +23,11 @@ export class TypeScriptClaims implements Template {
 				case 'boolean':
 					claimType = 'boolean';
 					break;
+				case 'any':
+					claimType = 'any';
+					break;
+				default:
+					throw new Error(`unhandled custom claim type ${claim.type}`);
 			}
 			return {
 				name: key,
@@ -30,8 +35,16 @@ export class TypeScriptClaims implements Template {
 				type: claimType,
 			};
 		});
+		const publicPaths = generationConfig.config.authentication.publicClaims.filter((claim) => !isWellKnownClaim(claim));
+		// Claim paths have already been validated, so a match a guaranteed
+		const publicFields = publicPaths.map((path) =>
+			Object.keys(claims).find((claimName) => claims[claimName].jsonPath == path)
+		);
+		const publicPick = publicFields.map((s) => `"${s}"`).join(' | ');
 		const content = tmpl({
 			customClaims: customClaims,
+			hasPublicCustomClaims: publicPick.length > 0,
+			publicCustomClaims: publicPick,
 		});
 		return Promise.resolve([
 			{

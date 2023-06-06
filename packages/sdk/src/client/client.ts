@@ -15,14 +15,16 @@ import {
 	User,
 } from './types';
 import { serialize } from '../utils';
-import { GraphQLResponseError } from './GraphQLResponseError';
-import { ResponseError } from './ResponseError';
-import { InputValidationError } from './InputValidationError';
-import { AuthorizationError } from './AuthorizationError';
-import { ClientResponseError } from './ClientResponseError';
 import { applyPatch } from 'fast-json-patch';
+import {
+	ResponseError,
+	InputValidationError,
+	AuthorizationError,
+	ValidationResponseJSON,
+	ClientOperationErrorCodes,
+} from './errors';
 
-// https://graphql.org/learn/serving-over-http/
+// We follow https://docs.wundergraph.com/docs/architecture/wundergraph-rpc-protocol-explained
 
 export interface UploadValidationOptions {
 	/** Whether authentication is required to upload to this profile
@@ -57,20 +59,22 @@ interface LogoutResponse {
 }
 
 export class Client {
-	constructor(private options: ClientConfig) {
-		this.baseHeaders = {
-			'WG-SDK-Version': options.sdkVersion,
-		};
+	constructor(protected options: ClientConfig) {
+		this.baseHeaders = options.sdkVersion
+			? {
+					'WG-SDK-Version': options.sdkVersion,
+			  }
+			: {};
 
 		this.extraHeaders = { ...options.extraHeaders };
 
 		this.csrfEnabled = options.csrfEnabled ?? true;
 	}
 
-	private readonly baseHeaders: Headers = {};
+	protected readonly baseHeaders: Headers = {};
 	private extraHeaders: Headers = {};
 	private csrfToken: string | undefined;
-	private csrfEnabled: boolean = true;
+	protected readonly csrfEnabled: boolean = true;
 
 	public static buildCacheKey(query: OperationRequestOptions): string {
 		return serialize(query);
@@ -80,11 +84,11 @@ export class Client {
 		return !!this.options.operationMetadata?.[operationName]?.requiresAuthentication;
 	}
 
-	private operationUrl(operationName: string) {
+	protected operationUrl(operationName: string) {
 		return this.options.baseURL + '/operations/' + operationName;
 	}
 
-	private addUrlParams(url: string, queryParams: URLSearchParams): string {
+	protected addUrlParams(url: string, queryParams: URLSearchParams): string {
 		// stable stringify
 		queryParams.sort();
 
@@ -93,14 +97,24 @@ export class Client {
 		return url + (queryString ? `?${queryString}` : '');
 	}
 
-	private encodeQueryParams(queryParams: URLSearchParams): string {
+	protected encodeQueryParams(queryParams: URLSearchParams): string {
 		const originalString = queryParams.toString();
 		const withoutEmptyArgs = originalString.replace('=&', '&');
 		return withoutEmptyArgs.endsWith('=') ? withoutEmptyArgs.slice(0, -1) : withoutEmptyArgs;
 	}
 
-	private async fetchJson(url: string, init: RequestInit = {}) {
+	protected searchParams(queryParams?: Record<string, string>) {
+		const searchParams = new URLSearchParams(queryParams);
+		if (this.options.applicationHash) {
+			searchParams.set('wg_api_hash', this.options.applicationHash);
+		}
+
+		return searchParams;
+	}
+
+	protected async fetchJson(url: string, init: RequestInit = {}) {
 		init.headers = { ...init.headers, Accept: 'application/json', 'Content-Type': 'application/json' };
+
 		return this.fetch(url, init);
 	}
 
@@ -113,26 +127,50 @@ export class Client {
 			...init.headers,
 		};
 
-		return fetchImpl(input, {
-			credentials: 'include',
-			mode: 'cors',
-			...init,
-		});
+		let timeout: NodeJS.Timeout | undefined;
+
+		if (!init.signal && this.options.requestTimeoutMs && this.options.requestTimeoutMs > 0) {
+			const controller = new AbortController();
+			timeout = setTimeout(() => controller.abort(), this.options.requestTimeoutMs);
+			init.signal = controller.signal;
+		}
+
+		try {
+			const resp = await fetchImpl(input, {
+				credentials: 'include',
+				mode: 'cors',
+				...init,
+			});
+			return resp;
+		} finally {
+			if (timeout) {
+				clearTimeout(timeout);
+			}
+		}
 	}
 
-	private convertGraphQLResponse(resp: GraphQLResponse): ClientResponse {
+	private convertGraphQLResponse(resp: GraphQLResponse, statusCode: number = 200): ClientResponse {
 		// If there were no errors returned, the "errors" field should not be present on the response.
 		// If no data is returned, according to the GraphQL spec,
 		// the "data" field should only be included if no errors occurred during execution.
 		if (resp.errors && resp.errors.length) {
 			return {
-				error: new GraphQLResponseError(resp.errors),
+				error: new ResponseError({
+					statusCode,
+					code: resp.errors[0]?.code,
+					message: resp.errors[0]?.message,
+					errors: resp.errors,
+				}),
 			};
 		}
 
-		if (!resp.data) {
+		if (resp.data === undefined) {
 			return {
-				error: new ResponseError('Invalid response from the server', 200),
+				error: new ResponseError({
+					code: 'ResponseError',
+					statusCode,
+					message: 'Server returned no data',
+				}),
 			};
 		}
 
@@ -142,21 +180,42 @@ export class Client {
 	}
 
 	// Determines whether the body is unparseable, plain text, or json (and assumes an invalid input if json)
-	private async handleClientResponseError(response: globalThis.Response): Promise<ClientResponseError> {
+	private async handleClientResponseError(response: globalThis.Response): Promise<ResponseError> {
+		// In some cases, the server does not return JSON to communicate errors.
+		// TODO: We should align it to always return JSON and in a consistent format.
+
+		if (response.status === 401) {
+			return new AuthorizationError();
+		}
+
 		const text = await response.text();
+
 		try {
 			const json = JSON.parse(text);
 
-			switch (response.status) {
-				case 401:
-					return new AuthorizationError(json.errors[0]?.message.trim(), response.status);
-				case 400:
-					return new InputValidationError(json, response.status);
-				default:
-					return new ResponseError((json.errors[0]?.message || json.message).trim(), response.status);
+			if (response.status === 400) {
+				if ((json?.code as ClientOperationErrorCodes) === 'InputValidationError') {
+					const validationResult: ValidationResponseJSON = json;
+					return new InputValidationError({
+						errors: validationResult.errors,
+						message: validationResult.message,
+						statusCode: response.status,
+					});
+				}
 			}
-		} catch {
-			return new ResponseError(text.length ? text.trim() : 'Response is not OK', response.status);
+
+			return new ResponseError({
+				code: json.errors[0]?.code,
+				statusCode: response.status,
+				errors: json.errors,
+				message: json.errors[0]?.message ?? 'Invalid response from server',
+			});
+		} catch (e: any) {
+			return new ResponseError({
+				cause: e,
+				statusCode: response.status,
+				message: text || 'Invalid response from server',
+			});
 		}
 	}
 
@@ -165,7 +224,7 @@ export class Client {
 	 * Network errors or non-200 status codes are converted to an error. Application errors
 	 * as from GraphQL are returned as an Error from type GraphQLResponseError.
 	 */
-	private async fetchResponseToClientResponse(response: globalThis.Response): Promise<ClientResponse> {
+	protected async fetchResponseToClientResponse(response: globalThis.Response): Promise<ClientResponse> {
 		// The Promise returned from fetch() won't reject on HTTP error status
 		// even if the response is an HTTP 404 or 500.
 
@@ -175,13 +234,16 @@ export class Client {
 
 		const json = await response.json();
 
-		return this.convertGraphQLResponse({
-			data: json.data,
-			errors: json.errors,
-		});
+		return this.convertGraphQLResponse(
+			{
+				data: json.data,
+				errors: json.errors,
+			},
+			response.status
+		);
 	}
 
-	private stringifyInput(input: any) {
+	protected stringifyInput(input: any) {
 		const encoded = JSON.stringify(input || {});
 		return encoded === '{}' ? undefined : encoded;
 	}
@@ -191,6 +253,10 @@ export class Client {
 			...this.extraHeaders,
 			...headers,
 		};
+	}
+
+	public hasExtraHeaders() {
+		return Object.keys(this.extraHeaders).length > 0;
 	}
 
 	/**
@@ -219,20 +285,18 @@ export class Client {
 	 * The method only throws an error if the request fails to reach the server or
 	 * the server returns a non-200 status code. Application errors are returned as part of the response.
 	 */
-	public async query<RequestOptions extends QueryRequestOptions, ResponseData = any>(
+	public async query<RequestOptions extends QueryRequestOptions, Data = any, Error = any>(
 		options: RequestOptions
-	): Promise<ClientResponse<ResponseData>> {
-		const searchParams = new URLSearchParams({
-			wg_api_hash: this.options.applicationHash,
-		});
+	): Promise<ClientResponse<Data, Error>> {
+		const params = this.searchParams();
 		const variables = this.stringifyInput(options.input);
 		if (variables) {
-			searchParams.set('wg_variables', variables);
+			params.set('wg_variables', variables);
 		}
 		if (options.subscribeOnce) {
-			searchParams.set('wg_subscribe_once', '');
+			params.set('wg_subscribe_once', '');
 		}
-		const url = this.addUrlParams(this.operationUrl(options.operationName), searchParams);
+		const url = this.addUrlParams(this.operationUrl(options.operationName), params);
 		const resp = await this.fetchJson(url, {
 			method: 'GET',
 			signal: options.abortSignal,
@@ -264,15 +328,11 @@ export class Client {
 	 * The method only throws an error if the request fails to reach the server or
 	 * the server returns a non-200 status code. Application errors are returned as part of the response.
 	 */
-	public async mutate<RequestOptions extends MutationRequestOptions, ResponseData = any>(
+	public async mutate<RequestOptions extends MutationRequestOptions, Data = any, Error = any>(
 		options: RequestOptions
-	): Promise<ClientResponse<ResponseData>> {
-		const url = this.addUrlParams(
-			this.operationUrl(options.operationName),
-			new URLSearchParams({
-				wg_api_hash: this.options.applicationHash,
-			})
-		);
+	): Promise<ClientResponse<Data, Error>> {
+		const params = this.searchParams();
+		const url = this.addUrlParams(this.operationUrl(options.operationName), params);
 
 		const headers: Headers = {};
 
@@ -296,9 +356,7 @@ export class Client {
 	 * the server returns a non-200 status code.
 	 */
 	public async fetchUser<U extends User>(options?: FetchUserRequestOptions): Promise<U> {
-		const params = new URLSearchParams({
-			wg_api_hash: this.options.applicationHash,
-		});
+		const params = this.searchParams();
 		if (options?.revalidate) {
 			params.set('revalidate', '');
 		}
@@ -316,34 +374,57 @@ export class Client {
 
 	/**
 	 * Set up subscriptions over SSE with fallback to web streams.
+	 *
+	 * Falls back to web streams if extraHeaders are set,
+	 * no callback is supplied or EventSource is not supported.
+	 *
 	 * When called with subscribeOnce it will return the response directly
 	 * without setting up a subscription.
 	 * @see https://docs.wundergraph.com/docs/architecture/wundergraph-rpc-protocol-explained#subscriptions
 	 */
-	public async subscribe<RequestOptions extends SubscriptionRequestOptions, ResponseData = unknown>(
+	public async subscribe<
+		RequestOptions extends SubscriptionRequestOptions,
+		Data = any,
+		Error = any,
+		Response = ClientResponse<Data, Error>
+	>(options: RequestOptions): Promise<Response>;
+	public async subscribe<RequestOptions extends SubscriptionRequestOptions, Data = any, Error = any>(
 		options: RequestOptions,
-		cb: SubscriptionEventHandler<ResponseData>
-	) {
+		cb?: SubscriptionEventHandler<Data, Error>
+	): Promise<ClientResponse<Data, Error> | void>;
+	public async subscribe<RequestOptions extends SubscriptionRequestOptions, Data = any, Error = any>(
+		options: RequestOptions,
+		cb?: SubscriptionEventHandler<Data, Error>
+	): Promise<any> {
 		if (options.subscribeOnce) {
-			const result = await this.query<RequestOptions, ResponseData>(options);
-			cb(result);
+			const result = await this.query<RequestOptions, Data, Error>(options);
+			cb?.(result);
 			return result;
 		}
-		if ('EventSource' in globalThis) {
-			return this.subscribeWithSSE<ResponseData>(options, cb);
+
+		const shouldUseSSE = this.options.forceSSE || !this.hasExtraHeaders();
+		if (cb && 'EventSource' in globalThis && shouldUseSSE) {
+			return this.subscribeWithSSE<Data, Error>(options, cb);
 		}
-		for await (const event of this.subscribeWithFetch<ResponseData>(options)) {
-			cb(event);
+
+		const generator = this.subscribeWithFetch<Data, Error>(options);
+
+		if (cb) {
+			for await (const event of generator) {
+				cb(event);
+			}
+			return;
 		}
+
+		return generator;
 	}
 
-	private subscribeWithSSE<ResponseData = any>(
+	protected subscribeWithSSE<Data = any, Error = any>(
 		subscription: SubscriptionRequestOptions,
-		cb: SubscriptionEventHandler<ResponseData>
+		cb: SubscriptionEventHandler<Data, Error>
 	) {
 		return new Promise<void>((resolve, reject) => {
-			const params = new URLSearchParams({
-				wg_api_hash: this.options.applicationHash,
+			const params = this.searchParams({
 				wg_sse: '',
 				wg_json_patch: '',
 			});
@@ -375,12 +456,16 @@ export class Client {
 				if (lastResponse !== null && Array.isArray(jsonResp)) {
 					// we have a lastResponse and the current response is a json patch
 					// we apply the patch to generate the latest response
-					lastResponse = applyPatch(lastResponse, jsonResp).newDocument as GraphQLResponse;
+					// applyPatch deep clones the document before applying the patch
+					// in that way we always ensure that the response is not cached by reference by clients / caches
+					// e.g. react works with reference equality to determine if a component needs to be re-rendered
+					lastResponse = applyPatch(lastResponse, jsonResp, true, false, true).newDocument as GraphQLResponse;
 				} else {
 					// it's not a patch, so we just set the lastResponse to the current response
 					lastResponse = jsonResp as GraphQLResponse;
 				}
-				cb(this.convertGraphQLResponse(lastResponse));
+				const clientResponse = this.convertGraphQLResponse(lastResponse);
+				cb(clientResponse);
 			});
 			if (subscription?.abortSignal) {
 				subscription?.abortSignal.addEventListener('abort', () => eventSource.close());
@@ -388,12 +473,8 @@ export class Client {
 		});
 	}
 
-	private async *subscribeWithFetch<ResponseData = any>(
-		subscription: SubscriptionRequestOptions
-	): AsyncGenerator<ClientResponse<ResponseData>> {
-		const params = new URLSearchParams({
-			wg_api_hash: this.options.applicationHash,
-		});
+	protected async fetchSubscription<Data = any, Error = any>(subscription: SubscriptionRequestOptions) {
+		const params = this.searchParams();
 		const variables = this.stringifyInput(subscription.input);
 		if (variables) {
 			params.set('wg_variables', variables);
@@ -401,15 +482,26 @@ export class Client {
 		if (subscription.liveQuery) {
 			params.set('wg_live', '');
 		}
+
 		const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
-		const response = await this.fetchJson(url, {
+		return await this.fetchJson(url, {
 			method: 'GET',
 			signal: subscription.abortSignal,
 		});
+	}
+
+	protected async *subscribeWithFetch<Data = any, Error = any>(
+		subscription: SubscriptionRequestOptions
+	): AsyncGenerator<ClientResponse<Data, Error>> {
+		const response = await this.fetchSubscription(subscription);
 
 		if (!response.ok || response.body === null) {
 			yield {
-				error: new ResponseError('HTTP Error', response.status),
+				error: new ResponseError({
+					code: 'ResponseError',
+					message: `Response is not ok. Failed to subscribe to '${subscription.operationName}'`,
+					statusCode: response.status,
+				}) as Error,
 			};
 			return;
 		}
@@ -431,7 +523,7 @@ export class Client {
 				} else {
 					lastResponse = jsonResp as GraphQLResponse;
 				}
-				yield this.convertGraphQLResponse(lastResponse);
+				yield this.convertGraphQLResponse(lastResponse, response.status);
 				message = '';
 			}
 		}
@@ -460,9 +552,7 @@ export class Client {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 
-		const params = new URLSearchParams({
-			wg_api_hash: this.options.applicationHash,
-		});
+		const params = this.searchParams();
 
 		if ('profile' in config) {
 			headers['X-Upload-Profile'] = (config as any).profile;
@@ -490,7 +580,11 @@ export class Client {
 		const result = await response.json();
 
 		if (!result.length) {
-			throw new ResponseError(`Invalid server response shape`, response.status);
+			throw new ResponseError({
+				code: 'ResponseError',
+				message: `Invalid server response shape. Failed to upload files to '${config.provider}' provider`,
+				statusCode: response.status,
+			});
 		}
 
 		const json = result as { key: string }[];

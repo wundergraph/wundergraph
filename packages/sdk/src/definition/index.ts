@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { buildClientSchema, GraphQLSchema, introspectionFromSchema, parse, print, printSchema } from 'graphql';
 import { renameTypeFields, renameTypes } from '../graphql/renametypes';
 import {
@@ -19,10 +20,10 @@ import {
 } from '@wundergraph/protobuf';
 import { applyNameSpaceToGraphQLSchema } from './namespacing';
 import { InputVariable, mapInputVariable } from '../configure/variables';
-import { introspectGraphql } from './graphql-introspection';
+import { introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
-import { loadOpenApi, openApi, openApiLegacy } from './openapi-introspection';
+import { introspectOpenApi, introspectOpenApiV2 } from './openapi-introspection';
 import {
 	introspectMongoDB,
 	introspectMySQL,
@@ -32,16 +33,33 @@ import {
 	introspectSQLite,
 	introspectSQLServer,
 } from './database-introspection';
+import { introspectSoap } from './soap-introspection';
 
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
 export const WG_ENABLE_INTROSPECTION_CACHE = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
+export const WG_INTROSPECTION_CACHE_SKIP = process.env['WG_INTROSPECTION_CACHE_SKIP'] === 'true';
 // Only use the introspection cache, return an error when hitting the network
 export const WG_ENABLE_INTROSPECTION_OFFLINE = process.env['WG_ENABLE_INTROSPECTION_OFFLINE'] === 'true';
-// When true, throw an exception an error is found while loading operations
-export const WG_THROW_ON_OPERATION_LOADING_ERROR = process.env['WG_THROW_ON_OPERATION_LOADING_ERROR'] === 'true';
 
 export const WG_PRETTY_GRAPHQL_VALIDATION_ERRORS = process.env['WG_PRETTY_GRAPHQL_VALIDATION_ERRORS'] === 'true';
+// Default polling interval for data sources without one
+export const WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS = (() => {
+	const seconds = parseInt(process.env['WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS'] ?? '', 10);
+	return isNaN(seconds) ? 0 : seconds;
+})();
+
+/**
+ * ApiIntrospectionOptions contains options that are passed to
+ * all ApiIntrospector<T> functions
+ */
+export interface ApiIntrospectionOptions {
+	/**
+	 * Global proxy URL, which might be overridden at the data source level
+	 */
+	httpProxyUrl?: string;
+	apiID?: string;
+}
 
 export interface RenameType {
 	from: string;
@@ -67,6 +85,7 @@ export type ApiType = GraphQLApiCustom | RESTApiCustom | DatabaseApiCustom;
 export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	constructor(
 		schema: string,
+		namespace: string,
 		dataSources: DataSource<T>[],
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
@@ -74,11 +93,13 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		customJsonScalars?: string[]
 	) {
 		this.Schema = schema;
+		this.Namespace = namespace;
 		this.DataSources = dataSources;
 		this.Fields = fields;
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
 		this.CustomJsonScalars = customJsonScalars;
+		this.Namespace = namespace;
 	}
 
 	DefaultFlushInterval: number = 500;
@@ -88,6 +109,13 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	Types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
 	CustomJsonScalars?: string[];
+	Namespace: string;
+
+	get schemaSha256() {
+		const hash = createHash('sha256');
+		hash.update(this.Schema);
+		return hash.digest('hex');
+	}
 
 	renameTypes(rename: RenameType[]): void {
 		this.Schema = renameTypes(this.Schema, rename);
@@ -182,7 +210,7 @@ const typeFieldsRenameTypeField = (fields: TypeField[], rename: RenameTypeField[
 
 export const createMockApi = async (sdl: string, apiNamespace?: string): Promise<Api<any>> => {
 	const schema = print(parse(sdl));
-	return new GraphQLApi(applyNameSpaceToGraphQLSchema(schema, [], apiNamespace), [], [], [], []);
+	return new GraphQLApi(applyNameSpaceToGraphQLSchema(schema, [], apiNamespace), apiNamespace || '', [], [], [], []);
 };
 
 export class GraphQLApi extends Api<GraphQLApiCustom> {}
@@ -219,6 +247,9 @@ interface GraphQLIntrospectionOptions {
 	loadSchemaFromString?: string | (() => string);
 	customFloatScalars?: string[];
 	customIntScalars?: string[];
+	/*
+		customJSONScalars is deprecated; the types are now detected automatically.
+	 */
 	customJSONScalars?: string[];
 	// switching internal to true will mark the origin as an internal GraphQL API
 	// this will forward the original request and user info to the internal upstream
@@ -238,7 +269,7 @@ export interface GraphQLIntrospection extends GraphQLUpstream, GraphQLIntrospect
 export interface GraphQLFederationUpstream extends Omit<Omit<GraphQLUpstream, 'introspection'>, 'apiNamespace'> {
 	name?: string;
 	loadSchemaFromString?: GraphQLIntrospectionOptions['loadSchemaFromString'];
-	introspection?: GraphqlIntrospectionHeaders;
+	introspection?: IntrospectionFetchOptions & GraphqlIntrospectionHeaders;
 }
 
 export interface GraphQLFederationIntrospection extends IntrospectionConfiguration {
@@ -247,9 +278,25 @@ export interface GraphQLFederationIntrospection extends IntrospectionConfigurati
 }
 
 export interface ReplaceCustomScalarTypeFieldConfiguration {
+	/**
+	 * entityName is the type name for the parent of the field whose response type you wish to replace
+	 * entityName must match exactly (including case)
+	 **/
 	entityName: string;
+	/**
+	 * fieldName is the type name for the field whose response type you wish to replace
+	 * fieldName must match exactly (including case)
+	 **/
 	fieldName: string;
+	/**
+	 * inputTypeReplacement is deprecated
+	 * If you wish to replace Input types, add an entire new configuration object into the array
+	 **/
 	inputTypeReplacement?: string;
+	/**
+	 * responseTypeRepalcement is the replacement response type for fieldName
+	 * responseTypeReplacement must match exactly (including case)
+	 **/
 	responseTypeReplacement: string;
 }
 
@@ -271,6 +318,11 @@ export interface PrismaIntrospection extends IntrospectionConfiguration {
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
+export interface IntrospectionFetchOptions {
+	disableCache?: boolean;
+	pollingIntervalSeconds?: number;
+}
+
 export interface IntrospectionConfiguration {
 	// id is the unique identifier for the data source
 	id?: string;
@@ -283,10 +335,7 @@ export interface IntrospectionConfiguration {
 	 * @defaultValue Use the default timeout for this node.
 	 */
 	requestTimeoutSeconds?: number;
-	introspection?: {
-		disableCache?: boolean;
-		pollingIntervalSeconds?: number;
-	};
+	introspection?: IntrospectionFetchOptions;
 }
 
 export interface HTTPUpstream extends IntrospectionConfiguration {
@@ -294,6 +343,12 @@ export interface HTTPUpstream extends IntrospectionConfiguration {
 	headers?: (builder: IHeadersBuilder) => IHeadersBuilder;
 	authentication?: HTTPUpstreamAuthentication;
 	mTLS?: HTTPmTlsConfiguration;
+	/** HTTP(S) proxy to use, overriding the default one. To disable a global proxy
+	 * set its value to null.
+	 *
+	 * @defaultValue undefined, which uses the global proxy defined in configureWunderGraphApplication()
+	 */
+	httpProxyUrl?: InputVariable | null;
 }
 
 export type HTTPmTlsConfiguration = {
@@ -341,7 +396,7 @@ export interface GraphQLUpstream extends HTTPUpstream {
 	path?: InputVariable;
 	subscriptionsURL?: InputVariable;
 	subscriptionsUseSSE?: boolean;
-	introspection?: HTTPUpstream['introspection'] & GraphqlIntrospectionHeaders;
+	introspection?: IntrospectionFetchOptions & GraphqlIntrospectionHeaders;
 }
 
 export interface OpenAPIIntrospectionFile {
@@ -376,11 +431,6 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
-}
-
-export interface OpenAPIV2Introspection extends Omit<HTTPUpstream, 'authentication' | 'mTLS'> {
-	source: OpenAPIIntrospectionSource;
-	baseURL?: InputVariable;
 }
 
 export interface StaticApiCustom {
@@ -428,79 +478,32 @@ export interface GraphQLServerConfiguration extends Omit<GraphQLIntrospection, '
 	schema: GraphQLSchema | Promise<GraphQLSchema>;
 }
 
-export interface ILazyIntrospection<T> {
-	(): Promise<T>;
-}
+export const introspectGraphqlServer = async (introspection: GraphQLServerConfiguration) => {
+	const { schema, ...rest } = introspection;
+	const resolvedSchema = (await schema) as GraphQLSchema;
 
-export const introspectGraphqlServer = (introspection: GraphQLServerConfiguration): ILazyIntrospection<GraphQLApi> => {
-	return async (): Promise<GraphQLApi> => {
-		const { schema, ...rest } = introspection;
-		const resolvedSchema = (await schema) as GraphQLSchema;
-
-		return introspectGraphql({
-			...rest,
-			internal: true,
-			loadSchemaFromString: () => printSchema(buildClientSchema(introspectionFromSchema(resolvedSchema))),
-		});
-	};
+	return introspectGraphqlWithCache({
+		...rest,
+		internal: true,
+		loadSchemaFromString: () => printSchema(buildClientSchema(introspectionFromSchema(resolvedSchema))),
+	});
 };
 
 export const introspect = {
-	graphql: (introspection: Omit<GraphQLIntrospection, 'isFederation'>): ILazyIntrospection<GraphQLApi> => {
-		return (): Promise<GraphQLApi> => {
-			return introspectGraphql(introspection);
-		};
+	graphql: (introspection: Omit<GraphQLIntrospection, 'isFederation'>) => {
+		return introspectGraphqlWithCache(introspection);
 	},
-	postgresql: (introspection: DatabaseIntrospection): ILazyIntrospection<PostgresqlApi> => {
-		return (): Promise<PostgresqlApi> => {
-			return introspectPostgresql(introspection);
-		};
-	},
-	mysql: (introspection: DatabaseIntrospection): ILazyIntrospection<MySQLApi> => {
-		return (): Promise<MySQLApi> => {
-			return introspectMySQL(introspection);
-		};
-	},
-	planetscale: (introspection: DatabaseIntrospection): ILazyIntrospection<PlanetscaleApi> => {
-		return (): Promise<PlanetscaleApi> => {
-			return introspectPlanetScale(introspection);
-		};
-	},
-	sqlite: (introspection: DatabaseIntrospection): ILazyIntrospection<SQLiteApi> => {
-		return (): Promise<SQLiteApi> => {
-			return introspectSQLite(introspection);
-		};
-	},
-	sqlserver: (introspection: DatabaseIntrospection): ILazyIntrospection<SQLServerApi> => {
-		return (): Promise<SQLServerApi> => {
-			return introspectSQLServer(introspection);
-		};
-	},
-	mongodb: (introspection: DatabaseIntrospection): ILazyIntrospection<MongoDBApi> => {
-		return (): Promise<MongoDBApi> => {
-			return introspectMongoDB(introspection);
-		};
-	},
-	prisma: (introspection: PrismaIntrospection): ILazyIntrospection<PrismaApi> => {
-		return (): Promise<PrismaApi> => {
-			return introspectPrisma(introspection);
-		};
-	},
-	federation: (introspection: GraphQLFederationIntrospection): ILazyIntrospection<GraphQLApi> => {
-		return (): Promise<GraphQLApi> => {
-			return introspectFederation(introspection);
-		};
-	},
-	openApiV2: (introspection: OpenAPIV2Introspection): ILazyIntrospection<GraphQLApi> => {
-		return (): Promise<GraphQLApi> => {
-			return openApi(introspection);
-		};
-	},
-	openApi: (introspection: OpenAPIIntrospection): ILazyIntrospection<RESTApi> => {
-		return (): Promise<RESTApi> => {
-			return openApiLegacy(introspection);
-		};
-	},
+	postgresql: introspectPostgresql,
+	mysql: introspectMySQL,
+	planetscale: introspectPlanetScale,
+	sqlite: introspectSQLite,
+	sqlserver: introspectSQLServer,
+	mongodb: introspectMongoDB,
+	prisma: introspectPrisma,
+	federation: introspectFederation,
+	openApi: introspectOpenApi,
+	openApiV2: introspectOpenApiV2,
+	soap: introspectSoap,
 };
 
 export const buildUpstreamAuthentication = (upstream: HTTPUpstream): UpstreamAuthentication | undefined => {
@@ -557,4 +560,3 @@ const upstreamAuthenticationKind = (kind: HTTPUpstreamAuthentication['kind']): U
 			throw new Error(`upstreamAuthenticationKind, unsupported kind: ${kind}`);
 	}
 };
-export { loadOpenApi } from './openapi-introspection';

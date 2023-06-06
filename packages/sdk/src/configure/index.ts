@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import process from 'node:process';
-import _ from 'lodash';
 import {
 	buildSchema,
 	FieldDefinitionNode,
@@ -12,14 +12,18 @@ import {
 	print,
 	visit,
 } from 'graphql';
+import { JSONSchema7 as JSONSchema } from 'json-schema';
+import objectHash from 'object-hash';
+import { camelCase } from 'lodash';
+import { buildGenerator, getProgramFromFiles, JsonSchemaGenerator, programFromConfig } from 'typescript-json-schema';
 import { ZodType } from 'zod';
 import {
 	Api,
 	DatabaseApiCustom,
 	DataSource,
 	GraphQLApiCustom,
-	ILazyIntrospection,
 	introspectGraphqlServer,
+	ApiIntrospectionOptions,
 	RESTApiCustom,
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
@@ -27,17 +31,24 @@ import {
 import { mergeApis } from '../definition/merge';
 import {
 	GraphQLOperation,
+	GraphQLOperationFile,
+	isInternalOperationByAPIMountPath,
+	isWellKnownClaim,
 	loadOperations,
 	LoadOperationsOutput,
 	ParsedOperations,
 	parseGraphQLOperations,
 	removeHookVariables,
+	TypeScriptOperation,
+	TypeScriptOperationFile,
+	WellKnownClaim,
 } from '../graphql/operations';
 import { GenerateCode, Template } from '../codegen';
 import {
 	ArgumentRenderConfiguration,
 	ArgumentSource,
 	AuthProvider,
+	BuildInfo,
 	ConfigurationVariable,
 	ConfigurationVariableKind,
 	CorsConfiguration,
@@ -56,18 +67,29 @@ import {
 } from '@wundergraph/protobuf';
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
+import { findUp } from './findup';
 import { FieldInfo, LinkConfiguration, LinkDefinition, queryTypeFields } from '../linkbuilder';
+import { LocalCache } from '../localcache';
+import { OpenApiBuilder } from '../openapibuilder';
 import { PostmanBuilder } from '../postman/builder';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import { HooksConfiguration, ResolvedServerOptions, WunderGraphHooksAndServerConfig } from '../server/types';
 import { getWebhooks } from '../webhooks';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
-import logger, { Logger } from '../logger';
-import { resolveServerOptions, serverOptionsWithDefaults } from '../server/server-options';
+import logger, { FatalLogger, Logger } from '../logger';
+import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
-import { cleanOpenApiSpecs } from '../openapi/introspection';
+import { GenerateConfig, OperationsGenerationConfig } from './codegeneration';
+import { generateOperations } from '../codegen/generateoperations';
+import { configurationHash } from '../codegen/templates/typescript/helpers';
+import templates from '../codegen/templates';
+
+const utf8 = 'utf8';
+const generated = 'generated';
+const jsonExtension = 'json';
+const unknown = 'unknown';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -78,9 +100,29 @@ export interface WunderGraphCorsConfiguration {
 	allowCredentials?: boolean;
 }
 
-export interface WunderGraphConfigApplicationConfig {
-	apis: ILazyIntrospection<Api<any>>[];
+/**
+ * ApiIntrospector<T> is a function type which the API generators must conform to.
+ * Given an ApiIntrospectionOptions, they should return a Promise that resolves
+ * to an Api<T>
+ */
+export type ApiIntrospector<T> = (options: ApiIntrospectionOptions) => Promise<Api<T>>;
+/**
+ * AsyncApiIntrospector<T> is the type returned by all functions that generate something
+ * "introspectable" (e.g. an API). These get awaited in parallel while resolving the
+ * application configuration.
+ */
+export type AsyncApiIntrospector<T> = Promise<ApiIntrospector<T>>;
+
+export interface WunderGraphConfigApplicationConfig<
+	TCustomClaim extends string = string,
+	TPublicClaim extends TCustomClaim | WellKnownClaim = TCustomClaim | WellKnownClaim
+> {
+	apis: AsyncApiIntrospector<any>[];
+	/**
+	 * @deprecated use `generate` instead
+	 */
 	codeGenerators?: CodeGen[];
+	generate?: GenerateConfig;
 	options?: NodeOptions;
 	server?: WunderGraphHooksAndServerConfig;
 	cors?: WunderGraphCorsConfiguration;
@@ -88,6 +130,9 @@ export interface WunderGraphConfigApplicationConfig {
 	operations?: OperationsConfiguration;
 	authorization?: {
 		roles?: string[];
+	};
+	experimental?: {
+		orm?: boolean;
 	};
 	authentication?: {
 		cookieBased?: {
@@ -111,14 +156,47 @@ export interface WunderGraphConfigApplicationConfig {
 			secureCookieBlockKey?: InputVariable;
 			// csrfTokenSecret is the secret to enable the csrf middleware, should be 32 bytes
 			csrfTokenSecret?: InputVariable;
+			/**
+			 * Optional timeout used for storing temporary data during authentication
+			 * @default 600 (10 minutes)
+			 */
+			timeoutSeconds?: InputVariable<number>;
 		};
 		tokenBased?: {
 			providers: TokenAuthProvider[];
 		};
-		customClaims?: Record<string, CustomClaim>;
+		/**
+		 * Custom claims defined by the application. Each key represents its shorthand name
+		 * (used in User attributes or references to custom claims) while each value is
+		 * a CustomClaim object.
+		 *
+		 * @default none
+		 *
+		 * @see CustomClaim
+		 */
+		customClaims?: Record<TCustomClaim, CustomClaim>;
+		/**
+		 * Claims to be publicly available (i.e. served by the API to the frontend), referenced by
+		 * their shorthand name for custom claims (i.e. keys in the customClaims attribute) or by their
+		 * enum value for well known ones. If the list is empty, all claims are made public.
+		 *
+		 * @default empty
+		 *
+		 * @see WellKnownClaim
+		 * @see WunderGraphConfigApplicationConfig.customClaims
+		 */
+		publicClaims?: TPublicClaim[];
 	};
 	links?: LinkConfiguration;
 	security?: SecurityConfig;
+
+	/**
+	 * OpenAPI generator configuration
+	 */
+	openApi?: {
+		title?: string;
+		apiVersion?: string;
+	};
 
 	/** @deprecated: Not used anymore */
 	dotGraphQLConfig?: any;
@@ -141,7 +219,7 @@ export interface CustomClaim {
 	 *
 	 * @default 'string'
 	 */
-	type?: 'string' | 'int' | 'float' | 'boolean';
+	type?: 'string' | 'int' | 'float' | 'boolean' | 'any';
 
 	/** If required is true, users without this claim will
 	 * fail to authenticate
@@ -167,6 +245,7 @@ export interface CodeGen {
 export type S3Provider = S3UploadConfiguration[];
 
 export interface ResolvedApplication {
+	Apis: Api<any>[];
 	EnableSingleFlight: boolean;
 	EngineConfiguration: Api<any>;
 	Operations: GraphQLOperation[];
@@ -253,6 +332,7 @@ export interface ResolvedWunderGraphConfig {
 		cookieBased: AuthProvider[];
 		tokenBased: TokenAuthProvider[];
 		customClaims: Record<string, CustomClaim>;
+		publicClaims: string[];
 		authorizedRedirectUris: ConfigurationVariable[];
 		authorizedRedirectUriRegexes: ConfigurationVariable[];
 		hooks: {
@@ -266,6 +346,7 @@ export interface ResolvedWunderGraphConfig {
 			secureCookieBlockKey: ConfigurationVariable;
 			csrfTokenSecret: ConfigurationVariable;
 		};
+		timeoutSeconds: ConfigurationVariable;
 	};
 	enableGraphQLEndpoint: boolean;
 	security: {
@@ -275,6 +356,9 @@ export interface ResolvedWunderGraphConfig {
 	webhooks: WebhookConfiguration[];
 	nodeOptions: ResolvedNodeOptions;
 	serverOptions?: ResolvedServerOptions;
+	experimental: {
+		orm: boolean;
+	};
 }
 
 export interface CodeGenerationConfig {
@@ -286,7 +370,25 @@ export interface CodeGenerationConfig {
 	wunderGraphDir: string;
 }
 
-const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promise<ResolvedWunderGraphConfig> => {
+const resolvePublicClaims = (config: WunderGraphConfigApplicationConfig) => {
+	const publicClaims: string[] = [];
+	for (const claim of config.authentication?.publicClaims ?? []) {
+		const customClaim = config.authentication?.customClaims?.[claim];
+		if (customClaim) {
+			publicClaims.push(customClaim.jsonPath);
+		} else {
+			if (!isWellKnownClaim(claim)) {
+				throw new Error(`invalid public claim ${claim}: not a custom nor a well known claim`);
+			}
+			publicClaims.push(claim);
+		}
+	}
+	return publicClaims;
+};
+
+const resolveConfig = async (
+	config: WunderGraphConfigApplicationConfig
+): Promise<{ config: ResolvedWunderGraphConfig; apis: Api<any>[] }> => {
 	const api = {
 		id: '',
 	};
@@ -338,10 +440,33 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	const roles = config.authorization?.roles || ['admin', 'user'];
 	const customClaims = Object.keys(config.authentication?.customClaims ?? {});
 
+	const apiIntrospectionOptions: ApiIntrospectionOptions = {
+		httpProxyUrl:
+			resolvedNodeOptions.defaultHttpProxyUrl !== undefined
+				? resolveConfigurationVariable(resolvedNodeOptions.defaultHttpProxyUrl)
+				: undefined,
+	};
+
+	// Generate the promises first, then await them all at once
+	// to run them in parallel
+	const generators = await Promise.all(config.apis);
+	const resolvedApis = await Promise.all(
+		generators.map((generator, index) => generator({ ...apiIntrospectionOptions, apiID: index.toString() }))
+	);
+
+	if (WG_DATA_SOURCE_POLLING_MODE) {
+		// To avoid having to deal with different return types, exit here when running in
+		// WG_DATA_SOURCE_POLLING_MODE. If there are any APIs with polling enabled this point
+		// will never be reached because we'll keep waiting while resolving the APIs while the
+		// polling runs at regular intervals.
+		process.exit(0);
+	}
+
 	const resolved = await resolveApplication(
 		roles,
 		customClaims,
-		config.apis,
+		resolvedApis,
+		apiIntrospectionOptions,
 		cors,
 		config.s3UploadProvider || [],
 		config.server?.hooks
@@ -354,7 +479,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 				.map((provider) => provider.resolve())
 				.map((provider) => ({
 					...provider,
-					id: _.camelCase(provider.id),
+					id: camelCase(provider.id),
 				}))) ||
 		[];
 
@@ -367,6 +492,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 			cookieBased: cookieBasedAuthProviders,
 			tokenBased: config.authentication?.tokenBased?.providers || [],
 			customClaims: config.authentication?.customClaims || {},
+			publicClaims: resolvePublicClaims(config),
 			authorizedRedirectUris:
 				config.authentication?.cookieBased?.authorizedRedirectUris?.map((stringOrEnvironmentVariable) => {
 					if (typeof stringOrEnvironmentVariable === 'string') {
@@ -402,6 +528,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 				secureCookieBlockKey: mapInputVariable(config.authentication?.cookieBased?.secureCookieBlockKey || ''),
 				csrfTokenSecret: mapInputVariable(config.authentication?.cookieBased?.csrfTokenSecret || ''),
 			},
+			timeoutSeconds: mapInputVariable(config?.authentication?.cookieBased?.timeoutSeconds ?? 0),
 		},
 		enableGraphQLEndpoint: config.security?.enableGraphQLEndpoint === true,
 		security: {
@@ -411,13 +538,13 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 		webhooks: [],
 		nodeOptions: resolvedNodeOptions,
 		serverOptions: resolvedServerOptions,
+		experimental: {
+			orm: config.experimental?.orm ?? false,
+		},
 	};
 
-	if (config.links) {
-		return addLinks(resolvedConfig, config.links);
-	}
-
-	return resolvedConfig;
+	const appConfig = config.links ? addLinks(resolvedConfig, config.links) : resolvedConfig;
+	return { config: appConfig, apis: resolvedApis };
 };
 
 const addLinks = (config: ResolvedWunderGraphConfig, links: LinkDefinition[]): ResolvedWunderGraphConfig => {
@@ -519,6 +646,7 @@ const addLink = (
 				sourceType: arg.type === 'objectField' ? ArgumentSource.OBJECT_FIELD : ArgumentSource.FIELD_ARGUMENT,
 				sourcePath: arg.path,
 				renderConfiguration: ArgumentRenderConfiguration.RENDER_ARGUMENT_AS_GRAPHQL_VALUE,
+				renameTypeTo: '',
 			});
 		});
 		config.application.EngineConfiguration.Fields.push(copy);
@@ -606,17 +734,16 @@ const resolveUploadConfiguration = (
 const resolveApplication = async (
 	roles: string[],
 	customClaims: string[],
-	apis: ILazyIntrospection<Api<any>>[],
+	resolvedApis: Api<any>[],
+	apiIntrospectionOptions: ApiIntrospectionOptions,
 	cors: CorsConfiguration,
 	s3?: S3Provider,
 	hooks?: HooksConfiguration
 ): Promise<ResolvedApplication> => {
-	await cleanOpenApiSpecs();
-	const apiPromises = apis.map((api) => api());
-	const resolvedApis = await Promise.all(apiPromises);
 	const merged = mergeApis(roles, customClaims, ...resolvedApis);
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
 	return {
+		Apis: resolvedApis,
 		EngineConfiguration: merged,
 		EnableSingleFlight: true,
 		Operations: [],
@@ -626,31 +753,66 @@ const resolveApplication = async (
 	};
 };
 
+const logLoadedOperations = (files: GraphQLOperationFile[] | TypeScriptOperationFile[] | undefined, suffix: string) => {
+	if (files) {
+		Logger.info(`found ${files.length ?? 0} ${suffix} operations`);
+		Logger.debug(files.map((op) => op.operation_name).join(', '));
+	}
+};
+
 // configureWunderGraphApplication generates the file "generated/wundergraph.config.json" and runs the configured code generators
 // the wundergraph.config.json file will be picked up by "wunderctl up" to configure your development environment
-export const configureWunderGraphApplication = (config: WunderGraphConfigApplicationConfig) => {
-	if (WG_DATA_SOURCE_POLLING_MODE) {
-		// if the DataSourcePolling environment variable is set to 'true',
-		// we don't run the regular config build process which would generate the whole config
-		// instead, we only resolve all Promises of the API Introspection
-		// This will keep polling the (configured) DataSources until `wunderctl up` stops the polling process
-		// If a change is detected in the DataSource, the cache is updated,
-		// which will trigger a re-run of the config build process
-		Promise.all(config.apis).catch();
-		return;
+export const configureWunderGraphApplication = <
+	TCustomClaim extends string,
+	TPublicClaim extends TCustomClaim | WellKnownClaim
+>(
+	config: WunderGraphConfigApplicationConfig<TCustomClaim, TPublicClaim>
+) => {
+	const wgDirAbs = process.env.WG_DIR_ABS;
+	if (!wgDirAbs) {
+		throw new Error('environment variable WG_DIR_ABS is empty');
 	}
 
+	let buildError: any = null;
+	const buildInfo: BuildInfo = {
+		success: false,
+		sdk: {
+			version: SDK_VERSION ?? unknown,
+		},
+		wunderctl: {
+			version: process.env.WUNDERCTL_VERSION ?? unknown,
+		},
+		node: {
+			version: process.version,
+		},
+		os: {
+			type: os.type(),
+			platform: os.platform(),
+			arch: os.arch(),
+			version: os.version(),
+			release: os.release(),
+		},
+		stats: {
+			// This must be read before passing the config to the resolveConfig function
+			totalApis: config.apis?.length ?? 0,
+			hasUploadProvider: !!config?.s3UploadProvider?.find((provider) => !!provider.name),
+			totalOperations: 0,
+			totalWebhooks: 0,
+			hasAuthenticationProvider:
+				!!config?.authentication?.tokenBased?.providers?.length ||
+				!!config?.authentication?.cookieBased?.providers?.length,
+		},
+	};
+
 	resolveConfig(config)
-		.then(async (resolved) => {
+		.then(async ({ config: resolved, apis }) => {
+			Logger.info({ sdk: buildInfo.sdk?.version, wunderctl: buildInfo.wunderctl?.version }, 'Building ...');
+
 			const app = resolved.application;
-
 			const schemaFileName = `wundergraph.schema.graphql`;
-
 			const schemaContent = '# Code generated by "wunderctl"; DO NOT EDIT.\n\n' + app.EngineConfiguration.Schema;
 
-			fs.writeFileSync(path.join('generated', schemaFileName), schemaContent, { encoding: 'utf8' });
-			done();
-			Logger.info(`${schemaFileName} updated`);
+			writeWunderGraphFileSync('schema', schemaContent, 'graphql');
 
 			/**
 			 * Webhooks
@@ -660,7 +822,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			if (fs.existsSync(webhooksDir)) {
 				const webhooks = await getWebhooks(path.join('webhooks'));
 				resolved.webhooks = webhooks.map((webhook) => {
-					let webhookConfig: WebhookConfiguration = {
+					const webhookConfig: WebhookConfiguration = {
 						name: webhook.name,
 						filePath: webhook.filePath,
 						verifier: undefined,
@@ -689,8 +851,31 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 				});
 			}
 
-			const loadedOperations = loadOperations(schemaFileName);
+			// Count total webhooks
+			if (buildInfo.stats) {
+				buildInfo.stats.totalWebhooks = resolved.webhooks?.length ?? 0;
+			}
+
+			if (config.generate?.operationsGenerator) {
+				const operationGenerationConfig = new OperationsGenerationConfig({ resolved, app: config, apis });
+				config.generate.operationsGenerator(operationGenerationConfig);
+				await generateOperations({
+					wgDirAbs,
+					operationGenerationConfig,
+					resolved,
+					app,
+					basePath: operationGenerationConfig.getBasePath(),
+					fields: operationGenerationConfig.getRootFields(),
+				});
+			}
+
+			const loadedOperations = await loadOperations(schemaFileName);
+
+			logLoadedOperations(loadedOperations.graphql_operation_files, 'GraphQL');
+			logLoadedOperations(loadedOperations.typescript_operation_files, 'TypeScript');
+
 			const operations = await resolveOperationsConfigurations(
+				wgDirAbs,
 				resolved,
 				loadedOperations,
 				app.EngineConfiguration.CustomJsonScalars || []
@@ -701,15 +886,14 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 				const ops = app.Operations.map(async (op) => {
 					const cfg = config.operations!;
 					const base = Object.assign({}, cfg.defaultConfig);
-					const customize =
-						cfg.custom !== undefined && cfg.custom[op.Name] !== undefined ? cfg.custom[op.Name] : undefined;
+					const customize = cfg.custom?.[op.Name];
 					switch (op.OperationType) {
 						case OperationType.MUTATION:
 							let mutationConfig = cfg.mutations(base);
-							if (customize as CustomizeMutation) {
-								mutationConfig = customize(mutationConfig);
+							if (customize) {
+								mutationConfig = (customize as CustomizeMutation)(mutationConfig);
 							}
-							return loadAndApplyNodeJsOperationOverrides({
+							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
@@ -718,17 +902,12 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 							});
 						case OperationType.QUERY:
 							let queryConfig = cfg.queries(base);
-							if (customize as CustomizeQuery) {
-								queryConfig = customize(queryConfig);
+							if (customize) {
+								queryConfig = (customize as CustomizeQuery)(queryConfig);
 							}
-							return loadAndApplyNodeJsOperationOverrides({
+							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
-								CacheConfig: {
-									enable: queryConfig.caching.enable,
-									maxAge: queryConfig.caching.maxAge,
-									public: queryConfig.caching.public,
-									staleWhileRevalidate: queryConfig.caching.staleWhileRevalidate,
-								},
+								CacheConfig: queryConfig.caching,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
 									required: op.AuthenticationConfig.required || queryConfig.authentication.required,
@@ -737,10 +916,10 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 							});
 						case OperationType.SUBSCRIPTION:
 							let subscriptionConfig = cfg.subscriptions(base);
-							if (customize as CustomizeSubscription) {
-								subscriptionConfig = customize(subscriptionConfig);
+							if (customize) {
+								subscriptionConfig = (customize as CustomizeSubscription)(subscriptionConfig);
 							}
-							return loadAndApplyNodeJsOperationOverrides({
+							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
@@ -753,6 +932,11 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 				});
 
 				app.Operations = await Promise.all(ops);
+			}
+
+			// Count total operations
+			if (buildInfo.stats) {
+				buildInfo.stats.totalOperations = app.Operations.length;
 			}
 
 			if (config.server?.hooks?.global?.httpTransport?.onOriginRequest) {
@@ -832,7 +1016,8 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 						subscriptionPollingIntervalMillis: 0,
 					};
 					op.HooksConfiguration.postResolve = hooks.postResolve !== undefined;
-					op.HooksConfiguration.mutatingPreResolve = hooks.mutatingPreResolve !== undefined;
+					op.HooksConfiguration.mutatingPreResolve =
+						'mutatingPreResolve' in hooks && hooks.mutatingPreResolve !== undefined;
 					op.HooksConfiguration.mutatingPostResolve = hooks.mutatingPostResolve !== undefined;
 					op.HooksConfiguration.customResolve = hooks.customResolve !== undefined;
 				}
@@ -850,7 +1035,8 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 						subscriptionPollingIntervalMillis: 0,
 					};
 					op.HooksConfiguration.postResolve = hooks.postResolve !== undefined;
-					op.HooksConfiguration.mutatingPreResolve = hooks.mutatingPreResolve !== undefined;
+					op.HooksConfiguration.mutatingPreResolve =
+						'mutatingPreResolve' in hooks && hooks.mutatingPreResolve !== undefined;
 					op.HooksConfiguration.mutatingPostResolve = hooks.mutatingPostResolve !== undefined;
 					op.HooksConfiguration.customResolve = hooks.customResolve !== undefined;
 				}
@@ -864,65 +1050,85 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 				if (op !== undefined && hooks !== undefined) {
 					op.HooksConfiguration.preResolve = hooks.preResolve !== undefined;
 					op.HooksConfiguration.postResolve = hooks.postResolve !== undefined;
-					op.HooksConfiguration.mutatingPreResolve = hooks.mutatingPreResolve !== undefined;
+					op.HooksConfiguration.mutatingPreResolve =
+						'mutatingPreResolve' in hooks && hooks.mutatingPreResolve !== undefined;
 					op.HooksConfiguration.mutatingPostResolve = hooks.mutatingPostResolve !== undefined;
 				}
 			}
 
-			if (config.codeGenerators) {
-				for (let i = 0; i < config.codeGenerators.length; i++) {
-					const gen = config.codeGenerators[i];
-					await GenerateCode({
-						wunderGraphConfig: resolved,
-						templates: gen.templates,
-						basePath: gen.path || 'generated',
-					});
-				}
-				done();
-				Logger.info(`Code generation completed.`);
+			const defaultCodeGenerators: CodeGen = { templates: [...templates.typescript.all] };
+
+			const combined = [
+				defaultCodeGenerators,
+				...(config.generate?.codeGenerators || []),
+				...(config.codeGenerators || []),
+			];
+			for (let i = 0; i < combined.length; i++) {
+				const gen = combined[i];
+				await GenerateCode({
+					wunderGraphConfig: resolved,
+					templates: gen.templates,
+					basePath: gen.path || generated,
+				});
 			}
 
-			const configJsonPath = path.join('generated', 'wundergraph.config.json');
+			// Update response types for TS operations. Do this only after code generation completes,
+			// since TS operations need some of the generated files
+			const tsOperations: TypeScriptOperation[] = app.Operations.filter(
+				(operation) => operation.ExecutionEngine == OperationExecutionEngine.ENGINE_NODEJS
+			);
+			await updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
+
+			const configJsonPath = path.join(generated, 'wundergraph.config.json');
 			const configJSON = ResolvedWunderGraphConfigToJSON(resolved);
 			// config json exists
 			if (fs.existsSync(configJsonPath)) {
-				const existing = fs.readFileSync(configJsonPath, 'utf8');
+				const existing = fs.readFileSync(configJsonPath, utf8);
 				if (configJSON !== existing) {
-					fs.writeFileSync(configJsonPath, configJSON, { encoding: 'utf8' });
-					Logger.info(`wundergraph.config.json updated`);
+					writeWunderGraphFileSync('config', configJSON);
 				}
 			} else {
-				fs.writeFileSync(configJsonPath, configJSON, { encoding: 'utf8' });
-				Logger.info(`wundergraph.config.json created`);
+				writeWunderGraphFileSync('config', configJSON);
 			}
 
-			done();
-
-			let publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl));
+			const publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl));
 
 			const postman = PostmanBuilder(app.Operations, {
 				baseURL: publicNodeUrl,
 			});
-			fs.writeFileSync(
-				path.join('generated', 'wundergraph.postman.json'),
-				JSON.stringify(postman.toJSON(), null, '  '),
-				{
-					encoding: 'utf8',
-				}
-			);
-			Logger.info(`wundergraph.postman.json updated`);
 
-			done();
+			writeWunderGraphFileSync('postman', postman.toJSON());
+
+			const openApiBuilder = new OpenApiBuilder({
+				title: config.openApi?.title || 'WunderGraph Application',
+				version: config.openApi?.apiVersion || '0',
+				baseURL: publicNodeUrl,
+			});
+
+			const openApiSpec = openApiBuilder.build(app.Operations);
+
+			writeWunderGraphFileSync('openapi', openApiSpec);
+
+			Logger.info('Build completed.');
+		})
+		.then(() => {
+			buildInfo.success = true;
 		})
 		.catch((e: any) => {
-			//throw e;
-			Logger.fatal(`Couldn't configure your WunderNode: ${e.stack}`);
-			process.exit(1);
+			buildError = e;
+		})
+		.finally(() => {
+			// Ensure that the build info is written even if the build fails
+			writeWunderGraphFileSync('build_info', buildInfo);
+
+			if (buildError) {
+				FatalLogger.fatal(buildError);
+				process.exit(1);
+			} else {
+				process.exit(0);
+			}
 		});
 };
-
-const total = 4;
-let doneCount = 0;
 
 const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputValue>(
 	record: Record<TKey, TValue>,
@@ -935,17 +1141,6 @@ const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputV
 	return output;
 };
 
-const done = () => {
-	doneCount++;
-	Logger.info(`${doneCount}/${total} done`);
-	if (doneCount === 3) {
-		setTimeout(() => {
-			Logger.info(`code generation completed`);
-			process.exit(0);
-		}, 10);
-	}
-};
-
 const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): string => {
 	const operations: Operation[] = config.application.Operations.map((op) => ({
 		content: removeHookVariables(op.Content),
@@ -956,12 +1151,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 		interpolationVariablesSchema: JSON.stringify(op.InterpolationVariablesSchema),
 		operationType: op.OperationType,
 		engine: op.ExecutionEngine,
-		cacheConfig: op.CacheConfig || {
-			enable: false,
-			maxAge: 0,
-			public: false,
-			staleWhileRevalidate: 0,
-		},
+		cacheConfig: op.CacheConfig,
 		authenticationConfig: {
 			authRequired: op.AuthenticationConfig.required,
 		},
@@ -1037,6 +1227,9 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 				};
 			}),
 			corsConfiguration: config.application.CorsConfiguration,
+			experimentalConfig: {
+				orm: config.experimental.orm ?? false,
+			},
 			authenticationConfig: {
 				cookieBased: {
 					providers: config.authentication.cookieBased,
@@ -1045,6 +1238,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 					blockKey: config.authentication.cookieSecurity.secureCookieBlockKey,
 					hashKey: config.authentication.cookieSecurity.secureCookieHashKey,
 					csrfSecret: config.authentication.cookieSecurity.csrfTokenSecret,
+					timeoutSeconds: config.authentication.timeoutSeconds,
 				},
 				hooks: config.authentication.hooks,
 				jwksBased: {
@@ -1055,6 +1249,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 						userInfoCacheTtlSeconds: provider.userInfoCacheTtlSeconds || 60 * 60,
 					})),
 				},
+				publicClaims: config.authentication.publicClaims,
 			},
 			allowedHostNames: config.security.allowedHostNames,
 			webhooks: config.webhooks,
@@ -1062,9 +1257,10 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 			serverOptions: config.serverOptions,
 		},
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
+		configHash: configurationHash(config),
 	};
 
-	return JSON.stringify(out, null, '  ');
+	return JSON.stringify(out, null, 2);
 };
 
 const mapDataSource = (source: DataSource): DataSourceConfiguration => {
@@ -1143,7 +1339,175 @@ const trimTrailingSlash = (url: string): string => {
 	return url.endsWith('/') ? url.slice(0, -1) : url;
 };
 
+// typeScriptOperationsResponseSchemas generates the response schemas for all TypeScript
+// operations at once, since it's several times faster than generating them one by one
+const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations: GraphQLOperation[]) => {
+	const functionTypeName = (op: GraphQLOperation) => `function_${op.Name}`;
+	const responseTypeName = (op: GraphQLOperation) => `${functionTypeName(op)}_Response`;
+
+	const programFile = 'typescript_schema_generator.ts';
+
+	const contents: string[] = ['import type { ExtractResponse } from "@wundergraph/sdk/operations";'];
+	const operationHashes: string[] = [];
+
+	for (const op of operations) {
+		const relativePath = `../operations/${op.PathName}`;
+		const name = functionTypeName(op);
+		contents.push(`import type ${name} from "${relativePath}";`);
+		contents.push(`export type ${responseTypeName(op)} = ExtractResponse<typeof ${name}>`);
+		const implementationFilePath = operationFilePath(wgDirAbs, op);
+		const implementationContents = fs.readFileSync(implementationFilePath, { encoding: 'utf8' });
+		operationHashes.push(objectHash(implementationContents));
+	}
+
+	const cache = new LocalCache().bucket('operationTypes');
+	const cacheKey = `ts.operationTypes.${objectHash([contents, operationHashes])}`;
+	const cachedData = await cache.getJSON(cacheKey);
+	if (cachedData) {
+		return cachedData as Record<string, JSONSchema>;
+	}
+
+	const basePath = path.join(wgDirAbs, generated);
+	const programPath = path.join(basePath, programFile);
+
+	fs.writeFileSync(programPath, contents.join('\n'), { encoding: utf8 });
+
+	const settings = {
+		required: true,
+		ignoreErrors: true,
+	};
+
+	// XXX: There's no way to silence warnings from TJS, override console.warn
+	const originalWarn = console.warn;
+	console.warn = (_message?: any, ..._optionalParams: any[]) => {};
+	// If we can find a tsconfig.json, use it
+	const tsConfigPath = await findUp('tsconfig.json', wgDirAbs);
+	let generator: JsonSchemaGenerator | null = null;
+	if (tsConfigPath) {
+		const tsConfigProgram = programFromConfig(tsConfigPath, [programPath]);
+		if (tsConfigProgram) {
+			generator = buildGenerator(tsConfigProgram, settings);
+		}
+	} else {
+		// Otherwise, use the default configuration feeding the TS files
+		const compilerOptions = {
+			strictNullChecks: true,
+			noEmit: true,
+			ignoreErrors: true,
+		};
+		const program = getProgramFromFiles([programPath], compilerOptions, basePath);
+		generator = buildGenerator(program, settings);
+	}
+	// generator can be null if the program can't be compiled
+	if (!generator) {
+		console.warn = originalWarn;
+		throw new Error('could not parse .ts operation files');
+	}
+	const schemas: Record<string, JSONSchema> = {};
+	for (const op of operations) {
+		try {
+			const schema = generator.getSchemaForSymbol(responseTypeName(op));
+			delete schema.$schema;
+			schemas[op.Name] = schema as JSONSchema;
+		} catch (e: any) {
+			Logger.warn(`could not generate response schema for ${op.Name}: ${e}`);
+		}
+	}
+	console.warn = originalWarn;
+
+	await cache.setJSON(cacheKey, schemas);
+	return schemas;
+};
+
+const updateTypeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations: GraphQLOperation[]) => {
+	const schemas = await typeScriptOperationsResponseSchemas(wgDirAbs, operations);
+	for (const op of operations) {
+		const schema = schemas[op.Name];
+		if (schema) {
+			op.ResponseSchema = schema;
+		} else {
+			// For functions that don't return anything, we return an empty JSON object
+			op.ResponseSchema = {
+				type: 'object',
+				additionalProperties: false,
+				properties: {},
+			};
+		}
+	}
+};
+
+const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFile) => {
+	const filePath = path.join(wgDirAbs, file.module_path);
+	const implementation = await loadNodeJsOperationDefaultModule(filePath);
+
+	if (implementation.internal) {
+		Logger.warn(
+			'Use of the internal prop is deprecated. ' +
+				'More details here: https://docs.wundergraph.com/docs/typescript-operations-reference/security#internal-operations'
+		);
+	}
+	const isInternal = implementation.internal || isInternalOperationByAPIMountPath(file.api_mount_path);
+
+	const operation: TypeScriptOperation = {
+		Name: file.operation_name,
+		PathName: file.api_mount_path,
+		Content: '',
+		Errors: implementation.errors?.map((E) => new E()) || [],
+		OperationType:
+			implementation.type === 'query'
+				? OperationType.QUERY
+				: implementation.type === 'mutation'
+				? OperationType.MUTATION
+				: OperationType.SUBSCRIPTION,
+		ExecutionEngine: OperationExecutionEngine.ENGINE_NODEJS,
+		VariablesSchema: { type: 'object', properties: {} },
+		InterpolationVariablesSchema: { type: 'object', properties: {} },
+		InternalVariablesSchema: { type: 'object', properties: {} },
+		InjectedVariablesSchema: { type: 'object', properties: {} },
+		// Use an empty default for now, we'll fill that later because we
+		// need some generated files to be ready
+		ResponseSchema: { type: 'object', properties: { data: {} } },
+		TypeScriptOperationImport: `function_${file.operation_name}`,
+		AuthenticationConfig: {
+			required: implementation.requireAuthentication || false,
+		},
+		LiveQuery: {
+			enable: true,
+			pollingIntervalSeconds: 5,
+		},
+		AuthorizationConfig: {
+			claims: [],
+			roleConfig: {
+				requireMatchAll: [],
+				requireMatchAny: [],
+				denyMatchAll: [],
+				denyMatchAny: [],
+			},
+		},
+		HooksConfiguration: {
+			preResolve: false,
+			postResolve: false,
+			mutatingPreResolve: false,
+			mutatingPostResolve: false,
+			mockResolve: {
+				enable: false,
+				subscriptionPollingIntervalMillis: 0,
+			},
+			httpTransportOnResponse: false,
+			httpTransportOnRequest: false,
+			customResolve: false,
+		},
+		VariablesConfiguration: {
+			injectVariables: [],
+		},
+		Internal: isInternal,
+		PostResolveTransformations: undefined,
+	};
+	return { operation, implementation };
+};
+
 const resolveOperationsConfigurations = async (
+	wgDirAbs: string,
 	config: ResolvedWunderGraphConfig,
 	loadedOperations: LoadOperationsOutput,
 	customJsonScalars: string[]
@@ -1163,15 +1527,22 @@ const resolveOperationsConfigurations = async (
 			case 'boolean':
 				claimType = ValueType.FLOAT;
 				break;
+			case 'any':
+				claimType = ValueType.ANY;
+				break;
 			case undefined:
 				claimType = ValueType.STRING;
 				break;
 			default:
 				throw new Error(`customClaim ${key} has invalid type ${claim.type}`);
 		}
+		const jsonPathComponents: string[] = claim.jsonPath.split('.');
+		if (jsonPathComponents.length === 0) {
+			throw new Error(`empty jsonPath in customClaim ${key}`);
+		}
 		return {
 			name: key,
-			jsonPathComponents: claim.jsonPath.split('.'),
+			jsonPathComponents,
 			type: claimType,
 			required: claim.required ?? true,
 		};
@@ -1182,87 +1553,59 @@ const resolveOperationsConfigurations = async (
 		customJsonScalars,
 		customClaims,
 	});
-	const nodeJSOperations: GraphQLOperation[] = [];
-	if (loadedOperations.typescript_operation_files)
+	const nodeJSOperations: TypeScriptOperation[] = [];
+	if (loadedOperations.typescript_operation_files) {
 		for (const file of loadedOperations.typescript_operation_files) {
 			try {
-				const filePath = path.join(process.env.WG_DIR_ABS!, file.module_path);
-				const implementation = await loadNodeJsOperationDefaultModule(filePath);
-				const operation: GraphQLOperation = {
-					Name: file.operation_name,
-					PathName: file.api_mount_path,
-					Content: '',
-					OperationType:
-						implementation.type === 'query'
-							? OperationType.QUERY
-							: implementation.type === 'mutation'
-							? OperationType.MUTATION
-							: OperationType.SUBSCRIPTION,
-					ExecutionEngine: OperationExecutionEngine.ENGINE_NODEJS,
-					VariablesSchema: { type: 'object', properties: {} },
-					InterpolationVariablesSchema: { type: 'object', properties: {} },
-					InternalVariablesSchema: { type: 'object', properties: {} },
-					InjectedVariablesSchema: { type: 'object', properties: {} },
-					ResponseSchema: { type: 'object', properties: { data: {} } },
-					TypeScriptOperationImport: `function_${file.operation_name}`,
-					AuthenticationConfig: {
-						required: implementation.requireAuthentication || false,
-					},
-					LiveQuery: {
-						enable: true,
-						pollingIntervalSeconds: 5,
-					},
-					AuthorizationConfig: {
-						claims: [],
-						roleConfig: {
-							requireMatchAll: [],
-							requireMatchAny: [],
-							denyMatchAll: [],
-							denyMatchAny: [],
-						},
-					},
-					HooksConfiguration: {
-						preResolve: false,
-						postResolve: false,
-						mutatingPreResolve: false,
-						mutatingPostResolve: false,
-						mockResolve: {
-							enable: false,
-							subscriptionPollingIntervalMillis: 0,
-						},
-						httpTransportOnResponse: false,
-						httpTransportOnRequest: false,
-						customResolve: false,
-					},
-					VariablesConfiguration: {
-						injectVariables: [],
-					},
-					Internal: implementation.internal ? implementation.internal : false,
-					PostResolveTransformations: undefined,
-				};
+				const { operation, implementation } = await loadNodeJsOperation(wgDirAbs, file);
 				nodeJSOperations.push(applyNodeJsOperationOverrides(operation, implementation));
 			} catch (e: any) {
 				logger.info(`Skipping operation ${file.file_path} due to error: ${e.message}`);
 			}
 		}
+	}
 	return {
 		operations: [...graphQLOperations.operations, ...nodeJSOperations],
 	};
 };
 
-const loadAndApplyNodeJsOperationOverrides = async (operation: GraphQLOperation): Promise<GraphQLOperation> => {
+// operationFilePath returns the absolute path for the implementation file of an operation
+const operationFilePath = (wgDirAbs: string, operation: GraphQLOperation) => {
+	let extension: string;
+	switch (operation.ExecutionEngine) {
+		case OperationExecutionEngine.ENGINE_GRAPHQL:
+			extension = '.graphql';
+			break;
+		case OperationExecutionEngine.ENGINE_NODEJS:
+			extension = '.ts';
+			break;
+	}
+	return path.join(wgDirAbs, 'operations', `${operation.PathName}${extension}`);
+};
+
+// loadAndApplyNodeJsOperationOverrides loads the implementation file from the given operation and
+// then calls applyNodeJsOperationOverrides with the implementation. If the operation doesn't use
+// the NODEJS engine, it returns the operation unchanged.
+const loadAndApplyNodeJsOperationOverrides = async (
+	wgDirAbs: string,
+	operation: TypeScriptOperation
+): Promise<TypeScriptOperation> => {
 	if (operation.ExecutionEngine !== OperationExecutionEngine.ENGINE_NODEJS) {
 		return operation;
 	}
-	const filePath = path.join(process.env.WG_DIR_ABS!, 'generated', 'bundle', 'operations', operation.PathName + '.js');
+	const filePath = path.join(wgDirAbs, generated, 'bundle', 'operations', operation.PathName + '.cjs');
 	const implementation = await loadNodeJsOperationDefaultModule(filePath);
 	return applyNodeJsOperationOverrides(operation, implementation);
 };
 
+// applyNodeJsOperationOverrides takes a GraphQLOperation using the NODEJS engine as well as the operation implementation
+// and sets the input schema, authorization and authentication configuration for the operation based on what the implementation
+// does. Notice that, for performance reasons, the response schema is set by updateTypeScriptOperationsResponseSchemas instead of
+// this function.
 const applyNodeJsOperationOverrides = (
-	operation: GraphQLOperation,
+	operation: TypeScriptOperation,
 	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any>
-): GraphQLOperation => {
+): TypeScriptOperation => {
 	if (overrides.inputSchema) {
 		const schema = zodToJsonSchema(overrides.inputSchema) as any;
 		operation.VariablesSchema = schema;
@@ -1274,10 +1617,18 @@ const applyNodeJsOperationOverrides = (
 			pollingIntervalSeconds: overrides.liveQuery.pollingIntervalSeconds,
 		};
 	}
+	if (overrides.cache) {
+		operation.CacheConfig = {
+			...overrides.cache,
+		};
+	}
 	if (overrides.requireAuthentication) {
 		operation.AuthenticationConfig = {
 			required: overrides.requireAuthentication,
 		};
+	}
+	if (overrides.errors) {
+		operation.Errors = overrides.errors.map((E) => new E());
 	}
 	if (overrides.rbac) {
 		operation.AuthorizationConfig = {
@@ -1291,4 +1642,12 @@ const applyNodeJsOperationOverrides = (
 		};
 	}
 	return operation;
+};
+
+const writeWunderGraphFileSync = (fileName: string, contents: object | string, extension = jsonExtension) => {
+	if (typeof contents !== 'string') {
+		contents = JSON.stringify(contents, null, 2);
+	}
+
+	fs.writeFileSync(path.join(generated, `wundergraph.${fileName}.${extension}`), contents, { encoding: utf8 });
 };

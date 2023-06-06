@@ -1,33 +1,28 @@
-import fetch from 'cross-fetch';
+import {
+	Client,
+	ClientConfig,
+	ClientResponse,
+	MutationRequestOptions,
+	OperationRequestOptions,
+	QueryRequestOptions,
+	SubscriptionRequestOptions,
+} from '../client';
+import { SpanKind, Tracer, trace, Context, propagation, Span } from '@opentelemetry/api';
+import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
+import { Attributes, Components } from './trace/attributes';
+import { attachErrorToSpan, setStatusFromResponseCode } from './trace/util';
 
-interface OperationArgs<OperationName, Input> {
-	operationName: OperationName;
-	input: Input;
-}
+// Web API compatible fetch API for nodejs.
+import { fetch } from '@whatwg-node/fetch';
 
-export interface Operation<Input, Response> {
+export interface Operation<Input extends object, Response> {
 	input: Input;
 	response: Response;
 }
 
 export interface Operations {
-	[key: string]: Operation<any, any>;
+	[key: string]: Operation<object, unknown>;
 }
-
-type ExtractInput<B> = B extends Operation<infer T, any> ? T : never;
-type ExtractResponse<B> = B extends Operation<any, infer T> ? T : never;
-
-// generic type to check if all keys of T are optional
-type AllOptional<T> = {
-	[P in keyof T]?: T[P];
-} extends T
-	? true
-	: false;
-
-// generic type that makes the field input optional if all fields of the Input type are optional
-type OptionalInput<T, OperationName> = AllOptional<ExtractInput<T>> extends true
-	? { operationName: OperationName; input?: ExtractInput<T> }
-	: { operationName: OperationName; input: ExtractInput<T> };
 
 export interface Options {
 	baseURL: string;
@@ -35,12 +30,75 @@ export interface Options {
 	clientRequest: any;
 }
 
-export class OperationsClient<Queries, Mutations, Subscriptions> {
-	constructor(options: Options) {
-		this.options = options;
+export interface OperationsClientConfig extends Omit<ClientConfig, 'csrfEnabled'> {
+	/**
+	 * raw JSON encoded client request
+	 */
+	clientRequest: any;
+	tracer?: Tracer;
+	traceContext?: Context;
+}
+
+export type InternalOperation = {
+	input?: object;
+	response: ClientResponse;
+};
+
+export type InternalOperationDefinition = {
+	[key: string]: InternalOperation;
+};
+
+export type InternalOperationsDefinition<
+	Queries extends InternalOperationDefinition = InternalOperationDefinition,
+	Mutations extends InternalOperationDefinition = InternalOperationDefinition,
+	Subscriptions extends InternalOperationDefinition = InternalOperationDefinition
+> = {
+	queries: Queries;
+	mutations: Mutations;
+	subscriptions: Subscriptions;
+};
+
+const forwardedHeaders = ['Authorization', 'X-Request-Id'];
+
+/**
+ * This client is used to execute custom operations on the Hooks server (server side only).
+ * The implementation is based on the `Client` class which is used on the web and server side.
+ * The implementation is an implementation detail and should not be used directly as a public API.
+ */
+export class OperationsClient<
+	Operations extends InternalOperationsDefinition = InternalOperationsDefinition
+> extends Client {
+	protected readonly csrfEnabled = false;
+
+	protected readonly clientRequest: any;
+	protected readonly tracer?: Tracer;
+	protected readonly traceContext?: Context;
+
+	constructor(options: OperationsClientConfig) {
+		const { clientRequest, customFetch = fetch, ...rest } = options;
+
+		super({
+			// fetch compatible but not the exact same type
+			customFetch: customFetch as any,
+			...rest,
+		});
+
+		this.clientRequest = clientRequest;
+		if (clientRequest?.headers) {
+			for (const header of forwardedHeaders) {
+				const value = clientRequest.headers[header];
+				if (value) {
+					this.baseHeaders[header] = value;
+				}
+			}
+		}
+		this.tracer = options.tracer;
+		this.traceContext = options.traceContext;
 	}
 
-	private readonly options: Options;
+	protected operationUrl(operationName: string) {
+		return this.options.baseURL + '/operations/' + operationName;
+	}
 
 	private subscriptions: AsyncGenerator<any>[] = [];
 
@@ -49,88 +107,142 @@ export class OperationsClient<Queries, Mutations, Subscriptions> {
 	}
 
 	public withHeaders = (headers: { [key: string]: string }) => {
-		return new OperationsClient<Queries, Mutations, Subscriptions>({
+		return new OperationsClient<Operations>({
 			...this.options,
 			extraHeaders: headers,
+			clientRequest: this.clientRequest,
 		});
 	};
 
-	public query = async <T extends keyof Queries>(
-		args: ExtractInput<Queries[T]> extends never ? Omit<OperationArgs<T, never>, 'input'> : OptionalInput<Queries[T], T>
-	): Promise<Queries[T] extends { response: any } ? Queries[T]['response'] : never> => {
-		const url = `${this.options.baseURL}/internal/operations/${String(args.operationName)}`;
-		const headers = Object.assign(
-			{},
-			{
-				'Content-Type': 'application/json',
-				...(this.options.extraHeaders || {}),
-			}
-		);
-		const input = (args as OperationArgs<T, ExtractInput<Queries[T]>>).input || undefined;
-		const res = await fetch(url, {
-			headers,
+	public query = async <
+		OperationName extends Extract<keyof Operations['queries'], string>,
+		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input'],
+		TResponse extends Operations['queries'][OperationName]['response'] = Operations['queries'][OperationName]['response']
+	>(
+		options: OperationName extends string ? QueryRequestOptions<OperationName, Input> : OperationRequestOptions
+	): Promise<ClientResponse<TResponse['data'], TResponse['error']>> => {
+		const searchParams = this.searchParams();
+		const params: any = { input: options.input, __wg: { clientRequest: this.clientRequest } };
+
+		if (options.subscribeOnce) {
+			searchParams.set('wg_subscribe_once', '');
+		}
+
+		const url = this.addUrlParams(this.operationUrl(options.operationName), searchParams);
+		const res = await this.makeRequest(url, {
 			method: 'POST',
-			body: JSON.stringify({ input, __wg: { clientRequest: this.options.clientRequest } }),
+			body: this.stringifyInput(params),
+			signal: options.abortSignal,
 		});
-		return (await res.json()) as Queries[T] extends { response: any } ? Queries[T]['response'] : never;
+
+		return this.fetchResponseToClientResponse(res);
 	};
-	public mutate = <T extends keyof Mutations>(
-		args: ExtractInput<Mutations[T]> extends never
-			? Omit<OperationArgs<T, never>, 'input'>
-			: OptionalInput<Mutations[T], T>
-	): Promise<Mutations[T] extends { response: any } ? Mutations[T]['response'] : never> => {
-		return this.query(args as any);
-	};
-	public subscribe = async <T extends keyof Subscriptions>(
-		args: ExtractInput<Subscriptions[T]> extends never
-			? Omit<OperationArgs<T, never>, 'input'>
-			: OptionalInput<Subscriptions[T], T>
-	): Promise<AsyncGenerator<Subscriptions[T] extends { response: any } ? Subscriptions[T]['response'] : never>> => {
-		const url = `${this.options.baseURL}/internal/operations/${String(args.operationName)}`;
-		const headers = Object.assign(
-			{},
-			{
-				'Content-Type': 'application/json',
-				Accept: 'text/event-stream',
-				...(this.options.extraHeaders || {}),
-			}
-		);
-		const input = (args as OperationArgs<T, ExtractInput<Subscriptions[T]>>).input || undefined;
-		const body = JSON.stringify({ input, __wg: { clientRequest: this.options.clientRequest } });
-		const abort = new AbortController();
-		const generator = async function* () {
-			try {
-				const res = await fetch(url, {
-					method: 'POST',
-					headers,
-					signal: abort.signal,
-					body,
-				});
-				if (res.status !== 200 || !res.body) {
-					throw new Error('Bad response' + JSON.stringify(res));
-				}
-				const reader = res.body.getReader();
-				const decoder = new TextDecoder();
-				let buffer = '';
-				while (true) {
-					const { done, value } = await reader.read();
-					if (done) {
-						break;
-					}
-					const data = decoder.decode(value);
-					buffer += data;
-					if (buffer.endsWith('\n\n')) {
-						const json = JSON.parse(buffer.substring(0, buffer.length - 2));
-						yield json as Subscriptions[T] extends { response: any } ? Subscriptions[T]['response'] : never;
-						buffer = '';
-					}
-				}
-			} finally {
-				abort.abort();
-			}
+
+	protected async makeRequest(url: string, init: RequestInit = {}) {
+		const method = init.method;
+		const spanName = `OperationsClient ${method}`;
+		let span: Span | undefined;
+
+		// Ensure that we have a headers object to inject into
+		init.headers = {
+			...init.headers,
 		};
-		const gen = generator();
-		this.subscriptions.push(gen);
-		return gen;
+
+		if (this.traceContext && this.tracer) {
+			span = this.tracer.startSpan(
+				spanName,
+				{
+					kind: SpanKind.CLIENT,
+					attributes: {
+						[SemanticAttributes.HTTP_METHOD]: method,
+						[SemanticAttributes.HTTP_URL]: url,
+						[Attributes.WG_COMPONENT_NAME]: Components.OPERATIONS_CLIENT,
+					},
+				},
+				this.traceContext
+			);
+			// Inject the span context into the headers
+			propagation.inject(trace.setSpan(this.traceContext, span), init.headers);
+		}
+
+		try {
+			const res = await this.fetchJson(url, init);
+
+			if (span) {
+				setStatusFromResponseCode(span, res.status);
+				span.setAttributes({
+					[SemanticAttributes.HTTP_STATUS_CODE]: res.status,
+					[SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH]: res.headers.get('content-length') ?? 0,
+				});
+			}
+
+			return res;
+		} catch (err: any) {
+			if (span) {
+				// Mark the request as errored and attach information about the error
+				attachErrorToSpan(span, err);
+			}
+			// Rethrow the error, we don't want to change the error handling
+			throw err;
+		} finally {
+			span?.end();
+		}
+	}
+
+	public mutate = async <
+		OperationName extends Extract<keyof Operations['mutations'], string>,
+		Input extends Operations['mutations'][OperationName]['input'] = Operations['mutations'][OperationName]['input'],
+		TResponse extends Operations['mutations'][OperationName]['response'] = Operations['mutations'][OperationName]['response']
+	>(
+		options: OperationName extends string ? MutationRequestOptions<OperationName, Input> : OperationRequestOptions
+	): Promise<ClientResponse<TResponse['data'], TResponse['error']>> => {
+		return this.query(options as any);
 	};
+
+	/**
+	 * Sets up a subscription using web streams.
+	 * @returns AsyncGenerator that yields the subscription events
+	 * @see https://docs.wundergraph.com/docs/architecture/wundergraph-rpc-protocol-explained#subscriptions
+	 */
+	public subscribe = async <
+		OperationName extends Extract<keyof Operations['subscriptions'], string>,
+		Input extends Operations['subscriptions'][OperationName]['input'] = Operations['subscriptions'][OperationName]['input'],
+		TResponse extends Operations['subscriptions'][OperationName]['response'] = Operations['subscriptions'][OperationName]['response'],
+		ReturnType = AsyncGenerator<ClientResponse<TResponse['data'], TResponse['error']>>
+	>(
+		options: OperationName extends string ? SubscriptionRequestOptions<OperationName, Input> : OperationRequestOptions
+	): Promise<ReturnType> => {
+		if (options.subscribeOnce) {
+			const self = this;
+			const generator = async function* () {
+				const res = await self.query(options);
+				yield res;
+			};
+			return generator() as any;
+		}
+
+		const sub = await this.subscribeWithFetch(options);
+
+		this.subscriptions.push(sub);
+
+		return sub as any;
+	};
+
+	protected async fetchSubscription<Data = any, Error = any>(
+		subscription: SubscriptionRequestOptions
+	): Promise<Response> {
+		const searchParams = this.searchParams();
+		const params: any = { input: subscription.input, __wg: { clientRequest: this.clientRequest } };
+
+		if (subscription.liveQuery) {
+			searchParams.set('wg_live', '');
+		}
+
+		const url = this.addUrlParams(this.operationUrl(subscription.operationName), searchParams);
+		return await this.makeRequest(url, {
+			method: 'POST',
+			body: this.stringifyInput(params),
+			signal: subscription.abortSignal,
+		});
+	}
 }

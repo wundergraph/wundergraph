@@ -57,7 +57,6 @@ exports[`complex operations with variables: testCase_0_variablesJSONSchema 1`] =
     }
   },
   "additionalProperties": false,
-  "definitions": {},
   "required": [
     "id"
   ]
@@ -127,6 +126,9 @@ exports[`complex operations with variables: testCase_1_variablesJSONSchema 1`] =
     }
   },
   "additionalProperties": false,
+  "required": [
+    "id"
+  ],
   "definitions": {
     "StringFilter": {
       "additionalProperties": false,
@@ -209,6 +211,7 @@ exports[`complex operations with variables: testCase_1_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "QueryMode",
           "enum": [
             "default",
             "insensitive"
@@ -303,10 +306,7 @@ exports[`complex operations with variables: testCase_1_variablesJSONSchema 1`] =
         }
       }
     }
-  },
-  "required": [
-    "id"
-  ]
+  }
 }"
 `;
 
@@ -509,6 +509,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "QueryMode",
           "enum": [
             "default",
             "insensitive"
@@ -1866,6 +1867,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "QueryMode",
           "enum": [
             "default",
             "insensitive"
@@ -2071,6 +2073,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "membership",
           "enum": [
             "owner",
             "maintainer",
@@ -2088,6 +2091,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
               "string",
               "null"
             ],
+            "x-graphql-enum-name": "membership",
             "enum": [
               "owner",
               "maintainer",
@@ -2106,6 +2110,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
               "string",
               "null"
             ],
+            "x-graphql-enum-name": "membership",
             "enum": [
               "owner",
               "maintainer",
@@ -2119,6 +2124,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "membership",
           "enum": [
             "owner",
             "maintainer",
@@ -2203,6 +2209,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "user_role",
           "enum": [
             "user",
             "admin"
@@ -2218,6 +2225,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
               "string",
               "null"
             ],
+            "x-graphql-enum-name": "user_role",
             "enum": [
               "user",
               "admin"
@@ -2234,6 +2242,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
               "string",
               "null"
             ],
+            "x-graphql-enum-name": "user_role",
             "enum": [
               "user",
               "admin"
@@ -2245,6 +2254,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "user_role",
           "enum": [
             "user",
             "admin"
@@ -2388,7 +2398,6 @@ exports[`complex schema operations: testCase_0_variablesJSONSchema 1`] = `
     }
   },
   "additionalProperties": false,
-  "definitions": {},
   "required": [
     "name",
     "personal"
@@ -2437,8 +2446,7 @@ exports[`operationVariablesToJSONSchema: testCase_0_variablesJSONSchema 1`] = `
       ]
     }
   },
-  "additionalProperties": false,
-  "definitions": {}
+  "additionalProperties": false
 }"
 `;
 
@@ -2545,6 +2553,7 @@ exports[`operationVariablesToJSONSchema: testCase_1_variablesJSONSchema 1`] = `
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "EnumInput",
           "enum": [
             "A",
             "B"
@@ -2552,6 +2561,7 @@ exports[`operationVariablesToJSONSchema: testCase_1_variablesJSONSchema 1`] = `
         },
         "nonNullEnum": {
           "type": "string",
+          "x-graphql-enum-name": "EnumInput",
           "enum": [
             "A",
             "B"
@@ -2639,20 +2649,17 @@ exports[`parseGraphQLOperations 1`] = `
       },
       "InjectedVariablesSchema": {
         "additionalProperties": false,
-        "definitions": {},
         "properties": {},
         "type": "object",
       },
       "Internal": false,
       "InternalVariablesSchema": {
         "additionalProperties": false,
-        "definitions": {},
         "properties": {},
         "type": "object",
       },
       "InterpolationVariablesSchema": {
         "additionalProperties": false,
-        "definitions": {},
         "properties": {},
         "type": "object",
       },
@@ -2704,7 +2711,6 @@ exports[`parseGraphQLOperations 1`] = `
       },
       "VariablesSchema": {
         "additionalProperties": false,
-        "definitions": {},
         "properties": {},
         "type": "object",
       },
@@ -2925,20 +2931,17 @@ exports[`parseGraphQLOperations 1`] = `
       },
       "InjectedVariablesSchema": {
         "additionalProperties": false,
-        "definitions": {},
         "properties": {},
         "type": "object",
       },
       "Internal": true,
       "InternalVariablesSchema": {
         "additionalProperties": false,
-        "definitions": {},
         "properties": {},
         "type": "object",
       },
       "InterpolationVariablesSchema": {
         "additionalProperties": false,
-        "definitions": {},
         "properties": {},
         "type": "object",
       },
@@ -2972,7 +2975,6 @@ exports[`parseGraphQLOperations 1`] = `
       },
       "VariablesSchema": {
         "additionalProperties": false,
-        "definitions": {},
         "properties": {},
         "type": "object",
       },

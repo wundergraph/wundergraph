@@ -1,9 +1,14 @@
-import { Client, ClientConfig, OperationRequestOptions } from './index';
+import {
+	AuthorizationError,
+	Client,
+	ClientConfig,
+	InputValidationError,
+	OperationRequestOptions,
+	ResponseError,
+} from './index';
 import nock from 'nock';
-import fetch from 'node-fetch';
-import { ResponseError } from './ResponseError';
+import { fetch } from '@whatwg-node/fetch';
 import { QueryRequestOptions } from './types';
-import { InputValidationError } from './InputValidationError';
 
 const newClient = (overrides?: Partial<ClientConfig>) => {
 	return new Client({
@@ -28,6 +33,7 @@ const newClient = (overrides?: Partial<ClientConfig>) => {
 
 describe('Client', () => {
 	const mockErrorJson = {
+		code: 'InputValidationError',
 		message: 'Bad Request: Invalid input',
 		errors: [
 			{
@@ -162,6 +168,9 @@ describe('Client', () => {
 						{
 							message: 'Error',
 						},
+						{
+							message: 'Error2',
+						},
 					],
 				});
 
@@ -171,8 +180,57 @@ describe('Client', () => {
 
 			scope.done();
 
+			expect(resp.error).toBeInstanceOf(ResponseError);
+			expect(resp.error.message).toBe('Error');
+			expect(resp.error.code).toBe('ResponseError');
+			expect(resp.error.statusCode).toBe(200);
+			expect(resp.error.errors).toEqual([
+				{
+					message: 'Error',
+				},
+				{
+					message: 'Error2',
+				},
+			]);
 			expect(resp.data).toBeUndefined();
-			expect(resp.error).toEqual(new Error('Error'));
+		});
+
+		test('Should set correct error code when origin returns a custom typescript operation error', async () => {
+			const client = newClient();
+
+			const scope = nock('https://api.com')
+				.matchHeader('accept', 'application/json')
+				.matchHeader('content-type', 'application/json')
+				.matchHeader('WG-SDK-Version', '1.0.0')
+				.get('/operations/Weather')
+				.query({ wg_api_hash: '123' })
+				.once()
+				.reply(200, {
+					errors: [
+						{
+							message: 'Error',
+							code: 'NotFound',
+						},
+					],
+				});
+
+			const resp = await client.query<QueryRequestOptions<'Weather'>>({
+				operationName: 'Weather',
+			});
+
+			scope.done();
+
+			expect(resp.error).toBeInstanceOf(ResponseError);
+			expect(resp.error.message).toBe('Error');
+			expect(resp.error.code).toBe('NotFound');
+			expect(resp.error.statusCode).toBe(200);
+			expect(resp.error.errors).toEqual([
+				{
+					message: 'Error',
+					code: 'NotFound',
+				},
+			]);
+			expect(resp.data).toBeUndefined();
 		});
 
 		test('Should return ResponseError when request fails with no response body', async () => {
@@ -184,8 +242,11 @@ describe('Client', () => {
 				operationName: 'Weather',
 			});
 
-			expect(resp.error).toBeInstanceOf(Error);
-			expect(resp.error).toEqual(new ResponseError('Response is not OK', 500));
+			expect(resp.error).toBeInstanceOf(ResponseError);
+			expect(resp.error.code).toBe('ResponseError');
+			expect(resp.error.statusCode).toBe(500);
+			expect(resp.error.message).toBe('Invalid response from server');
+			expect(resp.error.errors).toBeUndefined();
 			expect(resp.data).toBeUndefined();
 		});
 
@@ -198,8 +259,11 @@ describe('Client', () => {
 				operationName: 'Weather',
 			});
 
-			expect(resp.error).toBeInstanceOf(Error);
-			expect(resp.error).toEqual(new InputValidationError(mockErrorJson, 400));
+			expect(resp.error).toBeInstanceOf(InputValidationError);
+			expect(resp.error.code).toBe('InputValidationError');
+			expect(resp.error.statusCode).toBe(400);
+			expect(resp.error.message).toBe('Bad Request: Invalid input');
+			expect(resp.error.errors).toEqual([{ invalidValue: {}, message: 'some error message', propertyPath: '/' }]);
 			expect(resp.data).toBeUndefined();
 		});
 
@@ -213,8 +277,11 @@ describe('Client', () => {
 				operationName: 'Weather',
 			});
 
-			expect(resp.error).toBeInstanceOf(Error);
-			expect(resp.error).toEqual(new ResponseError(errorText, 400));
+			expect(resp.error).toBeInstanceOf(ResponseError);
+			expect(resp.error.code).toBe('ResponseError');
+			expect(resp.error.statusCode).toBe(400);
+			expect(resp.error.message).toBe('Some error text');
+			expect(resp.error.errors).toBeUndefined();
 			expect(resp.data).toBeUndefined();
 		});
 	});
@@ -353,7 +420,15 @@ describe('Client', () => {
 			csrfScope.done();
 			apiScope.done();
 
-			expect(resp.error).toEqual(new Error('Error'));
+			expect(resp.error).toBeInstanceOf(ResponseError);
+			expect(resp.error.code).toBe('ResponseError');
+			expect(resp.error.statusCode).toBe(200);
+			expect(resp.error.message).toBe('Error');
+			expect(resp.error.errors).toEqual([
+				{
+					message: 'Error',
+				},
+			]);
 			expect(resp.data).toBeUndefined();
 		});
 	});
@@ -383,8 +458,11 @@ describe('Client', () => {
 		csrfScope.done();
 		apiScope.done();
 
-		expect(resp.error).toBeInstanceOf(Error);
-		expect(resp.error).toEqual(new ResponseError('Response is not OK', 500));
+		expect(resp.error).toBeInstanceOf(ResponseError);
+		expect(resp.error.code).toBe('ResponseError');
+		expect(resp.error.statusCode).toBe(500);
+		expect(resp.error.message).toBe('Invalid response from server');
+		expect(resp.error.errors).toBeUndefined();
 		expect(resp.data).toBeUndefined();
 	});
 
@@ -413,8 +491,11 @@ describe('Client', () => {
 		csrfScope.done();
 		apiScope.done();
 
-		expect(resp.error).toBeInstanceOf(Error);
-		expect(resp.error).toEqual(new InputValidationError(mockErrorJson, 400));
+		expect(resp.error).toBeInstanceOf(ResponseError);
+		expect(resp.error.code).toBe('InputValidationError');
+		expect(resp.error.statusCode).toBe(400);
+		expect(resp.error.message).toBe('Bad Request: Invalid input');
+		expect(resp.error.errors).toEqual([{ invalidValue: {}, message: 'some error message', propertyPath: '/' }]);
 		expect(resp.data).toBeUndefined();
 	});
 
@@ -444,8 +525,46 @@ describe('Client', () => {
 		csrfScope.done();
 		apiScope.done();
 
-		expect(resp.error).toBeInstanceOf(Error);
-		expect(resp.error).toEqual(new ResponseError(errorText, 400));
+		expect(resp.error).toBeInstanceOf(ResponseError);
+		expect(resp.error.code).toBe('ResponseError');
+		expect(resp.error.statusCode).toBe(400);
+		expect(resp.error.message).toBe('Error text');
+		expect(resp.error.errors).toBeUndefined();
+		expect(resp.data).toBeUndefined();
+	});
+
+	test('Should return AuthorizationError when server responds with 401', async () => {
+		const client = newClient();
+
+		const csrfScope = nock('https://api.com')
+			.matchHeader('accept', 'text/plain')
+			.matchHeader('WG-SDK-Version', '1.0.0')
+			.get('/auth/cookie/csrf')
+			.reply(200, 'csrf');
+
+		const apiScope = nock('https://api.com')
+			.matchHeader('accept', 'application/json')
+			.matchHeader('content-type', 'application/json')
+			.matchHeader('WG-SDK-Version', '1.0.0')
+			.post('/operations/CreateWeather')
+			.query({ wg_api_hash: '123' })
+			.once()
+			.reply(401, 'Not authorized');
+
+		const resp = await client.mutate({
+			operationName: 'CreateWeather',
+		});
+
+		expect(resp.error).toBeInstanceOf(AuthorizationError);
+		expect(resp.error.code).toBe('AuthorizationError');
+		expect(resp.error.statusCode).toBe(401);
+		expect(resp.error.message).toBe('Not authorized');
+		expect(resp.error.errors).toBeUndefined();
+		expect(resp.data).toBeUndefined();
+
+		csrfScope.done();
+		apiScope.done();
+
 		expect(resp.data).toBeUndefined();
 	});
 });

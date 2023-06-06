@@ -19,8 +19,8 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 
-	"github.com/wundergraph/wundergraph/pkg/apicache"
 	"github.com/wundergraph/wundergraph/pkg/authentication"
+	"github.com/wundergraph/wundergraph/pkg/cacheheaders"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
@@ -58,10 +58,9 @@ func newPipeline(resolver *FakeResolver, operation *wgpb.Operation) *hooks.Synch
 	}
 	config := hooks.SynchronousOperationPipelineConfig{
 		PipelineConfig: hooks.PipelineConfig{
-			Authenticator: hooksAuthenticator,
-			Operation:     operation,
-			Transformer:   &postresolvetransform.Transformer{},
-			Logger:        zap.NewNop(),
+			Operation:   operation,
+			Transformer: &postresolvetransform.Transformer{},
+			Logger:      zap.NewNop(),
 		},
 		Resolver: resolver,
 		Plan:     preparedPlan,
@@ -155,6 +154,7 @@ func TestQueryHandler_ETag(t *testing.T) {
 			Response: &resolve.GraphQLResponse{},
 		},
 		pool:                   pool.New(),
+		cacheHeaders:           cacheheaders.New(nil, ""),
 		operation:              operation,
 		rbacEnforcer:           &authentication.RBACEnforcer{},
 		stringInterpolator:     interpolateNothing,
@@ -369,12 +369,14 @@ func TestQueryHandler_SubscriptionJsonPatch(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient("http://localhost:8080", zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: "http://localhost:8080",
+		Logger:    zap.NewNop(),
+	})
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
-		Client:        hooksClient,
-		Authenticator: hooksAuthenticator,
-		Operation:     operation,
-		Logger:        zap.NewNop(),
+		Client:    hooksClient,
+		Operation: operation,
+		Logger:    zap.NewNop(),
 	}
 	hooksPipelineConfig := hooks.SubscriptionOperationPipelineConfig{
 		PipelineConfig: hooksPipelineCommonConfig,
@@ -450,12 +452,14 @@ func TestQueryHandler_Subscription(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient("http://localhost:8080", zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: "http://localhost:8080",
+		Logger:    zap.NewNop(),
+	})
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
-		Client:        hooksClient,
-		Authenticator: hooksAuthenticator,
-		Operation:     operation,
-		Logger:        zap.NewNop(),
+		Client:    hooksClient,
+		Operation: operation,
+		Logger:    zap.NewNop(),
 	}
 	hooksPipelineConfig := hooks.SubscriptionOperationPipelineConfig{
 		PipelineConfig: hooksPipelineCommonConfig,
@@ -529,7 +533,10 @@ func TestFunctionsHandler_Default(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -594,7 +601,10 @@ func TestFunctionsHandler_Live(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -660,7 +670,10 @@ func TestFunctionsHandler_Live_JSONPatch(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -731,7 +744,10 @@ func TestFunctionsHandler_Subscription(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_SUBSCRIPTION,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -800,7 +816,10 @@ func TestFunctionsHandler_Subscription_JSONPatch(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_SUBSCRIPTION,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -870,7 +889,10 @@ func TestFunctionsHandler_Subscription_JSONPatch_SSE(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_SUBSCRIPTION,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -921,9 +943,6 @@ func TestQueryHandler_Caching(t *testing.T) {
 	validateNothing, err := inputvariables.NewValidator(`{"type":"object","properties":{"id":{"type":"number"}}}`, true)
 	assert.NoError(t, err)
 
-	cache, err := apicache.NewInMemory(1e4)
-	assert.NoError(t, err)
-
 	resolver := &FakeResolver{
 		resolve: func(ctx *resolve.Context, response *resolve.GraphQLResponse, data []byte) []byte {
 			return []byte(`{"data":{"me":{"name":"Jens"}}}`)
@@ -941,13 +960,11 @@ func TestQueryHandler_Caching(t *testing.T) {
 			Response: &resolve.GraphQLResponse{},
 		},
 		pool: pool.New(),
-		cacheConfig: cacheConfig{
-			enable:               true,
-			maxAge:               2,
-			public:               true,
-			staleWhileRevalidate: 0,
-		},
-		cache:                  cache,
+		cacheHeaders: cacheheaders.New(&cacheheaders.CacheControl{
+			MaxAge:               2,
+			Public:               true,
+			StaleWhileRevalidate: 0,
+		}, ""),
 		operation:              operation,
 		rbacEnforcer:           &authentication.RBACEnforcer{},
 		stringInterpolator:     interpolateNothing,
@@ -973,10 +990,13 @@ func TestQueryHandler_Caching(t *testing.T) {
 	res.Headers().ValueEqual("Etag", []string{"W/\"15825766644480138524\""})
 	res.Headers().ValueEqual("Cache-Control", []string{"public, max-age=2, stale-while-revalidate=0"})
 	res.Headers().ValueEqual("Age", []string{"0"})
-	res.Headers().ValueEqual(WgCacheHeader, []string{"MISS"})
 	res.Body().Equal(`{"data":{"me":{"name":"Jens"}}}`)
 
-	handler.cacheConfig.public = false
+	handler.cacheHeaders = cacheheaders.New(&cacheheaders.CacheControl{
+		MaxAge:               2,
+		Public:               false,
+		StaleWhileRevalidate: 0,
+	}, "")
 
 	time.Sleep(time.Second)
 
@@ -987,11 +1007,10 @@ func TestQueryHandler_Caching(t *testing.T) {
 	res.Status(http.StatusOK)
 	res.Headers().ValueEqual("Etag", []string{"W/\"15825766644480138524\""})
 	res.Headers().ValueEqual("Cache-Control", []string{"private, max-age=2, stale-while-revalidate=0"})
-	res.Headers().ValueEqual("Age", []string{"1"})
-	res.Headers().ValueEqual(WgCacheHeader, []string{"HIT"})
+	res.Headers().ValueEqual("Age", []string{"0"})
 	res.Body().Equal(`{"data":{"me":{"name":"Jens"}}}`)
 
-	assert.Equal(t, 1, resolver.invocations)
+	assert.Equal(t, 2, resolver.invocations)
 
 	res = e.GET("/api/main").
 		WithQuery("wg_variables", `{"id":123}`).
@@ -1001,8 +1020,7 @@ func TestQueryHandler_Caching(t *testing.T) {
 	res.Status(http.StatusNotModified)
 	res.Headers().ValueEqual("Etag", []string{"W/\"15825766644480138524\""})
 	res.Headers().ValueEqual("Cache-Control", []string{"private, max-age=2, stale-while-revalidate=0"})
-	res.Headers().ValueEqual("Age", []string{"1"})
-	res.Headers().ValueEqual(WgCacheHeader, []string{"HIT"})
+	res.Headers().ValueEqual("Age", []string{"0"})
 	res.Body().Empty()
 
 	time.Sleep(time.Second * 2)
@@ -1015,10 +1033,9 @@ func TestQueryHandler_Caching(t *testing.T) {
 	res.Headers().ValueEqual("Etag", []string{"W/\"15825766644480138524\""})
 	res.Headers().ValueEqual("Cache-Control", []string{"private, max-age=2, stale-while-revalidate=0"})
 	res.Headers().ValueEqual("Age", []string{"0"})
-	res.Headers().ValueEqual(WgCacheHeader, []string{"MISS"})
 	res.Body().Equal(`{"data":{"me":{"name":"Jens"}}}`)
 
-	assert.Equal(t, 2, resolver.invocations)
+	assert.Equal(t, 4, resolver.invocations)
 
 	time.Sleep(time.Second)
 
@@ -1030,11 +1047,10 @@ func TestQueryHandler_Caching(t *testing.T) {
 	res.Status(http.StatusNotModified)
 	res.Headers().ValueEqual("Etag", []string{"W/\"15825766644480138524\""})
 	res.Headers().ValueEqual("Cache-Control", []string{"private, max-age=2, stale-while-revalidate=0"})
-	res.Headers().ValueEqual("Age", []string{"1"})
-	res.Headers().ValueEqual(WgCacheHeader, []string{"HIT"})
+	res.Headers().ValueEqual("Age", []string{"0"})
 	res.Body().Empty()
 
-	assert.Equal(t, 2, resolver.invocations)
+	assert.Equal(t, 5, resolver.invocations)
 }
 
 func TestLogMiddleware_Debug(t *testing.T) {

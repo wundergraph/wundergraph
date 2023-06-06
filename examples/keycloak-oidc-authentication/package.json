@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "run-p dev wundergraph open",
-    "wundergraph": "wunderctl up --debug",
-    "build:wundergraph": "wunderctl generate --debug",
+    "wundergraph": "wunderctl up --logs",
+    "build:wundergraph": "wunderctl generate",
     "build:next": "next build",
     "build": "npm run build:wundergraph && npm run build:next",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3003",
@@ -14,13 +14,13 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.8.8",
-    "@wundergraph/sdk": "^0.135.0",
+    "@wundergraph/nextjs": "^0.11.5",
+    "@wundergraph/sdk": "^0.163.1",
     "graphql": "^16.3.0",
     "next": "^13.1.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "swr": "^2.0.0"
+    "swr": "^2.1.5"
   },
   "devDependencies": {
     "@types/node": "^17.0.15",

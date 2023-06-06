@@ -1,7 +1,6 @@
 ---
 title: Configure GraphQL Data Source
-pageTitle: WunderGraph - Configure GraphQL Data Source
-description:
+description: Introspect GraphQL services and add them to your Virtual Graph.
 ---
 
 The `GraphQL` data source allows you to introspect GraphQL services and add them to your virtual Graph.
@@ -15,11 +14,11 @@ const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
   requestTimeoutSeconds: 10, // optional
-})
+});
 
 configureWunderGraphApplication({
   apis: [countries],
-})
+});
 ```
 
 First, define the `url` which will be used to introspect the GraphQL service.

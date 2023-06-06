@@ -4,11 +4,11 @@ usage()
 {
   echo "Usage: $0 [-u]" 1>&2
   echo "This script tests a single example, optionally updating dependencies to point to workspace" 1>&2
-  echo "It must be run from the example directory e.g. ../../scripts/test-example.sh" 1>&2
+  echo "It must be run from the example directory e.g. ../../scripts/test-example/single.sh" 1>&2
   exit 2
 }
 
-default_node_url=http://localhost:9991
+default_node_url=http://127.0.0.1:9991
 update_package_json="no"
 
 kill_with_children() {
@@ -87,6 +87,20 @@ while ! test -f .wundergraph/generated/wundergraph.schema.graphql; do
     kill -0 ${pid}
 done
 
+# Wait for server health check
+while true; do
+    if ! curl -f -s ${default_node_url}/health; then
+        continue
+    fi
+    health=$(curl -f -s ${default_node_url}/health)
+    node_status=$(echo ${health} | jq .nodeStatus)
+    server_status=$(echo ${health} | jq .serverStatus)
+    if [ x${node_status} = 'x"READY"' ] && ([ x${server_status} = 'x"READY' ] || [ x${server_status} = 'x"SKIP"' ]); then
+        break
+    fi
+    # Make sure npm start is still running
+    kill -0 ${pid}
+done
 
 # Run test if available, otherwise just build or type-check
 if grep -q '"test"' package.json; then
@@ -102,7 +116,7 @@ fi
 # If the example uses Next.js, compile it
 if grep -q '"build:next"' package.json; then
     # This example doesn't build under a pnpm workspace
-    if !grep -q '"nextjs-react-query"' package.json; then
+    if ! grep -q '"wundergraph-nextjs-react-query"' package.json; then
         npm run build:next
     fi
 elif grep -q '"check"' package.json; then

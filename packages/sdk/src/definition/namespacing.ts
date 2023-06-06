@@ -29,7 +29,7 @@ import {
 import { isRootType } from '../graphql/configuration';
 import { Api, DataSource } from './index';
 
-const wellKnownTypeNames: string[] = [
+export const wellKnownTypeNames: string[] = [
 	'Query',
 	'Mutation',
 	'Subscription',
@@ -46,6 +46,7 @@ const wellKnownTypeNames: string[] = [
 	'UUID',
 	'_Any',
 	'UnspecifiedHttpResponse',
+	'_Row',
 ];
 
 const uniqueWellKnownTypes = (schema: DocumentNode): string[] => {
@@ -501,7 +502,7 @@ export const applyNamespaceToApi = (api: Api<unknown>, apiNamespace: string, ski
 	const interpolateVariableDefinitionAsJSON = api.interpolateVariableDefinitionAsJSON.map(
 		(type) => `${apiNamespace}_${type}`
 	);
-	return new Api(appliedSchema, datasources, fields, types, interpolateVariableDefinitionAsJSON);
+	return new Api(appliedSchema, apiNamespace, datasources, fields, types, interpolateVariableDefinitionAsJSON);
 };
 
 const applyNamespaceToDataSourceCustom = (datasource: DataSource, namespace?: string): any => {

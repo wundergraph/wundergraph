@@ -1,7 +1,6 @@
 ---
-title: TypeScript Client
-pageTitle: WunderGraph TypeScript Client
-description: WunderGraph TypeScript Client reference
+title: TypeScript client
+description: Reference documentation for the WunderGraph TypeScript Client
 ---
 
 This is the base implementation of the WunderGraph HTTP protocol in TypeScript that can be used on both browser and server environments.
@@ -22,7 +21,7 @@ configureWunderGraphApplication({
       path: '../generated',
     },
   ],
-})
+});
 ```
 
 ## Create the client
@@ -30,9 +29,9 @@ configureWunderGraphApplication({
 The generated `createClient` will return a fully typesafe client that can be used to execute operations.
 
 ```ts
-import { createClient } from 'generated/client'
+import { createClient } from 'generated/client';
 
-const client = createClient()
+const client = createClient();
 ```
 
 ## Client configuration
@@ -44,7 +43,7 @@ The client can be configured with a custom baseURL.
 ```ts
 const client = createClient({
   baseURL: 'https://my-custom-base-url.com',
-})
+});
 ```
 
 ### Node.js support
@@ -60,11 +59,11 @@ npm i node-fetch
 And add it to the client configuration.
 
 ```ts
-import fetch from 'node-fetch'
+import fetch from 'node-fetch';
 
 const client = createClient({
   customFetch: fetch,
-})
+});
 ```
 
 ### Browser
@@ -72,13 +71,13 @@ const client = createClient({
 If you target older browsers you will need a polyfill for fetch, AbortController, AbortSignal and possibly Promise.
 
 ```ts
-import 'promise-polyfill/src/polyfill'
-import 'yet-another-abortcontroller-polyfill'
-import { fetch } from 'whatwg-fetch'
+import 'promise-polyfill/src/polyfill';
+import 'yet-another-abortcontroller-polyfill';
+import { fetch } from 'whatwg-fetch';
 
 const client = createClient({
   customFetch: fetch,
-})
+});
 ```
 
 ### Adding custom headers
@@ -88,13 +87,13 @@ const client = createClient({
   extraHeaders: {
     customHeader: 'value',
   },
-})
+});
 
 // or
 
 client.setExtraHeaders({
   customHeader: 'value',
-})
+});
 ```
 
 ## Methods
@@ -107,7 +106,7 @@ const response = await client.query({
   input: {
     hello: 'World',
   },
-})
+});
 ```
 
 ### Mutation
@@ -118,7 +117,7 @@ const response = await client.mutate({
   input: {
     name: 'WunderGraph',
   },
-})
+});
 ```
 
 ### LiveQuery
@@ -133,7 +132,7 @@ client.subscribe(
     liveQuery: true,
   },
   (response) => {}
-)
+);
 ```
 
 ### Subscription
@@ -147,7 +146,7 @@ client.subscribe(
     },
   },
   (response) => {}
-)
+);
 ```
 
 ### One-of subscription
@@ -165,7 +164,7 @@ const response = await client.subscribe(
     subscribeOnce: true,
   },
   (response) => {}
-)
+);
 ```
 
 ### Upload files
@@ -174,7 +173,7 @@ const response = await client.subscribe(
 const { fileKeys } = await client.uploadFiles({
   provider: S3Provider.minio,
   files,
-})
+});
 ```
 
 ## Auth
@@ -182,7 +181,7 @@ const { fileKeys } = await client.uploadFiles({
 ### Login
 
 ```ts
-client.login('github')
+client.login('github');
 ```
 
 ### Log out
@@ -190,13 +189,13 @@ client.login('github')
 ```ts
 client.logout({
   logoutOpenidConnectProvider: true,
-})
+});
 ```
 
 ### Fetch user
 
 ```ts
-const user = await client.fetchUser()
+const user = await client.fetchUser();
 ```
 
 ## AbortController
@@ -204,16 +203,16 @@ const user = await client.fetchUser()
 Almost all methods accept an AbortController instance that can be used to cancel the request.
 
 ```ts
-const controller = new AbortController()
+const controller = new AbortController();
 
 const { fileKeys } = await client.uploadFiles({
   abortSignal: abortController.signal,
   provider: S3Provider.minio,
   files,
-})
+});
 
 // cancel the request
-controller.abort()
+controller.abort();
 ```
 
 ## Error handling (ClientResponseError)
@@ -235,12 +234,12 @@ const { data, error } = await client.query({
   input: {
     hello: 'World',
   },
-})
+});
 
 if (error instanceof GraphQLResponseError) {
-  error.errors[0].location
+  error.errors[0].location;
 } else if (error instanceof ResponseError) {
-  error.statusCode
+  error.statusCode;
 }
 ```
 
@@ -256,23 +255,23 @@ The `errors` property is an array of errors with the following structure:
 
 ```ts
 type error = {
-  propertyPath: string // provides the path to the error (useful if the error nested)
-  message: string // the error
-  invalidValue: any // the invalid input
-}
+  propertyPath: string; // provides the path to the error (useful if the error nested)
+  message: string; // the error
+  invalidValue: any; // the invalid input
+};
 ```
 
 ```ts
-import { InputValidationError } from './InputValidationError'
+import { InputValidationError } from './InputValidationError';
 
 const { data, error } = await client.query({
   operationName: 'Hello',
   input: {}, // a required input is missing
-})
+});
 
 if (error instanceof InputValidationError) {
-  error.message // the top level error
-  error.errors // an array of errors
+  error.message; // the top level error
+  error.errors; // an array of errors
 }
 ```
 

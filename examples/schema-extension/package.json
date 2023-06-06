@@ -4,10 +4,10 @@
   "description": "",
   "scripts": {
     "start": "run-p start:services start:server start:api",
-    "start:api": "wait-on tcp:8081 && wunderctl up --debug",
+    "start:api": "wait-on tcp:8081 && wunderctl up",
     "start:services": "docker-compose up -d",
     "start:server": "wait-on -d 5000 tcp:54322 && cd server && go run server.go",
-    "build:wundergraph": "wunderctl generate --debug",
+    "build:wundergraph": "wunderctl generate",
     "build": "npm run build:wundergraph",
     "cleanup": "docker-compose down -v",
     "check": "tsc --noEmit",
@@ -16,7 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.135.0",
+    "@wundergraph/sdk": "^0.163.1",
     "graphql": "^16.3.0"
   },
   "devDependencies": {

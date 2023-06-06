@@ -1,7 +1,6 @@
 ---
-title: Post Authentication Hook
-pageTitle: WunderGraph - Post Authentication Hook
-description:
+title: postAuthentication hook
+description: Reference documentation for the postAuthentication hook
 ---
 
 The `postAuthentication` hook gets called after the user has been authenticated.
@@ -17,7 +16,8 @@ the `customResolve` hook is called with the following parameters:
 - `user`: The user object when the user is authenticated
 - `clientRequest`: The original client request object, including Headers
 - `log`: The logger object
-- `internalClient`: The internal client object
+- `operations`: The operations client, used to call other (internal) operations
+- `internalClient`: The internal client object, _deprecated_
 - `response`: The response object (only for postResolve hooks)
 - `input`: The input object (only for Operation hooks)
 
@@ -27,13 +27,13 @@ e.g. to talk to a database or another service to enrich a response or manipulate
 
 ```typescript
 // wundergraph.server.ts
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     authentication: {
       postAuthentication: async ({ user, log }) => {
-        log.info(`User ${user.id} has been authenticated`)
+        log.info(`User ${user.id} has been authenticated`);
       },
     },
   },
-}))
+}));
 ```

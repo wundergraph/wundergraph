@@ -1,7 +1,6 @@
 ---
-title: Custom Resolve Hook
-pageTitle: WunderGraph - Custom Resolve Hook
-description:
+title: customResolve hook
+description: Reference documentation for the customResolve hook
 ---
 
 The `customResolve` hook allows you to override the default resolve behavior of WunderGraph.
@@ -19,7 +18,8 @@ the `customResolve` hook is called with the following parameters:
 - `user`: The user object when the user is authenticated
 - `clientRequest`: The original client request object, including Headers
 - `log`: The logger object
-- `internalClient`: The internal client object
+- `operations`: The operations client, used to call other (internal) operations
+- `internalClient`: The internal client object, _deprecated_
 - `response`: The response object (only for postResolve hooks)
 - `input`: The input object (only for Operation hooks)
 
@@ -29,17 +29,11 @@ e.g. to talk to a database or another service to enrich a response or manipulate
 
 ```typescript
 // wundergraph.server.ts
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     queries: {
       Dragons: {
-        customResolve: async ({
-          user,
-          clientRequest,
-          log,
-          input,
-          internalClient,
-        }) => {
+        customResolve: async ({ user, clientRequest, log, input, operations, internalClient }) => {
           return {
             data: {
               dragons: [
@@ -48,10 +42,10 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
                 },
               ],
             },
-          }
+          };
         },
       },
     },
   },
-}))
+}));
 ```

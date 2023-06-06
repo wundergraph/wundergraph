@@ -1,7 +1,6 @@
 ---
 title: WunderGraph Conventions
-pageTitle: WunderGraph - Conventions
-description:
+description: Everything you need to know about WunderGraph Conventions.
 ---
 
 - A valid WunderGraph application must have `.wundergraph` directory
@@ -40,7 +39,7 @@ Here's an example:
 ```typescript
 // wundergraph.config.ts
 
-import { EnvironmentVariable } from '@wundergraph/sdk'
+import { EnvironmentVariable } from '@wundergraph/sdk';
 
 configureWunderGraphApplication({
   authentication: {
@@ -56,7 +55,7 @@ configureWunderGraphApplication({
       authorizedRedirectUris: ['http://localhost:3000'],
     },
   },
-})
+});
 ```
 
 Once we generate the configuration,
@@ -89,17 +88,20 @@ So, you're safe to use `process.env.{VARIABLE_NAME}` in your `wundergraph.server
 
 By default, when no options are passed to `wundergraph.config.ts` or `wundergraph.server.ts`, we will use environment variables with default values:
 
-| Variable name        | Description                                             | Default value           |
-| -------------------- | ------------------------------------------------------- | ----------------------- |
-| `WG_LOG_LEVEL`       | The log level of the `WunderNode`/`WunderGraph Server`. | `info`                  |
-| `WG_NODE_URL`        | The internal URL of the `WunderNode`.                   | `http://localhost:9991` |
-| `WG_PUBLIC_NODE_URL` | The publicly available URL of the `WunderNode`.         | `http://localhost:9991` |
-| `WG_NODE_HOST`       | The host of the `WunderNode`.                           | `localhost`             |
-| `WG_NODE_PORT`       | The port of the `WunderNode`.                           | `9991`                  |
-| `WG_SERVER_URL`      | The URL of the `WunderGraph Server`.                    | `http://localhost:9992` |
-| `WG_SERVER_HOST`     | The host of the `WunderGraph Server`.                   | `localhost`             |
-| `WG_SERVER_PORT`     | The port of the `WunderGraph Server`.                   | `9992`                  |
-| `WG_IN_MEMORY_CACHE` | Size of the in-memory cache (number + suffix) or `off`. | `128MB`                 |
+| Variable name           | Description                                                        | Default value           |
+| ----------------------- | ------------------------------------------------------------------ | ----------------------- |
+| `WG_LOG_LEVEL`          | The log level of the `WunderNode`/`WunderGraph Server`.            | `info`                  |
+| `WG_NODE_URL`           | The internal URL of the `WunderNode`.                              | `http://localhost:9991` |
+| `WG_NODE_INTERNAL_URL`  | The internal URL of the `WunderNode` handling internal operations. | `http://localhost:9993` |
+| `WG_PUBLIC_NODE_URL`    | The publicly available URL of the `WunderNode`.                    | `http://localhost:9991` |
+| `WG_NODE_HOST`          | The host of the `WunderNode`.                                      | `localhost`             |
+| `WG_NODE_PORT`          | The port of the `WunderNode`.                                      | `9991`                  |
+| `WG_NODE_INTERNAL_PORT` | The port of the `WunderNode` for internal operations.              | `9993`                  |
+| `WG_SERVER_URL`         | The URL of the `WunderGraph Server`.                               | `http://localhost:9992` |
+| `WG_SERVER_HOST`        | The host of the `WunderGraph Server`.                              | `localhost`             |
+| `WG_SERVER_PORT`        | The port of the `WunderGraph Server`.                              | `9992`                  |
+| `WG_PROMETHEUS_ENABLED` | Whether to enable Prometheus metrics.                              | `true`                  |
+| `WG_PROMETHEUS_PORT`    | Port used to serve Prometheus metrics.                             | `8881`                  |
 
 ### Available log levels
 
@@ -113,9 +115,9 @@ By default, when no options are passed to `wundergraph.config.ts` or `wundergrap
 To have a proper code completions for log level you could use exported type from our sdk
 
 ```typescript
-import { LoggerLevel } from '@wundergraph/sdk'
+import { LoggerLevel } from '@wundergraph/sdk';
 
-const level: LoggerLevel = 'warning'
+const level: LoggerLevel = 'warning';
 ```
 
 #### How to use default environment variables
@@ -123,11 +125,11 @@ const level: LoggerLevel = 'warning'
 When you want to use default environment variables you don't have to type them manually as we are providing enum for that.
 
 ```typescript
-import { WgEnv } from '@wundergraph/sdk'
-import { EnvironmentVariable } from './variables'
+import { WgEnv } from '@wundergraph/sdk';
+import { EnvironmentVariable } from './variables';
 
-const varName = WgEnv.ServerPort // WG_SERVER_PORT
-const variable = new EnvironmentVariable(WgEnv.ServerPort, '9992')
+const varName = WgEnv.ServerPort; // WG_SERVER_PORT
+const variable = new EnvironmentVariable(WgEnv.ServerPort, '9992');
 ```
 
 ### Summary

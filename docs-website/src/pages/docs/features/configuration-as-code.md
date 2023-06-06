@@ -1,7 +1,6 @@
 ---
 title: Configuration as Code
-pageTitle: WunderGraph - Features - Configuration as Code
-description:
+description: Configure WunderGraph using TypeScript.
 ---
 
 One of our core principles is to deliver the best in class Developer Experience possible.
@@ -28,9 +27,8 @@ Here's a short example of how a configuration might look like:
 
 ```typescript
 const db = introspect.postgresql({
-  database_querystring:
-    'postgresql://admin:admin@localhost:54322/example?schema=public',
-})
+  database_querystring: 'postgresql://admin:admin@localhost:54322/example?schema=public',
+});
 configureWunderGraphApplication({
   apis: [db],
   hooksConfiguration: wunderGraphHooks.config,
@@ -48,10 +46,7 @@ configureWunderGraphApplication({
   ],
   cors: {
     ...cors.allowAll,
-    allowedOrigins:
-      process.env.NODE_ENV === 'production'
-        ? ['http://localhost:3000']
-        : ['http://localhost:3000'],
+    allowedOrigins: process.env.NODE_ENV === 'production' ? ['http://localhost:3000'] : ['http://localhost:3000'],
   },
   authentication: {
     cookieBased: {
@@ -64,7 +59,7 @@ configureWunderGraphApplication({
     },
   },
   operations: operations,
-})
+});
 ```
 
 This configuration introspects a PostgreSQL database,

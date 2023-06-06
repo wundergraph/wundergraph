@@ -6,21 +6,21 @@
     "start": "concurrently \"npm run dev:vite\" \"npm run wundergraph\" \"npm run browser\"",
     "check": "tsc --noEmit",
     "clean": "rimraf ./.next",
-    "wundergraph": "wunderctl up --debug",
+    "wundergraph": "wunderctl up",
     "browser": "wait-on \"http-get://localhost:5173\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:5173",
     "dev:vite": "vite",
-    "build:wundergraph": "wunderctl generate --debug",
+    "build:wundergraph": "wunderctl generate",
     "build:vite": "vite build",
     "build": "npm run build:wundergraph && npm run build:vite",
     "preview": "vite preview",
     "test": "jest"
   },
   "dependencies": {
-    "@wundergraph/sdk": "^0.135.0",
-    "@wundergraph/swr": "^0.12.5",
+    "@wundergraph/sdk": "^0.163.1",
+    "@wundergraph/swr": "^0.15.5",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
-    "swr": "^2.0.0"
+    "swr": "^2.1.5"
   },
   "devDependencies": {
     "@jest/globals": "^29.3.1",

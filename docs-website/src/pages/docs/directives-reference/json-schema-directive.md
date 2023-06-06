@@ -1,7 +1,6 @@
 ---
 title: '@jsonSchema Directive'
-pageTitle: WunderGraph - Directives - @jsonSchema
-description:
+description: Configure a JSON Schema for the variables of an Operation.
 ---
 
 The `@jsonSchema` directive can be used to configure a JSON Schema for the variables of an Operation.
@@ -152,3 +151,34 @@ successfully. If it has boolean value true, the instance validates
 successfully if all of its elements are unique.
 
 Omitting this keyword has the same behavior as a value of false.
+
+## Setting the JSON schema for a field
+
+`@jsonSchema` accepts an optional `on:` argument that might be used to set the JSON schema for an
+specific field. Given the following type:
+
+```graphql
+input createUserInput {
+  id: String!
+  email: String!
+  name: String!
+}
+```
+
+We can use `@jsonSchema` to set the JSON schema of `id` using:
+
+```graphql
+mutation ($input: createUserInput! @jsonSchema(pattern: "[0-9]+", on: "id")) {
+  users_Create($input) {
+    id
+    email
+    name
+  }
+}
+```
+
+## Validating multiple values
+
+`@jsonSchema` can be used multiple times on the same operation, validating data for different fields.
+Additionally, `@jsonSchema` can be combined with other directives for injecting or manipulating data
+like `@fromClaim`, `@injectCurrentDateTime`, `@injectEnvironmentVariable` and `@injectGeneratedUUID`.

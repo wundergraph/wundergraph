@@ -1,7 +1,6 @@
 ---
 title: Configure CORS
-pageTitle: WunderGraph - Configure CORS
-description:
+description: How to configure CORS in WunderGraph.
 ---
 
 This section describes how to configure CORS in WunderGraph.
@@ -26,7 +25,7 @@ configureWunderGraphApplication({
   cors: {
     ...cors.allowAll,
   },
-})
+});
 ```
 
 ## Configuration with allowed origin
@@ -41,7 +40,7 @@ configureWunderGraphApplication({
     ...cors.allowAll,
     allowedOrigins: ['http://localhost:3000'],
   },
-})
+});
 ```
 
 ## Custom Configuration
@@ -60,7 +59,7 @@ configureWunderGraphApplication({
     allowCredentials: true,
     allowedOrigins: ['http://localhost:3000'],
   },
-})
+});
 ```
 
 ## Using wildcards
@@ -74,5 +73,5 @@ configureWunderGraphApplication({
     ...cors.allowAll,
     allowedOrigins: ['https://*.wundergraph.com'],
   },
-})
+});
 ```

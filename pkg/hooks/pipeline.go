@@ -2,7 +2,6 @@ package hooks
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -18,8 +17,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
-type Authenticator func(ctx context.Context) (user interface{})
-
 type SubscriptionWriter interface {
 	http.ResponseWriter
 	resolve.FlushWriter
@@ -30,20 +27,20 @@ type QueryResolver interface {
 }
 
 type ResolveConfiguration struct {
-	// Pre indicates wheter the PreResolve hook should be run
+	// Pre indicates whether the PreResolve hook should be run
 	Pre bool
-	// MutatingPre indicates wheter the MutatingPreResolve hook should be run
+	// MutatingPre indicates whether the MutatingPreResolve hook should be run
 	MutatingPre bool
-	// Custom indicates wheter the CustomResolve hook should be run
+	// Custom indicates whether the CustomResolve hook should be run
 	Custom bool
-	// Mock indicates wether the MockResolve hook should be run
+	// Mock indicates whether the MockResolve hook should be run
 	Mock bool
 }
 
 type PostResolveConfiguration struct {
-	// Post indicates wether the PostResolve hook should be run
+	// Post indicates whether the PostResolve hook should be run
 	Post bool
-	// MutatingPost indicates wether the MutatingPostResolve hook should be run
+	// MutatingPost indicates whether the MutatingPostResolve hook should be run
 	MutatingPost bool
 }
 
@@ -54,11 +51,10 @@ type Response struct {
 }
 
 type PipelineConfig struct {
-	Client        *Client
-	Authenticator Authenticator
-	Operation     *wgpb.Operation
-	Transformer   *postresolvetransform.Transformer
-	Logger        *zap.Logger
+	Client      *Client
+	Operation   *wgpb.Operation
+	Transformer *postresolvetransform.Transformer
+	Logger      *zap.Logger
 }
 
 type SynchronousOperationPipelineConfig struct {
@@ -82,7 +78,6 @@ type pipeline struct {
 	logger                 *zap.Logger
 	operation              *wgpb.Operation
 	postResolveTransformer *postresolvetransform.Transformer
-	authenticator          Authenticator
 	ResolveConfig          ResolveConfiguration
 	PostResolveConfig      PostResolveConfiguration
 }
@@ -95,7 +90,6 @@ func newPipeline(config PipelineConfig) pipeline {
 		logger:                 config.Logger,
 		operation:              config.Operation,
 		postResolveTransformer: config.Transformer,
-		authenticator:          config.Authenticator,
 		ResolveConfig: ResolveConfiguration{
 			Pre:         hooksConfig.GetPreResolve(),
 			MutatingPre: hooksConfig.GetMutatingPreResolve(),
@@ -136,7 +130,7 @@ func (p *pipeline) updateContextHeaders(ctx *resolve.Context, headers map[string
 		httpHeader.Set(name, headers[name])
 	}
 	ctx.Request.Header = httpHeader
-	clientRequest := ctx.Context.Value(pool.ClientRequestKey)
+	clientRequest := ctx.Context().Value(pool.ClientRequestKey)
 	if clientRequest == nil {
 		return
 	}
@@ -173,11 +167,13 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	defer pool.PutBytesBuffer(payloadBuf)
 
 	var resp *MiddlewareHookResponse
-	var err error
 	data := ctx.Variables
 	if p.ResolveConfig.Pre {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
-		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, PreResolve, hookData, payloadBuf)
+		hookData, err := EncodeData(r, hookBuf, data, nil)
+		if err != nil {
+			return nil, err
+		}
+		resp, err = p.client.DoOperationRequest(ctx.Context(), p.operation.Name, PreResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -189,8 +185,11 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.MutatingPre {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
-		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, MutatingPreResolve, hookData, payloadBuf)
+		hookData, err := EncodeData(r, hookBuf, data, nil)
+		if err != nil {
+			return nil, err
+		}
+		resp, err = p.client.DoOperationRequest(ctx.Context(), p.operation.Name, MutatingPreResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -205,8 +204,11 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.Mock {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
-		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, MockResolve, hookData, payloadBuf)
+		hookData, err := EncodeData(r, hookBuf, data, nil)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := p.client.DoOperationRequest(ctx.Context(), p.operation.Name, MockResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -223,8 +225,11 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.Custom {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
-		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, CustomResolve, hookData, payloadBuf)
+		hookData, err := EncodeData(r, hookBuf, data, nil)
+		if err != nil {
+			return nil, err
+		}
+		resp, err = p.client.DoOperationRequest(ctx.Context(), p.operation.Name, CustomResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -258,8 +263,11 @@ func (p *pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 	defer pool.PutBytesBuffer(payloadBuf)
 
 	if p.PostResolveConfig.Post {
-		postResolveData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, responseData)
-		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, PostResolve, postResolveData, payloadBuf)
+		postResolveData, err := EncodeData(r, hookBuf, ctx.Variables, responseData)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := p.client.DoOperationRequest(ctx.Context(), p.operation.Name, PostResolve, postResolveData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -271,8 +279,11 @@ func (p *pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 	}
 
 	if p.PostResolveConfig.MutatingPost {
-		mutatingPostData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, responseData)
-		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, MutatingPostResolve, mutatingPostData, payloadBuf)
+		mutatingPostData, err := EncodeData(r, hookBuf, ctx.Variables, responseData)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := p.client.DoOperationRequest(ctx.Context(), p.operation.Name, MutatingPostResolve, mutatingPostData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}

@@ -1,21 +1,21 @@
 import {
-	HomeIcon,
+	AcademicCapIcon,
+	ArrowUpCircleIcon,
 	BoltIcon,
-	CircleStackIcon,
-	LockClosedIcon,
-	ShareIcon,
-	ServerIcon,
 	BookOpenIcon,
-	CubeIcon,
+	CircleStackIcon,
 	CloudIcon,
-	ComputerDesktopIcon,
 	CogIcon,
 	CommandLineIcon,
-	QuestionMarkCircleIcon,
-	WrenchIcon,
-	ArrowUpCircleIcon,
-	LightBulbIcon,
+	ComputerDesktopIcon,
+	CubeIcon,
+	HomeIcon,
 	ListBulletIcon,
+	LockClosedIcon,
+	QuestionMarkCircleIcon,
+	ServerIcon,
+	ShareIcon,
+	WrenchIcon,
 } from '@heroicons/react/24/solid';
 
 const navigation = [
@@ -27,7 +27,7 @@ const navigation = [
 	{
 		title: 'Getting started',
 		href: '/docs/getting-started',
-		paths: ['/docs/tutorials', '/docs/examples'],
+		paths: ['/docs/examples'],
 		icon: <BoltIcon />,
 		links: [
 			{
@@ -54,14 +54,21 @@ const navigation = [
 						title: 'Remix',
 						href: '/docs/getting-started/remix-quickstart',
 					},
-				],
-			},
-			{
-				title: 'Tutorials',
-				links: [
 					{
-						title: 'Your first WunderGraph Application',
-						href: '/docs/tutorials/your-first-wundergraph-application',
+						title: 'Relay',
+						href: '/docs/getting-started/relay-quickstart',
+					},
+					{
+						title: 'SvelteKit',
+						href: '/docs/getting-started/sveltekit-quickstart',
+					},
+					{
+						title: 'Nuxt',
+						href: '/docs/getting-started/nuxt-quickstart',
+					},
+					{
+						title: 'Expo',
+						href: '/docs/getting-started/expo-quickstart',
 					},
 				],
 			},
@@ -89,12 +96,44 @@ const navigation = [
 						href: '/docs/examples/nextjs-react-query',
 					},
 					{
+						title: 'Next.js + Relay',
+						href: '/docs/examples/nextjs-relay',
+					},
+					{
+						title: 'Next.js + Clerk',
+						href: '/docs/examples/nextjs-clerk',
+					},
+					{
+						title: 'Remix',
+						href: '/docs/examples/remix',
+					},
+					{
+						title: 'SvelteKit + SSR with TanStack Query',
+						href: '/docs/examples/sveltekit',
+					},
+					{
+						title: 'Astro',
+						href: '/docs/examples/astro',
+					},
+					{
+						title: 'Astro + Relay',
+						href: '/docs/examples/astro-relay',
+					},
+					{
 						title: 'Vite + SWR',
 						href: '/docs/examples/vite-swr',
 					},
 					{
 						title: 'Vite + Solid.js',
 						href: '/docs/examples/vite-solidjs',
+					},
+					{
+						title: 'Vite + React Relay',
+						href: '/docs/examples/vite-react-relay',
+					},
+					{
+						title: 'Vite + Svelte',
+						href: '/docs/examples/vite-svelte',
 					},
 					{
 						title: 'Hooks',
@@ -107,6 +146,10 @@ const navigation = [
 					{
 						title: 'Expo + SWR',
 						href: '/docs/examples/expo-swr',
+					},
+					{
+						title: 'Expo + Relay',
+						href: '/docs/examples/expo-relay',
 					},
 					{
 						title: 'FaunaDB Next.js',
@@ -172,7 +215,121 @@ const navigation = [
 						title: 'Next.js Todos',
 						href: '/docs/examples/nextjs-todos',
 					},
+					{
+						title: 'Nuxt + Vue Query',
+						href: '/docs/examples/nuxt',
+					},
+					{
+						title: 'TypeScript ORM',
+						href: '/docs/examples/orm',
+					},
 				],
+			},
+		],
+	},
+	{
+		title: 'About WunderGraph',
+		href: '/manifesto',
+		icon: <QuestionMarkCircleIcon />,
+		paths: ['/usage-information', '/about', '/docs/use-cases'],
+		links: [
+			{
+				title: 'Manifesto',
+				href: '/manifesto',
+			},
+			{
+				title: 'Usage Information',
+				href: '/usage-information',
+			},
+			{
+				title: 'WunderGraph for',
+				links: [
+					{
+						title: 'Frontend Developers',
+						href: '/about/for-frontend-developers',
+					},
+					{
+						title: 'Fullstack Developers',
+						href: '/about/for-fullstack-developers',
+					},
+					{
+						title: 'Backend Developers',
+						href: '/about/for-backend-developers',
+					},
+				],
+			},
+			{
+				title: 'Use Cases',
+				links: [
+					{
+						title: 'Overview',
+						navTitle: 'Use Cases',
+						href: '/docs/use-cases',
+					},
+					{
+						title: 'Programmable API Gateway',
+						href: '/docs/use-cases/programmable-api-gateway',
+					},
+					{
+						title: 'API Management',
+						href: '/docs/use-cases/api-management',
+					},
+					{
+						title: 'Backend for Frontend',
+						href: '/docs/use-cases/backend-for-frontend',
+					},
+					{
+						title: 'API Composition & Integration',
+						href: '/docs/use-cases/api-composition-and-integration',
+					},
+					{
+						title: 'Versionless APIs: Easily build backwards compatible APIs',
+						href: '/docs/use-cases/versionless-apis-easily-build-backwards-compatible-apis',
+					},
+					{
+						title: 'Multi Database, multi schema ORM',
+						href: '/docs/use-cases/multi-database-multi-schema-orm',
+					},
+					{
+						title: 'Generate SDKs for all your APIs',
+						href: '/docs/use-cases/generate-sdks-for-all-your-apis',
+					},
+					{
+						title: 'Centralized Governance, Monitoring, Access Controls and Logging across your APIs',
+						href: '/docs/use-cases/centralized-governance-monitoring-access-controls-and-logging-across-your-apis',
+					},
+					{
+						title: 'Enabling your Organization to become API first',
+						href: '/docs/use-cases/enabling-your-organization-to-become-api-first',
+					},
+				],
+			},
+		],
+	},
+	{
+		title: 'Learn WunderGraph',
+		href: '/learn',
+		icon: <AcademicCapIcon />,
+		links: [
+			{
+				title: 'Introduction',
+				href: '/learn',
+			},
+			{
+				title: 'Hello World',
+				href: '/learn/hello_world',
+			},
+			{
+				title: 'Thinking in API Dependencies',
+				href: '/learn/thinking_in_api_dependencies',
+			},
+			{
+				title: 'Joining data across APIs',
+				href: '/learn/joining_data_across_apis',
+			},
+			{
+				title: 'TypeScript Operations',
+				href: '/learn/typescript_operations',
 			},
 		],
 	},
@@ -193,18 +350,6 @@ const navigation = [
 						title: 'TypeSafe API Integrations with TypeScript Operations & GraphQL',
 						href: '/docs/guides/typesafe_api_integrations_with_typescript_operations_and_graphql',
 					},
-					{
-						title: 'API Namespacing',
-						href: '/docs/core-concepts/api-namespacing',
-					},
-					{
-						title: 'Virtual Graph',
-						href: '/docs/core-concepts/virtual-graph',
-					},
-					{
-						title: 'The `_join` field',
-						href: '/docs/core-concepts/_join-field',
-					},
 				],
 			},
 			// {
@@ -218,14 +363,12 @@ const navigation = [
 						title: 'Enable autocompletion in your IDE',
 						href: '/docs/guides/enable-autocompletion-in-your-ide',
 					},
+					{
+						title: 'Debugging WunderGraph applications',
+						href: '/docs/guides/debugging',
+					},
 				],
 			},
-			// {
-			// 	title: 'Debugging',
-			// 	links: [
-
-			// 	],
-			// },
 			{
 				title: 'Testing',
 				links: [
@@ -236,6 +379,10 @@ const navigation = [
 					{
 						title: 'End to end testing',
 						href: '/docs/guides/end-to-end-testing',
+					},
+					{
+						title: 'Mocking',
+						href: '/docs/guides/mocking',
 					},
 				],
 			},
@@ -266,6 +413,26 @@ const navigation = [
 					{
 						title: 'Signing Origin Requests',
 						href: '/docs/guides/signing-origin-requests',
+					},
+					{
+						title: 'Using HTTP proxies',
+						href: '/docs/guides/using-http-proxies',
+					},
+					{
+						title: 'Bundle the generated client for distribution',
+						href: '/docs/guides/bundle-generated-client-for-distribution',
+					},
+					{
+						title: 'Extend third party GraphQL APIs',
+						href: '/docs/guides/extend-third-party-graphql-apis',
+					},
+					{
+						title: 'Extend the WunderGraph server context',
+						href: '/docs/guides/context-factory',
+					},
+					{
+						title: 'Monitoring and Observability',
+						href: '/docs/guides/monitoring-and-observability',
 					},
 				],
 			},
@@ -310,11 +477,6 @@ const navigation = [
 				title: 'Cookie-based Auth',
 				links: [
 					{
-						title: 'Overview',
-						navTitle: 'Cookie-based Auth',
-						href: '/docs/auth/cookie-based-auth',
-					},
-					{
 						title: 'OpenID Connect',
 						href: '/docs/auth/cookie-based-auth/openid-connect',
 					},
@@ -340,17 +502,16 @@ const navigation = [
 				title: 'Token-based Auth',
 				links: [
 					{
-						title: 'Overview',
-						navTitle: 'Token-based Auth',
-						href: '/docs/auth/token-based-auth',
+						title: 'OpenID Connect JWKS',
+						href: '/docs/auth/token-based-auth/openid-connect',
 					},
 					{
 						title: 'Auth.js (NextAuth)',
 						href: '/docs/auth/token-based-auth/auth-js',
 					},
 					{
-						title: 'OpenID Connect',
-						href: '/docs/auth/token-based-auth/openid-connect',
+						title: 'Clerk.com',
+						href: '/docs/auth/token-based-auth/clerk',
 					},
 				],
 			},
@@ -367,44 +528,12 @@ const navigation = [
 				href: '/docs/databases',
 			},
 			{
-				title: 'PostgreSQL',
-				href: '/docs/databases/postgresql',
-			},
-			{
-				title: 'MySQL',
-				href: '/docs/databases/mysql',
-			},
-			{
-				title: 'SQLite',
-				href: '/docs/databases/sqlite',
-			},
-			{
-				title: 'SQLServer',
-				href: '/docs/databases/sqlserver',
-			},
-			{
-				title: 'Prisma',
+				title: 'Prisma Datasource',
 				href: '/docs/databases/prisma',
-			},
-			{
-				title: 'MongoDB + Atlas',
-				href: '/docs/databases/mongodb-atlas',
-			},
-			{
-				title: 'Planetscale',
-				href: '/docs/databases/planetscale',
 			},
 			{
 				title: 'FaunaDB',
 				href: '/docs/databases/faunadb',
-			},
-			{
-				title: 'Neo4j',
-				href: '/docs/databases/neo4j',
-			},
-			{
-				title: 'Yugabyte',
-				href: '/docs/databases/yugabyte',
 			},
 		],
 	},
@@ -466,6 +595,7 @@ const navigation = [
 			'/docs/supported-data-sources',
 			'/docs/supported-frontend-frameworks',
 			'/docs/supported-backend-languages-frameworks',
+			'/docs/core-concepts',
 		],
 		icon: <CubeIcon />,
 		links: [
@@ -482,11 +612,15 @@ const navigation = [
 						href: '/docs/architecture/architecture-diagram',
 					},
 					{
-						title: 'WunderGraph Explained in one Sequence Diagram',
+						title: 'WunderGraph Server',
+						href: '/docs/architecture/wundergraph-server',
+					},
+					{
+						title: 'WunderGraph in one Sequence Diagram',
 						href: '/docs/architecture/wundergraph-explained-in-one-sequence-diagram',
 					},
 					{
-						title: 'WunderGraph RPC Protocol explained',
+						title: 'WunderGraph RPC Protocol',
 						href: '/docs/architecture/wundergraph-rpc-protocol-explained',
 					},
 					{
@@ -530,6 +664,23 @@ const navigation = [
 					{
 						title: 'WunderHub',
 						href: '/docs/components-of-wundergraph/wunderhub',
+					},
+				],
+			},
+			{
+				title: 'Core Concepts',
+				links: [
+					{
+						title: 'API Namespacing',
+						href: '/docs/core-concepts/api-namespacing',
+					},
+					{
+						title: 'Virtual Graph',
+						href: '/docs/core-concepts/virtual-graph',
+					},
+					{
+						title: 'The `_join` field',
+						href: '/docs/core-concepts/_join-field',
 					},
 				],
 			},
@@ -647,8 +798,16 @@ const navigation = [
 						href: '/docs/supported-frontend-frameworks/svelte',
 					},
 					{
+						title: 'SvelteKit',
+						href: '/docs/supported-frontend-frameworks/sveltekit',
+					},
+					{
 						title: 'Vue',
 						href: '/docs/supported-frontend-frameworks/vue',
+					},
+					{
+						title: 'Nuxt',
+						href: '/docs/supported-frontend-frameworks/nuxt',
 					},
 					{
 						title: 'SolidJS',
@@ -680,54 +839,6 @@ const navigation = [
 		],
 	},
 	{
-		title: 'Use Cases',
-		href: '/docs/use-cases',
-		icon: <LightBulbIcon />,
-		links: [
-			{
-				title: 'Overview',
-				navTitle: 'Use Cases',
-				href: '/docs/use-cases',
-			},
-			{
-				title: 'Programmable API Gateway',
-				href: '/docs/use-cases/programmable-api-gateway',
-			},
-			{
-				title: 'API Management',
-				href: '/docs/use-cases/api-management',
-			},
-			{
-				title: 'Backend for Frontend',
-				href: '/docs/use-cases/backend-for-frontend',
-			},
-			{
-				title: 'API Composition & Integration',
-				href: '/docs/use-cases/api-composition-and-integration',
-			},
-			{
-				title: 'Versionless APIs: Easily build backwards compatible APIs',
-				href: '/docs/use-cases/versionless-apis-easily-build-backwards-compatible-apis',
-			},
-			{
-				title: 'Multi Database, multi schema ORM',
-				href: '/docs/use-cases/multi-database-multi-schema-orm',
-			},
-			{
-				title: 'Generate SDKs for all your APIs',
-				href: '/docs/use-cases/generate-sdks-for-all-your-apis',
-			},
-			{
-				title: 'Centralized Governance, Monitoring, Access Controls and Logging across your APIs',
-				href: '/docs/use-cases/centralized-governance-monitoring-access-controls-and-logging-across-your-apis',
-			},
-			{
-				title: 'Enabling your Organization to become API first',
-				href: '/docs/use-cases/enabling-your-organization-to-become-api-first',
-			},
-		],
-	},
-	{
 		title: 'Features',
 		href: '/docs/features',
 		icon: <ListBulletIcon />,
@@ -748,6 +859,10 @@ const navigation = [
 			{
 				title: 'TypeScript Operations',
 				href: '/docs/features/typescript-operations',
+			},
+			{
+				title: 'TypeScript ORM',
+				href: '/docs/features/typescript-orm',
 			},
 			{
 				title: 'API Namespacing',
@@ -833,6 +948,10 @@ const navigation = [
 				title: 'Custom GraphQL Resolvers',
 				href: '/docs/features/custom-graphql-resolvers',
 			},
+			{
+				title: 'Generate OpenAPI specs and Postman collections',
+				href: '/docs/features/openapi-postman',
+			},
 		],
 	},
 	{
@@ -846,11 +965,35 @@ const navigation = [
 				href: '/docs/cloud',
 			},
 			{
+				title: 'Workspace Configuration (wg.toml)',
+				href: '/docs/cloud/configuration',
+			},
+			{
+				title: 'Errors',
+				href: '/docs/cloud/errors',
+			},
+			{
 				title: 'Deployments',
 				links: [
 					{
 						title: 'Deploy to WunderGraph Cloud',
 						href: '/docs/cloud/deployments',
+					},
+					{
+						title: 'Add custom domains to your deployment',
+						href: '/docs/cloud/custom-domains',
+					},
+					{
+						title: 'Redeployment',
+						href: '/docs/cloud/redeployment',
+					},
+					{
+						title: 'Private NPM dependencies',
+						href: '/docs/cloud/private-npm-dependencies',
+					},
+					{
+						title: 'Preview environments',
+						href: '/docs/cloud/preview-environments',
 					},
 				],
 			},
@@ -858,8 +1001,16 @@ const navigation = [
 				title: 'Integrations',
 				links: [
 					{
+						title: 'Deploy button',
+						href: '/docs/cloud/deploy-button',
+					},
+					{
 						title: 'Vercel',
 						href: '/docs/cloud/integrations/vercel',
+					},
+					{
+						title: 'Neon',
+						href: '/docs/cloud/integrations/neon',
 					},
 				],
 			},
@@ -888,11 +1039,19 @@ const navigation = [
 				title: 'Docker',
 				href: '/docs/self-hosted/docker',
 			},
+			{
+				title: 'Security',
+				href: '/docs/self-hosted/security',
+			},
 		],
 	},
 	{ type: 'divider' },
 	{
-		title: 'Clients reference',
+		title: 'References',
+		type: 'title',
+	},
+	{
+		title: 'Clients',
 		href: '/docs/clients-reference',
 		icon: <ComputerDesktopIcon />,
 		links: [
@@ -910,6 +1069,14 @@ const navigation = [
 				href: '/docs/clients-reference/swr',
 			},
 			{
+				title: 'Next.js',
+				href: '/docs/clients-reference/nextjs',
+			},
+			{
+				title: 'React Relay',
+				href: '/docs/clients-reference/react-relay',
+			},
+			{
 				title: 'React Query',
 				href: '/docs/clients-reference/react-query',
 			},
@@ -918,13 +1085,13 @@ const navigation = [
 				href: '/docs/clients-reference/solid-query',
 			},
 			{
-				title: 'Next.js',
-				href: '/docs/clients-reference/nextjs',
+				title: 'Svelte Query',
+				href: '/docs/clients-reference/svelte-query',
 			},
 		],
 	},
 	{
-		title: 'WunderGraph reference',
+		title: 'Config',
 		href: '/docs/wundergraph-reference',
 		paths: [
 			'/docs/wundergraph-config-ts-reference',
@@ -1014,6 +1181,10 @@ const navigation = [
 						href: '/docs/wundergraph-config-ts-reference/configure-token-based-authentication',
 					},
 					{
+						title: 'Custom Claims',
+						href: '/docs/wundergraph-config-ts-reference/configure-custom-claims',
+					},
+					{
 						title: 'Authorization / RBAC',
 						href: '/docs/wundergraph-config-ts-reference/configure-authorization',
 					},
@@ -1035,7 +1206,7 @@ const navigation = [
 					},
 					{
 						title: 'Schema extension',
-						href: '/docs/wundergraph-config-ts-reference/configure-schema-extension',
+						href: '/docs/wundergraph-config-ts-reference/schema-extension-configuration',
 					},
 					{
 						title: 'WunderNode Options',
@@ -1150,10 +1321,14 @@ const navigation = [
 		],
 	},
 	{
-		title: 'Operations reference',
+		title: 'Operations',
 		href: '/docs/operations-reference',
 		icon: <CogIcon />,
-		paths: ['/docs/typescript-operations-reference', '/docs/directives-reference'],
+		paths: [
+			'/docs/typescript-operations-reference',
+			'/docs/directives-reference',
+			'/docs/auto-generated-operations-reference',
+		],
 		links: [
 			{
 				title: 'Overview',
@@ -1212,6 +1387,14 @@ const navigation = [
 						title: '@transform directive',
 						href: '/docs/directives-reference/transform-directive',
 					},
+					{
+						title: '@removeNullVariables directive',
+						href: '/docs/directives-reference/remove-null-variables-directive',
+					},
+					{
+						title: '@requireAuthentication directive',
+						href: '/docs/directives-reference/require-authentication-directive',
+					},
 				],
 			},
 			{
@@ -1235,6 +1418,10 @@ const navigation = [
 						href: '/docs/typescript-operations-reference/subscriptions',
 					},
 					{
+						title: 'Accessing Data Sources',
+						href: '/docs/typescript-operations-reference/accessing-data-sources-from-operations',
+					},
+					{
 						title: 'Authentication & Authorization',
 						href: '/docs/typescript-operations-reference/authentication-authorization',
 					},
@@ -1252,10 +1439,24 @@ const navigation = [
 					},
 				],
 			},
+			{
+				title: 'Auto-generated Operations',
+				links: [
+					{
+						title: 'Overview',
+						href: '/docs/auto-generated-operations-reference',
+					},
+				],
+			},
 		],
 	},
 	{
-		title: 'CLI Reference',
+		title: 'TypeScript ORM',
+		href: '/docs/typescript-orm-reference',
+		icon: <CircleStackIcon />,
+	},
+	{
+		title: 'CLI',
 		href: '/docs/cli-reference',
 		icon: <CommandLineIcon />,
 		paths: ['/docs/wunderctl-reference'],
@@ -1311,42 +1512,6 @@ const navigation = [
 		],
 	},
 	{ type: 'divider' },
-	{
-		title: 'About WunderGraph',
-		href: '/manifesto',
-		icon: <QuestionMarkCircleIcon />,
-		links: [
-			{
-				title: 'Manifesto',
-				href: '/manifesto',
-			},
-			{
-				title: 'Usage Information',
-				href: '/usage-information',
-			},
-			{
-				title: 'Frequently Asked Questions',
-				links: [
-					{
-						title: 'Does WunderGraph support Postman Collections?',
-						href: '/docs/frequently-asked-questions/does-wundergraph-support-postman-collections',
-					},
-					{
-						title: 'How is WunderGraph faster and more secure than other GraphQL solutions?',
-						href: '/docs/frequently-asked-questions/how-is-wundergraph-faster-and-more-secure-than-other-graphql-solutions',
-					},
-					{
-						title: 'How is the developer experience different from legacy GraphQL?',
-						href: '/docs/frequently-asked-questions/how-is-the-developer-experience-different-from-legacy-graphql',
-					},
-					{
-						title: 'How is server-side only GraphQL different from client-side GraphQL?',
-						href: '/docs/frequently-asked-questions/how-is-server-side-only-graphql-different-from-client-side-graphql',
-					},
-				],
-			},
-		],
-	},
 	// {
 	// 	title: 'Troubleshooting',
 	// 	href: '/docs/troubleshooting',
@@ -1368,6 +1533,10 @@ const navigation = [
 					{
 						title: 'Simplified URL structure',
 						href: '/docs/upgrade-guides/simplifying-the-wundergraph-url-structure',
+					},
+					{
+						title: 'Internal Client deprecated',
+						href: '/docs/upgrade-guides/internal-client-deprecated',
 					},
 				],
 			},

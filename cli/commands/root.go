@@ -1,17 +1,19 @@
 package commands
 
 import (
-	"errors"
+	"fmt"
 	"io/fs"
 	"os"
-	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/fatih/color"
 	"github.com/joho/godotenv"
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/config"
@@ -38,9 +40,11 @@ var (
 	DotEnvFile            string
 	log                   *zap.Logger
 	cmdDurationMetric     telemetry.DurationMetric
+	zapLogLevel           zapcore.Level
 	_wunderGraphDirConfig string
-	disableCache          bool
-	clearCache            bool
+	// otelBatchTimeout is the maximum timeout before a batch of otel data is sent
+	// By default it is 5 seconds but for CI and debugging purposes it should be set much lower
+	otelBatchTimeout time.Duration
 
 	rootFlags helpers.RootFlags
 
@@ -65,15 +69,15 @@ var rootCmd = &cobra.Command{
 		// because the command output data on stdout
 		case LoadOperationsCmdName:
 			return nil
-			// up command has a different default for global pretty logging
-			// we can't overwrite the default value in the init function because
-			// it would overwrite the default value for all other commands
-		case UpCmdName:
-			rootFlags.PrettyLogs = upCmdPrettyLogging
+		}
+
+		if !isatty.IsTerminal(os.Stdout.Fd()) {
+			// Always use JSON when not in a terminal
+			rootFlags.PrettyLogs = false
 		}
 
 		if rootFlags.DebugMode {
-			// override log level to debug
+			// override log level to debug in debug mode
 			rootFlags.CliLogLevel = "debug"
 		}
 
@@ -81,9 +85,10 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		zapLogLevel = logLevel
 
 		log = logging.
-			New(rootFlags.PrettyLogs, rootFlags.DebugMode, logLevel).
+			New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevel).
 			With(zap.String("component", "@wundergraph/wunderctl"))
 
 		err = godotenv.Load(DotEnvFile)
@@ -99,17 +104,6 @@ var rootCmd = &cobra.Command{
 			log.Debug("env file successfully loaded",
 				zap.String("file", DotEnvFile),
 			)
-		}
-
-		if clearCache {
-			wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
-			if err != nil {
-				return err
-			}
-			cacheDir := filepath.Join(wunderGraphDir, "cache")
-			if err := os.RemoveAll(cacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
-				return err
-			}
 		}
 
 		// Check if we want to track telemetry for this command
@@ -227,10 +221,65 @@ func wunderctlBinaryPath() string {
 	return path
 }
 
+// commonScriptEnv returns environment variables that all script invocations should use
+func commonScriptEnv(wunderGraphDir string) []string {
+	cacheDir, err := helpers.LocalWunderGraphCacheDir(wunderGraphDir)
+	if err != nil {
+		log.Warn("could not determine cache directory", zap.Error(err))
+	}
+	return []string{
+		fmt.Sprintf("WUNDERGRAPH_CACHE_DIR=%s", cacheDir),
+		fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
+		fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath()),
+		fmt.Sprintf("WUNDERCTL_VERSION=%s", BuildInfo.Version),
+	}
+}
+
+// cacheConfigurationEnv returns the environment variables required to configure the
+// cache in the SDK side
+func cacheConfigurationEnv(isCacheEnabled bool) []string {
+	return []string{
+		fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", isCacheEnabled),
+	}
+}
+
+type configScriptEnvOptions struct {
+	WunderGraphDir                string
+	RootFlags                     helpers.RootFlags
+	EnableCache                   bool
+	DefaultPollingIntervalSeconds int
+	FirstRun                      bool
+}
+
+// configScriptEnv returns the environment variables that scripts running the SDK configuration
+// must use
+func configScriptEnv(opts configScriptEnvOptions) []string {
+	var env []string
+	env = append(env, helpers.CliEnv(opts.RootFlags)...)
+	env = append(env, commonScriptEnv(opts.WunderGraphDir)...)
+	env = append(env, cacheConfigurationEnv(opts.EnableCache)...)
+	env = append(env, "WG_PRETTY_GRAPHQL_VALIDATION_ERRORS=true")
+	env = append(env, fmt.Sprintf("WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS=%d", opts.DefaultPollingIntervalSeconds))
+	if opts.FirstRun {
+		// WG_INTROSPECTION_CACHE_SKIP=true causes the cache to try to load the remote data on the first run
+		env = append(env, "WG_INTROSPECTION_CACHE_SKIP=true")
+	}
+	return env
+}
+
 func init() {
 	_, isTelemetryDisabled := os.LookupEnv("WG_TELEMETRY_DISABLED")
 	_, isTelemetryDebugEnabled := os.LookupEnv("WG_TELEMETRY_DEBUG")
 	telemetryAnonymousID := os.Getenv("WG_TELEMETRY_ANONYMOUS_ID")
+
+	if otelBatchTimeoutEnv, ok := os.LookupEnv("WG_OTEL_BATCH_TIMEOUT_MS"); ok {
+		ms, err := strconv.Atoi(otelBatchTimeoutEnv)
+		if err != nil {
+			log.Error("Value behind WG_OTEL_BATCH_TIMEOUT_MS could not be parsed as integer", zap.Error(err))
+		} else {
+			otelBatchTimeout = time.Duration(ms) * time.Millisecond
+		}
+	}
 
 	config.InitConfig(config.Options{
 		TelemetryEnabled:     !isTelemetryDisabled,
@@ -240,14 +289,11 @@ func init() {
 	// Can be overwritten by WG_API_URL=<url> env variable
 	viper.SetDefault("API_URL", "https://gateway.wundergraph.com")
 
-	rootCmd.PersistentFlags().StringVarP(&rootFlags.CliLogLevel, "cli-log-level", "l", "info", "sets the CLI log level")
-	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.DebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.Telemetry, "telemetry", !isTelemetryDisabled, "enables telemetry. Telemetry allows us to accurately gauge WunderGraph feature usage, pain points, and customization across all users.")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.TelemetryDebugMode, "telemetry-debug", isTelemetryDebugEnabled, "enables the debug mode for telemetry. Understand what telemetry is being sent to us.")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", false, "switches to human readable format")
-	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "directory of your wundergraph.config.ts")
-	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
-	rootCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches during startup")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.Pretty, "pretty", false, "pretty print output")
+	rootCmd.PersistentFlags().StringVarP(&rootFlags.CliLogLevel, "cli-log-level", "l", "info", "Sets the CLI log level")
+	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "Allows you to load environment variables from an env file. Defaults to .env in the current directory.")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.DebugMode, "debug", false, "Enables the debug mode so that all requests and responses will be logged")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.Telemetry, "telemetry", !isTelemetryDisabled, "Enables telemetry. Telemetry allows us to accurately gauge WunderGraph feature usage, pain points, and customization across all users.")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.TelemetryDebugMode, "telemetry-debug", isTelemetryDebugEnabled, "Enables the debug mode for telemetry. Understand what telemetry is being sent to us.")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", true, "Enables pretty logging")
+	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "Directory of your wundergraph.config.ts")
 }

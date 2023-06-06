@@ -55,6 +55,7 @@ type OpenIDConnectConfig struct {
 	InsecureCookies    bool
 	ForceRedirectHttps bool
 	Cookie             *securecookie.SecureCookie
+	AuthTimeout        time.Duration
 }
 
 type ClaimsInfo struct {
@@ -85,8 +86,8 @@ type Claims struct {
 	Raw               map[string]interface{} `json:"-"`
 }
 
-func (c *Claims) ToUser() User {
-	return User{
+func (c *Claims) ToUser() *User {
+	return &User{
 		UserID:            c.Subject,
 		Name:              c.Name,
 		FirstName:         c.GivenName,
@@ -108,7 +109,7 @@ func (c *Claims) ToUser() User {
 	}
 }
 
-// isCustomClaim true if claim represents a token claim that we're not explicitely
+// isCustomClaim true if claim represents a token claim that we're not explicitly
 // handling in type Claim
 func isCustomClaim(claim string) bool {
 	// XXX: Keep this list in sync with Claim's fields
@@ -159,11 +160,11 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 	})
 
 	callbackRouter.Path(fmt.Sprintf("/%s", config.ProviderID)).Methods(http.MethodGet).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h.authorizationCallback(ctx, w, r, provider, &config, &hooks)
+		h.authorizationCallback(ctx, w, r, provider, &config, hooks)
 	})
 }
 
-func (h *OpenIDConnectCookieHandler) authorize(ctx context.Context, w http.ResponseWriter, r *http.Request, provider *oidc.Provider, config *OpenIDConnectConfig) {
+func (h *OpenIDConnectCookieHandler) authorize(_ context.Context, w http.ResponseWriter, r *http.Request, provider *oidc.Provider, config *OpenIDConnectConfig) {
 
 	redirectOnCompletionURI := r.URL.Query().Get("redirect_uri")
 
@@ -198,7 +199,7 @@ func (h *OpenIDConnectCookieHandler) authorize(ctx context.Context, w http.Respo
 	stateCookie := &http.Cookie{
 		Name:     "state",
 		Value:    state,
-		MaxAge:   int(time.Minute.Seconds()),
+		MaxAge:   int(config.AuthTimeout.Seconds()),
 		Secure:   r.TLS != nil,
 		HttpOnly: true,
 		Path:     cookiePath,
@@ -210,7 +211,7 @@ func (h *OpenIDConnectCookieHandler) authorize(ctx context.Context, w http.Respo
 	redirectURICookie := &http.Cookie{
 		Name:     oidcRedirectURICookieName,
 		Value:    redirectURI,
-		MaxAge:   int(time.Minute.Seconds()),
+		MaxAge:   int(config.AuthTimeout.Seconds()),
 		Secure:   r.TLS != nil,
 		HttpOnly: true,
 		Path:     cookiePath,
@@ -223,7 +224,7 @@ func (h *OpenIDConnectCookieHandler) authorize(ctx context.Context, w http.Respo
 		redirectOnSucessURICookie := &http.Cookie{
 			Name:     oidcRedirectOnCompletionURICookieName,
 			Value:    redirectOnCompletionURI,
-			MaxAge:   int(time.Minute.Seconds()),
+			MaxAge:   int(config.AuthTimeout.Seconds()),
 			Secure:   r.TLS != nil,
 			HttpOnly: true,
 			Path:     cookiePath,
@@ -243,10 +244,10 @@ func (h *OpenIDConnectCookieHandler) authorize(ctx context.Context, w http.Respo
 	http.Redirect(w, r, redirect, http.StatusFound)
 }
 
-func (h *OpenIDConnectCookieHandler) authorizationCallback(ctx context.Context, w http.ResponseWriter, r *http.Request, provider *oidc.Provider, config *OpenIDConnectConfig, hooks *Hooks) {
+func (h *OpenIDConnectCookieHandler) authorizationCallback(ctx context.Context, w http.ResponseWriter, r *http.Request, provider *oidc.Provider, config *OpenIDConnectConfig, hooks Hooks) {
 	state, err := r.Cookie("state")
 	if err != nil {
-		h.log.Error("OIDCCookieHandler state missing",
+		h.log.Warn("OIDCCookieHandler state missing",
 			zap.Error(err),
 		)
 		w.WriteHeader(http.StatusBadRequest)
@@ -254,7 +255,7 @@ func (h *OpenIDConnectCookieHandler) authorizationCallback(ctx context.Context, 
 	}
 
 	if r.URL.Query().Get("state") != state.Value {
-		h.log.Error("OIDCCookieHandler state mismatch",
+		h.log.Warn("OIDCCookieHandler state mismatch",
 			zap.Error(err),
 		)
 		w.WriteHeader(http.StatusBadRequest)
@@ -263,7 +264,7 @@ func (h *OpenIDConnectCookieHandler) authorizationCallback(ctx context.Context, 
 
 	redirectURI, err := r.Cookie(oidcRedirectURICookieName)
 	if err != nil {
-		h.log.Error("OIDCCookieHandler redirect uri missing",
+		h.log.Warn("OIDCCookieHandler redirect uri missing",
 			zap.Error(err),
 		)
 		w.WriteHeader(http.StatusBadRequest)
@@ -314,7 +315,7 @@ func (h *OpenIDConnectCookieHandler) authorizationCallback(ctx context.Context, 
 	http.Redirect(w, r, redirect, http.StatusFound)
 }
 
-func (h *OpenIDConnectCookieHandler) exchangeToken(ctx context.Context, w http.ResponseWriter, r *http.Request, oauth2Config *oauth2.Config, provider *oidc.Provider, config *OpenIDConnectConfig, hooks *Hooks) error {
+func (h *OpenIDConnectCookieHandler) exchangeToken(ctx context.Context, w http.ResponseWriter, r *http.Request, oauth2Config *oauth2.Config, provider *oidc.Provider, config *OpenIDConnectConfig, hooks Hooks) error {
 	oauth2Token, err := oauth2Config.Exchange(r.Context(), r.URL.Query().Get("code"))
 	if err != nil {
 		h.log.Error("OIDCCookieHandler.exchange.token",
@@ -364,17 +365,11 @@ func (h *OpenIDConnectCookieHandler) exchangeToken(ctx context.Context, w http.R
 	user.RawIDToken = idToken
 	user.IdToken = idTokenJSON
 
-	hooks.handlePostAuthentication(r.Context(), user)
-	proceed, _, user := hooks.handleMutatingPostAuthentication(r.Context(), user)
-	if proceed {
-		err = user.Save(config.Cookie, w, r, r.Host, config.InsecureCookies)
-		if err != nil {
-			h.log.Error("OpenIDConnectCookieHandler.user.Save",
-				zap.Error(err),
-			)
-			return err
-		}
-
+	if err := postAuthentication(ctx, w, r, hooks, user, config.Cookie, config.InsecureCookies); err != nil {
+		h.log.Error("OpenIDConnectCookieHandler postAuthentication failed",
+			zap.Error(err),
+		)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	return nil
 }
@@ -569,7 +564,7 @@ func (p *OpenIDConnectProvider) disconnectDefault(ctx context.Context, user *Use
 	return nil, nil
 }
 
-func (p *OpenIDConnectProvider) disconnectAuth0(ctx context.Context, user *User) (*OpenIDDisconnectResult, error) {
+func (p *OpenIDConnectProvider) disconnectAuth0(_ context.Context, _ *User) (*OpenIDDisconnectResult, error) {
 	return &OpenIDDisconnectResult{
 		Redirect: fmt.Sprintf("%sv2/logout?client_id=%s", p.config.Issuer, p.clientID),
 	}, nil

@@ -1,7 +1,6 @@
 ---
-title: TypeScript Operations Reference
-pageTitle: WunderGraph - Reference - TypeScript Operations - Calling Operations from Operations
-description:
+title: Operations client reference
+description: How to use the operations client to call other operations.
 ---
 
 Let's say you'd like to call an operation from a client, but you'd like to add some additional logic before returning the result to the client.
@@ -20,15 +19,15 @@ export default createOperation.query({
     id: z.string(),
   }),
   handler: async ({ input, operations }) => {
-    const user = await operations.query({
+    const { data, error } = await operations.query({
       operationName: 'users/get',
       input: {
         id: input.id,
       },
     });
     return {
-      userID: user.id,
-      userName: user.name,
+      userID: data?.id,
+      userName: data?.name,
     };
   },
 });

@@ -7,6 +7,11 @@
 
 declare module 'postman-collection' {
 	/**
+	 * @todo This definition file is missing some types, adding stubs here to pass tests.
+	 */
+	type QueryParam = any;
+
+	/**
 	 * @example
 	 * Create a new CertificateList
 	 * var CertificateList = require('postman-collection').CertificateList,

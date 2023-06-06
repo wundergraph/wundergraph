@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/buger/jsonparser"
+	"github.com/dgraph-io/ristretto"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
 	"github.com/wundergraph/graphql-go-tools/pkg/asttransform"
 	"github.com/wundergraph/graphql-go-tools/pkg/astvalidation"
+	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/introspection_datasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 
@@ -25,33 +27,53 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/metrics"
+	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
+	"github.com/wundergraph/wundergraph/pkg/trace"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 type InternalBuilder struct {
-	pool             *pool.Pool
-	log              *zap.Logger
-	loader           *engineconfigloader.EngineConfigLoader
-	api              *Api
-	planConfig       plan.Configuration
-	resolver         *resolve.Resolver
-	definition       *ast.Document
-	router           *mux.Router
-	renameTypeNames  []resolve.RenameTypeName
-	middlewareClient *hooks.Client
+	pool                *pool.Pool
+	log                 *zap.Logger
+	loader              *engineconfigloader.EngineConfigLoader
+	api                 *Api
+	planConfig          plan.Configuration
+	resolver            *resolve.Resolver
+	definition          *ast.Document
+	router              *mux.Router
+	renameTypeNames     []resolve.RenameTypeName
+	middlewareClient    *hooks.Client
+	enableIntrospection bool
+	insecureCookies     bool
+	metrics             metrics.Metrics
 }
 
-func NewInternalBuilder(pool *pool.Pool, log *zap.Logger, hooksClient *hooks.Client, loader *engineconfigloader.EngineConfigLoader) *InternalBuilder {
+type InternalBuilderConfig struct {
+	Pool                *pool.Pool
+	Client              *hooks.Client
+	Loader              *engineconfigloader.EngineConfigLoader
+	EnableIntrospection bool
+	InsecureCookies     bool
+	Metrics             metrics.Metrics
+	Log                 *zap.Logger
+}
+
+func NewInternalBuilder(config InternalBuilderConfig) *InternalBuilder {
 	return &InternalBuilder{
-		pool:             pool,
-		log:              log,
-		loader:           loader,
-		middlewareClient: hooksClient,
+		pool:                config.Pool,
+		log:                 config.Log,
+		loader:              config.Loader,
+		middlewareClient:    config.Client,
+		enableIntrospection: config.EnableIntrospection,
+		insecureCookies:     config.InsecureCookies,
+		metrics:             config.Metrics,
 	}
 }
 
-func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, router *mux.Router, api *Api) (streamClosers []chan struct{}, err error) {
+func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, router *mux.Router, api *Api, planCache *ristretto.Cache) (streamClosers []chan struct{}, err error) {
 
 	if api.EngineConfiguration == nil {
 		// engine config is nil, skipping
@@ -81,12 +103,27 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 		return streamClosers, err
 	}
 
+	if i.enableIntrospection {
+		introspectionFactory, err := introspection_datasource.NewIntrospectionConfigFactory(i.definition)
+		if err != nil {
+			return streamClosers, err
+		}
+		fieldConfigs := introspectionFactory.BuildFieldConfigurations()
+		i.planConfig.Fields = append(i.planConfig.Fields, fieldConfigs...)
+		dataSource := introspectionFactory.BuildDataSourceConfiguration()
+		i.planConfig.DataSources = append(i.planConfig.DataSources, dataSource)
+	}
+
 	i.log.Debug("configuring API",
 		zap.Int("numOfOperations", len(api.Operations)),
 	)
 
 	route := router.NewRoute()
 	i.router = route.Subrouter()
+
+	if err := i.registerAuth(); err != nil {
+		i.log.Error("registering auth", zap.Error(err))
+	}
 
 	// RenameTo is the correct name for the origin
 	// for the downstream (client), we have to reverse the __typename fields
@@ -105,7 +142,33 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 		}
 	}
 
+	// Internal GraphQL endpoint should be always enabled because it's used by the ORM
+	mountGraphQLHandler(i.router, GraphQLHandlerOptions{
+		GraphQLBaseURL:  fmt.Sprintf("http://%s:%d", api.Options.InternalListener.Host, api.Options.InternalListener.Port),
+		Internal:        true,
+		PlanConfig:      i.planConfig,
+		Definition:      i.definition,
+		Resolver:        i.resolver,
+		RenameTypeNames: i.renameTypeNames,
+		Pool:            i.pool,
+		Cache:           planCache,
+		Log:             i.log,
+	})
 	return streamClosers, err
+}
+
+func (i *InternalBuilder) registerAuth() error {
+	config, err := loadUserConfiguration(i.api, i.middlewareClient, i.log)
+	if err != nil {
+		return err
+	}
+
+	i.router.Use(authentication.NewLoadUserMw(config))
+	i.router.Use(authentication.NewCSRFMw(authentication.CSRFConfig{
+		InsecureCookies: i.insecureCookies,
+		Secret:          config.CSRFSecret,
+	}))
+	return nil
 }
 
 func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
@@ -140,12 +203,15 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 	preparedPlan := shared.Planner.Plan(shared.Doc, i.definition, operation.Name, shared.Report)
 	shared.Postprocess.Process(preparedPlan)
 
+	postResolveTransformer := postresolvetransform.NewTransformer(operation.PostResolveTransformations)
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
-		Client:        i.middlewareClient,
-		Authenticator: hooksAuthenticator,
-		Operation:     operation,
-		Logger:        i.log,
+		Client:      i.middlewareClient,
+		Operation:   operation,
+		Transformer: postResolveTransformer,
+		Logger:      i.log,
 	}
+
+	var handler http.Handler
 
 	switch operation.OperationType {
 	case wgpb.OperationType_QUERY,
@@ -165,7 +231,7 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		}
 		hooksPipeline := hooks.NewSynchonousOperationPipeline(hooksPipelineConfig)
 
-		handler := &InternalApiHandler{
+		handler = &InternalApiHandler{
 			preparedPlan:       p,
 			operation:          operation,
 			extractedVariables: extractedVariables,
@@ -175,7 +241,14 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 			hooksPipeline:      hooksPipeline,
 		}
 
-		i.router.Methods(http.MethodPost).Path(apiPath).Handler(handler)
+		// Don't log for every operation because public ones are
+		// registered twice in the public and the internal router
+		if operation.Internal {
+			i.log.Debug("registered internal operation handler",
+				zap.String("method", http.MethodPost),
+				zap.String("path", apiPath),
+			)
+		}
 	case wgpb.OperationType_SUBSCRIPTION:
 		p, ok := preparedPlan.(*plan.SubscriptionResponsePlan)
 		if !ok {
@@ -192,7 +265,7 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		}
 		hooksPipeline := hooks.NewSubscriptionOperationPipeline(hooksPipelineConfig)
 
-		handler := &InternalSubscriptionApiHandler{
+		handler = &InternalSubscriptionApiHandler{
 			preparedPlan:       p,
 			operation:          operation,
 			extractedVariables: extractedVariables,
@@ -202,8 +275,17 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 			hooksPipeline:      hooksPipeline,
 		}
 
-		i.router.Methods(http.MethodPost).Path(apiPath).Handler(handler)
+		// See comment checking operation.Internal above
+		if operation.Internal {
+			i.log.Debug("registered internal subscription handler",
+				zap.String("method", http.MethodPost),
+				zap.String("path", apiPath),
+			)
+		}
 	}
+
+	metrics := newOperationMetrics(i.metrics, operation.Name)
+	i.router.Methods(http.MethodPost).Path(apiPath).Handler(metrics.Handler(handler))
 
 	return nil
 }
@@ -233,9 +315,11 @@ func (i *InternalBuilder) registerNodeJsOperation(operation *wgpb.Operation, api
 			enabled:                operation.LiveQueryConfig.Enable,
 			pollingIntervalSeconds: operation.LiveQueryConfig.PollingIntervalSeconds,
 		},
+		internal: true,
 	}
 
-	route.Handler(handler)
+	metrics := newOperationMetrics(i.metrics, operation.Name)
+	route.Handler(metrics.Handler(handler))
 	return nil
 }
 
@@ -253,8 +337,10 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reqID := r.Header.Get(logging.RequestIDHeader)
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
+	r = operation.SetOperationMetaData(r, h.operation)
 
-	r = setOperationMetaData(r, h.operation)
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	bodyBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(bodyBuf)
@@ -300,7 +386,8 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx.Variables = compactBuf.Bytes()
 
 	if len(h.extractedVariables) != 0 {
-		ctx.Variables = MergeJsonRightIntoLeft(ctx.Variables, h.extractedVariables)
+		// we make a copy of the extracted variables to not override h.extractedVariables
+		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
 	ctx.Variables = injectVariables(h.operation, r, ctx.Variables)
@@ -337,8 +424,10 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 	reqID := r.Header.Get(logging.RequestIDHeader)
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
+	r = operation.SetOperationMetaData(r, h.operation)
 
-	r = setOperationMetaData(r, h.operation)
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	bodyBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(bodyBuf)
@@ -384,7 +473,8 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 	ctx.Variables = compactBuf.Bytes()
 
 	if len(h.extractedVariables) != 0 {
-		ctx.Variables = MergeJsonRightIntoLeft(ctx.Variables, h.extractedVariables)
+		// we make a copy of the extracted variables to not override h.extractedVariables
+		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
 	ctx.Variables = injectVariables(h.operation, r, ctx.Variables)
@@ -392,7 +482,7 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	flushWriter, ok := getHooksFlushWriter(ctx, r, w, h.hooksPipeline, h.log)
+	ctx, flushWriter, ok := getHooksFlushWriter(ctx, r, w, h.hooksPipeline, h.log)
 	if !ok {
 		http.Error(w, "Connection not flushable", http.StatusBadRequest)
 		return

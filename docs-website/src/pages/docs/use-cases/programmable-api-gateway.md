@@ -1,7 +1,6 @@
 ---
 title: Programmable API Gateway
-pageTitle: WunderGraph - Programmable API Gateway
-description:
+description: Probably the most prominent use case for WunderGraph is to use it as a programmable API Gateway.
 ---
 
 Probably the most prominent use case for WunderGraph is to use it as a programmable API Gateway.

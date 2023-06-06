@@ -32,6 +32,7 @@ type GithubConfig struct {
 	InsecureCookies    bool
 	ForceRedirectHttps bool
 	Cookie             *securecookie.SecureCookie
+	AuthTimeout        time.Duration
 }
 
 type GithubUserInfo struct {
@@ -85,7 +86,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		c := &http.Cookie{
 			Name:     "state",
 			Value:    state,
-			MaxAge:   int(time.Minute.Seconds()),
+			MaxAge:   int(config.AuthTimeout.Seconds()),
 			Secure:   r.TLS != nil,
 			HttpOnly: true,
 			Path:     cookiePath,
@@ -98,7 +99,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		c2 := &http.Cookie{
 			Name:     "redirect_uri",
 			Value:    redirectURI,
-			MaxAge:   int(time.Minute.Seconds()),
+			MaxAge:   int(config.AuthTimeout.Seconds()),
 			Secure:   r.TLS != nil,
 			HttpOnly: true,
 			Path:     cookiePath,
@@ -111,7 +112,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 			c3 := &http.Cookie{
 				Name:     "success_redirect_uri",
 				Value:    redirectOnSuccess,
-				MaxAge:   int(time.Minute.Seconds()),
+				MaxAge:   int(config.AuthTimeout.Seconds()),
 				Secure:   r.TLS != nil,
 				HttpOnly: true,
 				Path:     cookiePath,
@@ -135,7 +136,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 
 		state, err := r.Cookie("state")
 		if err != nil {
-			g.log.Error("GithubCookieHandler state missing",
+			g.log.Warn("GithubCookieHandler state missing",
 				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
@@ -143,7 +144,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		}
 
 		if r.URL.Query().Get("state") != state.Value {
-			g.log.Error("GithubCookieHandler state mismatch",
+			g.log.Warn("GithubCookieHandler state mismatch",
 				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
@@ -152,7 +153,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 
 		redirectURI, err := r.Cookie("redirect_uri")
 		if err != nil {
-			g.log.Error("GithubCookieHandler redirect uri missing",
+			g.log.Warn("GithubCookieHandler redirect uri missing",
 				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
@@ -276,7 +277,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 			idToken = maybeIdToken.(string)
 		}
 
-		user := User{
+		user := &User{
 			ProviderName:   "github",
 			ProviderID:     config.ProviderID,
 			Email:          email.Email,
@@ -293,18 +294,11 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 			RawIDToken:     idToken,
 		}
 
-		hooks.handlePostAuthentication(r.Context(), user)
-		proceed, _, user := hooks.handleMutatingPostAuthentication(r.Context(), user)
-		if proceed {
-			err = user.Save(config.Cookie, w, r, r.Host, config.InsecureCookies)
-			if err != nil {
-				g.log.Error("GithubCookieHandler.user.Save",
-					zap.Error(err),
-				)
-				return
-			}
+		if err := postAuthentication(r.Context(), w, r, hooks, user, config.Cookie, config.InsecureCookies); err != nil {
+			g.log.Error("GithubCookieHandler postAuthentication failed", zap.Error(err))
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-
 		scheme := "https"
 		if !config.ForceRedirectHttps && r.TLS == nil {
 			scheme = "http"

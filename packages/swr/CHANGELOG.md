@@ -3,6 +3,208 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.6](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.15.5...@wundergraph/swr@0.15.6) (2023-06-02)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.15.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.15.4...@wundergraph/swr@0.15.5) (2023-06-02)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.15.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.15.3...@wundergraph/swr@0.15.4) (2023-06-01)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.15.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.15.2...@wundergraph/swr@0.15.3) (2023-05-31)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.15.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.15.1...@wundergraph/swr@0.15.2) (2023-05-31)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.15.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.15.0...@wundergraph/swr@0.15.1) (2023-05-26)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.15.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.33...@wundergraph/swr@0.15.0) (2023-05-25)
+
+### Features
+
+* add tsup to build nextjs and swr packages ([#993](https://github.com/wundergraph/wundergraph/issues/993)) ([2685e03](https://github.com/wundergraph/wundergraph/commit/2685e03cf7e103ed634fc98963ce622cf700b398)) (@Pagebakers)
+
+## [0.14.33](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.32...@wundergraph/swr@0.14.33) (2023-05-16)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.32](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.31...@wundergraph/swr@0.14.32) (2023-05-15)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.31](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.30...@wundergraph/swr@0.14.31) (2023-05-12)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.30](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.29...@wundergraph/swr@0.14.30) (2023-05-12)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.29](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.28...@wundergraph/swr@0.14.29) (2023-05-09)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.28](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.27...@wundergraph/swr@0.14.28) (2023-05-09)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.27](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.26...@wundergraph/swr@0.14.27) (2023-05-08)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.26](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.25...@wundergraph/swr@0.14.26) (2023-05-05)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.25](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.24...@wundergraph/swr@0.14.25) (2023-05-04)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.24](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.23...@wundergraph/swr@0.14.24) (2023-05-03)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.23](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.22...@wundergraph/swr@0.14.23) (2023-05-03)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.22](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.21...@wundergraph/swr@0.14.22) (2023-04-27)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.21](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.20...@wundergraph/swr@0.14.21) (2023-04-27)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.20](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.19...@wundergraph/swr@0.14.20) (2023-04-27)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.19](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.18...@wundergraph/swr@0.14.19) (2023-04-26)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.18](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.17...@wundergraph/swr@0.14.18) (2023-04-26)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.17](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.16...@wundergraph/swr@0.14.17) (2023-04-25)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.16](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.15...@wundergraph/swr@0.14.16) (2023-04-24)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.15](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.14...@wundergraph/swr@0.14.15) (2023-04-20)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.14](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.13...@wundergraph/swr@0.14.14) (2023-04-19)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.13](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.12...@wundergraph/swr@0.14.13) (2023-04-19)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.12](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.11...@wundergraph/swr@0.14.12) (2023-04-19)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.11](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.10...@wundergraph/swr@0.14.11) (2023-04-17)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.10](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.9...@wundergraph/swr@0.14.10) (2023-04-15)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.9](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.8...@wundergraph/swr@0.14.9) (2023-04-14)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.8](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.7...@wundergraph/swr@0.14.8) (2023-04-14)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.7](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.6...@wundergraph/swr@0.14.7) (2023-04-13)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.6](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.5...@wundergraph/swr@0.14.6) (2023-04-12)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.4...@wundergraph/swr@0.14.5) (2023-04-12)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.3...@wundergraph/swr@0.14.4) (2023-04-04)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.2...@wundergraph/swr@0.14.3) (2023-03-31)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.1...@wundergraph/swr@0.14.2) (2023-03-30)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.14.0...@wundergraph/swr@0.14.1) (2023-03-29)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.14.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.13.8...@wundergraph/swr@0.14.0) (2023-03-28)
+
+### Features
+
+* custom error support for typescript operations ([#759](https://github.com/wundergraph/wundergraph/issues/759)) ([7cfa815](https://github.com/wundergraph/wundergraph/commit/7cfa815a44b0b2a1184c2c50d0c4ea7cbb8066a7)) (@StarpTech)
+
+## [0.13.8](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.13.7...@wundergraph/swr@0.13.8) (2023-03-27)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.13.7](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.13.6...@wundergraph/swr@0.13.7) (2023-03-23)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.13.6](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.13.5...@wundergraph/swr@0.13.6) (2023-03-16)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.13.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.13.4...@wundergraph/swr@0.13.5) (2023-03-06)
+
+### Bug Fixes
+
+* upload types ([#723](https://github.com/wundergraph/wundergraph/issues/723)) ([5077a7d](https://github.com/wundergraph/wundergraph/commit/5077a7d2ab363d3bbbb1df35423e5ad799b1800f)) (@Pagebakers)
+
+## [0.13.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.13.3...@wundergraph/swr@0.13.4) (2023-03-01)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.13.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.13.2...@wundergraph/swr@0.13.3) (2023-03-01)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.13.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.13.1...@wundergraph/swr@0.13.2) (2023-02-28)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.13.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.13.0...@wundergraph/swr@0.13.1) (2023-02-26)
+
+**Note:** Version bump only for package @wundergraph/swr
+
 ## [0.13.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.12.6...@wundergraph/swr@0.13.0) (2023-02-23)
 
 ### Features

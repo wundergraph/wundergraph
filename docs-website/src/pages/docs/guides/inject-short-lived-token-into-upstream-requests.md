@@ -19,13 +19,12 @@ First, let's configure our upstream so that we're forwarding the Authorization h
 const secureUpstream = introspect.graphql({
   url: 'http://localhost:8111',
   loadSchemaFromString: someSchemaString,
-  headers: (builder) =>
-    builder.addClientRequestHeader('Authorization', 'Authorization'),
-})
+  headers: (builder) => builder.addClientRequestHeader('Authorization', 'Authorization'),
+});
 
 configureWunderGraphApplication({
   apis: [secureUpstream],
-})
+});
 ```
 
 The `headers` option on the upstream configuration defines that the "Authorization" header should be forwarded from the client request to the upstream request using the same name.
@@ -34,18 +33,18 @@ What's missing is that we need to implement a hook to fetch the short-lived toke
 
 ```typescript
 // wundergraph.server.ts
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     mutations: {
       draw: {
         preResolve: async ({ clientRequest, user }) => {
-          const token = await fetchShortLivedToken(user)
-          clientRequest.headers.set('Authorization', 'Bearer ' + token)
+          const token = await fetchShortLivedToken(user);
+          clientRequest.headers.set('Authorization', 'Bearer ' + token);
         },
       },
     },
   },
-}))
+}));
 ```
 
 In this hook, we fetch the short-lived token from our Identity Provider and use the `clientRequest.headers.set` method to inject it into the client request.

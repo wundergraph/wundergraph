@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/solid-query",
-  "version": "0.3.0",
+  "version": "0.4.40",
   "license": "Apache-2.0",
   "description": "WunderGraph Solid Query Integration",
   "main": "./dist/index.js",
@@ -32,7 +32,7 @@
     "url": "git+https://github.com/wundergraph/wundergraph.git"
   },
   "peerDependencies": {
-    "@tanstack/solid-query": "^4.24.6",
+    "@tanstack/solid-query": "^4.29.1",
     "@wundergraph/sdk": ">=0.110.0",
     "solid-js": "^1.5.7"
   },
@@ -43,7 +43,7 @@
     "@babel/preset-typescript": "^7.18.6",
     "@jest/globals": "^29.3.1",
     "@solidjs/testing-library": "^0.6.1",
-    "@tanstack/solid-query": "^4.24.6",
+    "@tanstack/solid-query": "^4.29.1",
     "@testing-library/jest-dom": "^5.16.5",
     "@types/jest": "^28.1.1",
     "@types/node-fetch": "2.6.2",

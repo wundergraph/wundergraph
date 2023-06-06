@@ -12,7 +12,6 @@ export type {
 	QueryRequestOptions,
 	MutationRequestOptions,
 	SubscriptionRequestOptions,
-	GraphQLError,
 	ClientConfig,
 	CreateClientConfig,
 	JSONObject,
@@ -26,10 +25,17 @@ export type {
 	S3ProviderDefinition,
 	HasRequiredInput,
 	WithInput,
+	ExtractProfileName,
+	ExtractMeta,
 } from './types';
-
+export type { UploadValidationOptions } from './client';
 export { Client } from './client';
 
-export { GraphQLResponseError } from './GraphQLResponseError';
-export { ResponseError } from './ResponseError';
-export type { ClientResponseError } from './ClientResponseError';
+export type { GraphQLError, GraphQLErrorLocation, ClientOperationErrors } from './errors';
+export {
+	OperationError,
+	ResponseError,
+	AuthorizationError,
+	InputValidationError,
+	getHttpResponseError,
+} from './errors';

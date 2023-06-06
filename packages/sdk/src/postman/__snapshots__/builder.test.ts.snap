@@ -16,10 +16,10 @@ exports[`PostmanBuilder 1`] = `
   "item": [
     {
       "_": {
-        "postman_id": "operatations",
+        "postman_id": "operations",
       },
       "event": [],
-      "id": "operatations",
+      "id": "operations",
       "item": [
         {
           "event": [],
@@ -74,6 +74,9 @@ exports[`PostmanBuilder 1`] = `
           "response": [],
         },
         {
+          "_": {
+            "postman_id": "item",
+          },
           "event": [],
           "id": "item",
           "item": [
@@ -108,6 +111,9 @@ exports[`PostmanBuilder 1`] = `
           "name": "item",
         },
         {
+          "_": {
+            "postman_id": "location",
+          },
           "event": [],
           "id": "location",
           "item": [
@@ -166,13 +172,16 @@ exports[`PostmanBuilder 1`] = `
               "response": [],
             },
             {
+              "_": {
+                "postman_id": "location/query",
+              },
               "event": [],
               "id": "location/query",
               "item": [
                 {
                   "event": [],
-                  "id": "location/query/GetUser",
-                  "name": "GetUser",
+                  "id": "location/query/GetUser2",
+                  "name": "GetUser2",
                   "request": {
                     "header": [
                       {
@@ -189,7 +198,7 @@ exports[`PostmanBuilder 1`] = `
                         "operations",
                         "location",
                         "query",
-                        "GetUser",
+                        "GetUser2",
                       ],
                       "query": [],
                       "variable": [],
@@ -199,8 +208,8 @@ exports[`PostmanBuilder 1`] = `
                 },
                 {
                   "event": [],
-                  "id": "location/query/GetUser",
-                  "name": "GetUser",
+                  "id": "location/query/GetCart",
+                  "name": "GetCart",
                   "request": {
                     "header": [
                       {
@@ -217,7 +226,7 @@ exports[`PostmanBuilder 1`] = `
                         "operations",
                         "location",
                         "query",
-                        "GetUser",
+                        "GetCart",
                       ],
                       "query": [],
                       "variable": [],
@@ -251,21 +260,45 @@ exports[`PostmanBuilder 1`] = `
                   },
                   "response": [],
                 },
-              ],
-              "name": "query",
-            },
-            {
-              "event": [],
-              "id": "location/query",
-              "name": "query",
-              "request": {
-                "method": "GET",
-                "url": {
-                  "query": [],
-                  "variable": [],
+                {
+                  "_": {
+                    "postman_id": "location/query/new",
+                  },
+                  "event": [],
+                  "id": "location/query/new",
+                  "item": [
+                    {
+                      "event": [],
+                      "id": "NewGetSetUser",
+                      "name": "SetUser",
+                      "request": {
+                        "body": {
+                          "mode": "urlencoded",
+                          "urlencoded": [],
+                        },
+                        "method": "POST",
+                        "url": {
+                          "host": [
+                            "{{apiBaseUrl}}",
+                          ],
+                          "path": [
+                            "operations",
+                            "location",
+                            "query",
+                            "new",
+                            "SetUser",
+                          ],
+                          "query": [],
+                          "variable": [],
+                        },
+                      },
+                      "response": [],
+                    },
+                  ],
+                  "name": "location/query/new",
                 },
-              },
-              "response": [],
+              ],
+              "name": "location/query",
             },
           ],
           "name": "location",

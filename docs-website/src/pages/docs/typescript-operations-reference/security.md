@@ -1,7 +1,6 @@
 ---
-title: TypeScript Operations Reference
-pageTitle: WunderGraph - Reference - TypeScript Operations - Security
-description:
+title: TypeScript Operations Security
+description: Learn more about the security features of TypeScript Operations
 ---
 
 Here's a simplified overview of the WunderGraph architecture.
@@ -29,3 +28,12 @@ The WunderGraph Gateway will validate the request against this JSON Schema befor
 
 This means, that if you're using TypeScript Operations, you don't have to worry about input validation.
 Define an input schema using `zod` and you can trust that the request will be validated before reaching the server.
+
+## Internal Operations
+
+Not all operations need to exposed to the public Internet. In this case, just place the operation file under a directory named _internal_, and the operation will automatically be marked as internal.
+The internal directory can be nested, and the same applies to nested operations within the internal directory.
+
+{% callout type="warning" %}
+The configuration for operations accepts and `internal` prop. This is deprecated. Please use the above method instead.
+{% /callout %}

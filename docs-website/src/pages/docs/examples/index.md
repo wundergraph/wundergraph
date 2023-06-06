@@ -14,6 +14,7 @@ Here's an overview of all the available examples.
 {% quick-link title="Cross API Joins" icon="core" href="/docs/examples/cross-api-joins" description="An example demonstrating how to join data across two APIs." /%}
 {% quick-link title="Next.js" icon="core" href="/docs/examples/nextjs" description="This example integrates WunderGraph with Next.js." /%}
 {% quick-link title="Next.js TypeScript Operations" icon="core" href="/docs/examples/nextjs-typescript-operations" description="TypeScript Operations with Next.js" /%}
+{% quick-link title="Next.js + Clerk" icon="core" href="/docs/examples/nextjs-clerk" description="WunderGraph with Clerk and Next.js" /%}
 {% quick-link title="Vite + SWR" icon="core" href="/docs/examples/vite-swr" description="This example integrates WunderGraph with Vite and SWR." /%}
 {% quick-link title="Hooks" icon="core" href="/docs/examples/hooks" description="This example demonstrates how to use hooks in WunderGraph." /%}
 {% quick-link title="Caching" icon="core" href="/docs/examples/caching" description="This example demonstrates how to use caching in WunderGraph." /%}
@@ -33,4 +34,5 @@ Here's an overview of all the available examples.
 {% quick-link title="GraphQL subscriptions hooks" icon="core" href="/docs/examples/graphql-subscriptions-hooks" description="This example demonstrates how to use GraphQL subscriptions hooks with WunderGraph." /%}
 {% quick-link title="WunderGraph schema extension" icon="core" href="/docs/examples/schema-extension" description="This example demonstrates how to use GraphQL schema extension with WunderGraph." /%}
 {% quick-link title="Nextjs Todos" icon="core" href="/docs/examples/nextjs-todos" description="This Todo app demonstrate how to use SWR with WunderGraph" /%}
+{% quick-link title="TypeScript ORM" icon="core" href="/docs/examples/orm" description="A simple example demonstrating the TypeScript ORM" /%}
 {% /quick-links %}

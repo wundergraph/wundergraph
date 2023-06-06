@@ -1,0 +1,31 @@
+# This file is auto generated.
+# Remove/modify this header if you want to customize the operation.
+query countries_countries_query($filter: countries_CountryFilterInput, $countries_countries_name_lang: String) {
+	countries_countries(filter: $filter) {
+		awsRegion
+		capital
+		code
+		continent {
+			code
+			name
+		}
+		currencies
+		currency
+		emoji
+		emojiU
+		languages {
+			code
+			name
+			native
+			rtl
+		}
+		name(lang: $countries_countries_name_lang)
+		native
+		phone
+		phones
+		states {
+			code
+			name
+		}
+	}
+}

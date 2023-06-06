@@ -17,7 +17,7 @@
   "scripts": {
     "clean": "rimraf ./.next",
     "dev": "concurrently \"npm run nextDev\" \"npm run wundergraph\" \"npm run browser\"",
-    "wundergraph": "wunderctl up",
+    "wundergraph": "wunderctl up --logs",
     "generate": "wunderctl generate",
     "browser": "wait-on \"http-get://localhost:3003\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:3003",
     "build": "pnpm generate && next build && pnpm check",
@@ -35,11 +35,12 @@
     "next": "^13.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "swr": "^2.0.0",
+    "stripe": "^11.12.0",
+    "swr": "^2.1.5",
     "zod": "^3.20.2"
   },
   "devDependencies": {
-    "@types/node": "^17.0.27",
+    "@types/node": "^18.16.0",
     "@types/react": "^18.0.7",
     "concurrently": "^6.0.0",
     "graphql": "^16.3.0",

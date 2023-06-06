@@ -8,7 +8,7 @@ description:
 
 ## Configuration
 
-Check schema extension configuration [doc](/docs/wundergraph-config-ts-reference/configure-schema-extension).
+Check Schema Extension configuration [doc](/docs/wundergraph-config-ts-reference/schema-extension-configuration).
 
 ## Getting started
 

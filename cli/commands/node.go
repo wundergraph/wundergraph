@@ -16,6 +16,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -47,7 +48,10 @@ var nodeStartCmd = &cobra.Command{
 		}
 
 		g.Go(func() error {
-			return StartWunderGraphNode(n, WithIdleHandler(stop))
+			return StartWunderGraphNode(n,
+				WithIdleHandler(stop),
+				WithRequestLogging(rootFlags.DebugMode),
+			)
 		})
 
 		n.HandleGracefulShutdown(gracefulTimeout)
@@ -68,7 +72,7 @@ func init() {
 	nodeCmd.AddCommand(nodeStartCmd)
 	rootCmd.AddCommand(nodeCmd)
 
-	nodeStartCmd.Flags().IntVar(&shutdownAfterIdle, "shutdown-after-idle", 0, "shuts down the server after given seconds in idle when no requests have been served")
+	nodeStartCmd.Flags().IntVar(&shutdownAfterIdle, "shutdown-after-idle", 0, "Shutdown the server after given seconds in idle when no requests have been served")
 }
 
 func NewWunderGraphNode(ctx context.Context) (*node.Node, error) {
@@ -77,13 +81,15 @@ func NewWunderGraphNode(ctx context.Context) (*node.Node, error) {
 		return nil, err
 	}
 
-	return node.New(ctx, BuildInfo, wunderGraphDir, log), nil
+	nodeLogger := logging.
+		New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevel)
+	return node.New(ctx, BuildInfo, wunderGraphDir, nodeLogger), nil
 }
 
 type options struct {
 	hooksServerHealthCheck bool
 	idleHandler            func()
-	prettyLogging          bool
+	enableRequestLogging   bool
 }
 
 type Option func(options *options)
@@ -97,6 +103,12 @@ func WithHooksServerHealthCheck() Option {
 func WithIdleHandler(idleHandler func()) Option {
 	return func(options *options) {
 		options.idleHandler = idleHandler
+	}
+}
+
+func WithRequestLogging(debugMode bool) Option {
+	return func(options *options) {
+		options.enableRequestLogging = debugMode
 	}
 }
 
@@ -137,10 +149,9 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 
 	nodeOpts := []node.Option{
 		node.WithStaticWunderNodeConfig(wunderNodeConfig),
-		node.WithDebugMode(rootFlags.DebugMode),
 		node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
 		node.WithIntrospection(enableIntrospection),
-		node.WithPrettyLogging(rootFlags.PrettyLogs),
+		node.WithTraceBatchTimeout(otelBatchTimeout),
 	}
 
 	if shutdownAfterIdle > 0 {
@@ -152,6 +163,10 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 
 	if options.hooksServerHealthCheck {
 		nodeOpts = append(nodeOpts, node.WithHooksServerHealthCheck(time.Duration(healthCheckTimeout)*time.Second))
+	}
+
+	if options.enableRequestLogging {
+		nodeOpts = append(nodeOpts, node.WithRequestLogging(options.enableRequestLogging))
 	}
 
 	err = n.StartBlocking(nodeOpts...)

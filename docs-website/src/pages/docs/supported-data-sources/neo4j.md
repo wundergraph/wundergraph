@@ -1,6 +1,5 @@
 ---
-title: Neo4j DataSource
-pageTitle: WunderGraph - Neo4j DataSource
+title: Neo4j support
 description: WunderGraph is the easiest way to expose Neo4j databases through GraphQL.
 ---
 
@@ -31,16 +30,13 @@ const db = introspect.graphql({
   apiNamespace: 'db',
   url: new EnvironmentVariable('NEO4J_GRAPHQL_URL'),
   headers: (builder) => {
-    builder.addStaticHeader(
-      'Authorization',
-      new EnvironmentVariable('NEO4J_TOKEN')
-    )
-    return builder
+    builder.addStaticHeader('Authorization', new EnvironmentVariable('NEO4J_TOKEN'));
+    return builder;
   },
-})
+});
 
 configureWunderGraphApplication({
   apis: [db],
   server,
-})
+});
 ```

@@ -1,7 +1,6 @@
 ---
 title: Cross-API Joins to Compose APIs
-pageTitle: WunderGraph - Features - Cross-API Joins to Compose APIs
-description:
+description: Access Data from multiple APIs and combine the results into a single dataset.
 ---
 
 Imagine you'd like to access Data from multiple APIs and combine the results into a single dataset.
@@ -18,12 +17,12 @@ one to query the capitals and the other to query the weather data.
 const weather = introspect.graphql({
   apiNamespace: 'weather',
   url: 'https://weather-api.wundergraph.com/',
-})
+});
 
 const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
-})
+});
 ```
 
 Next, let's define our JOIN query.

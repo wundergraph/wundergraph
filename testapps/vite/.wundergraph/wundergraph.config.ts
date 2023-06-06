@@ -119,15 +119,14 @@ configureWunderGraphApplication({
 			useSSL: false,
 		},
 	],
-	codeGenerators: [
-		{
-			templates: [...templates.typescript.all],
-		},
-		{
-			templates: [templates.typescript.client],
-			path: '../src/generated',
-		},
-	],
+	generate: {
+		codeGenerators: [
+			{
+				templates: [templates.typescript.client],
+				path: '../src/generated',
+			},
+		],
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins: ['http://localhost:5173', 'http://localhost:5173'],
@@ -136,12 +135,12 @@ configureWunderGraphApplication({
 		cookieBased: {
 			providers: [
 				authProviders.demo(),
-				authProviders.openIdConnect({
-					id: 'auth0',
-					issuer: new EnvironmentVariable('AUTH0_ISSUER'),
-					clientId: new EnvironmentVariable('AUTH0_CLIENT_ID'),
-					clientSecret: new EnvironmentVariable('AUTH0_CLIENT_SECRET'),
-				}),
+				// authProviders.openIdConnect({
+				// 	id: 'auth0',
+				// 	issuer: new EnvironmentVariable('AUTH0_ISSUER'),
+				// 	clientId: new EnvironmentVariable('AUTH0_CLIENT_ID'),
+				// 	clientSecret: new EnvironmentVariable('AUTH0_CLIENT_SECRET'),
+				// }),
 			],
 			authorizedRedirectUriRegexes: ['http://localhost:5173*'],
 		},

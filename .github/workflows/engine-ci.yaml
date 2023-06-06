@@ -12,8 +12,6 @@ on:
       - '.github/actions/go/action.yaml'
       - '.github/actions/node/action.yaml'
       - '.github/workflows/engine-ci.yaml'
-      - '!examples/**/*'
-      - '!**/*.md'
   pull_request:
     branches:
       - main
@@ -26,15 +24,13 @@ on:
       - '.github/actions/go/action.yaml'
       - '.github/actions/node/action.yaml'
       - '.github/workflows/engine-ci.yaml'
-      - '!examples/**/*'
-      - '!**/*.md'
-      - '!docs-website/**/*.md'
 
 concurrency:
   group: ${{github.workflow}}-${{github.head_ref}}
   cancel-in-progress: true
 
 env:
+  WG_TELEMETRY_DISABLED: 1
   WORKING_DIRECTORY: '.'
   CI: true
 
@@ -42,15 +38,6 @@ jobs:
   build_test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    services:
-      minio:
-        image: minio/minio:edge-cicd
-        ports:
-          - 9000:9000
-        env:
-          MINIO_ROOT_USER: minio
-          MINIO_ROOT_PASSWORD: minio123
-        options: --name=minio --health-cmd "curl http://localhost:9000/minio/health/live"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -70,7 +57,11 @@ jobs:
         with:
           protoc-version: '21.5'
 
-      - run: make bootstrap-minio
+      - name: Start MinIO container
+        run: docker run -d --rm --name=minio --health-cmd "curl http://localhost:9000/minio/health/live" -e MINIO_ROOT_USER=minio -e MINIO_ROOT_PASSWORD=minio123 -p 9000:9000 -p 9090:9090 quay.io/minio/minio:RELEASE.2023-03-20T20-16-18Z server /data --console-address ":9090"
+
+      - name: Setup MinIO container
+        run: make bootstrap-minio
 
       - run: pnpm install --ignore-scripts
 
@@ -82,10 +73,11 @@ jobs:
       - name: Linters
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.50
+          # keep in sync with local version
+          version: v1.52.2
           args: --timeout 2m
 
       - name: Run unit and integration tests
-        run: make test-go
+        run: go test -race ./...
         env:
           INT: true

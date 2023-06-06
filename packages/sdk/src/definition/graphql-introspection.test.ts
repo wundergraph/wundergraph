@@ -1,5 +1,4 @@
-import { GraphQLApi, introspect } from './index';
-import fetch from 'node-fetch';
+import { introspect } from './index';
 import nock from 'nock';
 import axios from 'axios';
 import { promises as fs } from 'fs';
@@ -40,7 +39,7 @@ test('introspection via http', async () => {
 	const productsIntrospection = await fetchSDL('http://localhost:4003/graphql', introspectionQuery);
 	const inventoryIntrospection = await fetchSDL('http://localhost:4004/graphql', introspectionQuery);
 	
-	await fs.writeFile(path.join(__dirname, 'testdata','introspection.json'), JSON.stringify({
+	await fs.writeFile(path.join(__dirname, 'testdata','graphql-introspection.json'), JSON.stringify({
 		accountsSDL,
 		productsSDL,
 		reviewsSDL,
@@ -51,7 +50,7 @@ test('introspection via http', async () => {
 		inventoryIntrospection,
 	}, null, 2), {encoding: 'utf8', flag: 'w'});*/
 
-	const data = await fs.readFile(path.join(__dirname, 'testdata', 'introspection.json'), { encoding: 'utf8' });
+	const data = await fs.readFile(path.join(__dirname, 'testdata', 'graphql-introspection.json'), { encoding: 'utf8' });
 	const {
 		accountsSDL,
 		productsSDL,
@@ -94,7 +93,7 @@ test('introspection via http', async () => {
 		.reply(200, inventoryIntrospection)
 		.persist();
 
-	const federatedApi: GraphQLApi = await introspect.federation({
+	const generator = await introspect.federation({
 		apiNamespace: 'federated',
 		upstreams: [
 			{
@@ -113,16 +112,17 @@ test('introspection via http', async () => {
 		introspection: {
 			disableCache: true,
 		},
-	})();
+	});
 
+	const federatedApi = await generator({});
 	expect(federatedApi).toMatchSnapshot();
 });
 
 test('introspection via string', async () => {
-	const data = await fs.readFile(path.join(__dirname, 'testdata', 'introspection.json'), { encoding: 'utf8' });
+	const data = await fs.readFile(path.join(__dirname, 'testdata', 'graphql-introspection.json'), { encoding: 'utf8' });
 	const { accountsSDL, productsSDL, reviewsSDL, inventorySDL } = JSON.parse(data);
 
-	const federatedApiFromString: GraphQLApi = await introspect.federation({
+	const generator = await introspect.federation({
 		apiNamespace: 'federated',
 		upstreams: [
 			{
@@ -145,13 +145,14 @@ test('introspection via string', async () => {
 		introspection: {
 			disableCache: true,
 		},
-	})();
+	});
 
+	const federatedApiFromString = await generator({});
 	expect(federatedApiFromString).toMatchSnapshot();
 });
 
 test('build subgraph schema', async () => {
-	const data = await fs.readFile(path.join(__dirname, 'testdata', 'introspection.json'), { encoding: 'utf8' });
+	const data = await fs.readFile(path.join(__dirname, 'testdata', 'graphql-introspection.json'), { encoding: 'utf8' });
 	const { accountsSDL, productsSDL, reviewsSDL, inventorySDL } = JSON.parse(data);
 
 	const accountsInput = accountsSDL.data._service.sdl;

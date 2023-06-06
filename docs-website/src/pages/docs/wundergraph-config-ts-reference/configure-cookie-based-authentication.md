@@ -1,7 +1,6 @@
 ---
 title: Configure Cookie-based authentication
-pageTitle: WunderGraph - Configure Cookie-based authentication
-description:
+description: Configure cookie-based authentication for your application.
 ---
 
 Cookie-Based Authentication is the best possible authentication flow to be used with a web-based application.
@@ -75,6 +74,7 @@ configureWunderGraphApplication({
         'http://localhost:3000/demo',
         'http://localhost:3000/generatedform',
       ],
+      timeoutSeconds: 600; // optional, defaults to 10 minutes
     },
   },
 });
@@ -108,9 +108,9 @@ configureWunderGraphApplication({
           clientSecret: 'XXX', // client secret from Auth0
         }),
       ],
-      secureCookieHashKey: new EnvironmentVariable('WUNDERGRAPH_SECURE_COOKIE_HASH_KEY'), // must be of length 32
-      secureCookieBlockKey: new EnvironmentVariable('WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY'), // must be of length 32
-      csrfTokenSecret: new EnvironmentVariable('WUNDERGRAPH_CSRF_TOKEN_SECRET'), // must be of length 11
+      secureCookieHashKey: new EnvironmentVariable('WG_SECURE_COOKIE_HASH_KEY'), // must be of length 32
+      secureCookieBlockKey: new EnvironmentVariable('WG_SECURE_COOKIE_BLOCK_KEY'), // must be of length 32
+      csrfTokenSecret: new EnvironmentVariable('WG_CSRF_TOKEN_SECRET'), // must be of length 11
     },
   },
 });

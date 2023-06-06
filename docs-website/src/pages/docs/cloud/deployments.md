@@ -99,6 +99,12 @@ Follow the steps from the `Import your repository` and `Deploy your project`.
 
 # Build script convention
 
+{% callout title="Priority of build scripts" %}
+WunderGraph Cloud will prioritise build scripts in the following order:
+
+`wg.toml` > `package.json build:wundergraph` > `package.json build`
+{% /callout %}
+
 - If your `package.json` file contains a build:wundergraph script, WunderGraph Cloud will execute it during deployment.
 - If no build:wundergraph script, WunderGraph Cloud will fall back to build script.
 - If no build script, WunderGraph Cloud will execute `wunderctl generate` by default and detect the WunderGraph project's location

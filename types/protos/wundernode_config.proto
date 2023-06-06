@@ -16,6 +16,7 @@ message ApiAuthenticationConfig {
 	CookieBasedAuthentication cookieBased = 1;
 	ApiAuthenticationHooks hooks = 2;
 	JwksBasedAuthentication jwksBased = 3;
+	repeated string publicClaims = 4;
 }
 
 message JwksBasedAuthentication {
@@ -43,6 +44,7 @@ message CookieBasedAuthentication {
 	ConfigurationVariable hashKey = 4;
 	ConfigurationVariable blockKey = 5;
 	ConfigurationVariable csrfSecret = 6;
+	ConfigurationVariable timeoutSeconds = 7;
 }
 
 message AuthProvider {
@@ -75,33 +77,13 @@ message OpenIDConnectAuthProviderConfig {
 	repeated OpenIDConnectQueryParameter queryParameters = 4;
 }
 
-message ApiCacheConfig {
-	ApiCacheKind kind = 1;
-	InMemoryCacheConfig inMemoryConfig = 2;
-	RedisCacheConfig redisConfig = 3;
-}
-
-enum ApiCacheKind {
-	NO_CACHE = 0;
-	IN_MEMORY_CACHE = 1;
-	REDIS_CACHE = 2;
-}
-
-message InMemoryCacheConfig {
-	int64 maxSize = 1;
-}
-
-message RedisCacheConfig {
-	string redisUrlEnvVar = 1;
-}
-
 message Operation {
 	string name = 1;
 	string content = 2;
 	OperationType operationType = 3;
 	string variablesSchema = 4;
 	string responseSchema = 5;
-	OperationCacheConfig cacheConfig = 7;
+	optional OperationCacheConfig cacheConfig = 7;
 	OperationAuthenticationConfig authenticationConfig = 8;
 	OperationLiveQueryConfig liveQueryConfig = 9;
 	OperationAuthorizationConfig authorizationConfig = 10;
@@ -141,7 +123,7 @@ message OperationVariablesConfiguration {
 }
 
 message VariableInjectionConfiguration {
-	string variableName = 1;
+	repeated string variablePathComponents = 1;
 	InjectVariableKind variableKind = 2;
 	string dateFormat = 3;
 	string environmentVariableName = 4;
@@ -197,7 +179,7 @@ message CustomClaim {
 }
 
 message ClaimConfig {
-	string variableName = 1;
+	repeated string variablePathComponents = 1;
 	ClaimType claimType = 2;
 	// Available iff claimType == CUSTOM
 	optional CustomClaim custom = 3;
@@ -235,6 +217,7 @@ enum ValueType {
 	INT = 1;
 	FLOAT = 2;
 	BOOLEAN = 3;
+	ANY = 4;
 }
 
 message OperationLiveQueryConfig {
@@ -247,10 +230,11 @@ message OperationAuthenticationConfig {
 }
 
 message OperationCacheConfig {
-	bool enable = 1;
-	int64 maxAge = 2;
-	bool public = 3;
-	int64 staleWhileRevalidate = 4;
+	optional bool enable = 1;
+	optional int64 maxAge = 2;
+	optional bool public = 3;
+	optional int64 staleWhileRevalidate = 4;
+	optional bool mustRevalidate = 5;
 }
 
 enum OperationType {
@@ -364,6 +348,7 @@ message FetchConfiguration {
 	MTLSConfiguration mTLS = 8;
 	ConfigurationVariable baseUrl = 9;
 	ConfigurationVariable path = 10;
+	optional ConfigurationVariable httpProxyUrl = 11;
 }
 
 message MTLSConfiguration {
@@ -456,6 +441,7 @@ message ArgumentConfiguration {
 	ArgumentSource sourceType = 2;
 	repeated string sourcePath = 3;
 	ArgumentRenderConfiguration renderConfiguration = 4;
+	string renameTypeTo = 5;
 }
 
 enum ArgumentRenderConfiguration {
@@ -469,6 +455,7 @@ message WunderGraphConfiguration {
 	string apiId = 2;
 	repeated string environmentIds = 3;
 	bool dangerouslyEnableGraphQLEndpoint = 4;
+	string configHash = 5;
 }
 
 message S3UploadProfileHooksConfiguration {
@@ -509,6 +496,11 @@ message UserDefinedApi {
 	repeated WebhookConfiguration webhooks = 12;
 	ServerOptions serverOptions = 14;
 	NodeOptions nodeOptions = 15;
+	ExperimentalConfiguration experimentalConfig = 17;
+}
+
+message ExperimentalConfiguration {
+	bool orm = 1;
 }
 
 message ListenerOptions {
@@ -516,8 +508,17 @@ message ListenerOptions {
 	ConfigurationVariable port = 2;
 }
 
+message InternalListenerOptions {
+	ConfigurationVariable port = 1;
+}
+
 message NodeLogging {
 	ConfigurationVariable level = 1;
+}
+
+message PrometheusOptions {
+	ConfigurationVariable enabled = 1;
+	ConfigurationVariable port = 2;
 }
 
 message NodeOptions {
@@ -526,6 +527,18 @@ message NodeOptions {
 	ListenerOptions listen = 2;
 	NodeLogging logger = 3;
 	int64 defaultRequestTimeoutSeconds = 5;
+	InternalListenerOptions listenInternal = 6;
+	ConfigurationVariable nodeInternalUrl = 7;
+	ConfigurationVariable defaultHttpProxyUrl = 8;
+	TelemetryOptions openTelemetry = 9;
+	PrometheusOptions prometheus = 10;
+}
+
+message TelemetryOptions {
+	ConfigurationVariable enabled = 1;
+	ConfigurationVariable exporterHttpEndpoint = 2;
+	ConfigurationVariable sampler = 3;
+	ConfigurationVariable authToken = 4;
 }
 
 message ServerLogging {
@@ -597,4 +610,33 @@ enum ConfigurationVariableKind {
 	STATIC_CONFIGURATION_VARIABLE = 0;
 	ENV_CONFIGURATION_VARIABLE = 1;
 	PLACEHOLDER_CONFIGURATION_VARIABLE = 2;
+}
+
+message BuildInfo {
+	bool success = 1;
+	BuildInfoVersion sdk = 2;
+	BuildInfoVersion wunderctl = 3;
+	BuildInfoVersion node = 4;
+	BuildInfoOS os = 5;
+	BuildInfoStats stats = 6;
+}
+
+message BuildInfoVersion {
+	string version = 1;
+}
+
+message BuildInfoOS {
+	string type = 1;
+	string platform = 2;
+	string arch = 3;
+	string version = 4;
+	string release = 5;
+}
+
+message BuildInfoStats {
+	int32 totalApis = 1;
+	int32 totalOperations = 2;
+	int32 totalWebhooks = 3;
+	bool hasAuthenticationProvider = 4;
+	bool hasUploadProvider = 5;
 }

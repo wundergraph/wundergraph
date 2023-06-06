@@ -28,7 +28,7 @@ getRepository({ exampleName: options?.example, githubLink: options?.link, projec
 	.then(() => {
 		console.log(logSymbols.success + chalk.green(' Project created successfully'));
 	})
-	.catch(() => {
-		console.error(logSymbols.error + chalk.red(' Project creation failed'));
+	.catch((reason) => {
+		console.error(logSymbols.error + chalk.red(` Project creation failed: ${reason}`));
 		process.exit(1);
 	});

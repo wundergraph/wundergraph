@@ -1,5 +1,5 @@
-import { ClientResponseError } from './ClientResponseError';
 import type { RequiredKeysOf, SetRequired } from 'type-fest';
+import { GraphQLError, ResponseError } from './errors';
 
 export type Headers = { [key: string]: string };
 
@@ -17,7 +17,7 @@ export interface OperationMetadata {
 export interface ClientOperation {
 	input?: object;
 	liveQuery?: boolean;
-	data: any;
+	response: ClientResponse;
 	requiresAuthentication: boolean;
 }
 
@@ -51,40 +51,40 @@ export interface OperationDefinition {
 }
 
 export interface ClientConfig {
-	applicationHash: string;
+	applicationHash?: string;
 	baseURL: string;
-	sdkVersion: string;
+	sdkVersion?: string;
 	customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 	extraHeaders?: Headers;
 	operationMetadata?: OperationMetadata;
+	/**
+	 * Specifies the number of milliseconds before the request times out.
+	 * default is `0` (no timeout)
+	 */
+	requestTimeoutMs?: number;
 	csrfEnabled?: boolean;
+	/**
+	 * Force SSE for subscriptions if extraHeaders are set.
+	 * Subscriptions fall back to fetch streaming by default
+	 * if extraHeaders are set, because EventSource does not
+	 * supported headers.
+	 */
+	forceSSE?: boolean;
 }
 
-type PrivateConfigProperties = 'applicationHash' | 'sdkVersion' | 'operationMetadata';
+type PrivateConfigProperties = 'applicationHash' | 'sdkVersion' | 'operationMetadata' | 'operationErrorTypes';
 export type CreateClientConfig = Partial<Omit<ClientConfig, PrivateConfigProperties>>;
 
-export type SubscriptionEventHandler<Data = any> = (resp: ClientResponse<Data>) => void;
+export type SubscriptionEventHandler<Data = any, ResponseError = any> = (
+	resp: ClientResponse<Data, ResponseError>
+) => void;
 
-export interface GraphQLErrorLocation {
-	line: number;
-	column: number;
+export interface ClientResponse<Data = any, Error = any> {
+	data?: Data;
+	error?: Error;
 }
 
-export interface GraphQLError {
-	message: string;
-	location?: ReadonlyArray<GraphQLErrorLocation>;
-	path?: ReadonlyArray<string | number>;
-}
-
-export interface ClientResponse<ResponseData = any> {
-	data?: ResponseData;
-	error?: ClientResponseError;
-}
-
-export interface GraphQLResponse<
-	ResponseData extends { [key: string]: any } = any,
-	ResponseError extends GraphQLError = GraphQLError
-> {
+export interface GraphQLResponse<ResponseData extends JSONObject = any, ResponseError extends GraphQLError = any> {
 	data?: ResponseData;
 	errors?: ResponseError[];
 }
@@ -94,6 +94,11 @@ export interface OperationRequestOptions<
 	Input extends object | undefined = object | undefined
 > {
 	operationName: OperationName;
+	/**
+	 * If you pass an AbortSignal, the request will be aborted when the signal is aborted.
+	 * You are responsible of handling the request timeout if you want to pass a custom AbortSignal.
+	 * @see https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal
+	 */
 	abortSignal?: AbortSignal;
 	input?: Input;
 }
@@ -114,7 +119,13 @@ export type SubscriptionRequestOptions<
 	OperationName extends string = any,
 	Input extends object | undefined = object | undefined
 > = WithInput<Input, OperationRequestOptions<OperationName, Input>> & {
+	/**
+	 * Subscribe to a live query
+	 */
 	liveQuery?: Boolean;
+	/**
+	 * Receive the initial response and then stop the subscription
+	 */
 	subscribeOnce?: Boolean;
 };
 
@@ -123,27 +134,30 @@ export interface SubscriptionResult {
 	data: any;
 }
 
-export interface UploadRequestOptions<ProviderName extends string = string> {
-	provider: ProviderName;
-	files: FileList;
-	abortSignal?: AbortSignal;
-}
+export type UploadRequestOptions<ProviderName = any, ProfileName = any, Meta = any> = ProfileName extends
+	| never
+	| undefined
+	? { provider: ProviderName; files: FileList; abortSignal?: AbortSignal; profile?: ProfileName; meta?: Meta }
+	: { provider: ProviderName; files: FileList; abortSignal?: AbortSignal; profile: ProfileName; meta?: Meta };
 
-export interface UploadRequestOptionsWithProfile<
-	ProviderName extends string = string,
-	ProfileName extends string = string,
-	Meta extends object = object
-> extends UploadRequestOptions<ProviderName> {
-	provider: ProviderName;
-	profile: ProfileName;
-	files: FileList;
-	abortSignal?: AbortSignal;
-	meta?: Meta;
-}
+/**
+ * @deprecated use `UploadRequestOptions` instead
+ */
+export type UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta> = UploadRequestOptions<
+	ProviderName,
+	ProfileName,
+	Meta
+>;
 
 export interface UploadResponse {
 	fileKeys: string[];
 }
+
+export type ExtractProfileName<Profile> = keyof Profile extends never ? undefined : Extract<keyof Profile, string>;
+export type ExtractMeta<
+	Profiles extends Record<string, object>,
+	ProfileName extends string | undefined
+> = ProfileName extends string ? Profiles[ProfileName] : never;
 
 export interface FetchUserRequestOptions {
 	abortSignal?: AbortSignal;

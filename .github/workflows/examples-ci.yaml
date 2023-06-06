@@ -27,6 +27,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  WG_TELEMETRY_DISABLED: 1
   WORKING_DIRECTORY: '.'
   CI: true
 
@@ -34,14 +35,14 @@ jobs:
   collect:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - id: set-matrix
         run: |
           echo "matrix=$(./scripts/test-examples/collect.sh)" >> $GITHUB_OUTPUT
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
-  build_test:
+  build_test_examples:
     needs: collect
     strategy:
       matrix:
@@ -61,10 +62,6 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           node-version: '18'
 
-      - name: Setup Docker image cache
-        uses: satackey/action-docker-layer-caching@v0.0.11
-        continue-on-error: true
-
       - name: Filter tests to run
         run: |
           echo '${{ toJson(matrix.test) }}' > tmp.json
@@ -77,13 +74,24 @@ jobs:
       - name: Build libs
         run: pnpm build:libs
 
-      - name: Build wunderctl
-        run: |
-          make install
-          echo "WUNDERCTL_BINARY_PATH=$(which wunderctl)" >> $GITHUB_ENV
+      - uses: ./.github/actions/wunderctl
 
       - name: Run tests
         run: ./scripts/test-examples/all.sh
 
       - name: Check if git is not dirty after generating files
         run: git diff --no-ext-diff --exit-code
+
+  # See https://github.com/orgs/community/discussions/26822
+  build_test:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    name: build_test
+    needs: build_test_examples
+    steps:
+      - run: exit 1
+        if: >-
+          ${{
+               contains(needs.*.result, 'failure')
+            || contains(needs.*.result, 'cancelled')
+          }}

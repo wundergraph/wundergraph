@@ -1,7 +1,6 @@
 ---
 title: Configure Planetscale Data Source
-pageTitle: WunderGraph - Configure Planetscale Data Source
-description:
+description: Introspect Planetscale databases and add them to your Virtual Graph.
 ---
 
 The Planetscale data source introspects the database and generates a GraphQL schema.
@@ -17,11 +16,11 @@ const db = introspect.planetscale({
   introspection: {
     pollingIntervalSeconds: 5,
   },
-})
+});
 
 configureWunderGraphApplication({
   apis: [db],
-})
+});
 ```
 
 Define the `databaseURL` which is the connection string to the database.

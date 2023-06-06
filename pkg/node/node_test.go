@@ -8,7 +8,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/http/httputil"
@@ -34,6 +33,7 @@ func TestNode(t *testing.T) {
 	logger := logging.New(true, false, zapcore.DebugLevel)
 
 	userService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "67b77eab-d1a5-4cd8-b908-8443f24502b6", r.Header.Get("X-Request-Id"))
 		assert.Equal(t, http.MethodPost, r.Method)
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
@@ -81,8 +81,10 @@ func TestNode(t *testing.T) {
 	}))
 	defer productService.Close()
 
-	port, err := freeport.GetFreePort()
+	ports, err := freeport.GetFreePorts(2)
 	assert.NoError(t, err)
+	port := ports[0]
+	internalPort := ports[1]
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -91,7 +93,7 @@ func TestNode(t *testing.T) {
 
 	node := New(ctx, BuildInfo{}, "", logger)
 
-	nodeConfig := WunderNodeConfig{
+	nodeConfig := &WunderNodeConfig{
 		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               5,
@@ -145,6 +147,10 @@ func TestNode(t *testing.T) {
 				Listener: &apihandler.Listener{
 					Host: "localhost",
 					Port: uint16(port),
+				},
+				InternalListener: &apihandler.Listener{
+					Host: "localhost",
+					Port: uint16(internalPort),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 			},
@@ -228,132 +234,8 @@ func TestNode(t *testing.T) {
 				}`,
 	}
 
-	actual = withHeaders.POST("/graphql").WithJSON(failingRequest).Expect().Status(http.StatusOK).Body().Raw()
+	actual = withHeaders.POST("/graphql").WithJSON(failingRequest).Expect().Status(http.StatusBadRequest).Body().Raw()
 	g.Assert(t, "post_my_reviews_graphql_returns_valid_graphql_error", prettyJSON(actual))
-}
-
-func TestInMemoryCache(t *testing.T) {
-	g := goldie.New(t, goldie.WithFixtureDir("fixtures"))
-
-	logger := logging.New(true, false, zapcore.DebugLevel)
-
-	productService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		data, err := io.ReadAll(r.Body)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if bytes.Contains(data, []byte(`{"variables":{},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
-			if _, err := io.WriteString(w, `{"data":{"topProducts":[{"upc":"1","name":"A","price":1},{"upc":"2","name":"B","price":2}]}}`); err != nil {
-				t.Fatal(err)
-			}
-			return
-		}
-		w.WriteHeader(500)
-	}))
-	defer productService.Close()
-
-	port, err := freeport.GetFreePort()
-	assert.NoError(t, err)
-
-	nodeURL := fmt.Sprintf(":%d", port)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	node := New(ctx, BuildInfo{}, "", logger)
-
-	nodeConfig := WunderNodeConfig{
-		Server: &Server{
-			GracefulShutdownTimeout: 0,
-			KeepAlive:               5,
-			ReadTimeout:             5,
-			WriteTimeout:            5,
-			IdleTimeout:             5,
-		},
-		Api: &apihandler.Api{
-			Hosts:                 []string{"jens.wundergraph.dev"},
-			EngineConfiguration:   federationPlanConfiguration("", productService.URL, ""),
-			EnableSingleFlight:    true,
-			EnableGraphqlEndpoint: true,
-			Operations: []*wgpb.Operation{
-				{
-					Name:    "TopProducts",
-					Path:    "TopProducts",
-					Content: topProductsQuery,
-					CacheConfig: &wgpb.OperationCacheConfig{
-						Enable:               true,
-						MaxAge:               60,
-						Public:               true,
-						StaleWhileRevalidate: 60,
-					},
-					OperationType: wgpb.OperationType_QUERY,
-					HooksConfiguration: &wgpb.OperationHooksConfiguration{
-						MockResolve: &wgpb.MockResolveHookConfiguration{},
-					},
-					VariablesSchema:              `{"type":"object","properties":{"first":{"type":["number","null"]}}}`,
-					ResponseSchema:               `{}`,
-					InterpolationVariablesSchema: `{"type":"object","properties":{"first":{"type":["number","null"]}}}`,
-					AuthorizationConfig: &wgpb.OperationAuthorizationConfig{
-						RoleConfig: &wgpb.OperationRoleConfig{},
-					},
-				},
-			},
-			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
-				CookieBased: &wgpb.CookieBasedAuthentication{},
-				JwksBased:   &wgpb.JwksBasedAuthentication{},
-				Hooks:       &wgpb.ApiAuthenticationHooks{},
-			},
-			CacheConfig: &wgpb.ApiCacheConfig{
-				Kind: wgpb.ApiCacheKind_IN_MEMORY_CACHE,
-				InMemoryConfig: &wgpb.InMemoryCacheConfig{
-					MaxSize: 16 * 1024 * 1024,
-				},
-			},
-			Options: &apihandler.Options{
-				Listener: &apihandler.Listener{
-					Host: "localhost",
-					Port: uint16(port),
-				},
-				Logging: apihandler.Logging{Level: zap.ErrorLevel},
-			},
-		},
-	}
-
-	go func() {
-		err = node.StartBlocking(WithStaticWunderNodeConfig(nodeConfig))
-		assert.NoError(t, err)
-	}()
-
-	time.Sleep(time.Second)
-
-	e := httpexpect.WithConfig(httpexpect.Config{
-		BaseURL: "http://" + nodeURL,
-		Client: &http.Client{
-			Jar:     httpexpect.NewJar(),
-			Timeout: time.Second * 30,
-		},
-		Reporter: httpexpect.NewRequireReporter(t),
-	})
-
-	withHeaders := e.Builder(func(request *httpexpect.Request) {
-		request.WithHeader("Host", "jens.wundergraph.dev")
-	})
-
-	const (
-		cacheHeaderName  = "X-Wg-Cache"
-		expectedDataName = "top_products_without_query"
-	)
-
-	// Send a request to populate the cache
-	cold := withHeaders.GET("/operations/TopProducts").Expect()
-	cold.Status(http.StatusOK).Header(cacheHeaderName).Equal("MISS")
-	g.Assert(t, expectedDataName, prettyJSON(cold.Body().Raw()))
-
-	// Close the origin, so request can only be answered from the in-memory cache
-	productService.Close()
-	hot := withHeaders.GET("/operations/TopProducts").Expect()
-	hot.Status(http.StatusOK).Header(cacheHeaderName).Equal("HIT")
-	g.Assert(t, expectedDataName, prettyJSON(hot.Body().Raw()))
 }
 
 func TestWebHooks(t *testing.T) {
@@ -367,8 +249,10 @@ func TestWebHooks(t *testing.T) {
 	}))
 	defer testServer.Close()
 
-	port, err := freeport.GetFreePort()
+	ports, err := freeport.GetFreePorts(2)
 	assert.NoError(t, err)
+	port := ports[0]
+	internalPort := ports[1]
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -378,7 +262,7 @@ func TestWebHooks(t *testing.T) {
 	logger := logging.New(true, false, zapcore.DebugLevel)
 	node := New(ctx, BuildInfo{}, "", logger)
 
-	nodeConfig := WunderNodeConfig{
+	nodeConfig := &WunderNodeConfig{
 		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               5,
@@ -420,6 +304,10 @@ func TestWebHooks(t *testing.T) {
 				Listener: &apihandler.Listener{
 					Host: "localhost",
 					Port: uint16(port),
+				},
+				InternalListener: &apihandler.Listener{
+					Host: "localhost",
+					Port: uint16(internalPort),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 			},
@@ -474,8 +362,10 @@ func BenchmarkNode(t *testing.B) {
 	}))
 	defer productService.Close()
 
-	port, err := freeport.GetFreePort()
+	ports, err := freeport.GetFreePorts(2)
 	assert.NoError(t, err)
+	port := ports[0]
+	internalPort := ports[1]
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -484,7 +374,7 @@ func BenchmarkNode(t *testing.B) {
 
 	node := New(ctx, BuildInfo{}, "", logger)
 
-	nodeConfig := WunderNodeConfig{
+	nodeConfig := &WunderNodeConfig{
 		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               0,
@@ -516,6 +406,10 @@ func BenchmarkNode(t *testing.B) {
 				Listener: &apihandler.Listener{
 					Host: "localhost",
 					Port: uint16(port),
+				},
+				InternalListener: &apihandler.Listener{
+					Host: "localhost",
+					Port: uint16(internalPort),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 			},

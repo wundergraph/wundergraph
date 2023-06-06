@@ -1,39 +1,67 @@
-import { Client, ClientResponseError, OperationsDefinition, User } from '@wundergraph/sdk/client';
+import { Client, ResponseError, OperationsDefinition, UploadResponse, User } from '@wundergraph/sdk/client';
 import { expectType } from 'tsd';
 import { SWRResponse } from 'swr';
 import { createHooks } from '../src';
 
-interface Operations extends OperationsDefinition {
-	queries: {
-		Weather: {
-			input: {
-				city: string;
-			};
-			data: any;
-			requiresAuthentication: boolean;
-		};
-	};
-	subscriptions: {
-		Weather: {
-			input: {
-				forCity: string;
-			};
-			data: any;
-			requiresAuthentication: boolean;
-		};
-	};
-	mutations: {
-		CreateUser: {
-			input: {
-				name: string;
-			};
-			data: any;
-			requiresAuthentication: boolean;
-		};
-	};
+export type UserRole = 'admin' | 'user';
+
+export enum AuthProviderId {
+	'github' = 'github',
+	'auth0' = 'auth0',
 }
 
-const { useSubscription, useQuery, useMutation, useUser } = createHooks<Operations>(
+type Queries = {
+	Weather: {
+		input: {
+			city: string;
+		};
+		response: { data?: { temperature: number }; error?: ResponseError };
+		requiresAuthentication: boolean;
+	};
+};
+
+type Mutations = {
+	CreateUser: {
+		input: {
+			name: string;
+		};
+		response: { data?: { name: string }; error?: ResponseError };
+		requiresAuthentication: boolean;
+	};
+};
+
+type Subscriptions = {
+	Weather: {
+		input: {
+			forCity: string;
+		};
+		response: { data?: { temperature: number }; error?: ResponseError };
+		requiresAuthentication: boolean;
+	};
+};
+
+type S3Providers = {
+	minio: {
+		hasProfiles: true;
+		profiles: {
+			avatar: object;
+			coverPicture: {
+				postId: string;
+			};
+		};
+	};
+};
+
+type Operations = OperationsDefinition<
+	Queries,
+	Mutations,
+	Subscriptions,
+	UserRole,
+	S3Providers,
+	keyof typeof AuthProviderId
+>;
+
+const { useSubscription, useQuery, useMutation, useUser, useFileUpload } = createHooks<Operations>(
 	new Client({
 		baseURL: 'http://localhost:8080',
 		applicationHash: 'my-application-hash',
@@ -49,8 +77,8 @@ const { data: queryData, error: queryError } = useQuery({
 	},
 });
 
-expectType<Operations['queries']['Weather']['data']>(queryData);
-expectType<ClientResponseError | undefined>(queryError);
+expectType<Operations['queries']['Weather']['response']['data']>(queryData);
+expectType<ResponseError | undefined>(queryError);
 
 const { data: subData, error: subError } = useSubscription({
 	enabled: true,
@@ -61,8 +89,8 @@ const { data: subData, error: subError } = useSubscription({
 	},
 });
 
-expectType<Operations['subscriptions']['Weather']['data']>(subData);
-expectType<ClientResponseError | undefined>(subError);
+expectType<Operations['subscriptions']['Weather']['response']['data']>(subData);
+expectType<ResponseError | undefined>(subError);
 
 const {
 	data: mutData,
@@ -72,19 +100,32 @@ const {
 	operationName: 'CreateUser',
 });
 
-expectType<Operations['mutations']['CreateUser']['data']>(mutData);
-expectType<ClientResponseError | undefined>(mutError);
+expectType<Operations['mutations']['CreateUser']['response']['data']>(mutData);
+expectType<ResponseError | undefined>(mutError);
 
-expectType<Promise<any>>(
+expectType<Promise<{ name: string } | undefined>>(
 	trigger({
 		name: 'John Doe',
 	})
 );
 
-expectType<SWRResponse<User<string>, ClientResponseError>>(useUser());
-expectType<SWRResponse<User<string>, ClientResponseError>>(
+expectType<SWRResponse<User<UserRole>, ResponseError>>(useUser());
+expectType<SWRResponse<User<UserRole>, ResponseError>>(
 	useUser({
 		revalidate: true,
 		abortSignal: new AbortController().signal,
+	})
+);
+
+const { upload } = useFileUpload();
+
+expectType<Promise<string[]>>(
+	upload({
+		provider: 'minio',
+		profile: 'coverPicture',
+		meta: {
+			postId: '1',
+		},
+		files: new FileList(),
 	})
 );

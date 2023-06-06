@@ -5,22 +5,16 @@ import operations from './wundergraph.operations';
 const hasura = introspect.graphql({
 	apiNamespace: 'hasura',
 	url: 'https://hasura.io/learn/graphql',
-	headers: (builder) => builder.addStaticHeader('Authorization', 'Secret'),
+	headers: (builder) => builder.addStaticHeader('Authorization', new EnvironmentVariable('HASURA_AUTH_TOKEN')),
 });
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
 	apis: [hasura],
 	server,
 	operations,
-	codeGenerators: [
-		{
-			templates: [
-				// use all the typescript react templates to generate a client
-				...templates.typescript.all,
-			],
-		},
-	],
+	generate: {
+		codeGenerators: [],
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins: [],

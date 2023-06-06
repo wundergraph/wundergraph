@@ -1,7 +1,6 @@
 ---
-title: Overview
-pageTitle: WunderGraph - Features - Overview
-description:
+title: Features Overview
+description: Overview of the most important features of WunderGraph.
 hideTableOfContents: true
 fullWidthContent: true
 isIndexFile: true
@@ -34,4 +33,6 @@ Here's an overview of the most important features of WunderGraph.
 {% quick-link title="Configuration as Code" icon="features" href="/docs/features/configuration-as-code" description="Everything in WunderGraph is configurable as code, with TypeScript, instead of JSON or YAML." /%}
 {% quick-link title="File Uploads to S3-compatible File Storages" icon="features" href="/docs/features/file-uploads-to-s3-compatible-file-storages" description="Need file uploads without any hassle? Plug in your S3 compatible file storage of choice and WunderGraph handles the rest." /%}
 {% quick-link title="Custom GraphQL Resolvers" icon="features" href="/docs/features/custom-graphql-resolvers" description="When APIs generated from your database are not enough, you can easily define your own GraphQL Resolvers, keeping clients decoupled from the generated APIs." /%}
+{% quick-link title="Generate OpenAPI definitions and Postman collections" icon="core" href="/docs/features/openapi-postman" description="Quickly test your API or generate bindings for other languages" /%}
+
 {% /quick-links %}

@@ -1,7 +1,6 @@
 ---
 title: '@fromClaim Directive'
-pageTitle: WunderGraph - Directives - @fromClaim
-description:
+description: Inject claims into variables
 ---
 
 WunderGraph builds on top of OpenID Connect for authentication.
@@ -111,4 +110,32 @@ mutation ($shopID: Int! @fromClaim(name: SHOPID), $productID: Int!) {
 ```
 
 Additionaly, custom claims are also available in `User` instances in both hooks and functions, under
-`User.customClaims.\<claimID\>` (e.g. `User.customClaims.shopID`).
+`User.customClaims.<claimID>` (e.g. `User.customClaims.shopID`).
+
+## Injecting claims into fields
+
+`@fromClaim` accepts a second optional `on:` argument that might be used to inject a value into an
+specific field. Given the following type:
+
+```graphql
+input countries_CountryFilterInput {
+  code: String!
+}
+```
+
+We can use `@fromClaim` to set the value of `code` using:
+
+```graphql
+mutation ($filter: countries_CountryFilterInput! @fromClaim(name: COUNTRY_CODE, on: "code")) {
+  countries_Countries(filter: $filter) {
+    id
+    name
+  }
+}
+```
+
+## Injecting multiple values
+
+`@fromClaim` can be used multiple times on the same operation, injecting data into different fields.
+Additionally, `@fromClaim` can be combined with other directives for injecting or manipulating data
+like `@injectCurrentDateTime`, `@injectEnvironmentVariable`, `@injectGeneratedUUID` and `@jsonSchema`.

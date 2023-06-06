@@ -26,15 +26,16 @@ configureWunderGraphApplication({
 	],
 	server,
 	operations,
-	codeGenerators: [
-		{
-			templates: [
-			    // Generate all TypeScript based templates, which includes the testing library
-				  ...templates.typescript.all,
-      ],
-    }
+  generate:{
+    codeGenerators: [],
+  },
 });
 ```
+
+{% callout type="note" %}
+Before you run the tests and import the `createTestServer` function, you must run `wundergraph generate --env .env.local` to generate the testing library.
+Some testing frameworks like Vitest or Jest provides a `globalSetup` hook that allows you to run a script before running the tests. In that way, you can automate it.
+{% /callout %}
 
 Within a test, you can use `WunderGraphTestServer.client()` to retrieve a TypeScript WunderGraph client
 instance ready to query the server set up by the testing library.
@@ -46,10 +47,10 @@ that depending on your project's settings, the path might be slightly different 
 you generate your templates.
 
 ```typescript
-import { createTestServer } from '../.wundergraph/generated/testing'
+import { createTestServer } from '../.wundergraph/generated/testing';
 
 // Imports from Jest
-import { describe, expect, test } from '@jest/globals'
+import { describe, expect, test } from '@jest/globals';
 ```
 
 We recommended creating as few testing server instances as possible and sharing them between
@@ -57,14 +58,14 @@ multiple tests. These minimizes the number of times the server starts and stops,
 faster.
 
 ```typescript
-const wg = createTestServer()
+const wg = createTestServer();
 ```
 
 Use Jest's `beforeAll()` and `afterAll()`, to set up the test server:
 
 ```typescript
-beforeAll(() => wg.start())
-afterAll(() => wg.stop())
+beforeAll(() => wg.start());
+afterAll(() => wg.stop());
 ```
 
 Finally, define your tests as Jest test functions:
@@ -105,10 +106,10 @@ that depending on your project's settings, the path might be slightly different 
 you generate your templates.
 
 ```typescript
-import { createTestServer } from '../.wundergraph/generated/testing'
+import { createTestServer } from '../.wundergraph/generated/testing';
 
 // Imports from Ava
-import { test } from 'ava'
+import { test } from 'ava';
 ```
 
 We recommended creating as few testing server instances as possible and sharing them between
@@ -116,14 +117,14 @@ multiple tests. These minimizes the number of times the server starts and stops,
 faster.
 
 ```typescript
-const wg = createTestServer()
+const wg = createTestServer();
 ```
 
 Use Ava's `test.before()` and `test.after()` functions to setup our testing server:
 
 ```typescript
-test.before(() => wg.start())
-test.after(() => wg.stop())
+test.before(() => wg.start());
+test.after(() => wg.stop());
 ```
 
 Finally, define your functions:
@@ -136,17 +137,15 @@ test('create a note', async (t) => {
     input: {
       text: 'my first note',
     },
-  })
+  });
   // Use Ava for assertions
-  t.falsy(result.error)
-  t.not(
-    result.data?.notes_newNote?.id ?? 0,
-    0,
-    'new note id should not be zero'
-  )
-})
+  t.falsy(result.error);
+  t.not(result.data?.notes_newNote?.id ?? 0, 0, 'new note id should not be zero');
+});
 ```
 
 ## Loading Environment Variables
 
-WunderGraph has builtin support for loading environment variables from `.env`. None of these files should be committed to git. In your CI, you should use plain environment variables that come from your secret store.
+WunderGraph has builtin support for loading environment variables from a `.env` file. For testing, we recommend creating a `.env.test` file to set the environment variables for the test environment. This allows you to set the environment variables for the test environment without affecting your local development environment.
+The test server search first for a `.env.test` file, and if it doesn't exist, it will fall back to `.env`. You can also pass environment variables to the test server with the `env` option of the `createTestServer` method.
+None of these files should be committed to git. In your CI, you should use plain environment variables that come from your secret store.

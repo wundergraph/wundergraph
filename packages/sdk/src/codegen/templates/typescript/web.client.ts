@@ -3,9 +3,8 @@ import { CodeGenerationConfig, ResolvedApplication } from '../../../configure';
 import Handlebars from 'handlebars';
 import { formatTypeScript } from './index';
 import { OperationType } from '@wundergraph/protobuf';
-import hash from 'object-hash';
 import { template } from './web.client.template';
-import { hasInjectedInput, hasInput, hasInternalInput } from './helpers';
+import { configurationHash, hasInput, hasInternalInput, modelImports } from './helpers';
 
 export class TypeScriptLegacyWebClient implements Template {
 	constructor(reactNative?: boolean) {
@@ -25,7 +24,7 @@ export class TypeScriptLegacyWebClient implements Template {
 			modelImports: modelImports(config.application, false),
 			baseURL: config.deployment.environment.baseUrl,
 			sdkVersion: config.sdkVersion,
-			applicationHash: hash(config).substring(0, 8),
+			applicationHash: configurationHash(config),
 			queries: _queries,
 			liveQueries: _liveQueries,
 			hasLiveQueries: _liveQueries.length !== 0,
@@ -79,28 +78,3 @@ export const liveQueries = (application: ResolvedApplication, includeInternal: b
 				requiresAuthentication: op.AuthenticationConfig.required,
 			};
 		});
-
-export const modelImports = (
-	application: ResolvedApplication,
-	includeInternal: boolean,
-	includeResponseData?: boolean
-): string => {
-	return filteredOperations(application, includeInternal)
-		.map((op) => {
-			let out = `${op.Name}Response`;
-			if (hasInput(op)) {
-				out += `,${op.Name}Input`;
-			}
-			if (includeInternal && hasInternalInput(op)) {
-				out += `,Internal${op.Name}Input`;
-			}
-			if (includeInternal && hasInjectedInput(op)) {
-				out += `,Injected${op.Name}Input`;
-			}
-			if (includeResponseData === true) {
-				out += `,${op.Name}ResponseData`;
-			}
-			return out;
-		})
-		.join(',');
-};

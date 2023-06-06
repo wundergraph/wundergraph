@@ -2,7 +2,6 @@ import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
 import Handlebars from 'handlebars';
-import hash from 'object-hash';
 import { compile as compileJSONSchema } from 'json-schema-to-typescript';
 
 import { handlebarTemplate } from './client.template';
@@ -10,8 +9,9 @@ import { Template, TemplateOutputFile } from '../../index';
 import { formatTypeScript } from './';
 import { OperationType } from '@wundergraph/protobuf';
 import { CodeGenerationConfig } from '../../../configure';
-import { liveQueries, modelImports, operations, queries as allQueries } from './helpers';
+import { liveQueries, modelImports, operations, queries as allQueries, configurationHash } from './helpers';
 import templates from '../index';
+import { isWellKnownClaim, wellKnownClaimField } from '../../../graphql/operations';
 
 export class TypeScriptClient implements Template {
 	constructor(reactNative: boolean = false) {}
@@ -60,12 +60,17 @@ export class TypeScriptClient implements Template {
 			}
 		}
 		const hasAuthProviders = config.authentication.cookieBased.length !== 0;
+		const publicWellKnownClaims = generationConfig.config.authentication.publicClaims.filter((claim) =>
+			isWellKnownClaim(claim)
+		);
+		const publicUserFields = publicWellKnownClaims.map((s) => `"${wellKnownClaimField(s)}"`).join(' | ');
+
 		const content = tmpl({
 			modelImports: modelImports(config.application, false, true),
 			baseURL: config.deployment.environment.baseUrl,
 			roleDefinitions: config.authentication.roles.map((role) => '"' + role + '"').join(' | '),
 			sdkVersion: config.sdkVersion,
-			applicationHash: hash(config).substring(0, 8),
+			applicationHash: configurationHash(config),
 			queries: _queries,
 			allOperations: allOperations,
 			liveQueries: _liveQueries,
@@ -88,6 +93,8 @@ export class TypeScriptClient implements Template {
 			uploadProfileTypeDefinitions: _uploadProfileTypeDefinitions,
 			uploadProfileTypeNames: _uploadProfileTypeNames,
 			csrfEnabled: hasAuthProviders,
+			hasPublicUserFields: publicUserFields.length > 0,
+			publicUserFields: publicUserFields,
 		});
 		return Promise.resolve([
 			{

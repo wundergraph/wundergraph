@@ -1,7 +1,6 @@
 ---
 title: Configure Introspection
-pageTitle: WunderGraph - Configure Introspection
-description:
+description: Configure introspection caching, polling and headers.
 ---
 
 When running `wunderctl up`,
@@ -24,19 +23,21 @@ but doesn't really scale.
 That's why we've introduced introspection caching.
 
 {% callout type="warning" %}
-By default, every data source is introspected exactly once.
-The result is cached in the `.wundergraph/cache/introspection` directory.
+By default, during development every remote data source is introspected exactly once.
+The result is cached in the `node_modules/.cache/wundergraph/introspection` directory.
 {% /callout %}
 
 When caching is enabled, if a cache entry is found for a data source,
 it's always used instead of introspecting the data source again. Cache is
 optional and might be turned off globally using the `--no-cache` flag.
 
+For production deployments, we prioritize retrieving fresh data over using cached results.
+This means, we will initially try to refresh the data from the remote upstreams and we'll
+only use the cache if that fails.
+
 ## Clearing the Cache
 
-Cache can be emptied when `wunderctl` starts by using the `--clear-cache`
-flag. Additionally, `wunderctl up` will automatically clear the cache
-when it starts up. To clear the cache again, just restart it.
+To clear the cache, removing all its data, run `wunderctl clean`.
 
 ## Pregenerating the Cache
 
@@ -45,20 +46,22 @@ useful to generate the cache contents and make the tests run offline.
 
 To populate the cache contents run `wunderctl generate --clear-cache`.
 This will delete any previous cache, introspect the data sources, and
-finally write the cache entries. `.wunderctl/cache` can then be stored
+finally write the cache entries. `node_modules/.cache/wundergraph/introspection` can then be stored
 and deployed to CI runners.
 
 To verify that your tests can run without fetching data from the network
 in a connected machine, the `--offline` flag can be used to disable loading
 remote resources.
 
-## Enable Introspection Polling
+## Introspection Polling
 
-If you want to enable introspection polling,
-set a reasonable interval for the `pollingIntervalSeconds` value.
-For most data sources, an interval of 2-5 seconds should be fine.
+By default, `wunderctl up` will poll remote data sources periodically every 5 seconds,
+which should be fine for most data sources. The default interval can be changed using
+the `--default-polling-interval` flag.
+
 For remote data sources with large schemas,
 we recommend setting the interval to a higher value to not overload the remote server.
+To set a different polling interval, use `pollingIntervalSeconds`:
 
 ```typescript
 // wundergraph.config.ts
@@ -66,10 +69,13 @@ const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
   url: 'https://spacex-api.fly.dev/graphql/',
   introspection: {
-    pollingIntervalSeconds: 5,
+    pollingIntervalSeconds: 30,
   },
-})
+});
 ```
+
+To disable polling for a given data source, set its `pollingIntervalSeconds` to `0`. Additionally,
+the default polling interval can also be disabled using `--default-polling-interval=5`.
 
 ## Disable Introspection Caching
 
@@ -84,7 +90,7 @@ const spaceX = introspect.graphql({
   introspection: {
     disableCache: true,
   },
-})
+});
 ```
 
 Disabling the cache can result in reduced performance,
@@ -118,7 +124,7 @@ const countries = introspect.graphql({
       .addClientRequestHeader('X-Authorization', 'Authorization')
       // this header is shared between introspection and actual requests
       .addStaticHeader('Authorization', 'Secret'),
-})
+});
 
 // or federated api
 const federatedApi = introspect.federation({
@@ -129,7 +135,7 @@ const federatedApi = introspect.federation({
       headers: (builder) => builder.addStaticHeader('Authorization', 'Secret'),
     },
   ],
-})
+});
 ```
 
 ### Provide headers with introspection configuration
@@ -142,12 +148,11 @@ Headers configured in a such way will be used only for the graphql introspection
 const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: ' http://localhost:4000/',
-  headers: (builder) =>
-    builder.addClientRequestHeader('X-Authorization', 'Authorization'),
+  headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
   introspection: {
     headers: (builder) => builder.addStaticHeader('Authorization', 'Secret'),
   },
-})
+});
 
 // or federated api
 const federatedApi = introspect.federation({
@@ -156,12 +161,11 @@ const federatedApi = introspect.federation({
     {
       url: 'http://localhost:4001/graphql',
       introspection: {
-        headers: (builder) =>
-          builder.addStaticHeader('Authorization', 'Secret'),
+        headers: (builder) => builder.addStaticHeader('Authorization', 'Secret'),
       },
     },
   ],
-})
+});
 ```
 
 You could even mix up both approaches.
@@ -173,8 +177,7 @@ const countries = introspect.graphql({
   url: ' http://localhost:4000/',
   headers: (builder) => builder.addStaticHeader('Authorization', 'Secret One'),
   introspection: {
-    headers: (builder) =>
-      builder.addStaticHeader('Authorization', 'Secret Two'),
+    headers: (builder) => builder.addStaticHeader('Authorization', 'Secret Two'),
   },
-})
+});
 ```

@@ -1,7 +1,6 @@
 ---
-title: Revalidate Hook
-pageTitle: WunderGraph - Revalidate Hook
-description:
+title: revalidate hook
+description: Reference documentation for the revalidate hook
 ---
 
 The `revalidate` hook is used to "re-authenticate" a user.
@@ -21,7 +20,8 @@ the `customResolve` hook is called with the following parameters:
 - `user`: The user object when the user is authenticated
 - `clientRequest`: The original client request object, including Headers
 - `log`: The logger object
-- `internalClient`: The internal client object
+- `operations`: The operations client, used to call other (internal) operations
+- `internalClient`: The internal client object, _deprecated_
 - `response`: The response object (only for postResolve hooks)
 - `input`: The input object (only for Operation hooks)
 
@@ -31,7 +31,7 @@ e.g. to talk to a database or another service to enrich a response or manipulate
 
 ```typescript
 // wundergraph.server.ts
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     authentication: {
       revalidate: async (hook) => {
@@ -40,9 +40,9 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
             name: 'John Doe',
           },
           status: 'ok',
-        }
+        };
       },
     },
   },
-}))
+}));
 ```

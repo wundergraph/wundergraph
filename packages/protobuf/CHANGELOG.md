@@ -3,6 +3,79 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.116.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.115.0...@wundergraph/protobuf@0.116.0) (2023-06-01)
+
+### Features
+
+* otel instrumentation of wundernode and server ([#1004](https://github.com/wundergraph/wundergraph/issues/1004)) ([7b45975](https://github.com/wundergraph/wundergraph/commit/7b45975ca8fb41ff03cbcc84c42ec3536ad6db13)) (@StarpTech)
+
+## [0.115.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.114.0...@wundergraph/protobuf@0.115.0) (2023-05-31)
+
+### Features
+
+* make timeout during authentication configurable ([#1018](https://github.com/wundergraph/wundergraph/issues/1018)) ([b5f6b74](https://github.com/wundergraph/wundergraph/commit/b5f6b744cd4efef456b9004b4109f7624e467f41)) (@fiam)
+
+## [0.114.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.113.0...@wundergraph/protobuf@0.114.0) (2023-05-26)
+
+### Features
+
+* use Prometheus to track and expose operation and API request counts ([#991](https://github.com/wundergraph/wundergraph/issues/991)) ([f949398](https://github.com/wundergraph/wundergraph/commit/f94939864c9ce7c3a9623fd5141fa486c4c9a55c)) (@fiam)
+
+## [0.113.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.112.0...@wundergraph/protobuf@0.113.0) (2023-05-25)
+
+### Features
+
+* improve Cache-Control support ([#959](https://github.com/wundergraph/wundergraph/issues/959)) ([1b330d5](https://github.com/wundergraph/wundergraph/commit/1b330d5c0207264ae0f3868276011ff9a8d83a67)) (@fiam)
+
+## [0.112.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.111.0...@wundergraph/protobuf@0.112.0) (2023-05-15)
+
+### Features
+
+* orm ([#963](https://github.com/wundergraph/wundergraph/issues/963)) ([8cd45a3](https://github.com/wundergraph/wundergraph/commit/8cd45a37f139e592f579c40e266ce128b8be1b5d)) (@Pagebakers)
+
+## [0.111.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.110.0...@wundergraph/protobuf@0.111.0) (2023-05-12)
+
+### Features
+
+* add support for caching in function handlers ([#932](https://github.com/wundergraph/wundergraph/issues/932)) ([ce31c4c](https://github.com/wundergraph/wundergraph/commit/ce31c4c02cbfd121886cf4c8a0fe354ac19ed340)) (@fiam)
+
+## [0.110.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.109.0...@wundergraph/protobuf@0.110.0) (2023-05-03)
+
+### Features
+
+* add support for custom claims of any type ([#911](https://github.com/wundergraph/wundergraph/issues/911)) ([c6f14f8](https://github.com/wundergraph/wundergraph/commit/c6f14f8d91db8bc908a85b20c6ef8f8561698078)) (@fiam)
+
+## [0.109.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.108.0...@wundergraph/protobuf@0.109.0) (2023-04-24)
+
+### Features
+
+* add support for using proxies in data sources ([#854](https://github.com/wundergraph/wundergraph/issues/854)) ([a472c46](https://github.com/wundergraph/wundergraph/commit/a472c463d6dbcb20b48444fdd4ce9c797c16feb2)) (@fiam)
+
+## [0.108.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.107.0...@wundergraph/protobuf@0.108.0) (2023-04-19)
+
+### Features
+
+* implement internal graphql handler ([#853](https://github.com/wundergraph/wundergraph/issues/853)) ([ad42f5f](https://github.com/wundergraph/wundergraph/commit/ad42f5f9f23a0e6ec968a1c5fefb226f2b46254a)) (@thisisnithin)
+
+## [0.107.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.106.1...@wundergraph/protobuf@0.107.0) (2023-04-12)
+
+### Features
+
+* tui + log handling ([#813](https://github.com/wundergraph/wundergraph/issues/813)) ([6bf7498](https://github.com/wundergraph/wundergraph/commit/6bf74980c69def43e4af8bdfdcc0fb5645a1025b)) (@StarpTech)
+
+## [0.106.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.106.0...@wundergraph/protobuf@0.106.1) (2023-03-16)
+
+### Bug Fixes
+
+* custom int/float scalars usage in arguments ([#427](https://github.com/wundergraph/wundergraph/issues/427))Co-authored-by: Alberto García Hierro <alberto@garciahierro.com> Co-authored-by: Sergiy <818351+devsergiy@users.noreply.github.com> Co-authored-by: spetrunin <neyasut@gmail.com> ([2b424f3](https://github.com/wundergraph/wundergraph/commit/2b424f3daaabea25abb4a23139751ff0ab2adefe)) (@OLingard)
+
+## [0.106.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.105.0...@wundergraph/protobuf@0.106.0) (2023-03-06)
+
+### Features
+
+* add support for declaring a list of public claims ([#706](https://github.com/wundergraph/wundergraph/issues/706)) ([2223d5c](https://github.com/wundergraph/wundergraph/commit/2223d5c02f1eadaad7ecb6ac863bb2f9e34c926c)) (@fiam)
+* add support for injecting variables into nested paths ([#678](https://github.com/wundergraph/wundergraph/issues/678)) ([ce0a0a0](https://github.com/wundergraph/wundergraph/commit/ce0a0a09b4e739767b17f1ad391074f6ba597253)) (@fiam)
+
 ## [0.105.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.104.0...@wundergraph/protobuf@0.105.0) (2023-02-10)
 
 ### Features

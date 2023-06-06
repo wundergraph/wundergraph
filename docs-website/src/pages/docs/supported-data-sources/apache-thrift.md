@@ -1,6 +1,5 @@
 ---
-title: Apache Thrift to GraphQL
-pageTitle: WunderGraph - Apache Thrift DataSource
+title: Apache Thrift support
 description: WunderGraph is the easiest way to expose Apache Thrift APIs through GraphQL.
 ---
 

@@ -8,6 +8,8 @@ export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) 
 
 	const fastify = await createServer({
 		wundergraphDir: '',
+		serverHost: 'localhost',
+		serverPort: 9992,
 		config: {
 			api: {
 				operations: [
@@ -40,9 +42,14 @@ export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) 
 				allowedHostNames: [],
 				enableGraphqlEndpoint: false,
 				webhooks: [],
+				experimentalConfig: {
+					orm: false,
+				},
 			},
 			apiId: '',
 			dangerouslyEnableGraphQLEndpoint: false,
+
+			configHash: '',
 			environmentIds: [],
 		},
 		serverConfig,

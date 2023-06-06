@@ -20,7 +20,7 @@ configureWunderGraphApplication({
 
 ```typescript
 // wundergraph.server.ts
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     global: {
       wsTransport: {
@@ -106,6 +106,10 @@ curl -N http://localhost:9991/operations/users/get?id=1
 ## Learn More
 
 Read the [Docs](https://wundergraph.com/docs).
+
+## Deploy to WunderGraph Cloud
+
+[![Deploy to WunderGraph](https://wundergraph.com/button)](https://cloud.wundergraph.com/new/clone?templateName=graphql-subscriptions-hooks)
 
 ## Got Questions?
 

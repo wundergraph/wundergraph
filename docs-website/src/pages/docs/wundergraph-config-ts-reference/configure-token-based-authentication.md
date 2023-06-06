@@ -1,7 +1,6 @@
 ---
 title: Configure Token-based Authentication
-pageTitle: WunderGraph - Configure Token-based Authentication
-description:
+description: How to configure token-based auhtentication with WunderGraph.
 ---
 
 Token-Based Authentication is very flexible and gives you a lot of different ways of authenticating client against your WunderGraph applications.
@@ -16,7 +15,7 @@ They then set the token as the Authorization Header.
 The header value needs to be prefixed with "Bearer ".
 
 ```typescript
-;`Authorization: Bearer ${TOKEN}`
+`Authorization: Bearer ${TOKEN}`;
 ```
 
 The WunderGraph Server will then use a JSON Web Key Set from your OpenID Connect Server to validate the token,
@@ -34,7 +33,26 @@ For that reason, you're able to configure a time to live to allow the WunderGrap
 ## Configuration
 
 Configuring token-based Authentication is straight forward.
-You can set the jwks URL as well as the userInfoEndpoint like so:
+
+### jwksURL
+
+You can set the jwks URL with the `jwksURL` property. If the tokens does not contain any claims (opaque), the WunderGraph server will use the userInfo endpoint to obtain the claims.
+
+```typescript
+configureWunderGraphApplication({
+  authentication: {
+    tokenBased: {
+      providers: [
+        {
+          jwksURL: 'https://wundergraph.fusionauth.io/.well-known/jwks.json',
+        },
+      ],
+    },
+  },
+});
+```
+
+Or with opaque tokens:
 
 ```typescript
 configureWunderGraphApplication({
@@ -48,8 +66,10 @@ configureWunderGraphApplication({
       ],
     },
   },
-})
+});
 ```
+
+### jwksJSON
 
 Alternatively, you can also pass the jwks as a JSON String.
 
@@ -59,14 +79,42 @@ configureWunderGraphApplication({
     tokenBased: {
       providers: [
         {
-          userInfoEndpoint: 'https://wundergraph.fusionauth.io/oauth2/userinfo',
           jwksJSON: '...',
         },
       ],
     },
   },
-})
+});
 ```
+
+### userInfoEndpoint
+
+The user info endpoint is used to obtain the claims of the user. It can be used standalone or in combination with the JWKS URL. The endpoint should return a `200` status code and JSON object with the claims.
+
+```json {% filename="response.json" %}
+{
+  "id": "1234567890",
+  "email": "user@wundergraph.com"
+}
+```
+
+Any non standard claims will can be accessed in the `customClaims` field of the user object.
+
+```typescript {% filename="wundergraph.config.ts" %}
+configureWunderGraphApplication({
+  authentication: {
+    tokenBased: {
+      providers: [
+        {
+          userInfoEndpoint: 'https://wundergraph.fusionauth.io/oauth2/userinfo',
+        },
+      ],
+    },
+  },
+});
+```
+
+### userInfoCacheTtlSeconds
 
 Finally, you're able to set the TTL to cache the userInfo response.
 The default TTL is: 60 \* 60 = 1 hour
@@ -84,5 +132,5 @@ configureWunderGraphApplication({
       ],
     },
   },
-})
+});
 ```

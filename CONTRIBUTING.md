@@ -9,7 +9,7 @@ This guide assumes you have already installed the following software:
 - make (should be installed on all linux / IOS systems)
 - [protoc](https://grpc.io/docs/protoc-installation/) (3.15.8)
   - curl -LO "https://github.com/protocolbuffers/protobuf/releases/download/v21.5/protoc-21.5-linux-x86_64.zip"
-- golang `>= 1.18`
+- golang `>= 1.20`
 - Node.js [LTS](https://nodejs.org/en/about/releases/)
 - pnpm `7`
 
@@ -46,7 +46,7 @@ Before you run any testapp, you need to ensure that you use your local wunderctl
 ```bash
 # Install the wunderctl binary in your GOBIN.
 make install
-# Set this environment variable to use your local wunderctl binary.
+# Set this environment variable to use your local wunderctl binary for all calls in the SDK.
 WUNDERCTL_BINARY_PATH="$(which wunderctl)"
 ```
 

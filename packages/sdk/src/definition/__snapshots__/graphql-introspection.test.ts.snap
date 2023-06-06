@@ -46,6 +46,7 @@ type User @key(fields: "id") {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -197,6 +198,7 @@ type Product @extends @key(fields: "upc") {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -355,6 +357,7 @@ type Mutation @extends {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -505,6 +508,7 @@ type Subscription {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -764,12 +768,14 @@ type Query",
       "argumentsConfiguration": [
         {
           "name": "first",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
         },
         {
           "name": "random",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
@@ -827,12 +833,14 @@ type Query",
       "argumentsConfiguration": [
         {
           "name": "upc",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
         },
         {
           "name": "price",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
@@ -918,6 +926,7 @@ type Query",
       "unescapeResponseJson": false,
     },
   ],
+  "Namespace": "federated",
   "Schema": """"
 The @removeNullVariables directive allows you to remove variables with null value from your GraphQL Query or Mutation Operations.
 
@@ -1058,13 +1067,15 @@ directive @jsonSchema(
   """
   uniqueItems: Boolean
   commonPattern: COMMON_REGEX_PATTERN
-) on VARIABLE_DEFINITION
+  """Optional field to apply the JSON schema to"""
+  on: String
+) repeatable on VARIABLE_DEFINITION
 
 """
 The @fromClaim directive sets the variable to the value retrieved from the given a claim.
 Adding this directive makes the operation require authentication.
 """
-directive @fromClaim(name: WG_CLAIM) on VARIABLE_DEFINITION
+directive @fromClaim(name: WG_CLAIM, on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The directive @injectCurrentDateTime injects a DateTime string of the current date and time into the variable.
@@ -1080,7 +1091,8 @@ directive @injectCurrentDateTime(
   customFormat must conform to the Golang specification for specifying a date time format
   """
   customFormat: String
-) on VARIABLE_DEFINITION
+  on: String = ""
+) repeatable on VARIABLE_DEFINITION
 
 """
 The directive @injectGeneratedUUID injects a generated UUID into the variable.
@@ -1090,7 +1102,7 @@ disallowing the user to supply it.
 
 This means, the UUID is 100% generated server-side and can be considered untempered.
 """
-directive @injectGeneratedUUID on VARIABLE_DEFINITION
+directive @injectGeneratedUUID(on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The @internalOperation Directive marks an Operation as internal.
@@ -1102,7 +1114,7 @@ directive @internalOperation on QUERY | MUTATION | SUBSCRIPTION
 """
 The directive @injectEnvironmentVariable allows you to inject an environment variable into the variable definition.
 """
-directive @injectEnvironmentVariable(name: String!) on VARIABLE_DEFINITION
+directive @injectEnvironmentVariable(name: String!, on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The @export directive instructs the Execution Planner to export the field during the execution into the variable of the 'as' argument.
@@ -1164,6 +1176,12 @@ directive @transform(
   """
   get: String
 ) on FIELD
+
+"""
+The @requireAuthentication Directive marks an Operation to require authentication.
+Without authentication, the operation will return an Unauthorized error with status code 401.
+"""
+directive @requireAuthentication on QUERY | MUTATION | SUBSCRIPTION
 
 type Query {
   federated_me: federated_User
@@ -1352,6 +1370,7 @@ type User @key(fields: "id") {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -1501,6 +1520,7 @@ type Product @extends @key(fields: "upc") {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -1655,6 +1675,7 @@ type Mutation @extends {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -1801,6 +1822,7 @@ type Subscription {
             "staticVariableContent": "",
           },
           "header": {},
+          "httpProxyUrl": undefined,
           "mTLS": undefined,
           "method": 1,
           "path": {
@@ -2058,12 +2080,14 @@ type Query",
       "argumentsConfiguration": [
         {
           "name": "first",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
         },
         {
           "name": "random",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
@@ -2121,12 +2145,14 @@ type Query",
       "argumentsConfiguration": [
         {
           "name": "upc",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
         },
         {
           "name": "price",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
@@ -2212,6 +2238,7 @@ type Query",
       "unescapeResponseJson": false,
     },
   ],
+  "Namespace": "federated",
   "Schema": """"
 The @removeNullVariables directive allows you to remove variables with null value from your GraphQL Query or Mutation Operations.
 
@@ -2352,13 +2379,15 @@ directive @jsonSchema(
   """
   uniqueItems: Boolean
   commonPattern: COMMON_REGEX_PATTERN
-) on VARIABLE_DEFINITION
+  """Optional field to apply the JSON schema to"""
+  on: String
+) repeatable on VARIABLE_DEFINITION
 
 """
 The @fromClaim directive sets the variable to the value retrieved from the given a claim.
 Adding this directive makes the operation require authentication.
 """
-directive @fromClaim(name: WG_CLAIM) on VARIABLE_DEFINITION
+directive @fromClaim(name: WG_CLAIM, on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The directive @injectCurrentDateTime injects a DateTime string of the current date and time into the variable.
@@ -2374,7 +2403,8 @@ directive @injectCurrentDateTime(
   customFormat must conform to the Golang specification for specifying a date time format
   """
   customFormat: String
-) on VARIABLE_DEFINITION
+  on: String = ""
+) repeatable on VARIABLE_DEFINITION
 
 """
 The directive @injectGeneratedUUID injects a generated UUID into the variable.
@@ -2384,7 +2414,7 @@ disallowing the user to supply it.
 
 This means, the UUID is 100% generated server-side and can be considered untempered.
 """
-directive @injectGeneratedUUID on VARIABLE_DEFINITION
+directive @injectGeneratedUUID(on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The @internalOperation Directive marks an Operation as internal.
@@ -2396,7 +2426,7 @@ directive @internalOperation on QUERY | MUTATION | SUBSCRIPTION
 """
 The directive @injectEnvironmentVariable allows you to inject an environment variable into the variable definition.
 """
-directive @injectEnvironmentVariable(name: String!) on VARIABLE_DEFINITION
+directive @injectEnvironmentVariable(name: String!, on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The @export directive instructs the Execution Planner to export the field during the execution into the variable of the 'as' argument.
@@ -2458,6 +2488,12 @@ directive @transform(
   """
   get: String
 ) on FIELD
+
+"""
+The @requireAuthentication Directive marks an Operation to require authentication.
+Without authentication, the operation will return an Unauthorized error with status code 401.
+"""
+directive @requireAuthentication on QUERY | MUTATION | SUBSCRIPTION
 
 type Query {
   federated_me: federated_User

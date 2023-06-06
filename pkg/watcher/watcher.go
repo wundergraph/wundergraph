@@ -2,7 +2,10 @@ package watcher
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -72,21 +75,24 @@ type Config struct {
 }
 
 type Watcher struct {
-	name   string
-	config *Config
-	log    *zap.Logger
+	name       string
+	config     *Config
+	log        *zap.Logger
+	fileHashes map[string]string
 }
 
 func NewWatcher(name string, config *Config, log *zap.Logger) *Watcher {
 	return &Watcher{
-		name:   name,
-		config: config,
-		log:    log,
+		name:       name,
+		config:     config,
+		log:        log,
+		fileHashes: map[string]string{},
 	}
 }
 
 // Watch function
 func (b *Watcher) Watch(ctx context.Context, fn func(paths []string) error) error {
+	b.fileHashes = map[string]string{}
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return err
@@ -100,7 +106,7 @@ func (b *Watcher) Watch(ctx context.Context, fn func(paths []string) error) erro
 		pathset.Add(path)
 		debounce(func() {
 			paths := pathset.Flush()
-			b.log.Debug("File change detected", zap.String("watcherName", b.name), zap.Strings("paths", paths))
+			b.log.Info("File change detected", zap.String("watcherName", b.name), zap.Strings("paths", paths))
 			if err := fn(paths); err != nil {
 				errorCh <- err
 			}
@@ -123,8 +129,8 @@ func (b *Watcher) Watch(ctx context.Context, fn func(paths []string) error) erro
 		return false
 	}
 	// Files to ignore while walking the directory
-	shouldIgnore := func(path string, de fs.DirEntry) error {
-		if b.skip(path) || filepath.Base(path) == ".git" {
+	shouldIgnore := func(info os.FileInfo, path string, de fs.DirEntry) error {
+		if b.skip(info, path) || filepath.Base(path) == ".git" {
 			return filepath.SkipDir
 		}
 		return nil
@@ -165,7 +171,7 @@ func (b *Watcher) Watch(ctx context.Context, fn func(paths []string) error) erro
 		if err != nil {
 			return nil
 		}
-		if b.skip(path) {
+		if b.skip(stat, path) {
 			return nil
 		}
 		if isDuplicate(path, stat) {
@@ -201,7 +207,7 @@ func (b *Watcher) Watch(ctx context.Context, fn func(paths []string) error) erro
 		if err != nil {
 			return nil
 		}
-		if b.skip(path) {
+		if b.skip(stat, path) {
 			return nil
 		}
 		if isDuplicate(path, stat) {
@@ -218,7 +224,7 @@ func (b *Watcher) Watch(ctx context.Context, fn func(paths []string) error) erro
 			if err != nil {
 				// Skip errors for optional directories
 				if wPath.Optional && os.IsNotExist(err) {
-					b.log.Debug("skip watch because optional path not found",
+					b.log.Debug("not watching non existing optional path",
 						zap.String("watcherName", b.name),
 						zap.String("path", wPath.Path),
 					)
@@ -227,7 +233,7 @@ func (b *Watcher) Watch(ctx context.Context, fn func(paths []string) error) erro
 				return err
 			}
 
-			if err := shouldIgnore(path, de); err != nil {
+			if err := shouldIgnore(nil, path, de); err != nil {
 				return err
 			}
 			watcher.Add(path)
@@ -297,13 +303,42 @@ func (b *Watcher) Watch(ctx context.Context, fn func(paths []string) error) erro
 	return nil
 }
 
-func (b *Watcher) skip(changedPath string) bool {
+func (b *Watcher) skip(info os.FileInfo, changedPath string) bool {
 	for _, ignorePath := range b.config.IgnorePaths {
 		if strings.Contains(changedPath, ignorePath) {
 			return true
 		}
 	}
+	if info != nil && info.IsDir() {
+		return true
+	}
+	// hash the file with md5
+	hash := b.hashFileMD5(changedPath)
+	if last, ok := b.fileHashes[changedPath]; ok && last == hash {
+		b.log.Debug("file has not changed, skipping",
+			zap.String("watcherName", b.name),
+			zap.String("path", changedPath),
+		)
+		return true
+	}
+	b.fileHashes[changedPath] = hash
 	return false
+}
+
+func (b *Watcher) hashFileMD5(filePath string) string {
+	var returnMD5String string
+	file, err := os.Open(filePath)
+	if err != nil {
+		return returnMD5String
+	}
+	defer file.Close()
+	hash := md5.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return returnMD5String
+	}
+	hashInBytes := hash.Sum(nil)[:16]
+	returnMD5String = hex.EncodeToString(hashInBytes)
+	return returnMD5String
 }
 
 // computeStamp uses path, size, mode and modtime to try and ensure this is a

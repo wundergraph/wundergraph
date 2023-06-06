@@ -1,7 +1,6 @@
 ---
 title: '@export Directive'
-pageTitle: WunderGraph - Directives - @export
-description:
+description: Export a value into a variable
 ---
 
 The `@export` directive can be used to achieve cross-API JOINs.
@@ -24,12 +23,12 @@ To achieve this, we could use the following two APIs:
 const weather = introspect.graphql({
   apiNamespace: 'weather',
   url: 'https://weather-api.wundergraph.com/',
-})
+});
 
 const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
-})
+});
 ```
 
 Using these two APIs,

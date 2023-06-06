@@ -1,4 +1,4 @@
-import { authProviders, configureWunderGraphApplication, cors, introspect } from '@wundergraph/sdk';
+import { authProviders, configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
 import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';

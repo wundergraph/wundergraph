@@ -90,41 +90,6 @@ export function authProviderKindToJSON(object: AuthProviderKind): string {
   }
 }
 
-export enum ApiCacheKind {
-  NO_CACHE = 0,
-  IN_MEMORY_CACHE = 1,
-  REDIS_CACHE = 2,
-}
-
-export function apiCacheKindFromJSON(object: any): ApiCacheKind {
-  switch (object) {
-    case 0:
-    case "NO_CACHE":
-      return ApiCacheKind.NO_CACHE;
-    case 1:
-    case "IN_MEMORY_CACHE":
-      return ApiCacheKind.IN_MEMORY_CACHE;
-    case 2:
-    case "REDIS_CACHE":
-      return ApiCacheKind.REDIS_CACHE;
-    default:
-      throw new globalThis.Error("Unrecognized enum value " + object + " for enum ApiCacheKind");
-  }
-}
-
-export function apiCacheKindToJSON(object: ApiCacheKind): string {
-  switch (object) {
-    case ApiCacheKind.NO_CACHE:
-      return "NO_CACHE";
-    case ApiCacheKind.IN_MEMORY_CACHE:
-      return "IN_MEMORY_CACHE";
-    case ApiCacheKind.REDIS_CACHE:
-      return "REDIS_CACHE";
-    default:
-      throw new globalThis.Error("Unrecognized enum value " + object + " for enum ApiCacheKind");
-  }
-}
-
 export enum OperationExecutionEngine {
   ENGINE_GRAPHQL = 0,
   ENGINE_NODEJS = 1,
@@ -380,6 +345,7 @@ export enum ValueType {
   INT = 1,
   FLOAT = 2,
   BOOLEAN = 3,
+  ANY = 4,
 }
 
 export function valueTypeFromJSON(object: any): ValueType {
@@ -396,6 +362,9 @@ export function valueTypeFromJSON(object: any): ValueType {
     case 3:
     case "BOOLEAN":
       return ValueType.BOOLEAN;
+    case 4:
+    case "ANY":
+      return ValueType.ANY;
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum ValueType");
   }
@@ -411,6 +380,8 @@ export function valueTypeToJSON(object: ValueType): string {
       return "FLOAT";
     case ValueType.BOOLEAN:
       return "BOOLEAN";
+    case ValueType.ANY:
+      return "ANY";
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum ValueType");
   }
@@ -747,6 +718,7 @@ export interface ApiAuthenticationConfig {
   cookieBased: CookieBasedAuthentication | undefined;
   hooks: ApiAuthenticationHooks | undefined;
   jwksBased: JwksBasedAuthentication | undefined;
+  publicClaims: string[];
 }
 
 export interface JwksBasedAuthentication {
@@ -774,6 +746,7 @@ export interface CookieBasedAuthentication {
   hashKey: ConfigurationVariable | undefined;
   blockKey: ConfigurationVariable | undefined;
   csrfSecret: ConfigurationVariable | undefined;
+  timeoutSeconds: ConfigurationVariable | undefined;
 }
 
 export interface AuthProvider {
@@ -800,27 +773,13 @@ export interface OpenIDConnectAuthProviderConfig {
   queryParameters: OpenIDConnectQueryParameter[];
 }
 
-export interface ApiCacheConfig {
-  kind: ApiCacheKind;
-  inMemoryConfig: InMemoryCacheConfig | undefined;
-  redisConfig: RedisCacheConfig | undefined;
-}
-
-export interface InMemoryCacheConfig {
-  maxSize: number;
-}
-
-export interface RedisCacheConfig {
-  redisUrlEnvVar: string;
-}
-
 export interface Operation {
   name: string;
   content: string;
   operationType: OperationType;
   variablesSchema: string;
   responseSchema: string;
-  cacheConfig: OperationCacheConfig | undefined;
+  cacheConfig?: OperationCacheConfig | undefined;
   authenticationConfig: OperationAuthenticationConfig | undefined;
   liveQueryConfig: OperationLiveQueryConfig | undefined;
   authorizationConfig: OperationAuthorizationConfig | undefined;
@@ -855,7 +814,7 @@ export interface OperationVariablesConfiguration {
 }
 
 export interface VariableInjectionConfiguration {
-  variableName: string;
+  variablePathComponents: string[];
   variableKind: InjectVariableKind;
   dateFormat: string;
   environmentVariableName: string;
@@ -905,7 +864,7 @@ export interface CustomClaim {
 }
 
 export interface ClaimConfig {
-  variableName: string;
+  variablePathComponents: string[];
   claimType: ClaimType;
   /** Available iff claimType == CUSTOM */
   custom?: CustomClaim | undefined;
@@ -921,10 +880,11 @@ export interface OperationAuthenticationConfig {
 }
 
 export interface OperationCacheConfig {
-  enable: boolean;
-  maxAge: number;
-  public: boolean;
-  staleWhileRevalidate: number;
+  enable?: boolean | undefined;
+  maxAge?: number | undefined;
+  public?: boolean | undefined;
+  staleWhileRevalidate?: number | undefined;
+  mustRevalidate?: boolean | undefined;
 }
 
 export interface EngineConfiguration {
@@ -1026,6 +986,7 @@ export interface FetchConfiguration {
   mTLS: MTLSConfiguration | undefined;
   baseUrl: ConfigurationVariable | undefined;
   path: ConfigurationVariable | undefined;
+  httpProxyUrl?: ConfigurationVariable | undefined;
 }
 
 export interface FetchConfiguration_HeaderEntry {
@@ -1101,6 +1062,7 @@ export interface ArgumentConfiguration {
   sourceType: ArgumentSource;
   sourcePath: string[];
   renderConfiguration: ArgumentRenderConfiguration;
+  renameTypeTo: string;
 }
 
 export interface WunderGraphConfiguration {
@@ -1108,6 +1070,7 @@ export interface WunderGraphConfiguration {
   apiId: string;
   environmentIds: string[];
   dangerouslyEnableGraphQLEndpoint: boolean;
+  configHash: string;
 }
 
 export interface S3UploadProfileHooksConfiguration {
@@ -1153,6 +1116,11 @@ export interface UserDefinedApi {
   webhooks: WebhookConfiguration[];
   serverOptions: ServerOptions | undefined;
   nodeOptions: NodeOptions | undefined;
+  experimentalConfig: ExperimentalConfiguration | undefined;
+}
+
+export interface ExperimentalConfiguration {
+  orm: boolean;
 }
 
 export interface ListenerOptions {
@@ -1160,8 +1128,17 @@ export interface ListenerOptions {
   port: ConfigurationVariable | undefined;
 }
 
+export interface InternalListenerOptions {
+  port: ConfigurationVariable | undefined;
+}
+
 export interface NodeLogging {
   level: ConfigurationVariable | undefined;
+}
+
+export interface PrometheusOptions {
+  enabled: ConfigurationVariable | undefined;
+  port: ConfigurationVariable | undefined;
 }
 
 export interface NodeOptions {
@@ -1170,6 +1147,18 @@ export interface NodeOptions {
   listen: ListenerOptions | undefined;
   logger: NodeLogging | undefined;
   defaultRequestTimeoutSeconds: number;
+  listenInternal: InternalListenerOptions | undefined;
+  nodeInternalUrl: ConfigurationVariable | undefined;
+  defaultHttpProxyUrl: ConfigurationVariable | undefined;
+  openTelemetry: TelemetryOptions | undefined;
+  prometheus: PrometheusOptions | undefined;
+}
+
+export interface TelemetryOptions {
+  enabled: ConfigurationVariable | undefined;
+  exporterHttpEndpoint: ConfigurationVariable | undefined;
+  sampler: ConfigurationVariable | undefined;
+  authToken: ConfigurationVariable | undefined;
 }
 
 export interface ServerLogging {
@@ -1247,8 +1236,37 @@ export interface ConfigurationVariable {
   placeholderVariableName: string;
 }
 
+export interface BuildInfo {
+  success: boolean;
+  sdk: BuildInfoVersion | undefined;
+  wunderctl: BuildInfoVersion | undefined;
+  node: BuildInfoVersion | undefined;
+  os: BuildInfoOS | undefined;
+  stats: BuildInfoStats | undefined;
+}
+
+export interface BuildInfoVersion {
+  version: string;
+}
+
+export interface BuildInfoOS {
+  type: string;
+  platform: string;
+  arch: string;
+  version: string;
+  release: string;
+}
+
+export interface BuildInfoStats {
+  totalApis: number;
+  totalOperations: number;
+  totalWebhooks: number;
+  hasAuthenticationProvider: boolean;
+  hasUploadProvider: boolean;
+}
+
 function createBaseApiAuthenticationConfig(): ApiAuthenticationConfig {
-  return { cookieBased: undefined, hooks: undefined, jwksBased: undefined };
+  return { cookieBased: undefined, hooks: undefined, jwksBased: undefined, publicClaims: [] };
 }
 
 export const ApiAuthenticationConfig = {
@@ -1257,6 +1275,7 @@ export const ApiAuthenticationConfig = {
       cookieBased: isSet(object.cookieBased) ? CookieBasedAuthentication.fromJSON(object.cookieBased) : undefined,
       hooks: isSet(object.hooks) ? ApiAuthenticationHooks.fromJSON(object.hooks) : undefined,
       jwksBased: isSet(object.jwksBased) ? JwksBasedAuthentication.fromJSON(object.jwksBased) : undefined,
+      publicClaims: Array.isArray(object?.publicClaims) ? object.publicClaims.map((e: any) => String(e)) : [],
     };
   },
 
@@ -1268,6 +1287,11 @@ export const ApiAuthenticationConfig = {
       (obj.hooks = message.hooks ? ApiAuthenticationHooks.toJSON(message.hooks) : undefined);
     message.jwksBased !== undefined &&
       (obj.jwksBased = message.jwksBased ? JwksBasedAuthentication.toJSON(message.jwksBased) : undefined);
+    if (message.publicClaims) {
+      obj.publicClaims = message.publicClaims.map((e) => e);
+    } else {
+      obj.publicClaims = [];
+    }
     return obj;
   },
 
@@ -1282,6 +1306,7 @@ export const ApiAuthenticationConfig = {
     message.jwksBased = (object.jwksBased !== undefined && object.jwksBased !== null)
       ? JwksBasedAuthentication.fromPartial(object.jwksBased)
       : undefined;
+    message.publicClaims = object.publicClaims?.map((e) => e) || [];
     return message;
   },
 };
@@ -1411,6 +1436,7 @@ function createBaseCookieBasedAuthentication(): CookieBasedAuthentication {
     hashKey: undefined,
     blockKey: undefined,
     csrfSecret: undefined,
+    timeoutSeconds: undefined,
   };
 }
 
@@ -1427,6 +1453,7 @@ export const CookieBasedAuthentication = {
       hashKey: isSet(object.hashKey) ? ConfigurationVariable.fromJSON(object.hashKey) : undefined,
       blockKey: isSet(object.blockKey) ? ConfigurationVariable.fromJSON(object.blockKey) : undefined,
       csrfSecret: isSet(object.csrfSecret) ? ConfigurationVariable.fromJSON(object.csrfSecret) : undefined,
+      timeoutSeconds: isSet(object.timeoutSeconds) ? ConfigurationVariable.fromJSON(object.timeoutSeconds) : undefined,
     };
   },
 
@@ -1457,6 +1484,8 @@ export const CookieBasedAuthentication = {
       (obj.blockKey = message.blockKey ? ConfigurationVariable.toJSON(message.blockKey) : undefined);
     message.csrfSecret !== undefined &&
       (obj.csrfSecret = message.csrfSecret ? ConfigurationVariable.toJSON(message.csrfSecret) : undefined);
+    message.timeoutSeconds !== undefined &&
+      (obj.timeoutSeconds = message.timeoutSeconds ? ConfigurationVariable.toJSON(message.timeoutSeconds) : undefined);
     return obj;
   },
 
@@ -1475,6 +1504,9 @@ export const CookieBasedAuthentication = {
       : undefined;
     message.csrfSecret = (object.csrfSecret !== undefined && object.csrfSecret !== null)
       ? ConfigurationVariable.fromPartial(object.csrfSecret)
+      : undefined;
+    message.timeoutSeconds = (object.timeoutSeconds !== undefined && object.timeoutSeconds !== null)
+      ? ConfigurationVariable.fromPartial(object.timeoutSeconds)
       : undefined;
     return message;
   },
@@ -1630,86 +1662,6 @@ export const OpenIDConnectAuthProviderConfig = {
       ? ConfigurationVariable.fromPartial(object.clientSecret)
       : undefined;
     message.queryParameters = object.queryParameters?.map((e) => OpenIDConnectQueryParameter.fromPartial(e)) || [];
-    return message;
-  },
-};
-
-function createBaseApiCacheConfig(): ApiCacheConfig {
-  return { kind: 0, inMemoryConfig: undefined, redisConfig: undefined };
-}
-
-export const ApiCacheConfig = {
-  fromJSON(object: any): ApiCacheConfig {
-    return {
-      kind: isSet(object.kind) ? apiCacheKindFromJSON(object.kind) : 0,
-      inMemoryConfig: isSet(object.inMemoryConfig) ? InMemoryCacheConfig.fromJSON(object.inMemoryConfig) : undefined,
-      redisConfig: isSet(object.redisConfig) ? RedisCacheConfig.fromJSON(object.redisConfig) : undefined,
-    };
-  },
-
-  toJSON(message: ApiCacheConfig): unknown {
-    const obj: any = {};
-    message.kind !== undefined && (obj.kind = apiCacheKindToJSON(message.kind));
-    message.inMemoryConfig !== undefined &&
-      (obj.inMemoryConfig = message.inMemoryConfig ? InMemoryCacheConfig.toJSON(message.inMemoryConfig) : undefined);
-    message.redisConfig !== undefined &&
-      (obj.redisConfig = message.redisConfig ? RedisCacheConfig.toJSON(message.redisConfig) : undefined);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<ApiCacheConfig>, I>>(object: I): ApiCacheConfig {
-    const message = createBaseApiCacheConfig();
-    message.kind = object.kind ?? 0;
-    message.inMemoryConfig = (object.inMemoryConfig !== undefined && object.inMemoryConfig !== null)
-      ? InMemoryCacheConfig.fromPartial(object.inMemoryConfig)
-      : undefined;
-    message.redisConfig = (object.redisConfig !== undefined && object.redisConfig !== null)
-      ? RedisCacheConfig.fromPartial(object.redisConfig)
-      : undefined;
-    return message;
-  },
-};
-
-function createBaseInMemoryCacheConfig(): InMemoryCacheConfig {
-  return { maxSize: 0 };
-}
-
-export const InMemoryCacheConfig = {
-  fromJSON(object: any): InMemoryCacheConfig {
-    return { maxSize: isSet(object.maxSize) ? Number(object.maxSize) : 0 };
-  },
-
-  toJSON(message: InMemoryCacheConfig): unknown {
-    const obj: any = {};
-    message.maxSize !== undefined && (obj.maxSize = Math.round(message.maxSize));
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<InMemoryCacheConfig>, I>>(object: I): InMemoryCacheConfig {
-    const message = createBaseInMemoryCacheConfig();
-    message.maxSize = object.maxSize ?? 0;
-    return message;
-  },
-};
-
-function createBaseRedisCacheConfig(): RedisCacheConfig {
-  return { redisUrlEnvVar: "" };
-}
-
-export const RedisCacheConfig = {
-  fromJSON(object: any): RedisCacheConfig {
-    return { redisUrlEnvVar: isSet(object.redisUrlEnvVar) ? String(object.redisUrlEnvVar) : "" };
-  },
-
-  toJSON(message: RedisCacheConfig): unknown {
-    const obj: any = {};
-    message.redisUrlEnvVar !== undefined && (obj.redisUrlEnvVar = message.redisUrlEnvVar);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<RedisCacheConfig>, I>>(object: I): RedisCacheConfig {
-    const message = createBaseRedisCacheConfig();
-    message.redisUrlEnvVar = object.redisUrlEnvVar ?? "";
     return message;
   },
 };
@@ -1949,13 +1901,15 @@ export const OperationVariablesConfiguration = {
 };
 
 function createBaseVariableInjectionConfiguration(): VariableInjectionConfiguration {
-  return { variableName: "", variableKind: 0, dateFormat: "", environmentVariableName: "" };
+  return { variablePathComponents: [], variableKind: 0, dateFormat: "", environmentVariableName: "" };
 }
 
 export const VariableInjectionConfiguration = {
   fromJSON(object: any): VariableInjectionConfiguration {
     return {
-      variableName: isSet(object.variableName) ? String(object.variableName) : "",
+      variablePathComponents: Array.isArray(object?.variablePathComponents)
+        ? object.variablePathComponents.map((e: any) => String(e))
+        : [],
       variableKind: isSet(object.variableKind) ? injectVariableKindFromJSON(object.variableKind) : 0,
       dateFormat: isSet(object.dateFormat) ? String(object.dateFormat) : "",
       environmentVariableName: isSet(object.environmentVariableName) ? String(object.environmentVariableName) : "",
@@ -1964,7 +1918,11 @@ export const VariableInjectionConfiguration = {
 
   toJSON(message: VariableInjectionConfiguration): unknown {
     const obj: any = {};
-    message.variableName !== undefined && (obj.variableName = message.variableName);
+    if (message.variablePathComponents) {
+      obj.variablePathComponents = message.variablePathComponents.map((e) => e);
+    } else {
+      obj.variablePathComponents = [];
+    }
     message.variableKind !== undefined && (obj.variableKind = injectVariableKindToJSON(message.variableKind));
     message.dateFormat !== undefined && (obj.dateFormat = message.dateFormat);
     message.environmentVariableName !== undefined && (obj.environmentVariableName = message.environmentVariableName);
@@ -1975,7 +1933,7 @@ export const VariableInjectionConfiguration = {
     object: I,
   ): VariableInjectionConfiguration {
     const message = createBaseVariableInjectionConfiguration();
-    message.variableName = object.variableName ?? "";
+    message.variablePathComponents = object.variablePathComponents?.map((e) => e) || [];
     message.variableKind = object.variableKind ?? 0;
     message.dateFormat = object.dateFormat ?? "";
     message.environmentVariableName = object.environmentVariableName ?? "";
@@ -2222,13 +2180,15 @@ export const CustomClaim = {
 };
 
 function createBaseClaimConfig(): ClaimConfig {
-  return { variableName: "", claimType: 0, custom: undefined };
+  return { variablePathComponents: [], claimType: 0, custom: undefined };
 }
 
 export const ClaimConfig = {
   fromJSON(object: any): ClaimConfig {
     return {
-      variableName: isSet(object.variableName) ? String(object.variableName) : "",
+      variablePathComponents: Array.isArray(object?.variablePathComponents)
+        ? object.variablePathComponents.map((e: any) => String(e))
+        : [],
       claimType: isSet(object.claimType) ? claimTypeFromJSON(object.claimType) : 0,
       custom: isSet(object.custom) ? CustomClaim.fromJSON(object.custom) : undefined,
     };
@@ -2236,7 +2196,11 @@ export const ClaimConfig = {
 
   toJSON(message: ClaimConfig): unknown {
     const obj: any = {};
-    message.variableName !== undefined && (obj.variableName = message.variableName);
+    if (message.variablePathComponents) {
+      obj.variablePathComponents = message.variablePathComponents.map((e) => e);
+    } else {
+      obj.variablePathComponents = [];
+    }
     message.claimType !== undefined && (obj.claimType = claimTypeToJSON(message.claimType));
     message.custom !== undefined && (obj.custom = message.custom ? CustomClaim.toJSON(message.custom) : undefined);
     return obj;
@@ -2244,7 +2208,7 @@ export const ClaimConfig = {
 
   fromPartial<I extends Exact<DeepPartial<ClaimConfig>, I>>(object: I): ClaimConfig {
     const message = createBaseClaimConfig();
-    message.variableName = object.variableName ?? "";
+    message.variablePathComponents = object.variablePathComponents?.map((e) => e) || [];
     message.claimType = object.claimType ?? 0;
     message.custom = (object.custom !== undefined && object.custom !== null)
       ? CustomClaim.fromPartial(object.custom)
@@ -2306,16 +2270,23 @@ export const OperationAuthenticationConfig = {
 };
 
 function createBaseOperationCacheConfig(): OperationCacheConfig {
-  return { enable: false, maxAge: 0, public: false, staleWhileRevalidate: 0 };
+  return {
+    enable: undefined,
+    maxAge: undefined,
+    public: undefined,
+    staleWhileRevalidate: undefined,
+    mustRevalidate: undefined,
+  };
 }
 
 export const OperationCacheConfig = {
   fromJSON(object: any): OperationCacheConfig {
     return {
-      enable: isSet(object.enable) ? Boolean(object.enable) : false,
-      maxAge: isSet(object.maxAge) ? Number(object.maxAge) : 0,
-      public: isSet(object.public) ? Boolean(object.public) : false,
-      staleWhileRevalidate: isSet(object.staleWhileRevalidate) ? Number(object.staleWhileRevalidate) : 0,
+      enable: isSet(object.enable) ? Boolean(object.enable) : undefined,
+      maxAge: isSet(object.maxAge) ? Number(object.maxAge) : undefined,
+      public: isSet(object.public) ? Boolean(object.public) : undefined,
+      staleWhileRevalidate: isSet(object.staleWhileRevalidate) ? Number(object.staleWhileRevalidate) : undefined,
+      mustRevalidate: isSet(object.mustRevalidate) ? Boolean(object.mustRevalidate) : undefined,
     };
   },
 
@@ -2325,15 +2296,17 @@ export const OperationCacheConfig = {
     message.maxAge !== undefined && (obj.maxAge = Math.round(message.maxAge));
     message.public !== undefined && (obj.public = message.public);
     message.staleWhileRevalidate !== undefined && (obj.staleWhileRevalidate = Math.round(message.staleWhileRevalidate));
+    message.mustRevalidate !== undefined && (obj.mustRevalidate = message.mustRevalidate);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<OperationCacheConfig>, I>>(object: I): OperationCacheConfig {
     const message = createBaseOperationCacheConfig();
-    message.enable = object.enable ?? false;
-    message.maxAge = object.maxAge ?? 0;
-    message.public = object.public ?? false;
-    message.staleWhileRevalidate = object.staleWhileRevalidate ?? 0;
+    message.enable = object.enable ?? undefined;
+    message.maxAge = object.maxAge ?? undefined;
+    message.public = object.public ?? undefined;
+    message.staleWhileRevalidate = object.staleWhileRevalidate ?? undefined;
+    message.mustRevalidate = object.mustRevalidate ?? undefined;
     return message;
   },
 };
@@ -2840,6 +2813,7 @@ function createBaseFetchConfiguration(): FetchConfiguration {
     mTLS: undefined,
     baseUrl: undefined,
     path: undefined,
+    httpProxyUrl: undefined,
   };
 }
 
@@ -2865,6 +2839,7 @@ export const FetchConfiguration = {
       mTLS: isSet(object.mTLS) ? MTLSConfiguration.fromJSON(object.mTLS) : undefined,
       baseUrl: isSet(object.baseUrl) ? ConfigurationVariable.fromJSON(object.baseUrl) : undefined,
       path: isSet(object.path) ? ConfigurationVariable.fromJSON(object.path) : undefined,
+      httpProxyUrl: isSet(object.httpProxyUrl) ? ConfigurationVariable.fromJSON(object.httpProxyUrl) : undefined,
     };
   },
 
@@ -2892,6 +2867,8 @@ export const FetchConfiguration = {
     message.baseUrl !== undefined &&
       (obj.baseUrl = message.baseUrl ? ConfigurationVariable.toJSON(message.baseUrl) : undefined);
     message.path !== undefined && (obj.path = message.path ? ConfigurationVariable.toJSON(message.path) : undefined);
+    message.httpProxyUrl !== undefined &&
+      (obj.httpProxyUrl = message.httpProxyUrl ? ConfigurationVariable.toJSON(message.httpProxyUrl) : undefined);
     return obj;
   },
 
@@ -2924,6 +2901,9 @@ export const FetchConfiguration = {
       : undefined;
     message.path = (object.path !== undefined && object.path !== null)
       ? ConfigurationVariable.fromPartial(object.path)
+      : undefined;
+    message.httpProxyUrl = (object.httpProxyUrl !== undefined && object.httpProxyUrl !== null)
+      ? ConfigurationVariable.fromPartial(object.httpProxyUrl)
       : undefined;
     return message;
   },
@@ -3358,7 +3338,7 @@ export const SingleTypeField = {
 };
 
 function createBaseArgumentConfiguration(): ArgumentConfiguration {
-  return { name: "", sourceType: 0, sourcePath: [], renderConfiguration: 0 };
+  return { name: "", sourceType: 0, sourcePath: [], renderConfiguration: 0, renameTypeTo: "" };
 }
 
 export const ArgumentConfiguration = {
@@ -3370,6 +3350,7 @@ export const ArgumentConfiguration = {
       renderConfiguration: isSet(object.renderConfiguration)
         ? argumentRenderConfigurationFromJSON(object.renderConfiguration)
         : 0,
+      renameTypeTo: isSet(object.renameTypeTo) ? String(object.renameTypeTo) : "",
     };
   },
 
@@ -3384,6 +3365,7 @@ export const ArgumentConfiguration = {
     }
     message.renderConfiguration !== undefined &&
       (obj.renderConfiguration = argumentRenderConfigurationToJSON(message.renderConfiguration));
+    message.renameTypeTo !== undefined && (obj.renameTypeTo = message.renameTypeTo);
     return obj;
   },
 
@@ -3393,12 +3375,13 @@ export const ArgumentConfiguration = {
     message.sourceType = object.sourceType ?? 0;
     message.sourcePath = object.sourcePath?.map((e) => e) || [];
     message.renderConfiguration = object.renderConfiguration ?? 0;
+    message.renameTypeTo = object.renameTypeTo ?? "";
     return message;
   },
 };
 
 function createBaseWunderGraphConfiguration(): WunderGraphConfiguration {
-  return { api: undefined, apiId: "", environmentIds: [], dangerouslyEnableGraphQLEndpoint: false };
+  return { api: undefined, apiId: "", environmentIds: [], dangerouslyEnableGraphQLEndpoint: false, configHash: "" };
 }
 
 export const WunderGraphConfiguration = {
@@ -3410,6 +3393,7 @@ export const WunderGraphConfiguration = {
       dangerouslyEnableGraphQLEndpoint: isSet(object.dangerouslyEnableGraphQLEndpoint)
         ? Boolean(object.dangerouslyEnableGraphQLEndpoint)
         : false,
+      configHash: isSet(object.configHash) ? String(object.configHash) : "",
     };
   },
 
@@ -3424,6 +3408,7 @@ export const WunderGraphConfiguration = {
     }
     message.dangerouslyEnableGraphQLEndpoint !== undefined &&
       (obj.dangerouslyEnableGraphQLEndpoint = message.dangerouslyEnableGraphQLEndpoint);
+    message.configHash !== undefined && (obj.configHash = message.configHash);
     return obj;
   },
 
@@ -3435,6 +3420,7 @@ export const WunderGraphConfiguration = {
     message.apiId = object.apiId ?? "";
     message.environmentIds = object.environmentIds?.map((e) => e) || [];
     message.dangerouslyEnableGraphQLEndpoint = object.dangerouslyEnableGraphQLEndpoint ?? false;
+    message.configHash = object.configHash ?? "";
     return message;
   },
 };
@@ -3669,6 +3655,7 @@ function createBaseUserDefinedApi(): UserDefinedApi {
     webhooks: [],
     serverOptions: undefined,
     nodeOptions: undefined,
+    experimentalConfig: undefined,
   };
 }
 
@@ -3700,6 +3687,9 @@ export const UserDefinedApi = {
         : [],
       serverOptions: isSet(object.serverOptions) ? ServerOptions.fromJSON(object.serverOptions) : undefined,
       nodeOptions: isSet(object.nodeOptions) ? NodeOptions.fromJSON(object.nodeOptions) : undefined,
+      experimentalConfig: isSet(object.experimentalConfig)
+        ? ExperimentalConfiguration.fromJSON(object.experimentalConfig)
+        : undefined,
     };
   },
 
@@ -3746,6 +3736,9 @@ export const UserDefinedApi = {
       (obj.serverOptions = message.serverOptions ? ServerOptions.toJSON(message.serverOptions) : undefined);
     message.nodeOptions !== undefined &&
       (obj.nodeOptions = message.nodeOptions ? NodeOptions.toJSON(message.nodeOptions) : undefined);
+    message.experimentalConfig !== undefined && (obj.experimentalConfig = message.experimentalConfig
+      ? ExperimentalConfiguration.toJSON(message.experimentalConfig)
+      : undefined);
     return obj;
   },
 
@@ -3773,6 +3766,31 @@ export const UserDefinedApi = {
     message.nodeOptions = (object.nodeOptions !== undefined && object.nodeOptions !== null)
       ? NodeOptions.fromPartial(object.nodeOptions)
       : undefined;
+    message.experimentalConfig = (object.experimentalConfig !== undefined && object.experimentalConfig !== null)
+      ? ExperimentalConfiguration.fromPartial(object.experimentalConfig)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseExperimentalConfiguration(): ExperimentalConfiguration {
+  return { orm: false };
+}
+
+export const ExperimentalConfiguration = {
+  fromJSON(object: any): ExperimentalConfiguration {
+    return { orm: isSet(object.orm) ? Boolean(object.orm) : false };
+  },
+
+  toJSON(message: ExperimentalConfiguration): unknown {
+    const obj: any = {};
+    message.orm !== undefined && (obj.orm = message.orm);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<ExperimentalConfiguration>, I>>(object: I): ExperimentalConfiguration {
+    const message = createBaseExperimentalConfiguration();
+    message.orm = object.orm ?? false;
     return message;
   },
 };
@@ -3808,6 +3826,30 @@ export const ListenerOptions = {
   },
 };
 
+function createBaseInternalListenerOptions(): InternalListenerOptions {
+  return { port: undefined };
+}
+
+export const InternalListenerOptions = {
+  fromJSON(object: any): InternalListenerOptions {
+    return { port: isSet(object.port) ? ConfigurationVariable.fromJSON(object.port) : undefined };
+  },
+
+  toJSON(message: InternalListenerOptions): unknown {
+    const obj: any = {};
+    message.port !== undefined && (obj.port = message.port ? ConfigurationVariable.toJSON(message.port) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<InternalListenerOptions>, I>>(object: I): InternalListenerOptions {
+    const message = createBaseInternalListenerOptions();
+    message.port = (object.port !== undefined && object.port !== null)
+      ? ConfigurationVariable.fromPartial(object.port)
+      : undefined;
+    return message;
+  },
+};
+
 function createBaseNodeLogging(): NodeLogging {
   return { level: undefined };
 }
@@ -3833,6 +3875,38 @@ export const NodeLogging = {
   },
 };
 
+function createBasePrometheusOptions(): PrometheusOptions {
+  return { enabled: undefined, port: undefined };
+}
+
+export const PrometheusOptions = {
+  fromJSON(object: any): PrometheusOptions {
+    return {
+      enabled: isSet(object.enabled) ? ConfigurationVariable.fromJSON(object.enabled) : undefined,
+      port: isSet(object.port) ? ConfigurationVariable.fromJSON(object.port) : undefined,
+    };
+  },
+
+  toJSON(message: PrometheusOptions): unknown {
+    const obj: any = {};
+    message.enabled !== undefined &&
+      (obj.enabled = message.enabled ? ConfigurationVariable.toJSON(message.enabled) : undefined);
+    message.port !== undefined && (obj.port = message.port ? ConfigurationVariable.toJSON(message.port) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<PrometheusOptions>, I>>(object: I): PrometheusOptions {
+    const message = createBasePrometheusOptions();
+    message.enabled = (object.enabled !== undefined && object.enabled !== null)
+      ? ConfigurationVariable.fromPartial(object.enabled)
+      : undefined;
+    message.port = (object.port !== undefined && object.port !== null)
+      ? ConfigurationVariable.fromPartial(object.port)
+      : undefined;
+    return message;
+  },
+};
+
 function createBaseNodeOptions(): NodeOptions {
   return {
     nodeUrl: undefined,
@@ -3840,6 +3914,11 @@ function createBaseNodeOptions(): NodeOptions {
     listen: undefined,
     logger: undefined,
     defaultRequestTimeoutSeconds: 0,
+    listenInternal: undefined,
+    nodeInternalUrl: undefined,
+    defaultHttpProxyUrl: undefined,
+    openTelemetry: undefined,
+    prometheus: undefined,
   };
 }
 
@@ -3853,6 +3932,17 @@ export const NodeOptions = {
       defaultRequestTimeoutSeconds: isSet(object.defaultRequestTimeoutSeconds)
         ? Number(object.defaultRequestTimeoutSeconds)
         : 0,
+      listenInternal: isSet(object.listenInternal)
+        ? InternalListenerOptions.fromJSON(object.listenInternal)
+        : undefined,
+      nodeInternalUrl: isSet(object.nodeInternalUrl)
+        ? ConfigurationVariable.fromJSON(object.nodeInternalUrl)
+        : undefined,
+      defaultHttpProxyUrl: isSet(object.defaultHttpProxyUrl)
+        ? ConfigurationVariable.fromJSON(object.defaultHttpProxyUrl)
+        : undefined,
+      openTelemetry: isSet(object.openTelemetry) ? TelemetryOptions.fromJSON(object.openTelemetry) : undefined,
+      prometheus: isSet(object.prometheus) ? PrometheusOptions.fromJSON(object.prometheus) : undefined,
     };
   },
 
@@ -3866,6 +3956,21 @@ export const NodeOptions = {
     message.logger !== undefined && (obj.logger = message.logger ? NodeLogging.toJSON(message.logger) : undefined);
     message.defaultRequestTimeoutSeconds !== undefined &&
       (obj.defaultRequestTimeoutSeconds = Math.round(message.defaultRequestTimeoutSeconds));
+    message.listenInternal !== undefined &&
+      (obj.listenInternal = message.listenInternal
+        ? InternalListenerOptions.toJSON(message.listenInternal)
+        : undefined);
+    message.nodeInternalUrl !== undefined &&
+      (obj.nodeInternalUrl = message.nodeInternalUrl
+        ? ConfigurationVariable.toJSON(message.nodeInternalUrl)
+        : undefined);
+    message.defaultHttpProxyUrl !== undefined && (obj.defaultHttpProxyUrl = message.defaultHttpProxyUrl
+      ? ConfigurationVariable.toJSON(message.defaultHttpProxyUrl)
+      : undefined);
+    message.openTelemetry !== undefined &&
+      (obj.openTelemetry = message.openTelemetry ? TelemetryOptions.toJSON(message.openTelemetry) : undefined);
+    message.prometheus !== undefined &&
+      (obj.prometheus = message.prometheus ? PrometheusOptions.toJSON(message.prometheus) : undefined);
     return obj;
   },
 
@@ -3884,6 +3989,69 @@ export const NodeOptions = {
       ? NodeLogging.fromPartial(object.logger)
       : undefined;
     message.defaultRequestTimeoutSeconds = object.defaultRequestTimeoutSeconds ?? 0;
+    message.listenInternal = (object.listenInternal !== undefined && object.listenInternal !== null)
+      ? InternalListenerOptions.fromPartial(object.listenInternal)
+      : undefined;
+    message.nodeInternalUrl = (object.nodeInternalUrl !== undefined && object.nodeInternalUrl !== null)
+      ? ConfigurationVariable.fromPartial(object.nodeInternalUrl)
+      : undefined;
+    message.defaultHttpProxyUrl = (object.defaultHttpProxyUrl !== undefined && object.defaultHttpProxyUrl !== null)
+      ? ConfigurationVariable.fromPartial(object.defaultHttpProxyUrl)
+      : undefined;
+    message.openTelemetry = (object.openTelemetry !== undefined && object.openTelemetry !== null)
+      ? TelemetryOptions.fromPartial(object.openTelemetry)
+      : undefined;
+    message.prometheus = (object.prometheus !== undefined && object.prometheus !== null)
+      ? PrometheusOptions.fromPartial(object.prometheus)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseTelemetryOptions(): TelemetryOptions {
+  return { enabled: undefined, exporterHttpEndpoint: undefined, sampler: undefined, authToken: undefined };
+}
+
+export const TelemetryOptions = {
+  fromJSON(object: any): TelemetryOptions {
+    return {
+      enabled: isSet(object.enabled) ? ConfigurationVariable.fromJSON(object.enabled) : undefined,
+      exporterHttpEndpoint: isSet(object.exporterHttpEndpoint)
+        ? ConfigurationVariable.fromJSON(object.exporterHttpEndpoint)
+        : undefined,
+      sampler: isSet(object.sampler) ? ConfigurationVariable.fromJSON(object.sampler) : undefined,
+      authToken: isSet(object.authToken) ? ConfigurationVariable.fromJSON(object.authToken) : undefined,
+    };
+  },
+
+  toJSON(message: TelemetryOptions): unknown {
+    const obj: any = {};
+    message.enabled !== undefined &&
+      (obj.enabled = message.enabled ? ConfigurationVariable.toJSON(message.enabled) : undefined);
+    message.exporterHttpEndpoint !== undefined && (obj.exporterHttpEndpoint = message.exporterHttpEndpoint
+      ? ConfigurationVariable.toJSON(message.exporterHttpEndpoint)
+      : undefined);
+    message.sampler !== undefined &&
+      (obj.sampler = message.sampler ? ConfigurationVariable.toJSON(message.sampler) : undefined);
+    message.authToken !== undefined &&
+      (obj.authToken = message.authToken ? ConfigurationVariable.toJSON(message.authToken) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<TelemetryOptions>, I>>(object: I): TelemetryOptions {
+    const message = createBaseTelemetryOptions();
+    message.enabled = (object.enabled !== undefined && object.enabled !== null)
+      ? ConfigurationVariable.fromPartial(object.enabled)
+      : undefined;
+    message.exporterHttpEndpoint = (object.exporterHttpEndpoint !== undefined && object.exporterHttpEndpoint !== null)
+      ? ConfigurationVariable.fromPartial(object.exporterHttpEndpoint)
+      : undefined;
+    message.sampler = (object.sampler !== undefined && object.sampler !== null)
+      ? ConfigurationVariable.fromPartial(object.sampler)
+      : undefined;
+    message.authToken = (object.authToken !== undefined && object.authToken !== null)
+      ? ConfigurationVariable.fromPartial(object.authToken)
+      : undefined;
     return message;
   },
 };
@@ -4126,6 +4294,157 @@ export const ConfigurationVariable = {
     message.environmentVariableName = object.environmentVariableName ?? "";
     message.environmentVariableDefaultValue = object.environmentVariableDefaultValue ?? "";
     message.placeholderVariableName = object.placeholderVariableName ?? "";
+    return message;
+  },
+};
+
+function createBaseBuildInfo(): BuildInfo {
+  return { success: false, sdk: undefined, wunderctl: undefined, node: undefined, os: undefined, stats: undefined };
+}
+
+export const BuildInfo = {
+  fromJSON(object: any): BuildInfo {
+    return {
+      success: isSet(object.success) ? Boolean(object.success) : false,
+      sdk: isSet(object.sdk) ? BuildInfoVersion.fromJSON(object.sdk) : undefined,
+      wunderctl: isSet(object.wunderctl) ? BuildInfoVersion.fromJSON(object.wunderctl) : undefined,
+      node: isSet(object.node) ? BuildInfoVersion.fromJSON(object.node) : undefined,
+      os: isSet(object.os) ? BuildInfoOS.fromJSON(object.os) : undefined,
+      stats: isSet(object.stats) ? BuildInfoStats.fromJSON(object.stats) : undefined,
+    };
+  },
+
+  toJSON(message: BuildInfo): unknown {
+    const obj: any = {};
+    message.success !== undefined && (obj.success = message.success);
+    message.sdk !== undefined && (obj.sdk = message.sdk ? BuildInfoVersion.toJSON(message.sdk) : undefined);
+    message.wunderctl !== undefined &&
+      (obj.wunderctl = message.wunderctl ? BuildInfoVersion.toJSON(message.wunderctl) : undefined);
+    message.node !== undefined && (obj.node = message.node ? BuildInfoVersion.toJSON(message.node) : undefined);
+    message.os !== undefined && (obj.os = message.os ? BuildInfoOS.toJSON(message.os) : undefined);
+    message.stats !== undefined && (obj.stats = message.stats ? BuildInfoStats.toJSON(message.stats) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<BuildInfo>, I>>(object: I): BuildInfo {
+    const message = createBaseBuildInfo();
+    message.success = object.success ?? false;
+    message.sdk = (object.sdk !== undefined && object.sdk !== null)
+      ? BuildInfoVersion.fromPartial(object.sdk)
+      : undefined;
+    message.wunderctl = (object.wunderctl !== undefined && object.wunderctl !== null)
+      ? BuildInfoVersion.fromPartial(object.wunderctl)
+      : undefined;
+    message.node = (object.node !== undefined && object.node !== null)
+      ? BuildInfoVersion.fromPartial(object.node)
+      : undefined;
+    message.os = (object.os !== undefined && object.os !== null) ? BuildInfoOS.fromPartial(object.os) : undefined;
+    message.stats = (object.stats !== undefined && object.stats !== null)
+      ? BuildInfoStats.fromPartial(object.stats)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseBuildInfoVersion(): BuildInfoVersion {
+  return { version: "" };
+}
+
+export const BuildInfoVersion = {
+  fromJSON(object: any): BuildInfoVersion {
+    return { version: isSet(object.version) ? String(object.version) : "" };
+  },
+
+  toJSON(message: BuildInfoVersion): unknown {
+    const obj: any = {};
+    message.version !== undefined && (obj.version = message.version);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<BuildInfoVersion>, I>>(object: I): BuildInfoVersion {
+    const message = createBaseBuildInfoVersion();
+    message.version = object.version ?? "";
+    return message;
+  },
+};
+
+function createBaseBuildInfoOS(): BuildInfoOS {
+  return { type: "", platform: "", arch: "", version: "", release: "" };
+}
+
+export const BuildInfoOS = {
+  fromJSON(object: any): BuildInfoOS {
+    return {
+      type: isSet(object.type) ? String(object.type) : "",
+      platform: isSet(object.platform) ? String(object.platform) : "",
+      arch: isSet(object.arch) ? String(object.arch) : "",
+      version: isSet(object.version) ? String(object.version) : "",
+      release: isSet(object.release) ? String(object.release) : "",
+    };
+  },
+
+  toJSON(message: BuildInfoOS): unknown {
+    const obj: any = {};
+    message.type !== undefined && (obj.type = message.type);
+    message.platform !== undefined && (obj.platform = message.platform);
+    message.arch !== undefined && (obj.arch = message.arch);
+    message.version !== undefined && (obj.version = message.version);
+    message.release !== undefined && (obj.release = message.release);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<BuildInfoOS>, I>>(object: I): BuildInfoOS {
+    const message = createBaseBuildInfoOS();
+    message.type = object.type ?? "";
+    message.platform = object.platform ?? "";
+    message.arch = object.arch ?? "";
+    message.version = object.version ?? "";
+    message.release = object.release ?? "";
+    return message;
+  },
+};
+
+function createBaseBuildInfoStats(): BuildInfoStats {
+  return {
+    totalApis: 0,
+    totalOperations: 0,
+    totalWebhooks: 0,
+    hasAuthenticationProvider: false,
+    hasUploadProvider: false,
+  };
+}
+
+export const BuildInfoStats = {
+  fromJSON(object: any): BuildInfoStats {
+    return {
+      totalApis: isSet(object.totalApis) ? Number(object.totalApis) : 0,
+      totalOperations: isSet(object.totalOperations) ? Number(object.totalOperations) : 0,
+      totalWebhooks: isSet(object.totalWebhooks) ? Number(object.totalWebhooks) : 0,
+      hasAuthenticationProvider: isSet(object.hasAuthenticationProvider)
+        ? Boolean(object.hasAuthenticationProvider)
+        : false,
+      hasUploadProvider: isSet(object.hasUploadProvider) ? Boolean(object.hasUploadProvider) : false,
+    };
+  },
+
+  toJSON(message: BuildInfoStats): unknown {
+    const obj: any = {};
+    message.totalApis !== undefined && (obj.totalApis = Math.round(message.totalApis));
+    message.totalOperations !== undefined && (obj.totalOperations = Math.round(message.totalOperations));
+    message.totalWebhooks !== undefined && (obj.totalWebhooks = Math.round(message.totalWebhooks));
+    message.hasAuthenticationProvider !== undefined &&
+      (obj.hasAuthenticationProvider = message.hasAuthenticationProvider);
+    message.hasUploadProvider !== undefined && (obj.hasUploadProvider = message.hasUploadProvider);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<BuildInfoStats>, I>>(object: I): BuildInfoStats {
+    const message = createBaseBuildInfoStats();
+    message.totalApis = object.totalApis ?? 0;
+    message.totalOperations = object.totalOperations ?? 0;
+    message.totalWebhooks = object.totalWebhooks ?? 0;
+    message.hasAuthenticationProvider = object.hasAuthenticationProvider ?? false;
+    message.hasUploadProvider = object.hasUploadProvider ?? false;
     return message;
   },
 };

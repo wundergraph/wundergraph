@@ -1,4 +1,5 @@
 import {
+	isInternalOperationByAPIMountPath,
 	LoadOperationsOutput,
 	operationResponseToJSONSchema,
 	operationVariablesToJSONSchema,
@@ -11,6 +12,7 @@ import { JSONSchema7 as JSONSchema } from 'json-schema';
 import { ClaimType, OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import * as fs from 'fs';
 import path from 'path';
+import process from 'node:process';
 
 const MyReviews = `
 query {
@@ -117,25 +119,21 @@ const expectedTransformOperations: ParsedOperations = {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InterpolationVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InternalVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InjectedVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			ResponseSchema: {
 				type: 'object',
@@ -202,25 +200,21 @@ const expectedTransformOperations: ParsedOperations = {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InterpolationVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InternalVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InjectedVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			ResponseSchema: {
 				type: 'object',
@@ -301,25 +295,21 @@ const expectedTransformOperations: ParsedOperations = {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InterpolationVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InternalVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InjectedVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			ResponseSchema: {
 				type: 'object',
@@ -499,13 +489,11 @@ const fromClaimParsed: ParsedOperations = {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InterpolationVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InternalVariablesSchema: {
 				type: 'object',
@@ -515,7 +503,6 @@ const fromClaimParsed: ParsedOperations = {
 					},
 				},
 				additionalProperties: false,
-				definitions: {},
 				required: ['email'],
 			},
 			InjectedVariablesSchema: {
@@ -526,7 +513,6 @@ const fromClaimParsed: ParsedOperations = {
 					},
 				},
 				additionalProperties: false,
-				definitions: {},
 				required: ['email'],
 			},
 			ResponseSchema: {
@@ -557,7 +543,7 @@ const fromClaimParsed: ParsedOperations = {
 			AuthorizationConfig: {
 				claims: [
 					{
-						variableName: 'email',
+						variablePathComponents: ['email'],
 						claimType: ClaimType.EMAIL,
 					},
 				],
@@ -739,7 +725,6 @@ const jsonSchemVariablesSchema: JSONSchema = {
 		},
 	},
 	additionalProperties: false,
-	definitions: {},
 	required: [
 		'stringWithTitle',
 		'stringWithDescription',
@@ -1453,3 +1438,23 @@ input CreateEnvironment {
   kind: EnvironmentKind!
   edges: [ID!]
 }`;
+
+test('isInternalOperationByAPIMountPath', () => {
+	const publicPaths = [
+		'foo.ts',
+		'bar.graphql',
+		'nested/bat.ts',
+		'internal.graphql',
+		'nested/internal.ts',
+		'hellointernal/bob.ts',
+	];
+	const internalPaths = ['internal/foo.ts', 'internal/bar.graphql', 'nested/internal/bat.ts'];
+
+	publicPaths.forEach((path) => {
+		expect(isInternalOperationByAPIMountPath(path)).toBe(false);
+	});
+
+	internalPaths.forEach((path) => {
+		expect(isInternalOperationByAPIMountPath(path)).toBe(true);
+	});
+});

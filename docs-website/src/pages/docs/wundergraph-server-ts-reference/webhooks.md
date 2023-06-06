@@ -1,10 +1,9 @@
 ---
-title: Webhooks
-pageTitle: WunderGraph - Webhooks
-description:
+title: webhooks configuration
+description: Configure webhook verifiers in the WunderGraph server.
 ---
 
-This property allows you to configure your custom webhooks.
+This property allows you to configure verifiers for your custom webhooks.
 Currently, only the `verifier` option is supported.
 The `verifier` define how the webhook is verified. Verification is handled by the gateway. Before a webhook can be configured you need to create one. See webhooks feature for more information.
 
@@ -16,16 +15,9 @@ import {
   EnvironmentVariable,
   GithubWebhookVerifier,
   WebhookVerifierKind,
-} from '@wundergraph/sdk/server'
-import type { HooksConfig } from './generated/wundergraph.hooks'
-import type { WebhooksConfig } from './generated/wundergraph.webhooks'
-import type { InternalClient } from './generated/wundergraph.internal.client'
+} from '@wundergraph/sdk/server';
 
-export default configureWunderGraphServer<
-  HooksConfig,
-  InternalClient,
-  WebhooksConfig
->(() => ({
+export default configureWunderGraphServer(() => ({
   webhooks: {
     // Enable this if you configure this endpoint on Github.
     // Don't forget to set the environment variable before starting your WunderNode
@@ -42,5 +34,5 @@ export default configureWunderGraphServer<
       }),
     },
   },
-}))
+}));
 ```

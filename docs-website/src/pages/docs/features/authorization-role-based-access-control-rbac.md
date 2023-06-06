@@ -1,7 +1,6 @@
 ---
 title: Authorization - Role Based Access Control (RBAC)
-pageTitle: WunderGraph - Features - Authorization - Role Based Access Control (RBAC)
-description:
+description: Configuring authorization roles (RBAC)
 ---
 
 Aside from injecting claims into Operations,
@@ -26,5 +25,5 @@ mutation ($email: String!) @rbac(requireMatchAll: [superadmin]) {
 ```
 
 Read more on how to configure authorization,
-how to implement the postAuthentication hook to assign roles,
+how to implement the mutatingPostAuthentication hook to assign roles,
 or how to use the `@rbac` directive in the reference.

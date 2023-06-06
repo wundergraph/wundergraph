@@ -7,7 +7,5 @@ declare module 'swagger2openapi' {
 
 	function convertObj(spec: Object, options: ConvertOptions): Promise<ConvertResult>;
 
-	export = {
-		convertObj,
-	};
+	export { convertObj };
 }

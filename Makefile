@@ -1,8 +1,11 @@
 all: check-setup
 # Bootstrap pnpm workspace
-	./scripts/pnpm.sh
+	make bootstrap-pnpm
 # prepare and install engine
 	make engine-dev
+
+bootstrap-pnpm:
+	./scripts/pnpm.sh
 
 docs:
 	pnpm --filter="./docs-website" dev
@@ -47,7 +50,7 @@ codegen: install-proto codegen-go
 	pnpm codegen
 
 build: codegen
-	cd cmd/wunderctl && go build -o ../../wunderctl -ldflags "-X 'main.commit=$(shell git rev-parse --short HEAD)' -X 'main.builtBy=dev' -X 'main.version=dev' -X 'main.date=$(shell date)'" -trimpath
+	cd cmd/wunderctl && CGO_ENABLED=0 go build -o ../../wunderctl -ldflags "-X 'main.commit=$(shell git rev-parse --short HEAD)' -X 'main.builtBy=dev' -X 'main.version=dev' -X 'main.date=$(shell date)'" -trimpath
 
 # This command builds the wunderctl binary and copies it into the nodejs wunderctl wrapper
 wunderctl: build
@@ -63,4 +66,4 @@ run:
 install:
 	cd cmd/wunderctl && CGO_ENABLED=0 go install
 
-.PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl build-docs bootstrap-minio
+.PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl build-docs bootstrap-minio bootstrap-pnpm

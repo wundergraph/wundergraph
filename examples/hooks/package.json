@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "run-p wundergraph open",
-    "wundergraph": "wunderctl up --debug",
-    "build:wundergraph": "wunderctl generate --debug",
+    "wundergraph": "wunderctl up",
+    "build:wundergraph": "wunderctl generate",
     "build": "npm run build:wundergraph",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:9991/operations/Dragons",
     "wunderctl": "wunderctl",
@@ -13,7 +13,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@wundergraph/sdk": "^0.135.0",
+    "@wundergraph/sdk": "^0.163.1",
     "graphql": "^16.3.0"
   },
   "devDependencies": {

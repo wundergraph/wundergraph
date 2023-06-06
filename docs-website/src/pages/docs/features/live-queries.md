@@ -1,7 +1,6 @@
 ---
 title: Live Queries
-pageTitle: WunderGraph - Features - Live Queries
-description:
+description: Live Queries allow you to turn any Query into a Live-Query with just one piece of configuration.
 ---
 
 Not every system is capable of implementing GraphQL Subscriptions.
@@ -37,7 +36,7 @@ export default configureWunderGraphOperations<OperationsConfiguration>({
       }),
     },
   },
-})
+});
 ```
 
 On the WunderNode we would keep polling the origin every two seconds.
@@ -46,9 +45,9 @@ Calling this Live-Query from the clients looks very similar to a regular Query:
 
 ```typescript jsx
 const IndexPage = () => {
-  const response = useQuery({ operationName: 'TopProducts', liveQuery: true })
-  return <div>{JSON.stringify(response)}</div>
-}
+  const response = useQuery({ operationName: 'TopProducts', liveQuery: true });
+  return <div>{JSON.stringify(response)}</div>;
+};
 ```
 
 Add `liveQuery: true` and you're done.

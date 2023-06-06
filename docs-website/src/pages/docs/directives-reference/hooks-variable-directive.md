@@ -1,7 +1,6 @@
 ---
 title: '@hooksVariable Directive'
-pageTitle: WunderGraph - Directives - @hooksVariable
-description:
+description: Pass variables to hooks
 ---
 
 The `@hooksVariable` directive is useful when working with Hooks.
@@ -33,15 +32,13 @@ const wunderGraphHooks = ConfigureWunderGraphHooks({
           ...response,
           data: {
             ...response.data,
-            missions: response.data.missions.filter(
-              (mission) => mission.name === 'Telstar'
-            ), // using a static string
+            missions: response.data.missions.filter((mission) => mission.name === 'Telstar'), // using a static string
           },
-        }
+        };
       },
     },
   },
-})
+});
 ```
 
 This hook can "statically" filter all missions by name.
@@ -81,13 +78,11 @@ const wunderGraphHooks = ConfigureWunderGraphHooks({
           ...response,
           data: {
             ...response.data,
-            missions: response.data.missions.filter(
-              (mission) => mission.name === input.filter
-            ), // now using the $filter Variable
+            missions: response.data.missions.filter((mission) => mission.name === input.filter), // now using the $filter Variable
           },
-        }
+        };
       },
     },
   },
-})
+});
 ```

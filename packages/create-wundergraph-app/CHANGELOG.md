@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.0](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.3.4...create-wundergraph-app@0.4.0) (2023-05-09)
+
+### Features
+
+* official react-native and expo integration package ([#851](https://github.com/wundergraph/wundergraph/issues/851)) ([83e5231](https://github.com/wundergraph/wundergraph/commit/83e5231644ee540bd27097dec28b62589a5ebb7f)) (@Pagebakers)
+
+## [0.3.4](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.3.3...create-wundergraph-app@0.3.4) (2023-05-08)
+
+### Bug Fixes
+
+* print error reason when create-wundergraph-app fails ([#936](https://github.com/wundergraph/wundergraph/issues/936)) ([4fb7555](https://github.com/wundergraph/wundergraph/commit/4fb7555102bc89a33ce044e4fe2975a52bc8f0d7)) (@fiam)
+
+## [0.3.3](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.3.2...create-wundergraph-app@0.3.3) (2023-02-28)
+
+### Bug Fixes
+
+* support yarn 3 with create-wundergraph-app --init ([#704](https://github.com/wundergraph/wundergraph/issues/704)) ([0ce00ec](https://github.com/wundergraph/wundergraph/commit/0ce00ec21c088481dfe78b3387fb9a9d6184cbb9)) (@Pagebakers)
+
 ## [0.3.2](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.3.1...create-wundergraph-app@0.3.2) (2023-02-03)
 
 ### Bug Fixes

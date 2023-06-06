@@ -16,11 +16,15 @@ import {
 	ArrowRightIcon,
 } from '@heroicons/react/24/outline';
 import { NextLogo } from '@/components/logos/next';
+import { SvelteLogo } from '@/components/logos/svelte';
 import { ViteLogo } from '@/components/logos/vite';
 import { RemixLogo } from '@/components/logos/remix';
+import { RelayLogo } from '@/components/logos/relay';
+import { NuxtLogo } from '@/components/logos/nuxt';
 import clsx from 'clsx';
 import { DiscordIcon } from '../components/logos/discord';
 import { GitHubIcon } from '../components/logos/github';
+import { ExpoLogo } from '@/components/logos/expo';
 
 const code = `npx create-wundergraph-app my-project -E nextjs \\ &&
 cd my-project && npm i && npm start`;
@@ -107,6 +111,33 @@ export default function HomePage() {
 						href="/docs/getting-started/remix-quickstart"
 						variant="plain"
 					/>
+					<QuickLink
+						title="Relay"
+						description="Learn how to use WunderGraph with Relay."
+						logo={<RelayLogo />}
+						href="/docs/getting-started/relay-quickstart"
+						variant="plain"
+					/>
+					<QuickLink
+						title="SvelteKit"
+						description="Learn how to use WunderGraph with SvelteKit."
+						logo={<SvelteLogo />}
+						href="/docs/getting-started/sveltekit-quickstart"
+					/>
+					<QuickLink
+						title="Nuxt"
+						description="Learn how to use WunderGraph with Nuxt."
+						logo={<NuxtLogo />}
+						href="/docs/getting-started/nuxt-quickstart"
+						variant="plain"
+					/>
+					<QuickLink
+						title="Expo"
+						description="Learn how to use WunderGraph with Expo."
+						logo={<ExpoLogo />}
+						href="/docs/getting-started/expo-quickstart"
+						variant="plain"
+					/>
 				</QuickLinks>
 			</div>
 
@@ -146,10 +177,10 @@ export default function HomePage() {
 						<Links
 							href="/docs/databases"
 							links={[
-								{ href: '/docs/databases/postgresql', label: 'Postgres', className: 'underline' },
-								{ href: '/docs/databases/mysql', label: 'MySQL', className: 'underline' },
+								{ href: '/docs/databases/prisma', label: 'Prisma', className: 'underline' },
+								{ href: '/docs/databases/prisma#postgre-sql', label: 'PostgreSQL', className: 'underline' },
+								{ href: '/docs/databases/prisma#planetscale', label: 'Planetscale', className: 'underline' },
 								{ href: '/docs/databases/faunadb', label: 'Fauna', className: 'underline' },
-								{ href: '/docs/databases/planetscale', label: 'Planetscale', className: 'underline' },
 								{
 									href: '/docs/databases',
 									label: <QuickLinkMore label="View all" className="underline-0" />,
@@ -244,7 +275,7 @@ export default function HomePage() {
 
 HomePage.getInitialProps = () => {
 	return {
-		title: 'WunderGraph Docs',
+		title: 'Documentation Overview',
 		description: 'Learn more about how to integrate APIs and build complete backends with WunderGraph.',
 	};
 };

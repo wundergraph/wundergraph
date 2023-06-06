@@ -17,6 +17,11 @@ const (
 
 	// logger field name must be aligned with fastify
 	requestIDField = "reqId"
+
+	//	environment variables
+	WgCloudEnvironmentID = "WG_CLOUD_ENVIRONMENT_ID"
+	WgCloudProjectID     = "WG_CLOUD_PROJECT_ID"
+	WgCloudDeploymentID  = "WG_CLOUD_DEPLOYMENT_ID"
 )
 
 type RequestIDKey struct{}
@@ -45,9 +50,38 @@ func zapJsonEncoder() zapcore.Encoder {
 func zapConsoleEncoder() zapcore.Encoder {
 	ec := zapBaseEncoderConfig()
 	ec.ConsoleSeparator = " "
-	ec.EncodeTime = zapcore.RFC3339TimeEncoder
+	ec.EncodeTime = zapcore.TimeEncoderOfLayout("15:04:05 PM")
 	ec.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	return zapcore.NewConsoleEncoder(ec)
+}
+
+func attachBaseFields(logger *zap.Logger) *zap.Logger {
+	host, err := os.Hostname()
+	if err != nil {
+		host = "unknown"
+	}
+
+	logger = logger.With(
+		zap.String("hostname", host),
+		zap.Int("pid", os.Getpid()),
+	)
+
+	environmentID := os.Getenv(WgCloudEnvironmentID)
+	if environmentID != "" {
+		logger = logger.With(zap.String("environmentID", environmentID))
+	}
+
+	projectID := os.Getenv(WgCloudProjectID)
+	if projectID != "" {
+		logger = logger.With(zap.String("projectID", projectID))
+	}
+
+	deploymentID := os.Getenv(WgCloudDeploymentID)
+	if projectID != "" {
+		logger = logger.With(zap.String("deploymentID", deploymentID))
+	}
+
+	return logger
 }
 
 func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool, level zapcore.Level) *zap.Logger {
@@ -61,7 +95,8 @@ func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool, le
 	}
 
 	if debug {
-		zapOpts = append(zapOpts, zap.AddCaller(), zap.AddStacktrace(zap.ErrorLevel))
+		zapOpts = append(zapOpts, zap.AddStacktrace(zap.ErrorLevel))
+		zapOpts = append(zapOpts, zap.AddCaller())
 	}
 
 	zapLogger := zap.New(zapcore.NewCore(
@@ -74,15 +109,9 @@ func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool, le
 		return zapLogger
 	}
 
-	host, err := os.Hostname()
-	if err != nil {
-		host = "unknown"
-	}
+	zapLogger = attachBaseFields(zapLogger)
 
-	return zapLogger.With(
-		zap.String("hostname", host),
-		zap.Int("pid", os.Getpid()),
-	)
+	return zapLogger
 }
 
 func FindLogLevel(logLevel string) (zapcore.Level, error) {
@@ -105,6 +134,9 @@ func FindLogLevel(logLevel string) (zapcore.Level, error) {
 }
 
 func RequestIDFromContext(ctx context.Context) string {
+	if ctx == nil {
+		return ""
+	}
 	requestID, ok := ctx.Value(RequestIDKey{}).(string)
 	if !ok {
 		return ""

@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`replaceCustomNumericScalars should replace float scalar: custom float scalar 1`] = `
+{
+  "argumentReplacements": [
+    {
+      "argName": "a",
+      "fieldName": "bar",
+      "renameTypeTo": "CustomFloat",
+      "typeName": "Query",
+    },
+  ],
+  "schemaSDL": "type Query {
+  foo: Float
+  bar(a: Float): String
+}",
+}
+`;
+
+exports[`replaceCustomNumericScalars should replace int scalar: custom int scalar 1`] = `
+{
+  "argumentReplacements": [
+    {
+      "argName": "a",
+      "fieldName": "bar",
+      "renameTypeTo": "CustomInt",
+      "typeName": "Query",
+    },
+  ],
+  "schemaSDL": "type Query {
+  foo: Int
+  bar(a: Int): String
+}",
+}
+`;

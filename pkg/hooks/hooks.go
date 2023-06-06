@@ -18,10 +18,14 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/mattbaird/jsonpatch"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	otrace "go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
+	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/trace"
 )
 
 type WunderGraphRequest struct {
@@ -159,17 +163,33 @@ type Client struct {
 	log                 *zap.Logger
 }
 
-func NewClient(serverUrl string, logger *zap.Logger) *Client {
+type ClientOptions struct {
+	ServerURL     string
+	EnableTracing bool
+	Logger        *zap.Logger
+}
+
+func NewClient(opts *ClientOptions) *Client {
+
+	rt := http.DefaultTransport
+
+	if opts.EnableTracing {
+		rt = trace.NewTransport(rt,
+			otelhttp.WithSpanOptions(otrace.WithAttributes(trace.HooksClientAttribute)),
+		)
+	}
+
 	return &Client{
-		serverUrl:           serverUrl,
-		httpClient:          buildClient(60 * time.Second),
-		subscriptionsClient: buildClient(0),
-		log:                 logger,
+		serverUrl:           opts.ServerURL,
+		httpClient:          buildClient(60*time.Second, rt),
+		subscriptionsClient: buildClient(0, rt),
+		log:                 opts.Logger,
 	}
 }
 
-func buildClient(requestTimeout time.Duration) *retryablehttp.Client {
+func buildClient(requestTimeout time.Duration, rt http.RoundTripper) *retryablehttp.Client {
 	httpClient := retryablehttp.NewClient()
+	httpClient.HTTPClient.Transport = rt
 	// we will try 40 times with a constant delay of 50ms after max 2s we will give up
 	httpClient.RetryMax = 40
 	// keep it low and linear to increase the chance
@@ -178,7 +198,7 @@ func buildClient(requestTimeout time.Duration) *retryablehttp.Client {
 	httpClient.RetryWaitMax = 50 * time.Millisecond
 	httpClient.RetryWaitMin = 50 * time.Millisecond
 	httpClient.HTTPClient.Timeout = requestTimeout
-	httpClient.Logger = log.New(ioutil.Discard, "", log.LstdFlags)
+	httpClient.Logger = log.New(io.Discard, "", log.LstdFlags)
 	httpClient.CheckRetry = func(ctx context.Context, resp *http.Response, err error) (bool, error) {
 		if resp != nil && resp.StatusCode == http.StatusInternalServerError {
 			return false, nil
@@ -224,13 +244,6 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 		return nil, fmt.Errorf("error calling function %s: no response", operationName)
 	}
 
-	switch resp.StatusCode {
-	case http.StatusOK, http.StatusInternalServerError, http.StatusUnauthorized:
-		break
-	default:
-		return nil, fmt.Errorf("error calling function %s: %s", operationName, resp.Status)
-	}
-
 	dec := json.NewDecoder(resp.Body)
 
 	var hookRes MiddlewareHookResponse
@@ -243,14 +256,7 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 		return nil, fmt.Errorf("error calling function %s: %s", operationName, hookRes.Error)
 	}
 
-	switch resp.StatusCode {
-	case http.StatusInternalServerError:
-		hookRes.ClientResponseStatusCode = http.StatusBadGateway
-	case http.StatusUnauthorized:
-		hookRes.ClientResponseStatusCode = http.StatusUnauthorized
-	default:
-		hookRes.ClientResponseStatusCode = http.StatusOK
-	}
+	hookRes.ClientResponseStatusCode = resp.StatusCode
 
 	return &hookRes, nil
 }
@@ -394,7 +400,8 @@ func (c *Client) setInternalHookData(ctx context.Context, jsonData []byte, buf *
 	if len(jsonData) == 0 {
 		jsonData = []byte(`{}`)
 	}
-	if clientRequest, ok := ctx.Value(pool.ClientRequestKey).(*http.Request); ok {
+	// Make sure we account for both pool.ClientRequestKey being nil and being non present
+	if clientRequest, ok := ctx.Value(pool.ClientRequestKey).(*http.Request); ok && clientRequest != nil {
 		_, wgClientRequestType, _, _ := jsonparser.Get(jsonData, "__wg", "clientRequest")
 		if clientRequestData, err := HttpRequestToWunderGraphRequestJSON(clientRequest, false); err == nil && wgClientRequestType == jsonparser.NotExist {
 			buf.Reset()
@@ -470,26 +477,55 @@ func (c *Client) DoHealthCheckRequest(ctx context.Context) (status bool) {
 	return true
 }
 
-func EncodeData(authenticator Authenticator, r *http.Request, buf []byte, variables []byte, response []byte) []byte {
-	// TODO: This doesn't really reuse the bytes.Buffer storage, refactor it after adding more tests
-	buf = buf[:0]
-	buf = append(buf, []byte(`{"__wg":{}}`)...)
-	if user := authenticator(r.Context()); user != nil {
-		if userJson, err := json.Marshal(user); err == nil {
-			buf, _ = jsonparser.Set(buf, userJson, "__wg", "user")
+func encodeData(r *http.Request, w *bytes.Buffer, variables []byte, response []byte) ([]byte, error) {
+	const (
+		wgKey = "__wg"
+		root  = `{"` + wgKey + `":{}}`
+	)
+	var err error
+	buf := w.Bytes()[0:]
+	buf = append(buf, []byte(root)...)
+
+	if user := authentication.UserFromContext(r.Context()); user != nil {
+		userJson, err := json.Marshal(user)
+		if err != nil {
+			return nil, err
+		}
+		if buf, err = jsonparser.Set(buf, userJson, wgKey, "user"); err != nil {
+			return nil, err
 		}
 	}
 	if len(variables) > 2 {
-		buf, _ = jsonparser.Set(buf, variables, "input")
+		if buf, err = jsonparser.Set(buf, variables, "input"); err != nil {
+			return nil, err
+		}
 	}
 	if len(response) != 0 {
-		buf, _ = jsonparser.Set(buf, response, "response")
+		if buf, err = jsonparser.Set(buf, response, "response"); err != nil {
+			return nil, err
+		}
 	}
 	if r != nil {
 		counterHeader := r.Header.Get("Wg-Cycle-Counter")
 		counter, _ := strconv.ParseInt(counterHeader, 10, 64)
 		counterValue := []byte(strconv.FormatInt(counter+1, 10))
-		buf, _ = jsonparser.Set(buf, counterValue, "cycleCounter")
+		if buf, err = jsonparser.Set(buf, counterValue, "cycleCounter"); err != nil {
+			return nil, err
+		}
 	}
-	return buf
+	// If buf required more bytes than what w provided, copy buf into w so next time w's backing slice has enough
+	// room to fit the whole payload
+	if cap(buf) > w.Cap() {
+		_, _ = w.Write(buf)
+	}
+	return buf, nil
+}
+
+// EncodeData encodes the given input data for a hook as a JSON payload to be sent to the hooks server
+func EncodeData(r *http.Request, buf *bytes.Buffer, variables []byte, response []byte) ([]byte, error) {
+	data, err := encodeData(r, buf, variables, response)
+	if err != nil {
+		return nil, fmt.Errorf("encoding hook data: %w", err)
+	}
+	return data, nil
 }

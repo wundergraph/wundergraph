@@ -18,7 +18,7 @@ like an ID token in this example.
 
 ```typescript
 // wundergraph.server.ts
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer(() => ({
   hooks: {
     global: {
       httpTransport: {
@@ -26,9 +26,9 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
           enableForAllOperations: true,
           hook: async ({ request, user }) => {
             if (user && user.rawIdToken) {
-              request.headers.set('Authorization', `Bearer ${user.rawIdToken}`)
+              request.headers.set('Authorization', `Bearer ${user.rawIdToken}`);
             }
-            return request
+            return request;
           },
         },
       },
@@ -36,9 +36,19 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
     queries: {},
     mutations: {},
   },
-  graphqlServers: [],
-}))
+}));
 ```
 
 If you want to learn more about http transport hooks,
 have a look at the onOriginRequest hook reference.
+
+## Learn more
+
+- [Guides](/docs/guides)
+- [WunderGraph Server TS Reference](/docs/wundergraph-server-ts-reference)
+
+## Deploy to WunderGraph Cloud
+
+The easiest way to deploy your WunderGraph app is to use WunderGraph Cloud.
+
+{% deploy template="inject-bearer" /%}

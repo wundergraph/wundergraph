@@ -1,12 +1,13 @@
 import Head from 'next/head';
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
+import { AppProps } from 'next/app';
 
 const client = new ApolloClient({
 	uri: 'http://localhost:9991/graphql',
 	cache: new InMemoryCache(),
 });
 
-function MyApp({ Component, pageProps }) {
+function MyApp({ Component, pageProps }: AppProps) {
 	return (
 		<>
 			<Head>

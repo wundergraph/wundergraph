@@ -28,46 +28,24 @@ export interface GraphQLServerConfig {
 	customResolverFactory?: (executionContext: HelixExecutionContext & ExecutionContext) => Promise<{}>;
 }
 
-interface ServerContext extends BaseRequestContext {
-	headers: Record<string, string>;
+interface ExecutionContext {
+	wundergraph: BaseRequestContext;
 }
 
-export interface ExecutionContext {
-	wundergraph: ServerContext;
-}
-
-export interface LazyGraphQLServerConfig extends Omit<GraphQLServerConfig, 'schema'> {
-	schema: GraphQLSchema | Promise<GraphQLSchema> | (() => Promise<GraphQLSchema>);
-}
-
-const lazyLoadSchema = (schema: LazyGraphQLServerConfig['schema']) =>
-	typeof schema === 'function' ? schema() : schema;
-
-const FastifyGraphQLPlugin: FastifyPluginAsync<LazyGraphQLServerConfig> = async (fastify, config) => {
+const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fastify, config) => {
+	const schema = await config.schema;
 	const baseContext = await config.baseContext;
-	let schema: GraphQLSchema;
 
 	fastify.route({
 		method: ['GET', 'POST'],
 		url: config.routeUrl,
 		async handler(req, reply) {
-			if (!schema) {
-				schema = await lazyLoadSchema(config.schema);
-			}
-
 			const request = {
 				body: req.body,
 				headers: req.headers,
 				method: req.method,
 				query: req.query,
 			};
-
-			const headers = Object.entries(request.headers).reduce((acc, [key, value]) => {
-				if (value) {
-					acc[key] = value.toString();
-				}
-				return acc;
-			}, {} as Record<string, string>);
 
 			const pluginLogger = req.ctx.log.child({ server: config.serverName, plugin: 'graphql' });
 
@@ -84,6 +62,12 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<LazyGraphQLServerConfig> = async 
 				// No fastify hooks are called for the response.
 				reply.hijack();
 
+				const request = {
+					body: req.body,
+					headers: req.headers,
+					method: req.method,
+					query: req.query,
+				};
 				const { operationName, query, variables } = getGraphQLParameters(request);
 
 				if (config.contextFactory) {
@@ -102,7 +86,6 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<LazyGraphQLServerConfig> = async 
 								wundergraph: {
 									...req.ctx,
 									log: pluginLogger,
-									headers: headers,
 								},
 							}),
 						});
@@ -125,7 +108,6 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<LazyGraphQLServerConfig> = async 
 						wundergraph: {
 							...req.ctx,
 							log: pluginLogger,
-							headers: headers,
 						},
 					}),
 				});

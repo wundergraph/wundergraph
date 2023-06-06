@@ -1,7 +1,6 @@
 ---
 title: Configure SQLServer Data Source
-pageTitle: WunderGraph - Configure SQLServer Data Source
-description:
+description: Introspect SQLServer databases and add them to the Virtual Graph.
 ---
 
 The SQLServer data source introspects the database and generates a GraphQL schema.
@@ -17,11 +16,11 @@ const db = introspect.sqlserver({
   introspection: {
     pollingIntervalSeconds: 5,
   },
-})
+});
 
 configureWunderGraphApplication({
   apis: [db],
-})
+});
 ```
 
 Define the `databaseURL` which is the connection string to the database.

@@ -1,5 +1,5 @@
 import fs from 'fs/promises';
-import { GraphQLApi, introspect } from './index';
+import { introspect } from './index';
 
 jest.mock('fs/promises');
 
@@ -35,11 +35,12 @@ describe('Introspection', () => {
 	test('introspect GraphQL API with interface type definitions', async () => {
 		fs.writeFile = jest.fn().mockResolvedValue(undefined);
 
-		const api: GraphQLApi = await introspect.graphql({
+		const generator = await introspect.graphql({
 			apiNamespace: 'api',
 			loadSchemaFromString: schema,
 			url: 'http://localhost:8080/graphql',
-		})();
+		});
+		const api = await generator({});
 		expect(api).toMatchSnapshot();
 	});
 });

@@ -1,7 +1,6 @@
 ---
 title: HTTP Layer Caching
-pageTitle: WunderGraph - Features - HTTP Layer Caching
-description:
+description: Caching GraphQL Operations on the HTTP Layer
 ---
 
 As described in another chapter, WunderGraph compiles GraphQL Operations into
@@ -35,7 +34,7 @@ export default configureWunderGraphOperations<OperationsConfiguration>({
           enable: false,
           pollingIntervalSeconds: 5,
         },
-      }
+      };
     },
     custom: {
       Countries: enableCaching,
@@ -56,7 +55,7 @@ export default configureWunderGraphOperations<OperationsConfiguration>({
       }),
     },
   },
-})
+});
 ```
 
 By default, caching is disabled for all Queries (enable: false), but we set a few other defaults.

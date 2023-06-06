@@ -1,6 +1,5 @@
 ---
-title: React.js
-pageTitle: WunderGraph - React.js
+title: React.js support
 description: WunderGraph is the easiest way to consume all kinds of APIs (GraphQL, REST, gRPC, Kafka, etc...) in React.js.
 ---
 
@@ -56,7 +55,7 @@ const LiveWeather = () => {
     operationName: 'Weather',
     input: { forCity: 'Berlin' },
     liveQuery: true,
-  })
+  });
   return (
     <div>
       <div>
@@ -68,10 +67,10 @@ const LiveWeather = () => {
         <p>{JSON.stringify(liveWeather.data?.weather?.wind)}</p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default withWunderGraph(LiveWeather)
+export default withWunderGraph(LiveWeather);
 ```
 
 By wrapping the page using `withWunderGraph`,
@@ -101,4 +100,4 @@ have a look at the following examples:
 - [Next.js + PostgreSQL + Prisma](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-postgres-prisma)
 
 If you've got any questions,
-please join our Discord Community and ask away.
+please [join our Discord community](https://wundergraph.com/discord) or [contact us](https://wundergraph.com/contact/sales).

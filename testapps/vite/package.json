@@ -2,20 +2,22 @@
   "name": "@test/vite",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "clean": "rimraf ./.next",
     "dev": "concurrently \"npm run dev:vite\" \"npm run wundergraph\" \"npm run browser\"",
-    "wundergraph": "wunderctl up --debug",
+    "wundergraph": "wunderctl up --logs",
     "generate": "wunderctl generate",
     "browser": "wait-on \"http-get://localhost:5173\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:5173",
     "dev:vite": "vite",
     "build": "npm run generate && tsc && vite build",
+    "build:vite": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "@wundergraph/swr": "workspace:*",
     "@wundergraph/sdk": "workspace:*",
-    "swr": "^2.0.0",
+    "swr": "^2.1.5",
     "react": "^18.1.0",
     "react-dom": "^18.1.0"
   },

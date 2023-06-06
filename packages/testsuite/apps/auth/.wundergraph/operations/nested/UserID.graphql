@@ -1,0 +1,3 @@
+query {
+	userId: echo_string(input: "not valid")
+}

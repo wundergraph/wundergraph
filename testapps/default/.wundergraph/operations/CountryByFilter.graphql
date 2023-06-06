@@ -1,0 +1,7 @@
+query ($filter: countries_CountryFilterInput) {
+	countries_countries(filter: $filter) {
+		code
+		name
+		capital
+	}
+}

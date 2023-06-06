@@ -6,6 +6,7 @@ import {
 	DocumentNode,
 	getIntrospectionQuery,
 	GraphQLSchema,
+	IntrospectionQuery,
 	lexicographicSortSchema,
 	ObjectTypeDefinitionNode,
 	ObjectTypeExtensionNode,
@@ -13,7 +14,8 @@ import {
 	print,
 	printSchema,
 } from 'graphql';
-import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosError, AxiosProxyConfig, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { HttpsProxyAgent, HttpsProxyAgentOptions } from 'https-proxy-agent';
 import { ConfigurationVariableKind, DataSourceKind, HTTPHeader, HTTPMethod } from '@wundergraph/protobuf';
 import { cleanupSchema } from '../graphql/schema';
 import {
@@ -26,14 +28,22 @@ import {
 } from './namespacing';
 import { loadFile } from '../codegen/templates/typescript';
 import * as https from 'https';
-import { introspectWithCache } from './introspection-cache';
+import { IntrospectionCacheConfiguration, introspectWithCache } from './introspection-cache';
 import { mapInputVariable, resolveVariable } from '../configure/variables';
-import { buildMTLSConfiguration, buildUpstreamAuthentication, GraphQLApi, GraphQLIntrospection } from './index';
+import {
+	buildMTLSConfiguration,
+	buildUpstreamAuthentication,
+	GraphQLApi,
+	GraphQLIntrospection,
+	ApiIntrospectionOptions,
+} from './index';
 import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
+import { urlHash, urlIsLocalNetwork } from '../localcache';
 import { Logger } from '../logger';
 import { mergeSchemas } from '@graphql-tools/schema';
-import transformSchema from '../transformations/schema';
+import transformSchema from '../transformations/transformSchema';
+import { printSchemaWithDirectives } from '@graphql-tools/utils';
 
 class MissingKeyError extends Error {
 	constructor(private key: string, private introspection: GraphQLIntrospection) {
@@ -69,132 +79,177 @@ export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HT
 	return baseHeaders;
 };
 
-export const introspectGraphql = async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
-	return introspectWithCache(introspection, async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
-		const headersBuilder = new HeadersBuilder();
-		const introspectionHeadersBuilder = new HeadersBuilder();
-
-		if (introspection.headers !== undefined) {
-			introspection.headers(headersBuilder);
-			introspection.headers(introspectionHeadersBuilder);
+export const graphqlIntrospectionCacheConfiguration = async (
+	introspection: GraphQLIntrospection
+): Promise<IntrospectionCacheConfiguration> => {
+	if (introspection.loadSchemaFromString) {
+		const schema = loadFile(introspection.loadSchemaFromString);
+		if (schema) {
+			return { keyInput: schema, dataSource: 'localFilesystem' };
 		}
-		if (introspection.introspection?.headers !== undefined) {
-			introspection.introspection?.headers(introspectionHeadersBuilder);
-		}
-
-		const headers = mapHeaders(headersBuilder);
-		const introspectionHeaders = resolveGraphqlIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
-
-		let schema = await introspectGraphQLSchema(introspection, introspectionHeaders);
-		schema = lexicographicSortSchema(schema);
-		const federationEnabled = introspection.isFederation || false;
-		const upstreamSchema = cleanupSchema(schema, introspection);
-		const { schemaSDL, customScalarTypeFields } = transformSchema.replaceCustomScalars(upstreamSchema, introspection);
-		let serviceSDL: string | undefined;
-		if (federationEnabled) {
-			if (introspection.loadSchemaFromString) {
-				serviceSDL = loadFile(introspection.loadSchemaFromString);
-			} else {
-				if (!introspection.url) {
-					throw new MissingKeyError('url', introspection);
-				}
-				serviceSDL = await fetchFederationServiceSDL(resolveVariable(introspection.url), introspectionHeaders, {
-					apiNamespace: introspection.apiNamespace,
-				});
-			}
-		}
-		const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
-		const schemaDocumentNode = parse(schemaSDL);
-		const graphQLSchema = buildSchema(schemaSDL);
-		const { RootNodes, ChildNodes, Fields } = configuration(
-			schemaDocumentNode,
-			introspection.customJSONScalars,
-			serviceDocumentNode
-		);
-		const subscriptionsEnabled = hasSubscriptions(schema);
-		if (introspection.internal === true) {
-			headers['X-WG-Internal-GraphQL-API'] = {
-				values: [
-					{
-						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-						staticVariableContent: 'true',
-						environmentVariableName: '',
-						environmentVariableDefaultValue: '',
-						placeholderVariableName: '',
-					},
-				],
-			};
-		}
-		return new GraphQLApi(
-			applyNameSpaceToGraphQLSchema(schemaSDL, introspection.skipRenameRootFields || [], introspection.apiNamespace),
-			[
-				{
-					Id: introspection.id,
-					Kind: DataSourceKind.GRAPHQL,
-					RootNodes: applyNameSpaceToTypeFields(RootNodes, graphQLSchema, introspection.apiNamespace),
-					ChildNodes: applyNameSpaceToTypeFields(ChildNodes, graphQLSchema, introspection.apiNamespace),
-					Custom: {
-						Fetch: {
-							url: mapInputVariable(introspection.url),
-							baseUrl: introspection.baseUrl ? mapInputVariable(introspection.baseUrl) : mapInputVariable(''),
-							path: introspection.path ? mapInputVariable(introspection.path) : mapInputVariable(''),
-							method: HTTPMethod.POST,
-							body: mapInputVariable(''),
-							header: headers,
-							query: [],
-							upstreamAuthentication: buildUpstreamAuthentication(introspection),
-							mTLS: buildMTLSConfiguration(introspection),
-							urlEncodeBody: false,
-						},
-						Subscription: {
-							Enabled: subscriptionsEnabled,
-							URL:
-								introspection.subscriptionsURL !== undefined
-									? mapInputVariable(introspection.subscriptionsURL)
-									: typeof introspection.url === 'string'
-									? mapInputVariable(introspection.url)
-									: mapInputVariable(''),
-							UseSSE: introspection.subscriptionsUseSSE !== undefined ? introspection.subscriptionsUseSSE : false,
-						},
-						Federation: {
-							Enabled: federationEnabled,
-							ServiceSDL: serviceSDL || '',
-						},
-						UpstreamSchema: upstreamSchema,
-						HooksConfiguration: {
-							onWSTransportConnectionInit: false,
-						},
-						CustomScalarTypeFields: applyNameSpaceToSingleTypeFields(
-							customScalarTypeFields,
-							graphQLSchema,
-							introspection.apiNamespace
-						),
-					},
-					Directives: applyNamespaceToDirectiveConfiguration(schema, introspection.apiNamespace),
-					RequestTimeoutSeconds: introspection.requestTimeoutSeconds ?? 0,
-				},
-			],
-			applyNameSpaceToFieldConfigurations(
-				Fields,
-				graphQLSchema,
-				introspection.skipRenameRootFields || [],
-				introspection.apiNamespace
-			),
-			generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
-			[],
-			introspection.customJSONScalars
-		);
-	});
+	}
+	const url = resolveVariable(introspection.url);
+	const baseUrl = introspection.baseUrl ? resolveVariable(introspection.baseUrl) : '';
+	const path = introspection.path ? resolveVariable(introspection.path) : '';
+	const hash = await urlHash(url);
+	const dataSource = (await urlIsLocalNetwork(url)) ? 'localNetwork' : 'remote';
+	const baseUrlHash = await urlHash(baseUrl + path);
+	return { keyInput: hash + baseUrlHash, dataSource };
 };
 
-const introspectGraphQLSchema = async (introspection: GraphQLIntrospection, headers?: Record<string, string>) => {
+export const introspectGraphql = async (
+	introspection: GraphQLIntrospection,
+	options: ApiIntrospectionOptions,
+	preserveSchemaDirectives?: boolean
+): Promise<GraphQLApi> => {
+	const headersBuilder = new HeadersBuilder();
+	const introspectionHeadersBuilder = new HeadersBuilder();
+
+	if (introspection.headers !== undefined) {
+		introspection.headers(headersBuilder);
+		introspection.headers(introspectionHeadersBuilder);
+	}
+	if (introspection.introspection?.headers !== undefined) {
+		introspection.introspection?.headers(introspectionHeadersBuilder);
+	}
+
+	const headers = mapHeaders(headersBuilder);
+	const introspectionHeaders = resolveGraphqlIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
+
+	let upstreamSchema = await introspectGraphQLSchema(introspection, options, introspectionHeaders);
+	upstreamSchema = lexicographicSortSchema(upstreamSchema);
+	const federationEnabled = introspection.isFederation || false;
+	const cleanUpstreamSchema = preserveSchemaDirectives
+		? printSchemaWithDirectives(upstreamSchema)
+		: cleanupSchema(upstreamSchema);
+
+	const {
+		schemaSDL: schemaSDLWithCustomScalars,
+		customScalarTypeFields,
+		customScalarTypeNames, // Remove the necessity to manually provide custom scalar types
+	} = transformSchema.replaceCustomScalars(cleanUpstreamSchema, introspection);
+
+	const { schemaSDL, argumentReplacements } = transformSchema.replaceCustomNumericScalars(
+		schemaSDLWithCustomScalars,
+		introspection
+	);
+
+	let serviceSDL: string | undefined;
+	if (federationEnabled) {
+		if (introspection.loadSchemaFromString) {
+			serviceSDL = loadFile(introspection.loadSchemaFromString);
+		} else {
+			if (!introspection.url) {
+				throw new MissingKeyError('url', introspection);
+			}
+			serviceSDL = await fetchFederationServiceSDL(resolveVariable(introspection.url), introspectionHeaders, {
+				apiNamespace: introspection.apiNamespace,
+			});
+		}
+	}
+	const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
+	const schemaDocumentNode = parse(schemaSDL);
+	const graphQLSchema = buildSchema(schemaSDL);
+	const { RootNodes, ChildNodes, Fields } = configuration(
+		schemaDocumentNode,
+		introspection,
+		customScalarTypeNames,
+		serviceDocumentNode,
+		argumentReplacements
+	);
+	const subscriptionsEnabled = hasSubscriptions(upstreamSchema);
+	if (introspection.internal === true) {
+		headers['X-WG-Internal-GraphQL-API'] = {
+			values: [
+				{
+					kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+					staticVariableContent: 'true',
+					environmentVariableName: '',
+					environmentVariableDefaultValue: '',
+					placeholderVariableName: '',
+				},
+			],
+		};
+	}
+	const skipRenameRootFields = introspection.skipRenameRootFields || [];
+	return new GraphQLApi(
+		applyNameSpaceToGraphQLSchema(schemaSDL, skipRenameRootFields, introspection.apiNamespace),
+		introspection.apiNamespace || '',
+		[
+			{
+				Id: introspection.id,
+				Kind: DataSourceKind.GRAPHQL,
+				RootNodes: applyNameSpaceToTypeFields(RootNodes, graphQLSchema, introspection.apiNamespace),
+				ChildNodes: applyNameSpaceToTypeFields(ChildNodes, graphQLSchema, introspection.apiNamespace),
+				Custom: {
+					Fetch: {
+						url: mapInputVariable(introspection.url),
+						baseUrl: introspection.baseUrl ? mapInputVariable(introspection.baseUrl) : mapInputVariable(''),
+						path: introspection.path ? mapInputVariable(introspection.path) : mapInputVariable(''),
+						method: HTTPMethod.POST,
+						body: mapInputVariable(''),
+						header: headers,
+						query: [],
+						upstreamAuthentication: buildUpstreamAuthentication(introspection),
+						mTLS: buildMTLSConfiguration(introspection),
+						urlEncodeBody: false,
+						httpProxyUrl: introspection.httpProxyUrl != null ? mapInputVariable(introspection.httpProxyUrl) : undefined,
+					},
+					Subscription: {
+						Enabled: subscriptionsEnabled,
+						URL:
+							introspection.subscriptionsURL !== undefined
+								? mapInputVariable(introspection.subscriptionsURL)
+								: typeof introspection.url === 'string'
+								? mapInputVariable(introspection.url)
+								: mapInputVariable(''),
+						UseSSE: introspection.subscriptionsUseSSE ?? false,
+					},
+					Federation: {
+						Enabled: federationEnabled,
+						ServiceSDL: serviceSDL || '',
+					},
+					UpstreamSchema: cleanUpstreamSchema,
+					HooksConfiguration: {
+						onWSTransportConnectionInit: false,
+					},
+					CustomScalarTypeFields: applyNameSpaceToSingleTypeFields(
+						customScalarTypeFields,
+						graphQLSchema,
+						introspection.apiNamespace
+					),
+				},
+				Directives: applyNamespaceToDirectiveConfiguration(upstreamSchema, introspection.apiNamespace),
+				RequestTimeoutSeconds: introspection.requestTimeoutSeconds ?? 0,
+			},
+		],
+		applyNameSpaceToFieldConfigurations(Fields, graphQLSchema, skipRenameRootFields, introspection.apiNamespace),
+		generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
+		[],
+		customScalarTypeNames
+	);
+};
+
+export const introspectGraphqlWithCache = async (introspection: GraphQLIntrospection) => {
+	const cacheConfig = await graphqlIntrospectionCacheConfiguration(introspection);
+	return introspectWithCache(introspection, cacheConfig, introspectGraphql);
+};
+
+const introspectGraphQLSchema = async (
+	introspection: GraphQLIntrospection,
+	options: ApiIntrospectionOptions,
+	headers?: Record<string, string>
+) => {
 	if (introspection.loadSchemaFromString) {
 		try {
 			if (introspection.isFederation) {
 				const parsedSchema = parse(loadFile(introspection.loadSchemaFromString));
-				return buildSubgraphSchema(parsedSchema);
+				return mergeSchemaExtension(buildSubgraphSchema(parsedSchema), introspection.schemaExtension);
 			}
-			return buildSchema(loadFile(introspection.loadSchemaFromString));
+			return mergeSchemaExtension(
+				buildSchema(loadFile(introspection.loadSchemaFromString)),
+				introspection.schemaExtension
+			);
 		} catch (e: any) {
 			throw new Error(
 				`Loading schema from string failed for apiNamespace '${introspection.apiNamespace}'. Make sure the schema is valid and try again: ${e}`
@@ -202,14 +257,32 @@ const introspectGraphQLSchema = async (introspection: GraphQLIntrospection, head
 		}
 	}
 	try {
-		return introspectGraphQLAPI(introspection, headers);
+		const schema = await introspectGraphQLAPI(introspection, options, headers);
+		return mergeSchemaExtension(schema, introspection.schemaExtension);
 	} catch (e: any) {
 		throw new Error(`Introspecting GraphQL API failed for apiNamespace '${introspection.apiNamespace}': ${e}`);
 	}
 };
 
+const mergeSchemaExtension = (schema: GraphQLSchema, schemaExtension?: string): GraphQLSchema => {
+	if (schemaExtension === undefined) {
+		return schema;
+	}
+	return buildSchema(printSchema(schema) + '\n' + schemaExtension.trim());
+};
+
+interface GraphQLErrorMessage {
+	message: string;
+}
+
+interface GraphQLIntrospectionResponse {
+	data?: IntrospectionQuery;
+	errors?: GraphQLErrorMessage[];
+}
+
 const introspectGraphQLAPI = async (
 	introspection: GraphQLIntrospection,
+	options: ApiIntrospectionOptions,
 	headers?: Record<string, string>
 ): Promise<GraphQLSchema> => {
 	const data = JSON.stringify({
@@ -217,8 +290,74 @@ const introspectGraphQLAPI = async (
 		operationName: 'IntrospectionQuery',
 	});
 
+	if (!introspection.url) {
+		throw new MissingKeyError('url', introspection);
+	}
+	const url = resolveVariable(introspection.url);
+
+	let proxyConfig: AxiosProxyConfig | undefined;
+
+	let httpProxyUrlString: string | undefined;
+	if (introspection.httpProxyUrl !== undefined) {
+		// introspection.httpProxyUrl might be null to allow disabling the global proxy
+		if (introspection.httpProxyUrl) {
+			try {
+				httpProxyUrlString = resolveVariable(introspection.httpProxyUrl);
+			} catch (e: any) {}
+		}
+	}
+	if (httpProxyUrlString === undefined) {
+		httpProxyUrlString = options.httpProxyUrl ?? '';
+	}
+	let httpsAgent: HttpsProxyAgent | undefined;
+	let httpsAgentOptions: HttpsProxyAgentOptions | undefined;
+	if (httpProxyUrlString) {
+		try {
+			const proxyUrl = new URL(httpProxyUrlString);
+			let protocol = proxyUrl.protocol.toLocaleLowerCase();
+			while (protocol.endsWith(':')) {
+				protocol = protocol.substring(0, protocol.length - 1);
+			}
+			const defaultPort = protocol === 'https' ? 443 : 80;
+			const proxyHostname = proxyUrl.hostname;
+			const proxyPort = proxyUrl.port ? parseInt(proxyUrl.port, 10) : defaultPort;
+			// XXX: axios doesn't work properly with CONNECT request to proxy HTTPS
+			// over HTTP proxies. Workaround it with HttpsProxyAgent instead
+			// See https://github.com/axios/axios/issues/4531
+			if (protocol === 'http' && url.toLocaleLowerCase().startsWith('https')) {
+				httpsAgentOptions = {
+					host: proxyHostname,
+					port: proxyPort,
+					protocol,
+				};
+				if (proxyUrl.username || proxyUrl.password) {
+					httpsAgentOptions.auth = `${proxyUrl.username}:${proxyUrl.password}`;
+				}
+				httpsAgent = new HttpsProxyAgent(httpsAgentOptions);
+			} else {
+				proxyConfig = {
+					host: proxyHostname,
+					port: proxyPort,
+					protocol,
+				};
+				if (proxyUrl.username || proxyUrl.password) {
+					proxyConfig.auth = {
+						username: proxyUrl.username,
+						password: proxyUrl.password,
+					};
+				}
+			}
+		} catch (e: any) {
+			throw new Error(`invalid HTTP proxy URL '${httpProxyUrlString} when introspecting ${url}': ${e}`);
+		}
+	}
+
 	let opts: AxiosRequestConfig = {
 		headers: headers,
+		proxy: proxyConfig,
+		httpsAgent,
+		// Prevent axios from running JSON.parse() for us
+		transformResponse: (res) => res,
 		'axios-retry': {
 			onRetry: (retryCount: number, error: AxiosError, requestConfig: AxiosRequestConfig) => {
 				let msg = `failed to run introspection query: method: ${requestConfig.method} url: ${requestConfig.url}`;
@@ -227,7 +366,7 @@ const introspectGraphQLAPI = async (
 				}
 				msg += ` retryAttempt: ${retryCount}`;
 
-				Logger.info(msg);
+				Logger.debug(msg);
 			},
 		},
 	};
@@ -239,39 +378,56 @@ const introspectGraphQLAPI = async (
 		if (!introspection.mTLS.cert) {
 			throw new MissingKeyError('mTLS.cert', introspection);
 		}
-		opts.httpsAgent = new https.Agent({
-			key: resolveVariable(introspection.mTLS.key),
-			cert: resolveVariable(introspection.mTLS.cert),
-			rejectUnauthorized: !introspection.mTLS.insecureSkipVerify,
-		});
+		if (httpsAgentOptions) {
+			// If httpsAgentOptions is truthy, it means we already have a custom
+			// agent for HTTP proxy -> HTTPS connection and we need to use it
+			// instead of https.Agent
+			opts.httpsAgent = new HttpsProxyAgent({
+				...httpsAgentOptions,
+				key: resolveVariable(introspection.mTLS.key),
+				cert: resolveVariable(introspection.mTLS.cert),
+				rejectUnauthorized: !introspection.mTLS.insecureSkipVerify,
+			});
+		} else {
+			opts.httpsAgent = new https.Agent({
+				key: resolveVariable(introspection.mTLS.key),
+				cert: resolveVariable(introspection.mTLS.cert),
+				rejectUnauthorized: !introspection.mTLS.insecureSkipVerify,
+			});
+		}
 	}
 
-	let res: AxiosResponse | undefined;
+	let res: AxiosResponse<string> | undefined;
 	try {
-		if (!introspection.url) {
-			throw new MissingKeyError('url', introspection);
-		}
-		res = await Fetcher().post(resolveVariable(introspection.url), data, opts);
+		res = await Fetcher().post(url, data, opts);
 	} catch (e: any) {
 		throw new Error(
-			`introspection failed (url: ${introspection.url}, namespace: ${introspection.apiNamespace || ''}), error: ${
-				e.message
-			}`
+			`introspection failed (url: ${url}, namespace: ${introspection.apiNamespace || ''}), error: ${e.message}`
 		);
 	}
 	if (res === undefined) {
-		throw new Error(
-			`introspection failed (url: ${introspection.url}, namespace: ${introspection.apiNamespace || ''}), no response`
-		);
+		throw new Error(`introspection failed (url: ${url}, namespace: ${introspection.apiNamespace || ''}), no response`);
 	}
 	if (res.status !== 200) {
 		throw new Error(
-			`introspection failed (url: ${introspection.url}, namespace: ${
-				introspection.apiNamespace || ''
-			}), response code: ${res.status}, message: ${res.statusText}`
+			`introspection failed (url: ${url}, namespace: ${introspection.apiNamespace || ''}), response code: ${
+				res.status
+			}, message: ${res.statusText}`
 		);
 	}
-	return buildClientSchema(res.data.data);
+	let response: GraphQLIntrospectionResponse;
+	try {
+		response = JSON.parse(res.data) as GraphQLIntrospectionResponse;
+	} catch (e: any) {
+		throw new Error(`error decoding introspection data from ${url}: ${e}`);
+	}
+	if (response.errors) {
+		throw new Error(`error introspecting ${url}: ${JSON.stringify(response.errors)}`);
+	}
+	if (!response.data) {
+		throw new Error(`no errors, but empty data when introspecting ${url}`);
+	}
+	return buildClientSchema(response.data);
 };
 
 const hasSubscriptions = (schema: GraphQLSchema): boolean => {

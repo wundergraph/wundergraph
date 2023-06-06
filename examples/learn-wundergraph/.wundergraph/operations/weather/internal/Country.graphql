@@ -1,0 +1,7 @@
+query ($code: String!) {
+	countries_countries(filter: { code: { eq: $code } }) {
+		code
+		name
+		capital
+	}
+}

@@ -1,0 +1,5 @@
+mutation ($id: Int!) {
+	db_deleteOneTodo(where: { id: $id }) {
+		id
+	}
+}

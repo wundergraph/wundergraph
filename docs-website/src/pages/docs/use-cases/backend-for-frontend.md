@@ -1,7 +1,6 @@
 ---
 title: Backend for Frontend
-pageTitle: WunderGraph - Backend for Frontend
-description:
+description: WunderGraph as a Backend for Frontend framework
 ---
 
 One way to think about WunderGraph is to understand it as an API Gateway,
@@ -53,16 +52,16 @@ Here's a quick example of an application defined using WunderGraph:
 const weather = introspect.graphql({
   apiNamespace: 'weather',
   url: 'https://weather-api.wundergraph.com/',
-})
+});
 
 const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
-})
+});
 
 configureWunderGraphApplication({
   apis: [weather, countries],
-})
+});
 ```
 
 This code snipped creates a WunderGraph application that depends on two APIs.

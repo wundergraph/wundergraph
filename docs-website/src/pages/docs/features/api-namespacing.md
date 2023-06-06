@@ -1,7 +1,6 @@
 ---
 title: API Namespacing
-pageTitle: WunderGraph - Features - API Namespacing
-description:
+description: Namespacing allows you to merge multiple APIs into one single GraphQL Schema.
 ---
 
 The intention of WunderGraph is to make it possible to access many APIs at once.
@@ -46,22 +45,22 @@ const federated = introspect.federation({
     { url: 'http://localhost:4003/graphql' },
     { url: 'http://localhost:4004/graphql' },
   ],
-})
+});
 
 const planetscale = introspect.planetscale({
   apiNamespace: 'planetscale',
   databaseURL: `mysql://${planetscaleCredentials}@fwsbiox1njhc.eu-west-3.psdb.cloud/test?sslaccept=strict`,
-})
+});
 
 const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
   url: 'https://spacex-api.fly.dev/graphql/',
-})
+});
 
 const postgres = introspect.postgresql({
   apiNamespace: 'postgres',
   databaseURL: 'postgresql://admin:admin@localhost:54322/example?schema=public',
-})
+});
 
 const jsonPlaceholder = introspect.openApi({
   apiNamespace: 'jsp',
@@ -69,11 +68,11 @@ const jsonPlaceholder = introspect.openApi({
     kind: 'file',
     filePath: 'jsonplaceholder.yaml',
   },
-})
+});
 
 configureWunderGraphApplication({
   apis: [postgres, spaceX, jsonPlaceholder, planetscale, federated],
-})
+});
 ```
 
 ## Querying our namespaced API

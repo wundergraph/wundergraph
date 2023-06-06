@@ -52,40 +52,31 @@ Now add the following code to `wundergraph.config.ts`.
 We're using our SpaceX test API for the sake of this example, but you could also add your existing database or APIs
 
 ```ts
-import {
-  configureWunderGraphApplication,
-  cors,
-  introspect,
-  templates,
-} from '@wundergraph/sdk'
-import { NextJsTemplate } from '@wundergraph/nextjs/dist/template'
-import server from './wundergraph.server'
-import operations from './wundergraph.operations'
+import { configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
+import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
+import server from './wundergraph.server';
+import operations from './wundergraph.operations';
 
 const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
   url: 'https://spacex-api.fly.dev/graphql/',
-})
+});
 
 configureWunderGraphApplication({
   apis: [spaceX],
   server,
   operations,
-  codeGenerators: [
-    {
-      templates: [...templates.typescript.all],
-    },
-    {
-      templates: [new NextJsTemplate()],
-      path: '../components/generated',
-    },
-  ],
+  generate: {
+    codeGenerators: [
+      {
+        templates: [new NextJsTemplate()],
+        path: '../components/generated',
+      },
+    ],
+  },
   cors: {
     ...cors.allowAll,
-    allowedOrigins:
-      process.env.NODE_ENV === 'production'
-        ? ['http://localhost:3000']
-        : ['http://localhost:3000'],
+    allowedOrigins: process.env.NODE_ENV === 'production' ? ['http://localhost:3000'] : ['http://localhost:3000'],
   },
   authentication: {
     tokenBased: {
@@ -96,7 +87,7 @@ configureWunderGraphApplication({
       ],
     },
   },
-})
+});
 ```
 
 Note that we have added the configuration for token based authentication. We are using the `userInfoEndpoint` to fetch the user information from the NextAuth.js session. The `userInfoEndpoint` is called with the `Authorization` header containing the JWT token that we will setup later.
@@ -108,8 +99,8 @@ This also assumes that you have installed NextAuth in `pages/api/auth/[...nextau
 Now add the following code to `wundergraph.operations.ts`.
 
 ```ts
-import { configureWunderGraphOperations } from '@wundergraph/sdk'
-import type { OperationsConfiguration } from './generated/wundergraph.operations'
+import { configureWunderGraphOperations } from '@wundergraph/sdk';
+import type { OperationsConfiguration } from './generated/wundergraph.operations';
 
 export default configureWunderGraphOperations<OperationsConfiguration>({
   operations: {
@@ -119,7 +110,7 @@ export default configureWunderGraphOperations<OperationsConfiguration>({
       },
     },
   },
-})
+});
 ```
 
 We enabled authentication for all operations.
@@ -129,13 +120,9 @@ We enabled authentication for all operations.
 Now add the following code to `wundergraph.server.ts`.
 
 ```ts
-import { configureWunderGraphServer } from '@wundergraph/sdk/server'
-import type { HooksConfig } from './generated/wundergraph.hooks'
-import type { InternalClient } from './generated/wundergraph.internal.client'
+import { configureWunderGraphServer } from '@wundergraph/sdk/server';
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>(
-  () => ({})
-)
+export default configureWunderGraphServer(() => ({}));
 ```
 
 ### Add an operation
@@ -156,28 +143,14 @@ query Dragons {
 Next we will create our React hooks. Create a new file `wundergraph.ts` in the `lib` folder.
 
 ```ts
-import { createWunderGraphNext } from '../components/generated/nextjs'
+import { createWunderGraphNext } from '../components/generated/nextjs';
 
-const {
-  client,
-  withWunderGraph,
-  useQuery,
-  useMutation,
-  useSubscription,
-  useFileUpload,
-} = createWunderGraphNext({
+const { client, withWunderGraph, useQuery, useMutation, useSubscription, useFileUpload } = createWunderGraphNext({
   baseURL: 'http://localhost:3000/api/wg',
   ssr: true,
-})
+});
 
-export {
-  client,
-  withWunderGraph,
-  useQuery,
-  useMutation,
-  useSubscription,
-  useFileUpload,
-}
+export { client, withWunderGraph, useQuery, useMutation, useSubscription, useFileUpload };
 ```
 
 We create our own WunderGraph client instead of using the auto generated client, because we need to point the baseURL to our Next.js API. In the next step you will see why.
@@ -193,40 +166,37 @@ The last step is to make sure we forward the session token to the WunderGraph AP
 Create `middelware.ts` in the root of your Next.js application.
 
 ```ts
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 // the middleware will run for all requests that match this pattern,
 // we don't actually need to define an api route for this.
 export const config = {
   matcher: '/api/wg/:function*',
-}
+};
 
 export function middleware(request: NextRequest) {
   // retrieve the session token from the cookie
-  const token = request.cookies.get('next-auth.session-token')?.value
+  const token = request.cookies.get('next-auth.session-token')?.value;
 
-  let pathname = request.nextUrl.pathname.replace('/api/wg', '')
+  let pathname = request.nextUrl.pathname.replace('/api/wg', '');
 
   // rewrite the api url to the WunderGraph API
-  const url = new URL(
-    pathname + request.nextUrl.search,
-    'http://127.0.0.1:9991'
-  )
+  const url = new URL(pathname + request.nextUrl.search, 'http://127.0.0.1:9991');
 
   // add the token to the Authorization header
   const headers = new Headers({
     Authorization: `Bearer ${token}`,
-  })
+  });
 
   // rewrite the request to the WunderGraph API
   const response = NextResponse.rewrite(url, {
     request: {
       headers,
     },
-  })
+  });
 
-  return response
+  return response;
 }
 ```
 
@@ -241,16 +211,16 @@ All that's left now is to run the query to verify if everything is working corre
 Add the following code to a page, for example `pages/index.tsx`.
 
 ```tsx
-import { signIn, signOut, useSession } from 'next-auth/react'
-import { useQuery } from '../lib/wundergraph'
+import { signIn, signOut, useSession } from 'next-auth/react';
+import { useQuery } from '../lib/wundergraph';
 
 export default function Home() {
-  const { data: session } = useSession()
+  const { data: session } = useSession();
 
   const { data, isLoading, error } = useQuery({
     operationName: 'Dragons',
     enabled: !!session, // only run the query once we are logged in
-  })
+  });
 
   if (!session) {
     return (
@@ -258,15 +228,15 @@ export default function Home() {
         <p>You are not signed in</p>
         <button onClick={() => signIn()}>Sign in</button>
       </div>
-    )
+    );
   }
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>
+    return <div>Error: {error.message}</div>;
   }
 
   return (
@@ -278,7 +248,7 @@ export default function Home() {
         </div>
       ))}
     </div>
-  )
+  );
 }
 ```
 

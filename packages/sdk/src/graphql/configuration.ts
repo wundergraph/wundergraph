@@ -1,12 +1,4 @@
-import {
-	buildASTSchema,
-	DocumentNode,
-	GraphQLSchema,
-	OperationDefinitionNode,
-	parse,
-	SelectionSetNode,
-	visit,
-} from 'graphql';
+import { DocumentNode, GraphQLSchema, OperationDefinitionNode, parse, SelectionSetNode, visit } from 'graphql';
 import {
 	ArgumentConfiguration,
 	ArgumentRenderConfiguration,
@@ -15,29 +7,12 @@ import {
 	TypeConfiguration,
 	TypeField,
 } from '@wundergraph/protobuf';
+import { ArgumentReplacement } from '../transformations/transformSchema';
 import { TypeNode } from 'graphql/language/ast';
 import { Kind } from 'graphql/language/kinds';
+import { GraphQLIntrospection } from '../definition';
 
 const DefaultJsonType = 'JSON';
-
-export const configuration = (
-	schema: DocumentNode,
-	customJsonScalars: string[] = [],
-	serviceSDL?: DocumentNode
-): GraphQLConfiguration => {
-	const config: GraphQLConfiguration = {
-		RootNodes: [],
-		ChildNodes: [],
-		Fields: [],
-		Types: [],
-	};
-	if (serviceSDL !== undefined) {
-		visitSchema(serviceSDL, config, customJsonScalars, true);
-	} else {
-		visitSchema(schema, config, customJsonScalars, false);
-	}
-	return config;
-};
 
 export interface GraphQLConfiguration {
 	RootNodes: TypeField[];
@@ -45,6 +20,65 @@ export interface GraphQLConfiguration {
 	Fields: FieldConfiguration[];
 	Types: TypeConfiguration[];
 }
+
+export const configuration = (
+	schema: DocumentNode,
+	introspection: GraphQLIntrospection,
+	customJSONScalars: string[],
+	serviceSDL?: DocumentNode,
+	argumentReplacements?: ArgumentReplacement[]
+): GraphQLConfiguration => {
+	const config: GraphQLConfiguration = {
+		RootNodes: [],
+		ChildNodes: [],
+		Fields: [],
+		Types: [],
+	};
+	const replacements = argumentReplacements || [];
+	if (serviceSDL !== undefined) {
+		visitSchema(serviceSDL, config, customJSONScalars, true, replacements);
+	} else {
+		visitSchema(schema, config, customJSONScalars, false, replacements);
+	}
+	if (introspection.schemaExtension) {
+		applySchemaExtension(config, introspection.schemaExtension);
+	}
+	return config;
+};
+
+const applySchemaExtension = (config: GraphQLConfiguration, schemaExtension: string) => {
+	const document = parse(schemaExtension);
+	let typeName: string = '';
+	visit(document, {
+		ObjectTypeDefinition: (node) => {
+			typeName = node.name.value;
+		},
+		ObjectTypeExtension: (node) => {
+			typeName = node.name.value;
+		},
+		InterfaceTypeDefinition: (node) => {
+			typeName = node.name.value;
+		},
+		InterfaceTypeExtension: (node) => {
+			typeName = node.name.value;
+		},
+		FieldDefinition: (node) => {
+			const fieldName = node.name.value;
+			// remove field from root nodes
+			config.RootNodes = config.RootNodes.map((r) => ({
+				...r,
+				fieldNames: r.fieldNames.filter((f) => !(r.typeName === typeName && f === fieldName)),
+			}));
+			// remove field from child nodes
+			config.ChildNodes = config.ChildNodes.map((r) => ({
+				...r,
+				fieldNames: r.fieldNames.filter((f) => !(r.typeName === typeName && f === fieldName)),
+			}));
+			// remove field from fields
+			config.Fields = config.Fields.filter((f) => !(f.typeName === typeName && f.fieldName === fieldName));
+		},
+	});
+};
 
 interface JsonTypeField {
 	typeName: string;
@@ -55,7 +89,8 @@ const visitSchema = (
 	schema: DocumentNode,
 	config: GraphQLConfiguration,
 	customJsonScalars: string[],
-	isFederation: boolean
+	isFederation: boolean,
+	argumentReplacements: ArgumentReplacement[]
 ) => {
 	let typeName: undefined | string;
 	let fieldName: undefined | string;
@@ -64,7 +99,7 @@ const visitSchema = (
 	let isEntity = false;
 	let isExternalField = false;
 	let entityFields: string[] = [];
-	let jsonFields: JsonTypeField[] = [];
+	const jsonFields: JsonTypeField[] = [];
 
 	const jsonScalars = [DefaultJsonType];
 	jsonScalars.push(...customJsonScalars);
@@ -212,7 +247,7 @@ const visitSchema = (
 				if (!fieldName || !typeName) {
 					return;
 				}
-				addFieldArgument(typeName, fieldName, node.name.value, config);
+				addFieldArgument(typeName, fieldName, node.name.value, config, argumentReplacements);
 			},
 		},
 	});
@@ -310,12 +345,22 @@ const addField = (typeField: TypeField, field: string) => {
 	typeField.fieldNames.push(field);
 };
 
-const addFieldArgument = (typeName: string, fieldName: string, argName: string, config: GraphQLConfiguration) => {
+const addFieldArgument = (
+	typeName: string,
+	fieldName: string,
+	argName: string,
+	config: GraphQLConfiguration,
+	argumentReplacements: ArgumentReplacement[]
+) => {
+	const replacement = argumentReplacements.find((argument) => {
+		return argument.argName == argName && argument.fieldName == fieldName && argument.typeName == typeName;
+	});
 	const arg: ArgumentConfiguration = {
 		name: argName,
 		sourceType: ArgumentSource.FIELD_ARGUMENT,
 		sourcePath: [],
 		renderConfiguration: ArgumentRenderConfiguration.RENDER_ARGUMENT_DEFAULT,
+		renameTypeTo: replacement?.renameTypeTo || '',
 	};
 	let field: FieldConfiguration | undefined = findField(config.Fields, typeName, fieldName);
 	if (!field) {

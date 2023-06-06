@@ -1,7 +1,6 @@
 ---
 title: '@injectGeneratedUUID Directive'
-pageTitle: WunderGraph - Directives - @injectGeneratedUUID
-description:
+description: Inject a generated UUID into a variable
 ---
 
 When creating new object in a database, it's common to use an incremental number as the primary key.
@@ -37,3 +36,34 @@ mutation ($email: String!, $name: String!, $id: String! @injectGeneratedUUID) {
 The user is allowed to enter their email and name while the WunderGraph Server injects the `$id` variable.
 This works independently of the upstream.
 You could use this with a database or API.
+
+## Injecting an UUID into a field
+
+`@injectGeneratedUUID` accepts an optional `on:` argument that might be used to inject a value into an
+specific field. Given the following type:
+
+```graphql
+input createUserInput {
+  id: String!
+  email: String!
+  name: String!
+}
+```
+
+We can use `@injectGeneratedUUID` to set the value of `id` using:
+
+```graphql
+mutation ($input: createUserInput! @injectGeneratedUUID(on: "id")) {
+  users_Create($input) {
+    id
+    email
+    name
+  }
+}
+```
+
+## Injecting multiple values
+
+`@injectGeneratedUUID` can be used multiple times on the same operation, injecting data into different fields.
+Additionally, `@injectGeneratedUUID` can be combined with other directives for injecting or manipulating data
+like `@fromClaim`, `@injectCurrentDateTime`, `@injectEnvironmentVariable` and `@jsonSchema`.

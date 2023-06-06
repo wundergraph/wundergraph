@@ -9,7 +9,6 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/operations"
@@ -19,19 +18,14 @@ import (
 )
 
 var (
-	generateAndPublish bool
-	offline            bool
+	offline bool
 )
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
-	Use:   "generate",
-	Short: "Generate the production config",
-	Long: `Generate the production config to start the node and hook component
- with 'wunderctl start' or individually with 'wunderctl node start', 'wunderctl
- server start'. All files are stored to .wundergraph/generated. The local
- introspection cache has precedence. You can overwrite this behavior by passing
- --no-cache to the command`,
+	Use:         "generate",
+	Short:       "Generate the production config",
+	Long:        `Generate the production config. You need to run this command before you can start the node or hooks server.`,
 	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
@@ -49,7 +43,16 @@ var generateCmd = &cobra.Command{
 
 		ctx := context.Background()
 
-		configOutFile := filepath.Join("generated", "bundle", "config.js")
+		configOutFile := filepath.Join("generated", "bundle", "config.cjs")
+
+		// XXX: generate never uses the cache
+		scriptEnv := configScriptEnv(configScriptEnvOptions{
+			RootFlags:      rootFlags,
+			WunderGraphDir: wunderGraphDir,
+		})
+		// Run scripts in prod mode
+		scriptEnv = append(scriptEnv, "NODE_ENV=production")
+		scriptEnv = append(scriptEnv, fmt.Sprintf("WG_ENABLE_INTROSPECTION_OFFLINE=%t", offline))
 
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
@@ -57,16 +60,8 @@ var generateCmd = &cobra.Command{
 			ScriptArgs:    []string{configOutFile},
 			AbsWorkingDir: wunderGraphDir,
 			Logger:        log,
-			ScriptEnv: append(
-				helpers.CliEnv(rootFlags),
-				// Run scripts in prod mode
-				"NODE_ENV=production",
-				"WG_THROW_ON_OPERATION_LOADING_ERROR=true",
-				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
-				fmt.Sprintf("WG_ENABLE_INTROSPECTION_OFFLINE=%t", offline),
-				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
-				fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath()),
-			),
+			ScriptEnv:     scriptEnv,
+			Streaming:     true,
 		})
 		defer func() {
 			log.Debug("Stopping config-runner")
@@ -79,10 +74,13 @@ var generateCmd = &cobra.Command{
 			}
 		}()
 
-		var onAfterBuild func() error
+		var onAfterBuild func(buildErr error, rebuild bool) error
+		outExtension := make(map[string]string)
+		outExtension[".js"] = ".cjs"
 
 		if codeServerFilePath != "" {
-			serverOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "server.js")
+			serverOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "server.cjs")
+			ormOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "orm.cjs")
 			webhooksDir := filepath.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
 			operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
 			generatedBundleOutDir := filepath.Join("generated", "bundle")
@@ -100,13 +98,24 @@ var generateCmd = &cobra.Command{
 					EntryPoints:   webhookPaths,
 					AbsWorkingDir: wunderGraphDir,
 					OutDir:        generatedBundleOutDir,
+					OutExtension:  outExtension,
 					Logger:        log,
-					OnAfterBundle: func() error {
-						log.Debug("Webhooks bundled!", zap.String("bundlerName", "webhooks-bundler"))
+					OnAfterBundle: func(buildErr error, rebuild bool) error {
+						log.Debug("Webhooks bundled!", zap.String("bundlerName", "webhooks-bundler"), zap.Bool("rebuild", rebuild))
 						return nil
 					},
 				})
 			}
+
+			ormEntryPointFilename := filepath.Join(wunderGraphDir, "generated", "orm", "index.ts")
+			ormBundler := bundler.NewBundler(bundler.Config{
+				Name:          "orm-bundler",
+				Production:    true,
+				AbsWorkingDir: wunderGraphDir,
+				EntryPoints:   []string{ormEntryPointFilename},
+				OutFile:       ormOutFile,
+				Logger:        log,
+			})
 
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "server-bundler",
@@ -117,7 +126,7 @@ var generateCmd = &cobra.Command{
 				Logger:        log,
 			})
 
-			onAfterBuild = func() error {
+			onAfterBuild = func(buildErr error, rebuild bool) error {
 
 				if files.DirectoryExists(operationsDir) {
 					operationsPaths, err := operations.GetPaths(wunderGraphDir)
@@ -137,6 +146,7 @@ var generateCmd = &cobra.Command{
 						EntryPoints:   operationsPaths,
 						AbsWorkingDir: wunderGraphDir,
 						OutDir:        generatedBundleOutDir,
+						OutExtension:  outExtension,
 						Logger:        log,
 					})
 					err = operationsBundler.Bundle()
@@ -154,6 +164,11 @@ var generateCmd = &cobra.Command{
 				}
 
 				var wg errgroup.Group
+
+				wg.Go(func() error {
+					// bundle (the generated) orm
+					return ormBundler.Bundle()
+				})
 
 				wg.Go(func() error {
 					// bundle hooks
@@ -174,8 +189,8 @@ var generateCmd = &cobra.Command{
 			}
 
 		} else {
-			log.Info("hooks EntryPoint not found, skipping", zap.String("file", serverEntryPointFilename))
-			onAfterBuild = func() error {
+			log.Debug("wundergraph.server.ts not found, skipping server", zap.String("file", serverEntryPointFilename))
+			onAfterBuild = func(buildErr error, rebuild bool) error {
 				<-configRunner.Run(ctx)
 
 				if !configRunner.Successful() {
@@ -184,7 +199,7 @@ var generateCmd = &cobra.Command{
 					)
 				}
 
-				log.Debug("Config built!", zap.String("bundlerName", "config-bundler"))
+				log.Debug("Config built!", zap.String("bundlerName", "config-bundler"), zap.Bool("rebuild", rebuild))
 
 				return nil
 			}
@@ -211,7 +226,6 @@ var generateCmd = &cobra.Command{
 }
 
 func init() {
-	generateCmd.Flags().BoolVarP(&generateAndPublish, "publish", "p", false, "publish the generated API immediately")
-	generateCmd.Flags().BoolVar(&offline, "offline", false, "disables loading resources from the network")
+	generateCmd.Flags().BoolVar(&offline, "offline", false, "Disables loading resources from the network")
 	rootCmd.AddCommand(generateCmd)
 }

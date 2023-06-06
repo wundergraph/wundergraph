@@ -1,7 +1,6 @@
 ---
 title: Configure advanced security
-pageTitle: WunderGraph - Configure advanced security
-description:
+description: Configure advanced security features of WunderGraph
 ---
 
 This section is about the `security` property of `configureWunderGraphApplication`.
@@ -12,7 +11,7 @@ configureWunderGraphApplication({
     enableGraphQLEndpoint: true,
     allowedHosts: ['localhost:3000'],
   },
-})
+});
 ```
 
 ## Enable GraphQL Endpoint

@@ -1,0 +1,7 @@
+query ($filter: countries_CountryFilterInput @jsonSchema(pattern: "[A-Z]{2}", on: "code.eq")) {
+	countries_countries(filter: $filter) {
+		code
+		name
+		capital
+	}
+}

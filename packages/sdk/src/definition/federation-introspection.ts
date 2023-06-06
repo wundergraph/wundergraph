@@ -1,11 +1,15 @@
 import { DocumentNode, parse } from 'graphql';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { GraphQLApi, GraphQLFederationIntrospection, GraphQLIntrospection } from './index';
+import { GraphQLApi, GraphQLFederationIntrospection, GraphQLIntrospection, ApiIntrospectionOptions } from './index';
 import { loadFile } from '../codegen/templates/typescript';
 import { resolveVariable } from '../configure/variables';
 import { mergeApis } from './merge';
 import { introspectWithCache } from './introspection-cache';
-import { introspectGraphql, resolveGraphqlIntrospectionHeaders } from './graphql-introspection';
+import {
+	graphqlIntrospectionCacheConfiguration,
+	introspectGraphql,
+	resolveGraphqlIntrospectionHeaders,
+} from './graphql-introspection';
 import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
 import { Logger } from '../logger';
@@ -61,49 +65,61 @@ export interface ServiceDefinition {
 	name: string;
 }
 
-export const introspectFederation = async (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> =>
-	introspectWithCache(introspection, async (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> => {
-		const upstreams = introspection.upstreams.map(async (upstream, i) => {
-			let schema = upstream.loadSchemaFromString ? loadFile(upstream.loadSchemaFromString) : '';
-
-			const name = upstream.name ?? i.toString();
-
-			if (schema === '' && upstream.url) {
-				const introspectionHeadersBuilder = new HeadersBuilder();
-
-				if (upstream.headers !== undefined) {
-					upstream.headers(introspectionHeadersBuilder);
-				}
-
-				if (upstream.introspection?.headers !== undefined) {
-					upstream.introspection?.headers(introspectionHeadersBuilder);
-				}
-				const introspectionHeaders = resolveGraphqlIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
-
-				// upstream.url is truthy at this point, no need to check
-				schema = await fetchFederationServiceSDL(resolveVariable(upstream.url), introspectionHeaders, {
-					apiNamespace: introspection.apiNamespace,
-					upstreamName: name,
-				});
-			}
-
-			if (schema == '') {
-				throw new Error(`Subgraph ${name} has not provided a schema`);
-			}
-
-			return {
-				name,
-				typeDefs: parse(schema),
-			};
-		});
-
-		const graphQLIntrospections: GraphQLIntrospection[] = introspection.upstreams.map((upstream) => ({
-			...upstream,
-			isFederation: true,
-			apiNamespace: introspection.apiNamespace,
-			id: upstream.id ?? introspection.id,
-		}));
-
-		const apis = await Promise.all(graphQLIntrospections.map((i) => introspectGraphql(i)));
-		return mergeApis([], [], ...apis) as GraphQLApi;
+export const introspectFederation = async (introspection: GraphQLFederationIntrospection) => {
+	const keyInputs: string[] = [];
+	introspection.upstreams.forEach(async (upstream) => {
+		keyInputs.push(await (await graphqlIntrospectionCacheConfiguration(upstream)).keyInput);
 	});
+	const cacheConfig = { keyInput: keyInputs.join('') };
+	return introspectWithCache(
+		introspection,
+		cacheConfig,
+		async (introspection: GraphQLFederationIntrospection, options: ApiIntrospectionOptions): Promise<GraphQLApi> => {
+			const upstreams = introspection.upstreams.map(async (upstream, i) => {
+				let schema = upstream.loadSchemaFromString ? loadFile(upstream.loadSchemaFromString) : '';
+
+				const name = upstream.name ?? i.toString();
+
+				if (schema === '' && upstream.url) {
+					const introspectionHeadersBuilder = new HeadersBuilder();
+
+					if (upstream.headers !== undefined) {
+						upstream.headers(introspectionHeadersBuilder);
+					}
+
+					if (upstream.introspection?.headers !== undefined) {
+						upstream.introspection?.headers(introspectionHeadersBuilder);
+					}
+					const introspectionHeaders = resolveGraphqlIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
+
+					// upstream.url is truthy at this point, no need to check
+					schema = await fetchFederationServiceSDL(resolveVariable(upstream.url), introspectionHeaders, {
+						apiNamespace: introspection.apiNamespace,
+						upstreamName: name,
+					});
+				}
+
+				if (schema == '') {
+					throw new Error(`Subgraph ${name} has not provided a schema`);
+				}
+
+				return {
+					name,
+					typeDefs: parse(schema),
+				};
+			});
+
+			const graphQLIntrospections: GraphQLIntrospection[] = introspection.upstreams.map((upstream) => ({
+				...upstream,
+				apiNamespace: introspection.apiNamespace,
+				id: upstream.id ?? introspection.id,
+				isFederation: true,
+			}));
+
+			const apis = await Promise.all(graphQLIntrospections.map((i) => introspectGraphql(i, options)));
+			const merged = mergeApis([], [], ...apis) as GraphQLApi;
+			merged.Namespace = introspection.apiNamespace || '';
+			return merged;
+		}
+	);
+};

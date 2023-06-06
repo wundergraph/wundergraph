@@ -1,7 +1,6 @@
 ---
 title: '@injectCurrentDatetime Directive'
-pageTitle: WunderGraph - Directives - @injectCurrentDatetime
-description:
+description: Inject the current dateTime into a variable
 ---
 
 When building APIs,
@@ -31,15 +30,8 @@ this can be adjusted.
 Let's look at an example:
 
 ```graphql
-mutation (
-  $email: String!
-  $name: String!
-  $id: String! @uuid
-  $createdAt: DateTime! @injectCurrentDateTime
-) {
-  createOneUser(
-    data: { id: $id, email: $email, name: $name, createdAt: $createdAt }
-  ) {
+mutation ($email: String!, $name: String!, $id: String! @uuid, $createdAt: DateTime! @injectCurrentDateTime) {
+  createOneUser(data: { id: $id, email: $email, name: $name, createdAt: $createdAt }) {
     id
     name
     email
@@ -51,15 +43,8 @@ mutation (
 We might also want to be able to update the record later:
 
 ```graphql
-mutation (
-  $email: String!
-  $name: String!
-  $id: String! @uuid
-  $updatedAt: DateTime! @injectCurrentDateTime
-) {
-  updateOneUser(
-    data: { id: $id, email: $email, name: $name, updatedAt: $createdAt }
-  ) {
+mutation ($email: String!, $name: String!, $id: String! @uuid, $updatedAt: DateTime! @injectCurrentDateTime) {
+  updateOneUser(data: { id: $id, email: $email, name: $name, updatedAt: $createdAt }) {
     id
     name
     email
@@ -77,9 +62,7 @@ mutation (
   $id: String! @uuid
   $updatedAt: DateTime! @injectCurrentDateTime(format: UnixDate)
 ) {
-  updateOneUser(
-    data: { id: $id, email: $email, name: $name, updatedAt: $createdAt }
-  ) {
+  updateOneUser(data: { id: $id, email: $email, name: $name, updatedAt: $createdAt }) {
     id
     name
     email
@@ -169,9 +152,7 @@ mutation (
   $id: String! @uuid
   $updatedAt: DateTime! @injectCurrentDateTime(customFormat: "2006-01-02")
 ) {
-  updateOneUser(
-    data: { id: $id, email: $email, name: $name, updatedAt: $createdAt }
-  ) {
+  updateOneUser(data: { id: $id, email: $email, name: $name, updatedAt: $createdAt }) {
     id
     name
     email
@@ -179,3 +160,34 @@ mutation (
   }
 }
 ```
+
+## Injecting a datetime into a field
+
+`@injectCurrentDateTime` accepts a second optional `on:` argument that might be used to inject a value into an
+specific field. Given the following type:
+
+```graphql
+input createUserInput {
+  email: String!
+  name: String!
+  createdAt: DateTime!
+}
+```
+
+We can use `@injectCurrentDateTime` to set the value of `createdAt` using:
+
+```graphql
+mutation ($input: createUserInput! @injectCurrentDateTime(on: "createdAt")) {
+  users_Create($input) {
+    id
+    email
+    name
+  }
+}
+```
+
+## Injecting multiple values
+
+`@injectCurrentDateTime` can be used multiple times on the same operation, injecting data into different fields.
+Additionally, `@injectCurrentDateTime` can be combined with other directives for injecting or manipulating data
+like `@fromClaim`, `@injectEnvironmentVariable`, `@injectGeneratedUUID` and `@jsonSchema`.

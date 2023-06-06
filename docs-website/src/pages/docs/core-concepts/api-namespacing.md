@@ -1,7 +1,6 @@
 ---
 title: API Namespacing
-pageTitle: WunderGraph - Core Concepts - API Namespacing
-description:
+description: API Namespacing allows you to merge multiple APIs into a single unified API.
 ---
 
 When we were building the initial version of WunderGraph,
@@ -31,7 +30,7 @@ Here's a simple example:
 const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
   url: 'https://spacex-api.fly.dev/graphql/',
-})
+});
 ```
 
 When introspecting the SpaceX API,

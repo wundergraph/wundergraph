@@ -1,7 +1,6 @@
 ---
 title: Authentication-aware data fetching
-pageTitle: WunderGraph - Features - Authentication-aware data fetching
-description:
+description: WunderGraph makes data fetching aware of authentication and authorization.
 ---
 
 As you've read in the previous section, we're already making authenticating users a breeze.
@@ -16,7 +15,7 @@ With that in mind, why are frameworks not offering an easy way to make data fetc
 WunderGraph allows you to configure in a declarative way if Operations are for anonymous users or not.
 Once configured, the generated client is fully aware of this and updates the UI accordingly.
 
-Let's have a look at a common configurion.
+Let's have a look at a common configuration.
 
 ```typescript
 const operations: ConfigureOperations = {
@@ -39,7 +38,7 @@ const operations: ConfigureOperations = {
         enable: false,
         pollingIntervalSeconds: 5,
       },
-    }
+    };
   },
   subscriptions: (config) => ({
     ...config,
@@ -57,7 +56,7 @@ const operations: ConfigureOperations = {
       },
     }),
   },
-}
+};
 ```
 
 By default, authentication is not required.
@@ -70,9 +69,9 @@ All it does is fetching the data.
 
 ```typescript jsx
 const IndexPage = () => {
-  const priceUpdate = useSubscription.PriceUpdates()
-  return <p>{JSON.stringify(priceUpdate)}</p>
-}
+  const priceUpdate = useSubscription.PriceUpdates();
+  return <p>{JSON.stringify(priceUpdate)}</p>;
+};
 ```
 
 If the user is authenticated, the PriceUpdates Subscription would fire and continuously update the UI.

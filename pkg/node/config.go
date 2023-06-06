@@ -2,21 +2,15 @@ package node
 
 import (
 	"fmt"
-	"os"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
-
-	"github.com/docker/go-units"
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
-)
-
-const (
-	defaultInMemoryCacheSize    = int64(128 * units.MB)
-	wgInMemoryCacheConfigEnvKey = "WG_IN_MEMORY_CACHE"
 )
 
 type Server struct {
@@ -32,7 +26,7 @@ type WunderNodeConfig struct {
 	Api    *apihandler.Api
 }
 
-func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig, error) {
+func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig, error) {
 	const (
 		defaultTimeout = 10 * time.Second
 	)
@@ -41,12 +35,37 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 
 	logLevel, err := logging.FindLogLevel(logLevelStr)
 	if err != nil {
-		return WunderNodeConfig{}, err
+		return nil, err
+	}
+
+	nodeHost := loadvariable.String(graphConfig.Api.NodeOptions.Listen.Host)
+
+	var nodePort uint64
+	rawNodePort := loadvariable.String(graphConfig.Api.NodeOptions.Listen.Port)
+	if rawNodePort != "" {
+		nodePort, err = strconv.ParseUint(rawNodePort, 10, 16)
+		if err != nil {
+			return nil, fmt.Errorf("can't parse node port %s: %w", rawNodePort, err)
+		}
+	}
+
+	var internalNodePort uint64
+	rawInternalNodePort := loadvariable.String(graphConfig.Api.NodeOptions.ListenInternal.Port)
+	if rawInternalNodePort != "" {
+		internalNodePort, err = strconv.ParseUint(rawInternalNodePort, 10, 16)
+		if err != nil {
+			return nil, fmt.Errorf("can't parse node internal port %s: %w", rawInternalNodePort, err)
+		}
 	}
 
 	listener := &apihandler.Listener{
-		Host: loadvariable.String(graphConfig.Api.NodeOptions.Listen.Host),
-		Port: uint16(loadvariable.Int(graphConfig.Api.NodeOptions.Listen.Port)),
+		Host: nodeHost,
+		Port: uint16(nodePort),
+	}
+
+	internalListener := &apihandler.Listener{
+		Host: nodeHost,
+		Port: uint16(internalNodePort),
 	}
 
 	defaultRequestTimeout := defaultTimeout
@@ -54,24 +73,33 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 		defaultRequestTimeout = time.Duration(graphConfig.Api.NodeOptions.DefaultRequestTimeoutSeconds) * time.Second
 	}
 
-	var cacheConfig *wgpb.ApiCacheConfig
-	inMemoryCacheConfig := os.Getenv(wgInMemoryCacheConfigEnvKey)
-	if strings.ToLower(inMemoryCacheConfig) != "off" {
-		cacheSize := defaultInMemoryCacheSize
-		if inMemoryCacheConfig != "" {
-			cacheSize, err = units.RAMInBytes(inMemoryCacheConfig)
-			if err != nil {
-				return WunderNodeConfig{}, fmt.Errorf("can't parse %s = %q: %w", wgInMemoryCacheConfigEnvKey, inMemoryCacheConfig, err)
-			}
+	var defaultHTTPProxyURL *url.URL
+	if defaultHTTPProxyURLString := loadvariable.String(graphConfig.Api.GetNodeOptions().GetDefaultHttpProxyUrl()); defaultHTTPProxyURLString != "" {
+		defaultHTTPProxyURL, err = url.Parse(defaultHTTPProxyURLString)
+		if err != nil {
+			return nil, fmt.Errorf("invalid default HTTP proxy URL %q: %w", defaultHTTPProxyURLString, err)
 		}
-		if cacheSize > 0 {
-			cacheConfig = &wgpb.ApiCacheConfig{
-				Kind: wgpb.ApiCacheKind_IN_MEMORY_CACHE,
-				InMemoryConfig: &wgpb.InMemoryCacheConfig{
-					MaxSize: cacheSize,
-				},
-			}
-		}
+	}
+
+	prometheusConfig := graphConfig.GetApi().GetNodeOptions().GetPrometheus()
+
+	prometheusEnabled, err := loadvariable.Bool(prometheusConfig.GetEnabled())
+	if err != nil {
+		return nil, err
+	}
+	prometheusPort, err := loadvariable.Int(prometheusConfig.GetPort())
+	if err != nil {
+		return nil, err
+	}
+
+	openTelemetryOptions := graphConfig.Api.GetNodeOptions().GetOpenTelemetry()
+	otelEnabled, err := loadvariable.Bool(openTelemetryOptions.GetEnabled())
+	if err != nil {
+		return nil, err
+	}
+	otelSampler, err := loadvariable.Float64(openTelemetryOptions.GetSampler())
+	if err != nil {
+		return nil, err
 	}
 
 	config := WunderNodeConfig{
@@ -84,18 +112,30 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 			Operations:            graphConfig.Api.Operations,
 			InvalidOperationNames: graphConfig.Api.InvalidOperationNames,
 			CorsConfiguration:     graphConfig.Api.CorsConfiguration,
+			ApiConfigHash:         graphConfig.ConfigHash,
 			S3UploadConfiguration: graphConfig.Api.S3UploadConfiguration,
-			CacheConfig:           cacheConfig,
 			AuthenticationConfig:  graphConfig.Api.AuthenticationConfig,
 			Webhooks:              graphConfig.Api.Webhooks,
 			Options: &apihandler.Options{
-				ServerUrl:     strings.TrimSuffix(loadvariable.String(graphConfig.Api.ServerOptions.ServerUrl), "/"),
-				PublicNodeUrl: loadvariable.String(graphConfig.Api.NodeOptions.PublicNodeUrl),
-				Listener:      listener,
+				ServerUrl:        strings.TrimSuffix(loadvariable.String(graphConfig.Api.ServerOptions.ServerUrl), "/"),
+				PublicNodeUrl:    loadvariable.String(graphConfig.Api.NodeOptions.PublicNodeUrl),
+				Listener:         listener,
+				InternalListener: internalListener,
 				Logging: apihandler.Logging{
 					Level: logLevel,
 				},
-				DefaultTimeout: defaultRequestTimeout,
+				DefaultTimeout:      defaultRequestTimeout,
+				DefaultHTTPProxyURL: defaultHTTPProxyURL,
+				Prometheus: apihandler.PrometheusOptions{
+					Enabled: prometheusEnabled,
+					Port:    prometheusPort,
+				},
+				OpenTelemetry: apihandler.OpenTelemetry{
+					Enabled:              otelEnabled,
+					AuthToken:            loadvariable.String(openTelemetryOptions.GetAuthToken()),
+					ExporterHTTPEndpoint: loadvariable.String(openTelemetryOptions.GetExporterHttpEndpoint()),
+					Sampler:              otelSampler,
+				},
 			},
 		},
 		Server: &Server{
@@ -107,5 +147,5 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 		},
 	}
 
-	return config, nil
+	return &config, nil
 }

@@ -1,16 +1,20 @@
-import { wunderctlExecAsync } from '../wunderctlexec';
-import { InputValueDefinitionNode, parse, parseType, print, TypeNode, visit } from 'graphql';
-import { DatabaseIntrospection, ReplaceCustomScalarTypeFieldConfiguration } from '../definition';
+import { wunderctl } from '../wunderctlexec';
+import { FieldDefinitionNode, InputValueDefinitionNode, Kind, parse, parseType, print, TypeNode, visit } from 'graphql';
+import { DatabaseIntrospection } from '../definition';
 import { SingleTypeField } from '@wundergraph/protobuf';
 import { DMMF } from '@prisma/generator-helper';
 import { NamedTypeNode } from 'graphql/language/ast';
-import _ from 'lodash';
+import { startCase } from 'lodash';
 import * as fs from 'fs';
 import hash from 'object-hash';
 import path from 'path';
 import { resolveVariable } from '../configure/variables';
 import { Logger } from '../logger';
 import { DatabaseSchema, prisma } from './types';
+import {
+	getCustomScalarReplacementsByParent,
+	handleScalarReplacementForChild,
+} from '../transformations/replaceCustomScalars';
 
 export interface PrismaDatabaseIntrospectionResult {
 	success: boolean;
@@ -25,10 +29,13 @@ export interface PrismaDatabaseIntrospectionResult {
 
 const _ensurePrisma = async () => {
 	Logger.info('Installing prisma...');
-	await wunderctlExecAsync({
+	const { failed, stderr } = await wunderctl({
 		cmd: ['installPrismaDependencies'],
 	});
-	Logger.info('Installing prisma... done');
+	if (failed) {
+		throw new Error(`Failed to install prisma: ${stderr}`);
+	}
+	Logger.info('Prisma installed');
 };
 
 let ensurePrisma: Promise<void> | undefined;
@@ -48,7 +55,7 @@ const introspectPrismaDatabase = async (
 	}
 	const introspectionFilePath = path.join('generated', 'introspection', 'database', `${id}.json`);
 	const cmd = ['introspect', databaseSchema, databaseURL, `--outfile=${introspectionFilePath}`, '--debug'];
-	const result = await wunderctlExecAsync({ cmd });
+	const { stdout: result } = await wunderctl({ cmd });
 	if (result === undefined) {
 		return {
 			success: false,
@@ -181,81 +188,93 @@ export const cleanupPrismaSchema = (
 	if (introspection.schemaExtension) {
 		result.graphql_schema = result.graphql_schema + ' ' + introspection.schemaExtension;
 	}
+	result.graphql_schema = result.graphql_schema + rowSchema;
 
-	let insideCustomScalarType = false;
-	let insideCustomScalarField = false;
-	let replaceCustomScalarType: ReplaceCustomScalarTypeFieldConfiguration | undefined;
-	let currentTypeName = '';
-	let replaceWith = '';
+	const replacementsByParentName = getCustomScalarReplacementsByParent(
+		introspection.replaceCustomScalarTypeFields || []
+	);
+	const replacementsByInterfaceName = new Map<string, Map<string, string>>();
+	let customScalarReplacementName = '';
 	let currentInputObjectTypeName = '';
+	let currentValidParentTypeName = '';
+	let currentParentInterfaces: string[] = [];
+	const replacementScalars: Set<SingleTypeField> = new Set<SingleTypeField>();
 
 	const document = parse(result.graphql_schema);
 	const cleaned = visit(document, {
 		ObjectTypeDefinition: {
 			enter: (node) => {
-				introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
-					if (node.name.value.startsWith(replace.entityName)) {
-						insideCustomScalarType = true;
-						currentTypeName = node.name.value;
+				const nodeName = node.name.value;
+				if (nodeName === 'Mutation') {
+					// we don't like the prisma schema using just JSON, so we rewrite the fields
+					return {
+						...node,
+						fields: [
+							...(node.fields || []).filter((f) => f.name.value !== 'queryRaw' && f.name.value !== 'executeRaw'),
+							executeRawField(),
+						],
+					};
+				}
+				if (nodeName === 'Query') {
+					// adding raw query fields to query instead of mutation (as prisma does)
+					// we're rewriting it later back to Mutation in the go engine
+					return {
+						...node,
+						fields: [...(node.fields || []), queryRawRowField(), queryRawJsonField()],
+					};
+				}
+				if (replacementsByParentName.get(nodeName)) {
+					const interfaces = node.interfaces;
+					if (interfaces) {
+						// Keep record of the implemented interfaces until a scalar is replaced
+						currentParentInterfaces = interfaces.map((i) => i.name.value);
 					}
-				});
+					currentValidParentTypeName = nodeName;
+				}
 			},
 			leave: () => {
-				insideCustomScalarType = false;
-				replaceCustomScalarType = undefined;
+				currentValidParentTypeName = '';
+				customScalarReplacementName = '';
+				currentParentInterfaces = [];
 			},
 		},
 		FieldDefinition: {
 			enter: (node) => {
-				if (insideCustomScalarType) {
-					introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
-						if (node.name.value.match(replace.fieldName)) {
-							insideCustomScalarField = true;
-							replaceCustomScalarType = replace;
-							replaceWith = replace.responseTypeReplacement;
-						}
-					});
-
-					if (insideCustomScalarField) {
-						if (!result.jsonTypeFields.some((f) => f.typeName === currentTypeName && f.fieldName === node.name.value)) {
-							result.jsonTypeFields.push({
-								typeName: currentTypeName,
-								fieldName: node.name.value,
-							});
-						}
-					}
-				}
+				customScalarReplacementName = handleScalarReplacementForChild(
+					node,
+					replacementsByParentName,
+					currentValidParentTypeName,
+					replacementScalars,
+					undefined,
+					currentParentInterfaces,
+					replacementsByInterfaceName
+				);
 			},
-			leave: () => {
-				insideCustomScalarField = false;
+			leave: (_) => {
+				customScalarReplacementName = '';
 			},
 		},
 		InputObjectTypeDefinition: {
 			enter: (node) => {
 				currentInputObjectTypeName = node.name.value;
-				introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
-					if (node.name.value.startsWith(replace.entityName)) {
-						insideCustomScalarType = true;
-						currentTypeName = node.name.value;
-					}
-				});
+				if (replacementsByParentName.get(currentInputObjectTypeName)) {
+					currentValidParentTypeName = currentInputObjectTypeName;
+				}
 			},
 			leave: () => {
-				insideCustomScalarType = false;
-				replaceCustomScalarType = undefined;
+				currentValidParentTypeName = '';
+				customScalarReplacementName = '';
+				currentInputObjectTypeName = '';
 			},
 		},
 		InputValueDefinition: {
 			enter: (node) => {
-				if (insideCustomScalarType) {
-					introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
-						if (node.name.value.match(replace.fieldName) && replace.inputTypeReplacement) {
-							insideCustomScalarField = true;
-							replaceCustomScalarType = replace;
-							replaceWith = replace.inputTypeReplacement;
-						}
-					});
-				}
+				customScalarReplacementName = handleScalarReplacementForChild(
+					node,
+					replacementsByParentName,
+					currentValidParentTypeName,
+					replacementScalars
+				);
 
 				if (listInputFields.includes(node.name.value)) {
 					// potential list input field
@@ -281,7 +300,7 @@ export const cleanupPrismaSchema = (
 				}
 			},
 			leave: () => {
-				insideCustomScalarField = false;
+				customScalarReplacementName = '';
 			},
 		},
 		NamedType: (node) => {
@@ -304,16 +323,19 @@ export const cleanupPrismaSchema = (
 				};
 			}
 			if (node.name.value === 'Json' || node.name.value === 'JsonNullValueInput') {
-				if (result.interpolateVariableDefinitionAsJSON.indexOf(replaceWith) === -1) {
-					result.interpolateVariableDefinitionAsJSON.push(replaceWith);
+				if (
+					customScalarReplacementName &&
+					result.interpolateVariableDefinitionAsJSON.indexOf(customScalarReplacementName) === -1
+				) {
+					result.interpolateVariableDefinitionAsJSON.push(customScalarReplacementName);
 				}
 
-				if (insideCustomScalarField && insideCustomScalarType && replaceCustomScalarType) {
+				if (customScalarReplacementName) {
 					return {
 						...node,
 						name: {
 							...node.name,
-							value: replaceWith,
+							value: customScalarReplacementName,
 						},
 					};
 				}
@@ -347,8 +369,242 @@ export const cleanupPrismaSchema = (
 			}
 		},
 	});
-	return print(cleaned);
+
+	for (const replacementScalar of replacementScalars) {
+		result.jsonTypeFields.push(replacementScalar);
+	}
+
+	if (replacementsByInterfaceName.size < 1) {
+		return print(cleaned);
+	}
+
+	const cleanedWithInterfaces = visit(cleaned, {
+		InterfaceTypeDefinition: {
+			enter: (node) => {
+				if (replacementsByInterfaceName.get(node.name.value)) {
+					currentValidParentTypeName = node.name.value;
+				} else {
+					// Skip this parent
+					return false;
+				}
+			},
+			leave: (_) => {
+				currentValidParentTypeName = '';
+				customScalarReplacementName = '';
+			},
+		},
+		FieldDefinition: {
+			enter: (node) => {
+				customScalarReplacementName = handleScalarReplacementForChild(
+					node,
+					replacementsByInterfaceName,
+					currentValidParentTypeName,
+					replacementScalars
+				);
+			},
+			leave: (_) => {
+				customScalarReplacementName = '';
+			},
+		},
+		NamedType: (node) => {
+			if (customScalarReplacementName) {
+				return { ...node, name: { ...node.name, value: customScalarReplacementName } };
+			}
+		},
+	});
+
+	return print(cleanedWithInterfaces);
 };
+
+const queryRawRowField = (): FieldDefinitionNode => ({
+	kind: Kind.FIELD_DEFINITION,
+	name: {
+		kind: Kind.NAME,
+		value: 'queryRaw',
+	},
+	type: {
+		kind: Kind.NON_NULL_TYPE,
+		type: {
+			kind: Kind.LIST_TYPE,
+			type: {
+				kind: Kind.NON_NULL_TYPE,
+				type: {
+					kind: Kind.NAMED_TYPE,
+					name: {
+						kind: Kind.NAME,
+						value: '_Row',
+					},
+				},
+			},
+		},
+	},
+	arguments: [
+		{
+			kind: Kind.INPUT_VALUE_DEFINITION,
+			name: {
+				kind: Kind.NAME,
+				value: 'query',
+			},
+			type: {
+				kind: Kind.NON_NULL_TYPE,
+				type: {
+					kind: Kind.NAMED_TYPE,
+					name: {
+						kind: Kind.NAME,
+						value: 'String',
+					},
+				},
+			},
+		},
+		{
+			kind: Kind.INPUT_VALUE_DEFINITION,
+			name: {
+				kind: Kind.NAME,
+				value: 'parameters',
+			},
+			type: {
+				kind: Kind.LIST_TYPE,
+				type: {
+					kind: Kind.NAMED_TYPE,
+					name: {
+						kind: Kind.NAME,
+						value: 'String',
+					},
+				},
+			},
+		},
+	],
+});
+
+const queryRawJsonField = (): FieldDefinitionNode => ({
+	kind: Kind.FIELD_DEFINITION,
+	name: {
+		kind: Kind.NAME,
+		value: 'queryRawJSON',
+	},
+	type: {
+		kind: Kind.NAMED_TYPE,
+		name: {
+			kind: Kind.NAME,
+			value: 'JSON',
+		},
+	},
+	arguments: [
+		{
+			kind: Kind.INPUT_VALUE_DEFINITION,
+			name: {
+				kind: Kind.NAME,
+				value: 'query',
+			},
+			type: {
+				kind: Kind.NON_NULL_TYPE,
+				type: {
+					kind: Kind.NAMED_TYPE,
+					name: {
+						kind: Kind.NAME,
+						value: 'String',
+					},
+				},
+			},
+		},
+		{
+			kind: Kind.INPUT_VALUE_DEFINITION,
+			name: {
+				kind: Kind.NAME,
+				value: 'parameters',
+			},
+			type: {
+				kind: Kind.LIST_TYPE,
+				type: {
+					kind: Kind.NAMED_TYPE,
+					name: {
+						kind: Kind.NAME,
+						value: 'String',
+					},
+				},
+			},
+		},
+	],
+});
+
+const executeRawField = (): FieldDefinitionNode => ({
+	kind: Kind.FIELD_DEFINITION,
+	name: {
+		kind: Kind.NAME,
+		value: 'executeRaw',
+	},
+	type: {
+		kind: Kind.NON_NULL_TYPE,
+		type: {
+			kind: Kind.NAMED_TYPE,
+			name: {
+				kind: Kind.NAME,
+				value: 'Int',
+			},
+		},
+	},
+	arguments: [
+		{
+			kind: Kind.INPUT_VALUE_DEFINITION,
+			name: {
+				kind: Kind.NAME,
+				value: 'query',
+			},
+			type: {
+				kind: Kind.NON_NULL_TYPE,
+				type: {
+					kind: Kind.NAMED_TYPE,
+					name: {
+						kind: Kind.NAME,
+						value: 'String',
+					},
+				},
+			},
+		},
+		{
+			kind: Kind.INPUT_VALUE_DEFINITION,
+			name: {
+				kind: Kind.NAME,
+				value: 'parameters',
+			},
+			type: {
+				kind: Kind.LIST_TYPE,
+				type: {
+					kind: Kind.NAMED_TYPE,
+					name: {
+						kind: Kind.NAME,
+						value: 'String',
+					},
+				},
+			},
+		},
+	],
+});
+
+const rowSchema = `
+
+type _Row {
+	ID: ID!
+	Int: Int!
+	Float: Float!
+	String: String!
+	Boolean: Boolean!
+	DateTime: DateTime!
+	JSON: JSON!
+	Object: _Row!
+	Array: [_Row!]!
+	OptionalID: ID
+	OptionalInt: Int
+	OptionalFloat: Float
+	OptionalString: String
+	OptionalBoolean: Boolean
+	OptionalDateTime: DateTime
+	OptionalJSON: JSON
+	OptionalObject: _Row
+	OptionalArray: [_Row!]
+}
+
+`;
 
 const unwrapNamedType = (node: TypeNode): NamedTypeNode => {
 	if (node.kind === 'NamedType') {
@@ -393,7 +649,7 @@ const resolveRelationship = (connectionType: string): Relationship | undefined =
 	if (connectionType.endsWith('WhereUnique')) {
 		connectionType = connectionType.substring(0, connectionType.length - 'WhereUnique'.length);
 	}
-	const fromTo = _.startCase(connectionType).split(' ');
+	const fromTo = startCase(connectionType).split(' ');
 	if (fromTo.length === 1) {
 		return undefined;
 	}

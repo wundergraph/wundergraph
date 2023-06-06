@@ -239,6 +239,13 @@ func (e *Engine) Request(ctx context.Context, request []byte, rw io.Writer) (err
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
+		if res.Body != nil {
+			defer res.Body.Close()
+			body, err := io.ReadAll(res.Body)
+			if err == nil {
+				return fmt.Errorf("http status != 200: %s", string(body))
+			}
+		}
 		return fmt.Errorf("http status != 200")
 	}
 	_, err = io.Copy(rw, res.Body)
@@ -259,12 +266,17 @@ func (e *Engine) StartQueryEngine(schema string) error {
 	port := strconv.Itoa(freePort)
 	ctx, cancel := context.WithCancel(context.Background())
 	e.cancel = cancel
-	e.cmd = exec.CommandContext(ctx, e.queryEnginePath, "-p", port)
+	e.cmd = exec.CommandContext(ctx, e.queryEnginePath, "-p", port, "--enable-raw-queries")
 	// ensure that prisma starts with the dir set to the .wundergraph directory
 	// this is important for sqlite support as it's expected that the path of the sqlite file is the same
 	// (relative to the .wundergraph directory) during introspection and at runtime
 	e.cmd.Dir = e.wundergraphDir
+
+	// append all environment variables, as demonstrated in the following:
+	// https://github.com/prisma/prisma/blob/304c54c732921c88bfb57f5730c7f81405ca83ea/packages/engine-core/src/binary/BinaryEngine.ts#L479
+	e.cmd.Env = append(e.cmd.Env, os.Environ()...)
 	e.cmd.Env = append(e.cmd.Env, "PRISMA_DML="+schema)
+
 	e.cmd.Stdout = os.Stdout
 	e.cmd.Stderr = os.Stderr
 	e.url = "http://localhost:" + port

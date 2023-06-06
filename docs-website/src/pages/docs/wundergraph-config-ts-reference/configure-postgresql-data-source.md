@@ -1,7 +1,6 @@
 ---
 title: Configure PostgreSQL Data Source
-pageTitle: WunderGraph - Configure PostgreSQL Data Source
-description:
+description: Introspect PostgreSQL databases and add them to your Virtual Graph.
 ---
 
 The PostgreSQL data source introspects the database and generates a GraphQL schema.
@@ -17,11 +16,11 @@ const db = introspect.postgresql({
   introspection: {
     pollingIntervalSeconds: 5,
   },
-})
+});
 
 configureWunderGraphApplication({
   apis: [db],
-})
+});
 ```
 
 Define the `databaseURL` which is the connection string to the database.

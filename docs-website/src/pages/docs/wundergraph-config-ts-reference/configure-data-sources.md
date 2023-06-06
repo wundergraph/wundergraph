@@ -1,7 +1,6 @@
 ---
 title: Data Sources Reference
-pageTitle: WunderGraph - Data Sources Reference
-description:
+description: Reference for all supported data sources
 ---
 
 WunderGraph supports a variety of data sources. They can be configured in the `wundergraph.config.ts` file by adding introspections to the `apis` configuration.
@@ -28,18 +27,19 @@ Each introspection supports an `apiNamespace` property. This property is used to
 
 ## Supported introspections
 
-| Introspection            | Description            |
-| ------------------------ | ---------------------- |
-| `introspect.graphql`     | GraphQL API            |
-| `introspect.postgresql`  | PostgreSQL database    |
-| `introspect.mysql`       | MySQL database         |
-| `introspect.planetscale` | Planetscale database   |
-| `introspect.sqlite`      | SQLite database        |
-| `introspect.sqlserver`   | SQL Server database    |
-| `introspect.mongodb`     | MongoDB database       |
-| `introspect.prisma`      | Prisma database        |
-| `introspect.federation`  | GraphQL Federation API |
-| `introspect.openApi`     | OpenAPI API            |
+| Introspection                                                                                            | Description            |
+| -------------------------------------------------------------------------------------------------------- | ---------------------- |
+| [`introspect.graphql`](/docs/wundergraph-config-ts-reference/configure-graphql-data-source)              | GraphQL API            |
+| [`introspect.postgresql`](/docs/wundergraph-config-ts-reference/configure-postgresql-data-source)        | PostgreSQL database    |
+| [`introspect.mysql`](/docs/wundergraph-config-ts-reference/configure-mysql-data-source)                  | MySQL database         |
+| [`introspect.planetscale`](/docs/wundergraph-config-ts-reference/configure-planetscale-data-source)      | Planetscale database   |
+| [`introspect.sqlite`](/docs/wundergraph-config-ts-reference/configure-sqlite-data-source)                | SQLite database        |
+| [`introspect.sqlserver`](/docs/wundergraph-config-ts-reference/configure-sqlserver-data-source)          | SQL Server database    |
+| [`introspect.mongodb`](/docs/wundergraph-config-ts-reference/configure-mongodb-atlas-data-source)        | MongoDB database       |
+| [`introspect.prisma`](/docs/wundergraph-config-ts-reference/configure-prisma-datasource)                 | Prisma database        |
+| [`introspect.federation`](/docs/wundergraph-config-ts-reference/configure-apollo-federation-data-source) | GraphQL Federation API |
+| [`introspect.openApi`](/docs/wundergraph-config-ts-reference/configure-openapi-rest-data-source)         | OpenAPI API            |
+| [`introspect.soap`](/docs/wundergraph-config-ts-reference/configure-soap-data-source)                    | SOAP                   |
 
 ## GraphQL
 
@@ -63,11 +63,11 @@ const countries = introspect.graphql({
 | `loadSchemaFromString`          | A function that returns the schema as a string. This is useful if you want to use a local schema file. |
 | `customFloatScalars`            | An array of custom float scalars.                                                                      |
 | `customIntScalars`              | An array of custom int scalars.                                                                        |
-| `customJSONScalars`             | An array of custom JSON scalars.                                                                       |
 | `internal`                      | Whether the GraphQL service is internal. Defaults to `false`                                           |
 | `skipRenameRootFields`          | An array of root fields to skip renaming.                                                              |
 | `schemaExtension`               | A string that is appended to the schema. Useful for adding custom scalars.                             |
 | `replaceCustomScalarTypeFields` | An array of custom scalar type fields to replace.                                                      |
+| `httpProxyUrl`                  | HTTP(S) proxy to use, overriding the default one (if any). Set to `null` to disable.                   |
 
 ## Databases
 
@@ -157,13 +157,14 @@ configureWunderGraphApplication({
 
 ### Properties
 
-| Property                        | Description                                                                |
-| ------------------------------- | -------------------------------------------------------------------------- |
-| `source`                        | The source of the OpenAPI schema. Either a file or a URL.                  |
-| `apiNamespace`                  | The namespace of the OpenAPI API                                           |
-| `introspection`                 | The introspection configuration                                            |
-| `schemaExtension`               | A string that is appended to the schema. Useful for adding custom scalars. |
-| `replaceCustomScalarTypeFields` | An array of custom scalar type fields to replace.                          |
+| Property                        | Description                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------------ |
+| `source`                        | The source of the OpenAPI schema. Either a file or a URL.                            |
+| `apiNamespace`                  | The namespace of the OpenAPI API                                                     |
+| `introspection`                 | The introspection configuration                                                      |
+| `schemaExtension`               | A string that is appended to the schema. Useful for adding custom scalars.           |
+| `replaceCustomScalarTypeFields` | An array of custom scalar type fields to replace.                                    |
+| `httpProxyUrl`                  | HTTP(S) proxy to use, overriding the default one (if any). Set to `null` to disable. |
 
 ## GraphQL Federation
 
@@ -191,10 +192,39 @@ configureWunderGraphApplication({
 
 ### Properties
 
-| Property                        | Description                                                                |
-| ------------------------------- | -------------------------------------------------------------------------- |
-| `upstreams`                     | An array of upstreams to use for the federation.                           |
-| `apiNamespace`                  | The namespace of the GraphQL Federation API                                |
-| `introspection`                 | The introspection configuration                                            |
-| `schemaExtension`               | A string that is appended to the schema. Useful for adding custom scalars. |
-| `replaceCustomScalarTypeFields` | An array of custom scalar type fields to replace.                          |
+| Property                        | Description                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------------ |
+| `upstreams`                     | An array of upstreams to use for the federation.                                     |
+| `apiNamespace`                  | The namespace of the GraphQL Federation API                                          |
+| `introspection`                 | The introspection configuration                                                      |
+| `schemaExtension`               | A string that is appended to the schema. Useful for adding custom scalars.           |
+| `replaceCustomScalarTypeFields` | An array of custom scalar type fields to replace.                                    |
+| `httpProxyUrl`                  | HTTP(S) proxy to use, overriding the default one (if any). Set to `null` to disable. |
+
+## SOAP
+
+You can use the `introspect.soap` function to configure a SOAP API.
+
+```typescript
+// wundergraph.config.ts
+const greeting = introspect.soap({
+  apiNamespace: 'greeting',
+  source: {
+    kind: 'file',
+    filePath: './greeting.wsdl',
+  },
+  headers: (builder) =>
+    builder.addClientRequestHeader('X-Authorization', 'Authorization').addStaticHeader('X-Static', 'Static'),
+});
+configureWunderGraphApplication({
+  apis: [greeting],
+});
+```
+
+### Properties
+
+| Property       | Description                          |
+| -------------- | ------------------------------------ |
+| `apiNamespace` | The namespace of the SOAP API        |
+| `source`       | The source of the SOAP wsdl. File.   |
+| `headers`      | The headers to send with the request |

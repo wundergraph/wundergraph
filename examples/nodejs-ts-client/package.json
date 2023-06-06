@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "wunderctl up --debug",
+    "start": "wunderctl up",
     "check": "tsc --noEmit",
-    "build:wundergraph": "wunderctl generate --debug",
+    "build:wundergraph": "wunderctl generate",
     "build": "npm run build:wundergraph",
     "request": "ts-node client.ts",
     "test": "jest"
@@ -13,7 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.135.0"
+    "@wundergraph/sdk": "^0.163.1"
   },
   "devDependencies": {
     "@jest/globals": "^29.3.1",

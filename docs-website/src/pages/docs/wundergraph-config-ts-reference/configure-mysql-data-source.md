@@ -1,7 +1,6 @@
 ---
 title: Configure MySQL Datasource
-pageTitle: WunderGraph - Configure MySQL Datasource
-description:
+description: Introspect mysql databases and add them to the Virtual.
 ---
 
 The MySQL data source introspects the database and generates a GraphQL schema.
@@ -17,11 +16,11 @@ const db = introspect.mysql({
   introspection: {
     pollingIntervalSeconds: 5,
   },
-})
+});
 
 configureWunderGraphApplication({
   apis: [db],
-})
+});
 ```
 
 Define the `databaseURL` which is the connection string to the database.

@@ -2,9 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -12,6 +10,8 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/loadoperations"
 )
+
+var prettyOutput = false
 
 const LoadOperationsCmdName = "loadoperations"
 
@@ -26,22 +26,23 @@ var loadoperationsCmd = &cobra.Command{
 			return err
 		}
 
-		outFile := path.Join(wunderGraphDir, "generated", "wundergraph.operations.json")
+		outFile := filepath.Join(wunderGraphDir, "generated", "wundergraph.operations.json")
 		outFile, err = filepath.Abs(outFile)
 		if err != nil {
 			return err
 		}
 
 		loader := loadoperations.NewLoader(args[0], args[1], args[2])
-		out, err := loader.Load(rootFlags.Pretty)
+		out, err := loader.Load(prettyOutput)
 		if err != nil {
 			return err
 		}
-		return ioutil.WriteFile(outFile, []byte(out), os.ModePerm)
+		return os.WriteFile(outFile, []byte(out), os.ModePerm)
 	},
 	Args: cobra.ExactArgs(3),
 }
 
 func init() {
 	rootCmd.AddCommand(loadoperationsCmd)
+	rootCmd.PersistentFlags().BoolVar(&prettyOutput, "pretty", false, "Pretty print the output")
 }

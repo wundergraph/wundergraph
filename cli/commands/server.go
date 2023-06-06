@@ -33,7 +33,7 @@ var serverStartCmd = &cobra.Command{
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
-		err := startWunderGraphServer(ctx)
+		err := startHooksServer(ctx)
 		if err != nil {
 			// Exit with error code 1 to indicate failure and restart
 			log.Error("WunderGraph server process shutdown: %w", zap.Error(err))
@@ -50,7 +50,7 @@ func init() {
 	rootCmd.AddCommand(serverCmd)
 }
 
-func startWunderGraphServer(ctx context.Context) error {
+func startHooksServer(ctx context.Context) error {
 	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 	if err != nil {
 		return err
@@ -61,20 +61,23 @@ func startWunderGraphServer(ctx context.Context) error {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
 	}
 
-	serverScriptFile := filepath.Join("generated", "bundle", "server.js")
+	serverScriptFile := filepath.Join("generated", "bundle", "server.cjs")
 	serverExecutablePath := filepath.Join(wunderGraphDir, serverScriptFile)
 	if !files.FileExists(serverExecutablePath) {
 		return fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
 	}
 
-	srvCfg := &helpers.ServerRunConfig{
+	srvCfg := &helpers.HooksServerRunConfig{
 		WunderGraphDirAbs: wunderGraphDir,
 		ServerScriptFile:  serverScriptFile,
 		Production:        true,
+		Debug:             rootFlags.DebugMode,
 		Env:               helpers.CliEnv(rootFlags),
+		LogLevel:          rootFlags.CliLogLevel,
+		LogStreaming:      true,
 	}
 
-	hookServerRunner := helpers.NewServerRunner(log, srvCfg)
+	hookServerRunner := helpers.NewHooksServerRunner(log, srvCfg)
 
 	<-hookServerRunner.Run(ctx)
 

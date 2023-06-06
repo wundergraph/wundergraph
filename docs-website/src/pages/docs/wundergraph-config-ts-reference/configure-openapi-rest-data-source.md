@@ -1,7 +1,6 @@
 ---
 title: Configure OpenAPI-/REST Datasource
-pageTitle: WunderGraph - Configure OpenAPI-/REST Datasource
-description:
+description: The OpenAPI-/REST data source introspects an OpenAPI Specification and generates a GraphQL schema from it.
 ---
 
 The OpenAPI-/REST data source introspects an OpenAPI Specification and generates a GraphQL schema from it.
@@ -20,10 +19,10 @@ const jsp = introspect.openApi({
     pollingIntervalSeconds: 2,
   },
   requestTimeoutSeconds: 10, // optional
-})
+});
 configureWunderGraphApplication({
   apis: [jsp],
-})
+});
 ```
 
 WunderGraph will automatically cache the introspection result in the local file-system.
@@ -46,7 +45,7 @@ const jsp = introspect.openApi({
     filePath: '../json_placeholder.json',
   },
   baseURL: 'https://jsonplaceholder.typicode.com',
-})
+});
 ```
 
 ## dynamically overriding the base URL
@@ -64,7 +63,7 @@ const jsp = introspect.openApi({
     filePath: '../json_placeholder.json',
   },
   baseURL: 'https://jsonplaceholder.typicode.com/{accountID}/',
-})
+});
 ```
 
 Using the template `{accountID}` as part of the baseURL adds the `accountID` field to all generated root fields of the resulting GraphQL schema.

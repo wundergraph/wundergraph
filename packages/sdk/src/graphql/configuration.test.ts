@@ -2,10 +2,12 @@ import { configuration, GraphQLConfiguration } from './configuration';
 import { assert } from 'chai';
 import { parse } from 'graphql';
 import { ArgumentRenderConfiguration, ArgumentSource } from '@wundergraph/protobuf';
+import { ArgumentReplacement } from '../transformations/transformSchema';
 
 const tests: {
 	schema: string;
 	serviceSDL?: string;
+	argumentReplacements: ArgumentReplacement[];
 	config: GraphQLConfiguration;
 }[] = [
 	{
@@ -13,6 +15,7 @@ const tests: {
 			'schema {   query: Query } union _Entity = User type Entity {      findUserByID(id: ID!): User! } type User {      id: ID!      name: String      username: String } scalar _Any scalar _FieldSet type Query {      me: User      _entities(representations: [_Any!]!): [_Entity]!      _service: _Service! } type _Service {      sdl: String }',
 		serviceSDL:
 			'type Query @extends {   me: User } type User @key(fields: "id") {   id: ID!   name: String   username: String } ',
+		argumentReplacements: [],
 		config: {
 			RootNodes: [
 				{
@@ -58,6 +61,7 @@ const tests: {
 			'schema {   query: Query } union _Entity = Product type Entity {      findProductByUpc(upc: String!): Product! } scalar _FieldSet type Product {      upc: String!      name: String      price: Int      weight: Int } scalar _Any type Query {      topProducts(first: Int = 5): [Product]      _entities(representations: [_Any!]!): [_Entity]!      _service: _Service! } type _Service {      sdl: String }',
 		serviceSDL:
 			'type Query @extends {   topProducts(first: Int = 5): [Product] }  type Product @key(fields: "upc") {   upc: String!   name: String   price: Int   weight: Int } ',
+		argumentReplacements: [],
 		config: {
 			RootNodes: [
 				{
@@ -85,6 +89,86 @@ const tests: {
 							sourceType: ArgumentSource.FIELD_ARGUMENT,
 							sourcePath: [],
 							renderConfiguration: ArgumentRenderConfiguration.RENDER_ARGUMENT_DEFAULT,
+							renameTypeTo: '',
+						},
+					],
+					disableDefaultFieldMapping: false,
+					path: [],
+					requiresFields: [],
+					unescapeResponseJson: false,
+				},
+				{
+					typeName: 'Product',
+					fieldName: 'name',
+					requiresFields: ['upc'],
+					argumentsConfiguration: [],
+					path: [],
+					disableDefaultFieldMapping: false,
+					unescapeResponseJson: false,
+				},
+				{
+					typeName: 'Product',
+					fieldName: 'price',
+					requiresFields: ['upc'],
+					argumentsConfiguration: [],
+					path: [],
+					disableDefaultFieldMapping: false,
+					unescapeResponseJson: false,
+				},
+				{
+					typeName: 'Product',
+					fieldName: 'weight',
+					requiresFields: ['upc'],
+					argumentsConfiguration: [],
+					path: [],
+					disableDefaultFieldMapping: false,
+					unescapeResponseJson: false,
+				},
+			],
+			Types: [],
+		},
+	},
+	{
+		schema:
+			'schema {   query: Query } union _Entity = Product type Entity {      findProductByUpc(upc: String!): Product! } scalar _FieldSet type Product {      upc: String!      name: String      price: Int      weight: Int } scalar _Any type Query {      topProducts(first: Int = 5): [Product]      _entities(representations: [_Any!]!): [_Entity]!      _service: _Service! } type _Service {      sdl: String }',
+		serviceSDL:
+			'type Query @extends {   topProducts(first: Int = 5): [Product] }  type Product @key(fields: "upc") {   upc: String!   name: String   price: Int   weight: Int } ',
+		argumentReplacements: [
+			{
+				fieldName: 'topProducts',
+				typeName: 'Query',
+				argName: 'first',
+				renameTypeTo: 'second',
+			},
+		],
+		config: {
+			RootNodes: [
+				{
+					typeName: 'Query',
+					fieldNames: ['topProducts'],
+				},
+				{
+					typeName: 'Product',
+					fieldNames: ['upc', 'name', 'price', 'weight'],
+				},
+			],
+			ChildNodes: [
+				{
+					typeName: 'Product',
+					fieldNames: ['upc', 'name', 'price', 'weight'],
+				},
+			],
+			Fields: [
+				{
+					typeName: 'Query',
+					fieldName: 'topProducts',
+					argumentsConfiguration: [
+						{
+							name: 'first',
+							sourceType: ArgumentSource.FIELD_ARGUMENT,
+							sourcePath: [],
+							renderConfiguration: ArgumentRenderConfiguration.RENDER_ARGUMENT_DEFAULT,
+							renameTypeTo: 'second',
 						},
 					],
 					disableDefaultFieldMapping: false,
@@ -128,6 +212,7 @@ const tests: {
 			'schema {   query: Query } scalar _FieldSet union _Entity = Product | Review | User type Entity {      findProductByUpc(upc: String!): Product!      findReviewByID(id: ID!): Review!      findUserByID(id: ID!): User! } type Product {      upc: String!      reviews: [Review] } type Query {      _entities(representations: [_Any!]!): [_Entity]!      _service: _Service! } scalar _Any type _Service {      sdl: String } type Review {      id: ID!      body: String      author: User      product: Product } type User {      id: ID!      username: String      reviews: [Review] }',
 		serviceSDL:
 			'type Review @key(fields: "id") {   id: ID!   body: String   author: User @provides(fields: "username")   product: Product }  type User @extends @key(fields: "id") {   id: ID! @external   username: String @external   reviews: [Review] }  type Product @extends @key(fields: "upc") {   upc: String! @external   reviews: [Review] } ',
+		argumentReplacements: [],
 		config: {
 			RootNodes: [
 				{
@@ -212,6 +297,7 @@ const tests: {
 			'schema {   query: Query } type Product {      upc: String!      weight: Int      price: Int      inStock: Boolean      shippingEstimate: Int } scalar _Any type Entity {      findProductByUpc(upc: String!): Product! } type Query {      _entities(representations: [_Any!]!): [_Entity]!      _service: _Service! } scalar _FieldSet union _Entity = Product type _Service {      sdl: String }',
 		serviceSDL:
 			'type Product @extends @key(fields: "upc") {     upc: String! @external     weight: Int @external     price: Int @external     inStock: Boolean     shippingEstimate: Int @requires(fields: "price weight") } ',
+		argumentReplacements: [],
 		config: {
 			RootNodes: [
 				{
@@ -269,6 +355,7 @@ const tests: {
 							sourceType: 1,
 							sourcePath: [],
 							renderConfiguration: 0,
+							renameTypeTo: '',
 						},
 					],
 					disableDefaultFieldMapping: false,
@@ -285,6 +372,7 @@ const tests: {
 							sourceType: 1,
 							sourcePath: [],
 							renderConfiguration: 0,
+							renameTypeTo: '',
 						},
 					],
 					disableDefaultFieldMapping: false,
@@ -313,6 +401,7 @@ const tests: {
 			],
 			Types: [],
 		},
+		argumentReplacements: [],
 	},
 	{
 		schema: 'type Query { me: User } type User {  id: ID!  username: String! }',
@@ -347,6 +436,7 @@ const tests: {
 			],
 			Types: [],
 		},
+		argumentReplacements: [],
 	},
 	{
 		schema:
@@ -400,6 +490,7 @@ const tests: {
 			],
 			Types: [],
 		},
+		argumentReplacements: [],
 	},
 	{
 		schema:
@@ -441,6 +532,7 @@ const tests: {
 			],
 			Types: [],
 		},
+		argumentReplacements: [],
 	},
 	{
 		schema:
@@ -525,16 +617,20 @@ const tests: {
 			],
 			Types: [],
 		},
+		argumentReplacements: [],
 	},
 ];
 
 describe('configuration', () => {
-	it.each(tests)('testCase: %#', ({ schema: tSchema, serviceSDL: tServiceSDL, config }) => {
-		const schema = parse(tSchema);
-		const serviceSDL = tServiceSDL === undefined ? undefined : parse(tServiceSDL);
-		const nodes = configuration(schema, undefined, serviceSDL);
-		assert.equal(pretty(nodes), pretty(config));
-	});
+	it.each(tests)(
+		'testCase: %#',
+		({ schema: tSchema, serviceSDL: tServiceSDL, argumentReplacements: tArgumentReplacements, config }) => {
+			const schema = parse(tSchema);
+			const serviceSDL = tServiceSDL === undefined ? undefined : parse(tServiceSDL);
+			const nodes = configuration(schema, { url: '' }, [], serviceSDL, tArgumentReplacements);
+			assert.equal(pretty(nodes), pretty(config));
+		}
+	);
 });
 
 const pretty = (input: any) => {

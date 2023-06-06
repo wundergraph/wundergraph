@@ -1,19 +1,11 @@
-import { DarkMode, Gradient, LightMode } from '@/components/Icon'
+import { DarkMode, Gradient, LightMode } from '@/components/Icon';
 
 export function PresetsIcon({ id, color }) {
 	return (
 		<>
 			<defs>
-				<Gradient
-					id={`${id}-gradient`}
-					color={color}
-					gradientTransform="matrix(0 21 -21 0 20 3)"
-				/>
-				<Gradient
-					id={`${id}-gradient-dark`}
-					color={color}
-					gradientTransform="matrix(0 22.75 -22.75 0 16 6.25)"
-				/>
+				<Gradient id={`${id}-gradient`} color={color} gradientTransform="matrix(0 21 -21 0 20 3)" />
+				<Gradient id={`${id}-gradient-dark`} color={color} gradientTransform="matrix(0 22.75 -22.75 0 16 6.25)" />
 			</defs>
 			<LightMode>
 				<circle cx={20} cy={12} r={12} fill={`url(#${id}-gradient)`} />
@@ -39,5 +31,5 @@ export function PresetsIcon({ id, color }) {
 				<path d="M2 4v13h2V4H2Zm2-2a2 2 0 0 0-2 2h2V2Zm8 0H4v2h8V2Zm2 2a2 2 0 0 0-2-2v2h2Zm0 13V4h-2v13h2Zm-2 2a2 2 0 0 0 2-2h-2v2Zm-8 0h8v-2H4v2Zm-2-2a2 2 0 0 0 2 2v-2H2Zm16 1v9h2v-9h-2Zm3-3a3 3 0 0 0-3 3h2a1 1 0 0 1 1-1v-2Zm6 0h-6v2h6v-2Zm3 3a3 3 0 0 0-3-3v2a1 1 0 0 1 1 1h2Zm0 9v-9h-2v9h2Zm-3 3a3 3 0 0 0 3-3h-2a1 1 0 0 1-1 1v2Zm-6 0h6v-2h-6v2Zm-3-3a3 3 0 0 0 3 3v-2a1 1 0 0 1-1-1h-2Zm2-18V4h-2v5h2Zm0 0h-2a2 2 0 0 0 2 2V9Zm8 0h-8v2h8V9Zm0 0v2a2 2 0 0 0 2-2h-2Zm0-5v5h2V4h-2Zm0 0h2a2 2 0 0 0-2-2v2Zm-8 0h8V2h-8v2Zm0 0V2a2 2 0 0 0-2 2h2ZM2 25v3h2v-3H2Zm2-2a2 2 0 0 0-2 2h2v-2Zm9 0H4v2h9v-2Zm2 2a2 2 0 0 0-2-2v2h2Zm0 3v-3h-2v3h2Zm-2 2a2 2 0 0 0 2-2h-2v2Zm-9 0h9v-2H4v2Zm-2-2a2 2 0 0 0 2 2v-2H2Z" />
 			</DarkMode>
 		</>
-	)
+	);
 }

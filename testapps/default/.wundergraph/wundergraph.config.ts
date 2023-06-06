@@ -4,20 +4,18 @@ import {
 	cors,
 	EnvironmentVariable,
 	introspect,
-	templates,
 } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
-import { golangClient } from '@wundergraph/golang-client';
+import generate from './wundergraph.generate';
 
-const jsp = introspect.openApi({
+const jsp = introspect.openApiV2({
+	id: 'jsp',
 	apiNamespace: 'jsp',
 	source: {
 		kind: 'file',
 		filePath: '../json_placeholder.json',
 	},
-	baseURL: 'https://jsonplaceholder.typicode.{tld}',
-	headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
 });
 
 const jsp2 = introspect.openApi({
@@ -27,30 +25,54 @@ const jsp2 = introspect.openApi({
 		filePath: '../json_placeholder.json',
 	},
 	baseURL: new EnvironmentVariable('JSP_BASE_URL'),
-	headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
 });
 
-/*const federatedApi = introspect.federation({
+const federationLocalUpstreams = [
+	{
+		url: 'http://localhost:4001/graphql',
+	},
+	{
+		url: 'http://localhost:4003/graphql',
+	},
+	{
+		url: 'http://localhost:4002/graphql',
+	},
+	{
+		url: 'http://localhost:4004/graphql',
+	},
+];
+
+const federationCloudUpstreams = [
+	{
+		url: 'https://wg-federation-demo-accounts.fly.dev/graphql',
+	},
+	{
+		url: 'https://wg-federation-demo-products.fly.dev/graphql',
+	},
+	{
+		url: 'https://wg-federation-demo-reviews.fly.dev/graphql',
+	},
+	{
+		url: 'https://wg-federation-demo-inventory.fly.dev/graphql',
+	},
+];
+
+const federatedApi = introspect.federation({
 	apiNamespace: 'federated',
-	upstreams: [
-		{
-			url: 'http://localhost:4001/graphql',
-		},
-		{
-			url: 'http://localhost:4002/graphql',
-		},
-		{
-			url: 'http://localhost:4003/graphql',
-		},
-		{
-			url: 'http://localhost:4004/graphql',
-		},
-	],
-});*/
+	upstreams: federationCloudUpstreams,
+});
 
 const spacex = introspect.graphql({
 	apiNamespace: 'spacex',
 	url: 'https://spacex-api.fly.dev/graphql/',
+	schemaExtension: `
+	extend type Capsule {
+		myCustomField: String
+	}
+	`,
+	introspection: {
+		disableCache: true,
+	},
 });
 
 const countries = introspect.graphql({
@@ -59,6 +81,7 @@ const countries = introspect.graphql({
 });
 
 const weather = introspect.graphql({
+	id: 'weather',
 	apiNamespace: 'weather',
 	url: 'https://weather-api.wundergraph.com/',
 	introspection: {
@@ -86,28 +109,16 @@ const usersPost = introspect.prisma({
 
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [jsp, weather, countries, spacex, chinook, db, jsp2, usersPost],
+	apis: [jsp, weather, countries, spacex, chinook, db, jsp2, usersPost, federatedApi],
 	server,
 	operations,
+	generate,
 	authorization: {
 		roles: ['admin', 'user'],
 	},
-	codeGenerators: [
-		{
-			templates: [
-				// use all the typescript react templates to generate a client
-				...templates.typescript.all,
-			],
-		},
-		{
-			templates: [
-				...golangClient.all({
-					packageName: 'client',
-				}),
-			],
-			path: './generated/golang/client',
-		},
-	],
+	experimental: {
+		orm: true,
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins:
@@ -122,9 +133,6 @@ configureWunderGraphApplication({
 		cookieBased: {
 			providers: [authProviders.demo()],
 			authorizedRedirectUris: ['http://localhost:3000'],
-			secureCookieHashKey: new EnvironmentVariable('WUNDERGRAPH_SECURE_COOKIE_HASH_KEY'), // must be of length 32
-			secureCookieBlockKey: new EnvironmentVariable('WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY'), // must be of length 32
-			csrfTokenSecret: new EnvironmentVariable('WUNDERGRAPH_CSRF_TOKEN_SECRET'), // must be of length 11
 		},
 	},
 	security: {

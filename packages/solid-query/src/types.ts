@@ -1,5 +1,7 @@
 import {
 	ClientResponse,
+	ExtractMeta,
+	ExtractProfileName,
 	FetchUserRequestOptions,
 	OperationRequestOptions,
 	OperationsDefinition,
@@ -17,13 +19,13 @@ import {
 	MutateOptions,
 	QueryClient,
 } from '@tanstack/solid-query';
-import { ClientResponseError } from '@wundergraph/sdk/client';
+import { ResponseError } from '@wundergraph/sdk/client';
 import { Context } from 'solid-js';
 
 export type QueryFetcher<Operations extends OperationsDefinition> = {
 	<
 		OperationName extends Extract<keyof Operations['queries'], string>,
-		Data extends Operations['queries'][OperationName]['data'] = Operations['queries'][OperationName]['data'],
+		Data extends Operations['queries'][OperationName]['response'] = Operations['queries'][OperationName]['response'],
 		RequestOptions extends OperationRequestOptions<
 			Extract<keyof Operations['queries'], string>,
 			Operations['queries'][OperationName]['input']
@@ -39,7 +41,7 @@ export type QueryFetcher<Operations extends OperationsDefinition> = {
 export type MutationFetcher<Operations extends OperationsDefinition> = {
 	<
 		OperationName extends Extract<keyof Operations['mutations'], string>,
-		Data extends Operations['mutations'][OperationName]['data'] = Operations['mutations'][OperationName]['data'],
+		Data extends Operations['mutations'][OperationName]['response'] = Operations['mutations'][OperationName]['response'],
 		RequestOptions extends OperationRequestOptions<
 			Extract<keyof Operations['mutations'], string>,
 			Operations['mutations'][OperationName]['input']
@@ -85,11 +87,11 @@ export type CreateQueryHook<Operations extends OperationsDefinition, ExtraOption
 	<
 		OperationName extends Extract<keyof Operations['queries'], string>,
 		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input'],
-		Data extends Operations['queries'][OperationName]['data'] = Operations['queries'][OperationName]['data'],
+		Response extends Operations['queries'][OperationName]['response'] = Operations['queries'][OperationName]['response'],
 		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
 	>(
-		options: CreateQueryOptions<Data, ClientResponseError, Input, OperationName, LiveQuery> & ExtraOptions
-	): CreateQueryResult<Data, ClientResponseError>;
+		options: CreateQueryOptions<Response['data'], Response['error'], Input, OperationName, LiveQuery> & ExtraOptions
+	): CreateQueryResult<Response['data'], Response['error']>;
 };
 
 export type CreateSubscriptionOptions<
@@ -114,13 +116,14 @@ export type CreateSubscriptionHook<Operations extends OperationsDefinition, Extr
 	<
 		OperationName extends Extract<keyof Operations['subscriptions'], string>,
 		Input extends Operations['subscriptions'][OperationName]['input'] = Operations['subscriptions'][OperationName]['input'],
-		Data extends Operations['subscriptions'][OperationName]['data'] = Operations['subscriptions'][OperationName]['data']
+		Response extends Operations['subscriptions'][OperationName]['response'] = Operations['subscriptions'][OperationName]['response']
 	>(
-		options: CreateSubscriptionOptions<Data | undefined, ClientResponseError, Input, OperationName> & ExtraOptions
-	): CreateSubscriptionResult<Data, ClientResponseError>;
+		options: CreateSubscriptionOptions<Response['data'] | undefined, Response['error'], Input, OperationName> &
+			ExtraOptions
+	): CreateSubscriptionResult<Response['data'], Response['error']>;
 };
 
-export type CreateSubscriptionResult<Data, Error = ClientResponseError> = CreateQueryResult<Data, Error> & {
+export type CreateSubscriptionResult<Data, Error = ResponseError> = CreateQueryResult<Data, Error> & {
 	isSubscribed: boolean;
 };
 
@@ -135,11 +138,11 @@ export type CreateMutationHook<Operations extends OperationsDefinition, ExtraOpt
 	<
 		OperationName extends Extract<keyof Operations['mutations'], string>,
 		Input extends Operations['mutations'][OperationName]['input'] = Operations['mutations'][OperationName]['input'],
-		Data extends Operations['mutations'][OperationName]['data'] = Operations['mutations'][OperationName]['data'],
+		Response extends Operations['mutations'][OperationName]['response'] = Operations['mutations'][OperationName]['response'],
 		Context = unknown
 	>(
-		options: CreateMutationOptions<Data, ClientResponseError, Input, OperationName> & ExtraOptions
-	): CreateMutationResult<Data, ClientResponseError, Input>;
+		options: CreateMutationOptions<Response['data'], Response['error'], Input, OperationName> & ExtraOptions
+	): CreateMutationResult<Response['data'], Response['error'], Input>;
 };
 
 export interface CreateSubscribeToProps extends SubscriptionRequestOptions {
@@ -147,67 +150,62 @@ export interface CreateSubscribeToProps extends SubscriptionRequestOptions {
 	enabled?: boolean;
 	resetOnMount?: boolean;
 	onSuccess?(response: ClientResponse): void;
-	onError?(error: ClientResponseError): void;
+	onError?(error: ResponseError): void;
 }
 
 export interface SubscribeToOptions extends SubscriptionRequestOptions {
 	onResult(response: ClientResponse): void;
 	onSuccess?(response: ClientResponse): void;
-	onError?(error: ClientResponseError): void;
+	onError?(error: ResponseError): void;
 	onAbort?(): void;
 }
 
 export interface UseUserOptions<User>
 	extends FetchUserRequestOptions,
-		CreateTanstackQueryOptions<User, ClientResponseError, User, () => [string]> {
+		CreateTanstackQueryOptions<User, ResponseError, User, () => [string]> {
 	enabled?: boolean;
 }
 
 export type UseUserHook<Operations extends OperationsDefinition> = {
-	(options?: UseUserOptions<Operations['user']>): CreateQueryResult<Operations['user'], ClientResponseError>;
+	(options?: UseUserOptions<Operations['user']>): CreateQueryResult<Operations['user'], ResponseError>;
 };
 
 export type CreateUploadOptions = Omit<
-	CreateTanstackMutationOptions<string[], ClientResponseError, UploadRequestOptions, Context<QueryClient | undefined>>,
+	CreateTanstackMutationOptions<string[], ResponseError, UploadRequestOptions, Context<QueryClient | undefined>>,
 	'mutationFn'
 >;
 
 export type CreateUploadHook<Operations extends OperationsDefinition> = {
 	(options?: CreateUploadOptions): Omit<
-		CreateTanstackMutationOptions<
-			string[],
-			ClientResponseError,
-			UploadRequestOptions,
-			Context<QueryClient | undefined>
-		>,
+		CreateTanstackMutationOptions<string[], ResponseError, UploadRequestOptions, Context<QueryClient | undefined>>,
 		'mutate'
 	> & {
 		upload: <
 			ProviderName extends Extract<keyof Operations['s3Provider'], string>,
-			ProfileName extends Extract<keyof Operations['s3Provider'][ProviderName]['profiles'], string> = Extract<
-				keyof Operations['s3Provider'][ProviderName]['profiles'],
-				string
+			ProfileName extends ExtractProfileName<Operations['s3Provider'][ProviderName]['profiles']> = ExtractProfileName<
+				Operations['s3Provider'][ProviderName]['profiles']
 			>,
-			Meta extends Operations['s3Provider'][ProviderName]['profiles'][ProfileName] = Operations['s3Provider'][ProviderName]['profiles'][ProfileName]
+			Meta extends ExtractMeta<Operations['s3Provider'][ProviderName]['profiles'], ProfileName> = ExtractMeta<
+				Operations['s3Provider'][ProviderName]['profiles'],
+				ProfileName
+			>
 		>(
-			options: ProfileName extends string
-				? UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta>
-				: UploadRequestOptions<ProviderName>,
-			config?: MutateOptions<string[], ClientResponseError, UploadRequestOptions, Context<QueryClient | undefined>>
+			options: UploadRequestOptions<ProviderName, ProfileName, Meta>,
+			config?: MutateOptions<string[], ResponseError, UploadRequestOptions, Context<QueryClient | undefined>>
 		) => void;
 
 		uploadAsync: <
 			ProviderName extends Extract<keyof Operations['s3Provider'], string>,
-			ProfileName extends Extract<keyof Operations['s3Provider'][ProviderName]['profiles'], string> = Extract<
-				keyof Operations['s3Provider'][ProviderName]['profiles'],
-				string
+			ProfileName extends ExtractProfileName<Operations['s3Provider'][ProviderName]['profiles']> = ExtractProfileName<
+				Operations['s3Provider'][ProviderName]['profiles']
 			>,
-			Meta extends Operations['s3Provider'][ProviderName]['profiles'][ProfileName] = Operations['s3Provider'][ProviderName]['profiles'][ProfileName]
+			Meta extends ExtractMeta<Operations['s3Provider'][ProviderName]['profiles'], ProfileName> = ExtractMeta<
+				Operations['s3Provider'][ProviderName]['profiles'],
+				ProfileName
+			>
 		>(
-			options: Operations['s3Provider'][ProviderName]['hasProfiles'] extends true
-				? UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta>
-				: UploadRequestOptions<ProviderName>,
-			config?: MutateOptions<string[], ClientResponseError, UploadRequestOptions, Context<QueryClient | undefined>>
+			options: UploadRequestOptions<ProviderName, ProfileName, Meta>,
+			config?: MutateOptions<string[], ResponseError, UploadRequestOptions, Context<QueryClient | undefined>>
 		) => Promise<string[] | undefined>;
 	};
 };
