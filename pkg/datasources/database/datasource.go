@@ -28,6 +28,8 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/pool"
 )
 
+const removeNullVariablesDirectiveName = "removeNullVariables"
+
 type Planner struct {
 	visitor                    *plan.Visitor
 	config                     Configuration
@@ -58,6 +60,7 @@ type Planner struct {
 	operationTypeDefinitionRef int
 	isQueryRaw                 bool
 	isQueryRawRow              bool
+	unNullVariables            bool
 }
 
 type inlinedVariable struct {
@@ -159,7 +162,7 @@ func (r *RawJsonVariableRenderer) GetKind() string {
 	return "raw_json"
 }
 
-func (r *RawJsonVariableRenderer) RenderVariable(ctx context.Context, data []byte, out io.Writer) error {
+func (r *RawJsonVariableRenderer) RenderVariable(_ context.Context, data []byte, out io.Writer) error {
 	if !r.parentIsJson {
 		// when the parent is already rendering as a JSON, we don't need to wrap the child in quotes
 		// this happens when using a variable inside the parameters list, e.g.
@@ -177,7 +180,6 @@ func (r *RawJsonVariableRenderer) RenderVariable(ctx context.Context, data []byt
 }
 
 func (p *Planner) ConfigureFetch() plan.FetchConfiguration {
-
 	operation := string(p.printOperation())
 
 	input := fetchInput{
@@ -223,6 +225,10 @@ func (p *Planner) ConfigureFetch() plan.FetchConfiguration {
 		rawInput = []byte(`{"error":` + err.Error() + `}`)
 	}
 
+	if p.unNullVariables {
+		rawInput = httpclient.SetInputFlag(rawInput, httpclient.UNNULLVARIABLES)
+	}
+
 	var engine *LazyEngine
 	if !p.testsSkipEngine {
 		engine = p.engineFactory.Engine(p.config.PrismaSchema, p.config.WunderGraphDir, p.config.CloseTimeoutSeconds)
@@ -256,6 +262,11 @@ func (p *Planner) ConfigureSubscription() plan.SubscriptionConfiguration {
 }
 
 func (p *Planner) EnterOperationDefinition(ref int) {
+	if p.visitor.Operation.OperationDefinitions[ref].HasDirectives &&
+		p.visitor.Operation.OperationDefinitions[ref].Directives.HasDirectiveByName(p.visitor.Operation, removeNullVariablesDirectiveName) {
+		p.unNullVariables = true
+		p.visitor.Operation.OperationDefinitions[ref].Directives.RemoveDirectiveByName(p.visitor.Operation, removeNullVariablesDirectiveName)
+	}
 	operationType := p.visitor.Operation.OperationDefinitions[ref].OperationType
 	if p.isNested {
 		operationType = ast.OperationTypeQuery
@@ -307,7 +318,7 @@ func (p *Planner) EnterSelectionSet(ref int) {
 	}
 }
 
-func (p *Planner) LeaveSelectionSet(ref int) {
+func (p *Planner) LeaveSelectionSet(_ int) {
 
 	if p.insideJsonField {
 		return
@@ -352,7 +363,7 @@ func (p *Planner) EnterInlineFragment(ref int) {
 	p.nodes = append(p.nodes, ast.Node{Kind: ast.NodeKindInlineFragment, Ref: inlineFragment})
 }
 
-func (p *Planner) LeaveInlineFragment(ref int) {
+func (p *Planner) LeaveInlineFragment(_ int) {
 
 	if p.insideJsonField {
 		return
@@ -489,13 +500,13 @@ func (p *Planner) LeaveField(ref int) {
 	p.nodes = p.nodes[:len(p.nodes)-1]
 }
 
-func (p *Planner) EnterArgument(ref int) {
+func (p *Planner) EnterArgument(_ int) {
 	if p.insideJsonField {
 		return
 	}
 }
 
-func (p *Planner) EnterDocument(operation, definition *ast.Document) {
+func (p *Planner) EnterDocument(_, _ *ast.Document) {
 	if p.upstreamOperation == nil {
 		p.upstreamOperation = ast.NewDocument()
 	} else {
@@ -514,7 +525,7 @@ func (p *Planner) EnterDocument(operation, definition *ast.Document) {
 	p.rootFieldRef = -1
 }
 
-func (p *Planner) LeaveDocument(operation, definition *ast.Document) {
+func (p *Planner) LeaveDocument(_, _ *ast.Document) {
 
 }
 
@@ -1047,8 +1058,6 @@ type Source struct {
 	log    *zap.Logger
 }
 
-// {"query":"{findFirstusers(where: {name: {contains: null}}){name id updatedat}}","variables":{}}
-
 func (s *Source) unNullRequest(request []byte) []byte {
 	if end := bytes.Index(request, []byte(": null")); end != -1 {
 		start1 := bytes.LastIndex(request[:end], []byte("{"))
@@ -1089,8 +1098,11 @@ func max(start1 int, start2 int, start3 int, start4 int) int {
 }
 
 func (s *Source) Load(ctx context.Context, input []byte, w io.Writer) (err error) {
+	if httpclient.IsInputFlagSet(input, httpclient.UNNULLVARIABLES) {
+		input = s.unNullRequest(input)
+	}
+	// Prisma does not support variables, and it MUST be set to "{}"
 	request, _ := jsonparser.Set(input, []byte("{}"), "variables")
-	request = s.unNullRequest(request)
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 	cancellableCtx, cancel := context.WithTimeout(ctx, time.Second*5)
