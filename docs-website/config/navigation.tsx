@@ -863,6 +863,15 @@ const navigation = [
 					},
 				],
 			},
+			{
+				title: 'Open Telemetry Tracing',
+				links: [
+					{
+						title: 'Public OpenTelemetry Collector',
+						href: '/docs/cloud/otel-collector',
+					},
+				],
+			},
 		],
 	},
 	{

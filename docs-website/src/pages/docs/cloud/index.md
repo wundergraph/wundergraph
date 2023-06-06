@@ -5,12 +5,9 @@ description: WunderGraph Cloud documentation
 isIndexFile: true
 ---
 
-WunderGraph Cloud is currently in private alpha. WunderGraph cloud allows you to deploy your WunderGraph API to our managed cloud.
-
-{% cta title="WunderGraph Cloud Early Access" primaryActionLabel="Join the Waitlist" primaryActionTypeformId="cn3Zwo5B" %}
-We’re looking for Alpha and Beta testers. Testers will receive access to WunderGraph Cloud and 3 months Cloud Pro for free.
-{% /cta %}
+WunderGraph Cloud is currently in public beta. If you haven't done so already, [sign up](https://cloud.wundergraph.com/).
 
 {% quick-links %}
 {% quick-link title="Deployments" icon="cloud" href="/docs/cloud/deployments" description="How to deploy your API to WunderGraph Cloud." /%}
+{% quick-link title="OpenTelemetry Collector" icon="cloud" href="/docs/cloud/otel-collector" description="How to use WunderGraph public OpenTelemetry Collector to import custom traces from your services." /%}
 {% /quick-links %}

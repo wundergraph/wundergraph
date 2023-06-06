@@ -6,7 +6,7 @@ description: How to deploy to WunderGraph Cloud
 
 # Introduction
 
-WunderGraph Cloud is currently in private alpha. If you haven't done so already, sign up using the banner on the top of this page.
+WunderGraph Cloud is currently in public beta. If you haven't done so already, [sign up](https://cloud.wundergraph.com/).
 
 # Requirements
 
