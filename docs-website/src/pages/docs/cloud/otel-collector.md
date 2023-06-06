@@ -13,6 +13,14 @@ There are different ways to push your traces to the collector, depending on your
 - Endpoint Version: `v1`
 - Supported Protocol: `OTLP/HTTP` (gRPC is not supported)
 
+{% callout type="warning" %}
+The minimum required for our collector to accept your traces is to have the service.name resource attribute on your spans and pass the WunderGraph API-Token through the Authorization HTTP header when making a request to our collector.
+{% /callout %}
+
+## Obtain your WunderGraph API-Token
+
+You can obtain your WunderGraph API-Token from the WunderGraph Cloud dashboard. Go the the `Settings` tab of your project and copy the `API-Token` from the `Telemetry` section.
+
 ## Export to WunderGraph Cloud Collector from your own OpenTelemetry Collector
 
 If you already have your own OpenTelemetry Collector and want to export your traces to WunderGraph, you'd need to add a new `otltphttp` exporter in your config.yml, with WunderGraph API-Token as your Authorization header:
