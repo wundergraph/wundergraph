@@ -19,6 +19,7 @@ import type { WebhooksConfig } from '../webhooks/types';
 import type { HooksRouteConfig } from './plugins/hooks';
 import type { WebHookRouteConfig } from './plugins/webhooks';
 import type {
+	ClientRequest,
 	FastifyRequestBody,
 	HooksConfiguration,
 	ServerRunOptions,
@@ -194,6 +195,29 @@ export const createClientRequest = (body: FastifyRequestBody) => {
 		headers: new Headers(raw?.headers),
 		requestURI: raw?.requestURI || '',
 		method: raw?.method || 'GET',
+	};
+};
+
+/**
+ * Converts a ClientRequest to its raw form, so it can be encoded in the body and sent to the node
+ * @param request A ClientRequest instance
+ * @returns A raw clientRequest as plain object
+ */
+export const encodeRawClientRequest = (request: ClientRequest) => {
+	const headers: Record<string, string> = {};
+	request.headers.forEach((value, key) => {
+		if (headers[key]) {
+			if (value) {
+				headers[key] += `,${value}`;
+			}
+		} else {
+			headers[key] = value;
+		}
+	});
+	return {
+		headers,
+		requestURI: request.requestURI,
+		method: request.method,
 	};
 };
 

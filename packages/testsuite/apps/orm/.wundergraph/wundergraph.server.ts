@@ -35,6 +35,15 @@ export default configureWunderGraphServer(() => ({
 								return context.wundergraph.clientRequest.headers.get('Content-Length');
 							},
 						},
+						clientRequestHeader: {
+							type: GraphQLString,
+							args: {
+								header: { type: GraphQLString },
+							},
+							resolve(obj, args, context, info) {
+								return context.wundergraph.clientRequest.headers.get(args.header);
+							},
+						},
 					},
 				}),
 			}),

@@ -56,10 +56,11 @@ export class NamespacingExecutor implements Executor {
 		document: DocumentNode,
 		variables?: Record<string, unknown> | undefined,
 		namespace?: string,
-		extraHeaders?: Record<string, string> | undefined
+		extraHeaders?: Record<string, string> | undefined,
+		rawClientRequest?: any
 	): Promise<T> {
 		const transformedDocument = namespace ? this.#namespaceOperation(document, namespace) : document;
-		const body = JSON.stringify(this.#buildOperationPayload(transformedDocument, variables));
+		const body = JSON.stringify(this.#buildOperationPayload(transformedDocument, variables, rawClientRequest));
 
 		if (operation === OperationTypeNode.SUBSCRIPTION) {
 			// we create an abort signal to manage request cancellation
@@ -82,12 +83,27 @@ export class NamespacingExecutor implements Executor {
 	// @todo utilize (or re-implement for now) `Client` methods from `./client/client.ts`
 	// OR just take an `InternalClient` instance
 
-	#buildOperationPayload(document: DocumentNode, variables?: Record<string, unknown> | undefined) {
-		return {
+	#buildOperationPayload(
+		document: DocumentNode,
+		variables?: Record<string, unknown> | undefined,
+		rawClientRequest?: any
+	) {
+		const payload: {
+			operationName: undefined;
+			query: string;
+			variables?: Record<string, unknown>;
+			__wg?: any;
+		} = {
 			operationName: undefined,
 			query: print(document),
 			variables,
 		};
+		if (rawClientRequest != null) {
+			payload.__wg = {
+				clientRequest: rawClientRequest,
+			};
+		}
+		return payload;
 	}
 
 	#processJson(json: any, namespace?: string) {

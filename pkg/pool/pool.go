@@ -116,19 +116,19 @@ func (p *Pool) GetShared(ctx context.Context, planConfig plan.Configuration, cfg
 	}
 }
 
-func (p *Pool) GetSharedFromRequest(ctx context.Context, r *http.Request, planConfig plan.Configuration, cfg Config) *Shared {
+func (p *Pool) GetSharedFromRequest(ctx context.Context, clientRequest *http.Request, planConfig plan.Configuration, cfg Config) *Shared {
 	shared := p.pool.Get()
-	c := context.WithValue(r.Context(), ClientRequestKey, r)
+	c := context.WithValue(clientRequest.Context(), ClientRequestKey, clientRequest)
 	if shared != nil {
 		s := shared.(*Shared)
 		s.Planner.SetConfig(planConfig)
 		s.Ctx = s.Ctx.WithContext(c)
-		s.Ctx.Request.Header = r.Header
+		s.Ctx.Request.Header = clientRequest.Header
 		s.Ctx.RenameTypeNames = cfg.RenameTypeNames
 		return s
 	}
 	resolveCtx := resolve.NewContext(c)
-	resolveCtx.Request.Header = r.Header
+	resolveCtx.Request.Header = clientRequest.Header
 	resolveCtx.RenameTypeNames = cfg.RenameTypeNames
 	return &Shared{
 		Doc:         ast.NewDocument(),

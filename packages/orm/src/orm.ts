@@ -5,6 +5,7 @@ export interface ORMConfig {
 	apis: Record<string, any>;
 	executor: Executor;
 	extraHeaders?: Record<string, string>;
+	rawClientRequest?: any;
 }
 
 export class ORM<Schemas extends Record<string, any>> {
@@ -18,6 +19,7 @@ export class ORM<Schemas extends Record<string, any>> {
 			executor: this.config.executor,
 			namespace,
 			extraHeaders: this.config.extraHeaders,
+			rawClientRequest: this.config.rawClientRequest,
 		});
 	}
 
@@ -25,6 +27,13 @@ export class ORM<Schemas extends Record<string, any>> {
 		return new ORM<Schemas>({
 			...this.config,
 			extraHeaders: headers,
+		});
+	}
+
+	withRawClientRequest(rawClientRequest?: any): ORM<Schemas> {
+		return new ORM<Schemas>({
+			...this.config,
+			rawClientRequest,
 		});
 	}
 }

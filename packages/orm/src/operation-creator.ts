@@ -48,6 +48,7 @@ export class OperationCreator<Config extends OperationCreatorConfig> {
 			namespace: string;
 			executor: Executor;
 			extraHeaders?: Record<string, string>;
+			rawClientRequest?: any;
 		}
 	) {}
 
@@ -98,6 +99,7 @@ export class OperationCreator<Config extends OperationCreatorConfig> {
 			executor: this.config.executor,
 			namespace: this.config.namespace,
 			extraHeaders: this.config.extraHeaders,
+			rawClientRequest: this.config.rawClientRequest,
 		});
 	}
 }

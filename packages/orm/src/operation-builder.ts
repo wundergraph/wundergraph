@@ -152,6 +152,7 @@ export class OperationBuilder<Config extends OperationBuilderConfig> {
 			executor: Executor;
 			namespace?: string;
 			extraHeaders?: Record<string, string>;
+			rawClientRequest?: any;
 		}
 	) {
 		this.#rootSelection = selectionSet([field(this.config.rootField, undefined, this.config.typeSelection)]);
@@ -159,7 +160,7 @@ export class OperationBuilder<Config extends OperationBuilderConfig> {
 	}
 
 	#defineVariable(argumentDefinition: GraphQLArgument, value: unknown) {
-		// create a unqiue (but still readable) name for the variable
+		// create a unique (but still readable) name for the variable
 		const name = `${argumentDefinition.name}_${++this.#variableCounter}`;
 		if (!argumentDefinition.astNode?.type) {
 			throw new Error('Unable to determine argument type from schema.');
@@ -349,7 +350,8 @@ export class OperationBuilder<Config extends OperationBuilderConfig> {
 			this.compile(),
 			this.variables,
 			this.config.namespace,
-			this.config.extraHeaders
+			this.config.extraHeaders,
+			this.config.rawClientRequest
 		);
 
 		if (result !== null && typeof (result as any)[Symbol.asyncIterator] === 'function') {

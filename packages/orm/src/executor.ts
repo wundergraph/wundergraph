@@ -6,6 +6,7 @@ export interface Executor {
 		document: DocumentNode,
 		variables?: Record<string, unknown>,
 		namespace?: string,
-		extraHeaders?: Record<string, string>
+		extraHeaders?: Record<string, string>,
+		rawClientRequest?: any
 	): Promise<T>;
 }

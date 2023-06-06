@@ -89,7 +89,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							input: (req.body as any)?.input,
 							operations: operationClient,
 							context: requestContext,
-							graph: orm,
+							graph: orm.withRawClientRequest(clientRequest),
 						};
 
 						switch (implementation.type) {
