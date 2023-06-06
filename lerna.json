@@ -24,7 +24,8 @@
     "packages/react-query",
     "packages/solid-query",
     "packages/svelte-query",
-    "packages/react-relay"
+    "packages/react-relay",
+    "packages/orm"
   ],
   "npmClient": "pnpm",
   "version": "independent"

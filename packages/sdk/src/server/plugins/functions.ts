@@ -16,6 +16,7 @@ import { createClientRequest, rawClientRequest } from '../server';
 import { FastifyRequestBody } from '../types';
 import { Attributes } from '../trace/attributes';
 import { attachErrorToSpan } from '../trace/util';
+import { createLogger } from '../logger';
 
 interface FastifyFunctionsOptions {
 	operationsRequestContext: OperationsAsyncContext;
@@ -82,7 +83,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							traceContext: req.telemetry?.context,
 						});
 						const ctx: HandlerContext<any, any, any, any, any, any, any> = {
-							log: fastify.log,
+							log: createLogger(fastify.log),
 							user: (req.body as any)?.__wg.user!,
 							internalClient: internalClientFactory(headers, clientRequest),
 							clientRequest: createClientRequest(req.body),

@@ -21,6 +21,10 @@ Here's an overview of all the available guides.
 
 {% quick-link title="Extend JSON fields with more specific types" icon="core" href="/docs/guides/extend-json-fields-with-more-specific-types" description="Some databases expose APIs with generic JSON fields. This guide helps you to extend these fields with more specific types to increase type-safety." /%}
 
+{% quick-link title="Logging" icon="core" href="/docs/guides/logging" description="Learn how to use WunderGraph's built-in logging system." /%}
+
+{% quick-link title="Monitoring and observability" icon="core" href="/docs/guides/monitoring-and-observability" description="Learn how to monitor your WunderGraph application." /%}
+
 {% quick-link title="Token based authentication with NextAuth.js" icon="core" href="/docs/guides/token-based-authentication-with-next-auth" description="This Guide helps you to configure Token based authentication." /%}
 
 {% quick-link title="Signing origin requests" icon="core" href="/docs/guides/signing-origin-requests" description="Similarly to injecting a short-lived token, this guide helps you to sign requests, which is a requirement for some APIs." /%}
@@ -42,7 +46,5 @@ Here's an overview of all the available guides.
 {% quick-link title="Extend third party GraphQL APIs" icon="core" href="/docs/guides/extend-third-party-graphql-apis" description="Add custom fields and resolvers to third party APIs that you cannot control." /%}
 
 {% quick-link title="Extend the WunderGraph server context" icon="core" href="/docs/guides/context-factory" description="Use a context factory to extend the WunderGraph server context." /%}
-
-{% quick-link title="Monitoring and observability" icon="core" href="/docs/guides/monitoring-and-observability" description="Learn how to monitor your WunderGraph application." /%}
 
 {% /quick-links %}
