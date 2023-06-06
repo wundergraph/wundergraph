@@ -52,7 +52,6 @@ export type {
 	WebhookHttpResponse,
 	Webhook,
 	WebhookRequestContext,
-	WebhookLogger,
 	WebhookHeaders,
 	WebhookQuery,
 	WebhookConfiguration,
@@ -76,6 +75,8 @@ export { createWebhookFactory } from '../webhooks/factory';
 export { EnvironmentVariable } from '../configure/variables';
 
 export { WgEnv } from '../configure/options';
+
+export type { RequestLogger } from './logger';
 
 export { OperationsClient } from './operations-client';
 

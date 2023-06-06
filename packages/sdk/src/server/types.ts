@@ -1,5 +1,4 @@
 import type { InternalClient, InternalClientFactory } from './internal-client';
-import type { FastifyLoggerInstance } from 'fastify';
 import type { Headers } from '@whatwg-node/fetch';
 import type { GraphQLServerConfig } from './plugins/graphql';
 import type { ConfigurationVariable, WunderGraphConfiguration } from '@wundergraph/protobuf';
@@ -9,6 +8,7 @@ import type { ListenOptions, LoggerLevel, ResolvedListenOptions } from '../confi
 import { OperationsClient } from './operations-client';
 import { GraphQLError } from '../client';
 import { TelemetryOptions } from './trace/trace';
+import { RequestLogger } from './logger';
 
 declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
@@ -88,7 +88,7 @@ export interface BaseRequestContext<
 	/**
 	 * The request logger.
 	 */
-	log: FastifyLoggerInstance;
+	log: RequestLogger;
 	/**
 	 * The internal client that is used to communicate with the server.
 	 * @deprecated Use `operations` instead.

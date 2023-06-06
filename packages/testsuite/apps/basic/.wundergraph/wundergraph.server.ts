@@ -6,7 +6,6 @@ import {
 } from '@wundergraph/sdk/server';
 import { GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql/index';
 import { GraphQLExecutionContext } from './generated/wundergraph.server';
-
 class GlobalContext {
 	constructor() {
 		console.log('create GlobalContext');
@@ -20,13 +19,8 @@ class GlobalContext {
 }
 
 class RequestContext {
-	id: string = (Math.random() + 1).toString(36).substring(7);
-	constructor(private ctx?: GlobalContext) {
-		console.log(`create RequestContext: ${this.id}`);
-	}
-	release() {
-		console.log(`release RequestContext: ${this.id}`);
-	}
+	constructor(private ctx?: GlobalContext) {}
+	release() {}
 	hello() {
 		console.log('hello');
 		return 'world';
@@ -61,7 +55,8 @@ export default configureWunderGraphServer(() => ({
 				},
 			},
 			RequestidGraphql: {
-				mutatingPostResolve: async ({ clientRequest, response }) => {
+				mutatingPostResolve: async ({ clientRequest, response, log }) => {
+					log.info('hello', { from: 'hook' });
 					response.data!.requestId!.code = clientRequest.headers.get('X-Request-ID') || '';
 					return response;
 				},
@@ -104,6 +99,7 @@ export default configureWunderGraphServer(() => ({
 								},
 							},
 							resolve: async (parent, args, ctx) => {
+								ctx.wundergraph.log.info('hello', { from: 'GraphQL server' });
 								return ctx.wundergraph.clientRequest.headers.get(args.header);
 							},
 						},
