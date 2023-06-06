@@ -510,6 +510,9 @@ export const createServer = async ({
 						`ORM is not enabled for your application. Set "experimental.orm" to "true" in your \`wundergraph.config.ts\` to enable.`
 					);
 				},
+				withRawClientRequest() {
+					return this;
+				},
 		  } as any);
 
 	if (config.api?.webhooks && config.api.webhooks.length > 0) {
