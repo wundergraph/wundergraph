@@ -56,6 +56,7 @@ export default configureWunderGraphServer(() => ({
 			},
 			RequestidGraphql: {
 				mutatingPostResolve: async ({ clientRequest, response, log }) => {
+					log.info('hello', { from: 'hook' });
 					response.data!.requestId!.code = clientRequest.headers.get('X-Request-ID') || '';
 					return response;
 				},
@@ -98,6 +99,7 @@ export default configureWunderGraphServer(() => ({
 								},
 							},
 							resolve: async (parent, args, ctx) => {
+								ctx.wundergraph.log.info('hello', { from: 'GraphQL server' });
 								return ctx.wundergraph.clientRequest.headers.get(args.header);
 							},
 						},
