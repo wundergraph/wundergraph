@@ -20,7 +20,7 @@ the `customResolve` hook is called with the following parameters:
 - `response`: The response object (only for postResolve hooks)
 - `input`: The input object (only for Operation hooks)
 
-With the `internalClient`,
+With the `operations` client,
 you're able to securely call into all defined Operations,
 e.g. to talk to a database or another service to enrich a response or manipulate the inputs of an Operation.
 

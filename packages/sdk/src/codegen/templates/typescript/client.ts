@@ -13,6 +13,9 @@ import { liveQueries, modelImports, operations, queries as allQueries, configura
 import templates from '../index';
 import { isWellKnownClaim, wellKnownClaimField } from '../../../graphql/operations';
 
+// Fields in User that are available even if they're not part of PublicClaims
+const alwaysAvailableUserFields = ['expires'];
+
 export class TypeScriptClient implements Template {
 	constructor(reactNative: boolean = false) {}
 	async generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
@@ -63,8 +66,11 @@ export class TypeScriptClient implements Template {
 		const publicWellKnownClaims = generationConfig.config.authentication.publicClaims.filter((claim) =>
 			isWellKnownClaim(claim)
 		);
-		const publicUserFields = publicWellKnownClaims.map((s) => `"${wellKnownClaimField(s)}"`).join(' | ');
-
+		let publicUserFields = publicWellKnownClaims.map((s) => `"${wellKnownClaimField(s)}"`).join(' | ');
+		if (publicUserFields.length > 0) {
+			const alwaysAvailableUserFieldsDefinition = alwaysAvailableUserFields.map((s) => `"${s}"`).join(' | ');
+			publicUserFields = `${publicUserFields} | ${alwaysAvailableUserFieldsDefinition}`;
+		}
 		const content = tmpl({
 			modelImports: modelImports(config.application, false, true),
 			baseURL: config.deployment.environment.baseUrl,
