@@ -28,7 +28,7 @@ class FakeFileSystem implements CodeGenOutWriter {
 test('GenerateCode', async () => {
 	const out = await RunTemplateTest(new FakeTemplate(), new FakeTemplate());
 	expect(out).toEqual({
-		'generated/testFile.txt': 'ClosestPlanets+MyReviews+CreatePet+NewPets',
+		'generated/testFile.txt': 'ClosestPlanets+MyReviews+CreatePet+NewPets+MutationWithUnionInput',
 	});
 });
 
