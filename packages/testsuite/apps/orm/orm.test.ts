@@ -49,7 +49,9 @@ describe('The WunderGraph ORM', () => {
 				},
 			});
 			expect(error).toBeUndefined();
-			expect(data?.value).toBe(headerValue);
+			expect(data?.forwarded).toBe(headerValue);
+			expect(data?.overridden).toBe(`${headerValue}_override`);
+			expect(data?.added).toBe(headerValue);
 		}
 	});
 
@@ -64,7 +66,9 @@ describe('The WunderGraph ORM', () => {
 			},
 		});
 		expect(error).toBeUndefined();
-		expect(data?.value).toBe(headerValue);
+		expect(data?.forwarded).toBe(headerValue);
+		expect(data?.overridden).toBe(`${headerValue}_override`);
+		expect(data?.added).toBe(headerValue);
 	});
 
 	it('should add custom headers', async () => {
