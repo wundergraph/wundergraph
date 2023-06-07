@@ -1,0 +1,9 @@
+mutation ($input: pocket_FriendInput!) {
+	pocket_createFriend(input: $input) {
+		id
+		details {
+			name
+			age
+		}
+	}
+}

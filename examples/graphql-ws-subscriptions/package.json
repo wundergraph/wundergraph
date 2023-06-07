@@ -16,7 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "@fastify/websocket": "^7.0.1",
-    "@wundergraph/sdk": "^0.159.0",
+    "@wundergraph/sdk": "^0.164.0",
     "fastify": "^4.6.0",
     "graphql": "^16.3.0",
     "graphql-ws": "^5.11.2",

@@ -115,7 +115,9 @@ describe('Invalid proxy configurations', () => {
 		const ts = createTestAndMockServer({
 			dir: __dirname,
 		});
-		const cleanup = await ts.start();
+		const cleanup = await ts.start({
+			mockURLEnvs: ['WG_HTTP_PROXY'],
+		});
 		onTestFailed(() => cleanup());
 
 		const scope = ts.mockServer.assertHTTPConnect({

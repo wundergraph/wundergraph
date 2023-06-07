@@ -151,6 +151,7 @@ export class OperationBuilder<Config extends OperationBuilderConfig> {
 			typeSelection: SelectionSet<any> | undefined;
 			executor: Executor;
 			namespace?: string;
+			extraHeaders?: Record<string, string>;
 		}
 	) {
 		this.#rootSelection = selectionSet([field(this.config.rootField, undefined, this.config.typeSelection)]);
@@ -347,7 +348,8 @@ export class OperationBuilder<Config extends OperationBuilderConfig> {
 			this.config.rootType,
 			this.compile(),
 			this.variables,
-			this.config.namespace
+			this.config.namespace,
+			this.config.extraHeaders
 		);
 
 		if (result !== null && typeof (result as any)[Symbol.asyncIterator] === 'function') {

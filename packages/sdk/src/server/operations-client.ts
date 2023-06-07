@@ -7,6 +7,10 @@ import {
 	QueryRequestOptions,
 	SubscriptionRequestOptions,
 } from '../client';
+import { SpanKind, Tracer, trace, Context, propagation, Span } from '@opentelemetry/api';
+import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
+import { Attributes, Components } from './trace/attributes';
+import { attachErrorToSpan, setStatusFromResponseCode } from './trace/util';
 
 // Web API compatible fetch API for nodejs.
 import { fetch } from '@whatwg-node/fetch';
@@ -31,6 +35,8 @@ export interface OperationsClientConfig extends Omit<ClientConfig, 'csrfEnabled'
 	 * raw JSON encoded client request
 	 */
 	clientRequest: any;
+	tracer?: Tracer;
+	traceContext?: Context;
 }
 
 export type InternalOperation = {
@@ -65,6 +71,8 @@ export class OperationsClient<
 	protected readonly csrfEnabled = false;
 
 	protected readonly clientRequest: any;
+	protected readonly tracer?: Tracer;
+	protected readonly traceContext?: Context;
 
 	constructor(options: OperationsClientConfig) {
 		const { clientRequest, customFetch = fetch, ...rest } = options;
@@ -84,6 +92,8 @@ export class OperationsClient<
 				}
 			}
 		}
+		this.tracer = options.tracer;
+		this.traceContext = options.traceContext;
 	}
 
 	protected operationUrl(operationName: string) {
@@ -119,7 +129,7 @@ export class OperationsClient<
 		}
 
 		const url = this.addUrlParams(this.operationUrl(options.operationName), searchParams);
-		const res = await this.fetchJson(url, {
+		const res = await this.makeRequest(url, {
 			method: 'POST',
 			body: this.stringifyInput(params),
 			signal: options.abortSignal,
@@ -127,6 +137,57 @@ export class OperationsClient<
 
 		return this.fetchResponseToClientResponse(res);
 	};
+
+	protected async makeRequest(url: string, init: RequestInit = {}) {
+		const method = init.method;
+		const spanName = `OperationsClient ${method}`;
+		let span: Span | undefined;
+
+		// Ensure that we have a headers object to inject into
+		init.headers = {
+			...init.headers,
+		};
+
+		if (this.traceContext && this.tracer) {
+			span = this.tracer.startSpan(
+				spanName,
+				{
+					kind: SpanKind.CLIENT,
+					attributes: {
+						[SemanticAttributes.HTTP_METHOD]: method,
+						[SemanticAttributes.HTTP_URL]: url,
+						[Attributes.WG_COMPONENT_NAME]: Components.OPERATIONS_CLIENT,
+					},
+				},
+				this.traceContext
+			);
+			// Inject the span context into the headers
+			propagation.inject(trace.setSpan(this.traceContext, span), init.headers);
+		}
+
+		try {
+			const res = await this.fetchJson(url, init);
+
+			if (span) {
+				setStatusFromResponseCode(span, res.status);
+				span.setAttributes({
+					[SemanticAttributes.HTTP_STATUS_CODE]: res.status,
+					[SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH]: res.headers.get('content-length') ?? 0,
+				});
+			}
+
+			return res;
+		} catch (err: any) {
+			if (span) {
+				// Mark the request as errored and attach information about the error
+				attachErrorToSpan(span, err);
+			}
+			// Rethrow the error, we don't want to change the error handling
+			throw err;
+		} finally {
+			span?.end();
+		}
+	}
 
 	public mutate = async <
 		OperationName extends Extract<keyof Operations['mutations'], string>,
@@ -178,7 +239,7 @@ export class OperationsClient<
 		}
 
 		const url = this.addUrlParams(this.operationUrl(subscription.operationName), searchParams);
-		return this.fetchJson(url, {
+		return await this.makeRequest(url, {
 			method: 'POST',
 			body: this.stringifyInput(params),
 			signal: subscription.abortSignal,

@@ -74,6 +74,7 @@ configureWunderGraphApplication({
         'http://localhost:3000/demo',
         'http://localhost:3000/generatedform',
       ],
+      timeoutSeconds: 600; // optional, defaults to 10 minutes
     },
   },
 });

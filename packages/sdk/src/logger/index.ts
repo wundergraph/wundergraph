@@ -2,6 +2,7 @@ import { ConfigurationVariable, LogLevel, logLevelFromJSON } from '@wundergraph/
 import { resolveConfigurationVariable } from '../configure/variables';
 import { DestinationStream, pino } from 'pino';
 import pretty from 'pino-pretty';
+import { pinoOptions } from '../server/logger';
 
 export enum PinoLogLevel {
 	Fatal = 'fatal',
@@ -50,12 +51,8 @@ const initLogger = (destination: DestinationStream): pino.Logger => {
 			: PinoLogLevel.Info;
 
 	let options: pino.LoggerOptions = {
+		...pinoOptions(),
 		level: logLevel,
-		formatters: {
-			level(label, number) {
-				return { level: label };
-			},
-		},
 	};
 
 	if (enablePretty) {

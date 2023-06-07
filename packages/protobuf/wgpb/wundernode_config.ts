@@ -746,6 +746,7 @@ export interface CookieBasedAuthentication {
   hashKey: ConfigurationVariable | undefined;
   blockKey: ConfigurationVariable | undefined;
   csrfSecret: ConfigurationVariable | undefined;
+  timeoutSeconds: ConfigurationVariable | undefined;
 }
 
 export interface AuthProvider {
@@ -1149,7 +1150,15 @@ export interface NodeOptions {
   listenInternal: InternalListenerOptions | undefined;
   nodeInternalUrl: ConfigurationVariable | undefined;
   defaultHttpProxyUrl: ConfigurationVariable | undefined;
+  openTelemetry: TelemetryOptions | undefined;
   prometheus: PrometheusOptions | undefined;
+}
+
+export interface TelemetryOptions {
+  enabled: ConfigurationVariable | undefined;
+  exporterHttpEndpoint: ConfigurationVariable | undefined;
+  sampler: ConfigurationVariable | undefined;
+  authToken: ConfigurationVariable | undefined;
 }
 
 export interface ServerLogging {
@@ -1427,6 +1436,7 @@ function createBaseCookieBasedAuthentication(): CookieBasedAuthentication {
     hashKey: undefined,
     blockKey: undefined,
     csrfSecret: undefined,
+    timeoutSeconds: undefined,
   };
 }
 
@@ -1443,6 +1453,7 @@ export const CookieBasedAuthentication = {
       hashKey: isSet(object.hashKey) ? ConfigurationVariable.fromJSON(object.hashKey) : undefined,
       blockKey: isSet(object.blockKey) ? ConfigurationVariable.fromJSON(object.blockKey) : undefined,
       csrfSecret: isSet(object.csrfSecret) ? ConfigurationVariable.fromJSON(object.csrfSecret) : undefined,
+      timeoutSeconds: isSet(object.timeoutSeconds) ? ConfigurationVariable.fromJSON(object.timeoutSeconds) : undefined,
     };
   },
 
@@ -1473,6 +1484,8 @@ export const CookieBasedAuthentication = {
       (obj.blockKey = message.blockKey ? ConfigurationVariable.toJSON(message.blockKey) : undefined);
     message.csrfSecret !== undefined &&
       (obj.csrfSecret = message.csrfSecret ? ConfigurationVariable.toJSON(message.csrfSecret) : undefined);
+    message.timeoutSeconds !== undefined &&
+      (obj.timeoutSeconds = message.timeoutSeconds ? ConfigurationVariable.toJSON(message.timeoutSeconds) : undefined);
     return obj;
   },
 
@@ -1491,6 +1504,9 @@ export const CookieBasedAuthentication = {
       : undefined;
     message.csrfSecret = (object.csrfSecret !== undefined && object.csrfSecret !== null)
       ? ConfigurationVariable.fromPartial(object.csrfSecret)
+      : undefined;
+    message.timeoutSeconds = (object.timeoutSeconds !== undefined && object.timeoutSeconds !== null)
+      ? ConfigurationVariable.fromPartial(object.timeoutSeconds)
       : undefined;
     return message;
   },
@@ -3901,6 +3917,7 @@ function createBaseNodeOptions(): NodeOptions {
     listenInternal: undefined,
     nodeInternalUrl: undefined,
     defaultHttpProxyUrl: undefined,
+    openTelemetry: undefined,
     prometheus: undefined,
   };
 }
@@ -3924,6 +3941,7 @@ export const NodeOptions = {
       defaultHttpProxyUrl: isSet(object.defaultHttpProxyUrl)
         ? ConfigurationVariable.fromJSON(object.defaultHttpProxyUrl)
         : undefined,
+      openTelemetry: isSet(object.openTelemetry) ? TelemetryOptions.fromJSON(object.openTelemetry) : undefined,
       prometheus: isSet(object.prometheus) ? PrometheusOptions.fromJSON(object.prometheus) : undefined,
     };
   },
@@ -3949,6 +3967,8 @@ export const NodeOptions = {
     message.defaultHttpProxyUrl !== undefined && (obj.defaultHttpProxyUrl = message.defaultHttpProxyUrl
       ? ConfigurationVariable.toJSON(message.defaultHttpProxyUrl)
       : undefined);
+    message.openTelemetry !== undefined &&
+      (obj.openTelemetry = message.openTelemetry ? TelemetryOptions.toJSON(message.openTelemetry) : undefined);
     message.prometheus !== undefined &&
       (obj.prometheus = message.prometheus ? PrometheusOptions.toJSON(message.prometheus) : undefined);
     return obj;
@@ -3978,8 +3998,59 @@ export const NodeOptions = {
     message.defaultHttpProxyUrl = (object.defaultHttpProxyUrl !== undefined && object.defaultHttpProxyUrl !== null)
       ? ConfigurationVariable.fromPartial(object.defaultHttpProxyUrl)
       : undefined;
+    message.openTelemetry = (object.openTelemetry !== undefined && object.openTelemetry !== null)
+      ? TelemetryOptions.fromPartial(object.openTelemetry)
+      : undefined;
     message.prometheus = (object.prometheus !== undefined && object.prometheus !== null)
       ? PrometheusOptions.fromPartial(object.prometheus)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseTelemetryOptions(): TelemetryOptions {
+  return { enabled: undefined, exporterHttpEndpoint: undefined, sampler: undefined, authToken: undefined };
+}
+
+export const TelemetryOptions = {
+  fromJSON(object: any): TelemetryOptions {
+    return {
+      enabled: isSet(object.enabled) ? ConfigurationVariable.fromJSON(object.enabled) : undefined,
+      exporterHttpEndpoint: isSet(object.exporterHttpEndpoint)
+        ? ConfigurationVariable.fromJSON(object.exporterHttpEndpoint)
+        : undefined,
+      sampler: isSet(object.sampler) ? ConfigurationVariable.fromJSON(object.sampler) : undefined,
+      authToken: isSet(object.authToken) ? ConfigurationVariable.fromJSON(object.authToken) : undefined,
+    };
+  },
+
+  toJSON(message: TelemetryOptions): unknown {
+    const obj: any = {};
+    message.enabled !== undefined &&
+      (obj.enabled = message.enabled ? ConfigurationVariable.toJSON(message.enabled) : undefined);
+    message.exporterHttpEndpoint !== undefined && (obj.exporterHttpEndpoint = message.exporterHttpEndpoint
+      ? ConfigurationVariable.toJSON(message.exporterHttpEndpoint)
+      : undefined);
+    message.sampler !== undefined &&
+      (obj.sampler = message.sampler ? ConfigurationVariable.toJSON(message.sampler) : undefined);
+    message.authToken !== undefined &&
+      (obj.authToken = message.authToken ? ConfigurationVariable.toJSON(message.authToken) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<TelemetryOptions>, I>>(object: I): TelemetryOptions {
+    const message = createBaseTelemetryOptions();
+    message.enabled = (object.enabled !== undefined && object.enabled !== null)
+      ? ConfigurationVariable.fromPartial(object.enabled)
+      : undefined;
+    message.exporterHttpEndpoint = (object.exporterHttpEndpoint !== undefined && object.exporterHttpEndpoint !== null)
+      ? ConfigurationVariable.fromPartial(object.exporterHttpEndpoint)
+      : undefined;
+    message.sampler = (object.sampler !== undefined && object.sampler !== null)
+      ? ConfigurationVariable.fromPartial(object.sampler)
+      : undefined;
+    message.authToken = (object.authToken !== undefined && object.authToken !== null)
+      ? ConfigurationVariable.fromPartial(object.authToken)
       : undefined;
     return message;
   },
