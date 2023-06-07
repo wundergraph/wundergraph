@@ -8,8 +8,8 @@ describe('introspectOpenApiV2', () => {
 		const files = [
 			'spotify.yaml', // x-extension fields
 			'union-types.yaml',
-			// 'Looker.4.0.oas.json', // objects with name Query
-			// 'split_over_files.yaml', // relative path in $ref
+			'Looker.4.0.oas.json', // objects with name Query
+			'split_over_files.yaml', // relative path in $ref
 		];
 
 		const runTest = (filePath: string) => {

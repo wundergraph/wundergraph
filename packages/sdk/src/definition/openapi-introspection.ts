@@ -5,12 +5,13 @@ import fs from 'fs/promises';
 import {
 	ApiIntrospectionOptions,
 	GraphQLApi,
-	OpenAPIIntrospection,
-	OpenAPIIntrospectionSource,
+	HTTPUpstream,
+	ReplaceCustomScalarTypeFieldConfiguration,
 	RESTApi,
 } from './index';
 import { openApiSpecificationToRESTApiObject } from '../v2openapi';
 import { introspectWithCache } from './introspection-cache';
+import { OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 import yaml from 'js-yaml';
 import { HeadersBuilder } from './headers-builder';
 import { getJSONSchemaOptionsFromOpenAPIOptions } from '@omnigraph/openapi';
@@ -18,6 +19,31 @@ import { loadNonExecutableGraphQLSchemaFromJSONSchemas } from '@omnigraph/json-s
 import { printSchemaWithDirectives } from '@graphql-tools/utils';
 import { introspectGraphql } from './graphql-introspection';
 import { WgEnv } from '../configure/options';
+import { InputVariable } from '../configure/variables';
+
+export interface OpenAPIIntrospectionFile {
+	kind: 'file';
+	filePath: string;
+}
+
+export interface OpenAPIIntrospectionString {
+	kind: 'string';
+	openAPISpec: string;
+}
+
+export interface OpenAPIIntrospectionObject {
+	kind: 'object';
+	openAPIObject: {};
+}
+
+export interface OpenAPIIntrospectionUrl {
+	kind: 'url';
+	url: string;
+}
+
+/*
+ * OpenAPI introspection
+ */
 
 const loadOpenApi = async (source: OpenAPIIntrospectionSource) => {
 	switch (source.kind) {
@@ -37,6 +63,25 @@ export const readFile = async (filePath: string) => {
 	return fs.readFile(fullPath, { encoding: 'utf-8' });
 };
 
+export type OpenAPIIntrospectionSource =
+	| OpenAPIIntrospectionFile
+	| OpenAPIIntrospectionString
+	| OpenAPIIntrospectionObject;
+
+export interface OpenAPIIntrospection extends HTTPUpstream {
+	source: OpenAPIIntrospectionSource;
+	// statusCodeUnions set to true will make all responses return a union type of all possible response objects,
+	// mapped by status code
+	// by default, only the status 200 response is mapped, which keeps the GraphQL API flat
+	// by enabling statusCodeUnions, you have to unwrap the response union via fragments for each response
+	statusCodeUnions?: boolean;
+	baseURL?: InputVariable;
+	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
+	// this is useful for specifying type definitions for JSON objects
+	schemaExtension?: string;
+	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
+}
+
 export const introspectOpenApi = async (introspection: OpenAPIIntrospection) => {
 	const spec = await loadOpenApi(introspection.source);
 	const configuration = { keyInput: spec, source: 'localFilesystem' };
@@ -49,12 +94,30 @@ export const introspectOpenApi = async (introspection: OpenAPIIntrospection) => 
 	);
 };
 
+/*
+ * OpenAPIV2 introspection
+ */
+
+export type OpenAPIIntrospectionV2Source =
+	| OpenAPIIntrospectionFile
+	| OpenAPIIntrospectionString
+	| OpenAPIIntrospectionObject
+	| OpenAPIIntrospectionUrl;
+
 export interface OpenAPIIntrospectionV2
-	extends Omit<OpenAPIIntrospection, 'statusCodeUnions' | 'authentication' | 'mTLS' | 'requestTimeoutSeconds'> {}
+	extends Omit<HTTPUpstream, 'authentication' | 'mTLS' | 'requestTimeoutSeconds'> {
+	source: OpenAPIIntrospectionV2Source;
+	baseURL?: InputVariable;
+	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
+	// this is useful for specifying type definitions for JSON objects
+	schemaExtension?: string;
+	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
+}
 
 export const introspectOpenApiV2 = async (introspection: OpenAPIIntrospectionV2) => {
 	const specSource = getSource(introspection.source);
-	const configuration = { keyInput: specSource, source: 'localFilesystem' };
+	const keyInput = JSON.stringify(specSource);
+	const configuration = { keyInput, source: 'localFilesystem' };
 	return introspectWithCache(
 		introspection,
 		configuration,
@@ -64,8 +127,10 @@ export const introspectOpenApiV2 = async (introspection: OpenAPIIntrospectionV2)
 	);
 };
 
+type OasSource = string | OpenAPIV3.Document | OpenAPIV2.Document;
+
 interface OpenApiOptions {
-	source: string;
+	source: OasSource;
 	cwd: string;
 	endpoint?: string;
 	name: string;
@@ -73,7 +138,7 @@ interface OpenApiOptions {
 }
 
 export const openApiSpecificationToGraphQLApi = async (
-	source: string, // could be json, file path or url
+	source: OasSource, // could be json, file path or url
 	introspection: OpenAPIIntrospectionV2,
 	apiID: string
 ): Promise<GraphQLApi> => {
@@ -124,12 +189,14 @@ export const openApiSpecificationToGraphQLApi = async (
 	);
 };
 
-const getSource = (source: OpenAPIIntrospectionSource): string => {
+const getSource = (source: OpenAPIIntrospectionV2Source): OasSource => {
 	switch (source.kind) {
 		case 'file':
-			return source.filePath; // let omnigraph handle reading spec
+			return source.filePath; // let omnigraph read spec
+		case 'url':
+			return source.url; // let omnigraph download spec
 		case 'object':
-			return JSON.stringify(source.openAPIObject);
+			return source.openAPIObject as any;
 		case 'string':
 			return tryReadSpec(source.openAPISpec);
 		default:
@@ -137,13 +204,13 @@ const getSource = (source: OpenAPIIntrospectionSource): string => {
 	}
 };
 
-const tryReadSpec = (spec: string): string => {
+const tryReadSpec = (spec: string): OasSource => {
 	try {
-		return JSON.stringify(JSON.parse(spec));
+		return JSON.parse(spec);
 	} catch (e) {
 		const obj = yaml.load(spec);
 		if (obj) {
-			return JSON.stringify(obj);
+			return obj as any;
 		}
 		throw new Error('cannot read OAS: ${e}');
 	}
