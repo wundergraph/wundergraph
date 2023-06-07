@@ -15,7 +15,7 @@ const webhook = createWebhook<WebhookHttpEvent<WebhookEvent>, WebhookHttpRespons
 		// and don't bundle them into the webhook.
 		buildSchema(`scalar DateTime`);
 
-		context.log.info(event.headers);
+		context.log.info('headers', event.headers);
 
 		return {
 			statusCode: 200,

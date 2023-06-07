@@ -39,6 +39,7 @@ import { propagation } from '@opentelemetry/api';
 import { CreateServerOptions, TracerConfig } from './types';
 import { loadTraceConfigFromWgConfig } from './trace/config';
 import { TelemetryPluginOptions } from './plugins/telemetry';
+import { createLogger } from './logger';
 
 const isProduction = process.env.NODE_ENV === 'production';
 let WG_CONFIG: WunderGraphConfiguration;
@@ -411,7 +412,7 @@ export const createServer = async ({
 			}
 
 			req.ctx = {
-				log: req.log,
+				log: createLogger(req.log),
 				user: req.body.__wg.user!,
 				clientRequest,
 				internalClient: clientFactory(headers, clientRequest),

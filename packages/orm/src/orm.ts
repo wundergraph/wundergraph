@@ -9,6 +9,11 @@ export interface ORMConfig {
 	extraHeaders?: Record<string, string>;
 }
 
+/**
+ * WunderGraph ORM Client
+ *
+ * @see Docs https://docs.wundergraph.com/docs/typescript-orm-reference
+ */
 export class ORM<Schemas extends Record<string, any>> {
 	constructor(public readonly config: ORMConfig) {}
 

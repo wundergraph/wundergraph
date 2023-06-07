@@ -20,7 +20,7 @@ the `preResolve` hook is called with the following parameters:
 - `internalClient`: The internal client object, _deprecated_
 - `input`: The input object (only for Operation hooks)
 
-With the `internalClient`,
+With the `operations` client,
 you're able to securely call into all defined Operations,
 e.g. to talk to a database or another service to enrich a response or manipulate the inputs of an Operation.
 
