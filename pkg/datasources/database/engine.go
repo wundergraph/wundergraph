@@ -288,7 +288,10 @@ func (e *Engine) StartQueryEngine(schema string) error {
 	}
 	err = temporaryFile.Close()
 	if err != nil {
-		os.Remove(temporaryFile.Name())
+		pathError := os.Remove(temporaryFile.Name())
+		if pathError != nil {
+			e.log.Error("Error while deleting temporary schema file : ", zap.Error(pathError))
+		}
 		return err
 	}
 	e.cmd.Env = append(e.cmd.Env, "PRISMA_DML_PATH="+temporaryFile.Name())
