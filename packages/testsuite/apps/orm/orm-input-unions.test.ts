@@ -23,8 +23,12 @@ describe('The WunderGraph ORM - input unions', () => {
 				return url.path === '/test' && method === 'POST';
 			},
 			handler: async ({ json }) => {
-				return await json();
+				const j = await json();
+				return {
+					body: JSON.stringify(j),
+				};
 			},
+			times: 2,
 		});
 
 		const result = await ts.testServer.client().query({
@@ -36,8 +40,14 @@ describe('The WunderGraph ORM - input unions', () => {
 		expect(result.error).toBeUndefined();
 		expect(result.data).toBeDefined();
 		expect(result.data).toEqual({
-			responseA: 'A',
-			responseB: { B: 'VALUE' },
+			responseA: {
+				A_const: 'A',
+				__typename: 'A_const_container',
+			},
+			responseB: {
+				B: 'VALUE',
+				__typename: 'mutation_test_endpoint_oneOf_1',
+			},
 		});
 	});
 });
