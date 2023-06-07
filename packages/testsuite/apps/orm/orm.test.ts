@@ -53,6 +53,20 @@ describe('The WunderGraph ORM', () => {
 		}
 	});
 
+	it('it should pass a clientRequest to the internal GraphQL server via a GraphQL operation', async () => {
+		const client = wg.client();
+		const headerValue = 'Bar';
+		client.setExtraHeaders({ 'X-Foo': headerValue });
+		const { data, error } = await client.query({
+			operationName: 'clientRequestHeaderViaGQL',
+			input: {
+				header: 'X-Foo',
+			},
+		});
+		expect(error).toBeUndefined();
+		expect(data?.value).toBe(headerValue);
+	});
+
 	it('should add custom headers', async () => {
 		const client = wg.client();
 		const { data, error } = await client.query({

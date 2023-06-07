@@ -48,12 +48,12 @@ func GetCtx(r, clientRequest *http.Request, cfg Config) *resolve.Context {
 	ctx := context.WithValue(r.Context(), ClientRequestKey, clientRequest)
 	if next == nil {
 		resolveCtx := resolve.NewContext(ctx)
-		resolveCtx.Request.Header = r.Header
+		resolveCtx.Request.Header = clientRequest.Header
 		resolveCtx.RenameTypeNames = cfg.RenameTypeNames
 		return resolveCtx
 	}
 	resolveContext := next.(*resolve.Context).WithContext(ctx)
-	resolveContext.Request.Header = r.Header
+	resolveContext.Request.Header = clientRequest.Header
 	resolveContext.RenameTypeNames = cfg.RenameTypeNames
 	return resolveContext
 }
