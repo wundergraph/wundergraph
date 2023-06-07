@@ -20,7 +20,7 @@ The minimum required for our collector to accept your traces is to have the serv
 
 ## Obtain your WunderGraph API-Token
 
-You can obtain your WunderGraph API-Token from the WunderGraph Cloud dashboard. Go the the `Settings` tab of your project and copy the `API-Token` from the `Telemetry` section.
+You can obtain your WunderGraph API-Token from the WunderGraph Cloud dashboard. Go the the `Settings` tab of your organization and copy the `API-Token` from the `Telemetry` section.
 
 ## Export to WunderGraph Cloud Collector from your own OpenTelemetry Collector
 
