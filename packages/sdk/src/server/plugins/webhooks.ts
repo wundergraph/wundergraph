@@ -4,13 +4,12 @@ import type { ORM } from '@wundergraph/orm';
 
 import { Webhook, WebhookHeaders, WebhookQuery } from '../../webhooks/types';
 import { Headers } from '@whatwg-node/fetch';
-import type { RequestMethod } from '../types';
+import type { ClientRequest, RequestMethod } from '../types';
 import type { WebhookConfiguration } from '@wundergraph/protobuf';
 import type { InternalClientFactory } from '../internal-client';
 import process from 'node:process';
 import { OperationsClient } from '../operations-client';
 import { propagation, trace } from '@opentelemetry/api';
-import { encodeRawClientRequest } from '../server';
 import { Attributes } from '../trace/attributes';
 import { attachErrorToSpan } from '../trace/util';
 
@@ -63,7 +62,6 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 							tracer: fastify.tracer,
 							traceContext: req.telemetry?.context,
 						});
-						const rawClientRequest = encodeRawClientRequest(clientRequest);
 						const eventResponse = await webhook.handler(
 							{
 								method: req.method as RequestMethod,
@@ -77,7 +75,7 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 								internalClient: config.internalClientFactory(headers, clientRequest),
 								operations: operationClient,
 								clientRequest,
-								graph: config.orm.withRawClientRequest(rawClientRequest),
+								graph: config.orm.withClientRequest(clientRequest),
 								context: requestContext,
 							}
 						);

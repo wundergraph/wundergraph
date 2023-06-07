@@ -203,7 +203,7 @@ export const createClientRequest = (body: FastifyRequestBody) => {
  * @param request A ClientRequest instance
  * @returns A raw clientRequest as plain object
  */
-export const encodeRawClientRequest = (request: ClientRequest) => {
+export const encodeRawClientRequest = (request: ClientRequest, extraHeaders?: Record<string, string>) => {
 	const headers: Record<string, string> = {};
 	request.headers.forEach((value, key) => {
 		if (headers[key]) {
@@ -214,6 +214,13 @@ export const encodeRawClientRequest = (request: ClientRequest) => {
 			headers[key] = value;
 		}
 	});
+	// To allow operations to access the headers set in extraHeaders, override
+	// the header values in the clientRequest sent to the node
+	if (extraHeaders != null) {
+		for (const key of Object.keys(extraHeaders)) {
+			headers[key] = extraHeaders[key];
+		}
+	}
 	return {
 		headers,
 		requestURI: request.requestURI,
@@ -387,10 +394,10 @@ export const createServer = async ({
 				log: req.log,
 				user: req.body.__wg.user!,
 				clientRequest,
-				internalClient: clientFactory(headers, req.body.__wg.clientRequest),
+				internalClient: clientFactory(headers, clientRequest),
 				operations: new OperationsClient({
 					baseURL: nodeInternalURL,
-					clientRequest: req.body.__wg.clientRequest,
+					clientRequest,
 					extraHeaders: headers,
 					tracer: fastify.tracer,
 					traceContext: req.telemetry?.context,
@@ -510,7 +517,7 @@ export const createServer = async ({
 						`ORM is not enabled for your application. Set "experimental.orm" to "true" in your \`wundergraph.config.ts\` to enable.`
 					);
 				},
-				withRawClientRequest() {
+				withClientRequest() {
 					return this;
 				},
 		  } as any);

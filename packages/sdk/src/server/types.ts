@@ -158,14 +158,14 @@ export interface ClientRequestHeaders extends Headers {}
 
 export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
 
-export interface ClientRequest<H = ClientRequestHeaders> {
+export interface ClientRequest {
 	method: RequestMethod;
 	requestURI: string;
 	/**
 	 * Contains all client request headers. You can manipulate the map to add or remove headers.
 	 * This might impact upstream hooks. Global hooks don't take changes into account.
 	 */
-	headers: H;
+	headers: ClientRequestHeaders;
 }
 
 export interface WunderGraphRequest {

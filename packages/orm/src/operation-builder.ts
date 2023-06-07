@@ -43,6 +43,7 @@ import { FragmentDefinitionBuilder } from './fragment-definition-builder';
 import { AddFragment } from './add-fragment-selection';
 import { Result } from './result';
 import { Executor } from './executor';
+import { ClientRequest } from './internal-types';
 
 export interface OperationBuilderConfig {
 	// @todo replace w/SchemaDefinitionNode (or thin TypeScript wrapper of `SchemaDefinition`)
@@ -151,8 +152,8 @@ export class OperationBuilder<Config extends OperationBuilderConfig> {
 			typeSelection: SelectionSet<any> | undefined;
 			executor: Executor;
 			namespace?: string;
+			clientRequest?: ClientRequest;
 			extraHeaders?: Record<string, string>;
-			rawClientRequest?: any;
 		}
 	) {
 		this.#rootSelection = selectionSet([field(this.config.rootField, undefined, this.config.typeSelection)]);
@@ -350,8 +351,8 @@ export class OperationBuilder<Config extends OperationBuilderConfig> {
 			this.compile(),
 			this.variables,
 			this.config.namespace,
-			this.config.extraHeaders,
-			this.config.rawClientRequest
+			this.config.clientRequest,
+			this.config.extraHeaders
 		);
 
 		if (result !== null && typeof (result as any)[Symbol.asyncIterator] === 'function') {

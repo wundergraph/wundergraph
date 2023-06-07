@@ -6,6 +6,7 @@ import { defaultSelection, type DefaultSelection } from './selections';
 
 import { OperationBuilder } from './operation-builder';
 import { Executor } from './executor';
+import { ClientRequest } from './internal-types';
 
 interface OperationCreatorConfig {
 	// @todo replace with type-annotated `SchemaDefinitionNode`
@@ -47,8 +48,8 @@ export class OperationCreator<Config extends OperationCreatorConfig> {
 			schema: GraphQLSchema;
 			namespace: string;
 			executor: Executor;
+			clientRequest?: ClientRequest;
 			extraHeaders?: Record<string, string>;
-			rawClientRequest?: any;
 		}
 	) {}
 
@@ -98,8 +99,8 @@ export class OperationCreator<Config extends OperationCreatorConfig> {
 			typeSelection: selection,
 			executor: this.config.executor,
 			namespace: this.config.namespace,
+			clientRequest: this.config.clientRequest,
 			extraHeaders: this.config.extraHeaders,
-			rawClientRequest: this.config.rawClientRequest,
 		});
 	}
 }

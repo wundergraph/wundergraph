@@ -1,11 +1,12 @@
 import { OperationCreator } from './operation-creator';
 import type { Executor } from './executor';
+import { ClientRequest } from './internal-types';
 
 export interface ORMConfig {
 	apis: Record<string, any>;
 	executor: Executor;
+	clientRequest?: ClientRequest;
 	extraHeaders?: Record<string, string>;
-	rawClientRequest?: any;
 }
 
 export class ORM<Schemas extends Record<string, any>> {
@@ -18,8 +19,8 @@ export class ORM<Schemas extends Record<string, any>> {
 			schema: (this.config.apis as any)[namespace],
 			executor: this.config.executor,
 			namespace,
+			clientRequest: this.config.clientRequest,
 			extraHeaders: this.config.extraHeaders,
-			rawClientRequest: this.config.rawClientRequest,
 		});
 	}
 
@@ -30,10 +31,10 @@ export class ORM<Schemas extends Record<string, any>> {
 		});
 	}
 
-	withRawClientRequest(rawClientRequest?: any): ORM<Schemas> {
+	withClientRequest(clientRequest: ClientRequest): ORM<Schemas> {
 		return new ORM<Schemas>({
 			...this.config,
-			rawClientRequest,
+			clientRequest,
 		});
 	}
 }

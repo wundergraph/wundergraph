@@ -14,10 +14,11 @@ import { fetch } from '@whatwg-node/fetch';
 import { from } from 'ix/asynciterable';
 import { map } from 'ix/asynciterable/operators';
 
-import { JSONObject } from '../server/types';
+import { ClientRequest, JSONObject } from '../server/types';
 import { wellKnownTypeNames } from '../definition/namespacing';
 import { Logger } from '../logger';
 import type { OperationsAsyncContext } from '../server/operations-context';
+import { encodeRawClientRequest } from '../server/server';
 
 interface GraphQLResult<T = unknown> {
 	data?: T;
@@ -56,11 +57,13 @@ export class NamespacingExecutor implements Executor {
 		document: DocumentNode,
 		variables?: Record<string, unknown> | undefined,
 		namespace?: string,
-		extraHeaders?: Record<string, string> | undefined,
-		rawClientRequest?: any
+		clientRequest?: ClientRequest,
+		extraHeaders?: Record<string, string>
 	): Promise<T> {
 		const transformedDocument = namespace ? this.#namespaceOperation(document, namespace) : document;
-		const body = JSON.stringify(this.#buildOperationPayload(transformedDocument, variables, rawClientRequest));
+		const body = JSON.stringify(
+			this.#buildOperationPayload(transformedDocument, variables, clientRequest, extraHeaders)
+		);
 
 		if (operation === OperationTypeNode.SUBSCRIPTION) {
 			// we create an abort signal to manage request cancellation
@@ -86,7 +89,8 @@ export class NamespacingExecutor implements Executor {
 	#buildOperationPayload(
 		document: DocumentNode,
 		variables?: Record<string, unknown> | undefined,
-		rawClientRequest?: any
+		clientRequest?: ClientRequest,
+		extraHeaders?: Record<string, string>
 	) {
 		const payload: {
 			operationName: undefined;
@@ -98,9 +102,9 @@ export class NamespacingExecutor implements Executor {
 			query: print(document),
 			variables,
 		};
-		if (rawClientRequest != null) {
+		if (clientRequest != null) {
 			payload.__wg = {
-				clientRequest: rawClientRequest,
+				clientRequest: encodeRawClientRequest(clientRequest, extraHeaders),
 			};
 		}
 		return payload;
