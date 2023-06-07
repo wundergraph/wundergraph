@@ -199,6 +199,26 @@ export const createClientRequest = (body: FastifyRequestBody) => {
 };
 
 /**
+ * Returns the headers that should be forwarded from the ClientRequest as headers
+ * in the next request sent to the node
+ * @param request A ClientRequest
+ * @returns A record with the headers where keys are the names and values are the header values
+ */
+export const forwardedHeaders = (request: ClientRequest) => {
+	const forwardedHeaders = ['Authorization', 'X-Request-Id'];
+	const headers: Record<string, string> = {};
+	if (request?.headers) {
+		for (const header of forwardedHeaders) {
+			const value = request.headers.get(header);
+			if (value) {
+				headers[header] = value;
+			}
+		}
+	}
+	return headers;
+};
+
+/**
  * Converts a ClientRequest to its raw form, so it can be encoded in the body and sent to the node
  * @param request A ClientRequest instance
  * @returns A raw clientRequest as plain object

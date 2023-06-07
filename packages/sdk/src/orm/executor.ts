@@ -18,7 +18,7 @@ import { ClientRequest, JSONObject } from '../server/types';
 import { wellKnownTypeNames } from '../definition/namespacing';
 import { Logger } from '../logger';
 import type { OperationsAsyncContext } from '../server/operations-context';
-import { encodeRawClientRequest } from '../server/server';
+import { encodeRawClientRequest, forwardedHeaders } from '../server/server';
 
 interface GraphQLResult<T = unknown> {
 	data?: T;
@@ -33,6 +33,7 @@ export interface NamespacingExecutorConfig {
 
 interface FetchOptions {
 	signal?: AbortSignal;
+	clientRequest?: ClientRequest;
 	extraHeaders?: Record<string, string>;
 }
 
@@ -257,12 +258,13 @@ export class NamespacingExecutor implements Executor {
 	}
 
 	async #fetch(body: globalThis.BodyInit, opts: FetchOptions) {
-		const { signal, extraHeaders = {} } = opts;
+		const { signal, clientRequest, extraHeaders = {} } = opts;
 		const fetchImp = this.config.fetch ?? fetch;
 
 		const headers = {
 			'Content-Type': 'application/json',
 			Accept: 'text/event-stream',
+			...(clientRequest ? forwardedHeaders(clientRequest) : {}),
 			...extraHeaders,
 		};
 

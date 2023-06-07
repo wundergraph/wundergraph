@@ -14,7 +14,7 @@ import {
 import { Attributes, Components } from './trace/attributes';
 import { attachErrorToSpan, setStatusFromResponseCode } from './trace/util';
 import { ClientRequest } from './types';
-import { encodeRawClientRequest } from './server';
+import { encodeRawClientRequest, forwardedHeaders } from './server';
 
 export interface Operation<Input extends object, Response> {
 	input: Input;
@@ -59,8 +59,6 @@ export type InternalOperationsDefinition<
 	subscriptions: Subscriptions;
 };
 
-const forwardedHeaders = ['Authorization', 'X-Request-Id'];
-
 /**
  * This client is used to execute custom operations on the Hooks server (server side only).
  * The implementation is based on the `Client` class which is used on the web and server side.
@@ -85,14 +83,7 @@ export class OperationsClient<
 		});
 
 		this.clientRequest = clientRequest;
-		if (clientRequest?.headers) {
-			for (const header of forwardedHeaders) {
-				const value = clientRequest.headers.get(header);
-				if (value) {
-					this.baseHeaders[header] = value;
-				}
-			}
-		}
+		Object.assign(this.baseHeaders, forwardedHeaders(clientRequest));
 		this.tracer = options.tracer;
 		this.traceContext = options.traceContext;
 	}
