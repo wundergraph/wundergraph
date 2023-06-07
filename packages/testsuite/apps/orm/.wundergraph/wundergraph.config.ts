@@ -11,6 +11,9 @@ import operations from './wundergraph.operations';
 const countries = introspect.graphql({
 	apiNamespace: 'countries',
 	url: 'https://countries.trevorblades.com/',
+	headers(builder) {
+		return builder.addClientRequestHeader('Authorization', 'Authorization');
+	},
 });
 
 const oas = introspect.openApiV2({

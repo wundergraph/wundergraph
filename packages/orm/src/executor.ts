@@ -5,6 +5,7 @@ export interface Executor {
 		operation: OperationTypeNode,
 		document: DocumentNode,
 		variables?: Record<string, unknown>,
-		namespace?: string
+		namespace?: string,
+		extraHeaders?: Record<string, string>
 	): Promise<T>;
 }

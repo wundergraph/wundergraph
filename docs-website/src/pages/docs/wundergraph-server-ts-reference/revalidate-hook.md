@@ -14,8 +14,30 @@ You might want to add this new org to the custom claims.
 In order to do so, you can use the `revalidate` hook.
 More info on how to revalidate user can be found in the [WunderGraph RPC Protocol](/docs/architecture/wundergraph-rpc-protocol-explained#cookie-based-authentication).
 
+Additionally, the `revalidate` hook can also be used to extend a session when the
+current one expires.
+
+```typescript
+// wundergraph.server.ts
+export default configureWunderGraphServer(() => ({
+  hooks: {
+    authentication: {
+      revalidate: async ({ user }) => {
+        return {
+          status: 'ok',
+          user: {
+            ...user,
+            expires: Date.now() + 60 * 1000,
+          },
+        };
+      },
+    },
+  },
+}));
+```
+
 Similar to all other hooks,
-the `customResolve` hook is called with the following parameters:
+the `revalidate` hook is called with the following parameters:
 
 - `user`: The user object when the user is authenticated
 - `clientRequest`: The original client request object, including Headers
@@ -25,7 +47,7 @@ the `customResolve` hook is called with the following parameters:
 - `response`: The response object (only for postResolve hooks)
 - `input`: The input object (only for Operation hooks)
 
-With the `internalClient`,
+With the `operations` client,
 you're able to securely call into all defined Operations,
 e.g. to talk to a database or another service to enrich a response or manipulate the inputs of an Operation.
 

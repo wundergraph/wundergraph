@@ -12,10 +12,10 @@ import (
 
 const (
 	schema = `
-
 		type Query {
 			queryRaw(query: String! parameters: [String]): String
 			queryRawJSON(query: String! parameters: [String]): JSON
+			findFirstUser(id: Int): users
 		}
 
 		type Mutation {
@@ -47,9 +47,18 @@ const (
 			}
 		}
 	`
+
+	operationWithRemoveNullVariablesDirective = `
+	query FindFirstUser($id: Int) @removeNullVariables {
+		findFirstUser(id: $id) {
+			id
+		}
+	}
+	`
 )
 
 func TestDatabaseDataSource(t *testing.T) {
+	idVariableResolver, _ := resolve.NewGraphQLVariableRendererFromJSONRootTypeWithoutValidation(resolve.JsonRootType{Value: jsonparser.Number})
 	providerVariableRenderer, _ := resolve.NewGraphQLVariableRendererFromJSONRootTypeWithoutValidation(resolve.JsonRootType{Value: jsonparser.String})
 	providerIdVariableRenderer, _ := resolve.NewGraphQLVariableRendererFromJSONRootTypeWithoutValidation(resolve.JsonRootType{Value: jsonparser.Number})
 	spVariableRenderer, _ := resolve.NewGraphQLVariableRendererFromJSONRootTypeWithoutValidation(resolve.JsonRootType{Value: jsonparser.String})
@@ -135,6 +144,88 @@ func TestDatabaseDataSource(t *testing.T) {
 					Arguments: []plan.ArgumentConfiguration{
 						{
 							Name:       "data",
+							SourceType: plan.FieldArgumentSource,
+						},
+					},
+				},
+			},
+			DisableResolveFieldPositions: true,
+		},
+	))
+
+	t.Run("findFirstUser", datasourcetesting.RunTest(schema, operationWithRemoveNullVariablesDirective, "",
+		&plan.SynchronousResponsePlan{
+			Response: &resolve.GraphQLResponse{
+				Data: &resolve.Object{
+					Nullable: false,
+					Fetch: &resolve.SingleFetch{
+						BufferId:   0,
+						Input:      `{"query":"{findFirstUser(id: $$0$$){id}}","variables":null,"unnull_variables":true}`,
+						DataSource: &Source{},
+						Variables: resolve.NewVariables(
+							&resolve.ContextVariable{
+								Path:     []string{"id"},
+								Renderer: idVariableResolver,
+							},
+						),
+						DataSourceIdentifier: []byte("database.Source"),
+						DisableDataLoader:    false,
+						DisallowSingleFlight: false,
+						ProcessResponseConfig: resolve.ProcessResponseConfig{
+							ExtractGraphqlResponse:    true,
+							ExtractFederationEntities: false,
+						},
+					},
+					Fields: []*resolve.Field{
+						{
+							BufferID:  0,
+							HasBuffer: true,
+							Name:      []byte("findFirstUser"),
+							Value: &resolve.Object{
+								Nullable: true,
+								Path:     []string{"findFirstUser"},
+								Fields: []*resolve.Field{
+									{
+										Name: []byte("id"),
+										Value: &resolve.Integer{
+											Path: []string{"id"},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		plan.Configuration{
+			DataSources: []plan.DataSourceConfiguration{
+				{
+					RootNodes: []plan.TypeField{
+						{
+							TypeName:   "Query",
+							FieldNames: []string{"findFirstUser"},
+						},
+					},
+					ChildNodes: []plan.TypeField{
+						{
+							TypeName:   "users",
+							FieldNames: []string{"id", "avatar", "provider", "providerId", "someprovider"},
+						},
+					},
+					Custom: ConfigJson(Configuration{
+						GraphqlSchema: schema,
+					}),
+					Factory: &Factory{testsSkipEngine: true},
+				},
+			},
+			Fields: []plan.FieldConfiguration{
+				{
+					TypeName:  "Query",
+					FieldName: "findFirstUser",
+					Arguments: []plan.ArgumentConfiguration{
+						{
+							Name:       "id",
 							SourceType: plan.FieldArgumentSource,
 						},
 					},

@@ -35,8 +35,10 @@ import { NamespacingExecutor } from '../orm';
 import type { OperationsAsyncContext } from './operations-context';
 import configureTracerProvider from './trace/trace';
 import { propagation } from '@opentelemetry/api';
-import { TracerConfig } from './types';
+import { CreateServerOptions, TracerConfig } from './types';
 import { loadTraceConfigFromWgConfig } from './trace/config';
+import { TelemetryPluginOptions } from './plugins/telemetry';
+import { createLogger } from './logger';
 
 const isProduction = process.env.NODE_ENV === 'production';
 let WG_CONFIG: WunderGraphConfiguration;
@@ -165,7 +167,11 @@ export const startServer = async (opts: ServerRunOptions) => {
 		const host = resolveConfigurationVariable(opts.config.api.serverOptions.listen.host);
 		const port = parseInt(portString, 10);
 
-		const fastify = await createServer(opts);
+		const fastify = await createServer({
+			...opts,
+			serverPort: port,
+			serverHost: host,
+		});
 
 		await fastify.listen({
 			port: port,
@@ -207,7 +213,9 @@ export const createServer = async ({
 	config,
 	gracefulShutdown,
 	clientFactory,
-}: ServerRunOptions): Promise<FastifyInstance> => {
+	serverHost,
+	serverPort,
+}: CreateServerOptions): Promise<FastifyInstance> => {
 	if (config.api?.serverOptions?.logger?.level && process.env.WG_DEBUG_MODE !== 'true') {
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
@@ -323,7 +331,13 @@ export const createServer = async ({
 				logger
 			);
 
-			await fastify.register(require('./plugins/telemetry'), tracerProvider);
+			await fastify.register<TelemetryPluginOptions>(require('./plugins/telemetry'), {
+				provider: tracerProvider.provider,
+				serverInfo: {
+					host: serverHost,
+					port: serverPort,
+				},
+			});
 		}
 	}
 
@@ -347,7 +361,7 @@ export const createServer = async ({
 			}
 
 			req.ctx = {
-				log: req.log,
+				log: createLogger(req.log),
 				user: req.body.__wg.user!,
 				clientRequest,
 				internalClient: clientFactory(headers, req.body.__wg.clientRequest),

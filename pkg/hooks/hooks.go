@@ -176,7 +176,6 @@ func NewClient(opts *ClientOptions) *Client {
 	if opts.EnableTracing {
 		rt = trace.NewTransport(rt,
 			otelhttp.WithSpanOptions(otrace.WithAttributes(trace.HooksClientAttribute)),
-			otelhttp.WithSpanNameFormatter(trace.SpanNameFormatter),
 		)
 	}
 

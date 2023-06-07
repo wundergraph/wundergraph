@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/nextjs",
-  "version": "0.11.3",
+  "version": "0.11.9",
   "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -75,7 +75,7 @@
     "swr": "^2.1.5"
   },
   "dependencies": {
-    "@wundergraph/protobuf": "workspace:^0.115.0",
+    "@wundergraph/protobuf": "workspace:^0.116.0",
     "@wundergraph/swr": "workspace:*",
     "handlebars": "^4.7.7",
     "object-hash": "^2.2.0",

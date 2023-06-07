@@ -69,6 +69,7 @@ type Engine struct {
 	cancel                  func()
 	client                  *http.Client
 	log                     *zap.Logger
+	schemaFilePath          string
 }
 
 func NewEngine(client *http.Client, log *zap.Logger, wundergraphDir string) *Engine {
@@ -275,7 +276,26 @@ func (e *Engine) StartQueryEngine(schema string) error {
 	// append all environment variables, as demonstrated in the following:
 	// https://github.com/prisma/prisma/blob/304c54c732921c88bfb57f5730c7f81405ca83ea/packages/engine-core/src/binary/BinaryEngine.ts#L479
 	e.cmd.Env = append(e.cmd.Env, os.Environ()...)
-	e.cmd.Env = append(e.cmd.Env, "PRISMA_DML="+schema)
+
+	// create temporary file in the default temporary directory, * is replaced by a random pattern
+	temporaryFile, err := os.CreateTemp("", "t*.prisma")
+	if err != nil {
+		return err
+	}
+	//write schema to the file
+	if _, err := temporaryFile.Write([]byte(schema)); err != nil {
+		return err
+	}
+	err = temporaryFile.Close()
+	if err != nil {
+		pathError := os.Remove(temporaryFile.Name())
+		if pathError != nil {
+			e.log.Error("Error while deleting temporary schema file : ", zap.Error(pathError))
+		}
+		return err
+	}
+	e.cmd.Env = append(e.cmd.Env, "PRISMA_DML_PATH="+temporaryFile.Name())
+	e.schemaFilePath = temporaryFile.Name()
 
 	e.cmd.Stdout = os.Stdout
 	e.cmd.Stderr = os.Stderr
@@ -369,6 +389,13 @@ func (e *Engine) StopQueryEngine() {
 		}
 	}
 	close(exitCh)
+	if e.schemaFilePath != "" {
+		err := os.Remove(e.schemaFilePath)
+		if err != nil {
+			e.log.Error("Deleting temporary schema file", zap.Error(err))
+		}
+		e.schemaFilePath = ""
+	}
 	e.cmd = nil
 	e.cancel = nil
 }

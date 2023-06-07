@@ -1,9 +1,8 @@
 import { FastifyPluginAsync } from 'fastify';
-import { propagation, Span, trace, Context, Tracer, ROOT_CONTEXT } from '@opentelemetry/api';
+import { Context, propagation, ROOT_CONTEXT, Span, SpanKind, trace, Tracer } from '@opentelemetry/api';
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
 import fp from 'fastify-plugin';
 import { FastifyRequestContext } from '../types';
-import { WgEnv } from '../../configure/options';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { attachErrorToSpan, setStatusFromResponseCode } from '../trace/util';
 import { Attributes, Components } from '../trace/attributes';
@@ -25,6 +24,10 @@ declare module 'fastify' {
 
 export interface TelemetryPluginOptions {
 	provider: NodeTracerProvider;
+	serverInfo: {
+		host: string;
+		port: number;
+	};
 }
 
 const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async (fastify, options) => {
@@ -44,7 +47,11 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async
 		}
 
 		const activeContext = propagation.extract(ROOT_CONTEXT, req.headers);
-		const span = tracer.startSpan(`${req.method} ${req.url}`, { startTime: performance.now() }, activeContext);
+		const span = tracer.startSpan(
+			`${req.method} ${req.routerPath}`,
+			{ startTime: performance.now(), kind: SpanKind.SERVER },
+			activeContext
+		);
 
 		// Overwrite decorator per request to ensure encapsulation
 		req.telemetry = {
@@ -57,12 +64,13 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryPluginOptions> = async
 			[SemanticAttributes.HTTP_FLAVOR]: req.raw.httpVersion,
 			[SemanticAttributes.HTTP_METHOD]: req.raw.method,
 			[SemanticAttributes.HTTP_ROUTE]: req.routerPath,
-			[SemanticAttributes.HTTP_URL]: req.raw.url,
-			[SemanticAttributes.NET_PEER_NAME]: process.env[WgEnv.ServerHost],
-			[SemanticAttributes.NET_PEER_PORT]: process.env[WgEnv.ServerPort],
+			[SemanticAttributes.HTTP_TARGET]: req.url,
+			[SemanticAttributes.NET_PEER_NAME]: options.serverInfo.host,
+			[SemanticAttributes.NET_PEER_PORT]: options.serverInfo.port,
 			[SemanticAttributes.HTTP_USER_AGENT]: req.headers['user-agent'],
+			[SemanticAttributes.HTTP_HOST]: req.hostname,
 			[SemanticAttributes.HTTP_REQUEST_CONTENT_LENGTH]: req.headers['content-length'],
-			[SemanticAttributes.HTTP_SCHEME]: req.protocol === 'https' ? 'https' : 'http',
+			[SemanticAttributes.HTTP_SCHEME]: req.protocol,
 		});
 	});
 
