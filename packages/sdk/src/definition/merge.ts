@@ -639,7 +639,7 @@ const mergeApiSchemas = <T extends {} = {}>(
 		},
 	});
 	const withoutEmptyDescription = removeEmptyDescriptions(filtered);
-	return printSchemaWithDirectives(buildASTSchema(withoutEmptyDescription));
+	return printSchemaWithDirectives(buildASTSchema(withoutEmptyDescription, { assumeValidSDL: true }));
 };
 
 const removeEmptyDescriptions = (astNode: DocumentNode): DocumentNode => {
