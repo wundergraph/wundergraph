@@ -12,7 +12,7 @@ import { InternalError, OperationError } from '../../client/errors';
 import { Logger } from '../../logger';
 import type { AsyncStore, OperationsAsyncContext } from '../operations-context';
 import { propagation, trace } from '@opentelemetry/api';
-import { createClientRequest, rawClientRequest } from '../server';
+import { createClientRequest } from '../server';
 import { FastifyRequestBody } from '../types';
 import { Attributes } from '../trace/attributes';
 import { attachErrorToSpan } from '../trace/util';
@@ -74,7 +74,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 						}
 
 						requestContext = await config.createContext(config.globalContext);
-						const clientRequest = rawClientRequest(req.body);
+						const clientRequest = createClientRequest(req.body);
 						const operationClient = new OperationsClient({
 							baseURL: nodeURL,
 							clientRequest,
@@ -86,11 +86,11 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							log: createLogger(fastify.log),
 							user: (req.body as any)?.__wg.user!,
 							internalClient: internalClientFactory(headers, clientRequest),
-							clientRequest: createClientRequest(req.body),
+							clientRequest,
 							input: (req.body as any)?.input,
 							operations: operationClient,
 							context: requestContext,
-							graph: orm,
+							graph: orm.withClientRequest(clientRequest),
 						};
 
 						switch (implementation.type) {

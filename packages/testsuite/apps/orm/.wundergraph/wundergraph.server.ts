@@ -29,10 +29,13 @@ export default configureWunderGraphServer(() => ({
 				query: new GraphQLObjectType({
 					name: 'RootQueryType',
 					fields: {
-						clientRequestContentLength: {
+						clientRequestHeader: {
 							type: GraphQLString,
+							args: {
+								header: { type: GraphQLString },
+							},
 							resolve(obj, args, context, info) {
-								return context.wundergraph.clientRequest.headers.get('Content-Length');
+								return context.wundergraph.clientRequest.headers.get(args.header);
 							},
 						},
 					},

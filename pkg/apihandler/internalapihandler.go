@@ -531,5 +531,5 @@ func NewRequestFromWunderGraphClientRequest(ctx context.Context, body []byte) (*
 		return request, nil
 	}
 
-	return nil, nil
+	return nil, fmt.Errorf("__wg.clientRequest not found in %s", string(body))
 }

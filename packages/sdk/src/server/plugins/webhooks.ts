@@ -4,7 +4,7 @@ import type { ORM } from '@wundergraph/orm';
 
 import { Webhook, WebhookHeaders, WebhookQuery } from '../../webhooks/types';
 import { Headers } from '@whatwg-node/fetch';
-import type { RequestMethod } from '../types';
+import type { ClientRequest, RequestMethod } from '../types';
 import type { WebhookConfiguration } from '@wundergraph/protobuf';
 import type { InternalClientFactory } from '../internal-client';
 import process from 'node:process';
@@ -76,7 +76,7 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 								internalClient: config.internalClientFactory(headers, clientRequest),
 								operations: operationClient,
 								clientRequest,
-								graph: config.orm,
+								graph: config.orm.withClientRequest(clientRequest),
 								context: requestContext,
 							}
 						);

@@ -1,4 +1,5 @@
 import { type OperationTypeNode, type DocumentNode } from 'graphql';
+import { ClientRequest } from './internal-types';
 
 export interface Executor {
 	execute<T>(
@@ -6,6 +7,7 @@ export interface Executor {
 		document: DocumentNode,
 		variables?: Record<string, unknown>,
 		namespace?: string,
+		clientRequest?: ClientRequest,
 		extraHeaders?: Record<string, string>
 	): Promise<T>;
 }
