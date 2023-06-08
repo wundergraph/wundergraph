@@ -1046,7 +1046,9 @@ const typeSchema = (
 							root.definitions![typeName] = {
 								type: nonNull ? 'object' : ['object', 'null'],
 							};
-							schema.additionalProperties = false;
+							if (!hasOneOfDirective) {
+								schema.additionalProperties = false;
+							}
 							schema.type = nonNull ? 'object' : ['object', 'null'];
 
 							if (hasOneOfDirective) {
@@ -1061,6 +1063,7 @@ const typeSchema = (
 
 									const fieldSchema: JSONSchema = {
 										type: 'object',
+										additionalProperties: false,
 										properties: {
 											[name]: typeSchema(
 												root,

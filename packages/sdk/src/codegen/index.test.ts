@@ -632,9 +632,9 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 								additionalProperties: false,
 								definitions: {
 									TestType_Input: {
-										additionalProperties: false,
 										oneOf: [
 											{
+												additionalProperties: false,
 												properties: {
 													A_const: {
 														enum: ['A'],
@@ -645,6 +645,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 												type: 'object',
 											},
 											{
+												additionalProperties: false,
 												properties: {
 													mutation_test_endpoint_oneOf_1_Input: {
 														$ref: '#/definitions/mutation_test_endpoint_oneOf_1_Input',
@@ -678,9 +679,9 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 								additionalProperties: false,
 								definitions: {
 									TestType_Input: {
-										additionalProperties: false,
 										oneOf: [
 											{
+												additionalProperties: false,
 												properties: {
 													A_const: {
 														enum: ['A'],
@@ -691,6 +692,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 												type: 'object',
 											},
 											{
+												additionalProperties: false,
 												properties: {
 													mutation_test_endpoint_oneOf_1_Input: {
 														$ref: '#/definitions/mutation_test_endpoint_oneOf_1_Input',
@@ -723,9 +725,9 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 								additionalProperties: false,
 								definitions: {
 									TestType_Input: {
-										additionalProperties: false,
 										oneOf: [
 											{
+												additionalProperties: false,
 												properties: {
 													A_const: {
 														enum: ['A'],
@@ -736,6 +738,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 												type: 'object',
 											},
 											{
+												additionalProperties: false,
 												properties: {
 													mutation_test_endpoint_oneOf_1_Input: {
 														$ref: '#/definitions/mutation_test_endpoint_oneOf_1_Input',
@@ -800,9 +803,9 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 								additionalProperties: false,
 								definitions: {
 									TestType_Input: {
-										additionalProperties: false,
 										oneOf: [
 											{
+												additionalProperties: false,
 												properties: {
 													A_const: {
 														enum: ['A'],
@@ -813,6 +816,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 												type: 'object',
 											},
 											{
+												additionalProperties: false,
 												properties: {
 													mutation_test_endpoint_oneOf_1_Input: {
 														$ref: '#/definitions/mutation_test_endpoint_oneOf_1_Input',

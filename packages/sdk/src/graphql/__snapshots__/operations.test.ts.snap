@@ -395,9 +395,9 @@ exports[`parseGraphQLOperations 1`] = `
         "additionalProperties": false,
         "definitions": {
           "TestType_Input": {
-            "additionalProperties": false,
             "oneOf": [
               {
+                "additionalProperties": false,
                 "properties": {
                   "A_const": {
                     "enum": [
@@ -413,6 +413,7 @@ exports[`parseGraphQLOperations 1`] = `
                 "type": "object",
               },
               {
+                "additionalProperties": false,
                 "properties": {
                   "mutation_test_endpoint_oneOf_1_Input": {
                     "$ref": "#/definitions/mutation_test_endpoint_oneOf_1_Input",
@@ -454,9 +455,9 @@ exports[`parseGraphQLOperations 1`] = `
         "additionalProperties": false,
         "definitions": {
           "TestType_Input": {
-            "additionalProperties": false,
             "oneOf": [
               {
+                "additionalProperties": false,
                 "properties": {
                   "A_const": {
                     "enum": [
@@ -472,6 +473,7 @@ exports[`parseGraphQLOperations 1`] = `
                 "type": "object",
               },
               {
+                "additionalProperties": false,
                 "properties": {
                   "mutation_test_endpoint_oneOf_1_Input": {
                     "$ref": "#/definitions/mutation_test_endpoint_oneOf_1_Input",
@@ -512,9 +514,9 @@ exports[`parseGraphQLOperations 1`] = `
         "additionalProperties": false,
         "definitions": {
           "TestType_Input": {
-            "additionalProperties": false,
             "oneOf": [
               {
+                "additionalProperties": false,
                 "properties": {
                   "A_const": {
                     "enum": [
@@ -530,6 +532,7 @@ exports[`parseGraphQLOperations 1`] = `
                 "type": "object",
               },
               {
+                "additionalProperties": false,
                 "properties": {
                   "mutation_test_endpoint_oneOf_1_Input": {
                     "$ref": "#/definitions/mutation_test_endpoint_oneOf_1_Input",
@@ -604,9 +607,9 @@ exports[`parseGraphQLOperations 1`] = `
         "additionalProperties": false,
         "definitions": {
           "TestType_Input": {
-            "additionalProperties": false,
             "oneOf": [
               {
+                "additionalProperties": false,
                 "properties": {
                   "A_const": {
                     "enum": [
@@ -622,6 +625,7 @@ exports[`parseGraphQLOperations 1`] = `
                 "type": "object",
               },
               {
+                "additionalProperties": false,
                 "properties": {
                   "mutation_test_endpoint_oneOf_1_Input": {
                     "$ref": "#/definitions/mutation_test_endpoint_oneOf_1_Input",
