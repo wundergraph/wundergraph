@@ -2,6 +2,12 @@ import { OperationsClient } from './operations-client';
 import { createServer } from 'http';
 import { AddressInfo } from 'net';
 
+const clientRequest = {
+	method: 'GET' as const,
+	requestURI: '',
+	headers: new Headers(),
+};
+
 describe('Operations Client', () => {
 	test('Should be able to make a request with default fetch implementation', (done) => {
 		const mock = {
@@ -18,7 +24,7 @@ describe('Operations Client', () => {
 		server.listen(0, async () => {
 			const client = new OperationsClient({
 				baseURL: `http://localhost:${(server.address() as AddressInfo).port}`,
-				clientRequest: {},
+				clientRequest,
 			});
 			const { data, error } = await client.query({
 				operationName: 'Weather',
@@ -46,7 +52,7 @@ describe('Operations Client', () => {
 		server.listen(0, async () => {
 			const client = new OperationsClient({
 				baseURL: `http://localhost:${(server.address() as AddressInfo).port}`,
-				clientRequest: {},
+				clientRequest,
 			});
 			const updates = await client.subscribe({
 				operationName: 'Events',

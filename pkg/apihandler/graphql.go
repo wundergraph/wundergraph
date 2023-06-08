@@ -54,6 +54,7 @@ func mountGraphQLHandler(router *mux.Router, opts GraphQLHandlerOptions) {
 		resolver:        opts.Resolver,
 		log:             opts.Log,
 		pool:            opts.Pool,
+		internal:        opts.Internal,
 		sf:              &singleflight.Group{},
 		prepared:        map[uint64]planWithExtractedVariables{},
 		preparedMux:     &sync.RWMutex{},
@@ -103,6 +104,7 @@ type GraphQLHandler struct {
 	log        *zap.Logger
 	pool       *pool.Pool
 	sf         *singleflight.Group
+	internal   bool
 
 	prepared    map[uint64]planWithExtractedVariables
 	preparedMux *sync.RWMutex
@@ -141,7 +143,24 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		requestOperationName = nil
 	}
 
-	shared := h.pool.GetSharedFromRequest(context.Background(), r, h.planConfig, pool.Config{
+	// clientRequest will only be provided in internal
+	var clientRequest *http.Request
+	if h.internal {
+		req, err := NewRequestFromWunderGraphClientRequest(r.Context(), body)
+		if err != nil {
+			requestLogger.Error("GraphQLHandler.ServeHTTP: Could not create request from __wg.clientRequest",
+				zap.Error(err),
+				zap.String("url", r.RequestURI),
+			)
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+		clientRequest = req
+	} else {
+		clientRequest = r
+	}
+
+	shared := h.pool.GetSharedFromRequest(context.Background(), clientRequest, h.planConfig, pool.Config{
 		RenameTypeNames: h.renameTypeNames,
 	})
 	defer h.pool.PutShared(shared)
