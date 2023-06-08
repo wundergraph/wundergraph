@@ -18,7 +18,6 @@ import (
 
 	"github.com/gofrs/flock"
 	"github.com/phayes/freeport"
-	"github.com/prisma/prisma-client-go/binaries"
 	"github.com/prisma/prisma-client-go/binaries/platform"
 	"go.uber.org/zap"
 
@@ -38,11 +37,18 @@ func InstallPrismaDependencies(log *zap.Logger, wundergraphDir string) error {
 	return engine.ensurePrisma()
 }
 
+type IntrospectionParams struct {
+	CompositeTypeDepth int      `json:"compositeTypeDepth"`
+	Force              bool     `json:"force"`
+	Schema             string   `json:"schema"`
+	Schemas            []string `json:"schemas,omitempty"`
+}
+
 type IntrospectionRequest struct {
-	ID      int         `json:"id"`
-	JSONRPC string      `json:"jsonrpc"`
-	Method  string      `json:"method"`
-	Params  interface{} `json:"params"`
+	ID      int                 `json:"id"`
+	JSONRPC string              `json:"jsonrpc"`
+	Method  string              `json:"method"`
+	Params  IntrospectionParams `json:"params"`
 }
 
 type IntrospectionResponse struct {
@@ -91,11 +97,9 @@ func (e *Engine) IntrospectPrismaDatabaseSchema(ctx context.Context, introspecti
 		ID:      1,
 		Method:  "introspect",
 		JSONRPC: "2.0",
-		Params: []map[string]interface{}{
-			{
-				"schema":             introspectionSchema,
-				"compositeTypeDepth": -1,
-			},
+		Params: IntrospectionParams{
+			Schema:             introspectionSchema,
+			CompositeTypeDepth: -1,
 		},
 	}
 	requestData, err := json.Marshal(request)
@@ -320,8 +324,8 @@ func (e *Engine) ensurePrisma() error {
 		return err
 	}
 
-	e.queryEnginePath = filepath.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-query-engine-%s", platform.BinaryPlatformName()))
-	e.introspectionEnginePath = filepath.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-introspection-engine-%s", platform.BinaryPlatformName()))
+	e.queryEnginePath = filepath.Join(prismaPath, PrismaBinaryVersion, fmt.Sprintf("prisma-query-engine-%s", platform.BinaryPlatformName()))
+	e.introspectionEnginePath = filepath.Join(prismaPath, PrismaBinaryVersion, fmt.Sprintf("prisma-migration-engine-%s", platform.BinaryPlatformName()))
 
 	if runtime.GOOS == "windows" {
 		// Append .exe suffix
@@ -343,7 +347,7 @@ func (e *Engine) ensurePrisma() error {
 		e.log.Info("downloading prisma query engine",
 			zap.String("path", e.queryEnginePath),
 		)
-		if err := binaries.FetchEngine(prismaPath, "query-engine", platform.BinaryPlatformName()); err != nil {
+		if err := FetchEngine(prismaPath, "query-engine", platform.BinaryPlatformName()); err != nil {
 			return err
 		}
 		e.log.Info("downloading prisma query engine complete")
@@ -354,7 +358,7 @@ func (e *Engine) ensurePrisma() error {
 		e.log.Info("downloading prisma introspection engine",
 			zap.String("path", e.introspectionEnginePath),
 		)
-		if err := binaries.FetchEngine(prismaPath, "introspection-engine", platform.BinaryPlatformName()); err != nil {
+		if err := FetchEngine(prismaPath, "migration-engine", platform.BinaryPlatformName()); err != nil {
 			return err
 		}
 		e.log.Info("downloading prisma introspection engine complete")

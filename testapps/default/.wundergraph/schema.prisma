@@ -1,6 +1,11 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
+}
+
 datasource db {
-		provider = "sqlite"
-		url      = "file:./users_post.sqlite"
+  provider = "sqlite"
+  url      = "file:./users_post.sqlite"
 }
 
 model User {
@@ -17,4 +22,9 @@ model Post {
   published Boolean @default(false)
   author    User    @relation(fields: [authorID], references: [id])
   authorID  Int
+}
+
+view UserName {
+  id   Int    @unique
+  name String
 }
