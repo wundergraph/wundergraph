@@ -76,7 +76,6 @@ describe('selections', () => {
 				),
 			]);
 			const expanded = expandSelection(schema, type, original);
-			console.log(print(expanded));
 		});
 	});
 });

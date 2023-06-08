@@ -1,5 +1,2621 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`complex operations with variables: testCase_0_responseJSONSchema 1`] = `
+"{
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "findFirstapi": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "namespace": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "name"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "name",
+            "namespace"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}"
+`;
+
+exports[`complex operations with variables: testCase_0_variablesJSONSchema 1`] = `
+"{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ]
+}"
+`;
+
+exports[`complex operations with variables: testCase_1_responseJSONSchema 1`] = `
+"{
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "findFirstnamespace": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "api": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "created_at": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "name",
+                  "created_at"
+                ]
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}"
+`;
+
+exports[`complex operations with variables: testCase_1_variablesJSONSchema 1`] = `
+"{
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "#/definitions/StringFilter"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "definitions": {
+    "StringFilter": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "equals": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "in": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "notIn": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "lt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contains": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "startsWith": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "endsWith": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-graphql-enum-name": "QueryMode",
+          "enum": [
+            "default",
+            "insensitive"
+          ]
+        },
+        "not": {
+          "$ref": "#/definitions/NestedStringFilter"
+        }
+      }
+    },
+    "NestedStringFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "in": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "notIn": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "lt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contains": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "startsWith": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "endsWith": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "not": {
+          "$ref": "#/definitions/NestedStringFilter"
+        }
+      }
+    }
+  }
+}"
+`;
+
+exports[`complex operations with variables: testCase_2_responseJSONSchema 1`] = `
+"{
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "findFirstnamespace": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "api": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "created_at": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "name",
+                  "created_at"
+                ]
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}"
+`;
+
+exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] = `
+"{
+  "type": "object",
+  "properties": {
+    "where": {
+      "$ref": "#/definitions/namespaceWhereInput"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "namespaceWhereInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "AND": {
+          "$ref": "#/definitions/namespaceWhereInput"
+        },
+        "OR": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/namespaceWhereInput"
+          }
+        },
+        "NOT": {
+          "$ref": "#/definitions/namespaceWhereInput"
+        },
+        "id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "name": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "price_plan_id": {
+          "$ref": "#/definitions/IntFilter"
+        },
+        "created_at": {
+          "$ref": "#/definitions/DateTimeFilter"
+        },
+        "updated_at": {
+          "$ref": "#/definitions/DateTimeNullableFilter"
+        },
+        "price_plan": {
+          "$ref": "#/definitions/Price_planRelationFilter"
+        },
+        "api": {
+          "$ref": "#/definitions/ApiListRelationFilter"
+        },
+        "environment": {
+          "$ref": "#/definitions/EnvironmentListRelationFilter"
+        },
+        "namespace_members": {
+          "$ref": "#/definitions/Namespace_membersListRelationFilter"
+        }
+      }
+    },
+    "StringFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "in": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "notIn": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "lt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contains": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "startsWith": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "endsWith": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-graphql-enum-name": "QueryMode",
+          "enum": [
+            "default",
+            "insensitive"
+          ]
+        },
+        "not": {
+          "$ref": "#/definitions/NestedStringFilter"
+        }
+      }
+    },
+    "NestedStringFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "in": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "notIn": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "lt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contains": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "startsWith": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "endsWith": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "not": {
+          "$ref": "#/definitions/NestedStringFilter"
+        }
+      }
+    },
+    "IntFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "in": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "notIn": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "lt": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "lte": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "gt": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "gte": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "not": {
+          "$ref": "#/definitions/NestedIntFilter"
+        }
+      }
+    },
+    "NestedIntFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "in": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "notIn": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "lt": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "lte": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "gt": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "gte": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "not": {
+          "$ref": "#/definitions/NestedIntFilter"
+        }
+      }
+    },
+    "DateTimeFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "in": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "notIn": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "lt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "not": {
+          "$ref": "#/definitions/NestedDateTimeFilter"
+        }
+      }
+    },
+    "NestedDateTimeFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "in": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "notIn": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "lt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "not": {
+          "$ref": "#/definitions/NestedDateTimeFilter"
+        }
+      }
+    },
+    "DateTimeNullableFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "in": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "notIn": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "lt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "not": {
+          "$ref": "#/definitions/NestedDateTimeNullableFilter"
+        }
+      }
+    },
+    "NestedDateTimeNullableFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "in": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "notIn": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "lt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "not": {
+          "$ref": "#/definitions/NestedDateTimeNullableFilter"
+        }
+      }
+    },
+    "Price_planRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "is": {
+          "$ref": "#/definitions/price_planWhereInput"
+        },
+        "isNot": {
+          "$ref": "#/definitions/price_planWhereInput"
+        }
+      }
+    },
+    "price_planWhereInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "AND": {
+          "$ref": "#/definitions/price_planWhereInput"
+        },
+        "OR": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/price_planWhereInput"
+          }
+        },
+        "NOT": {
+          "$ref": "#/definitions/price_planWhereInput"
+        },
+        "id": {
+          "$ref": "#/definitions/IntFilter"
+        },
+        "name": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "quota_daily_requests": {
+          "$ref": "#/definitions/IntFilter"
+        },
+        "quota_environments": {
+          "$ref": "#/definitions/IntFilter"
+        },
+        "quota_members": {
+          "$ref": "#/definitions/IntFilter"
+        },
+        "quota_apis": {
+          "$ref": "#/definitions/IntFilter"
+        },
+        "allow_secondary_environments": {
+          "$ref": "#/definitions/BoolFilter"
+        },
+        "namespace": {
+          "$ref": "#/definitions/NamespaceListRelationFilter"
+        }
+      }
+    },
+    "BoolFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "not": {
+          "$ref": "#/definitions/NestedBoolFilter"
+        }
+      }
+    },
+    "NestedBoolFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "not": {
+          "$ref": "#/definitions/NestedBoolFilter"
+        }
+      }
+    },
+    "NamespaceListRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "every": {
+          "$ref": "#/definitions/namespaceWhereInput"
+        },
+        "some": {
+          "$ref": "#/definitions/namespaceWhereInput"
+        },
+        "none": {
+          "$ref": "#/definitions/namespaceWhereInput"
+        }
+      }
+    },
+    "ApiListRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "every": {
+          "$ref": "#/definitions/apiWhereInput"
+        },
+        "some": {
+          "$ref": "#/definitions/apiWhereInput"
+        },
+        "none": {
+          "$ref": "#/definitions/apiWhereInput"
+        }
+      }
+    },
+    "apiWhereInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "AND": {
+          "$ref": "#/definitions/apiWhereInput"
+        },
+        "OR": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/apiWhereInput"
+          }
+        },
+        "NOT": {
+          "$ref": "#/definitions/apiWhereInput"
+        },
+        "id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "namespace_id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "name": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "markdown_description": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "created_at": {
+          "$ref": "#/definitions/DateTimeFilter"
+        },
+        "updated_at": {
+          "$ref": "#/definitions/DateTimeNullableFilter"
+        },
+        "namespace": {
+          "$ref": "#/definitions/NamespaceRelationFilter"
+        },
+        "deployment": {
+          "$ref": "#/definitions/DeploymentListRelationFilter"
+        }
+      }
+    },
+    "NamespaceRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "is": {
+          "$ref": "#/definitions/namespaceWhereInput"
+        },
+        "isNot": {
+          "$ref": "#/definitions/namespaceWhereInput"
+        }
+      }
+    },
+    "DeploymentListRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "every": {
+          "$ref": "#/definitions/deploymentWhereInput"
+        },
+        "some": {
+          "$ref": "#/definitions/deploymentWhereInput"
+        },
+        "none": {
+          "$ref": "#/definitions/deploymentWhereInput"
+        }
+      }
+    },
+    "deploymentWhereInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "AND": {
+          "$ref": "#/definitions/deploymentWhereInput"
+        },
+        "OR": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/deploymentWhereInput"
+          }
+        },
+        "NOT": {
+          "$ref": "#/definitions/deploymentWhereInput"
+        },
+        "id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "api_id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "name": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "config": {
+          "$ref": "#/definitions/JsonFilter"
+        },
+        "created_at": {
+          "$ref": "#/definitions/DateTimeFilter"
+        },
+        "updated_at": {
+          "$ref": "#/definitions/DateTimeNullableFilter"
+        },
+        "api": {
+          "$ref": "#/definitions/ApiRelationFilter"
+        },
+        "deployment_environment": {
+          "$ref": "#/definitions/Deployment_environmentListRelationFilter"
+        }
+      }
+    },
+    "JsonFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "not": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "ApiRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "is": {
+          "$ref": "#/definitions/apiWhereInput"
+        },
+        "isNot": {
+          "$ref": "#/definitions/apiWhereInput"
+        }
+      }
+    },
+    "Deployment_environmentListRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "every": {
+          "$ref": "#/definitions/deployment_environmentWhereInput"
+        },
+        "some": {
+          "$ref": "#/definitions/deployment_environmentWhereInput"
+        },
+        "none": {
+          "$ref": "#/definitions/deployment_environmentWhereInput"
+        }
+      }
+    },
+    "deployment_environmentWhereInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "AND": {
+          "$ref": "#/definitions/deployment_environmentWhereInput"
+        },
+        "OR": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/deployment_environmentWhereInput"
+          }
+        },
+        "NOT": {
+          "$ref": "#/definitions/deployment_environmentWhereInput"
+        },
+        "deployment_id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "environment_id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "deployment": {
+          "$ref": "#/definitions/DeploymentRelationFilter"
+        },
+        "environment": {
+          "$ref": "#/definitions/EnvironmentRelationFilter"
+        }
+      }
+    },
+    "DeploymentRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "is": {
+          "$ref": "#/definitions/deploymentWhereInput"
+        },
+        "isNot": {
+          "$ref": "#/definitions/deploymentWhereInput"
+        }
+      }
+    },
+    "EnvironmentRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "is": {
+          "$ref": "#/definitions/environmentWhereInput"
+        },
+        "isNot": {
+          "$ref": "#/definitions/environmentWhereInput"
+        }
+      }
+    },
+    "environmentWhereInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "AND": {
+          "$ref": "#/definitions/environmentWhereInput"
+        },
+        "OR": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/environmentWhereInput"
+          }
+        },
+        "NOT": {
+          "$ref": "#/definitions/environmentWhereInput"
+        },
+        "id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "name": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "namespace_id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "primary_hostname": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "hostnames": {
+          "$ref": "#/definitions/StringNullableListFilter"
+        },
+        "primary": {
+          "$ref": "#/definitions/BoolFilter"
+        },
+        "namespace": {
+          "$ref": "#/definitions/NamespaceRelationFilter"
+        },
+        "deployment_environment": {
+          "$ref": "#/definitions/Deployment_environmentListRelationFilter"
+        },
+        "environment_edges": {
+          "$ref": "#/definitions/Environment_edgesListRelationFilter"
+        },
+        "nodepool_environment": {
+          "$ref": "#/definitions/Nodepool_environmentListRelationFilter"
+        }
+      }
+    },
+    "StringNullableListFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "has": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "hasEvery": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "hasSome": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "isEmpty": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    },
+    "Environment_edgesListRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "every": {
+          "$ref": "#/definitions/environment_edgesWhereInput"
+        },
+        "some": {
+          "$ref": "#/definitions/environment_edgesWhereInput"
+        },
+        "none": {
+          "$ref": "#/definitions/environment_edgesWhereInput"
+        }
+      }
+    },
+    "environment_edgesWhereInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "AND": {
+          "$ref": "#/definitions/environment_edgesWhereInput"
+        },
+        "OR": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/environment_edgesWhereInput"
+          }
+        },
+        "NOT": {
+          "$ref": "#/definitions/environment_edgesWhereInput"
+        },
+        "environment_id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "edge_id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "edge": {
+          "$ref": "#/definitions/EdgeRelationFilter"
+        },
+        "environment": {
+          "$ref": "#/definitions/EnvironmentRelationFilter"
+        }
+      }
+    },
+    "EdgeRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "is": {
+          "$ref": "#/definitions/edgeWhereInput"
+        },
+        "isNot": {
+          "$ref": "#/definitions/edgeWhereInput"
+        }
+      }
+    },
+    "edgeWhereInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "AND": {
+          "$ref": "#/definitions/edgeWhereInput"
+        },
+        "OR": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/edgeWhereInput"
+          }
+        },
+        "NOT": {
+          "$ref": "#/definitions/edgeWhereInput"
+        },
+        "id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "name": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "location": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "created_at": {
+          "$ref": "#/definitions/DateTimeFilter"
+        },
+        "updated_at": {
+          "$ref": "#/definitions/DateTimeNullableFilter"
+        },
+        "environment_edges": {
+          "$ref": "#/definitions/Environment_edgesListRelationFilter"
+        }
+      }
+    },
+    "Nodepool_environmentListRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "every": {
+          "$ref": "#/definitions/nodepool_environmentWhereInput"
+        },
+        "some": {
+          "$ref": "#/definitions/nodepool_environmentWhereInput"
+        },
+        "none": {
+          "$ref": "#/definitions/nodepool_environmentWhereInput"
+        }
+      }
+    },
+    "nodepool_environmentWhereInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "AND": {
+          "$ref": "#/definitions/nodepool_environmentWhereInput"
+        },
+        "OR": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/nodepool_environmentWhereInput"
+          }
+        },
+        "NOT": {
+          "$ref": "#/definitions/nodepool_environmentWhereInput"
+        },
+        "nodepool_id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "environment_id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "environment": {
+          "$ref": "#/definitions/EnvironmentRelationFilter"
+        },
+        "nodepool": {
+          "$ref": "#/definitions/NodepoolRelationFilter"
+        }
+      }
+    },
+    "NodepoolRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "is": {
+          "$ref": "#/definitions/nodepoolWhereInput"
+        },
+        "isNot": {
+          "$ref": "#/definitions/nodepoolWhereInput"
+        }
+      }
+    },
+    "nodepoolWhereInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "AND": {
+          "$ref": "#/definitions/nodepoolWhereInput"
+        },
+        "OR": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/nodepoolWhereInput"
+          }
+        },
+        "NOT": {
+          "$ref": "#/definitions/nodepoolWhereInput"
+        },
+        "id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "wundernode_id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "shared": {
+          "$ref": "#/definitions/BoolFilter"
+        },
+        "created_at": {
+          "$ref": "#/definitions/DateTimeFilter"
+        },
+        "updated_at": {
+          "$ref": "#/definitions/DateTimeNullableFilter"
+        },
+        "wundernode": {
+          "$ref": "#/definitions/WundernodeRelationFilter"
+        },
+        "nodepool_environment": {
+          "$ref": "#/definitions/Nodepool_environmentListRelationFilter"
+        }
+      }
+    },
+    "WundernodeRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "is": {
+          "$ref": "#/definitions/wundernodeWhereInput"
+        },
+        "isNot": {
+          "$ref": "#/definitions/wundernodeWhereInput"
+        }
+      }
+    },
+    "wundernodeWhereInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "AND": {
+          "$ref": "#/definitions/wundernodeWhereInput"
+        },
+        "OR": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/wundernodeWhereInput"
+          }
+        },
+        "NOT": {
+          "$ref": "#/definitions/wundernodeWhereInput"
+        },
+        "id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "etag": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "config": {
+          "$ref": "#/definitions/JsonFilter"
+        },
+        "ipv4": {
+          "$ref": "#/definitions/StringNullableFilter"
+        },
+        "ipv6": {
+          "$ref": "#/definitions/StringNullableFilter"
+        },
+        "created_at": {
+          "$ref": "#/definitions/DateTimeFilter"
+        },
+        "updated_at": {
+          "$ref": "#/definitions/DateTimeNullableFilter"
+        },
+        "nodepool": {
+          "$ref": "#/definitions/NodepoolListRelationFilter"
+        }
+      }
+    },
+    "StringNullableFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "in": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "notIn": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "lt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contains": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "startsWith": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "endsWith": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-graphql-enum-name": "QueryMode",
+          "enum": [
+            "default",
+            "insensitive"
+          ]
+        },
+        "not": {
+          "$ref": "#/definitions/NestedStringNullableFilter"
+        }
+      }
+    },
+    "NestedStringNullableFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "in": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "notIn": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "lt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gte": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contains": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "startsWith": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "endsWith": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "not": {
+          "$ref": "#/definitions/NestedStringNullableFilter"
+        }
+      }
+    },
+    "NodepoolListRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "every": {
+          "$ref": "#/definitions/nodepoolWhereInput"
+        },
+        "some": {
+          "$ref": "#/definitions/nodepoolWhereInput"
+        },
+        "none": {
+          "$ref": "#/definitions/nodepoolWhereInput"
+        }
+      }
+    },
+    "EnvironmentListRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "every": {
+          "$ref": "#/definitions/environmentWhereInput"
+        },
+        "some": {
+          "$ref": "#/definitions/environmentWhereInput"
+        },
+        "none": {
+          "$ref": "#/definitions/environmentWhereInput"
+        }
+      }
+    },
+    "Namespace_membersListRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "every": {
+          "$ref": "#/definitions/namespace_membersWhereInput"
+        },
+        "some": {
+          "$ref": "#/definitions/namespace_membersWhereInput"
+        },
+        "none": {
+          "$ref": "#/definitions/namespace_membersWhereInput"
+        }
+      }
+    },
+    "namespace_membersWhereInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "AND": {
+          "$ref": "#/definitions/namespace_membersWhereInput"
+        },
+        "OR": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/namespace_membersWhereInput"
+          }
+        },
+        "NOT": {
+          "$ref": "#/definitions/namespace_membersWhereInput"
+        },
+        "user_id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "namespace_id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "membership": {
+          "$ref": "#/definitions/EnummembershipFilter"
+        },
+        "created_at": {
+          "$ref": "#/definitions/DateTimeFilter"
+        },
+        "updated_at": {
+          "$ref": "#/definitions/DateTimeNullableFilter"
+        },
+        "namespace": {
+          "$ref": "#/definitions/NamespaceRelationFilter"
+        },
+        "users": {
+          "$ref": "#/definitions/UsersRelationFilter"
+        }
+      }
+    },
+    "EnummembershipFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-graphql-enum-name": "membership",
+          "enum": [
+            "owner",
+            "maintainer",
+            "viewer",
+            "guest"
+          ]
+        },
+        "in": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "x-graphql-enum-name": "membership",
+            "enum": [
+              "owner",
+              "maintainer",
+              "viewer",
+              "guest"
+            ]
+          }
+        },
+        "notIn": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "x-graphql-enum-name": "membership",
+            "enum": [
+              "owner",
+              "maintainer",
+              "viewer",
+              "guest"
+            ]
+          }
+        },
+        "not": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-graphql-enum-name": "membership",
+          "enum": [
+            "owner",
+            "maintainer",
+            "viewer",
+            "guest"
+          ]
+        }
+      }
+    },
+    "UsersRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "is": {
+          "$ref": "#/definitions/usersWhereInput"
+        },
+        "isNot": {
+          "$ref": "#/definitions/usersWhereInput"
+        }
+      }
+    },
+    "usersWhereInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "AND": {
+          "$ref": "#/definitions/usersWhereInput"
+        },
+        "OR": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/usersWhereInput"
+          }
+        },
+        "NOT": {
+          "$ref": "#/definitions/usersWhereInput"
+        },
+        "id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "name": {
+          "$ref": "#/definitions/StringNullableFilter"
+        },
+        "email": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "role": {
+          "$ref": "#/definitions/Enumuser_roleFilter"
+        },
+        "created_at": {
+          "$ref": "#/definitions/DateTimeFilter"
+        },
+        "updated_at": {
+          "$ref": "#/definitions/DateTimeNullableFilter"
+        },
+        "access_token": {
+          "$ref": "#/definitions/Access_tokenListRelationFilter"
+        },
+        "namespace_members": {
+          "$ref": "#/definitions/Namespace_membersListRelationFilter"
+        }
+      }
+    },
+    "Enumuser_roleFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "equals": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-graphql-enum-name": "user_role",
+          "enum": [
+            "user",
+            "admin"
+          ]
+        },
+        "in": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "x-graphql-enum-name": "user_role",
+            "enum": [
+              "user",
+              "admin"
+            ]
+          }
+        },
+        "notIn": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "x-graphql-enum-name": "user_role",
+            "enum": [
+              "user",
+              "admin"
+            ]
+          }
+        },
+        "not": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-graphql-enum-name": "user_role",
+          "enum": [
+            "user",
+            "admin"
+          ]
+        }
+      }
+    },
+    "Access_tokenListRelationFilter": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "every": {
+          "$ref": "#/definitions/access_tokenWhereInput"
+        },
+        "some": {
+          "$ref": "#/definitions/access_tokenWhereInput"
+        },
+        "none": {
+          "$ref": "#/definitions/access_tokenWhereInput"
+        }
+      }
+    },
+    "access_tokenWhereInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "AND": {
+          "$ref": "#/definitions/access_tokenWhereInput"
+        },
+        "OR": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/access_tokenWhereInput"
+          }
+        },
+        "NOT": {
+          "$ref": "#/definitions/access_tokenWhereInput"
+        },
+        "id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "token": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "user_id": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "name": {
+          "$ref": "#/definitions/StringFilter"
+        },
+        "created_at": {
+          "$ref": "#/definitions/DateTimeFilter"
+        },
+        "users": {
+          "$ref": "#/definitions/UsersRelationFilter"
+        }
+      }
+    }
+  }
+}"
+`;
+
+exports[`complex schema operations: testCase_0_responseJSONSchema 1`] = `
+"{
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "namespaceCreate": {
+          "type": "object",
+          "properties": {
+            "namespace": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "name"
+              ]
+            },
+            "code": {
+              "type": "string",
+              "enum": [
+                "Internal",
+                "AuthenticationRequired",
+                "Unauthorized",
+                "NotFound",
+                "Conflict",
+                "UserAlreadyHasPersonalNamespace",
+                "TeamPlanInPersonalNamespace",
+                "InvalidName",
+                "UnableToDeployEnvironment",
+                "InvalidWunderGraphConfig",
+                "ApiEnvironmentNamespaceMismatch",
+                "UnableToUpdateEdgesOnPersonalEnvironment"
+              ]
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "namespaceCreate"
+      ]
+    }
+  },
+  "additionalProperties": false
+}"
+`;
+
+exports[`complex schema operations: testCase_0_variablesJSONSchema 1`] = `
+"{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "personal": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "personal"
+  ]
+}"
+`;
+
+exports[`operationVariablesToJSONSchema: testCase_0_responseJSONSchema 1`] = `
+"{
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "topProducts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "upc": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "upc"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}"
+`;
+
+exports[`operationVariablesToJSONSchema: testCase_0_variablesJSONSchema 1`] = `
+"{
+  "type": "object",
+  "properties": {
+    "a": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false
+}"
+`;
+
+exports[`operationVariablesToJSONSchema: testCase_1_responseJSONSchema 1`] = `
+"{
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "nullableComplex": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "id"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}"
+`;
+
+exports[`operationVariablesToJSONSchema: testCase_1_variablesJSONSchema 1`] = `
+"{
+  "type": "object",
+  "properties": {
+    "a": {
+      "$ref": "#/definitions/ComplexInput"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "ComplexInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "nullableString": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "nullableStringWithDefault": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "nonNullString": {
+          "type": "string"
+        },
+        "nonNullStringWithDefault": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "nullableBoolean": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "nonNullBoolean": {
+          "type": "boolean"
+        },
+        "nullableFloat": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "nonNullFloat": {
+          "type": "number"
+        },
+        "nullableInt": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "nonNullInt": {
+          "type": "integer"
+        },
+        "nullableInput": {
+          "$ref": "#/definitions/NestedInput"
+        },
+        "nonNullInput": {
+          "$ref": "#/definitions/NestedInput"
+        },
+        "nullableEnum": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-graphql-enum-name": "EnumInput",
+          "enum": [
+            "A",
+            "B"
+          ]
+        },
+        "nonNullEnum": {
+          "type": "string",
+          "x-graphql-enum-name": "EnumInput",
+          "enum": [
+            "A",
+            "B"
+          ]
+        },
+        "nullableListOfNullableString": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "nonNullListOfNullableString": {
+          "type": "array",
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "nonNullListOfNonNullString": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "NestedInput": {
+      "additionalProperties": false,
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "nullableString": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}"
+`;
+
 exports[`parseGraphQLOperations 1`] = `
 {
   "operations": [
