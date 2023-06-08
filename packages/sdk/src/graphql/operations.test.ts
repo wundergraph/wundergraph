@@ -39,8 +39,15 @@ subscription @internalOperation {
 }`;
 
 const mutationWithUnionInput = `
-mutation MutationWithUnionInput($input: UnionInput!) {
-	mutationWithUnionInput(input: $input)
+mutation ($input: TestType_Input!) {
+  test_endpoint(input: $input) {
+    ... on A_const_container {
+      A_const
+    }
+    ... on mutation_test_endpoint_oneOf_1 {
+      B
+    }
+  }
 }
 `;
 
@@ -985,7 +992,7 @@ directive @transform(
 
 type Mutation {
     postPets(petInput: PetInput!): Pet
-    mutationWithUnionInput(input: UnionInput): String
+    test_endpoint(input: TestType_Input): TestType
 }
 
 type Subscription {
@@ -1000,19 +1007,6 @@ type Pet {
 input PetInput {
     id: ID!
     name: String
-}
-
-input UnionInput @oneOf {
-	a: UnionInputA
-	b: UnionInputB
-}
-
-input UnionInputA {
-    a: String
-}
-
-input UnionInputB {
-    b: String
 }
 
 enum EnumInput {
@@ -1066,6 +1060,29 @@ type Review {
   body: String
   author: User
   product: Product
+}
+
+enum A_const {
+  A
+}
+
+type A_const_container {
+  A_const: A_const
+}
+
+type mutation_test_endpoint_oneOf_1 {
+  B: String
+}
+
+union TestType = A_const_container | mutation_test_endpoint_oneOf_1
+
+input TestType_Input @oneOf {
+  A_const: A_const
+  mutation_test_endpoint_oneOf_1_Input: mutation_test_endpoint_oneOf_1_Input
+}
+
+input mutation_test_endpoint_oneOf_1_Input {
+  B: String
 }
 `;
 

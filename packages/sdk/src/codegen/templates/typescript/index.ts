@@ -518,6 +518,14 @@ export const extractEnums = (schema: JSONSchema, enumMap: Map<string, Array<JSON
 			}
 		}
 
+		if (obj.oneOf) {
+			for (const item of obj.oneOf) {
+				if (typeof item !== 'boolean') {
+					traverseSchema(item);
+				}
+			}
+		}
+
 		if (obj.items && typeof obj.items !== 'boolean' && !Array.isArray(obj.items)) {
 			traverseSchema(obj.items);
 		}

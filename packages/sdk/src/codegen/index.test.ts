@@ -612,7 +612,8 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 									requireMatchAny: [],
 								},
 							},
-							Content: 'mutation MutationWithUnionInput($input:UnionInput!){mutationWithUnionInput(input:$input)}',
+							Content:
+								'mutation($input:TestType_Input!){test_endpoint(input:$input){...on A_const_container{A_const}...on mutation_test_endpoint_oneOf_1{B}}}',
 							ExecutionEngine: 0,
 							HooksConfiguration: {
 								customResolve: false,
@@ -630,21 +631,23 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							InjectedVariablesSchema: {
 								additionalProperties: false,
 								definitions: {
-									UnionInput: {
+									TestType_Input: {
 										additionalProperties: false,
 										oneOf: [
 											{
 												properties: {
-													a: {
-														$ref: '#/definitions/UnionInputA',
+													A_const: {
+														enum: ['A'],
+														type: ['string', 'null'],
+														'x-graphql-enum-name': 'A_const',
 													},
 												},
 												type: 'object',
 											},
 											{
 												properties: {
-													b: {
-														$ref: '#/definitions/UnionInputB',
+													mutation_test_endpoint_oneOf_1_Input: {
+														$ref: '#/definitions/mutation_test_endpoint_oneOf_1_Input',
 													},
 												},
 												type: 'object',
@@ -652,19 +655,10 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 										],
 										type: 'object',
 									},
-									UnionInputA: {
+									mutation_test_endpoint_oneOf_1_Input: {
 										additionalProperties: false,
 										properties: {
-											a: {
-												type: ['string', 'null'],
-											},
-										},
-										type: ['object', 'null'],
-									},
-									UnionInputB: {
-										additionalProperties: false,
-										properties: {
-											b: {
+											B: {
 												type: ['string', 'null'],
 											},
 										},
@@ -673,7 +667,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 								},
 								properties: {
 									input: {
-										$ref: '#/definitions/UnionInput',
+										$ref: '#/definitions/TestType_Input',
 									},
 								},
 								required: ['input'],
@@ -683,21 +677,23 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							InternalVariablesSchema: {
 								additionalProperties: false,
 								definitions: {
-									UnionInput: {
+									TestType_Input: {
 										additionalProperties: false,
 										oneOf: [
 											{
 												properties: {
-													a: {
-														$ref: '#/definitions/UnionInputA',
+													A_const: {
+														enum: ['A'],
+														type: ['string', 'null'],
+														'x-graphql-enum-name': 'A_const',
 													},
 												},
 												type: 'object',
 											},
 											{
 												properties: {
-													b: {
-														$ref: '#/definitions/UnionInputB',
+													mutation_test_endpoint_oneOf_1_Input: {
+														$ref: '#/definitions/mutation_test_endpoint_oneOf_1_Input',
 													},
 												},
 												type: 'object',
@@ -705,19 +701,10 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 										],
 										type: 'object',
 									},
-									UnionInputA: {
+									mutation_test_endpoint_oneOf_1_Input: {
 										additionalProperties: false,
 										properties: {
-											a: {
-												type: ['string', 'null'],
-											},
-										},
-										type: ['object', 'null'],
-									},
-									UnionInputB: {
-										additionalProperties: false,
-										properties: {
-											b: {
+											B: {
 												type: ['string', 'null'],
 											},
 										},
@@ -726,7 +713,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 								},
 								properties: {
 									input: {
-										$ref: '#/definitions/UnionInput',
+										$ref: '#/definitions/TestType_Input',
 									},
 								},
 								required: ['input'],
@@ -735,21 +722,23 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							InterpolationVariablesSchema: {
 								additionalProperties: false,
 								definitions: {
-									UnionInput: {
+									TestType_Input: {
 										additionalProperties: false,
 										oneOf: [
 											{
 												properties: {
-													a: {
-														$ref: '#/definitions/UnionInputA',
+													A_const: {
+														enum: ['A'],
+														type: ['string', 'null'],
+														'x-graphql-enum-name': 'A_const',
 													},
 												},
 												type: 'object',
 											},
 											{
 												properties: {
-													b: {
-														$ref: '#/definitions/UnionInputB',
+													mutation_test_endpoint_oneOf_1_Input: {
+														$ref: '#/definitions/mutation_test_endpoint_oneOf_1_Input',
 													},
 												},
 												type: 'object',
@@ -757,19 +746,10 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 										],
 										type: 'object',
 									},
-									UnionInputA: {
+									mutation_test_endpoint_oneOf_1_Input: {
 										additionalProperties: false,
 										properties: {
-											a: {
-												type: ['string', 'null'],
-											},
-										},
-										type: ['object', 'null'],
-									},
-									UnionInputB: {
-										additionalProperties: false,
-										properties: {
-											b: {
+											B: {
 												type: ['string', 'null'],
 											},
 										},
@@ -778,7 +758,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 								},
 								properties: {
 									input: {
-										$ref: '#/definitions/UnionInput',
+										$ref: '#/definitions/TestType_Input',
 									},
 								},
 								required: ['input'],
@@ -794,8 +774,18 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 									data: {
 										additionalProperties: false,
 										properties: {
-											mutationWithUnionInput: {
-												type: 'string',
+											test_endpoint: {
+												additionalProperties: false,
+												properties: {
+													A_const: {
+														enum: ['A'],
+														type: 'string',
+													},
+													B: {
+														type: 'string',
+													},
+												},
+												type: 'object',
 											},
 										},
 										type: 'object',
@@ -809,21 +799,23 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							VariablesSchema: {
 								additionalProperties: false,
 								definitions: {
-									UnionInput: {
+									TestType_Input: {
 										additionalProperties: false,
 										oneOf: [
 											{
 												properties: {
-													a: {
-														$ref: '#/definitions/UnionInputA',
+													A_const: {
+														enum: ['A'],
+														type: ['string', 'null'],
+														'x-graphql-enum-name': 'A_const',
 													},
 												},
 												type: 'object',
 											},
 											{
 												properties: {
-													b: {
-														$ref: '#/definitions/UnionInputB',
+													mutation_test_endpoint_oneOf_1_Input: {
+														$ref: '#/definitions/mutation_test_endpoint_oneOf_1_Input',
 													},
 												},
 												type: 'object',
@@ -831,19 +823,10 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 										],
 										type: 'object',
 									},
-									UnionInputA: {
+									mutation_test_endpoint_oneOf_1_Input: {
 										additionalProperties: false,
 										properties: {
-											a: {
-												type: ['string', 'null'],
-											},
-										},
-										type: ['object', 'null'],
-									},
-									UnionInputB: {
-										additionalProperties: false,
-										properties: {
-											b: {
+											B: {
 												type: ['string', 'null'],
 											},
 										},
@@ -852,7 +835,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 								},
 								properties: {
 									input: {
-										$ref: '#/definitions/UnionInput',
+										$ref: '#/definitions/TestType_Input',
 									},
 								},
 								required: ['input'],
