@@ -444,7 +444,7 @@ importers:
       '@types/prettier': ^2.7.2
       '@types/traverse': ^0.6.32
       '@types/write-file-atomic': ^4.0.0
-      '@whatwg-node/fetch': ^0.9.0
+      '@whatwg-node/fetch': ^0.9.4
       '@wundergraph/orm': workspace:*
       '@wundergraph/protobuf': workspace:^0.116.0
       '@wundergraph/straightforward': ^4.2.5
@@ -510,7 +510,7 @@ importers:
       '@opentelemetry/sdk-trace-node': 1.13.0_@opentelemetry+api@1.4.1
       '@opentelemetry/semantic-conventions': 1.13.0
       '@prisma/generator-helper': 3.15.2
-      '@whatwg-node/fetch': 0.9.0
+      '@whatwg-node/fetch': 0.9.4
       '@wundergraph/orm': link:../orm
       '@wundergraph/protobuf': link:../protobuf
       '@wundergraph/straightforward': 4.2.5
@@ -5521,7 +5521,7 @@ packages:
       '@graphql-mesh/utils': 0.93.1_okhidrftli3kjbj7qxt5j6p67e
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       '@json-schema-tools/meta-schema': 1.7.0
-      '@whatwg-node/fetch': 0.9.0
+      '@whatwg-node/fetch': 0.9.4
       ajv: 8.12.0
       ajv-formats: 2.1.1
       dset: 3.1.2
@@ -8241,16 +8241,16 @@ packages:
     transitivePeerDependencies:
       - encoding
 
-  /@whatwg-node/fetch/0.9.0:
-    resolution: {integrity: sha512-zEyXaoz5w6BpKYKyZLTwBA41fqGuscOvSoPHytADRo1FY/s/fmjwiKq4QGmB88DlNuQ8e57s6AgWqIYyAT0Zmg==}
+  /@whatwg-node/fetch/0.9.4:
+    resolution: {integrity: sha512-nR0nZeOCy4M4ep/nwuGdQxRlOrHqmA5M3t+laOAsPEwwnpoTmA4DSuopyD5Dqk7+sFaOiX328HeGhvwj4HHdng==}
     engines: {node: '>=16.0.0'}
     dependencies:
-      '@whatwg-node/node-fetch': 0.4.0
-      urlpattern-polyfill: 8.0.2
+      '@whatwg-node/node-fetch': 0.4.3
+      urlpattern-polyfill: 9.0.0
     dev: false
 
-  /@whatwg-node/node-fetch/0.4.0:
-    resolution: {integrity: sha512-aFfJNTMwkWrkl8I9nTkslVjPlkL+zb/Z71ng+71UbYYm1gPHfltHHXBiM99aZgUCaqyvaR5XzzwyCL6m0ikqsA==}
+  /@whatwg-node/node-fetch/0.4.3:
+    resolution: {integrity: sha512-C+nki+rxOM4mEfQwxohx4QXlPV96oQfQNFR94/3jp125vh+UW/r0CAG/ELUFQSJIcSFAQJarq+mZGiv46Jg7ag==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@whatwg-node/events': 0.1.1
@@ -16915,7 +16915,7 @@ packages:
       '@graphql-mesh/utils': 0.93.1_okhidrftli3kjbj7qxt5j6p67e
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       '@json-schema-tools/meta-schema': 1.7.0
-      '@whatwg-node/fetch': 0.9.0
+      '@whatwg-node/fetch': 0.9.4
       graphql: 16.6.0
       json-pointer: 0.6.2
       to-json-schema: 0.2.5
@@ -24351,8 +24351,8 @@ packages:
     resolution: {integrity: sha512-KmkCs6SjE6t4ihrfW9JelAPQIIIFbJweaaSLTh/4AO+c58JlDcb+GbdPt8yr5lRcFg4rPswRFRRhBGpWwh0K/Q==}
     dev: false
 
-  /urlpattern-polyfill/8.0.2:
-    resolution: {integrity: sha512-Qp95D4TPJl1kC9SKigDcqgyM2VDVO4RiJc2d4qe5GrYm+zbIQCWWKAFaJNQ4BhdFeDGwBmAxqJBwWSJDb9T3BQ==}
+  /urlpattern-polyfill/9.0.0:
+    resolution: {integrity: sha512-WHN8KDQblxd32odxeIgo83rdVDE2bvdkb86it7bMhYZwWKJz0+O0RK/eZiHYnM+zgt/U7hAHOlCQGfjjvSkw2g==}
     dev: false
 
   /use-sync-external-store/1.2.0_react@18.2.0:
@@ -25434,7 +25434,7 @@ packages:
       '@prisma/generator-helper': 3.15.2
       '@remix-run/web-fetch': 4.3.4
       '@web-std/fetch': 4.1.0
-      '@whatwg-node/fetch': 0.9.0
+      '@whatwg-node/fetch': 0.9.4
       '@wundergraph/orm': link:packages/orm
       '@wundergraph/protobuf': link:packages/protobuf
       '@wundergraph/straightforward': 4.2.5
