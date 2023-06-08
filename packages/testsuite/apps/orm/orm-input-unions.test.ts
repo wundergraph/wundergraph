@@ -12,7 +12,7 @@ beforeAll(async (ctx) => {
 
 	return await ts.start({
 		// Environment variables replaced by the test mock server URL
-		mockURLEnvs: ['ONE_OF_URL'],
+		mockURLEnvs: ['ORM_UNION_TYPES_URL'],
 	});
 });
 

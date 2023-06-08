@@ -22,7 +22,7 @@ const oas = introspect.openApiV2({
 		kind: 'file',
 		filePath: './union-types.yaml',
 	},
-	baseURL: new EnvironmentVariable('ONE_OF_URL', ''),
+	baseURL: new EnvironmentVariable('ORM_UNION_TYPES_URL', ''),
 });
 
 configureWunderGraphApplication({
