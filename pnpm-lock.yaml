@@ -417,9 +417,6 @@ importers:
     specifiers:
       '@fastify/formbody': ^7.3.0
       '@graphql-mesh/cross-helpers': ^0.4.0
-      '@graphql-mesh/json-schema': 0.94.2
-      '@graphql-mesh/openapi': 0.94.2
-      '@graphql-mesh/store': '0.94'
       '@graphql-mesh/types': 0.94.0
       '@graphql-mesh/utils': 0.94.0
       '@graphql-tools/schema': ^8.5.1
@@ -498,10 +495,7 @@ importers:
     dependencies:
       '@fastify/formbody': 7.3.0
       '@graphql-mesh/cross-helpers': 0.4.0_pgitk55pksmh724wxkovid65ci
-      '@graphql-mesh/json-schema': 0.94.2_eiq7x44w6bqqjx66pnv5eewgtq
-      '@graphql-mesh/openapi': 0.94.2_eiq7x44w6bqqjx66pnv5eewgtq
-      '@graphql-mesh/store': 0.94.0_lyyffdw2meesutvp3pmm6lc2ye
-      '@graphql-mesh/types': 0.94.0_wzi3fdkpachpjsxlannad7j3iu
+      '@graphql-mesh/types': 0.94.0_uoeeqqlv6c6lhv3gqe7g3h6vhq
       '@graphql-mesh/utils': 0.94.0_jbrdvdlgwxeoxswluszpeqie6e
       '@graphql-tools/schema': 8.5.1_graphql@16.6.0
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
@@ -3593,6 +3587,23 @@ packages:
       tslib: 2.5.0
     dev: false
 
+  /@graphql-mesh/types/0.94.0_uoeeqqlv6c6lhv3gqe7g3h6vhq:
+    resolution: {integrity: sha512-LBFKhrb4Pwn6R/TZ/FS5QHQvzxgJGS5P4J6PHjoEfLEK98APqXwBH9Tbxb4wXUH9htUGOtkTWL25fZivwi770A==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      '@graphql-mesh/store': ^0.94.0
+      '@graphql-tools/utils': ^9.2.1 || ^10.0.0
+      graphql: '*'
+      tslib: ^2.4.0
+    dependencies:
+      '@graphql-tools/batch-delegate': 9.0.0_graphql@16.6.0
+      '@graphql-tools/delegate': 10.0.0_graphql@16.6.0
+      '@graphql-tools/utils': 9.2.1_graphql@16.6.0
+      '@graphql-typed-document-node/core': 3.2.0_graphql@16.6.0
+      graphql: 16.6.0
+      tslib: 2.5.0
+    dev: false
+
   /@graphql-mesh/types/0.94.0_wzi3fdkpachpjsxlannad7j3iu:
     resolution: {integrity: sha512-LBFKhrb4Pwn6R/TZ/FS5QHQvzxgJGS5P4J6PHjoEfLEK98APqXwBH9Tbxb4wXUH9htUGOtkTWL25fZivwi770A==}
     engines: {node: '>=16.0.0'}
@@ -3623,7 +3634,7 @@ packages:
     dependencies:
       '@graphql-mesh/cross-helpers': 0.4.0_pgitk55pksmh724wxkovid65ci
       '@graphql-mesh/string-interpolation': 0.5.0_graphql@16.6.0+tslib@2.5.0
-      '@graphql-mesh/types': 0.94.0_wzi3fdkpachpjsxlannad7j3iu
+      '@graphql-mesh/types': 0.94.0_uoeeqqlv6c6lhv3gqe7g3h6vhq
       '@graphql-tools/delegate': 10.0.0_graphql@16.6.0
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       dset: 3.1.2
@@ -5633,7 +5644,7 @@ packages:
     dependencies:
       '@graphql-mesh/cross-helpers': 0.4.0_pgitk55pksmh724wxkovid65ci
       '@graphql-mesh/string-interpolation': 0.5.0_graphql@16.6.0+tslib@2.5.0
-      '@graphql-mesh/types': 0.94.0_wzi3fdkpachpjsxlannad7j3iu
+      '@graphql-mesh/types': 0.94.0_uoeeqqlv6c6lhv3gqe7g3h6vhq
       '@graphql-mesh/utils': 0.94.0_jbrdvdlgwxeoxswluszpeqie6e
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       '@json-schema-tools/meta-schema': 1.7.0
@@ -5664,7 +5675,7 @@ packages:
     dependencies:
       '@graphql-mesh/cross-helpers': 0.4.0_pgitk55pksmh724wxkovid65ci
       '@graphql-mesh/string-interpolation': 0.5.0_graphql@16.6.0+tslib@2.5.0
-      '@graphql-mesh/types': 0.94.0_wzi3fdkpachpjsxlannad7j3iu
+      '@graphql-mesh/types': 0.94.0_uoeeqqlv6c6lhv3gqe7g3h6vhq
       '@graphql-mesh/utils': 0.94.0_jbrdvdlgwxeoxswluszpeqie6e
       '@omnigraph/json-schema': 0.94.2_lyyffdw2meesutvp3pmm6lc2ye
       change-case: 4.1.2
@@ -5685,7 +5696,7 @@ packages:
       '@graphql-tools/utils': ^9.2.1 || ^10.0.0
       graphql: '*'
     dependencies:
-      '@graphql-mesh/types': 0.94.0_wzi3fdkpachpjsxlannad7j3iu
+      '@graphql-mesh/types': 0.94.0_uoeeqqlv6c6lhv3gqe7g3h6vhq
       '@graphql-mesh/utils': 0.94.0_jbrdvdlgwxeoxswluszpeqie6e
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       fast-xml-parser: 4.2.4
@@ -17040,7 +17051,7 @@ packages:
       tslib: ^2.4.0
     dependencies:
       '@graphql-mesh/cross-helpers': 0.4.0_pgitk55pksmh724wxkovid65ci
-      '@graphql-mesh/types': 0.94.0_wzi3fdkpachpjsxlannad7j3iu
+      '@graphql-mesh/types': 0.94.0_uoeeqqlv6c6lhv3gqe7g3h6vhq
       '@graphql-mesh/utils': 0.94.0_jbrdvdlgwxeoxswluszpeqie6e
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       '@json-schema-tools/meta-schema': 1.7.0
