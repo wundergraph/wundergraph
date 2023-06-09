@@ -141,11 +141,13 @@ func parseLinuxDistro(str string) string {
 }
 
 func getLinuxDistro() string {
-	out, _ := exec.Command("cat", "/etc/os-release").CombinedOutput()
-	if out != nil {
-		return parseLinuxDistro(string(out))
+	filePath := "/etc/os-release"
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return "debian"
 	}
-	return "debian"
+
+	return parseLinuxDistro(string(content))
 }
 
 // CheckForExtension adds a .exe extension on windows (e.g. .gz -> .exe.gz)
