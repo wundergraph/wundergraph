@@ -285,9 +285,20 @@ export class OpenApiBuilder {
 	}
 
 	private rewriteOperationSchemaRefs(spec: OpenApiSpec, op: OpenApiOperation) {
+		for (const input of Object.values(op.requestBody?.content ?? {})) {
+			if (input.schema) {
+				const schema = JSON.parse(JSON.stringify(input.schema));
+				this.rewriteSchemaRefs(spec, schema);
+				input.schema = schema;
+			}
+		}
 		for (const response of Object.values(op.responses)) {
 			for (const contents of Object.values(response.content)) {
-				this.rewriteSchemaRefs(spec, contents.schema);
+				if (contents.schema) {
+					const schema = JSON.parse(JSON.stringify(contents.schema));
+					this.rewriteSchemaRefs(spec, schema);
+					contents.schema = schema;
+				}
 			}
 		}
 	}
