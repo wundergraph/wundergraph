@@ -183,14 +183,18 @@ func (e *Engine) BinaryPlatformName() string {
 	return name
 }
 
-func (e *Engine) FetchEngine(toDir string, engineName string, binaryPlatformName string) error {
-	to := checkForExtension(binaryPlatformName, path.Join(toDir, PrismaBinaryVersion, fmt.Sprintf("prisma-%s-%s", engineName, binaryPlatformName)))
-
+func (e *Engine) GetEngineURL(engineName string, binaryPlatformName string) string {
 	binaryPlatformRemoteName := binaryPlatformName
 	if binaryPlatformRemoteName == "linux" {
 		binaryPlatformRemoteName = "linux-musl"
 	}
-	url := checkForExtension(binaryPlatformName, fmt.Sprintf(EngineURL, PrismaBinaryVersion, binaryPlatformRemoteName, engineName))
+	return checkForExtension(binaryPlatformName, fmt.Sprintf(EngineURL, PrismaBinaryVersion, binaryPlatformRemoteName, engineName))
+}
+
+func (e *Engine) FetchEngine(toDir string, engineName string, binaryPlatformName string) error {
+	to := checkForExtension(binaryPlatformName, path.Join(toDir, PrismaBinaryVersion, fmt.Sprintf("prisma-%s-%s", engineName, binaryPlatformName)))
+
+	url := e.GetEngineURL(engineName, binaryPlatformName)
 
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
 		return nil

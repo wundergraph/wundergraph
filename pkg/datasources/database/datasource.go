@@ -1147,8 +1147,6 @@ func (s *Source) Load(ctx context.Context, input []byte, w io.Writer) (err error
 		}
 	}
 
-	s.log.Debug("", zap.Any("DeserializeResponse", buf.String()))
-
 	_, err = buf.WriteTo(w)
 	return
 }
