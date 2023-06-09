@@ -18,7 +18,6 @@ import (
 
 	"github.com/gofrs/flock"
 	"github.com/phayes/freeport"
-	"github.com/prisma/prisma-client-go/binaries/platform"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/repair"
@@ -324,8 +323,8 @@ func (e *Engine) ensurePrisma() error {
 		return err
 	}
 
-	e.queryEnginePath = filepath.Join(prismaPath, PrismaBinaryVersion, fmt.Sprintf("prisma-query-engine-%s", platform.BinaryPlatformName()))
-	e.introspectionEnginePath = filepath.Join(prismaPath, PrismaBinaryVersion, fmt.Sprintf("prisma-migration-engine-%s", platform.BinaryPlatformName()))
+	e.queryEnginePath = filepath.Join(prismaPath, PrismaBinaryVersion, fmt.Sprintf("prisma-query-engine-%s", e.BinaryPlatformName()))
+	e.introspectionEnginePath = filepath.Join(prismaPath, PrismaBinaryVersion, fmt.Sprintf("prisma-migration-engine-%s", e.BinaryPlatformName()))
 
 	if runtime.GOOS == "windows" {
 		// Append .exe suffix
@@ -347,7 +346,7 @@ func (e *Engine) ensurePrisma() error {
 		e.log.Info("downloading prisma query engine",
 			zap.String("path", e.queryEnginePath),
 		)
-		if err := FetchEngine(prismaPath, "query-engine", platform.BinaryPlatformName()); err != nil {
+		if err := e.FetchEngine(prismaPath, "query-engine", e.BinaryPlatformName()); err != nil {
 			return err
 		}
 		e.log.Info("downloading prisma query engine complete")
@@ -358,7 +357,7 @@ func (e *Engine) ensurePrisma() error {
 		e.log.Info("downloading prisma introspection engine",
 			zap.String("path", e.introspectionEnginePath),
 		)
-		if err := FetchEngine(prismaPath, "migration-engine", platform.BinaryPlatformName()); err != nil {
+		if err := e.FetchEngine(prismaPath, "migration-engine", e.BinaryPlatformName()); err != nil {
 			return err
 		}
 		e.log.Info("downloading prisma introspection engine complete")

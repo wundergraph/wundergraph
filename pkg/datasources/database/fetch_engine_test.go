@@ -1,9 +1,10 @@
 package database
 
 import (
-	"github.com/prisma/prisma-client-go/binaries/platform"
+	"net/http"
 	"os"
 	"testing"
+	"time"
 )
 
 func tmpDir(t *testing.T) string {
@@ -19,11 +20,15 @@ func TestFetchEngine(t *testing.T) {
 	//goland:noinspection GoUnhandledErrorResult
 	defer os.RemoveAll(dir)
 
+	engine := NewEngine(&http.Client{
+		Timeout: time.Second * 5,
+	}, nil, dir)
+
 	var engines = []string{"query-engine", "migration-engine"}
 
-	for _, engine := range engines {
-		if err := FetchEngine(dir, engine, platform.BinaryPlatformName()); err != nil {
-			t.Fatalf("FetchEngine failed for %s: %s", engine, err)
+	for _, engineName := range engines {
+		if err := engine.FetchEngine(dir, engineName, engine.BinaryPlatformName()); err != nil {
+			t.Fatalf("FetchEngine failed for %s: %s", engineName, err)
 		}
 	}
 }

@@ -3,17 +3,20 @@ package database
 import (
 	"compress/gzip"
 	"fmt"
-	"github.com/prisma/prisma-client-go/binaries"
-	"github.com/prisma/prisma-client-go/binaries/platform"
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
+	"regexp"
+	"runtime"
+	"strings"
 )
 
 var (
 	//PrismaBinaryVersion is taken from the commit sha of https://github.com/prisma/prisma-engines/releases/tag/4.15.0
 	PrismaBinaryVersion = "8fbc245156db7124f997f4cecdd8d1219e360944"
+	EngineURL           = "https://binaries.prisma.sh/all_commits/%s/%s/%s.gz"
 )
 
 func copyFile(from string, to string) error {
@@ -79,14 +82,115 @@ func download(url string, to string) error {
 	return nil
 }
 
-func FetchEngine(toDir string, engineName string, binaryPlatformName string) error {
-	to := platform.CheckForExtension(binaryPlatformName, path.Join(toDir, PrismaBinaryVersion, fmt.Sprintf("prisma-%s-%s", engineName, binaryPlatformName)))
+var binaryNameWithSSLCache string
+
+// parseOpenSSLVersion returns the OpenSSL version, ignoring the patch version; e.g. 1.1.x
+func parseOpenSSLVersion(str string) string {
+	r := regexp.MustCompile(`^OpenSSL\s(\d+\.\d+)\.\d+`)
+	matches := r.FindStringSubmatch(str)
+	if len(matches) > 0 {
+		return matches[1] + ".x"
+	}
+	// default to 1.1.x
+	return "1.1.x"
+}
+
+func getOpenSSL() string {
+	out, _ := exec.Command("openssl", "version", "-v").CombinedOutput()
+	if out == nil {
+		return ""
+	}
+	return parseOpenSSLVersion(string(out))
+}
+
+func parseLinuxDistro(str string) string {
+	var id string
+	var idLike string
+
+	// match everything after `ID=` except quotes and newlines
+	idMatches := regexp.MustCompile(`(?m)^ID="?([^"\n]*)"?`).FindStringSubmatch(str)
+	if len(idMatches) > 0 {
+		id = idMatches[1]
+	}
+
+	// match everything after `ID_LIKE=` except quotes and newlines
+	idLikeMatches := regexp.MustCompile(`(?m)^ID_LIKE="?([^"\n]*)"?`).FindStringSubmatch(str)
+	if len(idLikeMatches) > 0 {
+		idLike = idLikeMatches[1]
+	}
+
+	if id == "alpine" {
+		return "alpine"
+	}
+
+	if strings.Contains(idLike, "centos") ||
+		strings.Contains(idLike, "fedora") ||
+		strings.Contains(idLike, "rhel") ||
+		id == "fedora" {
+		return "rhel"
+	}
+
+	if strings.Contains(idLike, "debian") ||
+		strings.Contains(idLike, "ubuntu") ||
+		id == "debian" {
+		return "debian"
+	}
+
+	// default to debian as it's most common
+	return "debian"
+}
+
+func getLinuxDistro() string {
+	out, _ := exec.Command("cat", "/etc/os-release").CombinedOutput()
+	if out != nil {
+		return parseLinuxDistro(string(out))
+	}
+	return "debian"
+}
+
+// CheckForExtension adds a .exe extension on windows (e.g. .gz -> .exe.gz)
+func checkForExtension(platform, path string) string {
+	if platform == "windows" {
+		if strings.Contains(path, ".gz") {
+			return strings.Replace(path, ".gz", ".exe.gz", 1)
+		}
+		return path + ".exe"
+	}
+	return path
+}
+
+// BinaryPlatformName returns the name of the prisma binary which should be used,
+// for example "darwin" or "linux-openssl-1.1.x"
+func (e *Engine) BinaryPlatformName() string {
+	if binaryNameWithSSLCache != "" {
+		return binaryNameWithSSLCache
+	}
+
+	platformName := runtime.GOOS
+	if platformName != "linux" {
+		return platformName
+	}
+
+	distro := getLinuxDistro()
+	if distro == "alpine" {
+		return "linux-musl"
+	}
+
+	ssl := getOpenSSL()
+	name := fmt.Sprintf("%s-openssl-%s", distro, ssl)
+	binaryNameWithSSLCache = name
+
+	return name
+}
+
+func (e *Engine) FetchEngine(toDir string, engineName string, binaryPlatformName string) error {
+	to := checkForExtension(binaryPlatformName, path.Join(toDir, PrismaBinaryVersion, fmt.Sprintf("prisma-%s-%s", engineName, binaryPlatformName)))
 
 	binaryPlatformRemoteName := binaryPlatformName
 	if binaryPlatformRemoteName == "linux" {
 		binaryPlatformRemoteName = "linux-musl"
 	}
-	url := platform.CheckForExtension(binaryPlatformName, fmt.Sprintf(binaries.EngineURL, PrismaBinaryVersion, binaryPlatformRemoteName, engineName))
+	url := checkForExtension(binaryPlatformName, fmt.Sprintf(EngineURL, PrismaBinaryVersion, binaryPlatformRemoteName, engineName))
 
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
 		return nil
