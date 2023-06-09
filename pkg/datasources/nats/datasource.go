@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -240,6 +242,64 @@ func (s *KeyValueSource) Start(ctx context.Context, input []byte, next chan<- []
 	if err := s.ensureKv(); err != nil {
 		return err
 	}
+	switch s.Operation {
+	case wgpb.NatsKvOperation_NATSKV_WATCH:
+		return s.watch(ctx, input, next)
+	case wgpb.NatsKvOperation_NATSKV_WATCHALL:
+		return s.watchAll(ctx, input, next)
+	}
+	return fmt.Errorf("unknown operation %s", s.Operation.String())
+}
+
+func (s *KeyValueSource) watch(ctx context.Context, input []byte, next chan<- []byte) error {
+	keyVariableName, err := jsonparser.GetString(input, "args", "keys")
+	if err != nil {
+		return err
+	}
+	keys := make([]string, 0, 1)
+	_, err = jsonparser.ArrayEach(input, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		keys = append(keys, string(value))
+	}, "variables", keyVariableName)
+	if err != nil {
+		return err
+	}
+	watcher, err := s.kv.Watch(strings.Join(keys, ","), nats.Context(ctx))
+	if err != nil {
+		return err
+	}
+	updates := watcher.Updates()
+	done := ctx.Done()
+	for {
+		select {
+		case <-done:
+			return nil
+		case update, ok := <-updates:
+			if !ok {
+				return nil
+			}
+			if update == nil {
+				// initial sync complete
+				continue
+			}
+			entry := ResponseKeyValueEntry{
+				Key:      update.Key(),
+				Value:    update.Value(),
+				Revision: update.Revision(),
+				Created:  update.Created().Unix(),
+			}
+			if s.overrideCreatedTime != nil {
+				entry.Created = *s.overrideCreatedTime
+			}
+			entryBytes, err := json.Marshal(entry)
+			if err != nil {
+				return err
+			}
+			next <- entryBytes
+		}
+	}
+}
+
+func (s *KeyValueSource) watchAll(ctx context.Context, input []byte, next chan<- []byte) error {
 	return nil
 }
 
