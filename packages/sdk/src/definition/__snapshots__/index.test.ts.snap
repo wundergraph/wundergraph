@@ -81,7 +81,11 @@ GraphQLApi {
           },
           "UseSSE": false,
         },
-        "UpstreamSchema": "type Query {
+        "UpstreamSchema": "schema {
+  query: Query
+}
+
+type Query {
   user: User
 }
 
@@ -127,7 +131,11 @@ interface User {
     },
   ],
   "Namespace": "api",
-  "Schema": "type Query {
+  "Schema": "schema {
+  query: Query
+}
+
+type Query {
   api_user: api_User
 }
 

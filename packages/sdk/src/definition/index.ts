@@ -35,6 +35,8 @@ import {
 } from './database-introspection';
 import { introspectSoap } from './soap-introspection';
 
+export type { OpenAPIIntrospection } from './openapi-introspection';
+
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
 export const WG_ENABLE_INTROSPECTION_CACHE = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
@@ -397,40 +399,6 @@ export interface GraphQLUpstream extends HTTPUpstream {
 	subscriptionsURL?: InputVariable;
 	subscriptionsUseSSE?: boolean;
 	introspection?: IntrospectionFetchOptions & GraphqlIntrospectionHeaders;
-}
-
-export interface OpenAPIIntrospectionFile {
-	kind: 'file';
-	filePath: string;
-}
-
-export interface OpenAPIIntrospectionString {
-	kind: 'string';
-	openAPISpec: string;
-}
-
-export interface OpenAPIIntrospectionObject {
-	kind: 'object';
-	openAPIObject: {};
-}
-
-export type OpenAPIIntrospectionSource =
-	| OpenAPIIntrospectionFile
-	| OpenAPIIntrospectionString
-	| OpenAPIIntrospectionObject;
-
-export interface OpenAPIIntrospection extends HTTPUpstream {
-	source: OpenAPIIntrospectionSource;
-	// statusCodeUnions set to true will make all responses return a union type of all possible response objects,
-	// mapped by status code
-	// by default, only the status 200 response is mapped, which keeps the GraphQL API flat
-	// by enabling statusCodeUnions, you have to unwrap the response union via fragments for each response
-	statusCodeUnions?: boolean;
-	baseURL?: InputVariable;
-	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
-	// this is useful for specifying type definitions for JSON objects
-	schemaExtension?: string;
-	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
 export interface StaticApiCustom {

@@ -352,6 +352,8 @@ const JSONSchemaToTypescriptInterface = (
 		return `export type ${interfaceName} = JSONObject;`;
 	}
 
+	const isUnion = !!schema.oneOf;
+
 	let out = '';
 	const writeType = (name: string, isRequired: boolean, typeName: string) => {
 		out += `${name + (isRequired ? '' : '?')}: ${typeName}\n`;
@@ -362,6 +364,11 @@ const JSONSchemaToTypescriptInterface = (
 	visitJSONSchema(schema, {
 		root: {
 			enter: () => {
+				if (isUnion) {
+					out += `export type ${interfaceName} = `;
+					return;
+				}
+
 				out += `export interface ${interfaceName} {\n`;
 			},
 			leave: () => {
@@ -374,7 +381,9 @@ const JSONSchemaToTypescriptInterface = (
 						out += `errors?: GraphQLError[];\n`;
 					}
 				}
-				out += '}';
+				if (!isUnion) {
+					out += '}';
+				}
 			},
 		},
 		number: (name, isRequired, isArray) => {
@@ -420,7 +429,7 @@ const JSONSchemaToTypescriptInterface = (
 		},
 		object: {
 			enter: (name, isRequired, isArray) => {
-				if (isArray) {
+				if (isArray || isUnion) {
 					out += '{\n';
 				} else {
 					writeType(name, isRequired, '{');
@@ -428,7 +437,7 @@ const JSONSchemaToTypescriptInterface = (
 			},
 			leave: (name, isRequired, isArray) => {
 				out += '}';
-				if (!isArray) {
+				if (!isArray && !isUnion) {
 					out += ',\n';
 				}
 			},
@@ -453,6 +462,13 @@ const JSONSchemaToTypescriptInterface = (
 			} else {
 				writeType(name, isRequired, typeName);
 			}
+		},
+		oneOf: {
+			afterEach: (index, count) => {
+				if (index !== count - 1) {
+					out += ' | ';
+				}
+			},
 		},
 	});
 	return out;
@@ -498,6 +514,14 @@ export const extractEnums = (schema: JSONSchema, enumMap: Map<string, Array<JSON
 				const property = obj.properties[prop];
 				if (typeof property !== 'boolean') {
 					traverseSchema(property);
+				}
+			}
+		}
+
+		if (obj.oneOf) {
+			for (const item of obj.oneOf) {
+				if (typeof item !== 'boolean') {
+					traverseSchema(item);
 				}
 			}
 		}

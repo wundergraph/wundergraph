@@ -8,7 +8,7 @@ export const createOpenAPITestServer = (port: number) => {
 	});
 
 	server.post<{ Body: string }>('/notes/new', async (request, reply) => {
-		const text = request.body;
+		const text = JSON.parse(request.body);
 		if ((text?.length ?? 0) == 0) {
 			reply.code(400).send('text cannot be empty');
 			return;

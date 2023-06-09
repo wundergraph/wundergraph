@@ -54,7 +54,6 @@ const soapToGraphQLApi = async (wsdl: string, introspection: SoapIntrospection, 
 			headers: introspection.headers,
 			customIntScalars: ['BigInt'],
 		},
-		{},
-		true
+		{}
 	);
 };

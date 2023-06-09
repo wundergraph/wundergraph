@@ -16,6 +16,7 @@ import {
 	DocumentNode,
 	GraphQLInputField,
 } from 'graphql';
+import { getDirectives } from '@graphql-tools/utils';
 import { code } from 'ts-poet';
 import { invariant } from 'outvariant';
 
@@ -97,6 +98,9 @@ export const transform = (ast: DocumentNode, schema: GraphQLSchema): ASTVisitor 
 				`Type "${typename}" was not instance of expected class GraphQLInputObjectType.`
 			);
 
+			const directives = getDirectives(schema, type!);
+			const hasOneOfDirective = directives.some((directive) => directive.name === 'oneOf');
+
 			const fields = Object.values(type.getFields());
 
 			const printField = (field: GraphQLInputField) => {
@@ -119,11 +123,17 @@ export const transform = (ast: DocumentNode, schema: GraphQLSchema): ASTVisitor 
 				return [field.name, isNonNull ? ':' : '?:', ' ', tsType, isList ? '[]' : ''].join('');
 			};
 
-			return code`
+			if (!hasOneOfDirective) {
+				return code`
         export interface ${typename} {
           ${fields.map(printField).join('\n')}
         }
       `;
+			}
+
+			return code`
+				export type ${typename} = { ${fields.map(printField).join('} | {')} }
+			`;
 		},
 
 		[Kind.OBJECT_TYPE_DEFINITION]: (node) => {

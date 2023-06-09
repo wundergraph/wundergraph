@@ -43,6 +43,7 @@
     "url": "git+https://github.com/wundergraph/wundergraph.git"
   },
   "dependencies": {
+    "@graphql-tools/utils": "^9.2.1",
     "@timkendall/tql": "1.0.0-rc.8",
     "graphql": "^16.6.0",
     "hotscript": "^1.0.10",

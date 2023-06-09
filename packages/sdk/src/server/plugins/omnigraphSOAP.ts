@@ -4,6 +4,7 @@ import { buildSchema, GraphQLResolveInfo } from 'graphql/index';
 import { fetch } from '@whatwg-node/fetch';
 import { createExecutorFromSchemaAST } from '@omnigraph/soap';
 import { MeshFetch } from '@graphql-mesh/types';
+import { Agent } from 'https';
 
 export interface SoapServerConfig {
 	serverName: string;
@@ -23,7 +24,17 @@ const fetchWithHeaders = (url: string, options?: RequestInit, context?: any, inf
 		...options?.headers,
 	};
 
-	return (fetch as MeshFetch)(url, { ...options, headers }, context, info);
+	// workaround to deal with https://github.com/node-fetch/node-fetch/discussions/1678
+	delete headers.host;
+	delete headers.referer;
+
+	const opts = {
+		...options,
+		headers,
+		agent: new Agent({ family: 4 }),
+	};
+
+	return (fetch as MeshFetch)(url, opts, context, info);
 };
 
 const FastifySoapGraphQLPlugin: FastifyPluginAsync<SoapServerConfig> = async (fastify, config) => {
