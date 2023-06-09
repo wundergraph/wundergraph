@@ -12,9 +12,18 @@ const notes = introspect.openApiV2({
 	baseURL: new EnvironmentVariable('OPENAPI_URL', 'http://localhost:8090/'),
 });
 
+const unions = introspect.openApiV2({
+	apiNamespace: 'unions',
+	source: {
+		kind: 'file',
+		filePath: './union-types.yaml',
+	},
+	baseURL: new EnvironmentVariable('OPEN_API_INPUT_UNIONS_URL', ''),
+});
+
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [notes],
+	apis: [notes, unions],
 	server,
 	operations,
 	codeGenerators: [

@@ -81,16 +81,44 @@ type User @key(fields: "id") {
           },
           "UseSSE": false,
         },
-        "UpstreamSchema": """""""
+        "UpstreamSchema": "schema {
+  query: Query
+}
+
+directive @extends on OBJECT
+
+directive @external on FIELD_DEFINITION
+
+directive @key(fields: _FieldSet!) on INTERFACE | OBJECT
+
+directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
+
+directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
+
+type Entity {
+  findUserByID(id: ID!): User!
+}
+
 type Query {
+  _entities(representations: [_Any!]!): [_Entity]!
+  _service: _Service!
   me: User
 }
 
-""""""
 type User {
   id: ID!
   name: String
   username: String
+}
+
+scalar _Any
+
+union _Entity = User
+
+scalar _FieldSet
+
+type _Service {
+  sdl: String
 }",
       },
       "Directives": [
@@ -233,16 +261,36 @@ type Product @extends @key(fields: "upc") {
           },
           "UseSSE": false,
         },
-        "UpstreamSchema": """""""
+        "UpstreamSchema": "schema {
+  query: Query
+}
+
+directive @extends on OBJECT
+
+directive @external on FIELD_DEFINITION
+
+directive @key(fields: _FieldSet!) on INTERFACE | OBJECT
+
+directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
+
+directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
+
+type Entity {
+  findProductByUpc(upc: String!): Product!
+  findReviewByID(id: ID!): Review!
+  findUserByID(id: ID!): User!
+}
+
 type Product {
   reviews: [Review]
   upc: String!
 }
 
-""""""
-type Query
+type Query {
+  _entities(representations: [_Any!]!): [_Entity]!
+  _service: _Service!
+}
 
-""""""
 type Review {
   author: User
   body: String
@@ -250,11 +298,20 @@ type Review {
   product: Product
 }
 
-""""""
 type User {
   id: ID!
   reviews: [Review]
   username: String
+}
+
+scalar _Any
+
+union _Entity = Product | Review | User
+
+scalar _FieldSet
+
+type _Service {
+  sdl: String
 }",
       },
       "Directives": [
@@ -392,12 +449,30 @@ type Mutation @extends {
           },
           "UseSSE": false,
         },
-        "UpstreamSchema": """""""
+        "UpstreamSchema": "schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+directive @extends on OBJECT
+
+directive @external on FIELD_DEFINITION
+
+directive @key(fields: _FieldSet!) on INTERFACE | OBJECT
+
+directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
+
+directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
+
+type Entity {
+  findProductByUpc(upc: String!): Product!
+}
+
 type Mutation {
   setPrice(price: Int!, upc: String!): Product
 }
 
-""""""
 type Product {
   name: String
   price: Int
@@ -405,14 +480,24 @@ type Product {
   weight: Int
 }
 
-""""""
 type Query {
+  _entities(representations: [_Any!]!): [_Entity]!
+  _service: _Service!
   topProducts(first: Int = 5, random: Boolean): [Product]
 }
 
-""""""
 type Subscription {
   updatedPrice: Product!
+}
+
+scalar _Any
+
+union _Entity = Product
+
+scalar _FieldSet
+
+type _Service {
+  sdl: String
 }",
       },
       "Directives": [
@@ -543,7 +628,24 @@ type Subscription {
           },
           "UseSSE": false,
         },
-        "UpstreamSchema": """""""
+        "UpstreamSchema": "schema {
+  query: Query
+}
+
+directive @extends on OBJECT
+
+directive @external on FIELD_DEFINITION
+
+directive @key(fields: _FieldSet!) on INTERFACE | OBJECT
+
+directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
+
+directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
+
+type Entity {
+  findProductByUpc(upc: String!): Product!
+}
+
 type Product {
   inStock: Boolean
   price: Int
@@ -552,8 +654,20 @@ type Product {
   weight: Int
 }
 
-""""""
-type Query",
+type Query {
+  _entities(representations: [_Any!]!): [_Entity]!
+  _service: _Service!
+}
+
+scalar _Any
+
+union _Entity = Product
+
+scalar _FieldSet
+
+type _Service {
+  sdl: String
+}",
       },
       "Directives": [
         {
@@ -927,7 +1041,13 @@ type Query",
     },
   ],
   "Namespace": "federated",
-  "Schema": """"
+  "Schema": "schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+"""
 The @removeNullVariables directive allows you to remove variables with null value from your GraphQL Query or Mutation Operations.
 
 A potential use-case could be that you have a graphql upstream which is not accepting null values for variables.
@@ -1273,37 +1393,37 @@ enum WG_CLAIM {
 }
 
 enum WunderGraphDateTimeFormat {
-  """2006-01-02T15:04:05-0700"""
+  "2006-01-02T15:04:05-0700"
   ISO8601
-  """Mon Jan _2 15:04:05 2006"""
+  "Mon Jan _2 15:04:05 2006"
   ANSIC
-  """Mon Jan _2 15:04:05 MST 2006"""
+  "Mon Jan _2 15:04:05 MST 2006"
   UnixDate
-  """Mon Jan 02 15:04:05 -0700 2006"""
+  "Mon Jan 02 15:04:05 -0700 2006"
   RubyDate
-  """02 Jan 06 15:04 MST"""
+  "02 Jan 06 15:04 MST"
   RFC822
-  """02 Jan 06 15:04 -0700"""
+  "02 Jan 06 15:04 -0700"
   RFC822Z
-  """Monday, 02-Jan-06 15:04:05 MST"""
+  "Monday, 02-Jan-06 15:04:05 MST"
   RFC850
-  """Mon, 02 Jan 2006 15:04:05 MST"""
+  "Mon, 02 Jan 2006 15:04:05 MST"
   RFC1123
-  """Mon, 02 Jan 2006 15:04:05 -0700"""
+  "Mon, 02 Jan 2006 15:04:05 -0700"
   RFC1123Z
-  """2006-01-02T15:04:05Z07:00"""
+  "2006-01-02T15:04:05Z07:00"
   RFC3339
-  """2006-01-02T15:04:05.999999999Z07:00"""
+  "2006-01-02T15:04:05.999999999Z07:00"
   RFC3339Nano
-  """3:04PM"""
+  "3:04PM"
   Kitchen
-  """Jan _2 15:04:05"""
+  "Jan _2 15:04:05"
   Stamp
-  """Jan _2 15:04:05.000"""
+  "Jan _2 15:04:05.000"
   StampMilli
-  """Jan _2 15:04:05.000000"""
+  "Jan _2 15:04:05.000000"
   StampMicro
-  """Jan _2 15:04:05.000000000"""
+  "Jan _2 15:04:05.000000000"
   StampNano
 }",
   "Types": [
@@ -1405,7 +1525,23 @@ type User @key(fields: "id") {
           },
           "UseSSE": false,
         },
-        "UpstreamSchema": "type Query {
+        "UpstreamSchema": "schema {
+  query: Query
+}
+
+directive @extends on INTERFACE | OBJECT
+
+directive @external on FIELD_DEFINITION | OBJECT
+
+directive @key(fields: String!) on INTERFACE | OBJECT
+
+directive @provides(fields: String!) on FIELD_DEFINITION
+
+directive @requires(fields: String!) on FIELD_DEFINITION
+
+type Query {
+  _entities(representations: [_Any!]!): [_Entity]!
+  _service: _Service!
   me: User
 }
 
@@ -1413,6 +1549,17 @@ type User {
   id: ID!
   name: String
   username: String
+}
+
+scalar _Any
+
+union _Entity = User
+
+type _Service {
+  """
+  The sdl representing the federated service capabilities. Includes federation directives, removes federation types, and includes rest of full schema after schema directives have been applied
+  """
+  sdl: String
 }",
       },
       "Directives": [
@@ -1555,12 +1702,29 @@ type Product @extends @key(fields: "upc") {
           },
           "UseSSE": false,
         },
-        "UpstreamSchema": "type Product {
+        "UpstreamSchema": "schema {
+  query: Query
+}
+
+directive @extends on INTERFACE | OBJECT
+
+directive @external on FIELD_DEFINITION | OBJECT
+
+directive @key(fields: String!) on INTERFACE | OBJECT
+
+directive @provides(fields: String!) on FIELD_DEFINITION
+
+directive @requires(fields: String!) on FIELD_DEFINITION
+
+type Product {
   reviews: [Review]
   upc: String!
 }
 
-type Query
+type Query {
+  _entities(representations: [_Any!]!): [_Entity]!
+  _service: _Service!
+}
 
 type Review {
   author: User
@@ -1573,6 +1737,17 @@ type User {
   id: ID!
   reviews: [Review]
   username: String
+}
+
+scalar _Any
+
+union _Entity = Product | Review | User
+
+type _Service {
+  """
+  The sdl representing the federated service capabilities. Includes federation directives, removes federation types, and includes rest of full schema after schema directives have been applied
+  """
+  sdl: String
 }",
       },
       "Directives": [
@@ -1710,7 +1885,23 @@ type Mutation @extends {
           },
           "UseSSE": false,
         },
-        "UpstreamSchema": "type Mutation {
+        "UpstreamSchema": "schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+directive @extends on INTERFACE | OBJECT
+
+directive @external on FIELD_DEFINITION | OBJECT
+
+directive @key(fields: String!) on INTERFACE | OBJECT
+
+directive @provides(fields: String!) on FIELD_DEFINITION
+
+directive @requires(fields: String!) on FIELD_DEFINITION
+
+type Mutation {
   setPrice(price: Int!, upc: String!): Product
 }
 
@@ -1722,11 +1913,24 @@ type Product {
 }
 
 type Query {
+  _entities(representations: [_Any!]!): [_Entity]!
+  _service: _Service!
   topProducts(first: Int = 5, random: Boolean): [Product]
 }
 
 type Subscription {
   updatedPrice: Product!
+}
+
+scalar _Any
+
+union _Entity = Product
+
+type _Service {
+  """
+  The sdl representing the federated service capabilities. Includes federation directives, removes federation types, and includes rest of full schema after schema directives have been applied
+  """
+  sdl: String
 }",
       },
       "Directives": [
@@ -1857,7 +2061,21 @@ type Subscription {
           },
           "UseSSE": false,
         },
-        "UpstreamSchema": "type Product {
+        "UpstreamSchema": "schema {
+  query: Query
+}
+
+directive @extends on INTERFACE | OBJECT
+
+directive @external on FIELD_DEFINITION | OBJECT
+
+directive @key(fields: String!) on INTERFACE | OBJECT
+
+directive @provides(fields: String!) on FIELD_DEFINITION
+
+directive @requires(fields: String!) on FIELD_DEFINITION
+
+type Product {
   inStock: Boolean
   price: Int
   shippingEstimate: Int
@@ -1865,7 +2083,21 @@ type Subscription {
   weight: Int
 }
 
-type Query",
+type Query {
+  _entities(representations: [_Any!]!): [_Entity]!
+  _service: _Service!
+}
+
+scalar _Any
+
+union _Entity = Product
+
+type _Service {
+  """
+  The sdl representing the federated service capabilities. Includes federation directives, removes federation types, and includes rest of full schema after schema directives have been applied
+  """
+  sdl: String
+}",
       },
       "Directives": [
         {
@@ -2239,7 +2471,13 @@ type Query",
     },
   ],
   "Namespace": "federated",
-  "Schema": """"
+  "Schema": "schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+"""
 The @removeNullVariables directive allows you to remove variables with null value from your GraphQL Query or Mutation Operations.
 
 A potential use-case could be that you have a graphql upstream which is not accepting null values for variables.
@@ -2585,37 +2823,37 @@ enum WG_CLAIM {
 }
 
 enum WunderGraphDateTimeFormat {
-  """2006-01-02T15:04:05-0700"""
+  "2006-01-02T15:04:05-0700"
   ISO8601
-  """Mon Jan _2 15:04:05 2006"""
+  "Mon Jan _2 15:04:05 2006"
   ANSIC
-  """Mon Jan _2 15:04:05 MST 2006"""
+  "Mon Jan _2 15:04:05 MST 2006"
   UnixDate
-  """Mon Jan 02 15:04:05 -0700 2006"""
+  "Mon Jan 02 15:04:05 -0700 2006"
   RubyDate
-  """02 Jan 06 15:04 MST"""
+  "02 Jan 06 15:04 MST"
   RFC822
-  """02 Jan 06 15:04 -0700"""
+  "02 Jan 06 15:04 -0700"
   RFC822Z
-  """Monday, 02-Jan-06 15:04:05 MST"""
+  "Monday, 02-Jan-06 15:04:05 MST"
   RFC850
-  """Mon, 02 Jan 2006 15:04:05 MST"""
+  "Mon, 02 Jan 2006 15:04:05 MST"
   RFC1123
-  """Mon, 02 Jan 2006 15:04:05 -0700"""
+  "Mon, 02 Jan 2006 15:04:05 -0700"
   RFC1123Z
-  """2006-01-02T15:04:05Z07:00"""
+  "2006-01-02T15:04:05Z07:00"
   RFC3339
-  """2006-01-02T15:04:05.999999999Z07:00"""
+  "2006-01-02T15:04:05.999999999Z07:00"
   RFC3339Nano
-  """3:04PM"""
+  "3:04PM"
   Kitchen
-  """Jan _2 15:04:05"""
+  "Jan _2 15:04:05"
   Stamp
-  """Jan _2 15:04:05.000"""
+  "Jan _2 15:04:05.000"
   StampMilli
-  """Jan _2 15:04:05.000000"""
+  "Jan _2 15:04:05.000000"
   StampMicro
-  """Jan _2 15:04:05.000000000"""
+  "Jan _2 15:04:05.000000000"
   StampNano
 }",
   "Types": [
