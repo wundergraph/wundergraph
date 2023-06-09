@@ -12,7 +12,6 @@ import { JSONSchema7 as JSONSchema } from 'json-schema';
 import { ClaimType, OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import * as fs from 'fs';
 import path from 'path';
-import process from 'node:process';
 
 const MyReviews = `
 query {
@@ -39,6 +38,19 @@ subscription @internalOperation {
     }
 }`;
 
+const mutationWithUnionInput = `
+mutation ($input: TestType_Input!) {
+  test_endpoint(input: $input) {
+    ... on A_const_container {
+      A_const
+    }
+    ... on mutation_test_endpoint_oneOf_1 {
+      B
+    }
+  }
+}
+`;
+
 test('parseGraphQLOperations', () => {
 	const operations: LoadOperationsOutput = {
 		graphql_operation_files: [
@@ -59,6 +71,12 @@ test('parseGraphQLOperations', () => {
 				api_mount_path: 'NewPets',
 				content: NewPets,
 				file_path: 'NewPets.graphql',
+			},
+			{
+				operation_name: 'MutationWithUnionInput',
+				api_mount_path: 'MutationWithUnionInput',
+				content: mutationWithUnionInput,
+				file_path: 'MutationWithUnionInput.graphql',
 			},
 		],
 	};
@@ -966,12 +984,15 @@ const testSchema = `type Query {
 
 directive @internalOperation on QUERY | MUTATION | SUBSCRIPTION
 
+directive @oneOf on OBJECT | INPUT_OBJECT | INTERFACE
+
 directive @transform(
     get: String
 ) on FIELD
 
 type Mutation {
     postPets(petInput: PetInput!): Pet
+    test_endpoint(input: TestType_Input): TestType
 }
 
 type Subscription {
@@ -1039,6 +1060,29 @@ type Review {
   body: String
   author: User
   product: Product
+}
+
+enum A_const {
+  A
+}
+
+type A_const_container {
+  A_const: A_const
+}
+
+type mutation_test_endpoint_oneOf_1 {
+  B: String
+}
+
+union TestType = A_const_container | mutation_test_endpoint_oneOf_1
+
+input TestType_Input @oneOf {
+  A_const: A_const
+  mutation_test_endpoint_oneOf_1_Input: mutation_test_endpoint_oneOf_1_Input
+}
+
+input mutation_test_endpoint_oneOf_1_Input {
+  B: String
 }
 `;
 

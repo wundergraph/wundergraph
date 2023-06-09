@@ -10,7 +10,11 @@ exports[`replaceCustomNumericScalars should replace float scalar: custom float s
       "typeName": "Query",
     },
   ],
-  "schemaSDL": "type Query {
+  "schemaSDL": "schema {
+  query: Query
+}
+
+type Query {
   foo: Float
   bar(a: Float): String
 }",
@@ -27,7 +31,11 @@ exports[`replaceCustomNumericScalars should replace int scalar: custom int scala
       "typeName": "Query",
     },
   ],
-  "schemaSDL": "type Query {
+  "schemaSDL": "schema {
+  query: Query
+}
+
+type Query {
   foo: Int
   bar(a: Int): String
 }",
