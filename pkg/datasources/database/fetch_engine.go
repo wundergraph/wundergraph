@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/prisma/prisma-client-go/binaries"
 	"github.com/prisma/prisma-client-go/binaries/platform"
-	"github.com/prisma/prisma-client-go/logger"
 	"io"
 	"net/http"
 	"os"
@@ -13,6 +12,7 @@ import (
 )
 
 var (
+	//PrismaBinaryVersion is taken from the commit sha of https://github.com/prisma/prisma-engines/releases/tag/4.15.0
 	PrismaBinaryVersion = "8fbc245156db7124f997f4cecdd8d1219e360944"
 )
 
@@ -80,8 +80,6 @@ func download(url string, to string) error {
 }
 
 func FetchEngine(toDir string, engineName string, binaryPlatformName string) error {
-	logger.Debug.Printf("checking %s...", engineName)
-
 	to := platform.CheckForExtension(binaryPlatformName, path.Join(toDir, PrismaBinaryVersion, fmt.Sprintf("prisma-%s-%s", engineName, binaryPlatformName)))
 
 	binaryPlatformRemoteName := binaryPlatformName
@@ -90,20 +88,13 @@ func FetchEngine(toDir string, engineName string, binaryPlatformName string) err
 	}
 	url := platform.CheckForExtension(binaryPlatformName, fmt.Sprintf(binaries.EngineURL, PrismaBinaryVersion, binaryPlatformRemoteName, engineName))
 
-	logger.Debug.Printf("download url %s", url)
-
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
-		logger.Debug.Printf("%s is cached", to)
 		return nil
 	}
-
-	logger.Debug.Printf("%s is missing, downloading...", engineName)
 
 	if err := download(url, to); err != nil {
 		return fmt.Errorf("could not download %s to %s: %w", url, to, err)
 	}
-
-	logger.Debug.Printf("%s done", engineName)
 
 	return nil
 }
