@@ -170,6 +170,7 @@ func (p *Planner) ConfigureFetch() plan.FetchConfiguration {
 			Operation: p.config.Operation,
 			connector: p.connector,
 			config:    p.config,
+			kvMutex:   &sync.Mutex{},
 		},
 		DisallowSingleFlight: true,
 		DisableDataLoader:    true,
@@ -192,6 +193,7 @@ func (p *Planner) ConfigureSubscription() plan.SubscriptionConfiguration {
 			Operation: p.config.Operation,
 			connector: p.connector,
 			config:    p.config,
+			kvMutex:   &sync.Mutex{},
 		},
 	}
 }
@@ -214,11 +216,14 @@ type KeyValueSource struct {
 	config              Configuration
 	js                  nats.JetStreamContext
 	kv                  nats.KeyValue
+	kvMutex             *sync.Mutex
 	Operation           wgpb.NatsKvOperation
 	overrideCreatedTime *int64
 }
 
 func (s *KeyValueSource) ensureKv() (err error) {
+	s.kvMutex.Lock()
+	defer s.kvMutex.Unlock()
 	if s.kv != nil {
 		return
 	}
@@ -433,6 +438,7 @@ func (s *KeyValueSource) get(input []byte, w io.Writer) (err error) {
 		return err
 	}
 	if entry == nil {
+		_, err = w.Write([]byte("null"))
 		return nil
 	}
 	return s.writeResponse(key, entry.Value(), entry.Revision(), entry.Created(), w)

@@ -590,6 +590,7 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 	})
 
 	t.Run("token_watch", func(t *testing.T) {
+
 		ds := &KeyValueSource{
 			kv: kv,
 			overrideCreatedTime: func() *int64 {
