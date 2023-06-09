@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/buger/jsonparser"
 	"strconv"
 	"time"
 
+	"github.com/buger/jsonparser"
 	"github.com/shopspring/decimal"
 )
 
