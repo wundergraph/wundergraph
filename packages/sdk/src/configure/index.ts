@@ -19,11 +19,12 @@ import { buildGenerator, getProgramFromFiles, JsonSchemaGenerator, programFromCo
 import { ZodType } from 'zod';
 import {
 	Api,
+	ApiIntrospectionOptions,
 	DatabaseApiCustom,
 	DataSource,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
-	ApiIntrospectionOptions,
+	NatsKvApiCustom,
 	RESTApiCustom,
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
@@ -1274,6 +1275,7 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 		customStatic: undefined,
 		overrideFieldPathFromAlias: source.Kind === DataSourceKind.GRAPHQL,
 		customDatabase: undefined,
+		customNatsKv: undefined,
 		directives: source.Directives,
 		requestTimeoutSeconds: source.RequestTimeoutSeconds,
 	};
@@ -1330,6 +1332,15 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 				jsonTypeFields: database.jsonTypeFields,
 				jsonInputVariables: database.jsonInputVariables,
 			};
+			break;
+		case DataSourceKind.NATSKV:
+			const natskv = source.Custom as NatsKvApiCustom;
+			out.customNatsKv = {
+				serverURL: natskv.serverURL,
+				bucketName: natskv.bucketName,
+				operation: natskv.operation,
+			};
+			break;
 	}
 
 	return out;

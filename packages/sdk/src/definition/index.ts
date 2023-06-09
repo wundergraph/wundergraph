@@ -10,6 +10,7 @@ import {
 	FieldConfiguration,
 	GraphQLDataSourceHooksConfiguration,
 	MTLSConfiguration,
+	NatsKvOperation,
 	SigningMethod,
 	SingleTypeField,
 	StatusCodeTypeMapping,
@@ -34,6 +35,7 @@ import {
 	introspectSQLServer,
 } from './database-introspection';
 import { introspectSoap } from './soap-introspection';
+import { introspectNatsKV } from './nats-kv-introspection';
 
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
@@ -230,6 +232,14 @@ export class SQLServerApi extends Api<DatabaseApiCustom> {}
 export class MongoDBApi extends Api<DatabaseApiCustom> {}
 
 export class PrismaApi extends Api<DatabaseApiCustom> {}
+
+export class NatsKvApi extends Api<NatsKvApiCustom> {}
+
+export interface NatsKvApiCustom {
+	serverURL: ConfigurationVariable;
+	bucketName: string;
+	operation: NatsKvOperation;
+}
 
 export interface DataSource<Custom = unknown> {
 	Id?: string;
@@ -504,6 +514,7 @@ export const introspect = {
 	openApi: introspectOpenApi,
 	openApiV2: introspectOpenApiV2,
 	soap: introspectSoap,
+	natsKV: introspectNatsKV,
 };
 
 export const buildUpstreamAuthentication = (upstream: HTTPUpstream): UpstreamAuthentication | undefined => {

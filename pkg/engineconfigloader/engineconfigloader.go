@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
+	"github.com/wundergraph/wundergraph/pkg/datasources/nats"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/graphql_datasource"
@@ -54,6 +55,7 @@ type DefaultFactoryResolver struct {
 	graphql          *graphql_datasource.Factory
 	rest             *oas_datasource.Factory
 	static           *staticdatasource.Factory
+	natsKv           *nats.Factory
 	database         *database.Factory
 	hooksClient      *hooks.Client
 	log              *zap.Logger
@@ -86,6 +88,7 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 			Client: defaultHttpClient,
 			Log:    log,
 		},
+		natsKv:      &nats.Factory{},
 		hooksClient: hooksClient,
 		log:         log,
 	}
@@ -280,6 +283,8 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 		return d.rest, nil
 	case wgpb.DataSourceKind_STATIC:
 		return d.static, nil
+	case wgpb.DataSourceKind_NATSKV:
+		return d.natsKv, nil
 	case wgpb.DataSourceKind_POSTGRESQL,
 		wgpb.DataSourceKind_MYSQL,
 		wgpb.DataSourceKind_SQLSERVER,
@@ -295,7 +300,7 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 		}
 		return d.database, nil
 	default:
-		return nil, fmt.Errorf("invalid datasource kind %q", ds.Kind)
+		return nil, fmt.Errorf("datasource factory resolver - undefined kind:%q", ds.Kind)
 	}
 }
 
@@ -470,6 +475,13 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration, wgServe
 				UpstreamSchema:         in.CustomGraphql.UpstreamSchema,
 				CustomScalarTypeFields: customScalarTypeFields,
 			})
+		case wgpb.DataSourceKind_NATSKV:
+			config := nats.Configuration{
+				Operation: in.CustomNatsKv.GetOperation(),
+				Bucket:    in.CustomNatsKv.GetBucketName(),
+				ServerURL: loadvariable.String(in.CustomNatsKv.GetServerURL()),
+			}
+			out.Custom = nats.ConfigJson(config)
 		case wgpb.DataSourceKind_POSTGRESQL,
 			wgpb.DataSourceKind_MYSQL,
 			wgpb.DataSourceKind_SQLSERVER,

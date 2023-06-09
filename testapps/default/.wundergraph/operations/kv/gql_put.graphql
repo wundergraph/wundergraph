@@ -1,0 +1,10 @@
+mutation ($key: String!, $value: kv_InputValue!) {
+	kv_put(key: $key, value: $value) {
+		key
+		revision
+		created
+		value {
+			token
+		}
+	}
+}

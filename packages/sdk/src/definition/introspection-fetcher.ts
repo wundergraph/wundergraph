@@ -1,7 +1,7 @@
 import axiosRetry from 'axios-retry';
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosStatic } from 'axios';
 
-let axiosInstance: AxiosInstance | undefined;
+let axiosInstance: AxiosInstance | AxiosStatic | undefined;
 
 export const Fetcher = (): AxiosInstance => {
 	if (axiosInstance) {
