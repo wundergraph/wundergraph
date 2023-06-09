@@ -122,7 +122,6 @@ describe('replaceCustomScalars Tests', () => {
 		};
 
 		const { schemaSDL, customScalarTypeFields, customScalarTypeNames } = replaceCustomScalars(schema, introspection);
-		console.log(schemaSDL);
 		assert.equal(customScalarTypeFields.length, 6);
 		assert.deepEqual(customScalarTypeFields, [
 			{
@@ -269,7 +268,6 @@ describe('replaceCustomScalars Tests', () => {
 		};
 
 		const { schemaSDL, customScalarTypeFields, customScalarTypeNames } = replaceCustomScalars(schema, introspection);
-		console.log(schemaSDL);
 		assert.equal(customScalarTypeFields.length, 6);
 		assert.deepEqual(customScalarTypeFields, [
 			{
@@ -343,7 +341,6 @@ describe('replaceCustomScalars Tests', () => {
 		};
 
 		const { schemaSDL, customScalarTypeFields, customScalarTypeNames } = replaceCustomScalars(schema, introspection);
-		console.log(schemaSDL);
 		assert.equal(customScalarTypeFields.length, 0);
 		assert.deepEqual(customScalarTypeFields, []);
 		assert.deepEqual(customScalarTypeNames, []);

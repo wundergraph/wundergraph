@@ -1,0 +1,10 @@
+mutation ($input: unions_TestType_Input!) {
+	unions_test_endpoint(input: $input) {
+		... on unions_A_const_container {
+			A_const
+		}
+		... on unions_mutation_test_endpoint_oneOf_1 {
+			B
+		}
+	}
+}

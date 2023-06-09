@@ -99,8 +99,7 @@ export const graphqlIntrospectionCacheConfiguration = async (
 
 export const introspectGraphql = async (
 	introspection: GraphQLIntrospection,
-	options: ApiIntrospectionOptions,
-	preserveSchemaDirectives?: boolean
+	options: ApiIntrospectionOptions
 ): Promise<GraphQLApi> => {
 	const headersBuilder = new HeadersBuilder();
 	const introspectionHeadersBuilder = new HeadersBuilder();
@@ -119,9 +118,9 @@ export const introspectGraphql = async (
 	let upstreamSchema = await introspectGraphQLSchema(introspection, options, introspectionHeaders);
 	upstreamSchema = lexicographicSortSchema(upstreamSchema);
 	const federationEnabled = introspection.isFederation || false;
-	const cleanUpstreamSchema = preserveSchemaDirectives
-		? printSchemaWithDirectives(upstreamSchema)
-		: cleanupSchema(upstreamSchema);
+
+	const printedUpstreamSchemaWithDirectives = printSchemaWithDirectives(upstreamSchema);
+	const cleanUpstreamSchema = cleanupSchema(upstreamSchema);
 
 	const {
 		schemaSDL: schemaSDLWithCustomScalars,
@@ -209,7 +208,7 @@ export const introspectGraphql = async (
 						Enabled: federationEnabled,
 						ServiceSDL: serviceSDL || '',
 					},
-					UpstreamSchema: cleanUpstreamSchema,
+					UpstreamSchema: printedUpstreamSchemaWithDirectives,
 					HooksConfiguration: {
 						onWSTransportConnectionInit: false,
 					},

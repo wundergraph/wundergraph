@@ -17,10 +17,11 @@ describe('introspectSoap', () => {
 		};
 
 		files.forEach((file) => {
-			it(`should introspect ${file} succesfully`, async () => {
+			it(`should introspect wsdl ${file} succesfully`, async () => {
 				const filePath = path.join(fixturePath, file);
 				const result = await (await runTest(filePath))({});
-				expect(result.Schema).toMatchSnapshot();
+				expect(result.DataSources[0].Custom.UpstreamSchema).toMatchSnapshot();
+				expect(result.Schema).toMatchSnapshot('wg_schema');
 			});
 		});
 	});
