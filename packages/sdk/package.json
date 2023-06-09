@@ -133,8 +133,8 @@
   "dependencies": {
     "@fastify/formbody": "^7.3.0",
     "@graphql-mesh/cross-helpers": "^0.4.0",
-    "@graphql-mesh/json-schema": "^0.94.2",
-    "@graphql-mesh/openapi": "^0.94.2",
+    "@graphql-mesh/json-schema": "0.94.2",
+    "@graphql-mesh/openapi": "0.94.2",
     "@graphql-mesh/store": "0.94",
     "@graphql-mesh/types": "0.94.0",
     "@graphql-mesh/utils": "0.94.0",
@@ -183,7 +183,6 @@
     "postman-collection": "^4.1.1",
     "protobufjs": "^6.11.2",
     "raw-body": "^2.5.2",
-    "store@0.94": "link:graphql-mesh/store@0.94",
     "swagger2openapi": "^7.0.8",
     "terminate": "^2.5.0",
     "traverse": "^0.6.7",
