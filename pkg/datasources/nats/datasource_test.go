@@ -9,14 +9,15 @@ import (
 
 	"github.com/hashicorp/go-uuid"
 	natsServer "github.com/nats-io/nats-server/v2/server"
+	natsTest "github.com/nats-io/nats-server/v2/test"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasourcetesting"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
-	"github.com/wundergraph/wundergraph/pkg/wgpb"
 
-	natsTest "github.com/nats-io/nats-server/v2/test"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 const (

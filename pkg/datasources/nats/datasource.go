@@ -11,9 +11,11 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/nats-io/nats.go"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
+
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -320,9 +322,10 @@ func (s *KeyValueSource) delete(input []byte, w io.Writer) (err error) {
 	if err != nil {
 		return err
 	}
-	err = s.kv.Delete(key)
+	err = s.kv.Delete(key) // nolint:errcheck
 	if err != nil {
 		_, err = w.Write([]byte("false"))
+		return
 	}
 	_, err = w.Write([]byte("true"))
 	return

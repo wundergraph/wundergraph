@@ -12,6 +12,8 @@ import (
 	"github.com/fatih/color"
 	"github.com/joho/godotenv"
 	"github.com/mattn/go-isatty"
+	natsServer "github.com/nats-io/nats-server/v2/server"
+	natsTest "github.com/nats-io/nats-server/v2/test"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -23,9 +25,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
-
-	natsServer "github.com/nats-io/nats-server/v2/server"
-	natsTest "github.com/nats-io/nats-server/v2/test"
 )
 
 const (

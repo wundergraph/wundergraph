@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
-	"github.com/wundergraph/wundergraph/pkg/datasources/nats"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/graphql_datasource"
@@ -25,6 +24,7 @@ import (
 
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/datasources/database"
+	"github.com/wundergraph/wundergraph/pkg/datasources/nats"
 	oas_datasource "github.com/wundergraph/wundergraph/pkg/datasources/oas"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
