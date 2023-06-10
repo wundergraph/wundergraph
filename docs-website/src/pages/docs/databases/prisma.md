@@ -393,17 +393,19 @@ mutation ($id: String!, $name: String!, $email: String!) {
 
 Prisma now supports views as an early preview feature and so do we! Do note that views should be created directly onto the database and not through prisma. By combining the above raw sql queries to create a view and the prisma schema as the data source, you can use views in your database. Once you perform the creation, just include it in the schema and on introspection we automatically generate TypeScript models and TypeSafe queries against those database views.
 
-An example for creating a view is show below using a database with a `User` table. Within your prisma schema you need to enable the feature and include your views using the `view` block. The creation and schema will look like this.
-
 To learn more about Prisma Views, checkout the official [Prisma Docs](https://www.prisma.io/docs/concepts/components/prisma-schema/views).
+
+An example for creating a view is show below using a database with a `User` table. The creation is done once using raw queries.
 
 ```graphql
 {
-  users_post_queryRaw(query: "CREATE VIEW UserName AS SELECT id, name FROM User") {
+  users_queryRaw(query: "CREATE VIEW UserName AS SELECT id, name FROM User") {
     ID
   }
 }
 ```
+
+Within your prisma schema you need to enable the feature and include your views using the `view` block.
 
 ```prisma
 generator client {
