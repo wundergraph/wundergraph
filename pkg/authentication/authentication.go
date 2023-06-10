@@ -418,18 +418,6 @@ func (u *User) loadUser(loader *UserLoader, r *http.Request) error {
 	return err
 }
 
-func bearerTokenToJSON(token string) ([]byte, error) {
-	parts := strings.Split(token, ".")
-	if len(parts) != 3 {
-		return nil, fmt.Errorf("invalid token")
-	}
-	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
-	if err != nil {
-		return nil, err
-	}
-	return payload, nil
-}
-
 func tryParseJWT(token string) []byte {
 	_, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		return nil, nil
@@ -963,16 +951,13 @@ func resetUserCookies(w http.ResponseWriter, r *http.Request, secure bool) {
 	}
 }
 
-func postAuthentication(ctx context.Context, w http.ResponseWriter, r *http.Request, hooks Hooks, user *User, cookie *securecookie.SecureCookie, insecureCookies bool) error {
+func postAuthenticationHooks(ctx context.Context, r *http.Request, hooks Hooks, user *User) (*User, error) {
 	if err := hooks.PostAuthentication(ctx, user); err != nil {
-		return err
+		return nil, err
 	}
 	user, err := hooks.MutatingPostAuthentication(r.Context(), user)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if err := user.Save(cookie, w, r, r.Host, insecureCookies); err != nil {
-		return fmt.Errorf("could not encode user data: %w", err)
-	}
-	return nil
+	return user, nil
 }
