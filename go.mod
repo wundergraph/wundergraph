@@ -36,13 +36,13 @@ require (
 	github.com/muesli/termenv v0.15.1
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pires/go-proxyproto v0.6.2
-	github.com/prisma/prisma-client-go v0.16.2
 	github.com/prometheus/client_golang v1.15.1
 	github.com/qri-io/jsonschema v0.2.1
 	github.com/rs/cors v1.7.0
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.0
 	github.com/sebdah/goldie/v2 v2.5.3
 	github.com/segmentio/ksuid v1.0.4
+	github.com/shopspring/decimal v1.3.1
 	github.com/smallnest/ringbuffer v0.0.0-20210227121335-0a58434b36f2
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.10.1
