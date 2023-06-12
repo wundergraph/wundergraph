@@ -748,6 +748,78 @@ func TestNatsDataSource(t *testing.T) {
 			},
 		},
 	))
+
+	t.Run("token_watchAll", datasourcetesting.RunTest(schema, `subscription{token_watchAll{value{token}}}`, "",
+		&plan.SubscriptionResponsePlan{
+			Response: &resolve.GraphQLSubscription{
+				Trigger: resolve.GraphQLSubscriptionTrigger{
+					Input: []byte(`{}`),
+					Source: &KeyValueSource{
+						Operation: wgpb.NatsKvOperation_NATSKV_WATCHALL,
+					},
+				},
+				Response: &resolve.GraphQLResponse{
+					Data: &resolve.Object{
+						Nullable: false,
+						Fields: []*resolve.Field{
+							{
+								Name: []byte("token_watchAll"),
+								Value: &resolve.Array{
+									Nullable: false,
+									Item: &resolve.Object{
+										Nullable: false,
+										Fields: []*resolve.Field{
+											{
+												Name: []byte("value"),
+												Value: &resolve.Object{
+													Nullable: false,
+													Path:     []string{"value"},
+													Fields: []*resolve.Field{
+														{
+															Name: []byte("token"),
+															Value: &resolve.String{
+																Path: []string{"token"},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		plan.Configuration{
+			DataSources: []plan.DataSourceConfiguration{
+				{
+					RootNodes: []plan.TypeField{
+						{
+							TypeName:   "Subscription",
+							FieldNames: []string{"token_watchAll"},
+						},
+					},
+					Custom: ConfigJson(Configuration{
+						Operation: wgpb.NatsKvOperation_NATSKV_WATCHALL,
+						Bucket:    "token",
+						ServerURL: nats.DefaultURL,
+					}),
+					Factory: &Factory{},
+				},
+			},
+			DisableResolveFieldPositions: true,
+			Fields: []plan.FieldConfiguration{
+				{
+					TypeName:              "Subscription",
+					FieldName:             "token_watchAll",
+					DisableDefaultMapping: true,
+				},
+			},
+		},
+	))
 }
 
 func TestNatsKeyValueDataSourceLoad(t *testing.T) {
@@ -862,14 +934,14 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		ds.Operation = wgpb.NatsKvOperation_NATSKV_CREATE
 		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key","value":"input"},"variables":{"key":"foo","input":{"token":"bar","org":{"id":1},"user":{"id":1}}}}`), out)
 		assert.NoError(t, err)
-		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":1,"created":1}`, out.String())
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":4,"created":1}`, out.String())
 
 		// create another one
 		out.Reset()
 		ds.Operation = wgpb.NatsKvOperation_NATSKV_CREATE
 		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key","value":"input"},"variables":{"key":"fooCopy","input":{"token":"bar","org":{"id":1},"user":{"id":1}}}}`), out)
 		assert.NoError(t, err)
-		assert.Equal(t, `{"key":"fooCopy","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":2,"created":1}`, out.String())
+		assert.Equal(t, `{"key":"fooCopy","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":5,"created":1}`, out.String())
 
 		out.Reset()
 		ds.Operation = wgpb.NatsKvOperation_NATSKV_KEYS
@@ -903,7 +975,7 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		ds.Operation = wgpb.NatsKvOperation_NATSKV_PUT
 		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key","value":"input"},"variables":{"key":"foo","input":{"token":"bar","org":{"id":1},"user":{"id":1}}}}`), out)
 		assert.NoError(t, err)
-		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":4,"created":1}`, out.String())
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":6,"created":1}`, out.String())
 
 		time.Sleep(100 * time.Millisecond)
 
@@ -931,7 +1003,7 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		ds.Operation = wgpb.NatsKvOperation_NATSKV_PUT
 		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key","value":"input"},"variables":{"key":"foo","input":{"token":"bar","org":{"id":1},"user":{"id":2}}}}`), out)
 		assert.NoError(t, err)
-		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":5,"created":1}`, out.String())
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":7,"created":1}`, out.String())
 
 		time.Sleep(100 * time.Millisecond)
 
@@ -939,7 +1011,7 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		ds.Operation = wgpb.NatsKvOperation_NATSKV_PUT
 		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key","value":"input"},"variables":{"key":"foo","input":{"token":"bar","org":{"id":1},"user":{"id":3}}}}`), out)
 		assert.NoError(t, err)
-		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":3}},"revision":6,"created":1}`, out.String())
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":3}},"revision":8,"created":1}`, out.String())
 
 		time.Sleep(100 * time.Millisecond)
 
@@ -947,15 +1019,98 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		ds.Operation = wgpb.NatsKvOperation_NATSKV_PUT
 		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key","value":"input"},"variables":{"key":"foo","input":{"token":"bar","org":{"id":1},"user":{"id":4}}}}`), out)
 		assert.NoError(t, err)
-		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":4}},"revision":7,"created":1}`, out.String())
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":4}},"revision":9,"created":1}`, out.String())
 
 		time.Sleep(100 * time.Millisecond)
 
 		wg.Wait()
 
 		assert.Equal(t, 3, len(streamOut))
-		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":5,"created":1}`, streamOut[0])
-		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":3}},"revision":6,"created":1}`, streamOut[1])
-		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":4}},"revision":7,"created":1}`, streamOut[2])
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":7,"created":1}`, streamOut[0])
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":3}},"revision":8,"created":1}`, streamOut[1])
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":4}},"revision":9,"created":1}`, streamOut[2])
+	})
+
+	t.Run("token_watchAll", func(t *testing.T) {
+
+		ds := &KeyValueSource{
+			kv: kv,
+			overrideCreatedTime: func() *int64 {
+				zero := int64(1)
+				return &zero
+			}(),
+			kvMutex: &sync.Mutex{},
+		}
+
+		streamDs := &KeyValueSource{
+			kv: kv,
+			overrideCreatedTime: func() *int64 {
+				zero := int64(1)
+				return &zero
+			}(),
+			Operation: wgpb.NatsKvOperation_NATSKV_WATCHALL,
+			kvMutex:   &sync.Mutex{},
+		}
+
+		out := &bytes.Buffer{}
+		ds.Operation = wgpb.NatsKvOperation_NATSKV_PUT
+		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key","value":"input"},"variables":{"key":"foo","input":{"token":"bar","org":{"id":1},"user":{"id":1}}}}`), out)
+		assert.NoError(t, err)
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":10,"created":1}`, out.String())
+
+		time.Sleep(100 * time.Millisecond)
+
+		var streamOut []string
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		next := make(chan []byte)
+		go func() {
+			err = streamDs.Start(ctx, []byte(``), next)
+			assert.NoError(t, err)
+		}()
+
+		wg := sync.WaitGroup{}
+		wg.Add(1)
+
+		go func() {
+			for i := 0; i < 4; i++ {
+				message := <-next
+				streamOut = append(streamOut, string(message))
+			}
+			wg.Done()
+		}()
+
+		out.Reset()
+		ds.Operation = wgpb.NatsKvOperation_NATSKV_PUT
+		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key","value":"input"},"variables":{"key":"foo","input":{"token":"bar","org":{"id":1},"user":{"id":2}}}}`), out)
+		assert.NoError(t, err)
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":11,"created":1}`, out.String())
+
+		time.Sleep(100 * time.Millisecond)
+
+		out.Reset()
+		ds.Operation = wgpb.NatsKvOperation_NATSKV_PUT
+		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key","value":"input"},"variables":{"key":"foo","input":{"token":"bar","org":{"id":1},"user":{"id":3}}}}`), out)
+		assert.NoError(t, err)
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":3}},"revision":12,"created":1}`, out.String())
+
+		time.Sleep(100 * time.Millisecond)
+
+		out.Reset()
+		ds.Operation = wgpb.NatsKvOperation_NATSKV_PUT
+		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key","value":"input"},"variables":{"key":"fooCopy","input":{"token":"bar","org":{"id":1},"user":{"id":4}}}}`), out)
+		assert.NoError(t, err)
+		assert.Equal(t, `{"key":"fooCopy","value":{"token":"bar","org":{"id":1},"user":{"id":4}},"revision":13,"created":1}`, out.String())
+
+		time.Sleep(100 * time.Millisecond)
+
+		wg.Wait()
+
+		assert.Equal(t, 4, len(streamOut))
+		t.Log(streamOut)
+		assert.Equal(t, `{"key":"fooCopy","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":5,"created":1}`, streamOut[0])
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":11,"created":1}`, streamOut[1])
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":3}},"revision":12,"created":1}`, streamOut[2])
+		assert.Equal(t, `{"key":"fooCopy","value":{"token":"bar","org":{"id":1},"user":{"id":4}},"revision":13,"created":1}`, streamOut[3])
 	})
 }
