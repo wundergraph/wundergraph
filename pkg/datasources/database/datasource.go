@@ -237,9 +237,10 @@ func (p *Planner) ConfigureFetch() plan.FetchConfiguration {
 	return plan.FetchConfiguration{
 		Input: string(rawInput),
 		DataSource: &Source{
-			engine: engine,
-			debug:  p.debug,
-			log:    p.log,
+			engine:     engine,
+			debug:      p.debug,
+			log:        p.log,
+			isRawQuery: p.isQueryRaw || p.isQueryRawRow,
 		},
 		Variables:            p.variables,
 		DisallowSingleFlight: p.disallowSingleFlight,
@@ -1053,9 +1054,10 @@ func (e *LazyEngine) initEngineAndExecute(ctx context.Context, request []byte, o
 }
 
 type Source struct {
-	engine *LazyEngine
-	debug  bool
-	log    *zap.Logger
+	engine     *LazyEngine
+	debug      bool
+	log        *zap.Logger
+	isRawQuery bool
 }
 
 func (s *Source) unNullRequest(request []byte) []byte {
@@ -1137,6 +1139,13 @@ func (s *Source) Load(ctx context.Context, input []byte, w io.Writer) (err error
 		zap.ByteString("request", request),
 		zap.String("response", buf.String()),
 	)
+
+	if s.isRawQuery {
+		buf, err = DeserializeRawResponse(buf)
+		if err != nil {
+			return err
+		}
+	}
 
 	_, err = buf.WriteTo(w)
 	return
