@@ -108,6 +108,7 @@ func TestNatsDataSource(t *testing.T) {
 	defer server.Shutdown()
 
 	keyVariableRenderer := resolve.NewJSONVariableRendererWithValidation(`{"type":["string"]}`)
+	integerVariableRenderer := resolve.NewJSONVariableRendererWithValidation(`{"type":["integer"]}`)
 	keyArrayVariableRenderer := resolve.NewJSONVariableRendererWithValidation(`{"type":["array"],"items":{"type":["string"]}}`)
 	inputVariableRenderer := resolve.NewJSONVariableRendererWithValidation(`{"type":["object"],"properties":{"org":{"$ref":"#/$defs/token_InputValueOrg"},"token":{"type":["string"]},"user":{"$ref":"#/$defs/token_InputValueUser"}},"required":["token","user","org"],"additionalProperties":false,"$defs":{"token_InputValueOrg":{"type":["object"],"properties":{"id":{"type":["number"]}},"required":["id"],"additionalProperties":false},"token_InputValueUser":{"type":["object"],"properties":{"id":{"type":["number"]}},"required":["id"],"additionalProperties":false}}}`)
 
@@ -434,6 +435,93 @@ func TestNatsDataSource(t *testing.T) {
 		},
 	))
 
+	t.Run("token_getRevision", datasourcetesting.RunTest(schema, `query($key: String!, $revision: Int!){token_getRevision(key: $key, revision: $revision){value{token}}}`, "",
+		&plan.SynchronousResponsePlan{
+			Response: &resolve.GraphQLResponse{
+				Data: &resolve.Object{
+					Nullable: false,
+					Fetch: &resolve.SingleFetch{
+						BufferId: 0,
+						Input:    `{"args":{"key":"key","revision":"revision"},"variables":{"key":$$0$$,"revision":$$1$$}}`,
+						DataSource: &KeyValueSource{
+							Operation: wgpb.NatsKvOperation_NATSKV_GETREVISION,
+						},
+						Variables: resolve.NewVariables(
+							&resolve.ContextVariable{
+								Path:     []string{"key"},
+								Renderer: keyVariableRenderer,
+							},
+							&resolve.ContextVariable{
+								Path:     []string{"revision"},
+								Renderer: integerVariableRenderer,
+							},
+						),
+						DataSourceIdentifier: []byte("nats.KeyValueSource"),
+						DisableDataLoader:    true,
+						DisallowSingleFlight: true,
+						ProcessResponseConfig: resolve.ProcessResponseConfig{
+							ExtractGraphqlResponse:    false,
+							ExtractFederationEntities: false,
+						},
+					},
+					Fields: []*resolve.Field{
+						{
+							BufferID:  0,
+							HasBuffer: true,
+							Name:      []byte("token_getRevision"),
+							Value: &resolve.Object{
+								Nullable: true,
+								Fields: []*resolve.Field{
+									{
+										Name: []byte("value"),
+										Value: &resolve.Object{
+											Nullable: false,
+											Path:     []string{"value"},
+											Fields: []*resolve.Field{
+												{
+													Name: []byte("token"),
+													Value: &resolve.String{
+														Path: []string{"token"},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		plan.Configuration{
+			DataSources: []plan.DataSourceConfiguration{
+				{
+					RootNodes: []plan.TypeField{
+						{
+							TypeName:   "Query",
+							FieldNames: []string{"token_getRevision"},
+						},
+					},
+					Custom: ConfigJson(Configuration{
+						Operation: wgpb.NatsKvOperation_NATSKV_GETREVISION,
+						Bucket:    "token",
+						ServerURL: nats.DefaultURL,
+					}),
+					Factory: &Factory{},
+				},
+			},
+			DisableResolveFieldPositions: true,
+			Fields: []plan.FieldConfiguration{
+				{
+					TypeName:              "Query",
+					FieldName:             "token_getRevision",
+					DisableDefaultMapping: true,
+				},
+			},
+		},
+	))
+
 	t.Run("token_watch", datasourcetesting.RunTest(schema, `subscription($keys: [String!]!){token_watch(keys: $keys){value{token}}}`, "",
 		&plan.SubscriptionResponsePlan{
 			Response: &resolve.GraphQLSubscription{
@@ -536,7 +624,8 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 	assert.NoError(t, err)
 
 	kv, err := js.CreateKeyValue(&nats.KeyValueConfig{
-		Bucket: "token",
+		Bucket:  "token",
+		History: 2,
 	})
 	assert.NoError(t, err)
 
@@ -576,6 +665,12 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key"},"variables":{"key":"foo"}}`), out)
 		assert.NoError(t, err)
 		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":2,"created":1}`, out.String())
+
+		out.Reset()
+		ds.Operation = wgpb.NatsKvOperation_NATSKV_GETREVISION
+		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key","revision":"revision"},"variables":{"key":"foo","revision":1}}`), out)
+		assert.NoError(t, err)
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":1,"created":1}`, out.String())
 
 		out.Reset()
 		ds.Operation = wgpb.NatsKvOperation_NATSKV_DELETE

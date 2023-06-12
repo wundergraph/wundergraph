@@ -322,6 +322,8 @@ func (s *KeyValueSource) Load(ctx context.Context, input []byte, w io.Writer) (e
 	switch s.Operation {
 	case wgpb.NatsKvOperation_NATSKV_GET:
 		return s.get(input, w)
+	case wgpb.NatsKvOperation_NATSKV_GETREVISION:
+		return s.getRevision(input, w)
 	case wgpb.NatsKvOperation_NATSKV_PUT:
 		return s.put(input, w)
 	case wgpb.NatsKvOperation_NATSKV_DELETE:
@@ -430,6 +432,38 @@ func (s *KeyValueSource) get(input []byte, w io.Writer) (err error) {
 		return err
 	}
 	entry, err := s.kv.Get(key)
+	if err != nil {
+		if errors.Is(err, nats.ErrKeyNotFound) {
+			_, err = w.Write([]byte("null"))
+			return
+		}
+		return err
+	}
+	if entry == nil {
+		_, err = w.Write([]byte("null"))
+		return
+	}
+	return s.writeResponse(key, entry.Value(), entry.Revision(), entry.Created(), w)
+}
+
+func (s *KeyValueSource) getRevision(input []byte, w io.Writer) (err error) {
+	keyVariableName, err := jsonparser.GetString(input, "args", "key")
+	if err != nil {
+		return err
+	}
+	key, err := jsonparser.GetString(input, "variables", keyVariableName)
+	if err != nil {
+		return err
+	}
+	revisionVariableName, err := jsonparser.GetString(input, "args", "revision")
+	if err != nil {
+		return err
+	}
+	revision, err := jsonparser.GetInt(input, "variables", revisionVariableName)
+	if err != nil {
+		return err
+	}
+	entry, err := s.kv.GetRevision(key, uint64(revision))
 	if err != nil {
 		if errors.Is(err, nats.ErrKeyNotFound) {
 			_, err = w.Write([]byte("null"))
