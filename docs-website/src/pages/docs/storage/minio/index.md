@@ -18,17 +18,15 @@ const aws = {
   secretAccessKey: '12345678', // access secret to upload files to the S3 bucket
   bucketName: 'uploads', // the bucket name to which you're uploading files
   useSSL: false, // disable SSL if you're running e.g. Minio on your local machine
-  uploadProfiles: [
-    {
-      avatar: {
-        requireAuthentication: false, // optional, defaults to true
-        maxAllowedUploadSizeBytes: 1024 * 1024 * 10, // 10 MB, optional, defaults to 25 MB
-        maxAllowedFiles: 1, // limit the number of files to 1, leave undefined for unlimited files
-        allowedMimeTypes: ['image/png', 'image/jpeg'], // wildcard is supported, e.g. 'image/*', leave empty/undefined to allow all
-        allowedFileExtensions: ['png', 'jpg'], // leave empty/undefined to allow all
-      },
+  uploadProfiles: {
+    avatar: {
+      requireAuthentication: false, // optional, defaults to true
+      maxAllowedUploadSizeBytes: 1024 * 1024 * 10, // 10 MB, optional, defaults to 25 MB
+      maxAllowedFiles: 1, // limit the number of files to 1, leave undefined for unlimited files
+      allowedMimeTypes: ['image/png', 'image/jpeg'], // wildcard is supported, e.g. 'image/*', leave empty/undefined to allow all
+      allowedFileExtensions: ['png', 'jpg'], // leave empty/undefined to allow all
     },
-  ],
+  },
 };
 
 configureWunderGraphApplication({
