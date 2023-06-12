@@ -779,7 +779,7 @@ type UserHandler struct {
 func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	user := UserFromContext(r.Context())
 	if user == nil {
-		http.NotFound(w, r)
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 
