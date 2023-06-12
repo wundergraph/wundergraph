@@ -178,6 +178,7 @@
     "pino": "^8.11.0",
     "pino-pretty": "^10.0.0",
     "postman-collection": "^4.1.1",
+    "postman-to-openapi": "^3.0.1",
     "protobufjs": "^6.11.2",
     "raw-body": "^2.5.2",
     "swagger2openapi": "^7.0.8",

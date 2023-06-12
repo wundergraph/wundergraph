@@ -239,6 +239,9 @@ enum COMMON_REGEX_PATTERN {
     EMAIL
     DOMAIN
 }
+
+""" statusCodeTypeName maps status codes to individual types in a union returned from an HTTP operation"""
+directive @statusCodeTypeName(typeName: String, statusCode: ID) repeatable on UNION
 `;
 
 const roleSchema = (roles: string[]) => `

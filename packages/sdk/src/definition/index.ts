@@ -24,6 +24,7 @@ import { introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
 import { introspectOpenApi, introspectOpenApiV2 } from './openapi-introspection';
+import { introspectPostman } from './postman-instrospection';
 import {
 	introspectMongoDB,
 	introspectMySQL,
@@ -471,6 +472,7 @@ export const introspect = {
 	federation: introspectFederation,
 	openApi: introspectOpenApi,
 	openApiV2: introspectOpenApiV2,
+	postman: introspectPostman,
 	soap: introspectSoap,
 };
 
