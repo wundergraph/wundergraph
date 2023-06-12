@@ -391,21 +391,23 @@ mutation ($id: String!, $name: String!, $email: String!) {
 
 ## Support for Prisma Views and Database Views
 
-Prisma now supports views as an early preview feature and so do we! Do note that views should be created directly onto the database and not through prisma. By combining the above raw sql queries to create a view and the prisma schema as the data source, you can use views in your database. Once you perform the creation, just include it in the schema and on introspection we automatically generate TypeScript models and TypeSafe queries against those database views.
+Prisma now supports views as an early preview feature, and so do we!
+
+Executing raw SQL queries is a very powerful feature,
+but it might get a little out of hand when your SQL statements get more complex.
+To make things easier, you can now use Prisma Views to define a view on top of your database
+and query it in a type-safe way.
 
 To learn more about Prisma Views, checkout the official [Prisma Docs](https://www.prisma.io/docs/concepts/components/prisma-schema/views).
 
-An example for creating a view is show below using a database with a `User` table. The creation is done once using raw queries.
+Let's go through an example to see how it works.
+First, define a view in your database.
 
-```graphql
-{
-  users_queryRaw(query: "CREATE VIEW UserName AS SELECT id, name FROM User") {
-    ID
-  }
-}
+```PostgreSQL
+CREATE VIEW UserName AS SELECT id, name FROM "User";
 ```
 
-Within your prisma schema you need to enable the feature and include your views using the `view` block.
+Next, define the view in your Prisma Schema so we can generate the types for it.
 
 ```prisma
 generator client {
@@ -429,6 +431,9 @@ view UserName {
   name String
 }
 ```
+
+WunderGraph will now add the view to the generated GraphQL Schema,
+so you can query it like any other table without having to define the response shapre.
 
 ## Injecting Claims into your Database API
 
