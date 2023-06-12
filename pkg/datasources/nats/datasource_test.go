@@ -522,6 +522,155 @@ func TestNatsDataSource(t *testing.T) {
 		},
 	))
 
+	t.Run("token_keys", datasourcetesting.RunTest(schema, `query{token_keys}`, "",
+		&plan.SynchronousResponsePlan{
+			Response: &resolve.GraphQLResponse{
+				Data: &resolve.Object{
+					Nullable: false,
+					Fetch: &resolve.SingleFetch{
+						BufferId: 0,
+						Input:    `{}`,
+						DataSource: &KeyValueSource{
+							Operation: wgpb.NatsKvOperation_NATSKV_KEYS,
+						},
+						DataSourceIdentifier: []byte("nats.KeyValueSource"),
+						DisableDataLoader:    true,
+						DisallowSingleFlight: true,
+						ProcessResponseConfig: resolve.ProcessResponseConfig{
+							ExtractGraphqlResponse:    false,
+							ExtractFederationEntities: false,
+						},
+					},
+					Fields: []*resolve.Field{
+						{
+							BufferID:  0,
+							HasBuffer: true,
+							Name:      []byte("token_keys"),
+							Value: &resolve.Array{
+								Nullable: false,
+								Item: &resolve.String{
+									Nullable: false,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		plan.Configuration{
+			DataSources: []plan.DataSourceConfiguration{
+				{
+					RootNodes: []plan.TypeField{
+						{
+							TypeName:   "Query",
+							FieldNames: []string{"token_keys"},
+						},
+					},
+					Custom: ConfigJson(Configuration{
+						Operation: wgpb.NatsKvOperation_NATSKV_KEYS,
+						Bucket:    "token",
+						ServerURL: nats.DefaultURL,
+					}),
+					Factory: &Factory{},
+				},
+			},
+			DisableResolveFieldPositions: true,
+			Fields: []plan.FieldConfiguration{
+				{
+					TypeName:              "Query",
+					FieldName:             "token_keys",
+					DisableDefaultMapping: true,
+				},
+			},
+		},
+	))
+
+	t.Run("token_history", datasourcetesting.RunTest(schema, `query($key: String!){token_history(key: $key){value{token}}}`, "",
+		&plan.SynchronousResponsePlan{
+			Response: &resolve.GraphQLResponse{
+				Data: &resolve.Object{
+					Nullable: false,
+					Fetch: &resolve.SingleFetch{
+						BufferId: 0,
+						Input:    `{"args":{"key":"key"},"variables":{"key":$$0$$}}`,
+						DataSource: &KeyValueSource{
+							Operation: wgpb.NatsKvOperation_NATSKV_HISTORY,
+						},
+						Variables: resolve.NewVariables(
+							&resolve.ContextVariable{
+								Path:     []string{"key"},
+								Renderer: keyVariableRenderer,
+							},
+						),
+						DataSourceIdentifier: []byte("nats.KeyValueSource"),
+						DisableDataLoader:    true,
+						DisallowSingleFlight: true,
+						ProcessResponseConfig: resolve.ProcessResponseConfig{
+							ExtractGraphqlResponse:    false,
+							ExtractFederationEntities: false,
+						},
+					},
+					Fields: []*resolve.Field{
+						{
+							BufferID:  0,
+							HasBuffer: true,
+							Name:      []byte("token_history"),
+							Value: &resolve.Array{
+								Nullable: false,
+								Item: &resolve.Object{
+									Nullable: false,
+									Fields: []*resolve.Field{
+										{
+											Name: []byte("value"),
+											Value: &resolve.Object{
+												Nullable: false,
+												Path:     []string{"value"},
+												Fields: []*resolve.Field{
+													{
+														Name: []byte("token"),
+														Value: &resolve.String{
+															Path: []string{"token"},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		plan.Configuration{
+			DataSources: []plan.DataSourceConfiguration{
+				{
+					RootNodes: []plan.TypeField{
+						{
+							TypeName:   "Query",
+							FieldNames: []string{"token_history"},
+						},
+					},
+					Custom: ConfigJson(Configuration{
+						Operation: wgpb.NatsKvOperation_NATSKV_HISTORY,
+						Bucket:    "token",
+						ServerURL: nats.DefaultURL,
+					}),
+					Factory: &Factory{},
+				},
+			},
+			DisableResolveFieldPositions: true,
+			Fields: []plan.FieldConfiguration{
+				{
+					TypeName:              "Query",
+					FieldName:             "token_history",
+					DisableDefaultMapping: true,
+				},
+			},
+		},
+	))
+
 	t.Run("token_watch", datasourcetesting.RunTest(schema, `subscription($keys: [String!]!){token_watch(keys: $keys){value{token}}}`, "",
 		&plan.SubscriptionResponsePlan{
 			Response: &resolve.GraphQLSubscription{
@@ -629,7 +778,7 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	t.Run("token_create_put_get_delete", func(t *testing.T) {
+	t.Run("token_create_put_get_revision_history_delete", func(t *testing.T) {
 		ds := &KeyValueSource{
 			kv: kv,
 			overrideCreatedTime: func() *int64 {
@@ -673,6 +822,12 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":1,"created":1}`, out.String())
 
 		out.Reset()
+		ds.Operation = wgpb.NatsKvOperation_NATSKV_HISTORY
+		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key"},"variables":{"key":"foo"}}`), out)
+		assert.NoError(t, err)
+		assert.Equal(t, `[{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":1,"created":1},{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":2,"created":1}]`, out.String())
+
+		out.Reset()
 		ds.Operation = wgpb.NatsKvOperation_NATSKV_DELETE
 		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key"},"variables":{"key":"foo"}}`), out)
 		assert.NoError(t, err)
@@ -683,6 +838,44 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key"},"variables":{"key":"foo"}}`), out)
 		assert.NoError(t, err)
 		assert.Equal(t, `null`, out.String())
+	})
+
+	t.Run("token_create_keys", func(t *testing.T) {
+		ds := &KeyValueSource{
+			kv: kv,
+			overrideCreatedTime: func() *int64 {
+				zero := int64(1)
+				return &zero
+			}(),
+			kvMutex: &sync.Mutex{},
+		}
+
+		out := &bytes.Buffer{}
+
+		ds.Operation = wgpb.NatsKvOperation_NATSKV_KEYS
+		err = ds.Load(context.Background(), []byte(`{"args":{},"variables":{}}`), out)
+		assert.NoError(t, err)
+		assert.Equal(t, `[]`, out.String())
+
+		// create one
+		out.Reset()
+		ds.Operation = wgpb.NatsKvOperation_NATSKV_CREATE
+		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key","value":"input"},"variables":{"key":"foo","input":{"token":"bar","org":{"id":1},"user":{"id":1}}}}`), out)
+		assert.NoError(t, err)
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":1,"created":1}`, out.String())
+
+		// create another one
+		out.Reset()
+		ds.Operation = wgpb.NatsKvOperation_NATSKV_CREATE
+		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key","value":"input"},"variables":{"key":"fooCopy","input":{"token":"bar","org":{"id":1},"user":{"id":1}}}}`), out)
+		assert.NoError(t, err)
+		assert.Equal(t, `{"key":"fooCopy","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":2,"created":1}`, out.String())
+
+		out.Reset()
+		ds.Operation = wgpb.NatsKvOperation_NATSKV_KEYS
+		err = ds.Load(context.Background(), []byte(`{"args":{},"variables":{}}`), out)
+		assert.NoError(t, err)
+		assert.Equal(t, `[foo,fooCopy]`, out.String())
 	})
 
 	t.Run("token_watch", func(t *testing.T) {

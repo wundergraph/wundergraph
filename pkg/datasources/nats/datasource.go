@@ -324,6 +324,10 @@ func (s *KeyValueSource) Load(ctx context.Context, input []byte, w io.Writer) (e
 		return s.get(input, w)
 	case wgpb.NatsKvOperation_NATSKV_GETREVISION:
 		return s.getRevision(input, w)
+	case wgpb.NatsKvOperation_NATSKV_KEYS:
+		return s.keys(w)
+	case wgpb.NatsKvOperation_NATSKV_HISTORY:
+		return s.history(input, w)
 	case wgpb.NatsKvOperation_NATSKV_PUT:
 		return s.put(input, w)
 	case wgpb.NatsKvOperation_NATSKV_DELETE:
@@ -476,4 +480,67 @@ func (s *KeyValueSource) getRevision(input []byte, w io.Writer) (err error) {
 		return
 	}
 	return s.writeResponse(key, entry.Value(), entry.Revision(), entry.Created(), w)
+}
+
+func (s *KeyValueSource) keys(w io.Writer) (err error) {
+	keys, err := s.kv.Keys()
+	if err != nil {
+		if errors.Is(err, nats.ErrNoKeysFound) {
+			_, err = w.Write([]byte("[]"))
+			return err
+		}
+		return err
+	}
+
+	if keys == nil {
+		_, err = w.Write([]byte("[]"))
+		return err
+	}
+
+	_, err = w.Write([]byte("[" + strings.Join(keys, ",") + "]"))
+	return err
+}
+
+func (s *KeyValueSource) history(input []byte, w io.Writer) (err error) {
+	keyVariableName, err := jsonparser.GetString(input, "args", "key")
+	if err != nil {
+		return err
+	}
+	key, err := jsonparser.GetString(input, "variables", keyVariableName)
+	if err != nil {
+		return err
+	}
+	entries, err := s.kv.History(key)
+	if err != nil {
+		if errors.Is(err, nats.ErrKeyNotFound) {
+			_, err = w.Write([]byte("[]"))
+			return
+		}
+		return err
+	}
+	if entries == nil {
+		_, err = w.Write([]byte("[]"))
+		return
+	}
+
+	responseEntries := make([]ResponseKeyValueEntry, 0, len(entries))
+	for _, entry := range entries {
+		response := ResponseKeyValueEntry{
+			Key:      key,
+			Value:    entry.Value(),
+			Revision: entry.Revision(),
+			Created:  entry.Created().Unix(),
+		}
+		if s.overrideCreatedTime != nil {
+			response.Created = *s.overrideCreatedTime
+		}
+		responseEntries = append(responseEntries, response)
+	}
+
+	responseBytes, err := json.Marshal(responseEntries)
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(responseBytes)
+	return err
 }
