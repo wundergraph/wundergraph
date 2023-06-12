@@ -20,7 +20,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/hashicorp/go-uuid"
-	"github.com/mattbaird/jsonpatch"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"go.uber.org/zap"
@@ -43,6 +42,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
+	"github.com/wundergraph/wundergraph/pkg/jsonpatch"
 	"github.com/wundergraph/wundergraph/pkg/jsonpath"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
@@ -1081,7 +1081,7 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 			if wgParams.UseJsonPatch && lastData.Len() != 0 {
 				last := lastData.Bytes()
 				current := currentData.Bytes()
-				patch, err := jsonpatch.CreatePatch(last, current)
+				patch, err := jsonpatch.Create(last, current)
 				if err != nil {
 					requestLogger.Error("HandleLiveQueryEvent could not create json patch", zap.Error(err))
 					continue
@@ -1448,7 +1448,7 @@ func (f *httpFlushWriter) Flush() {
 
 	if f.useJsonPatch && f.lastMessage.Len() != 0 {
 		last := f.lastMessage.Bytes()
-		patch, err := jsonpatch.CreatePatch(last, resp)
+		patch, err := jsonpatch.Create(last, resp)
 		if err != nil {
 			if f.logger != nil {
 				f.logger.Error("subscription json patch", zap.Error(err))
