@@ -64,6 +64,8 @@ const uniqueWellKnownTypes = (schema: DocumentNode): string[] => {
 };
 
 const wellKnownDirectives: string[] = ['include', 'skip', 'deprecated', 'specifiedBy'];
+const omnigraphOpenApiDirectives: string[] = ['oneOf'];
+const knownDirectives: string[] = [...wellKnownDirectives, ...omnigraphOpenApiDirectives];
 
 export const applyNameSpaceToGraphQLSchema = (
 	schema: string,
@@ -205,7 +207,7 @@ export const applyNameSpaceToGraphQLSchema = (
 		},
 		DirectiveDefinition: {
 			enter: (node) => {
-				if (wellKnownDirectives.find((d) => d === node.name.value) !== undefined) {
+				if (knownDirectives.find((d) => d === node.name.value) !== undefined) {
 					return; // skip well known
 				}
 				const updated: DirectiveDefinitionNode = {
@@ -477,7 +479,7 @@ export const applyNamespaceToDirectiveConfiguration = (
 	}
 	const out: DirectiveConfiguration[] = [];
 	schema.getDirectives().forEach((directive) => {
-		if (wellKnownDirectives.find((w) => w === directive.name) !== undefined) {
+		if (knownDirectives.find((w) => w === directive.name) !== undefined) {
 			return;
 		}
 		out.push({

@@ -19,6 +19,7 @@ import type { WebhooksConfig } from '../webhooks/types';
 import type { HooksRouteConfig } from './plugins/hooks';
 import type { WebHookRouteConfig } from './plugins/webhooks';
 import type {
+	ClientRequest,
 	FastifyRequestBody,
 	HooksConfiguration,
 	ServerRunOptions,
@@ -199,6 +200,56 @@ export const createClientRequest = (body: FastifyRequestBody) => {
 };
 
 /**
+ * Returns the headers that should be forwarded from the ClientRequest as headers
+ * in the next request sent to the node
+ * @param request A ClientRequest
+ * @returns A record with the headers where keys are the names and values are the header values
+ */
+export const forwardedHeaders = (request: ClientRequest) => {
+	const forwardedHeaders = ['Authorization', 'X-Request-Id'];
+	const headers: Record<string, string> = {};
+	if (request?.headers) {
+		for (const header of forwardedHeaders) {
+			const value = request.headers.get(header);
+			if (value) {
+				headers[header] = value;
+			}
+		}
+	}
+	return headers;
+};
+
+/**
+ * Converts a ClientRequest to its raw form, so it can be encoded in the body and sent to the node
+ * @param request A ClientRequest instance
+ * @returns A raw clientRequest as plain object
+ */
+export const encodeRawClientRequest = (request: ClientRequest, extraHeaders?: Record<string, string>) => {
+	const headers: Record<string, string> = {};
+	request.headers.forEach((value, key) => {
+		if (headers[key]) {
+			if (value) {
+				headers[key] += `,${value}`;
+			}
+		} else {
+			headers[key] = value;
+		}
+	});
+	// To allow operations to access the headers set in extraHeaders, override
+	// the header values in the clientRequest sent to the node
+	if (extraHeaders != null) {
+		for (const key of Object.keys(extraHeaders)) {
+			headers[key] = extraHeaders[key];
+		}
+	}
+	return {
+		headers,
+		requestURI: request.requestURI,
+		method: request.method,
+	};
+};
+
+/**
  * rawClientRequest returns the raw JSON encoded client request
  * @param body Request body
  * @returns Client request as raw JSON, as received in the request body
@@ -364,10 +415,10 @@ export const createServer = async ({
 				log: createLogger(req.log),
 				user: req.body.__wg.user!,
 				clientRequest,
-				internalClient: clientFactory(headers, req.body.__wg.clientRequest),
+				internalClient: clientFactory(headers, clientRequest),
 				operations: new OperationsClient({
 					baseURL: nodeInternalURL,
-					clientRequest: req.body.__wg.clientRequest,
+					clientRequest,
 					extraHeaders: headers,
 					tracer: fastify.tracer,
 					traceContext: req.telemetry?.context,
@@ -486,6 +537,9 @@ export const createServer = async ({
 					throw new Error(
 						`ORM is not enabled for your application. Set "experimental.orm" to "true" in your \`wundergraph.config.ts\` to enable.`
 					);
+				},
+				withClientRequest() {
+					return this;
 				},
 		  } as any);
 

@@ -43,6 +43,7 @@ import { FragmentDefinitionBuilder } from './fragment-definition-builder';
 import { AddFragment } from './add-fragment-selection';
 import { Result } from './result';
 import { Executor } from './executor';
+import { ClientRequest } from './internal-types';
 
 export interface OperationBuilderConfig {
 	// @todo replace w/SchemaDefinitionNode (or thin TypeScript wrapper of `SchemaDefinition`)
@@ -151,6 +152,7 @@ export class OperationBuilder<Config extends OperationBuilderConfig> {
 			typeSelection: SelectionSet<any> | undefined;
 			executor: Executor;
 			namespace?: string;
+			clientRequest?: ClientRequest;
 			extraHeaders?: Record<string, string>;
 		}
 	) {
@@ -159,7 +161,7 @@ export class OperationBuilder<Config extends OperationBuilderConfig> {
 	}
 
 	#defineVariable(argumentDefinition: GraphQLArgument, value: unknown) {
-		// create a unqiue (but still readable) name for the variable
+		// create a unique (but still readable) name for the variable
 		const name = `${argumentDefinition.name}_${++this.#variableCounter}`;
 		if (!argumentDefinition.astNode?.type) {
 			throw new Error('Unable to determine argument type from schema.');
@@ -349,6 +351,7 @@ export class OperationBuilder<Config extends OperationBuilderConfig> {
 			this.compile(),
 			this.variables,
 			this.config.namespace,
+			this.config.clientRequest,
 			this.config.extraHeaders
 		);
 
