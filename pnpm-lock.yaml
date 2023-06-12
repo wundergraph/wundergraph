@@ -726,6 +726,7 @@ importers:
       typescript: ^4.8.2
       vitest: ^0.31.1
       wait-on: ^7.0.1
+      zod: ^3.21.4
     dependencies:
       '@opensearch-project/opensearch': 2.2.1
       '@opentelemetry/otlp-proto-exporter-base': 0.39.1
@@ -733,6 +734,7 @@ importers:
       '@wundergraph/sdk': link:../sdk
       '@wundergraph/wunderctl': link:../wunderctl
       graphql: 16.6.0
+      zod: 3.21.4
     devDependencies:
       '@graphql-yoga/node': 2.13.13_graphql@16.6.0
       '@prisma/client': 4.15.0_prisma@4.15.0
@@ -25587,7 +25589,7 @@ packages:
       '@graphql-mesh/json-schema': 0.94.2_eiq7x44w6bqqjx66pnv5eewgtq
       '@graphql-mesh/openapi': 0.94.2_eiq7x44w6bqqjx66pnv5eewgtq
       '@graphql-mesh/store': 0.94.0_lyyffdw2meesutvp3pmm6lc2ye
-      '@graphql-mesh/types': 0.94.0_wzi3fdkpachpjsxlannad7j3iu
+      '@graphql-mesh/types': 0.94.0_uoeeqqlv6c6lhv3gqe7g3h6vhq
       '@graphql-mesh/utils': 0.94.0_jbrdvdlgwxeoxswluszpeqie6e
       '@graphql-tools/schema': 8.5.1_graphql@16.6.0
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
@@ -25654,6 +25656,7 @@ packages:
       zod: 3.21.4
       zod-to-json-schema: 3.20.2_zod@3.21.4
     transitivePeerDependencies:
+      - '@graphql-mesh/store'
       - '@swc/core'
       - '@swc/wasm'
       - encoding

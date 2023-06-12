@@ -439,7 +439,7 @@ func (s *KeyValueSource) get(input []byte, w io.Writer) (err error) {
 	}
 	if entry == nil {
 		_, err = w.Write([]byte("null"))
-		return nil
+		return
 	}
 	return s.writeResponse(key, entry.Value(), entry.Revision(), entry.Created(), w)
 }
