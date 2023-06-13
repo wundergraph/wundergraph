@@ -410,10 +410,12 @@ export class Client {
 		const generator = this.subscribeWithFetch<Data, Error>(options);
 
 		if (cb) {
+			let last: ClientResponse<Data, Error> | undefined;
 			for await (const event of generator) {
+				last = event;
 				cb(event);
 			}
-			return;
+			return last;
 		}
 
 		return generator;
