@@ -3,7 +3,6 @@ package nats
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"github.com/phayes/freeport"
 	"os"
 	"path/filepath"
@@ -995,9 +994,7 @@ func createKV(t *testing.T) (nats.KeyValue, *natsServer.Server, string) {
 		Port:      port,
 	})
 
-	url := fmt.Sprintf("nats://127.0.0.1:%d", port)
-
-	nc, err := nats.Connect(url)
+	nc, err := nats.Connect(server.ClientURL())
 	assert.NoError(t, err)
 	js, err := nc.JetStream(nats.PublishAsyncMaxPending(256))
 	assert.NoError(t, err)
