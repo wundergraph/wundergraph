@@ -1,8 +1,7 @@
 import fastify from 'fastify';
 
-const notes: Record<number, string> = {};
-
 export const createOpenAPITestServer = (port: number) => {
+	const notes: Record<number, string> = {};
 	const server = fastify({
 		logger: true,
 	});

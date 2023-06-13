@@ -86,7 +86,26 @@ describe('Test correct responses', () => {
 		expect(queryResult.data?.notes_noteByID?.id ?? 0).toBe(id);
 		expect(queryResult.data?.notes_noteByID?.text ?? '').toBe(text);
 	});
+});
 
+describe('Test subscriptions', () => {
+	// This test checks all notes, so it needs a dedicated server
+	const httpServer = createOpenAPITestServer(8091);
+	const wg = createTestServer({
+		dir: __dirname,
+		env: {
+			OPENAPI_URL: 'http://localhost:8091',
+		},
+	});
+
+	beforeAll(async () => {
+		await wg.start();
+	});
+
+	afterAll(async () => {
+		await httpServer.close();
+		await wg.stop();
+	});
 	test('subscription with tail deletion via jsonpatch', async () => {
 		const client = wg.client();
 		// Create 100 notes, to ensure the payload is bigger than
@@ -113,10 +132,13 @@ describe('Test correct responses', () => {
 		let expectedNotesLength = result.data!.notes_all!.length;
 		const abort = new AbortController();
 		let triggers = 0;
-		const query = client.subscribe({ operationName: 'AllNotes', liveQuery: true }, (resp) => {
-			expect(resp.data?.notes_all?.length).toBe(expectedNotesLength);
-			triggers++;
-		});
+		const query = client.subscribe(
+			{ operationName: 'AllNotes', liveQuery: true, abortSignal: abort.signal },
+			(resp) => {
+				expect(resp.data?.notes_all?.length).toBe(expectedNotesLength);
+				triggers++;
+			}
+		);
 		// Now delete the last 2 notes
 		await client.mutate({ operationName: 'DeleteNote', input: { id: ids[ids.length - 1] } });
 		await client.mutate({ operationName: 'DeleteNote', input: { id: ids[ids.length - 2] } });
