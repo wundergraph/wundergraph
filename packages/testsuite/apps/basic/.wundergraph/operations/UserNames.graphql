@@ -1,0 +1,6 @@
+query {
+	users_post_findManyUserName {
+		id
+		name
+	}
+}
