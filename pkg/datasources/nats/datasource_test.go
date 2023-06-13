@@ -1313,7 +1313,6 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		wg.Wait()
 
 		assert.Equal(t, 4, len(streamOut))
-		t.Log(streamOut)
 		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":1,"created":1}`, streamOut[0])
 		assert.Equal(t, `{"key":"fooCopy","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":2,"created":1}`, streamOut[1])
 		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":3,"created":1}`, streamOut[2])
