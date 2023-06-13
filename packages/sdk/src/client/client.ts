@@ -369,6 +369,11 @@ export class Client {
 			throw await this.handleClientResponseError(response);
 		}
 
+		if (response.status == 204) {
+			// No user is signed in. Keep this in sync with pkg/authentication/authentication.go
+			throw new AuthorizationError();
+		}
+
 		return response.json();
 	}
 

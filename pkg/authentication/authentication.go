@@ -779,6 +779,9 @@ type UserHandler struct {
 func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	user := UserFromContext(r.Context())
 	if user == nil {
+		// Return a 204 instead of a 4xx. Returning a 4xx would cause an error to be shown
+		// on the developer console in the browser when this is hit to test if the current
+		// user is authenticated. Keep this in sync with packages/sdk/src/client/client.ts
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
