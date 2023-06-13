@@ -512,7 +512,18 @@ export class Client {
 		let message: string = '';
 		let lastResponse: GraphQLResponse | null = null;
 		while (true) {
-			const { value, done } = await reader.read();
+			let value: Uint8Array | undefined;
+			let done: boolean;
+			try {
+				const result = await reader.read();
+				value = result.value;
+				done = result.done;
+			} catch (e) {
+				if (!(e instanceof Error) || !e.message.indexOf('aborted')) {
+					throw e;
+				}
+				done = true;
+			}
 			if (done) return;
 			if (!value) continue;
 			message += decoder.decode(value);

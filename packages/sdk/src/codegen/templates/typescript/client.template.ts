@@ -118,6 +118,7 @@ export class WunderGraphClient extends Client {
 	>(options: OperationName extends string ? QueryRequestOptions<OperationName, Input> : OperationRequestOptions) {
 		return super.query<OperationRequestOptions, Response['data'], Response['error']>(options);
 	}
+
 	mutate<
 		OperationName extends Extract<keyof Operations['mutations'], string>,
 		Input extends Operations['mutations'][OperationName]['input'] = Operations['mutations'][OperationName]['input'],
@@ -125,6 +126,18 @@ export class WunderGraphClient extends Client {
 	>(options: OperationName extends string ? MutationRequestOptions<OperationName, Input> : OperationRequestOptions) {
 		return super.mutate<OperationRequestOptions, Response['data'], Response['error']>(options);
 	}
+
+	subscribe<
+		OperationName extends Extract<keyof Operations["liveQueries"], string>,
+		Input extends Operations["liveQueries"][OperationName]["input"] = Operations["liveQueries"][OperationName]["input"],
+		Response extends Operations["liveQueries"][OperationName]["response"] = Operations["liveQueries"][OperationName]["response"]
+	>(
+		options: OperationName extends string
+		? LiveQueryRequestOptions<OperationName, Input>
+		: LiveQueryRequestOptions,
+		cb?: SubscriptionEventHandler<Response["data"], Response["error"]>
+	): Promise<Response | void>;;
+
 	subscribe<
 		OperationName extends Extract<keyof Operations["subscriptions"], string>,
 		Input extends Operations["subscriptions"][OperationName]["input"] = Operations["subscriptions"][OperationName]["input"],
@@ -211,5 +224,5 @@ export type LiveQueries = {
 {{/each}}
 }
 
-export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, UserRole,{{#if hasS3Providers}}S3Providers{{else}}{}{{/if}}{{#if hasAuthProviders}},keyof typeof AuthProviderId{{/if}}> {}
+export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, LiveQueries, UserRole,{{#if hasS3Providers}}S3Providers{{else}}{}{{/if}}{{#if hasAuthProviders}},keyof typeof AuthProviderId{{/if}}> {}
 `;
