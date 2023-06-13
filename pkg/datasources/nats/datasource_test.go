@@ -3,7 +3,6 @@ package nats
 import (
 	"bytes"
 	"context"
-	"github.com/phayes/freeport"
 	"os"
 	"path/filepath"
 	"sync"
@@ -14,6 +13,7 @@ import (
 	natsServer "github.com/nats-io/nats-server/v2/server"
 	natsTest "github.com/nats-io/nats-server/v2/test"
 	"github.com/nats-io/nats.go"
+	"github.com/phayes/freeport"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasourcetesting"
