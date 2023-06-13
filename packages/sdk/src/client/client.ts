@@ -476,7 +476,9 @@ export class Client {
 	}
 
 	protected async fetchSubscription<Data = any, Error = any>(subscription: SubscriptionRequestOptions) {
-		const params = this.searchParams();
+		const params = this.searchParams({
+			wg_json_patch: '',
+		});
 		const variables = this.stringifyInput(subscription.input);
 		if (variables) {
 			params.set('wg_variables', variables);
