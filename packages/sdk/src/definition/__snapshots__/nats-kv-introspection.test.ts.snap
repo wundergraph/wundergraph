@@ -43,7 +43,7 @@ type Subscription {
 
 type token_KeyValueEntry {
   key: String!
-  value: token_Value!
+  value: token_Value
   revision: Int!
   created: Int!
 }
@@ -103,6 +103,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 0
       },
@@ -128,6 +129,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 1
       },
@@ -153,6 +155,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 2
       },
@@ -178,6 +181,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 3
       },
@@ -203,6 +207,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 4
       },
@@ -228,6 +233,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 5
       },
@@ -253,6 +259,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 6
       },
@@ -278,6 +285,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 7
       },
@@ -303,6 +311,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 8
       },
@@ -328,6 +337,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 9
       },
@@ -353,6 +363,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 10
       },
@@ -508,7 +519,7 @@ type Subscription {
 
 type token_KeyValueEntry {
   key: String!
-  value: token_Value!
+  value: token_Value
   revision: Int!
   created: Int!
 }
@@ -548,6 +559,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 0
       },
@@ -573,6 +585,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 1
       },
@@ -598,6 +611,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 2
       },
@@ -623,6 +637,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 3
       },
@@ -648,6 +663,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 4
       },
@@ -673,6 +689,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 5
       },
@@ -698,6 +715,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 6
       },
@@ -723,6 +741,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 7
       },
@@ -748,6 +767,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 8
       },
@@ -773,6 +793,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 9
       },
@@ -798,6 +819,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
+        "history": 1,
         "bucketName": "token",
         "operation": 10
       },

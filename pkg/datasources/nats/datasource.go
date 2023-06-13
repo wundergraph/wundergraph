@@ -25,6 +25,7 @@ type Configuration struct {
 	ServerURL string
 	Operation wgpb.NatsKvOperation
 	Bucket    string
+	History   int32
 }
 
 func ConfigJson(config Configuration) json.RawMessage {
@@ -234,7 +235,8 @@ func (s *KeyValueSource) ensureKv() (err error) {
 	s.kv, err = s.js.KeyValue(s.config.Bucket)
 	if err != nil {
 		s.kv, err = s.js.CreateKeyValue(&nats.KeyValueConfig{
-			Bucket: s.config.Bucket,
+			Bucket:  s.config.Bucket,
+			History: uint8(s.config.History),
 		})
 		if err != nil {
 			return
@@ -563,7 +565,12 @@ func (s *KeyValueSource) keys(w io.Writer) (err error) {
 		return err
 	}
 
-	_, err = w.Write([]byte("[" + strings.Join(keys, ",") + "]"))
+	bytes, err := json.Marshal(keys)
+	if err != nil {
+		return err
+	}
+
+	_, err = w.Write(bytes)
 	return err
 }
 
@@ -593,13 +600,19 @@ func (s *KeyValueSource) history(input []byte, w io.Writer) (err error) {
 	for _, entry := range entries {
 		response := ResponseKeyValueEntry{
 			Key:      key,
-			Value:    entry.Value(),
 			Revision: entry.Revision(),
 			Created:  entry.Created().Unix(),
 		}
 		if s.overrideCreatedTime != nil {
 			response.Created = *s.overrideCreatedTime
 		}
+
+		if len(entry.Value()) > 0 {
+			response.Value = entry.Value()
+		} else {
+			response.Value = []byte("null")
+		}
+
 		responseEntries = append(responseEntries, response)
 	}
 

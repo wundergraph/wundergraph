@@ -14,6 +14,7 @@ import { buildSchema } from 'graphql';
 export interface NatsKVIntrospection {
 	apiNamespace: string;
 	model: z.AnyZodObject;
+	history?: number;
 }
 
 export const introspectNatsKV = async (introspection: NatsKVIntrospection) => {
@@ -46,6 +47,7 @@ export const introspectNatsKV = async (introspection: NatsKVIntrospection) => {
 					placeholderVariableName: '',
 					staticVariableContent: '',
 				},
+				history: introspection.history ?? 1,
 				bucketName: introspection.apiNamespace,
 				operation: NatsKvOperation.NATSKV_GET,
 			},
@@ -221,7 +223,7 @@ type Subscription {
 
 type KeyValueEntry {
 	key: String!
-	value: Value!
+	value: Value
 	revision: Int!
 	created: Int!
 }

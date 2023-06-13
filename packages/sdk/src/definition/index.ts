@@ -241,6 +241,7 @@ export interface NatsKvApiCustom {
 	serverURL: ConfigurationVariable;
 	bucketName: string;
 	operation: NatsKvOperation;
+	history: number;
 }
 
 export interface DataSource<Custom = unknown> {

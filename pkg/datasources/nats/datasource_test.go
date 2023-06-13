@@ -68,7 +68,7 @@ type Subscription {
 
 type token_KeyValueEntry {
   key: String!
-  value: token_Value!
+  value: token_Value
   revision: Int!
   created: Int!
 }
@@ -153,7 +153,7 @@ func TestNatsDataSource(t *testing.T) {
 									{
 										Name: []byte("value"),
 										Value: &resolve.Object{
-											Nullable: false,
+											Nullable: true,
 											Path:     []string{"value"},
 											Fields: []*resolve.Field{
 												{
@@ -240,7 +240,7 @@ func TestNatsDataSource(t *testing.T) {
 									{
 										Name: []byte("value"),
 										Value: &resolve.Object{
-											Nullable: false,
+											Nullable: true,
 											Path:     []string{"value"},
 											Fields: []*resolve.Field{
 												{
@@ -331,7 +331,7 @@ func TestNatsDataSource(t *testing.T) {
 									{
 										Name: []byte("value"),
 										Value: &resolve.Object{
-											Nullable: false,
+											Nullable: true,
 											Path:     []string{"value"},
 											Fields: []*resolve.Field{
 												{
@@ -546,7 +546,7 @@ func TestNatsDataSource(t *testing.T) {
 									{
 										Name: []byte("value"),
 										Value: &resolve.Object{
-											Nullable: false,
+											Nullable: true,
 											Path:     []string{"value"},
 											Fields: []*resolve.Field{
 												{
@@ -633,7 +633,7 @@ func TestNatsDataSource(t *testing.T) {
 									{
 										Name: []byte("value"),
 										Value: &resolve.Object{
-											Nullable: false,
+											Nullable: true,
 											Path:     []string{"value"},
 											Fields: []*resolve.Field{
 												{
@@ -781,7 +781,7 @@ func TestNatsDataSource(t *testing.T) {
 										{
 											Name: []byte("value"),
 											Value: &resolve.Object{
-												Nullable: false,
+												Nullable: true,
 												Path:     []string{"value"},
 												Fields: []*resolve.Field{
 													{
@@ -858,7 +858,7 @@ func TestNatsDataSource(t *testing.T) {
 											{
 												Name: []byte("value"),
 												Value: &resolve.Object{
-													Nullable: false,
+													Nullable: true,
 													Path:     []string{"value"},
 													Fields: []*resolve.Field{
 														{
@@ -930,7 +930,7 @@ func TestNatsDataSource(t *testing.T) {
 											{
 												Name: []byte("value"),
 												Value: &resolve.Object{
-													Nullable: false,
+													Nullable: true,
 													Path:     []string{"value"},
 													Fields: []*resolve.Field{
 														{
@@ -1001,7 +1001,7 @@ func createKV(t *testing.T) (nats.KeyValue, *natsServer.Server, string) {
 
 	kv, err := js.CreateKeyValue(&nats.KeyValueConfig{
 		Bucket:  "token",
-		History: 2,
+		History: 4,
 	})
 	assert.NoError(t, err)
 
@@ -1024,7 +1024,7 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		}
 	}()
 
-	t.Run("token_create_put_get_revision_history_update_delete", func(t *testing.T) {
+	t.Run("token_create_put_get_revision_delete", func(t *testing.T) {
 		kv, server, dir := createKV(t)
 		servers = append(servers, server)
 		dirs = append(dirs, dir)
@@ -1072,18 +1072,6 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":1,"created":1}`, out.String())
 
 		out.Reset()
-		ds.Operation = wgpb.NatsKvOperation_NATSKV_HISTORY
-		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key"},"variables":{"key":"foo"}}`), out)
-		assert.NoError(t, err)
-		assert.Equal(t, `[{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":1,"created":1},{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":2,"created":1}]`, out.String())
-
-		out.Reset()
-		ds.Operation = wgpb.NatsKvOperation_NATSKV_UPDATE
-		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key","value":"input","revision":"revision"},"variables":{"key":"foo","input":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":2}}`), out)
-		assert.NoError(t, err)
-		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":3,"created":1}`, out.String())
-
-		out.Reset()
 		ds.Operation = wgpb.NatsKvOperation_NATSKV_DELETE
 		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key"},"variables":{"key":"foo"}}`), out)
 		assert.NoError(t, err)
@@ -1094,9 +1082,15 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key"},"variables":{"key":"foo"}}`), out)
 		assert.NoError(t, err)
 		assert.Equal(t, `null`, out.String())
+
+		out.Reset()
+		ds.Operation = wgpb.NatsKvOperation_NATSKV_HISTORY
+		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key"},"variables":{"key":"foo"}}`), out)
+		assert.NoError(t, err)
+		assert.Equal(t, `[{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":1,"created":1},{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":2,"created":1},{"key":"foo","value":null,"revision":3,"created":1}]`, out.String())
 	})
 
-	t.Run("token_create_keys_purge", func(t *testing.T) {
+	t.Run("token_create_keys_update_purge", func(t *testing.T) {
 		kv, server, dir := createKV(t)
 		servers = append(servers, server)
 		dirs = append(dirs, dir)
@@ -1135,17 +1129,23 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		ds.Operation = wgpb.NatsKvOperation_NATSKV_KEYS
 		err = ds.Load(context.Background(), []byte(`{"args":{},"variables":{}}`), out)
 		assert.NoError(t, err)
-		assert.Equal(t, `[foo1,foo2]`, out.String())
+		assert.Equal(t, `["foo1","foo2"]`, out.String())
+
+		out.Reset()
+		ds.Operation = wgpb.NatsKvOperation_NATSKV_UPDATE
+		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key","value":"input","revision":"revision"},"variables":{"key":"foo1","input":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":1}}`), out)
+		assert.NoError(t, err)
+		assert.Equal(t, `{"key":"foo1","value":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":3,"created":1}`, out.String())
 
 		out.Reset()
 		ds.Operation = wgpb.NatsKvOperation_NATSKV_PURGE
-		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key"},"variables":{"key":"foo"}}`), out)
+		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key"},"variables":{"key":"foo1"}}`), out)
 		assert.NoError(t, err)
 		assert.Equal(t, `true`, out.String())
 
 		out.Reset()
 		ds.Operation = wgpb.NatsKvOperation_NATSKV_GET
-		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key"},"variables":{"key":"foo"}}`), out)
+		err = ds.Load(context.Background(), []byte(`{"args":{"key":"key"},"variables":{"key":"foo1"}}`), out)
 		assert.NoError(t, err)
 		assert.Equal(t, `null`, out.String())
 	})

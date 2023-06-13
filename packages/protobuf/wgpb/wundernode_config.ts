@@ -1008,6 +1008,7 @@ export interface DataSourceCustomNatsKv {
   serverURL: ConfigurationVariable | undefined;
   bucketName: string;
   operation: NatsKvOperation;
+  history: number;
 }
 
 export interface DataSourceCustomREST {
@@ -2605,7 +2606,7 @@ export const DirectiveConfiguration = {
 };
 
 function createBaseDataSourceCustomNatsKv(): DataSourceCustomNatsKv {
-  return { serverURL: undefined, bucketName: "", operation: 0 };
+  return { serverURL: undefined, bucketName: "", operation: 0, history: 0 };
 }
 
 export const DataSourceCustomNatsKv = {
@@ -2614,6 +2615,7 @@ export const DataSourceCustomNatsKv = {
       serverURL: isSet(object.serverURL) ? ConfigurationVariable.fromJSON(object.serverURL) : undefined,
       bucketName: isSet(object.bucketName) ? String(object.bucketName) : "",
       operation: isSet(object.operation) ? natsKvOperationFromJSON(object.operation) : 0,
+      history: isSet(object.history) ? Number(object.history) : 0,
     };
   },
 
@@ -2623,6 +2625,7 @@ export const DataSourceCustomNatsKv = {
       (obj.serverURL = message.serverURL ? ConfigurationVariable.toJSON(message.serverURL) : undefined);
     message.bucketName !== undefined && (obj.bucketName = message.bucketName);
     message.operation !== undefined && (obj.operation = natsKvOperationToJSON(message.operation));
+    message.history !== undefined && (obj.history = Math.round(message.history));
     return obj;
   },
 
@@ -2633,6 +2636,7 @@ export const DataSourceCustomNatsKv = {
       : undefined;
     message.bucketName = object.bucketName ?? "";
     message.operation = object.operation ?? 0;
+    message.history = object.history ?? 0;
     return message;
   },
 };
