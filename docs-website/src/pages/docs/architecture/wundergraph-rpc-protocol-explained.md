@@ -224,6 +224,10 @@ The client may add an optional `revalidate` query parameter to the URL.
 If this query parameter exists, the server will trigger the revalidation of the user's auth state,
 allowing the backend to update or revoke the user's auth state.
 
+If the user is logged in, this endpoint will return an HTTP `200` with the JSON encoded `User` object
+as the response body. If no user is logged in, it will return an empty response with a `204` response
+code.
+
 ### Token based authentication
 
 For non-browser based clients,
