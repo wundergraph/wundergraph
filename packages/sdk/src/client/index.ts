@@ -10,7 +10,6 @@ export type {
 	Headers,
 	OperationRequestOptions,
 	QueryRequestOptions,
-	LiveQueryRequestOptions,
 	MutationRequestOptions,
 	SubscriptionRequestOptions,
 	ClientConfig,

@@ -86,6 +86,48 @@ describe('Test correct responses', () => {
 		expect(queryResult.data?.notes_noteByID?.id ?? 0).toBe(id);
 		expect(queryResult.data?.notes_noteByID?.text ?? '').toBe(text);
 	});
+
+	test('subscription with tail deletion via jsonpatch', async () => {
+		const client = wg.client();
+		// Create 100 notes, to ensure the payload is bigger than
+		// the patch
+		const n = 100;
+		const ids: number[] = [];
+		for (let ii = 0; ii < n; ii++) {
+			const result = await client.mutate({
+				operationName: 'NewNote',
+				input: {
+					text: ii.toString(),
+				},
+			});
+			expect(result.error).toBeUndefined();
+			ids.push(result.data!.notes_newNote!.id!);
+		}
+
+		// Count the current notes
+		const result = await client.query({ operationName: 'AllNotes' });
+		expect(result.error).toBeUndefined();
+		expect(result.data?.notes_all?.length).toBeGreaterThanOrEqual(n);
+
+		// Now start the live query
+		let expectedNotesLength = result.data!.notes_all!.length;
+		const abort = new AbortController();
+		let triggers = 0;
+		const query = client.subscribe({ operationName: 'AllNotes', liveQuery: true }, (resp) => {
+			expect(resp.data?.notes_all?.length).toBe(expectedNotesLength);
+			triggers++;
+		});
+		// Now delete the last 2 notes
+		await client.mutate({ operationName: 'DeleteNote', input: { id: ids[ids.length - 1] } });
+		await client.mutate({ operationName: 'DeleteNote', input: { id: ids[ids.length - 2] } });
+		expectedNotesLength -= 2;
+		// Wait for the live query to trigger again (minimum interval is 1s, which is what we set in the config)
+		await new Promise((r) => setTimeout(r, 1100));
+		expect(triggers).toBe(2);
+		abort.abort();
+		const last = await query;
+		expect(last?.data?.notes_all?.length).toBe(expectedNotesLength);
+	});
 });
 
 describe('Test error responses', () => {

@@ -133,10 +133,10 @@ export class WunderGraphClient extends Client {
 		Response extends Operations["liveQueries"][OperationName]["response"] = Operations["liveQueries"][OperationName]["response"]
 	>(
 		options: OperationName extends string
-		? LiveQueryRequestOptions<OperationName, Input>
-		: LiveQueryRequestOptions,
+		? SubscriptionRequestOptions<OperationName, Input> & {liveQuery: true}
+		: SubscriptionRequestOptions,
 		cb?: SubscriptionEventHandler<Response["data"], Response["error"]>
-	): Promise<Response | void>;;
+	): Promise<Response | undefined>;
 
 	subscribe<
 		OperationName extends Extract<keyof Operations["subscriptions"], string>,
