@@ -340,10 +340,14 @@ func (s *KeyValueSource) Load(ctx context.Context, input []byte, w io.Writer) (e
 		return s.history(input, w)
 	case wgpb.NatsKvOperation_NATSKV_PUT:
 		return s.put(input, w)
-	case wgpb.NatsKvOperation_NATSKV_DELETE:
-		return s.delete(input, w)
 	case wgpb.NatsKvOperation_NATSKV_CREATE:
 		return s.create(input, w)
+	case wgpb.NatsKvOperation_NATSKV_UPDATE:
+		return s.update(input, w)
+	case wgpb.NatsKvOperation_NATSKV_DELETE:
+		return s.delete(input, w)
+	case wgpb.NatsKvOperation_NATSKV_PURGE:
+		return s.purge(input, w)
 	}
 	return nil
 }
@@ -412,6 +416,24 @@ func (s *KeyValueSource) delete(input []byte, w io.Writer) (err error) {
 	return
 }
 
+func (s *KeyValueSource) purge(input []byte, w io.Writer) (err error) {
+	keyVariableName, err := jsonparser.GetString(input, "args", "key")
+	if err != nil {
+		return err
+	}
+	key, err := jsonparser.GetString(input, "variables", keyVariableName)
+	if err != nil {
+		return err
+	}
+	err = s.kv.Purge(key) // nolint:errcheck
+	if err != nil {
+		_, err = w.Write([]byte("false"))
+		return
+	}
+	_, err = w.Write([]byte("true"))
+	return
+}
+
 func (s *KeyValueSource) put(input []byte, w io.Writer) (err error) {
 	keyVariableName, err := jsonparser.GetString(input, "args", "key")
 	if err != nil {
@@ -434,6 +456,40 @@ func (s *KeyValueSource) put(input []byte, w io.Writer) (err error) {
 		return err
 	}
 	return s.writeResponse(key, value, revision, time.Now(), w)
+}
+
+func (s *KeyValueSource) update(input []byte, w io.Writer) (err error) {
+	keyVariableName, err := jsonparser.GetString(input, "args", "key")
+	if err != nil {
+		return err
+	}
+	key, err := jsonparser.GetString(input, "variables", keyVariableName)
+	if err != nil {
+		return err
+	}
+	valueVariableName, err := jsonparser.GetString(input, "args", "value")
+	if err != nil {
+		return err
+	}
+	value, _, _, err := jsonparser.Get(input, "variables", valueVariableName)
+	if err != nil {
+		return err
+	}
+
+	revisionVariableName, err := jsonparser.GetString(input, "args", "revision")
+	if err != nil {
+		return err
+	}
+	revision, err := jsonparser.GetInt(input, "variables", revisionVariableName)
+	if err != nil {
+		return err
+	}
+
+	revisionResult, err := s.kv.Update(key, value, uint64(revision))
+	if err != nil {
+		return err
+	}
+	return s.writeResponse(key, value, revisionResult, time.Now(), w)
 }
 
 func (s *KeyValueSource) get(input []byte, w io.Writer) (err error) {
