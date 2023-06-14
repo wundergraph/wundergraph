@@ -13,7 +13,7 @@ import { resolveConfigurationVariable } from '../configure/variables';
 import { onParentProcessExit } from '../utils/process';
 import { customGqlServerMountPath } from './util';
 
-import type { WunderGraphConfiguration } from '@wundergraph/protobuf';
+import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { ConfigurationVariableKind, DataSourceKind } from '@wundergraph/protobuf';
 import type { WebhooksConfig } from '../webhooks/types';
 import type { HooksRouteConfig } from './plugins/hooks';
@@ -68,10 +68,8 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 		process.exit(1);
 	}
 	try {
-		const configContent = fs.readFileSync(path.join(process.env.WG_DIR_ABS!, 'generated', 'wundergraph.config.json'), {
-			encoding: 'utf8',
-		});
-		WG_CONFIG = JSON.parse(configContent);
+		const configContent = fs.readFileSync(path.join(process.env.WG_DIR_ABS!, 'generated', 'wundergraph.config.wg'));
+		WG_CONFIG = WunderGraphConfiguration.decode(configContent);
 
 		if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.nodeInternalUrl) {
 			const nodeInternalURL = resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.nodeInternalUrl);

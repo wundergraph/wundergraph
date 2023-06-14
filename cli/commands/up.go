@@ -464,7 +464,7 @@ var upCmd = &cobra.Command{
 		n := node.New(ctx, BuildInfo, wunderGraphDir, nodeLogger)
 
 		go func() {
-			configFile := filepath.Join(wunderGraphDir, "generated", "wundergraph.config.json")
+			configFile := filepath.Join(wunderGraphDir, "generated", serializedConfigFilename)
 			options := []node.Option{
 				node.WithConfigFileChange(configFileChangeChan),
 				node.WithFileSystemConfig(configFile),
