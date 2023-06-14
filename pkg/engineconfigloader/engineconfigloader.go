@@ -306,7 +306,20 @@ func New(wundergraphDir string, resolvers ...FactoryResolver) *EngineConfigLoade
 	}
 }
 
-func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration, wgServerUrl string) (*plan.Configuration, error) {
+func (l *EngineConfigLoader) LoadStoredString(engineConfig *wgpb.EngineConfiguration, ref string) (string, error) {
+	const prefix = "string://"
+	if strings.HasPrefix(ref, prefix) {
+		key := strings.TrimPrefix(ref, prefix)
+		s, ok := engineConfig.StringStorage[key]
+		if !ok {
+			return "", fmt.Errorf("no string found for key %q", key)
+		}
+		return s, nil
+	}
+	return ref, nil
+}
+
+func (l *EngineConfigLoader) Load(engineConfig *wgpb.EngineConfiguration, wgServerUrl string) (*plan.Configuration, error) {
 	var (
 		outConfig plan.Configuration
 	)
@@ -479,11 +492,19 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration, wgServe
 			if in.CustomDatabase == nil {
 				continue
 			}
+			prismaSchema, err := l.LoadStoredString(engineConfig, in.CustomDatabase.PrismaSchema)
+			if err != nil {
+				return nil, fmt.Errorf("could not load prisma schema for data source %s: %w", in.Id, err)
+			}
+			graphqlSchema, err := l.LoadStoredString(engineConfig, in.CustomDatabase.GraphqlSchema)
+			if err != nil {
+				return nil, fmt.Errorf("could not load GraphQL schema for data source %s: %w", in.Id, err)
+			}
 			databaseURL := loadvariable.String(in.CustomDatabase.DatabaseURL)
 			config := database.Configuration{
 				DatabaseURL:         databaseURL,
-				PrismaSchema:        l.addDataSourceToPrismaSchema(in.CustomDatabase.PrismaSchema, databaseURL, in.Kind),
-				GraphqlSchema:       in.CustomDatabase.GraphqlSchema,
+				PrismaSchema:        l.addDataSourceToPrismaSchema(prismaSchema, databaseURL, in.Kind),
+				GraphqlSchema:       graphqlSchema,
 				CloseTimeoutSeconds: in.CustomDatabase.CloseTimeoutSeconds,
 				WunderGraphDir:      l.wundergraphDir,
 			}

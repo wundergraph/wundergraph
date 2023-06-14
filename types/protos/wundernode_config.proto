@@ -249,6 +249,7 @@ message EngineConfiguration {
 	repeated FieldConfiguration fieldConfigurations = 3;
 	string graphqlSchema = 4;
 	repeated TypeConfiguration typeConfigurations = 5;
+	map<string, string> stringStorage = 6;
 }
 
 message DataSourceConfiguration {

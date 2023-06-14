@@ -118,7 +118,7 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 		opts[i](&options)
 	}
 
-	configFile := filepath.Join(n.WundergraphDir, "generated", configJsonFilename)
+	configFile := filepath.Join(n.WundergraphDir, "generated", serializedConfigFilename)
 	if !files.FileExists(configFile) {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
 	}
