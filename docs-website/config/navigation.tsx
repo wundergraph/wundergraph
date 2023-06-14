@@ -12,10 +12,10 @@ import {
 	HomeIcon,
 	ListBulletIcon,
 	LockClosedIcon,
-	QuestionMarkCircleIcon,
 	ServerIcon,
 	ShareIcon,
 	WrenchIcon,
+	SunIcon,
 } from '@heroicons/react/24/solid';
 
 const navigation = [
@@ -23,6 +23,85 @@ const navigation = [
 		title: 'Home',
 		href: '/',
 		icon: <HomeIcon />,
+	},
+	{
+		title: 'Introduction to WunderGraph',
+		href: '/introduction-to-wundergraph',
+		icon: <SunIcon />,
+		paths: ['/usage-information', '/about', '/docs/use-cases'],
+		links: [
+			{
+				title: 'Introduction',
+				href: '/introduction-to-wundergraph',
+			},
+			{
+				title: 'Usage Information',
+				href: '/usage-information',
+			},
+			{
+				title: 'WunderGraph for',
+				links: [
+					{
+						title: 'Frontend Developers',
+						href: '/about/for-frontend-developers',
+					},
+					{
+						title: 'Fullstack Developers',
+						href: '/about/for-fullstack-developers',
+					},
+					{
+						title: 'Backend Developers',
+						href: '/about/for-backend-developers',
+					},
+				],
+			},
+			{
+				title: 'Use Cases',
+				links: [
+					{
+						title: 'Overview',
+						navTitle: 'Use Cases',
+						href: '/docs/use-cases',
+					},
+					{
+						title: 'Programmable API Gateway',
+						href: '/docs/use-cases/programmable-api-gateway',
+					},
+					{
+						title: 'API Management',
+						href: '/docs/use-cases/api-management',
+					},
+					{
+						title: 'Backend for Frontend',
+						href: '/docs/use-cases/backend-for-frontend',
+					},
+					{
+						title: 'API Composition & Integration',
+						href: '/docs/use-cases/api-composition-and-integration',
+					},
+					{
+						title: 'Versionless APIs: Easily build backwards compatible APIs',
+						href: '/docs/use-cases/versionless-apis-easily-build-backwards-compatible-apis',
+					},
+					{
+						title: 'Multi Database, multi schema ORM',
+						href: '/docs/use-cases/multi-database-multi-schema-orm',
+					},
+					{
+						title: 'Generate SDKs for all your APIs',
+						href: '/docs/use-cases/generate-sdks-for-all-your-apis',
+					},
+					{
+						title: 'Centralized Governance, Monitoring, Access Controls and Logging across your APIs',
+						href: '/docs/use-cases/centralized-governance-monitoring-access-controls-and-logging-across-your-apis',
+					},
+					{
+						title: 'Enabling your Organization to become API first',
+						href: '/docs/use-cases/enabling-your-organization-to-become-api-first',
+					},
+				],
+			},
+		],
 	},
 	{
 		title: 'Getting started',
@@ -38,6 +117,10 @@ const navigation = [
 			{
 				title: 'Quickstart',
 				href: '/docs/getting-started/quickstart',
+			},
+			{
+				title: 'Cloud Quickstart',
+				href: '/docs/getting-started/cloud-quickstart',
 			},
 			{
 				title: 'Framework Quickstarts',
@@ -222,85 +305,6 @@ const navigation = [
 					{
 						title: 'TypeScript ORM',
 						href: '/docs/examples/orm',
-					},
-				],
-			},
-		],
-	},
-	{
-		title: 'About WunderGraph',
-		href: '/manifesto',
-		icon: <QuestionMarkCircleIcon />,
-		paths: ['/usage-information', '/about', '/docs/use-cases'],
-		links: [
-			{
-				title: 'Manifesto',
-				href: '/manifesto',
-			},
-			{
-				title: 'Usage Information',
-				href: '/usage-information',
-			},
-			{
-				title: 'WunderGraph for',
-				links: [
-					{
-						title: 'Frontend Developers',
-						href: '/about/for-frontend-developers',
-					},
-					{
-						title: 'Fullstack Developers',
-						href: '/about/for-fullstack-developers',
-					},
-					{
-						title: 'Backend Developers',
-						href: '/about/for-backend-developers',
-					},
-				],
-			},
-			{
-				title: 'Use Cases',
-				links: [
-					{
-						title: 'Overview',
-						navTitle: 'Use Cases',
-						href: '/docs/use-cases',
-					},
-					{
-						title: 'Programmable API Gateway',
-						href: '/docs/use-cases/programmable-api-gateway',
-					},
-					{
-						title: 'API Management',
-						href: '/docs/use-cases/api-management',
-					},
-					{
-						title: 'Backend for Frontend',
-						href: '/docs/use-cases/backend-for-frontend',
-					},
-					{
-						title: 'API Composition & Integration',
-						href: '/docs/use-cases/api-composition-and-integration',
-					},
-					{
-						title: 'Versionless APIs: Easily build backwards compatible APIs',
-						href: '/docs/use-cases/versionless-apis-easily-build-backwards-compatible-apis',
-					},
-					{
-						title: 'Multi Database, multi schema ORM',
-						href: '/docs/use-cases/multi-database-multi-schema-orm',
-					},
-					{
-						title: 'Generate SDKs for all your APIs',
-						href: '/docs/use-cases/generate-sdks-for-all-your-apis',
-					},
-					{
-						title: 'Centralized Governance, Monitoring, Access Controls and Logging across your APIs',
-						href: '/docs/use-cases/centralized-governance-monitoring-access-controls-and-logging-across-your-apis',
-					},
-					{
-						title: 'Enabling your Organization to become API first',
-						href: '/docs/use-cases/enabling-your-organization-to-become-api-first',
 					},
 				],
 			},
