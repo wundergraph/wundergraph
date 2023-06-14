@@ -22,6 +22,7 @@ import {
 	AuthorizationError,
 	ValidationResponseJSON,
 	ClientOperationErrorCodes,
+	NoUserError,
 } from './errors';
 
 // We follow https://docs.wundergraph.com/docs/architecture/wundergraph-rpc-protocol-explained
@@ -371,7 +372,7 @@ export class Client {
 
 		if (response.status == 204) {
 			// No user is signed in. Keep this in sync with pkg/authentication/authentication.go
-			throw new AuthorizationError();
+			throw new NoUserError({ statusCode: response.status });
 		}
 
 		return response.json();
