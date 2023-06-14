@@ -816,6 +816,44 @@ export const configureWunderGraphApplication = <
 			writeWunderGraphFileSync('schema', schemaContent, 'graphql');
 
 			/**
+			 * NATS
+			 */
+
+			const natsKVApis = apis.filter((a) => a.DataSources.filter((d) => d.Kind === DataSourceKind.NATSKV).length > 1);
+
+			const buckets: {
+				name: string;
+				schema: any;
+			}[] = [];
+
+			natsKVApis.forEach((kvAPI) => {
+				kvAPI.DataSources.filter((d) => d.Kind === DataSourceKind.NATSKV).forEach((ds) => {
+					const custom = ds.Custom as NatsKvApiCustom;
+					const exists = buckets.find((b) => b.name === custom.bucketName);
+					if (!exists) {
+						buckets.push({
+							name: custom.bucketName,
+							schema: custom.schema,
+						});
+					}
+				});
+			});
+
+			const natsConfig = {
+				kv: {
+					buckets,
+				},
+			};
+
+			const natsDir = 'generated/nats';
+			if (!fs.existsSync(natsDir)) {
+				fs.mkdirSync(natsDir, { recursive: true });
+			}
+			fs.writeFileSync(path.join(natsDir, 'config.json'), JSON.stringify(natsConfig, null, 2), {
+				encoding: utf8,
+			});
+
+			/**
 			 * Webhooks
 			 */
 

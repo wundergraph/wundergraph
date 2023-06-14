@@ -64,6 +64,7 @@ export const introspectNatsKV = async (introspection: NatsKVIntrospection) => {
 				history: introspection.history ?? 1,
 				bucketName: introspection.apiNamespace,
 				operation: NatsKvOperation.NATSKV_GET,
+				schema: modelJsonSchema,
 			},
 			RequestTimeoutSeconds: 10,
 		};
