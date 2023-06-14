@@ -476,11 +476,18 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration, wgServe
 				CustomScalarTypeFields: customScalarTypeFields,
 			})
 		case wgpb.DataSourceKind_NATSKV:
+			bucketName := in.CustomNatsKv.GetBucketName()
+			prefix := loadvariable.String(in.CustomNatsKv.GetBucketPrefix())
+			if prefix != "" {
+				bucketName = strings.Join([]string{prefix, bucketName}, ".")
+			}
+
 			config := nats.Configuration{
 				Operation: in.CustomNatsKv.GetOperation(),
-				Bucket:    in.CustomNatsKv.GetBucketName(),
+				Bucket:    bucketName,
 				ServerURL: loadvariable.String(in.CustomNatsKv.GetServerURL()),
 				History:   in.CustomNatsKv.GetHistory(),
+				Token:     loadvariable.String(in.CustomNatsKv.GetToken()),
 			}
 			out.Custom = nats.ConfigJson(config)
 		case wgpb.DataSourceKind_POSTGRESQL,

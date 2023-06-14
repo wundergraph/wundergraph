@@ -1340,6 +1340,8 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 				bucketName: natskv.bucketName,
 				operation: natskv.operation,
 				history: natskv.history,
+				token: natskv.token,
+				bucketPrefix: natskv.bucketPrefix,
 			};
 			break;
 	}

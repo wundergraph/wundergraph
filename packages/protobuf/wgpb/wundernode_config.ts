@@ -1009,6 +1009,8 @@ export interface DataSourceCustomNatsKv {
   bucketName: string;
   operation: NatsKvOperation;
   history: number;
+  token: ConfigurationVariable | undefined;
+  bucketPrefix: ConfigurationVariable | undefined;
 }
 
 export interface DataSourceCustomREST {
@@ -2606,7 +2608,7 @@ export const DirectiveConfiguration = {
 };
 
 function createBaseDataSourceCustomNatsKv(): DataSourceCustomNatsKv {
-  return { serverURL: undefined, bucketName: "", operation: 0, history: 0 };
+  return { serverURL: undefined, bucketName: "", operation: 0, history: 0, token: undefined, bucketPrefix: undefined };
 }
 
 export const DataSourceCustomNatsKv = {
@@ -2616,6 +2618,8 @@ export const DataSourceCustomNatsKv = {
       bucketName: isSet(object.bucketName) ? String(object.bucketName) : "",
       operation: isSet(object.operation) ? natsKvOperationFromJSON(object.operation) : 0,
       history: isSet(object.history) ? Number(object.history) : 0,
+      token: isSet(object.token) ? ConfigurationVariable.fromJSON(object.token) : undefined,
+      bucketPrefix: isSet(object.bucketPrefix) ? ConfigurationVariable.fromJSON(object.bucketPrefix) : undefined,
     };
   },
 
@@ -2626,6 +2630,10 @@ export const DataSourceCustomNatsKv = {
     message.bucketName !== undefined && (obj.bucketName = message.bucketName);
     message.operation !== undefined && (obj.operation = natsKvOperationToJSON(message.operation));
     message.history !== undefined && (obj.history = Math.round(message.history));
+    message.token !== undefined &&
+      (obj.token = message.token ? ConfigurationVariable.toJSON(message.token) : undefined);
+    message.bucketPrefix !== undefined &&
+      (obj.bucketPrefix = message.bucketPrefix ? ConfigurationVariable.toJSON(message.bucketPrefix) : undefined);
     return obj;
   },
 
@@ -2637,6 +2645,12 @@ export const DataSourceCustomNatsKv = {
     message.bucketName = object.bucketName ?? "";
     message.operation = object.operation ?? 0;
     message.history = object.history ?? 0;
+    message.token = (object.token !== undefined && object.token !== null)
+      ? ConfigurationVariable.fromPartial(object.token)
+      : undefined;
+    message.bucketPrefix = (object.bucketPrefix !== undefined && object.bucketPrefix !== null)
+      ? ConfigurationVariable.fromPartial(object.bucketPrefix)
+      : undefined;
     return message;
   },
 };

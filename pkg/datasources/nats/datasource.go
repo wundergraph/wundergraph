@@ -23,6 +23,7 @@ import (
 
 type Configuration struct {
 	ServerURL string
+	Token     string
 	Operation wgpb.NatsKvOperation
 	Bucket    string
 	History   int32
@@ -77,7 +78,7 @@ func (c *Connector) connect(config Configuration) (conn *nats.Conn, js nats.JetS
 		return conn.conn, conn.js, nil
 	}
 
-	conn, err = nats.Connect(config.ServerURL)
+	conn, err = nats.Connect(config.ServerURL, nats.Token(config.Token))
 	if err != nil {
 		return
 	}
