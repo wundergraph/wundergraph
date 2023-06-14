@@ -128,7 +128,7 @@ export class InternalError extends OperationError<'InternalError'> {
 }
 
 /** NoUserError is thrown when fetchUser can't retrieve the current user
- * because there's no authenticatd user.
+ * because there's no authenticated user.
  **/
 export class NoUserError extends OperationError<'NoUserError'> {
 	constructor(opts?: { statusCode?: number }) {
