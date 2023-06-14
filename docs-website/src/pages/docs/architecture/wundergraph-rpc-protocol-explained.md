@@ -217,7 +217,7 @@ Once the authentication was successful, and the user cookie is set,
 the user can be fetched sending a `GET` request to the URL:
 
 ```
-GET https://<hostname>/auth/cookie/user
+GET https://<hostname>/auth/user
 ```
 
 The client may add an optional `revalidate` query parameter to the URL.
