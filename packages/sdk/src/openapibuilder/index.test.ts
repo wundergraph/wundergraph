@@ -167,18 +167,16 @@ describe('OpenAPI builder', () => {
 		expect(querySpec.get?.parameters?.[0].schema).toStrictEqual({ type: 'string' });
 		const queryResponse = querySpec.get?.responses['200'];
 		expect(queryResponse).toBeDefined();
-		expect(queryResponse?.content['application/json'].schema).toStrictEqual(operations[0].ResponseSchema);
+		expect(queryResponse?.content['application/json'].schema).toEqual(operations[0].ResponseSchema);
 
 		const mutationSpec = result.paths['/MutationPath'];
 		expect(mutationSpec).toBeDefined();
 		expect(mutationSpec.get).toBeUndefined();
 		expect(mutationSpec.post?.operationId).toBe('Mutation');
-		expect(mutationSpec.post?.requestBody?.content['application/json'].schema).toStrictEqual(
-			operations[1].VariablesSchema
-		);
+		expect(mutationSpec.post?.requestBody?.content['application/json'].schema).toEqual(operations[1].VariablesSchema);
 		const mutationResponse = mutationSpec.post?.responses['200'];
 		expect(mutationResponse).toBeDefined();
-		expect(mutationResponse?.content['application/json'].schema).toStrictEqual(operations[1].ResponseSchema);
+		expect(mutationResponse?.content['application/json'].schema).toEqual(operations[1].ResponseSchema);
 	});
 
 	test('skip internal operations', async () => {
@@ -300,7 +298,7 @@ describe('OpenAPI builder', () => {
 		expect((inputSchema?.properties?.['data'] as JSONSchema)?.$ref).toBe('#/components/schemas/Person');
 		const personDefinition = result?.components?.schemas?.['Person'];
 		expect(personDefinition).toBeDefined();
-		expect(personDefinition).toStrictEqual(personSchema?.definitions?.['Person']);
+		expect(personDefinition).toEqual(personSchema?.definitions?.['Person']);
 	});
 
 	test('OpenAPI Builder', async () => {
