@@ -252,6 +252,11 @@ message EngineConfiguration {
 	map<string, string> stringStorage = 6;
 }
 
+message StringReference {
+	// key to index into EngineConfiguration.stringStorage
+	string key = 1;
+}
+
 message DataSourceConfiguration {
 	DataSourceKind kind = 1;
 	repeated TypeField rootNodes = 2;
@@ -307,8 +312,8 @@ message DataSourceCustom_GraphQL {
 
 message DataSourceCustom_Database {
 	ConfigurationVariable databaseURL = 1;
-	string prismaSchema = 2;
-	string graphqlSchema = 3;
+	StringReference prismaSchema = 2;
+	StringReference graphqlSchema = 3;
 	// closeTimeoutSeconds define that the database connection will be closed after the given amount of seconds of inactivity
 	int64 closeTimeoutSeconds = 4;
 	repeated SingleTypeField jsonTypeFields = 5;

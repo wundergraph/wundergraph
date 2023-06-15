@@ -65,6 +65,7 @@ import {
 	ValueType,
 	WebhookConfiguration,
 	WunderGraphConfiguration,
+	StringReference,
 } from '@wundergraph/protobuf';
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
@@ -86,6 +87,7 @@ import { GenerateConfig, OperationsGenerationConfig } from './codegeneration';
 import { generateOperations } from '../codegen/generateoperations';
 import { configurationHash } from '../codegen/templates/typescript/helpers';
 import templates from '../codegen/templates';
+import { WunderGraphConfigurationFilename } from '../server/server';
 
 export const WG_GENERATE_CONFIG_JSON = process.env['WG_GENERATE_CONFIG_JSON'] === 'true';
 
@@ -1084,9 +1086,9 @@ export const configureWunderGraphApplication = <
 
 			const storedConfig = storedWunderGraphConfig(resolved);
 			const configData = WunderGraphConfiguration.encode(storedConfig).finish();
-			fs.writeFileSync(wunderGraphFilePath('config', 'wg'), configData);
+			fs.writeFileSync(path.join(generated, WunderGraphConfigurationFilename), configData);
 			if (WG_GENERATE_CONFIG_JSON) {
-				writeWunderGraphFileSync('config', storedConfig, 'json');
+				writeWunderGraphFileSync('config', storedConfig);
 			}
 
 			const publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl));
@@ -1264,10 +1266,19 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig) => {
 	return out;
 };
 
-const storeString = (stringStorage: Record<string, string>, s: string) => {
+/**
+ * Stores the string s in the given stringStorage, returning a reference to it
+ *
+ * @param stringStorage Storage to store the string into
+ * @param s String to intern
+ * @returns StringReference pointing to s
+ */
+const storeString = (stringStorage: Record<string, string>, s: string): StringReference => {
 	const key = crypto.createHash('sha1').update(s).digest('hex');
 	stringStorage[key] = s;
-	return `string://${key}`;
+	return {
+		key: key,
+	};
 };
 
 const mapDataSource = (stringStorage: Record<string, string>, source: DataSource): DataSourceConfiguration => {

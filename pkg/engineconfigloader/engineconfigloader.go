@@ -306,17 +306,12 @@ func New(wundergraphDir string, resolvers ...FactoryResolver) *EngineConfigLoade
 	}
 }
 
-func (l *EngineConfigLoader) LoadStoredString(engineConfig *wgpb.EngineConfiguration, ref string) (string, error) {
-	const prefix = "string://"
-	if strings.HasPrefix(ref, prefix) {
-		key := strings.TrimPrefix(ref, prefix)
-		s, ok := engineConfig.StringStorage[key]
-		if !ok {
-			return "", fmt.Errorf("no string found for key %q", key)
-		}
-		return s, nil
+func (l *EngineConfigLoader) LoadStringReference(engineConfig *wgpb.EngineConfiguration, ref *wgpb.StringReference) (string, error) {
+	s, ok := engineConfig.StringStorage[ref.Key]
+	if !ok {
+		return "", fmt.Errorf("no string found for key %q", ref.Key)
 	}
-	return ref, nil
+	return s, nil
 }
 
 func (l *EngineConfigLoader) Load(engineConfig *wgpb.EngineConfiguration, wgServerUrl string) (*plan.Configuration, error) {
@@ -492,11 +487,11 @@ func (l *EngineConfigLoader) Load(engineConfig *wgpb.EngineConfiguration, wgServ
 			if in.CustomDatabase == nil {
 				continue
 			}
-			prismaSchema, err := l.LoadStoredString(engineConfig, in.CustomDatabase.PrismaSchema)
+			prismaSchema, err := l.LoadStringReference(engineConfig, in.CustomDatabase.PrismaSchema)
 			if err != nil {
 				return nil, fmt.Errorf("could not load prisma schema for data source %s: %w", in.Id, err)
 			}
-			graphqlSchema, err := l.LoadStoredString(engineConfig, in.CustomDatabase.GraphqlSchema)
+			graphqlSchema, err := l.LoadStringReference(engineConfig, in.CustomDatabase.GraphqlSchema)
 			if err != nil {
 				return nil, fmt.Errorf("could not load GraphQL schema for data source %s: %w", in.Id, err)
 			}

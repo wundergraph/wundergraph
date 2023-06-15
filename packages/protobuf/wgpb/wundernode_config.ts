@@ -903,6 +903,11 @@ export interface EngineConfiguration_StringStorageEntry {
   value: string;
 }
 
+export interface StringReference {
+  /** key to index into EngineConfiguration.stringStorage */
+  key: string;
+}
+
 export interface DataSourceConfiguration {
   kind: DataSourceKind;
   rootNodes: TypeField[];
@@ -946,8 +951,10 @@ export interface DataSourceCustomGraphQL {
 
 export interface DataSourceCustomDatabase {
   databaseURL: ConfigurationVariable | undefined;
-  prismaSchema: string;
-  graphqlSchema: string;
+  prismaSchema: StringReference | undefined;
+  graphqlSchema:
+    | StringReference
+    | undefined;
   /** closeTimeoutSeconds define that the database connection will be closed after the given amount of seconds of inactivity */
   closeTimeoutSeconds: number;
   jsonTypeFields: SingleTypeField[];
@@ -3514,6 +3521,53 @@ export const EngineConfiguration_StringStorageEntry = {
   },
 };
 
+function createBaseStringReference(): StringReference {
+  return { key: "" };
+}
+
+export const StringReference = {
+  encode(message: StringReference, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): StringReference {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseStringReference();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.key = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): StringReference {
+    return { key: isSet(object.key) ? String(object.key) : "" };
+  },
+
+  toJSON(message: StringReference): unknown {
+    const obj: any = {};
+    message.key !== undefined && (obj.key = message.key);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<StringReference>, I>>(object: I): StringReference {
+    const message = createBaseStringReference();
+    message.key = object.key ?? "";
+    return message;
+  },
+};
+
 function createBaseDataSourceConfiguration(): DataSourceConfiguration {
   return {
     kind: 0,
@@ -4047,8 +4101,8 @@ export const DataSourceCustomGraphQL = {
 function createBaseDataSourceCustomDatabase(): DataSourceCustomDatabase {
   return {
     databaseURL: undefined,
-    prismaSchema: "",
-    graphqlSchema: "",
+    prismaSchema: undefined,
+    graphqlSchema: undefined,
     closeTimeoutSeconds: 0,
     jsonTypeFields: [],
     jsonInputVariables: [],
@@ -4060,11 +4114,11 @@ export const DataSourceCustomDatabase = {
     if (message.databaseURL !== undefined) {
       ConfigurationVariable.encode(message.databaseURL, writer.uint32(10).fork()).ldelim();
     }
-    if (message.prismaSchema !== "") {
-      writer.uint32(18).string(message.prismaSchema);
+    if (message.prismaSchema !== undefined) {
+      StringReference.encode(message.prismaSchema, writer.uint32(18).fork()).ldelim();
     }
-    if (message.graphqlSchema !== "") {
-      writer.uint32(26).string(message.graphqlSchema);
+    if (message.graphqlSchema !== undefined) {
+      StringReference.encode(message.graphqlSchema, writer.uint32(26).fork()).ldelim();
     }
     if (message.closeTimeoutSeconds !== 0) {
       writer.uint32(32).int64(message.closeTimeoutSeconds);
@@ -4089,10 +4143,10 @@ export const DataSourceCustomDatabase = {
           message.databaseURL = ConfigurationVariable.decode(reader, reader.uint32());
           break;
         case 2:
-          message.prismaSchema = reader.string();
+          message.prismaSchema = StringReference.decode(reader, reader.uint32());
           break;
         case 3:
-          message.graphqlSchema = reader.string();
+          message.graphqlSchema = StringReference.decode(reader, reader.uint32());
           break;
         case 4:
           message.closeTimeoutSeconds = longToNumber(reader.int64() as Long);
@@ -4114,8 +4168,8 @@ export const DataSourceCustomDatabase = {
   fromJSON(object: any): DataSourceCustomDatabase {
     return {
       databaseURL: isSet(object.databaseURL) ? ConfigurationVariable.fromJSON(object.databaseURL) : undefined,
-      prismaSchema: isSet(object.prismaSchema) ? String(object.prismaSchema) : "",
-      graphqlSchema: isSet(object.graphqlSchema) ? String(object.graphqlSchema) : "",
+      prismaSchema: isSet(object.prismaSchema) ? StringReference.fromJSON(object.prismaSchema) : undefined,
+      graphqlSchema: isSet(object.graphqlSchema) ? StringReference.fromJSON(object.graphqlSchema) : undefined,
       closeTimeoutSeconds: isSet(object.closeTimeoutSeconds) ? Number(object.closeTimeoutSeconds) : 0,
       jsonTypeFields: Array.isArray(object?.jsonTypeFields)
         ? object.jsonTypeFields.map((e: any) => SingleTypeField.fromJSON(e))
@@ -4130,8 +4184,10 @@ export const DataSourceCustomDatabase = {
     const obj: any = {};
     message.databaseURL !== undefined &&
       (obj.databaseURL = message.databaseURL ? ConfigurationVariable.toJSON(message.databaseURL) : undefined);
-    message.prismaSchema !== undefined && (obj.prismaSchema = message.prismaSchema);
-    message.graphqlSchema !== undefined && (obj.graphqlSchema = message.graphqlSchema);
+    message.prismaSchema !== undefined &&
+      (obj.prismaSchema = message.prismaSchema ? StringReference.toJSON(message.prismaSchema) : undefined);
+    message.graphqlSchema !== undefined &&
+      (obj.graphqlSchema = message.graphqlSchema ? StringReference.toJSON(message.graphqlSchema) : undefined);
     message.closeTimeoutSeconds !== undefined && (obj.closeTimeoutSeconds = Math.round(message.closeTimeoutSeconds));
     if (message.jsonTypeFields) {
       obj.jsonTypeFields = message.jsonTypeFields.map((e) => e ? SingleTypeField.toJSON(e) : undefined);
@@ -4151,8 +4207,12 @@ export const DataSourceCustomDatabase = {
     message.databaseURL = (object.databaseURL !== undefined && object.databaseURL !== null)
       ? ConfigurationVariable.fromPartial(object.databaseURL)
       : undefined;
-    message.prismaSchema = object.prismaSchema ?? "";
-    message.graphqlSchema = object.graphqlSchema ?? "";
+    message.prismaSchema = (object.prismaSchema !== undefined && object.prismaSchema !== null)
+      ? StringReference.fromPartial(object.prismaSchema)
+      : undefined;
+    message.graphqlSchema = (object.graphqlSchema !== undefined && object.graphqlSchema !== null)
+      ? StringReference.fromPartial(object.graphqlSchema)
+      : undefined;
     message.closeTimeoutSeconds = object.closeTimeoutSeconds ?? 0;
     message.jsonTypeFields = object.jsonTypeFields?.map((e) => SingleTypeField.fromPartial(e)) || [];
     message.jsonInputVariables = object.jsonInputVariables?.map((e) => e) || [];
