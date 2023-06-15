@@ -307,9 +307,10 @@ func New(wundergraphDir string, resolvers ...FactoryResolver) *EngineConfigLoade
 }
 
 func (l *EngineConfigLoader) LoadInternedString(engineConfig *wgpb.EngineConfiguration, str *wgpb.InternedString) (string, error) {
-	s, ok := engineConfig.StringStorage[str.Key]
+	key := str.GetKey()
+	s, ok := engineConfig.StringStorage[key]
 	if !ok {
-		return "", fmt.Errorf("no string found for key %q", str.Key)
+		return "", fmt.Errorf("no string found for key %q", key)
 	}
 	return s, nil
 }
@@ -461,7 +462,7 @@ func (l *EngineConfigLoader) Load(engineConfig *wgpb.EngineConfiguration, wgServ
 				}
 			}
 
-			graphqlSchema, err := l.LoadInternedString(engineConfig, in.CustomGraphql.UpstreamSchema)
+			graphqlSchema, err := l.LoadInternedString(engineConfig, in.CustomGraphql.GetUpstreamSchema())
 			if err != nil {
 				return nil, fmt.Errorf("could not load GraphQL schema for data source %s: %w", in.Id, err)
 			}
