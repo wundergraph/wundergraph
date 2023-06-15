@@ -114,10 +114,6 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 		i.planConfig.DataSources = append(i.planConfig.DataSources, dataSource)
 	}
 
-	i.log.Debug("configuring API",
-		zap.Int("numOfOperations", len(api.Operations)),
-	)
-
 	route := router.NewRoute()
 	i.router = route.Subrouter()
 
@@ -133,13 +129,6 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 			From: []byte(configuration.RenameTo),
 			To:   []byte(configuration.TypeName),
 		})
-	}
-
-	for _, operation := range api.Operations {
-		err = i.registerOperation(operation)
-		if err != nil {
-			i.log.Error("registerOperation", zap.Error(err))
-		}
 	}
 
 	// Internal GraphQL endpoint should be always enabled because it's used by the ORM

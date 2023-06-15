@@ -1,6 +1,5 @@
 import { internalClientFactory } from '../internal-client';
 import { createServer } from '../server';
-import { OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import { FastifyRequestBody, OnConnectionInitHookRequestBody, WunderGraphHooksAndServerConfig } from '../types';
 
 export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) => {
@@ -12,26 +11,6 @@ export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) 
 		serverPort: 9992,
 		config: {
 			api: {
-				operations: [
-					{
-						name: 'Chat',
-						path: 'Chat',
-						operationType: OperationType.SUBSCRIPTION,
-						engine: OperationExecutionEngine.ENGINE_GRAPHQL,
-						variablesSchema: '',
-						responseSchema: '',
-						cacheConfig: undefined,
-						authenticationConfig: undefined,
-						liveQueryConfig: undefined,
-						authorizationConfig: undefined,
-						hooksConfiguration: undefined,
-						variablesConfiguration: undefined,
-						internal: false,
-						interpolationVariablesSchema: '',
-						postResolveTransformations: [],
-						content: '',
-					},
-				],
 				invalidOperationNames: [],
 				engineConfiguration: undefined,
 				corsConfiguration: undefined,

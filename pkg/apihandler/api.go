@@ -133,7 +133,6 @@ type Api struct {
 	EngineConfiguration   *wgpb.EngineConfiguration
 	EnableSingleFlight    bool
 	EnableGraphqlEndpoint bool
-	Operations            []*wgpb.Operation
 	InvalidOperationNames []string
 	CorsConfiguration     *wgpb.CorsConfiguration
 	ApiConfigHash         string

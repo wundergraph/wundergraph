@@ -19,11 +19,11 @@ import { buildGenerator, getProgramFromFiles, JsonSchemaGenerator, programFromCo
 import { ZodType } from 'zod';
 import {
 	Api,
+	ApiIntrospectionOptions,
 	DatabaseApiCustom,
 	DataSource,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
-	ApiIntrospectionOptions,
 	RESTApiCustom,
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
@@ -1091,6 +1091,8 @@ export const configureWunderGraphApplication = <
 				writeWunderGraphFileSync('config', configJSON);
 			}
 
+			writeOperationFilesSync(resolved.application.Operations, path.join(wgDirAbs, 'generated', 'operations'));
+
 			const publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl));
 
 			const postman = PostmanBuilder(app.Operations, {
@@ -1142,36 +1144,6 @@ const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputV
 };
 
 const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): string => {
-	const operations: Operation[] = config.application.Operations.map((op) => ({
-		content: removeHookVariables(op.Content),
-		name: op.Name,
-		path: op.PathName,
-		responseSchema: JSON.stringify(op.ResponseSchema),
-		variablesSchema: JSON.stringify(op.VariablesSchema),
-		interpolationVariablesSchema: JSON.stringify(op.InterpolationVariablesSchema),
-		operationType: op.OperationType,
-		engine: op.ExecutionEngine,
-		cacheConfig: op.CacheConfig,
-		authenticationConfig: {
-			authRequired: op.AuthenticationConfig.required,
-		},
-		authorizationConfig: op.AuthorizationConfig,
-		liveQueryConfig: op.LiveQuery,
-		hooksConfiguration: op.HooksConfiguration,
-		variablesConfiguration: op.VariablesConfiguration,
-		internal: op.Internal,
-		postResolveTransformations:
-			op.PostResolveTransformations?.map((t) => {
-				switch (t.kind) {
-					case 'get':
-						return {
-							kind: PostResolveTransformationKind.GET_POST_RESOLVE_TRANSFORMATION,
-							depth: t.depth,
-							get: t.get,
-						};
-				}
-			}) || [],
-	}));
 	const dataSources: DataSourceConfiguration[] = config.application.EngineConfiguration.DataSources.map(mapDataSource);
 	const fields: FieldConfiguration[] = config.application.EngineConfiguration.Fields;
 	const types: TypeConfiguration[] = config.application.EngineConfiguration.Types;
@@ -1181,7 +1153,6 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 		environmentIds: [config.deployment.environment.id],
 		api: {
 			enableGraphqlEndpoint: false,
-			operations: operations,
 			invalidOperationNames: config.application.InvalidOperationNames,
 			engineConfiguration: {
 				defaultFlushInterval: config.application.EngineConfiguration.DefaultFlushInterval,
@@ -1650,4 +1621,53 @@ const writeWunderGraphFileSync = (fileName: string, contents: object | string, e
 	}
 
 	fs.writeFileSync(path.join(generated, `wundergraph.${fileName}.${extension}`), contents, { encoding: utf8 });
+};
+
+const writeOperationFilesSync = (graphQLOperations: GraphQLOperation[], basePath: string) => {
+	const operations: Operation[] = graphQLOperations.map((op) => ({
+		content: removeHookVariables(op.Content),
+		name: op.Name,
+		path: op.PathName,
+		responseSchema: JSON.stringify(op.ResponseSchema),
+		variablesSchema: JSON.stringify(op.VariablesSchema),
+		interpolationVariablesSchema: JSON.stringify(op.InterpolationVariablesSchema),
+		operationType: op.OperationType,
+		engine: op.ExecutionEngine,
+		cacheConfig: op.CacheConfig,
+		authenticationConfig: {
+			authRequired: op.AuthenticationConfig.required,
+		},
+		authorizationConfig: op.AuthorizationConfig,
+		liveQueryConfig: op.LiveQuery,
+		hooksConfiguration: op.HooksConfiguration,
+		variablesConfiguration: op.VariablesConfiguration,
+		internal: op.Internal,
+		postResolveTransformations:
+			op.PostResolveTransformations?.map((t) => {
+				switch (t.kind) {
+					case 'get':
+						return {
+							kind: PostResolveTransformationKind.GET_POST_RESOLVE_TRANSFORMATION,
+							depth: t.depth,
+							get: t.get,
+						};
+				}
+			}) || [],
+	}));
+	for (let i = 0; i < operations.length; i++) {
+		const op = operations[i];
+		const filePath = path.join(basePath, trimTrailingSlash(op.path)) + '.wgoperation';
+		console.log(filePath);
+		const data = Operation.encode(op).finish();
+		// mkdirall
+		fs.mkdirSync(path.dirname(filePath), { recursive: true });
+		// load existing file if it exists
+		if (fs.existsSync(filePath)) {
+			const existing = fs.readFileSync(filePath);
+			if (existing.equals(data)) {
+				continue;
+			}
+		}
+		fs.writeFileSync(filePath, data, { encoding: 'binary' });
+	}
 };

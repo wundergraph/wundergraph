@@ -122,7 +122,7 @@ func NewApiTransport(httpTransport *http.Transport, enableStreamingMode bool, op
 		}
 	}
 
-	for _, op := range opts.API.Operations {
+	/*	for _, op := range opts.API.Operations {
 		name := op.Name
 		if op.HooksConfiguration.HttpTransportOnRequest {
 			transport.onRequestHook[name] = struct{}{}
@@ -130,7 +130,7 @@ func NewApiTransport(httpTransport *http.Transport, enableStreamingMode bool, op
 		if op.HooksConfiguration.HttpTransportOnResponse {
 			transport.onResponseHook[name] = struct{}{}
 		}
-	}
+	}*/
 
 	return transport
 }

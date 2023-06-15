@@ -10,13 +10,14 @@ import {
 	WunderGraphRequest,
 	WunderGraphResponse,
 } from '../types';
-import { OperationType, WunderGraphConfiguration } from '@wundergraph/protobuf';
+import { Operation, OperationType, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/utils';
 import { Headers } from '@whatwg-node/fetch';
 import { FastifyRequest } from 'fastify';
 import { trace } from '@opentelemetry/api';
 import { Attributes } from '../trace/attributes';
 import { attachErrorToSpan } from '../trace/util';
+import { GraphQLOperation } from '../../graphql/operations';
 
 const maximumRecursionLimit = 16;
 
@@ -316,13 +317,13 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		);
 	}
 
-	const queries =
-		config.config.api?.operations.filter((op) => op.operationType == OperationType.QUERY).map((op) => op.name) || [];
-	const mutations =
-		config.config.api?.operations.filter((op) => op.operationType == OperationType.MUTATION).map((op) => op.name) || [];
-	const subscriptions =
-		config.config.api?.operations.filter((op) => op.operationType == OperationType.SUBSCRIPTION).map((op) => op.name) ||
-		[];
+	const queries: string[] = [];
+	//config.config.api?.operations.filter((op) => op.operationType == OperationType.QUERY).map((op) => op.name) || [];
+	const mutations: string[] = [];
+	//config.config.api?.operations.filter((op) => op.operationType == OperationType.MUTATION).map((op) => op.name) || [];
+	const subscriptions: string[] = [];
+	//config.config.api?.operations.filter((op) => op.operationType == OperationType.SUBSCRIPTION).map((op) => op.name) ||
+	//[];
 
 	const requestContext = (req: FastifyRequest) => {
 		const body = req.body as any;

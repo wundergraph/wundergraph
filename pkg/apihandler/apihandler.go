@@ -200,10 +200,6 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		r.planConfig.DataSources = append(r.planConfig.DataSources, dataSource)
 	}
 
-	r.log.Debug("configuring API",
-		zap.Int("numOfOperations", len(api.Operations)),
-	)
-
 	r.router.Use(func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, request *http.Request) {
 			requestID := request.Header.Get(logging.RequestIDHeader)
@@ -288,13 +284,13 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		})
 	}
 
-	for _, operation := range api.Operations {
+	/*	for _, operation := range api.Operations {
 		err = r.registerOperation(operation)
 		if err != nil {
 			r.log.Error("registerOperation", zap.Error(err))
 			return streamClosers, err
 		}
-	}
+	}*/
 
 	for _, operationName := range api.InvalidOperationNames {
 		r.registerInvalidOperation(operationName)

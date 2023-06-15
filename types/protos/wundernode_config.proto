@@ -487,7 +487,6 @@ message S3UploadConfiguration {
 message UserDefinedApi {
 	EngineConfiguration engineConfiguration = 3;
 	bool enableGraphqlEndpoint = 5;
-	repeated Operation operations = 6;
 	repeated string invalidOperationNames = 16;
 	CorsConfiguration corsConfiguration = 7;
 	ApiAuthenticationConfig authenticationConfig = 8;
