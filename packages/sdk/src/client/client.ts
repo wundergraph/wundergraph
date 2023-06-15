@@ -516,21 +516,24 @@ export class Client {
 		let message: string = '';
 		let lastResponse: GraphQLResponse | null = null;
 		while (true) {
-			let value: Uint8Array | undefined;
-			let done: boolean;
+			let result: ReadableStreamReadResult<Uint8Array>;
 			try {
-				const result = await reader.read();
-				value = result.value;
-				done = result.done;
+				result = await reader.read();
 			} catch (e) {
-				if (!(e instanceof Error) || !e.message.indexOf('aborted')) {
+				// If we're blocked awaiting for a read when the attached
+				// AbortController's abort() method is called, we'll get
+				// an exception here. Make sure we swallow AbortError, but
+				// nothing else.
+				if (!(e instanceof Error) || e.name !== 'AbortError') {
 					throw e;
 				}
-				done = true;
+				result = {
+					done: true,
+				};
 			}
-			if (done) return;
-			if (!value) continue;
-			message += decoder.decode(value);
+			if (result.done) return;
+			if (!result.value) continue;
+			message += decoder.decode(result.value);
 			if (message.endsWith('\n\n')) {
 				const jsonResp = JSON.parse(message.substring(0, message.length - 2));
 				if (lastResponse !== null && Array.isArray(jsonResp)) {
