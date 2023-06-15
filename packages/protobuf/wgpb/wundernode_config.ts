@@ -903,7 +903,7 @@ export interface EngineConfiguration_StringStorageEntry {
   value: string;
 }
 
-export interface StringReference {
+export interface InternedString {
   /** key to index into EngineConfiguration.stringStorage */
   key: string;
 }
@@ -944,16 +944,16 @@ export interface DataSourceCustomGraphQL {
   fetch: FetchConfiguration | undefined;
   subscription: GraphQLSubscriptionConfiguration | undefined;
   federation: GraphQLFederationConfiguration | undefined;
-  upstreamSchema: string;
+  upstreamSchema: InternedString | undefined;
   hooksConfiguration: GraphQLDataSourceHooksConfiguration | undefined;
   customScalarTypeFields: SingleTypeField[];
 }
 
 export interface DataSourceCustomDatabase {
   databaseURL: ConfigurationVariable | undefined;
-  prismaSchema: StringReference | undefined;
+  prismaSchema: InternedString | undefined;
   graphqlSchema:
-    | StringReference
+    | InternedString
     | undefined;
   /** closeTimeoutSeconds define that the database connection will be closed after the given amount of seconds of inactivity */
   closeTimeoutSeconds: number;
@@ -3521,22 +3521,22 @@ export const EngineConfiguration_StringStorageEntry = {
   },
 };
 
-function createBaseStringReference(): StringReference {
+function createBaseInternedString(): InternedString {
   return { key: "" };
 }
 
-export const StringReference = {
-  encode(message: StringReference, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const InternedString = {
+  encode(message: InternedString, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.key !== "") {
       writer.uint32(10).string(message.key);
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): StringReference {
+  decode(input: _m0.Reader | Uint8Array, length?: number): InternedString {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseStringReference();
+    const message = createBaseInternedString();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -3551,18 +3551,18 @@ export const StringReference = {
     return message;
   },
 
-  fromJSON(object: any): StringReference {
+  fromJSON(object: any): InternedString {
     return { key: isSet(object.key) ? String(object.key) : "" };
   },
 
-  toJSON(message: StringReference): unknown {
+  toJSON(message: InternedString): unknown {
     const obj: any = {};
     message.key !== undefined && (obj.key = message.key);
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<StringReference>, I>>(object: I): StringReference {
-    const message = createBaseStringReference();
+  fromPartial<I extends Exact<DeepPartial<InternedString>, I>>(object: I): InternedString {
+    const message = createBaseInternedString();
     message.key = object.key ?? "";
     return message;
   },
@@ -3979,7 +3979,7 @@ function createBaseDataSourceCustomGraphQL(): DataSourceCustomGraphQL {
     fetch: undefined,
     subscription: undefined,
     federation: undefined,
-    upstreamSchema: "",
+    upstreamSchema: undefined,
     hooksConfiguration: undefined,
     customScalarTypeFields: [],
   };
@@ -3996,8 +3996,8 @@ export const DataSourceCustomGraphQL = {
     if (message.federation !== undefined) {
       GraphQLFederationConfiguration.encode(message.federation, writer.uint32(26).fork()).ldelim();
     }
-    if (message.upstreamSchema !== "") {
-      writer.uint32(34).string(message.upstreamSchema);
+    if (message.upstreamSchema !== undefined) {
+      InternedString.encode(message.upstreamSchema, writer.uint32(34).fork()).ldelim();
     }
     if (message.hooksConfiguration !== undefined) {
       GraphQLDataSourceHooksConfiguration.encode(message.hooksConfiguration, writer.uint32(42).fork()).ldelim();
@@ -4025,7 +4025,7 @@ export const DataSourceCustomGraphQL = {
           message.federation = GraphQLFederationConfiguration.decode(reader, reader.uint32());
           break;
         case 4:
-          message.upstreamSchema = reader.string();
+          message.upstreamSchema = InternedString.decode(reader, reader.uint32());
           break;
         case 5:
           message.hooksConfiguration = GraphQLDataSourceHooksConfiguration.decode(reader, reader.uint32());
@@ -4048,7 +4048,7 @@ export const DataSourceCustomGraphQL = {
         ? GraphQLSubscriptionConfiguration.fromJSON(object.subscription)
         : undefined,
       federation: isSet(object.federation) ? GraphQLFederationConfiguration.fromJSON(object.federation) : undefined,
-      upstreamSchema: isSet(object.upstreamSchema) ? String(object.upstreamSchema) : "",
+      upstreamSchema: isSet(object.upstreamSchema) ? InternedString.fromJSON(object.upstreamSchema) : undefined,
       hooksConfiguration: isSet(object.hooksConfiguration)
         ? GraphQLDataSourceHooksConfiguration.fromJSON(object.hooksConfiguration)
         : undefined,
@@ -4066,7 +4066,8 @@ export const DataSourceCustomGraphQL = {
       : undefined);
     message.federation !== undefined &&
       (obj.federation = message.federation ? GraphQLFederationConfiguration.toJSON(message.federation) : undefined);
-    message.upstreamSchema !== undefined && (obj.upstreamSchema = message.upstreamSchema);
+    message.upstreamSchema !== undefined &&
+      (obj.upstreamSchema = message.upstreamSchema ? InternedString.toJSON(message.upstreamSchema) : undefined);
     message.hooksConfiguration !== undefined && (obj.hooksConfiguration = message.hooksConfiguration
       ? GraphQLDataSourceHooksConfiguration.toJSON(message.hooksConfiguration)
       : undefined);
@@ -4089,7 +4090,9 @@ export const DataSourceCustomGraphQL = {
     message.federation = (object.federation !== undefined && object.federation !== null)
       ? GraphQLFederationConfiguration.fromPartial(object.federation)
       : undefined;
-    message.upstreamSchema = object.upstreamSchema ?? "";
+    message.upstreamSchema = (object.upstreamSchema !== undefined && object.upstreamSchema !== null)
+      ? InternedString.fromPartial(object.upstreamSchema)
+      : undefined;
     message.hooksConfiguration = (object.hooksConfiguration !== undefined && object.hooksConfiguration !== null)
       ? GraphQLDataSourceHooksConfiguration.fromPartial(object.hooksConfiguration)
       : undefined;
@@ -4115,10 +4118,10 @@ export const DataSourceCustomDatabase = {
       ConfigurationVariable.encode(message.databaseURL, writer.uint32(10).fork()).ldelim();
     }
     if (message.prismaSchema !== undefined) {
-      StringReference.encode(message.prismaSchema, writer.uint32(18).fork()).ldelim();
+      InternedString.encode(message.prismaSchema, writer.uint32(18).fork()).ldelim();
     }
     if (message.graphqlSchema !== undefined) {
-      StringReference.encode(message.graphqlSchema, writer.uint32(26).fork()).ldelim();
+      InternedString.encode(message.graphqlSchema, writer.uint32(26).fork()).ldelim();
     }
     if (message.closeTimeoutSeconds !== 0) {
       writer.uint32(32).int64(message.closeTimeoutSeconds);
@@ -4143,10 +4146,10 @@ export const DataSourceCustomDatabase = {
           message.databaseURL = ConfigurationVariable.decode(reader, reader.uint32());
           break;
         case 2:
-          message.prismaSchema = StringReference.decode(reader, reader.uint32());
+          message.prismaSchema = InternedString.decode(reader, reader.uint32());
           break;
         case 3:
-          message.graphqlSchema = StringReference.decode(reader, reader.uint32());
+          message.graphqlSchema = InternedString.decode(reader, reader.uint32());
           break;
         case 4:
           message.closeTimeoutSeconds = longToNumber(reader.int64() as Long);
@@ -4168,8 +4171,8 @@ export const DataSourceCustomDatabase = {
   fromJSON(object: any): DataSourceCustomDatabase {
     return {
       databaseURL: isSet(object.databaseURL) ? ConfigurationVariable.fromJSON(object.databaseURL) : undefined,
-      prismaSchema: isSet(object.prismaSchema) ? StringReference.fromJSON(object.prismaSchema) : undefined,
-      graphqlSchema: isSet(object.graphqlSchema) ? StringReference.fromJSON(object.graphqlSchema) : undefined,
+      prismaSchema: isSet(object.prismaSchema) ? InternedString.fromJSON(object.prismaSchema) : undefined,
+      graphqlSchema: isSet(object.graphqlSchema) ? InternedString.fromJSON(object.graphqlSchema) : undefined,
       closeTimeoutSeconds: isSet(object.closeTimeoutSeconds) ? Number(object.closeTimeoutSeconds) : 0,
       jsonTypeFields: Array.isArray(object?.jsonTypeFields)
         ? object.jsonTypeFields.map((e: any) => SingleTypeField.fromJSON(e))
@@ -4185,9 +4188,9 @@ export const DataSourceCustomDatabase = {
     message.databaseURL !== undefined &&
       (obj.databaseURL = message.databaseURL ? ConfigurationVariable.toJSON(message.databaseURL) : undefined);
     message.prismaSchema !== undefined &&
-      (obj.prismaSchema = message.prismaSchema ? StringReference.toJSON(message.prismaSchema) : undefined);
+      (obj.prismaSchema = message.prismaSchema ? InternedString.toJSON(message.prismaSchema) : undefined);
     message.graphqlSchema !== undefined &&
-      (obj.graphqlSchema = message.graphqlSchema ? StringReference.toJSON(message.graphqlSchema) : undefined);
+      (obj.graphqlSchema = message.graphqlSchema ? InternedString.toJSON(message.graphqlSchema) : undefined);
     message.closeTimeoutSeconds !== undefined && (obj.closeTimeoutSeconds = Math.round(message.closeTimeoutSeconds));
     if (message.jsonTypeFields) {
       obj.jsonTypeFields = message.jsonTypeFields.map((e) => e ? SingleTypeField.toJSON(e) : undefined);
@@ -4208,10 +4211,10 @@ export const DataSourceCustomDatabase = {
       ? ConfigurationVariable.fromPartial(object.databaseURL)
       : undefined;
     message.prismaSchema = (object.prismaSchema !== undefined && object.prismaSchema !== null)
-      ? StringReference.fromPartial(object.prismaSchema)
+      ? InternedString.fromPartial(object.prismaSchema)
       : undefined;
     message.graphqlSchema = (object.graphqlSchema !== undefined && object.graphqlSchema !== null)
-      ? StringReference.fromPartial(object.graphqlSchema)
+      ? InternedString.fromPartial(object.graphqlSchema)
       : undefined;
     message.closeTimeoutSeconds = object.closeTimeoutSeconds ?? 0;
     message.jsonTypeFields = object.jsonTypeFields?.map((e) => SingleTypeField.fromPartial(e)) || [];

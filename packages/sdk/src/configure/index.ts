@@ -65,7 +65,6 @@ import {
 	ValueType,
 	WebhookConfiguration,
 	WunderGraphConfiguration,
-	StringReference,
 } from '@wundergraph/protobuf';
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
@@ -1271,9 +1270,9 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig) => {
  *
  * @param stringStorage Storage to store the string into
  * @param s String to intern
- * @returns StringReference pointing to s
+ * @returns InternedString pointing to s
  */
-const storeString = (stringStorage: Record<string, string>, s: string): StringReference => {
+const internString = (stringStorage: Record<string, string>, s: string) => {
 	const key = crypto.createHash('sha1').update(s).digest('hex');
 	stringStorage[key] = s;
 	return {
@@ -1328,7 +1327,7 @@ const mapDataSource = (stringStorage: Record<string, string>, source: DataSource
 					url: graphql.Subscription.URL,
 					useSSE: graphql.Subscription.UseSSE,
 				},
-				upstreamSchema: graphql.UpstreamSchema,
+				upstreamSchema: internString(stringStorage, graphql.UpstreamSchema),
 				hooksConfiguration: graphql.HooksConfiguration,
 				customScalarTypeFields: graphql.CustomScalarTypeFields,
 			};
@@ -1342,8 +1341,8 @@ const mapDataSource = (stringStorage: Record<string, string>, source: DataSource
 			const database = source.Custom as DatabaseApiCustom;
 			out.customDatabase = {
 				databaseURL: database.databaseURL,
-				prismaSchema: storeString(stringStorage, database.prisma_schema),
-				graphqlSchema: storeString(stringStorage, database.graphql_schema),
+				prismaSchema: internString(stringStorage, database.prisma_schema),
+				graphqlSchema: internString(stringStorage, database.graphql_schema),
 				closeTimeoutSeconds: 30,
 				jsonTypeFields: database.jsonTypeFields,
 				jsonInputVariables: database.jsonInputVariables,

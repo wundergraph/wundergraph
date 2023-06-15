@@ -13,7 +13,7 @@ import { resolveConfigurationVariable } from '../configure/variables';
 import { onParentProcessExit } from '../utils/process';
 import { customGqlServerMountPath } from './util';
 
-import { WunderGraphConfiguration } from '@wundergraph/protobuf';
+import { EngineConfiguration, InternedString, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { ConfigurationVariableKind, DataSourceKind } from '@wundergraph/protobuf';
 import type { WebhooksConfig } from '../webhooks/types';
 import type { HooksRouteConfig } from './plugins/hooks';
@@ -260,6 +260,14 @@ export const rawClientRequest = (body: FastifyRequestBody) => {
 	return body.__wg.clientRequest;
 };
 
+const loadInternedString = (engineConfig: EngineConfiguration, str: InternedString) => {
+	const s = engineConfig.stringStorage[str.key];
+	if (s === undefined) {
+		throw new Error(`could not load interned string ${str.key}`);
+	}
+	return s;
+};
+
 export const createServer = async ({
 	wundergraphDir,
 	serverConfig,
@@ -455,7 +463,9 @@ export const createServer = async ({
 				return;
 			}
 
-			const schema = ds.customGraphql?.upstreamSchema;
+			const schema = ds.customGraphql?.upstreamSchema
+				? loadInternedString(config.api!.engineConfiguration!, ds.customGraphql?.upstreamSchema)
+				: undefined;
 			let serverName, mountPath;
 
 			if (ds.customGraphql?.fetch?.path?.staticVariableContent) {

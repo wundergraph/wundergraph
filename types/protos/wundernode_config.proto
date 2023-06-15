@@ -252,7 +252,7 @@ message EngineConfiguration {
 	map<string, string> stringStorage = 6;
 }
 
-message StringReference {
+message InternedString {
 	// key to index into EngineConfiguration.stringStorage
 	string key = 1;
 }
@@ -305,15 +305,15 @@ message DataSourceCustom_GraphQL {
 	FetchConfiguration fetch = 1;
 	GraphQLSubscriptionConfiguration subscription = 2;
 	GraphQLFederationConfiguration federation = 3;
-	string upstreamSchema = 4;
+	InternedString upstreamSchema = 4;
 	GraphQLDataSourceHooksConfiguration hooksConfiguration = 5;
 	repeated SingleTypeField customScalarTypeFields = 6;
 }
 
 message DataSourceCustom_Database {
 	ConfigurationVariable databaseURL = 1;
-	StringReference prismaSchema = 2;
-	StringReference graphqlSchema = 3;
+	InternedString prismaSchema = 2;
+	InternedString graphqlSchema = 3;
 	// closeTimeoutSeconds define that the database connection will be closed after the given amount of seconds of inactivity
 	int64 closeTimeoutSeconds = 4;
 	repeated SingleTypeField jsonTypeFields = 5;

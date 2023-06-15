@@ -306,10 +306,10 @@ func New(wundergraphDir string, resolvers ...FactoryResolver) *EngineConfigLoade
 	}
 }
 
-func (l *EngineConfigLoader) LoadStringReference(engineConfig *wgpb.EngineConfiguration, ref *wgpb.StringReference) (string, error) {
-	s, ok := engineConfig.StringStorage[ref.Key]
+func (l *EngineConfigLoader) LoadInternedString(engineConfig *wgpb.EngineConfiguration, str *wgpb.InternedString) (string, error) {
+	s, ok := engineConfig.StringStorage[str.Key]
 	if !ok {
-		return "", fmt.Errorf("no string found for key %q", ref.Key)
+		return "", fmt.Errorf("no string found for key %q", str.Key)
 	}
 	return s, nil
 }
@@ -461,6 +461,11 @@ func (l *EngineConfigLoader) Load(engineConfig *wgpb.EngineConfiguration, wgServ
 				}
 			}
 
+			graphqlSchema, err := l.LoadInternedString(engineConfig, in.CustomDatabase.GraphqlSchema)
+			if err != nil {
+				return nil, fmt.Errorf("could not load GraphQL schema for data source %s: %w", in.Id, err)
+			}
+
 			out.Custom = graphql_datasource.ConfigJson(graphql_datasource.Configuration{
 				Fetch: graphql_datasource.FetchConfiguration{
 					URL:    fetchUrl,
@@ -475,7 +480,7 @@ func (l *EngineConfigLoader) Load(engineConfig *wgpb.EngineConfiguration, wgServ
 					URL:    subscriptionUrl,
 					UseSSE: in.CustomGraphql.Subscription.UseSSE,
 				},
-				UpstreamSchema:         in.CustomGraphql.UpstreamSchema,
+				UpstreamSchema:         graphqlSchema,
 				CustomScalarTypeFields: customScalarTypeFields,
 			})
 		case wgpb.DataSourceKind_POSTGRESQL,
@@ -487,11 +492,11 @@ func (l *EngineConfigLoader) Load(engineConfig *wgpb.EngineConfiguration, wgServ
 			if in.CustomDatabase == nil {
 				continue
 			}
-			prismaSchema, err := l.LoadStringReference(engineConfig, in.CustomDatabase.PrismaSchema)
+			prismaSchema, err := l.LoadInternedString(engineConfig, in.CustomDatabase.PrismaSchema)
 			if err != nil {
 				return nil, fmt.Errorf("could not load prisma schema for data source %s: %w", in.Id, err)
 			}
-			graphqlSchema, err := l.LoadStringReference(engineConfig, in.CustomDatabase.GraphqlSchema)
+			graphqlSchema, err := l.LoadInternedString(engineConfig, in.CustomDatabase.GraphqlSchema)
 			if err != nil {
 				return nil, fmt.Errorf("could not load GraphQL schema for data source %s: %w", in.Id, err)
 			}
