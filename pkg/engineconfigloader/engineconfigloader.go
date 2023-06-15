@@ -461,7 +461,7 @@ func (l *EngineConfigLoader) Load(engineConfig *wgpb.EngineConfiguration, wgServ
 				}
 			}
 
-			graphqlSchema, err := l.LoadInternedString(engineConfig, in.CustomDatabase.GraphqlSchema)
+			graphqlSchema, err := l.LoadInternedString(engineConfig, in.CustomGraphql.UpstreamSchema)
 			if err != nil {
 				return nil, fmt.Errorf("could not load GraphQL schema for data source %s: %w", in.Id, err)
 			}
