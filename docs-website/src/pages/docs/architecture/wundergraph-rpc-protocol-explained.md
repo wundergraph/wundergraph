@@ -217,12 +217,16 @@ Once the authentication was successful, and the user cookie is set,
 the user can be fetched sending a `GET` request to the URL:
 
 ```
-GET https://<hostname>/auth/cookie/user
+GET https://<hostname>/auth/user
 ```
 
 The client may add an optional `revalidate` query parameter to the URL.
 If this query parameter exists, the server will trigger the revalidation of the user's auth state,
 allowing the backend to update or revoke the user's auth state.
+
+If the user is logged in, this endpoint will return an HTTP `200` with the JSON encoded `User` object
+as the response body. If no user is logged in, it will return an empty response with a `204` status
+code.
 
 ### Token based authentication
 
