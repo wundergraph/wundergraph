@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	serializedConfigFilename = "wundergraph.config.wg"
+	serializedConfigFilename = "wundergraph.wgconfig"
 	configEntryPointFilename = "wundergraph.config.ts"
 	serverEntryPointFilename = "wundergraph.server.ts"
 

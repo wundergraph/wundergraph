@@ -41,6 +41,8 @@ import { loadTraceConfigFromWgConfig } from './trace/config';
 import { TelemetryPluginOptions } from './plugins/telemetry';
 import { createLogger } from './logger';
 
+export const WunderGraphConfigurationFilename = 'wundergraph.wgconfig';
+
 const isProduction = process.env.NODE_ENV === 'production';
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -68,7 +70,9 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 		process.exit(1);
 	}
 	try {
-		const configContent = fs.readFileSync(path.join(process.env.WG_DIR_ABS!, 'generated', 'wundergraph.config.wg'));
+		const configContent = fs.readFileSync(
+			path.join(process.env.WG_DIR_ABS!, 'generated', WunderGraphConfigurationFilename)
+		);
 		WG_CONFIG = WunderGraphConfiguration.decode(configContent);
 
 		if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.nodeInternalUrl) {
