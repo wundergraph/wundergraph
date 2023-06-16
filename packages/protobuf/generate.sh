@@ -14,7 +14,7 @@ protoc  \
   --ts_proto_opt=unrecognizedEnum=false \
   --ts_proto_opt=esModuleInterop=true \
   --ts_proto_opt=env=node \
-  --ts_proto_opt=outputEncodeMethods=false \
+  --ts_proto_opt=outputEncodeMethods=true \
   --ts_proto_opt=outputJsonMethods=true \
   --ts_proto_opt=outputClientImpl=false \
   --ts_proto_out="${OUT_DIR}" \
