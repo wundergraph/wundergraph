@@ -171,7 +171,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		return streamClosers, fmt.Errorf("authentication config missing")
 	}
 
-	planConfig, err := r.loader.Load(*api.EngineConfiguration, api.Options.ServerUrl)
+	planConfig, err := r.loader.Load(api.EngineConfiguration, api.Options.ServerUrl)
 	if err != nil {
 		return streamClosers, err
 	}

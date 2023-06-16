@@ -140,7 +140,7 @@ var upCmd = &cobra.Command{
 			zap.String("builtBy", BuildInfo.BuiltBy),
 		)
 
-		configJsonPath := filepath.Join(wunderGraphDir, "generated", configJsonFilename)
+		configFilePath := filepath.Join(wunderGraphDir, "generated", serializedConfigFilename)
 		webhooksDir := filepath.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
 		configOutFile := filepath.Join("generated", "bundle", "config.cjs")
 		serverOutFile := filepath.Join("generated", "bundle", "server.cjs")
@@ -148,7 +148,7 @@ var upCmd = &cobra.Command{
 		operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
 		generatedBundleOutDir := filepath.Join("generated", "bundle")
 
-		if port, err := helpers.ServerPortFromConfig(configJsonPath); err == nil {
+		if port, err := helpers.ServerPortFromConfig(configFilePath); err == nil {
 			helpers.KillExistingHooksProcess(port, log)
 		}
 
@@ -253,7 +253,7 @@ var upCmd = &cobra.Command{
 				OutFile:       serverOutFile,
 				Logger:        log,
 				WatchPaths: []*watcher.WatchPath{
-					{Path: configJsonPath},
+					{Path: configFilePath},
 				},
 			})
 
@@ -436,7 +436,7 @@ var upCmd = &cobra.Command{
 		configFileChangeChan := make(chan struct{})
 		configWatcher := watcher.NewWatcher("config", &watcher.Config{
 			WatchPaths: []*watcher.WatchPath{
-				{Path: configJsonPath},
+				{Path: configFilePath},
 			},
 		}, log)
 
@@ -464,7 +464,7 @@ var upCmd = &cobra.Command{
 		n := node.New(ctx, BuildInfo, wunderGraphDir, nodeLogger)
 
 		go func() {
-			configFile := filepath.Join(wunderGraphDir, "generated", "wundergraph.config.json")
+			configFile := filepath.Join(wunderGraphDir, "generated", serializedConfigFilename)
 			options := []node.Option{
 				node.WithConfigFileChange(configFileChangeChan),
 				node.WithFileSystemConfig(configFile),
