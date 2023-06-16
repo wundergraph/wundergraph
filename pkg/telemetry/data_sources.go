@@ -7,9 +7,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"google.golang.org/protobuf/proto"
+
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
-	"google.golang.org/protobuf/proto"
 )
 
 const (
