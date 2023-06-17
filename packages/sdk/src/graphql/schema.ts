@@ -199,6 +199,12 @@ export const cleanupSchema = (schema: GraphQLSchema): string => {
 				case 'typescript':
 				// omnigraph/soap directives:
 				case 'soap':
+				// federation directives:
+				case 'key':
+				case 'extends':
+				case 'external':
+				case 'requires':
+				case 'provides':
 					return null;
 				default:
 					return node;
