@@ -174,7 +174,7 @@
     "lodash": "^4.17.21",
     "long": "^5.2.0",
     "object-hash": "^2.2.0",
-    "openapi-types": "^10.0.0",
+    "openapi-types": "12.1.0",
     "pino": "^8.11.0",
     "pino-pretty": "^10.0.0",
     "postman-collection": "^4.1.1",
