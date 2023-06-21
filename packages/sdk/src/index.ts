@@ -30,8 +30,10 @@ export {
 	TypeScriptInputModels,
 	TypeScriptResponseDataModels,
 	TypeScriptResponseModels,
+	TypeScriptEnumModels,
 } from './codegen/templates/typescript/index';
 export { TypeScriptClient } from './codegen/templates/typescript/client';
 export { PlaceHolder } from './configure/variables';
 export { EnvironmentVariable } from './configure/variables';
 export { configureWunderGraphGeneration } from './configure/codegeneration';
+export type { RequestLogger } from './server';

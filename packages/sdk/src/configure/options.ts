@@ -17,6 +17,11 @@ export enum WgEnv {
 	HttpProxyUrl = 'WG_HTTP_PROXY',
 	PrometheusEnabled = 'WG_PROMETHEUS_ENABLED',
 	PrometheusPort = 'WG_PROMETHEUS_PORT',
+	OtelEnabled = 'WG_OTEL_ENABLED',
+	OtelExporterHttpEndpoint = 'WG_OTEL_EXPORTER_HTTP_ENDPOINT',
+	OtelSampler = 'WG_OTEL_SAMPLER',
+	OtelAuthToken = 'WG_OTEL_AUTH_TOKEN',
+	OtelBatchTimeoutMs = 'WG_OTEL_BATCH_TIMEOUT_MS',
 }
 
 export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'debug';
@@ -35,6 +40,12 @@ const DefaultNodeOptions = {
 	},
 	listenInternal: {
 		port: new EnvironmentVariable(WgEnv.NodeInternalPort, defaultNodeInternalPort),
+	},
+	openTelemetry: {
+		enabled: new EnvironmentVariable<boolean>(WgEnv.OtelEnabled, false),
+		exporterHttpEndpoint: new EnvironmentVariable(WgEnv.OtelExporterHttpEndpoint, 'http://localhost:4318'),
+		sampler: new EnvironmentVariable(WgEnv.OtelSampler, '1.0'),
+		authToken: new EnvironmentVariable(WgEnv.OtelAuthToken, ''),
 	},
 	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, `http://${defaultHost}:${defaultNodePort}`),
 	nodeInternalUrl: new EnvironmentVariable(WgEnv.NodeInternalUrl, `http://${defaultHost}:${defaultNodeInternalPort}`),
@@ -55,6 +66,38 @@ export interface ListenOptions {
 	port?: InputVariable;
 }
 
+export interface TelemetryOptions {
+	/**
+	 * Enable OpenTelemetry tracing.
+	 * Defaults to `false`.
+	 */
+	enabled: InputVariable<boolean>;
+	/**
+	 * OpenTelemetry exporter HTTP endpoint.
+	 * Defaults to `http://localhost:4318`.
+	 * We only support v1 of the OpenTelemetry protocol.
+	 */
+	exporterHttpEndpoint?: InputVariable;
+	/**
+	 * OpenTelemetry sampler.
+	 * Defaults to `1.0` (always sample).
+	 * The value must be a number between 0 and 1. 0 means never sample, 1 means always sample.
+	 */
+	sampler?: InputVariable<number>;
+	/**
+	 * OpenTelemetry JWT token.
+	 * Attach this token to every request in form of a Bearer token.
+	 */
+	authToken?: InputVariable;
+}
+
+export interface ResolvedTelemetryOptions {
+	enabled: ConfigurationVariable;
+	exporterHttpEndpoint: ConfigurationVariable;
+	sampler: ConfigurationVariable;
+	authToken: ConfigurationVariable;
+}
+
 export interface ListenInternalOptions extends Omit<ListenOptions, 'host'> {}
 
 export interface ResolvedListenOptions {
@@ -69,6 +112,7 @@ export interface NodeOptions {
 	publicNodeUrl?: InputVariable;
 	listen?: ListenOptions;
 	listenInternal?: ListenInternalOptions;
+	openTelemetry?: TelemetryOptions;
 	logger?: {
 		level?: InputVariable<LoggerLevel>;
 	};
@@ -107,6 +151,7 @@ export interface ResolvedNodeOptions {
 	publicNodeUrl: ConfigurationVariable;
 	listen: ResolvedListenOptions;
 	listenInternal: ResolvedListenInternalOptions;
+	openTelemetry: ResolvedTelemetryOptions;
 	logger: {
 		level: ConfigurationVariable;
 	};
@@ -150,6 +195,13 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 				logger: {
 					level: options?.logger?.level || DefaultNodeOptions.logger.level,
 				},
+				openTelemetry: {
+					enabled: options?.openTelemetry?.enabled || DefaultNodeOptions.openTelemetry.enabled,
+					sampler: options?.openTelemetry?.sampler || DefaultNodeOptions.openTelemetry.sampler,
+					exporterHttpEndpoint:
+						options?.openTelemetry?.exporterHttpEndpoint || DefaultNodeOptions.openTelemetry.exporterHttpEndpoint,
+					authToken: options?.openTelemetry?.authToken || DefaultNodeOptions.openTelemetry.authToken,
+				},
 				defaultRequestTimeoutSeconds:
 					options?.defaultRequestTimeoutSeconds || DefaultNodeOptions.defaultRequestTimeoutSeconds,
 				defaultHttpProxyUrl: options?.defaultHttpProxyUrl || DefaultNodeOptions.defaultHttpProxyUrl,
@@ -166,6 +218,12 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 		listen: {
 			host: mapInputVariable(nodeOptions.listen.host),
 			port: mapInputVariable(nodeOptions.listen.port),
+		},
+		openTelemetry: {
+			enabled: mapInputVariable(nodeOptions.openTelemetry.enabled),
+			exporterHttpEndpoint: mapInputVariable(nodeOptions.openTelemetry.exporterHttpEndpoint),
+			sampler: mapInputVariable<number | string>(nodeOptions.openTelemetry.sampler),
+			authToken: mapInputVariable(nodeOptions.openTelemetry?.authToken),
 		},
 		listenInternal: {
 			port: mapInputVariable(nodeOptions.listenInternal.port),

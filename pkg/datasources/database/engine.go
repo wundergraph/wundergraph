@@ -18,8 +18,6 @@ import (
 
 	"github.com/gofrs/flock"
 	"github.com/phayes/freeport"
-	"github.com/prisma/prisma-client-go/binaries"
-	"github.com/prisma/prisma-client-go/binaries/platform"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/repair"
@@ -38,11 +36,18 @@ func InstallPrismaDependencies(log *zap.Logger, wundergraphDir string) error {
 	return engine.ensurePrisma()
 }
 
+type IntrospectionParams struct {
+	CompositeTypeDepth int      `json:"compositeTypeDepth"`
+	Force              bool     `json:"force"`
+	Schema             string   `json:"schema"`
+	Schemas            []string `json:"schemas,omitempty"`
+}
+
 type IntrospectionRequest struct {
-	ID      int         `json:"id"`
-	JSONRPC string      `json:"jsonrpc"`
-	Method  string      `json:"method"`
-	Params  interface{} `json:"params"`
+	ID      int                 `json:"id"`
+	JSONRPC string              `json:"jsonrpc"`
+	Method  string              `json:"method"`
+	Params  IntrospectionParams `json:"params"`
 }
 
 type IntrospectionResponse struct {
@@ -69,6 +74,7 @@ type Engine struct {
 	cancel                  func()
 	client                  *http.Client
 	log                     *zap.Logger
+	schemaFilePath          string
 }
 
 func NewEngine(client *http.Client, log *zap.Logger, wundergraphDir string) *Engine {
@@ -90,11 +96,9 @@ func (e *Engine) IntrospectPrismaDatabaseSchema(ctx context.Context, introspecti
 		ID:      1,
 		Method:  "introspect",
 		JSONRPC: "2.0",
-		Params: []map[string]interface{}{
-			{
-				"schema":             introspectionSchema,
-				"compositeTypeDepth": -1,
-			},
+		Params: IntrospectionParams{
+			Schema:             introspectionSchema,
+			CompositeTypeDepth: -1,
 		},
 	}
 	requestData, err := json.Marshal(request)
@@ -275,7 +279,26 @@ func (e *Engine) StartQueryEngine(schema string) error {
 	// append all environment variables, as demonstrated in the following:
 	// https://github.com/prisma/prisma/blob/304c54c732921c88bfb57f5730c7f81405ca83ea/packages/engine-core/src/binary/BinaryEngine.ts#L479
 	e.cmd.Env = append(e.cmd.Env, os.Environ()...)
-	e.cmd.Env = append(e.cmd.Env, "PRISMA_DML="+schema)
+
+	// create temporary file in the default temporary directory, * is replaced by a random pattern
+	temporaryFile, err := os.CreateTemp("", "t*.prisma")
+	if err != nil {
+		return err
+	}
+	//write schema to the file
+	if _, err := temporaryFile.Write([]byte(schema)); err != nil {
+		return err
+	}
+	err = temporaryFile.Close()
+	if err != nil {
+		pathError := os.Remove(temporaryFile.Name())
+		if pathError != nil {
+			e.log.Error("Error while deleting temporary schema file : ", zap.Error(pathError))
+		}
+		return err
+	}
+	e.cmd.Env = append(e.cmd.Env, "PRISMA_DML_PATH="+temporaryFile.Name())
+	e.schemaFilePath = temporaryFile.Name()
 
 	e.cmd.Stdout = os.Stdout
 	e.cmd.Stderr = os.Stderr
@@ -300,8 +323,8 @@ func (e *Engine) ensurePrisma() error {
 		return err
 	}
 
-	e.queryEnginePath = filepath.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-query-engine-%s", platform.BinaryPlatformName()))
-	e.introspectionEnginePath = filepath.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-introspection-engine-%s", platform.BinaryPlatformName()))
+	e.queryEnginePath = filepath.Join(prismaPath, PrismaBinaryVersion, fmt.Sprintf("prisma-query-engine-%s", e.BinaryPlatformName()))
+	e.introspectionEnginePath = filepath.Join(prismaPath, PrismaBinaryVersion, fmt.Sprintf("prisma-migration-engine-%s", e.BinaryPlatformName()))
 
 	if runtime.GOOS == "windows" {
 		// Append .exe suffix
@@ -323,7 +346,7 @@ func (e *Engine) ensurePrisma() error {
 		e.log.Info("downloading prisma query engine",
 			zap.String("path", e.queryEnginePath),
 		)
-		if err := binaries.FetchEngine(prismaPath, "query-engine", platform.BinaryPlatformName()); err != nil {
+		if err := e.FetchEngine(prismaPath, "query-engine", e.BinaryPlatformName()); err != nil {
 			return err
 		}
 		e.log.Info("downloading prisma query engine complete")
@@ -334,7 +357,7 @@ func (e *Engine) ensurePrisma() error {
 		e.log.Info("downloading prisma introspection engine",
 			zap.String("path", e.introspectionEnginePath),
 		)
-		if err := binaries.FetchEngine(prismaPath, "introspection-engine", platform.BinaryPlatformName()); err != nil {
+		if err := e.FetchEngine(prismaPath, "migration-engine", e.BinaryPlatformName()); err != nil {
 			return err
 		}
 		e.log.Info("downloading prisma introspection engine complete")
@@ -369,6 +392,13 @@ func (e *Engine) StopQueryEngine() {
 		}
 	}
 	close(exitCh)
+	if e.schemaFilePath != "" {
+		err := os.Remove(e.schemaFilePath)
+		if err != nil {
+			e.log.Error("Deleting temporary schema file", zap.Error(err))
+		}
+		e.schemaFilePath = ""
+	}
 	e.cmd = nil
 	e.cancel = nil
 }

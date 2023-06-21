@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"strconv"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -198,7 +199,7 @@ func TestQueryHandler_LiveQuery(t *testing.T) {
 	validateNothing, err := inputvariables.NewValidator(inputSchema, true)
 	assert.NoError(t, err)
 
-	validateCalled := false
+	var validateCalled atomic.Bool
 	counter := 0
 
 	resolver := &FakeResolver{
@@ -210,7 +211,7 @@ func TestQueryHandler_LiveQuery(t *testing.T) {
 		},
 		validate: func(ctx *resolve.Context, response *resolve.GraphQLResponse, data []byte) {
 			assert.Equal(t, `{"id":123}`, string(ctx.Variables))
-			validateCalled = true
+			validateCalled.Store(true)
 		},
 	}
 	operation := &wgpb.Operation{
@@ -262,7 +263,7 @@ func TestQueryHandler_LiveQuery(t *testing.T) {
 	data, err := ioutil.ReadAll(res.Body)
 	assert.Equal(t, context.DeadlineExceeded, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"counter\":0}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"counter\":1}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"counter\":2}}}\n\n", string(data))
-	assert.True(t, validateCalled)
+	assert.True(t, validateCalled.Load())
 }
 
 func TestQueryHandler_LiveQueryJsonPatch(t *testing.T) {
@@ -275,7 +276,7 @@ func TestQueryHandler_LiveQueryJsonPatch(t *testing.T) {
 	validateNothing, err := inputvariables.NewValidator(inputSchema, true)
 	assert.NoError(t, err)
 
-	validateCalled := false
+	var validateCalled atomic.Bool
 	counter := 0
 
 	resolver := &FakeResolver{
@@ -287,7 +288,7 @@ func TestQueryHandler_LiveQueryJsonPatch(t *testing.T) {
 		},
 		validate: func(ctx *resolve.Context, response *resolve.GraphQLResponse, data []byte) {
 			assert.Equal(t, `{"id":123}`, string(ctx.Variables))
-			validateCalled = true
+			validateCalled.Store(true)
 		},
 	}
 	operation := &wgpb.Operation{
@@ -340,7 +341,7 @@ func TestQueryHandler_LiveQueryJsonPatch(t *testing.T) {
 	data, err := ioutil.ReadAll(res.Body)
 	assert.Equal(t, context.DeadlineExceeded, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}\n\n[{\"op\":\"replace\",\"path\":\"/data/me/counter\",\"value\":1}]\n\n[{\"op\":\"replace\",\"path\":\"/data/me/counter\",\"value\":2}]\n\n", string(data))
-	assert.True(t, validateCalled)
+	assert.True(t, validateCalled.Load())
 }
 
 func TestQueryHandler_SubscriptionJsonPatch(t *testing.T) {
@@ -369,7 +370,10 @@ func TestQueryHandler_SubscriptionJsonPatch(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient("http://localhost:8080", zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: "http://localhost:8080",
+		Logger:    zap.NewNop(),
+	})
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
 		Client:    hooksClient,
 		Operation: operation,
@@ -449,7 +453,10 @@ func TestQueryHandler_Subscription(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient("http://localhost:8080", zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: "http://localhost:8080",
+		Logger:    zap.NewNop(),
+	})
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
 		Client:    hooksClient,
 		Operation: operation,
@@ -527,7 +534,10 @@ func TestFunctionsHandler_Default(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -592,7 +602,10 @@ func TestFunctionsHandler_Live(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -658,7 +671,10 @@ func TestFunctionsHandler_Live_JSONPatch(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -729,7 +745,10 @@ func TestFunctionsHandler_Subscription(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_SUBSCRIPTION,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -798,7 +817,10 @@ func TestFunctionsHandler_Subscription_JSONPatch(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_SUBSCRIPTION,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -868,7 +890,10 @@ func TestFunctionsHandler_Subscription_JSONPatch_SSE(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_SUBSCRIPTION,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		ServerURL: fakeHookServer.URL,
+		Logger:    zap.NewNop(),
+	})
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,

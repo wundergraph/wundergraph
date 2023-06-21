@@ -32,6 +32,7 @@ type GithubConfig struct {
 	InsecureCookies    bool
 	ForceRedirectHttps bool
 	Cookie             *securecookie.SecureCookie
+	AuthTimeout        time.Duration
 }
 
 type GithubUserInfo struct {
@@ -85,7 +86,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		c := &http.Cookie{
 			Name:     "state",
 			Value:    state,
-			MaxAge:   int(time.Minute.Seconds()),
+			MaxAge:   int(config.AuthTimeout.Seconds()),
 			Secure:   r.TLS != nil,
 			HttpOnly: true,
 			Path:     cookiePath,
@@ -98,7 +99,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		c2 := &http.Cookie{
 			Name:     "redirect_uri",
 			Value:    redirectURI,
-			MaxAge:   int(time.Minute.Seconds()),
+			MaxAge:   int(config.AuthTimeout.Seconds()),
 			Secure:   r.TLS != nil,
 			HttpOnly: true,
 			Path:     cookiePath,
@@ -111,7 +112,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 			c3 := &http.Cookie{
 				Name:     "success_redirect_uri",
 				Value:    redirectOnSuccess,
-				MaxAge:   int(time.Minute.Seconds()),
+				MaxAge:   int(config.AuthTimeout.Seconds()),
 				Secure:   r.TLS != nil,
 				HttpOnly: true,
 				Path:     cookiePath,

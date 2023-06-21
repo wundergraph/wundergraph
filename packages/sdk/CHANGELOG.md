@@ -3,6 +3,77 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.165.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.164.1...@wundergraph/sdk@0.165.0) (2023-06-09)
+
+### Features
+
+* add logging interface ([#1043](https://github.com/wundergraph/wundergraph/issues/1043)) ([5ffb1f2](https://github.com/wundergraph/wundergraph/commit/5ffb1f29e815b4337e73e5b5becb345047f79760)) (@fiam)
+* add support for user-defined session durations ([#1035](https://github.com/wundergraph/wundergraph/issues/1035)) ([4ec4bcd](https://github.com/wundergraph/wundergraph/commit/4ec4bcdb5f5b8536bafc393b67dabc603055150e)) (@fiam)
+* pass internal requests from ORM into GraphQLHandler ([#1049](https://github.com/wundergraph/wundergraph/issues/1049)) ([c58bd13](https://github.com/wundergraph/wundergraph/commit/c58bd13d7e314dcd09ff65b1cc32c7a2c7fabd03)) (@fiam)
+* support oneof on inputs for the generated client ([#1031](https://github.com/wundergraph/wundergraph/issues/1031)) ([4635d05](https://github.com/wundergraph/wundergraph/commit/4635d05fa52a1c67fe3f1762499193b23faef037)) (@devsergiy)
+
+### Bug Fixes
+
+* handle nested type definitions in operation inputs when generating OAS ([#1056](https://github.com/wundergraph/wundergraph/issues/1056)) ([f2f8663](https://github.com/wundergraph/wundergraph/commit/f2f866327f5ffc48c7da030be991cf1188aa3d37)) (@fiam)
+
+## [0.164.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.164.0...@wundergraph/sdk@0.164.1) (2023-06-06)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.164.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.163.3...@wundergraph/sdk@0.164.0) (2023-06-05)
+
+### Features
+
+* add withHeaders method to ORM ([#1025](https://github.com/wundergraph/wundergraph/issues/1025)) ([76641e1](https://github.com/wundergraph/wundergraph/commit/76641e14eccd417837745743b94155a157983322)) (@Pagebakers)
+
+## [0.163.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.163.2...@wundergraph/sdk@0.163.3) (2023-06-04)
+
+### Bug Fixes
+
+* align otel attributes ([#1042](https://github.com/wundergraph/wundergraph/issues/1042)) ([106fbfd](https://github.com/wundergraph/wundergraph/commit/106fbfd671e16d2f4137c685e67e0a083f521b15)) (@StarpTech)
+
+## [0.163.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.163.1...@wundergraph/sdk@0.163.2) (2023-06-02)
+
+### Bug Fixes
+
+* pass correct url to http.url otel attribute ([#1039](https://github.com/wundergraph/wundergraph/issues/1039)) ([a5adc66](https://github.com/wundergraph/wundergraph/commit/a5adc6640a657ab9a9e1027723f718583c42df93)) (@StarpTech)
+
+## [0.163.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.163.0...@wundergraph/sdk@0.163.1) (2023-06-02)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.163.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.162.0...@wundergraph/sdk@0.163.0) (2023-06-01)
+
+### Features
+
+* otel instrumentation of wundernode and server ([#1004](https://github.com/wundergraph/wundergraph/issues/1004)) ([7b45975](https://github.com/wundergraph/wundergraph/commit/7b45975ca8fb41ff03cbcc84c42ec3536ad6db13)) (@StarpTech)
+
+## [0.162.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.161.0...@wundergraph/sdk@0.162.0) (2023-05-31)
+
+### Features
+
+* fix replaceCustomScalars and add interface support ([#1000](https://github.com/wundergraph/wundergraph/issues/1000)) ([fa00db4](https://github.com/wundergraph/wundergraph/commit/fa00db471f7b9ef0d7372fbe7a5dec100bf62a50)) (@Aenimus)
+* make timeout during authentication configurable ([#1018](https://github.com/wundergraph/wundergraph/issues/1018)) ([b5f6b74](https://github.com/wundergraph/wundergraph/commit/b5f6b744cd4efef456b9004b4109f7624e467f41)) (@fiam)
+
+## [0.161.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.160.0...@wundergraph/sdk@0.161.0) (2023-05-31)
+
+### Features
+
+* add graphql enums to generated typescript model ([#1015](https://github.com/wundergraph/wundergraph/issues/1015)) ([845f036](https://github.com/wundergraph/wundergraph/commit/845f03608d13bc86e19c21769cb67a157232c3bf)) (@thisisnithin)
+* use one web compatible fetch implementation on the server ([#1016](https://github.com/wundergraph/wundergraph/issues/1016)) ([784eddb](https://github.com/wundergraph/wundergraph/commit/784eddb209098a5bbd78c814aa9ccfed85c726b3)) (@StarpTech)
+
+### Bug Fixes
+
+* hook server strictness ([#1013](https://github.com/wundergraph/wundergraph/issues/1013)) ([f2608e5](https://github.com/wundergraph/wundergraph/commit/f2608e5ed9ac7f30c417e0a036e346d33d1c991f)) (@Pagebakers)
+* infinite recursion when extracting enums ([#1022](https://github.com/wundergraph/wundergraph/issues/1022)) ([6e58da6](https://github.com/wundergraph/wundergraph/commit/6e58da63c1ba5d0e835c4dbd0d4ccebcc2220273)) (@thisisnithin)
+* use Node.js fetch that supports web stream api ([#1007](https://github.com/wundergraph/wundergraph/issues/1007)) ([7977c79](https://github.com/wundergraph/wundergraph/commit/7977c79dc5dc9484c2412622828ac3a1380422fd)) (@StarpTech)
+
+## [0.160.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.159.0...@wundergraph/sdk@0.160.0) (2023-05-26)
+
+### Features
+
+* use Prometheus to track and expose operation and API request counts ([#991](https://github.com/wundergraph/wundergraph/issues/991)) ([f949398](https://github.com/wundergraph/wundergraph/commit/f94939864c9ce7c3a9623fd5141fa486c4c9a55c)) (@fiam)
+
 ## [0.159.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.158.1...@wundergraph/sdk@0.159.0) (2023-05-25)
 
 ### Features

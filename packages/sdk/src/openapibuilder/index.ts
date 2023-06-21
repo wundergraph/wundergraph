@@ -3,6 +3,7 @@ import { JSONSchema7 as JSONSchema, JSONSchema7Definition } from 'json-schema';
 import objectHash from 'object-hash';
 import { GraphQLOperation } from '../graphql/operations';
 import { buildPath, JSONSchemaParameterPath } from './operations';
+import { deepClone } from '../utils/helper';
 
 const openApiVersion = '3.1.0';
 
@@ -285,9 +286,20 @@ export class OpenApiBuilder {
 	}
 
 	private rewriteOperationSchemaRefs(spec: OpenApiSpec, op: OpenApiOperation) {
+		for (const input of Object.values(op.requestBody?.content ?? {})) {
+			if (input.schema) {
+				const schema = deepClone(input.schema);
+				this.rewriteSchemaRefs(spec, schema);
+				input.schema = schema;
+			}
+		}
 		for (const response of Object.values(op.responses)) {
 			for (const contents of Object.values(response.content)) {
-				this.rewriteSchemaRefs(spec, contents.schema);
+				if (contents.schema) {
+					const schema = deepClone(contents.schema);
+					this.rewriteSchemaRefs(spec, schema);
+					contents.schema = schema;
+				}
 			}
 		}
 	}

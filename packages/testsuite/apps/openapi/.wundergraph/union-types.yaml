@@ -1,0 +1,85 @@
+openapi: 3.0.3
+info:
+  title: union_types_test
+  description: ''
+  contact:
+    name: ''
+  license:
+    name: ''
+  version: 0.1.0
+paths:
+  /test:
+    post:
+      description: ''
+      operationId: test_endpoint
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestType'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestType'
+        '500':
+          description: ''
+      deprecated: false
+components:
+  schemas:
+    TestType:
+      oneOf:
+        - type: string
+          enum:
+            - A
+        - type: object
+          properties:
+            B:
+              type: string
+        - type: object
+          properties:
+            C:
+              type: array
+              items:
+                type: object
+              maxItems: 2
+              minItems: 2
+        - type: object
+          properties:
+            D:
+              type: object
+              required:
+                - first
+                - second
+              properties:
+                first:
+                  type: integer
+                  format: int32
+                second:
+                  type: boolean
+        - type: object
+          properties:
+            E:
+              type: object
+              required:
+                - first
+                - second
+              properties:
+                first:
+                  $ref: '#/components/schemas/WrapperTypeA'
+                second:
+                  $ref: '#/components/schemas/WrapperTypeB'
+    WrapperTypeA:
+      type: integer
+      format: int32
+    WrapperTypeB:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: boolean
+tags: []

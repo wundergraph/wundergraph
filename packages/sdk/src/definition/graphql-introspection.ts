@@ -99,8 +99,7 @@ export const graphqlIntrospectionCacheConfiguration = async (
 
 export const introspectGraphql = async (
 	introspection: GraphQLIntrospection,
-	options: ApiIntrospectionOptions,
-	preserveSchemaDirectives?: boolean
+	options: ApiIntrospectionOptions
 ): Promise<GraphQLApi> => {
 	const headersBuilder = new HeadersBuilder();
 	const introspectionHeadersBuilder = new HeadersBuilder();
@@ -119,14 +118,15 @@ export const introspectGraphql = async (
 	let upstreamSchema = await introspectGraphQLSchema(introspection, options, introspectionHeaders);
 	upstreamSchema = lexicographicSortSchema(upstreamSchema);
 	const federationEnabled = introspection.isFederation || false;
-	const cleanUpstreamSchema = preserveSchemaDirectives
-		? printSchemaWithDirectives(upstreamSchema)
-		: cleanupSchema(upstreamSchema);
 
-	const { schemaSDL: schemaSDLWithCustomScalars, customScalarTypeFields } = transformSchema.replaceCustomScalars(
-		cleanUpstreamSchema,
-		introspection
-	);
+	const printedUpstreamSchemaWithDirectives = printSchemaWithDirectives(upstreamSchema);
+	const cleanUpstreamSchema = cleanupSchema(upstreamSchema);
+
+	const {
+		schemaSDL: schemaSDLWithCustomScalars,
+		customScalarTypeFields,
+		customScalarTypeNames, // Remove the necessity to manually provide custom scalar types
+	} = transformSchema.replaceCustomScalars(cleanUpstreamSchema, introspection);
 
 	const { schemaSDL, argumentReplacements } = transformSchema.replaceCustomNumericScalars(
 		schemaSDLWithCustomScalars,
@@ -152,6 +152,7 @@ export const introspectGraphql = async (
 	const { RootNodes, ChildNodes, Fields } = configuration(
 		schemaDocumentNode,
 		introspection,
+		customScalarTypeNames,
 		serviceDocumentNode,
 		argumentReplacements
 	);
@@ -207,7 +208,7 @@ export const introspectGraphql = async (
 						Enabled: federationEnabled,
 						ServiceSDL: serviceSDL || '',
 					},
-					UpstreamSchema: cleanUpstreamSchema,
+					UpstreamSchema: printedUpstreamSchemaWithDirectives,
 					HooksConfiguration: {
 						onWSTransportConnectionInit: false,
 					},
@@ -224,7 +225,7 @@ export const introspectGraphql = async (
 		applyNameSpaceToFieldConfigurations(Fields, graphQLSchema, skipRenameRootFields, introspection.apiNamespace),
 		generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
 		[],
-		introspection.customJSONScalars
+		customScalarTypeNames
 	);
 };
 

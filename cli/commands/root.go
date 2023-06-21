@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/fatih/color"
@@ -23,7 +24,7 @@ import (
 )
 
 const (
-	configJsonFilename       = "wundergraph.config.json"
+	serializedConfigFilename = "wundergraph.wgconfig"
 	configEntryPointFilename = "wundergraph.config.ts"
 	serverEntryPointFilename = "wundergraph.server.ts"
 
@@ -41,6 +42,9 @@ var (
 	cmdDurationMetric     telemetry.DurationMetric
 	zapLogLevel           zapcore.Level
 	_wunderGraphDirConfig string
+	// otelBatchTimeout is the maximum timeout before a batch of otel data is sent
+	// By default it is 5 seconds but for CI and debugging purposes it should be set much lower
+	otelBatchTimeout time.Duration
 
 	rootFlags helpers.RootFlags
 
@@ -267,6 +271,15 @@ func init() {
 	_, isTelemetryDisabled := os.LookupEnv("WG_TELEMETRY_DISABLED")
 	_, isTelemetryDebugEnabled := os.LookupEnv("WG_TELEMETRY_DEBUG")
 	telemetryAnonymousID := os.Getenv("WG_TELEMETRY_ANONYMOUS_ID")
+
+	if otelBatchTimeoutEnv, ok := os.LookupEnv("WG_OTEL_BATCH_TIMEOUT_MS"); ok {
+		ms, err := strconv.Atoi(otelBatchTimeoutEnv)
+		if err != nil {
+			log.Error("Value behind WG_OTEL_BATCH_TIMEOUT_MS could not be parsed as integer", zap.Error(err))
+		} else {
+			otelBatchTimeout = time.Duration(ms) * time.Millisecond
+		}
+	}
 
 	config.InitConfig(config.Options{
 		TelemetryEnabled:     !isTelemetryDisabled,

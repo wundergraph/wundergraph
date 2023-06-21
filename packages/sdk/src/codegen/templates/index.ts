@@ -1,4 +1,5 @@
 import {
+	TypeScriptEnumModels,
 	TypeScriptInjectedInputModels,
 	TypeScriptInputModels,
 	TypeScriptInternalInputModels,
@@ -21,6 +22,7 @@ import { TypeScriptTesting } from './typescript/testing';
 import { ORM } from './typescript/orm';
 
 const typescriptModels = [
+	new TypeScriptEnumModels(),
 	new TypeScriptInputModels(),
 	new TypeScriptInternalInputModels(),
 	new TypeScriptInjectedInputModels(),

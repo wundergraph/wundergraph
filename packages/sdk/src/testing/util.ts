@@ -2,14 +2,12 @@ import net from 'net';
 import { Request } from '@wundergraph/straightforward';
 import getRawBody from 'raw-body';
 import { access } from 'node:fs/promises';
+import getPort from 'get-port';
 
 export async function freeport(): Promise<number> {
-	const server = net.createServer();
-	await new Promise<void>((resolve, reject) => server.listen(0, resolve).on('error', reject));
-	const address = server.address() as net.AddressInfo;
-	const port = address.port;
-	await new Promise((resolve) => server.close(resolve));
-	return port;
+	return getPort({
+		host: '127.0.0.1',
+	});
 }
 
 export function getJSONBody<Body = any>(req: Request): Promise<Body> {
@@ -22,6 +20,10 @@ export function getJSONBody<Body = any>(req: Request): Promise<Body> {
 			}
 		});
 	});
+}
+
+export function getBody(req: Request): Promise<Buffer> {
+	return getRawBody(req);
 }
 
 export function getTextBody(req: Request): Promise<string> {

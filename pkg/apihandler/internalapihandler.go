@@ -28,8 +28,10 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/metrics"
+	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
+	"github.com/wundergraph/wundergraph/pkg/trace"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -82,7 +84,7 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 		return streamClosers, fmt.Errorf("authentication config missing")
 	}
 
-	planConfig, err := i.loader.Load(*api.EngineConfiguration, api.Options.ServerUrl)
+	planConfig, err := i.loader.Load(api.EngineConfiguration, api.Options.ServerUrl)
 	if err != nil {
 		return streamClosers, err
 	}
@@ -335,8 +337,10 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reqID := r.Header.Get(logging.RequestIDHeader)
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
+	r = operation.SetOperationMetaData(r, h.operation)
 
-	r = setOperationMetaData(r, h.operation)
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	bodyBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(bodyBuf)
@@ -420,8 +424,10 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 	reqID := r.Header.Get(logging.RequestIDHeader)
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
+	r = operation.SetOperationMetaData(r, h.operation)
 
-	r = setOperationMetaData(r, h.operation)
+	// Set trace attributes based on the current operation
+	trace.SetOperationAttributes(r.Context())
 
 	bodyBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(bodyBuf)
@@ -525,5 +531,5 @@ func NewRequestFromWunderGraphClientRequest(ctx context.Context, body []byte) (*
 		return request, nil
 	}
 
-	return nil, nil
+	return nil, fmt.Errorf("__wg.clientRequest not found in %s", string(body))
 }

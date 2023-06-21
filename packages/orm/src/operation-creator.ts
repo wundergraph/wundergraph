@@ -6,6 +6,7 @@ import { defaultSelection, type DefaultSelection } from './selections';
 
 import { OperationBuilder } from './operation-builder';
 import { Executor } from './executor';
+import { ClientRequest } from './internal-types';
 
 interface OperationCreatorConfig {
 	// @todo replace with type-annotated `SchemaDefinitionNode`
@@ -42,7 +43,15 @@ type RootMethod<Config extends OperationCreatorConfig, Type extends RootType> = 
 }>;
 
 export class OperationCreator<Config extends OperationCreatorConfig> {
-	constructor(private readonly config: { schema: GraphQLSchema; namespace: string; executor: Executor }) {}
+	constructor(
+		private readonly config: {
+			schema: GraphQLSchema;
+			namespace: string;
+			executor: Executor;
+			clientRequest?: ClientRequest;
+			extraHeaders?: Record<string, string>;
+		}
+	) {}
 
 	query: RootMethod<Config, 'Query'> = (rootField) => {
 		const rootType = OperationTypeNode.QUERY;
@@ -90,6 +99,8 @@ export class OperationCreator<Config extends OperationCreatorConfig> {
 			typeSelection: selection,
 			executor: this.config.executor,
 			namespace: this.config.namespace,
+			clientRequest: this.config.clientRequest,
+			extraHeaders: this.config.extraHeaders,
 		});
 	}
 }

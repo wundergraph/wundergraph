@@ -3,11 +3,34 @@ import { JSONSchema7 } from 'json-schema';
 import { OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import { GraphQLOperation } from '../graphql/operations';
 import { OpenApiBuilder, isValidOpenApiSchemaName } from './index';
+import { JSONSchema } from 'json-schema-to-typescript';
 
-const emptySchema = {
+const emptySchema: JSONSchema7 = {
 	type: 'object',
 	properties: {},
 	additionalProperties: false,
+};
+
+const personSchema: JSONSchema7 = {
+	type: 'object',
+	properties: {
+		data: {
+			$ref: '#/definitions/Person',
+		},
+	},
+	additionalProperties: false,
+	definitions: {
+		Person: {
+			type: 'object',
+			properties: {
+				name: { type: 'string' },
+				surname: { type: 'string' },
+				age: { type: 'number' },
+			},
+			required: ['name', 'surname'],
+			additionalProperties: false,
+		},
+	},
 };
 
 const operations = [
@@ -49,7 +72,7 @@ const operations = [
 		OperationType: OperationType.MUTATION,
 		ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
 		AuthenticationConfig: { required: true },
-		VariablesSchema: emptySchema,
+		VariablesSchema: personSchema,
 		ResponseSchema: emptySchema,
 	},
 ] as GraphQLOperation[];
@@ -144,16 +167,16 @@ describe('OpenAPI builder', () => {
 		expect(querySpec.get?.parameters?.[0].schema).toStrictEqual({ type: 'string' });
 		const queryResponse = querySpec.get?.responses['200'];
 		expect(queryResponse).toBeDefined();
-		expect(queryResponse?.content['application/json'].schema).toBe(operations[0].ResponseSchema);
+		expect(queryResponse?.content['application/json'].schema).toEqual(operations[0].ResponseSchema);
 
 		const mutationSpec = result.paths['/MutationPath'];
 		expect(mutationSpec).toBeDefined();
 		expect(mutationSpec.get).toBeUndefined();
 		expect(mutationSpec.post?.operationId).toBe('Mutation');
-		expect(mutationSpec.post?.requestBody?.content['application/json'].schema).toBe(operations[1].VariablesSchema);
+		expect(mutationSpec.post?.requestBody?.content['application/json'].schema).toEqual(operations[1].VariablesSchema);
 		const mutationResponse = mutationSpec.post?.responses['200'];
 		expect(mutationResponse).toBeDefined();
-		expect(mutationResponse?.content['application/json'].schema).toBe(operations[1].ResponseSchema);
+		expect(mutationResponse?.content['application/json'].schema).toEqual(operations[1].ResponseSchema);
 	});
 
 	test('skip internal operations', async () => {
@@ -254,6 +277,28 @@ describe('OpenAPI builder', () => {
 		expect(refName).toBeDefined();
 		expect(isValidOpenApiSchemaName(refName!)).toBeTruthy();
 		expect(result.components?.schemas?.[refName!]).toBeDefined();
+	});
+
+	test('move definitions from input to /components/schemas', () => {
+		const operations = [
+			{
+				Name: 'PutUser',
+				PathName: 'users/put',
+				OperationType: OperationType.MUTATION,
+				ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+				AuthenticationConfig: { required: true },
+				VariablesSchema: personSchema,
+				ResponseSchema: emptySchema,
+			},
+		] as unknown as GraphQLOperation[];
+
+		const result = build(operations);
+		const operation = result.paths['/users/put'].post;
+		const inputSchema = operation?.requestBody?.content?.['application/json']?.schema;
+		expect((inputSchema?.properties?.['data'] as JSONSchema)?.$ref).toBe('#/components/schemas/Person');
+		const personDefinition = result?.components?.schemas?.['Person'];
+		expect(personDefinition).toBeDefined();
+		expect(personDefinition).toEqual(personSchema?.definitions?.['Person']);
 	});
 
 	test('OpenAPI Builder', async () => {

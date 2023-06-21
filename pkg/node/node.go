@@ -12,10 +12,12 @@ import (
 	"time"
 
 	"github.com/dgraph-io/ristretto"
+	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/mux"
 	"github.com/pires/go-proxyproto"
 	"github.com/rs/cors"
 	"github.com/valyala/fasthttp"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/time/rate"
@@ -28,6 +30,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/metrics"
 	"github.com/wundergraph/wundergraph/pkg/node/nodetemplates"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/trace"
 	"github.com/wundergraph/wundergraph/pkg/validate"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
@@ -70,6 +73,7 @@ type Node struct {
 	apiClient      *fasthttp.Client
 	options        options
 	WundergraphDir string
+	tracer         *sdktrace.TracerProvider
 }
 
 type options struct {
@@ -94,6 +98,7 @@ type options struct {
 	healthCheckTimeout      time.Duration
 	onServerConfigLoad      func(config *WunderNodeConfig)
 	onServerError           func(err error)
+	traceBatchTimeout       time.Duration
 }
 
 type Option func(options *options)
@@ -155,6 +160,18 @@ func WithGlobalRateLimit(requests int, perDuration time.Duration) Option {
 		options.globalRateLimit.enable = true
 		options.globalRateLimit.requests = requests
 		options.globalRateLimit.perDuration = perDuration
+	}
+}
+
+// WithTraceBatchTimeout sets the timeout for the trace batch exporter.
+// It defines how long the exporter will wait for a batch to be filled before sending it.
+// If the timeout is less or equal than 0, the default value of 5 seconds will be used
+func WithTraceBatchTimeout(batchTimeout time.Duration) Option {
+	return func(options *options) {
+		if batchTimeout <= 0 {
+			batchTimeout = 3000 * time.Millisecond
+		}
+		options.traceBatchTimeout = batchTimeout
 	}
 }
 
@@ -251,44 +268,81 @@ func (n *Node) StartBlocking(opts ...Option) error {
 	return g.Wait()
 }
 
+func (n *Node) startTracer(traceConfig *trace.Config) error {
+	tp, err := trace.StartAgent(n.log, *traceConfig)
+	if err != nil {
+		return err
+	}
+	n.tracer = tp
+
+	return nil
+}
+
 func (n *Node) Shutdown(ctx context.Context) error {
 	if n.metrics != nil {
 		if err := n.metrics.Shutdown(ctx); err != nil {
 			return err
 		}
 	}
+
 	if n.server != nil {
 		if err := n.server.Shutdown(ctx); err != nil {
 			return err
 		}
 	}
+
 	if n.internalServer != nil {
 		if err := n.internalServer.Shutdown(ctx); err != nil {
 			return err
 		}
 	}
+
+	if n.tracer != nil {
+		if err := n.tracer.ForceFlush(ctx); err != nil {
+			n.log.Error("could not force flush tracer", zap.Error(err))
+		}
+		if err := n.tracer.Shutdown(ctx); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
+// Close closes the node and all its dependencies.
+// It is doing that without waiting for the node to shutdown properly.
 func (n *Node) Close() error {
+	if n.metrics != nil {
+		n.metrics.Close()
+		n.metrics = nil
+	}
 	if n.builder != nil {
 		if err := n.builder.Close(); err != nil {
 			return err
 		}
 		n.builder = nil
 	}
+
 	if n.server != nil {
 		if err := n.server.Close(); err != nil {
 			return err
 		}
 		n.server = nil
 	}
+
 	if n.internalServer != nil {
 		if err := n.internalServer.Close(); err != nil {
 			return err
 		}
 		n.internalServer = nil
 	}
+
+	if n.tracer != nil {
+		if err := n.tracer.Shutdown(context.Background()); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -396,6 +450,31 @@ func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (
 }
 
 func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
+	if nodeConfig.Api.Options.OpenTelemetry.Enabled {
+		endpoint := nodeConfig.Api.Options.OpenTelemetry.ExporterHTTPEndpoint
+		sampler := nodeConfig.Api.Options.OpenTelemetry.Sampler
+
+		n.log.Info("OpenTelemetry enabled",
+			zap.String("endpoint", endpoint),
+			zap.Float64("sampler", sampler),
+			zap.String("batchTimeout", n.options.traceBatchTimeout.String()),
+		)
+
+		if err := n.startTracer(&trace.Config{
+			Name:         "wundernode",
+			Endpoint:     endpoint,
+			Batcher:      "otlphttp",
+			OtlpHttpPath: "/v1/traces",
+			BatchTimeout: n.options.traceBatchTimeout,
+			Sampler:      sampler,
+			OtlpHeaders: map[string]string{
+				"Authorization": fmt.Sprintf("Bearer %s", nodeConfig.Api.Options.OpenTelemetry.AuthToken),
+			},
+		}); err != nil {
+			return err
+		}
+	}
+
 	router := mux.NewRouter()
 	internalRouter := mux.NewRouter()
 
@@ -435,7 +514,11 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		return errors.New("API config invalid")
 	}
 
-	hooksClient := hooks.NewClient(nodeConfig.Api.Options.ServerUrl, n.log)
+	hooksClient := hooks.NewClient(&hooks.ClientOptions{
+		EnableTracing: nodeConfig.Api.Options.OpenTelemetry.Enabled,
+		ServerURL:     nodeConfig.Api.Options.ServerUrl,
+		Logger:        n.log,
+	})
 
 	dialer := &net.Dialer{
 		Timeout:   10 * time.Second,
@@ -463,6 +546,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		API:                  nodeConfig.Api,
 		HooksClient:          hooksClient,
 		EnableRequestLogging: n.options.enableRequestLogging,
+		EnableTracing:        nodeConfig.Api.Options.OpenTelemetry.Enabled,
 		Metrics:              n.metrics,
 	})
 
@@ -565,10 +649,15 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	}))
 
 	handler := n.setupGlobalMiddlewares(router, nodeConfig)
-	internalHandler := http.HandlerFunc(internalRouter.ServeHTTP)
+	internalHandler := http.Handler(internalRouter)
 
 	connContext := func(ctx context.Context, c net.Conn) context.Context {
 		return context.WithValue(ctx, "conn", c)
+	}
+
+	if nodeConfig.Api.Options.OpenTelemetry.Enabled {
+		handler = trace.WrapHandler(handler, trace.PublicServerAttribute)
+		internalHandler = trace.WrapHandler(internalHandler, trace.InternalServerAttribute)
 	}
 
 	n.server = &http.Server{
@@ -776,16 +865,15 @@ func (n *Node) filePollConfig(filePath string) error {
 func (n *Node) reloadFileConfig(filePath string) error {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		n.log.Error("reloadFileConfig ioutil.ReadFile", zap.String("filePath", filePath), zap.Error(err))
+		n.log.Error("reloadFileConfig os.ReadFile", zap.String("filePath", filePath), zap.Error(err))
 		return err
 	}
 	if len(data) == 0 {
 		return errors.New("empty config file")
 	}
 	var graphConfig wgpb.WunderGraphConfiguration
-	err = json.Unmarshal(data, &graphConfig)
-	if err != nil {
-		n.log.Error("reloadFileConfig json.Unmarshal", zap.String("filePath", filePath), zap.Error(err))
+	if err := proto.Unmarshal(data, &graphConfig); err != nil {
+		n.log.Error("decoding config file", zap.Error(err))
 		return err
 	}
 

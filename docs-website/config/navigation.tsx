@@ -391,6 +391,19 @@ const navigation = [
 				],
 			},
 			{
+				title: 'Logging and Monitoring',
+				links: [
+					{
+						title: 'Logging',
+						href: '/docs/guides/logging',
+					},
+					{
+						title: 'Monitoring and Observability',
+						href: '/docs/guides/monitoring-and-observability',
+					},
+				],
+			},
+			{
 				title: 'Security',
 				links: [
 					{
@@ -433,10 +446,6 @@ const navigation = [
 					{
 						title: 'Extend the WunderGraph server context',
 						href: '/docs/guides/context-factory',
-					},
-					{
-						title: 'Monitoring and observability',
-						href: '/docs/guides/monitoring-and-observability',
 					},
 				],
 			},
@@ -995,6 +1004,10 @@ const navigation = [
 						title: 'Private NPM dependencies',
 						href: '/docs/cloud/private-npm-dependencies',
 					},
+					{
+						title: 'Preview environments',
+						href: '/docs/cloud/preview-environments',
+					},
 				],
 			},
 			{
@@ -1011,6 +1024,15 @@ const navigation = [
 					{
 						title: 'Neon',
 						href: '/docs/cloud/integrations/neon',
+					},
+				],
+			},
+			{
+				title: 'Open Telemetry Tracing',
+				links: [
+					{
+						title: 'Public OpenTelemetry Collector',
+						href: '/docs/cloud/otel-collector',
 					},
 				],
 			},
@@ -1197,7 +1219,7 @@ const navigation = [
 					},
 					{
 						title: 'Schema extension',
-						href: '/docs/wundergraph-config-ts-reference/configure-schema-extension',
+						href: '/docs/wundergraph-config-ts-reference/schema-extension-configuration',
 					},
 					{
 						title: 'WunderNode Options',
