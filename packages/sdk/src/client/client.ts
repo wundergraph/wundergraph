@@ -416,10 +416,12 @@ export class Client {
 		const generator = this.subscribeWithFetch<Data, Error>(options);
 
 		if (cb) {
+			let last: ClientResponse<Data, Error> | undefined;
 			for await (const event of generator) {
+				last = event;
 				cb(event);
 			}
-			return;
+			return last;
 		}
 
 		return generator;
@@ -480,7 +482,9 @@ export class Client {
 	}
 
 	protected async fetchSubscription<Data = any, Error = any>(subscription: SubscriptionRequestOptions) {
-		const params = this.searchParams();
+		const params = this.searchParams({
+			wg_json_patch: '',
+		});
 		const variables = this.stringifyInput(subscription.input);
 		if (variables) {
 			params.set('wg_variables', variables);
@@ -518,10 +522,24 @@ export class Client {
 		let message: string = '';
 		let lastResponse: GraphQLResponse | null = null;
 		while (true) {
-			const { value, done } = await reader.read();
-			if (done) return;
-			if (!value) continue;
-			message += decoder.decode(value);
+			let result: ReadableStreamReadResult<Uint8Array>;
+			try {
+				result = await reader.read();
+			} catch (e) {
+				// If we're blocked awaiting for a read when the attached
+				// AbortController's abort() method is called, we'll get
+				// an exception here. Make sure we swallow AbortError, but
+				// nothing else.
+				if (!(e instanceof Error) || e.name !== 'AbortError') {
+					throw e;
+				}
+				result = {
+					done: true,
+				};
+			}
+			if (result.done) return;
+			if (!result.value) continue;
+			message += decoder.decode(result.value);
 			if (message.endsWith('\n\n')) {
 				const jsonResp = JSON.parse(message.substring(0, message.length - 2));
 				if (lastResponse !== null && Array.isArray(jsonResp)) {

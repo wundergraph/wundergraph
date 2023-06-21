@@ -35,6 +35,7 @@ export interface OperationsDefinition<
 	Queries extends OperationDefinition = OperationDefinition,
 	Mutations extends OperationDefinition = OperationDefinition,
 	Subscriptions extends OperationDefinition = OperationDefinition,
+	LiveQueries extends OperationDefinition = OperationDefinition,
 	UserRole extends string = string,
 	S3Provider extends S3ProviderDefinition = S3ProviderDefinition,
 	AuthProvider extends string = string
@@ -45,6 +46,7 @@ export interface OperationsDefinition<
 	queries: Queries;
 	mutations: Mutations;
 	subscriptions: Subscriptions;
+	liveQueries: LiveQueries;
 }
 
 export interface OperationDefinition {
