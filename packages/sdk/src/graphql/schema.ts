@@ -179,6 +179,7 @@ export const cleanupSchema = (schema: GraphQLSchema): string => {
 				case 'example':
 				case 'globalOptions':
 				case 'httpOperation':
+				case 'regexp':
 				case 'resolveRoot':
 				case 'typescript':
 				// omnigraph/soap directives:
