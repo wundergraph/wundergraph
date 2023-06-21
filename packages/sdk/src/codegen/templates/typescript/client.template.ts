@@ -15,7 +15,7 @@ import type {
 	FetchUserRequestOptions,
 	UploadValidationOptions,
 	QueryRequestOptions,
-  MutationRequestOptions,
+	MutationRequestOptions,
 	ClientOperationErrors,
 	ExtractProfileName,
 	ExtractMeta,
@@ -128,17 +128,6 @@ export class WunderGraphClient extends Client {
 	}
 
 	subscribe<
-		OperationName extends Extract<keyof Operations["liveQueries"], string>,
-		Input extends Operations["liveQueries"][OperationName]["input"] = Operations["liveQueries"][OperationName]["input"],
-		Response extends Operations["liveQueries"][OperationName]["response"] = Operations["liveQueries"][OperationName]["response"]
-	>(
-		options: OperationName extends string
-		? SubscriptionRequestOptions<OperationName, Input> & {liveQuery: true}
-		: SubscriptionRequestOptions,
-		cb?: SubscriptionEventHandler<Response["data"], Response["error"]>
-	): Promise<Response | undefined>;
-
-	subscribe<
 		OperationName extends Extract<keyof Operations["subscriptions"], string>,
 		Input extends Operations["subscriptions"][OperationName]["input"] = Operations["subscriptions"][OperationName]["input"],
 		Response extends Operations["subscriptions"][OperationName]["response"] = Operations["subscriptions"][OperationName]["response"],
@@ -208,6 +197,14 @@ export type Subscriptions = {
     "{{operationPath}}": {
         {{#if hasInput}}input: {{inputTypename}}{{else}}input?: undefined{{/if}}
     		response: {{#if isTypeScriptOperation}}{ data?: {{responseDataTypename}}, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{responseTypename}}['data'], error?: ClientOperationErrors }{{/if}}
+        requiresAuthentication: {{requiresAuthentication}}
+    }
+{{/each}}
+{{#each liveQueries}}
+    "{{operationPath}}": {
+        {{#if hasInput}}input: {{inputTypename}}{{else}}input?: undefined{{/if}}
+    		response: {{#if isTypeScriptOperation}}{ data?: {{responseDataTypename}}, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{responseTypename}}['data'], error?: ClientOperationErrors }{{/if}}
+        liveQuery: true
         requiresAuthentication: {{requiresAuthentication}}
     }
 {{/each}}

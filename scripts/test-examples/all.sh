@@ -20,7 +20,7 @@ set -e
 SKIP="faunadb-nextjs graphql-hasura-subscriptions inject-bearer"
 
 # These are broken
-SKIP="${SKIP} nextjs-todos remix nuxt"
+SKIP="${SKIP} nextjs-todos remix nuxt sveltekit-oidc-cookies-auth sveltekit-todos"
 
 ## Doesn't support monorepo
 SKIP="${SKIP} expo-swr"

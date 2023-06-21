@@ -42,7 +42,7 @@ func (w *responseWriter) WriteHeader(statusCode int) {
 
 func (w *responseWriter) Write(data []byte) (int, error) {
 	if w.statusCode == 0 {
-		w.WriteHeader(http.StatusOK)
+		w.statusCode = http.StatusOK
 	}
 	n, err := w.w.Write(data)
 	w.written += int64(n)
@@ -71,7 +71,7 @@ func (w *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 
 func (w *responseWriter) ReadFrom(r io.Reader) (int64, error) {
 	if w.statusCode == 0 {
-		w.WriteHeader(http.StatusOK)
+		w.statusCode = http.StatusOK
 	}
 	var n int64
 	var err error
