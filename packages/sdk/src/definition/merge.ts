@@ -498,9 +498,11 @@ const collectAndReplaceDescriptions = (descriptions: DescriptionsMap, schemaSDL:
 
 	const modifiedAst = visit(schemaAST, {
 		leave(node, key, parent, path, ancestors) {
-			if (!('description' in node && !!node.description && node.description.value.trim() !== '')) {
+			const nodeHasDescription = 'description' in node && !!node.description && node.description.value.trim() !== '';
+			if (!nodeHasDescription) {
 				return node;
 			}
+
 			let mapKey: string;
 			switch (node.kind) {
 				case Kind.SCHEMA_DEFINITION:
@@ -535,7 +537,10 @@ const collectAndReplaceDescriptions = (descriptions: DescriptionsMap, schemaSDL:
 const restoreDescriptions = (descriptions: DescriptionsMap, schemaAST: DocumentNode): DocumentNode => {
 	return visit(schemaAST, {
 		leave: function (node) {
-			if (!('description' in node && !!node.description && node.description.value.startsWith('replaced-'))) {
+			const nodeHasReplacedDescription =
+				'description' in node && !!node.description && node.description.value.startsWith('replaced-');
+
+			if (!nodeHasReplacedDescription) {
 				return node;
 			}
 
