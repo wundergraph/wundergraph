@@ -766,8 +766,14 @@ type UserHandler struct {
 
 func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	user := UserFromContext(r.Context())
+	// Make sure we never cache responses in a public cache, since the response
+	// varies depending on the user but it might be a 2xx
+	w.Header().Set("Cache-Control", "private, max-age=0, stale-while-revalidate=60")
 	if user == nil {
-		http.NotFound(w, r)
+		// Return a 204 instead of a 4xx. Returning a 4xx would cause an error to be shown
+		// on the developer console in the browser when this is hit to test if the current
+		// user is authenticated. Keep this in sync with packages/sdk/src/client/client.ts
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 
@@ -796,7 +802,6 @@ func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if user.ETag != "" {
 		w.Header()["ETag"] = []string{user.ETag}
-		w.Header().Set("Cache-Control", "private, max-age=0, stale-while-revalidate=60")
 	}
 
 	encoder := json.NewEncoder(w)
