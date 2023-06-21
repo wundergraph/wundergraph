@@ -9,6 +9,26 @@ servers:
     description: Example Server
 
 paths:
+  /notes/all:
+    get:
+      summary: Returns a note by ID
+      operationId: all
+      responses:
+        '200':
+          description: A note object
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                    text:
+                      type: string
+
   /notes/note/{noteID}:
     get:
       summary: Returns a note by ID
@@ -41,6 +61,28 @@ paths:
           description: A note with the specified ID was not found.
         default:
           description: Unexpected error
+    delete:
+      summary: Deletes a note by its ID
+      operationId: deleteNote
+      parameters:
+        - name: noteID
+          in: path
+          required: true
+          description: Note unique identifier
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '204':
+          description: No content
+        '400':
+          description: The specified note ID is invalid (not a number).
+        '404':
+          description: A note with the specified ID was not found.
+        default:
+          description: Unexpected error
+
   /notes/new:
     post:
       summary: Creates a new note

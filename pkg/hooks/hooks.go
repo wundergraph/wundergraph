@@ -17,7 +17,7 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/hashicorp/go-retryablehttp"
-	"github.com/mattbaird/jsonpatch"
+	"github.com/wI2L/jsondiff"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	otrace "go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
@@ -338,7 +338,7 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 			}
 		}
 		if useJsonPatch && lastLine.Len() != 0 {
-			patchOperation, err := jsonpatch.CreatePatch(lastLine.Bytes(), line[:len(line)-1]) // remove newline
+			patchOperation, err := jsondiff.CompareJSON(lastLine.Bytes(), line[:len(line)-1]) // remove newline
 			if err != nil {
 				return fmt.Errorf("error creating json patch: %w", err)
 			}

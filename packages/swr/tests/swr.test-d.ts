@@ -40,6 +40,8 @@ type Subscriptions = {
 	};
 };
 
+type LiveQueries = {};
+
 type S3Providers = {
 	minio: {
 		hasProfiles: true;
@@ -56,6 +58,7 @@ type Operations = OperationsDefinition<
 	Queries,
 	Mutations,
 	Subscriptions,
+	LiveQueries,
 	UserRole,
 	S3Providers,
 	keyof typeof AuthProviderId
