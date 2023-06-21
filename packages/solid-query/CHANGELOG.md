@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.45](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.44...@wundergraph/solid-query@0.4.45) (2023-06-21)
+
+### Bug Fixes
+
+* produce JSONPatch patches with removals in the right order ([#1060](https://github.com/wundergraph/wundergraph/issues/1060)) ([461b6a4](https://github.com/wundergraph/wundergraph/commit/461b6a446a59f3b81e01a1840f151f716e138416)) (@fiam)
+
 ## [0.4.44](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.4.43...@wundergraph/solid-query@0.4.44) (2023-06-09)
 
 **Note:** Version bump only for package @wundergraph/solid-query

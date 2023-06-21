@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.40](https://github.com/wundergraph/wundergraph/compare/@wundergraph/svelte-query@0.2.39...@wundergraph/svelte-query@0.2.40) (2023-06-21)
+
+### Bug Fixes
+
+* produce JSONPatch patches with removals in the right order ([#1060](https://github.com/wundergraph/wundergraph/issues/1060)) ([461b6a4](https://github.com/wundergraph/wundergraph/commit/461b6a446a59f3b81e01a1840f151f716e138416)) (@fiam)
+
 ## [0.2.39](https://github.com/wundergraph/wundergraph/compare/@wundergraph/svelte-query@0.2.38...@wundergraph/svelte-query@0.2.39) (2023-06-09)
 
 **Note:** Version bump only for package @wundergraph/svelte-query
