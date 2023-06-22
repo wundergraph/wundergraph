@@ -186,7 +186,7 @@ export const cleanupSchema = (schema: GraphQLSchema): string => {
 			}
 		},
 		Directive: (node) => {
-			if (omnigraphDirectives.includes(node.name.value)) {
+			if (federationDirectives.includes(node.name.value) || omnigraphDirectives.includes(node.name.value)) {
 				return null;
 			}
 		},
