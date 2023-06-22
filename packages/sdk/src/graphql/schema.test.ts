@@ -45,11 +45,11 @@ describe('cleanupSchema', () => {
 				}
 		
 				type Query {
-					foo: String
+					foo: String @key @extends @external @requires @provides
 				}
 			`;
 
-		it('should remove federation directives definitions', function () {
+		it('should remove federation directives and directive definitions', function () {
 			const schema = buildSchema(schemaSDL);
 			const resultSchema = cleanupSchema(schema);
 			expect(resultSchema).toMatchInlineSnapshot(`
