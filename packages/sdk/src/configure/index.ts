@@ -744,7 +744,7 @@ const resolveApplication = async (
 	s3?: S3Provider,
 	hooks?: HooksConfiguration
 ): Promise<ResolvedApplication> => {
-	const merged = mergeApis(roles, customClaims, ...resolvedApis);
+	const merged = mergeApis({ roles, customClaims, apis: resolvedApis });
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
 	return {
 		Apis: resolvedApis,
