@@ -1,6 +1,5 @@
 import { cleanupSchema } from './schema';
 import { buildSchema } from 'graphql';
-import { describe } from 'node:test';
 
 describe('cleanupSchema', () => {
 	describe('renamed query types', function () {

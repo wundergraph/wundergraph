@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`should rename query type 1`] = `
+exports[`cleanupSchema renamed query types should rename query type 1`] = `
 "schema {
   query: Query
   mutation: Mutation
