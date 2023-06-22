@@ -183,15 +183,11 @@ export const cleanupSchema = (schema: GraphQLSchema): string => {
 		DirectiveDefinition: (node) => {
 			if (federationDirectives.includes(node.name.value) || omnigraphDirectives.includes(node.name.value)) {
 				return null;
-			} else {
-				return node;
 			}
 		},
 		Directive: (node) => {
 			if (omnigraphDirectives.includes(node.name.value)) {
 				return null;
-			} else {
-				return node;
 			}
 		},
 		FieldDefinition: {
