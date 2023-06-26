@@ -1,5 +1,5 @@
 {
-  "name": "wundergraph-graphql-ws",
+  "name": "wundergraph-graphql-apollo-subscriptions",
   "version": "1.0.0",
   "description": "",
   "scripts": {
@@ -14,7 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.164.0",
+    "@wundergraph/sdk": "^0.166.0",
     "graphql": "^16.3.0"
   },
   "devDependencies": {

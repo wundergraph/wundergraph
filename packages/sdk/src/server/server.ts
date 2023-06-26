@@ -82,7 +82,7 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 			throw new Error('User defined api is not set.');
 		}
 	} catch (err: any) {
-		logger.fatal(err, 'Could not load wundergraph.config.json. Did you forget to run `wunderctl generate` ?');
+		logger.fatal(err, 'Could not load wundergraph configuration file. Did you forget to run `wunderctl generate` ?');
 		process.exit(1);
 	}
 }
