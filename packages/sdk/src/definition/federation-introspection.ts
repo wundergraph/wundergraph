@@ -117,7 +117,12 @@ export const introspectFederation = async (introspection: GraphQLFederationIntro
 			}));
 
 			const apis = await Promise.all(graphQLIntrospections.map((i) => introspectGraphql(i, options)));
-			const merged = mergeApis([], [], ...apis) as GraphQLApi;
+			const merged = mergeApis({
+				roles: [],
+				customClaims: [],
+				apis,
+				ignoreDescriptionConflicts: true,
+			}) as GraphQLApi;
 			merged.Namespace = introspection.apiNamespace || '';
 			return merged;
 		}
