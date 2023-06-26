@@ -57,6 +57,6 @@ body:
         WunderGraph is an Open Source project. That means that the priority we assign to this issue might not align with your business needs.
         If you need this issue to be expedited, understand that we are open to the following options:
 
-          * Consider writing a Test Case for this issue and submitting a Pull Request for it.
-          * If you have the ability to do so, consider looking into the issue yourself and open a Pull Request for this.
+          * Write a test case or test suite for this issue that clearly exhibits the issue and submit a Pull Request.
+          * If possible, investigate the issue yourself and submit a Pull Request including the proposed solution with relevant test cases.
           * If you haven't already, talk to [Sales](https://wundergraph.com/contact/sales) to discuss further options, which includes paid support.
