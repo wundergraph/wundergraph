@@ -31,10 +31,11 @@ body:
         Please include relevant information such as:
 
         * Versions of the software you rely on:
-          * WunderGraph
-          * NodeJS, PNPM
+          * Runtime: NodeJS (`node --version`), Docker (`docker --version`)
+          * Package manager: NPM (`npm --version`), Yarn (`yarn --version`) or PNPM (`pnpm --version`)
           * APIs and databases ...
         * Relevant snippets from:
+          * `.wundergraph/generated/wundergraph.build_info.json`
           * `.wundergraph/wundergraph.server.ts`
           * `.wundergraph/wundergraph.config.ts`
           * `.wundergraph/operations/*.graphql`
