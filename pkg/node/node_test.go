@@ -510,6 +510,9 @@ var (
 
 func federationPlanConfiguration(userServiceURL, productServiceURL, reviewServiceURL string) *wgpb.EngineConfiguration {
 	return &wgpb.EngineConfiguration{
+		StringStorage: map[string]string{
+			"": "",
+		},
 		DatasourceConfigurations: []*wgpb.DataSourceConfiguration{
 			{
 				Kind: wgpb.DataSourceKind_GRAPHQL,

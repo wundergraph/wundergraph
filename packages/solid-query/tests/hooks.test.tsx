@@ -36,7 +36,10 @@ export type Subscriptions = {
 	};
 };
 
-export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, string, {}, 'github'> {}
+export type LiveQueries = {};
+
+export interface Operations
+	extends OperationsDefinition<Queries, Mutations, Subscriptions, LiveQueries, string, {}, 'github'> {}
 
 export function sleep(time: number) {
 	return new Promise<void>((resolve) => setTimeout(resolve, time));

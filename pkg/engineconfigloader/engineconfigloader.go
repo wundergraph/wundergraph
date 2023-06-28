@@ -306,7 +306,16 @@ func New(wundergraphDir string, resolvers ...FactoryResolver) *EngineConfigLoade
 	}
 }
 
-func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration, wgServerUrl string) (*plan.Configuration, error) {
+func (l *EngineConfigLoader) LoadInternedString(engineConfig *wgpb.EngineConfiguration, str *wgpb.InternedString) (string, error) {
+	key := str.GetKey()
+	s, ok := engineConfig.StringStorage[key]
+	if !ok {
+		return "", fmt.Errorf("no string found for key %q", key)
+	}
+	return s, nil
+}
+
+func (l *EngineConfigLoader) Load(engineConfig *wgpb.EngineConfiguration, wgServerUrl string) (*plan.Configuration, error) {
 	var (
 		outConfig plan.Configuration
 	)
@@ -453,6 +462,11 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration, wgServe
 				}
 			}
 
+			graphqlSchema, err := l.LoadInternedString(engineConfig, in.CustomGraphql.GetUpstreamSchema())
+			if err != nil {
+				return nil, fmt.Errorf("could not load GraphQL schema for data source %s: %w", in.Id, err)
+			}
+
 			out.Custom = graphql_datasource.ConfigJson(graphql_datasource.Configuration{
 				Fetch: graphql_datasource.FetchConfiguration{
 					URL:    fetchUrl,
@@ -467,7 +481,7 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration, wgServe
 					URL:    subscriptionUrl,
 					UseSSE: in.CustomGraphql.Subscription.UseSSE,
 				},
-				UpstreamSchema:         in.CustomGraphql.UpstreamSchema,
+				UpstreamSchema:         graphqlSchema,
 				CustomScalarTypeFields: customScalarTypeFields,
 			})
 		case wgpb.DataSourceKind_POSTGRESQL,
@@ -479,11 +493,19 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration, wgServe
 			if in.CustomDatabase == nil {
 				continue
 			}
+			prismaSchema, err := l.LoadInternedString(engineConfig, in.CustomDatabase.PrismaSchema)
+			if err != nil {
+				return nil, fmt.Errorf("could not load prisma schema for data source %s: %w", in.Id, err)
+			}
+			graphqlSchema, err := l.LoadInternedString(engineConfig, in.CustomDatabase.GraphqlSchema)
+			if err != nil {
+				return nil, fmt.Errorf("could not load GraphQL schema for data source %s: %w", in.Id, err)
+			}
 			databaseURL := loadvariable.String(in.CustomDatabase.DatabaseURL)
 			config := database.Configuration{
 				DatabaseURL:         databaseURL,
-				PrismaSchema:        l.addDataSourceToPrismaSchema(in.CustomDatabase.PrismaSchema, databaseURL, in.Kind),
-				GraphqlSchema:       in.CustomDatabase.GraphqlSchema,
+				PrismaSchema:        l.addDataSourceToPrismaSchema(prismaSchema, databaseURL, in.Kind),
+				GraphqlSchema:       graphqlSchema,
 				CloseTimeoutSeconds: in.CustomDatabase.CloseTimeoutSeconds,
 				WunderGraphDir:      l.wundergraphDir,
 			}

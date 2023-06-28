@@ -146,4 +146,15 @@ describe('Operations', () => {
 
 		assertType<weather_LanguageValues | undefined>(weatherInput.lang);
 	});
+
+	it('should query from view', async () => {
+		const client = wg.client();
+
+		const { data, error } = await client.query({
+			operationName: 'UserNames',
+		});
+
+		expect(error).toBeUndefined();
+		expect(data?.users_post_findManyUserName?.length).toBeGreaterThan(0);
+	});
 });

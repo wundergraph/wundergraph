@@ -1,6 +1,7 @@
 import {
 	buildSchema,
 	DirectiveDefinitionNode,
+	DirectiveNode,
 	DocumentNode,
 	EnumTypeDefinitionNode,
 	FieldDefinitionNode,
@@ -211,6 +212,21 @@ export const applyNameSpaceToGraphQLSchema = (
 					return; // skip well known
 				}
 				const updated: DirectiveDefinitionNode = {
+					...node,
+					name: {
+						...node.name,
+						value: namespace + '_' + node.name.value,
+					},
+				};
+				return updated;
+			},
+		},
+		Directive: {
+			enter: (node) => {
+				if (knownDirectives.find((d) => d === node.name.value) !== undefined) {
+					return; // skip well known
+				}
+				const updated: DirectiveNode = {
 					...node,
 					name: {
 						...node.name,
@@ -488,42 +504,4 @@ export const applyNamespaceToDirectiveConfiguration = (
 		});
 	});
 	return out;
-};
-
-export const applyNamespaceToApi = (api: Api<unknown>, apiNamespace: string, skipRenameRootFields: string[]) => {
-	const schema = buildSchema(api.Schema);
-	const datasources = api.DataSources.map((ds) => ({
-		...ds,
-		RootNodes: applyNameSpaceToTypeFields(ds.RootNodes, schema, apiNamespace),
-		ChildNodes: applyNameSpaceToTypeFields(ds.ChildNodes, schema, apiNamespace),
-		Custom: applyNamespaceToDataSourceCustom(ds, apiNamespace),
-	}));
-	const appliedSchema = applyNameSpaceToGraphQLSchema(api.Schema, skipRenameRootFields, apiNamespace);
-	const fields = applyNamespaceToExistingRootFieldConfigurationsWithPathRewrite(api.Fields, schema, apiNamespace);
-	const types = generateTypeConfigurationsForNamespaceWithExisting(api.Schema, api.Types, apiNamespace);
-	const interpolateVariableDefinitionAsJSON = api.interpolateVariableDefinitionAsJSON.map(
-		(type) => `${apiNamespace}_${type}`
-	);
-	return new Api(appliedSchema, apiNamespace, datasources, fields, types, interpolateVariableDefinitionAsJSON);
-};
-
-const applyNamespaceToDataSourceCustom = (datasource: DataSource, namespace?: string): any => {
-	switch (datasource.Kind) {
-		case DataSourceKind.SQLSERVER:
-		case DataSourceKind.MYSQL:
-		case DataSourceKind.POSTGRESQL:
-		case DataSourceKind.SQLITE:
-		case DataSourceKind.MONGODB:
-			const custom = datasource.Custom as DataSourceCustomDatabase;
-			return {
-				...custom,
-				jsonTypeFields: applyNameSpaceToSingleTypeFields(
-					custom.jsonTypeFields,
-					buildSchema(custom.graphqlSchema),
-					namespace
-				),
-			};
-		default:
-			return datasource.Custom;
-	}
 };

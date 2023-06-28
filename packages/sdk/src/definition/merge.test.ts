@@ -5,7 +5,7 @@ import { mapInputVariable } from '../configure/variables';
 
 test('Should be merged', () => {
 	const userApi: GraphQLApi = new GraphQLApi(
-		'type Query @extends {   me: User } type User @key(fields: "id") {   id: ID!   name: String   username: String }',
+		'directive @some("Some arg"\narg: String) on FIELD_DEFINITION\n type Query @extends { "Query me"\nme: User } type User @key(fields: "id") {   id: ID!   name: String   username: String }',
 		'',
 		[
 			{
@@ -61,7 +61,7 @@ test('Should be merged', () => {
 	);
 
 	const productApi: GraphQLApi = new GraphQLApi(
-		'type Query @extends {   topProducts(first: Int = 5): [Product] }  type Product @key(fields: "upc") {   upc: String!   name: String   price: Int   weight: Int }',
+		'directive @some("Some arg. Conflicted"\narg: String) on FIELD_DEFINITION\n type Query @extends {   topProducts(first: Int = 5): [Product] }  type Product @key(fields: "upc") {   upc: String!   name: String   price: Int   weight: Int }',
 		'',
 		[
 			{
@@ -362,7 +362,13 @@ test('Should be merged', () => {
 		[]
 	);
 
-	const actual = mergeApis([], [], userApi, productApi, reviewsApi, inventoryApi);
+	const actual = mergeApis({
+		roles: [],
+		customClaims: [],
+		apis: [userApi, productApi, reviewsApi, inventoryApi],
+		ignoreDescriptionConflicts: true,
+	});
+
 	expect(actual.Schema).toMatchSnapshot('merged_schema');
 	expect(pretty(actual)).toMatchSnapshot('merged_apis');
 });

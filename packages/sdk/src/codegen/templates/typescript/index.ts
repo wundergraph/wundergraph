@@ -18,6 +18,7 @@ import { visitJSONSchema } from '../../jsonschema';
 import { OperationExecutionEngine } from '@wundergraph/protobuf';
 import { GraphQLOperation } from '../../../graphql/operations';
 import { TypeScriptOperationErrors } from './ts-operation-errors';
+import { deepClone } from '../../../utils/helper';
 
 declare module 'json-schema' {
 	export interface JSONSchema7 {
@@ -123,7 +124,7 @@ export class TypeScriptResponseModels implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const content = generationConfig.config.application.Operations.map((op) => {
 			const dataName = '#/definitions/' + operationResponseDataTypename(op);
-			const responseSchema = JSON.parse(JSON.stringify(op.ResponseSchema)) as JSONSchema7;
+			const responseSchema = deepClone(op.ResponseSchema);
 			if (responseSchema.properties) {
 				responseSchema.properties['data'] = {
 					$ref: dataName,

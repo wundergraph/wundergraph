@@ -13,7 +13,7 @@ import { resolveConfigurationVariable } from '../configure/variables';
 import { onParentProcessExit } from '../utils/process';
 import { customGqlServerMountPath } from './util';
 
-import type { WunderGraphConfiguration } from '@wundergraph/protobuf';
+import { EngineConfiguration, InternedString, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { ConfigurationVariableKind, DataSourceKind } from '@wundergraph/protobuf';
 import type { WebhooksConfig } from '../webhooks/types';
 import type { HooksRouteConfig } from './plugins/hooks';
@@ -40,6 +40,8 @@ import { CreateServerOptions, TracerConfig } from './types';
 import { loadTraceConfigFromWgConfig } from './trace/config';
 import { TelemetryPluginOptions } from './plugins/telemetry';
 import { createLogger } from './logger';
+
+export const WunderGraphConfigurationFilename = 'wundergraph.wgconfig';
 
 const isProduction = process.env.NODE_ENV === 'production';
 let WG_CONFIG: WunderGraphConfiguration;
@@ -68,10 +70,10 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 		process.exit(1);
 	}
 	try {
-		const configContent = fs.readFileSync(path.join(process.env.WG_DIR_ABS!, 'generated', 'wundergraph.config.json'), {
-			encoding: 'utf8',
-		});
-		WG_CONFIG = JSON.parse(configContent);
+		const configContent = fs.readFileSync(
+			path.join(process.env.WG_DIR_ABS!, 'generated', WunderGraphConfigurationFilename)
+		);
+		WG_CONFIG = WunderGraphConfiguration.decode(configContent);
 
 		if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.nodeInternalUrl) {
 			const nodeInternalURL = resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.nodeInternalUrl);
@@ -80,7 +82,7 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 			throw new Error('User defined api is not set.');
 		}
 	} catch (err: any) {
-		logger.fatal(err, 'Could not load wundergraph.config.json. Did you forget to run `wunderctl generate` ?');
+		logger.fatal(err, 'Could not load wundergraph configuration file. Did you forget to run `wunderctl generate` ?');
 		process.exit(1);
 	}
 }
@@ -256,6 +258,14 @@ export const encodeRawClientRequest = (request: ClientRequest, extraHeaders?: Re
  */
 export const rawClientRequest = (body: FastifyRequestBody) => {
 	return body.__wg.clientRequest;
+};
+
+const loadInternedString = (engineConfig: EngineConfiguration, str: InternedString) => {
+	const s = engineConfig.stringStorage[str.key];
+	if (s === undefined) {
+		throw new Error(`could not load interned string ${str.key}`);
+	}
+	return s;
 };
 
 export const createServer = async ({
@@ -453,7 +463,9 @@ export const createServer = async ({
 				return;
 			}
 
-			const schema = ds.customGraphql?.upstreamSchema;
+			const schema = ds.customGraphql?.upstreamSchema
+				? loadInternedString(config.api!.engineConfiguration!, ds.customGraphql?.upstreamSchema)
+				: undefined;
 			let serverName, mountPath;
 
 			if (ds.customGraphql?.fetch?.path?.staticVariableContent) {
