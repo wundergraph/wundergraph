@@ -9,6 +9,7 @@ import (
 
 const (
 	DATASOURCE_USAGE_METRIC_NAME = "WG_DATASOURCE_USAGE"
+	FEATURE_USAGE_METRIC_NAME    = "WG_FEATURE_USAGE"
 )
 
 func UsageMetricSuffix(cmdName string) string {

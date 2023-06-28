@@ -202,7 +202,7 @@ func (c *client) Send(metrics []*Metric) error {
 	if c.log != nil && c.debug {
 		c.log.Info("Telemetry client info", zap.Any("clientInfo", c.clientInfo))
 		for _, m := range metrics {
-			c.log.Info("Telemetry Metric", zap.String("Name", m.Name), zap.Float64("Value", m.Value))
+			c.log.Info("Telemetry Metric", zap.String("Name", m.Name), zap.Float64("Value", m.Value), zap.Any("Tags", m.Tags))
 		}
 	}
 
