@@ -30,6 +30,10 @@ test('apply namespace to directive configuration', () => {
 			directiveName: 'api_customFormat',
 			renameTo: 'customFormat',
 		},
+		{
+			directiveName: 'api_some',
+			renameTo: 'some',
+		},
 	];
 	assert.equal(JSON.stringify(actual, null, '  '), JSON.stringify(expected, null, '  '));
 });
@@ -422,6 +426,7 @@ directive @skip on FIELD
 directive @include on FIELD
 directive @deprecated on FIELD
 directive @specifiedBy on SCALAR
+directive @some on FIELD_DEFINITION
 
 schema {
     query: Query
@@ -434,7 +439,7 @@ interface Heroes {
 }
 
 type Query implements Heroes {
-    api_hero: Character
+    api_hero: Character @some
     droid(id: ID!): Droid
     search(name: String!): SearchResult
 	stringList: [String]
@@ -499,6 +504,7 @@ directive @skip on FIELD
 directive @include on FIELD
 directive @deprecated on FIELD
 directive @specifiedBy on SCALAR
+directive @api_some on FIELD_DEFINITION
 
 schema {
     query: Query
@@ -511,7 +517,7 @@ interface api_Heroes {
 }
 
 type Query implements api_Heroes {
-    api_hero: api_Character
+    api_hero: api_Character @api_some
     api_droid(id: ID!): api_Droid
     api_search(name: String!): api_SearchResult
 	api_stringList: [String]

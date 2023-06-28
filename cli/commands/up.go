@@ -512,7 +512,13 @@ var upCmd = &cobra.Command{
 
 		// trigger server reload after initial config build
 		// because no fs event is fired as build is already done
-		configFileChangeChan <- struct{}{}
+		// Make sure we don't get stuck here if the node has already
+		// exited when we reach this point (and no one is reading from
+		// configFileChangeChan)
+		select {
+		case configFileChangeChan <- struct{}{}:
+		case <-ctx.Done():
+		}
 
 		// wait for context to be canceled (signal, context cancellation or via cancel())
 		<-ctx.Done()

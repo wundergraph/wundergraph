@@ -1,0 +1,63 @@
+name: Issue Report
+description: Report a WunderGraph issue
+title: '[Issue]: '
+labels: ['triage', 'issue']
+assignees:
+  - triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Welcome to the WunderGraph community.
+        Thank you for reporting an issue with our software.
+
+        ## Issue Description
+        Please give us a brief description of the issue you're experiencing.
+        This will help us identify the scope and priority of this issue.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: When using WunderGraph I found that ...
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ## Reproduction path
+        The first step of us working on addressing this issue is that we validate the issue by reproducing it.
+        It's important that we can reproduce the issue on an environment that is not your computer or server environment.
+
+        Please include relevant information such as:
+
+        * Versions of the software you rely on:
+          * Runtime: NodeJS (`node --version`), Docker (`docker --version`)
+          * Package manager: NPM (`npm --version`), Yarn (`yarn --version`) or PNPM (`pnpm --version`)
+          * APIs and databases ...
+        * Relevant snippets from:
+          * `.wundergraph/generated/wundergraph.build_info.json`
+          * `.wundergraph/wundergraph.server.ts`
+          * `.wundergraph/wundergraph.config.ts`
+          * `.wundergraph/operations/*.graphql`
+
+        **Be careful not to share any passwords or private connection strings.**
+
+        The more details you provide here, the easier it will be for us to reproduce, identify and solve the issue.
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      placeholder: This is how I can reproduce this issue ...
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ## Next steps
+
+        WunderGraph is an Open Source project. That means that the priority we assign to this issue might not align with your business needs.
+        If you need this issue to be expedited, understand that we are open to the following options:
+
+          * Write a test case or test suite for this issue that clearly exhibits the issue and submit a Pull Request.
+          * If possible, investigate the issue yourself and submit a Pull Request including the proposed solution with relevant test cases.
+          * If you haven't already, talk to [Sales](https://wundergraph.com/contact/sales) to discuss further options, which includes paid support.

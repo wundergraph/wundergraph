@@ -283,7 +283,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.166.0
+        specifier: workspace:^0.166.1
         version: link:../sdk
       typescript:
         specifier: ^4.7.2
@@ -605,6 +605,9 @@ importers:
       '@graphql-mesh/utils':
         specifier: 0.94.0
         version: 0.94.0(@graphql-mesh/cross-helpers@0.4.0)(@graphql-mesh/types@0.94.0)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.5.0)
+      '@graphql-tools/merge':
+        specifier: ^9.0.0
+        version: 9.0.0(graphql@16.6.0)
       '@graphql-tools/schema':
         specifier: ^8.5.1
         version: 8.5.1(graphql@16.6.0)
@@ -27276,13 +27279,14 @@ packages:
     resolution: {directory: packages/sdk, type: directory}
     id: file:packages/sdk
     name: '@wundergraph/sdk'
-    version: 0.166.0
+    version: 0.166.1
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.3.0
       '@graphql-mesh/cross-helpers': 0.4.0(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(react-native@0.71.7)
       '@graphql-mesh/types': 0.94.0(@graphql-mesh/store@0.94.0)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.5.0)
       '@graphql-mesh/utils': 0.94.0(@graphql-mesh/cross-helpers@0.4.0)(@graphql-mesh/types@0.94.0)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.5.0)
+      '@graphql-tools/merge': 9.0.0(graphql@16.6.0)
       '@graphql-tools/schema': 8.5.1(graphql@16.6.0)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
       '@omnigraph/json-schema': 0.94.2(@graphql-mesh/cross-helpers@0.4.0)(@graphql-mesh/types@0.94.0)(@graphql-mesh/utils@0.94.0)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.5.0)

@@ -1,6 +1,7 @@
 import {
 	buildSchema,
 	DirectiveDefinitionNode,
+	DirectiveNode,
 	DocumentNode,
 	EnumTypeDefinitionNode,
 	FieldDefinitionNode,
@@ -211,6 +212,21 @@ export const applyNameSpaceToGraphQLSchema = (
 					return; // skip well known
 				}
 				const updated: DirectiveDefinitionNode = {
+					...node,
+					name: {
+						...node.name,
+						value: namespace + '_' + node.name.value,
+					},
+				};
+				return updated;
+			},
+		},
+		Directive: {
+			enter: (node) => {
+				if (knownDirectives.find((d) => d === node.name.value) !== undefined) {
+					return; // skip well known
+				}
+				const updated: DirectiveNode = {
 					...node,
 					name: {
 						...node.name,

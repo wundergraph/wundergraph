@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.166.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.166.0...@wundergraph/sdk@0.166.1) (2023-06-22)
+
+### Bug Fixes
+
+* delete unknown directives from the schema generated from OAS ([#1086](https://github.com/wundergraph/wundergraph/issues/1086)) ([938e7ed](https://github.com/wundergraph/wundergraph/commit/938e7edf02fb8a28cd95d550387ca69fe489f33e)), closes [#1083](https://github.com/wundergraph/wundergraph/issues/1083) (@fiam)
+* federation introspection ([#1073](https://github.com/wundergraph/wundergraph/issues/1073)) ([12c9307](https://github.com/wundergraph/wundergraph/commit/12c9307750c968082e1798dbd3d8ca5af9d668a0)) (@devsergiy)
+
 ## [0.166.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.165.0...@wundergraph/sdk@0.166.0) (2023-06-21)
 
 ### Features
