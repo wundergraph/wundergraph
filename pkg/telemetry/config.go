@@ -4,8 +4,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/wundergraph/wundergraph/pkg/wgpb"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 func readWunderGraphConfig(wunderGraphDir string) (*wgpb.WunderGraphConfiguration, error) {

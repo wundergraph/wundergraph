@@ -50,6 +50,9 @@ func FeatureMetrics(wunderGraphDir string) ([]*Metric, error) {
 		metrics = append(metrics, NewFeatureMetric(FeaturePrometheus))
 	}
 	useOpenTelemetry, err := loadvariable.Bool(config.Api.GetNodeOptions().GetOpenTelemetry().GetEnabled())
+	if err != nil {
+		return nil, err
+	}
 	if useOpenTelemetry {
 		metrics = append(metrics, NewFeatureMetric(FeatureOpenTelemetry))
 	}
