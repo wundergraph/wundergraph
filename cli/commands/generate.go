@@ -52,17 +52,20 @@ var generateCmd = &cobra.Command{
 		})
 		// Run scripts in prod mode
 		scriptEnv = append(scriptEnv, "NODE_ENV=production")
-		scriptEnv = append(scriptEnv, fmt.Sprintf("WG_ENABLE_INTROSPECTION_OFFLINE=%t", offline))
+  scriptEnv = append(scriptEnv, fmt.Sprintf("WG_ENABLE_INTROSPECTION_OFFLINE=%t", offline))
+  scriptEnv = append(scriptEnv, "WG_ALIAS_GRAPHQL_FIELDS=true") // Add this line
 
-		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
-			Name:          "config-runner",
-			Executable:    "node",
-			ScriptArgs:    []string{configOutFile},
-			AbsWorkingDir: wunderGraphDir,
-			Logger:        log,
-			ScriptEnv:     scriptEnv,
-			Streaming:     true,
-		})
+
+	configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
+    Name:          "config-runner",
+    Executable:    "node",
+    ScriptArgs:    []string{configOutFile},
+    AbsWorkingDir: wunderGraphDir,
+    Logger:        log,
+    ScriptEnv:     scriptEnv, // Pass the scriptEnv variable
+    Streaming:     true,
+})
+
 		defer func() {
 			log.Debug("Stopping config-runner")
 			err := configRunner.Stop()
@@ -205,23 +208,27 @@ var generateCmd = &cobra.Command{
 			}
 		}
 
-		configBundler := bundler.NewBundler(bundler.Config{
-			Name:          "config-bundler",
-			Production:    true,
-			AbsWorkingDir: wunderGraphDir,
-			EntryPoints:   []string{configEntryPointFilename},
-			OutFile:       configOutFile,
-			Logger:        log,
-			IgnorePaths: []string{
-				"generated",
-				"node_modules",
-			},
-			OnAfterBundle: onAfterBuild,
-		})
+	configBundler := bundler.NewBundler(bundler.Config{
+	Name:          "config-bundler",
+	Production:    true,
+	AbsWorkingDir: wunderGraphDir,
+	EntryPoints:   []string{configEntryPointFilename},
+	OutFile:       configOutFile,
+	Logger:        log,
+	IgnorePaths: []string{
+		"generated",
+		"node_modules",
+	},
+	OnAfterBundle: onAfterBuild,
+})
 
-		err = configBundler.Bundle()
+// Enable camelCase aliasing for generated GraphQL fields
+configBundler.EnableCamelCaseAlias(true)
 
-		return err
+err = configBundler.Bundle()
+
+return err
+
 	},
 }
 
