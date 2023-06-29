@@ -57,7 +57,7 @@ Let's break down the workflow of working with WunderGraph.
 
 ## Benefits of using WunderGraph
 
-- Declaratively build a unified API across REST, SOAP, GraphQL, Federation and Databases
+- Declaratively build an unified API across REST, SOAP, GraphQL, Federation and Databases
 - Automatically get client libraries for React, Svelte, Vue, NextJS, Relay, Remix, Expo, etc...
 - Get unified Analytics, Monitoring & Tracing across all your APIs
 
@@ -75,19 +75,12 @@ In addition, you can benefit from the community and the patterns that are emergi
 Instead of having to figure out how to solve a specific problem,
 you can simply ask the community and get help from people that have already solved the problem.
 
-## Next Steps
+## Want to know more about WunderGraph?
 
-As a next step, I recommend you to check out the [WunderGraph Cloud Quick Start](/docs/getting-started/cloud-quickstart) guide.
-In addition to the Open Source SDK and Engine,
-we provide a batteries-included Cloud offering that lets you focus on building your application instead of managing infrastructure.
+If you're not yet sure what kind of problems WunderGraph can solve for you,
+check out [the different use cases](/docs/use-cases) we support,
+and the different [features](/docs/features) we provide.
+You might also be interested to learn more about the [architecture](/docs/architecture) of WunderGraph.
+If you haven't read our [Manifesto](/manifesto) yet, it's a great way to better understand what we're working on and why.
 
-Highlights of the WunderGraph Cloud:
-
-- Push to Deploy: Fully integrated with GitHub. Deploy every commit in seconds.
-- Serverless API Gateway: No infrastructure to manage. Pay only for what you use.
-- Analytics & Monitoring: Get insights into your API usage and performance
-- Distributed Tracing: Trace your API calls across all your APIs and Services with our OpenTelemetry (OTEL) integration
-- The fastest CI/CD for APIs: Build, Test & Deploy your APIs in as little as 13 seconds
-- Next Generation API Collaboration: Instantly get a Postman Collection, OpenAPI Spec and automatically publish SDKs to NPM
-
-You can find out more about the [WunderGraph Cloud here](https://wundergraph.com/cloud).
+If you've got questions, please [join our Discord community](https://wundergraph.com/discord) or [contact us](https://wundergraph.com/contact/sales).

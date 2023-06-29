@@ -25,14 +25,14 @@ const navigation = [
 		icon: <HomeIcon />,
 	},
 	{
-		title: 'Introduction to WunderGraph',
-		href: '/introduction-to-wundergraph',
+		title: 'Introduction',
+		href: '/introduction',
 		icon: <SunIcon />,
 		paths: ['/usage-information', '/about', '/docs/use-cases'],
 		links: [
 			{
 				title: 'Introduction',
-				href: '/introduction-to-wundergraph',
+				href: '/introduction',
 			},
 			{
 				title: 'Usage Information',
@@ -118,10 +118,10 @@ const navigation = [
 				title: 'Quickstart',
 				href: '/docs/getting-started/quickstart',
 			},
-			{
-				title: 'Cloud Quickstart',
-				href: '/docs/getting-started/cloud-quickstart',
-			},
+			// {
+			// 	title: 'Cloud Quickstart',
+			// 	href: '/docs/getting-started/cloud-quickstart',
+			// },
 			{
 				title: 'Framework Quickstarts',
 				links: [
