@@ -10,6 +10,11 @@ const nextConfig = {
 	async redirects() {
 		return [
 			{
+				source: '/manifesto',
+				destination: '/introduction-to-wundergraph',
+				permanent: false,
+			},
+			{
 				source: '/docs',
 				destination: '/',
 				permanent: true,
