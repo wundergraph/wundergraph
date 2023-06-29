@@ -121,6 +121,7 @@ var rootCmd = &cobra.Command{
 			clientInfo := &telemetry.MetricClientInfo{
 				WunderctlVersion: BuildInfo.Version,
 				IsCI:             os.Getenv("CI") != "" || os.Getenv("ci") != "",
+				IsWGCloud:        os.Getenv("WG_CLOUD") != "",
 				AnonymousID:      viper.GetString("anonymousid"),
 			}
 

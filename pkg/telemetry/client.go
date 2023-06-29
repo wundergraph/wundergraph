@@ -193,6 +193,7 @@ type MetricClientInfo struct {
 	OsName           string `json:"osName,omitempty"`
 	CpuCount         int    `json:"cpuCount,omitempty"`
 	IsCI             bool   `json:"isCI"`
+	IsWGCloud        bool   `json:"isWGCloud"`
 	WunderctlVersion string `json:"wunderctlVersion,omitempty"`
 	AnonymousID      string `json:"anonymousID,omitempty"`
 	GitRepoURLHash   string `json:"gitRepoURLHash,omitempty"`
