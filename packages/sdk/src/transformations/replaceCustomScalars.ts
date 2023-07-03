@@ -5,7 +5,7 @@ import { SingleTypeField } from '@wundergraph/protobuf';
 export interface ReplaceCustomScalarsResult {
 	schemaSDL: string;
 	customScalarTypeFields: SingleTypeField[];
-	customScalarTypeNames: string[];
+	customScalarTypeNames: Set<string>;
 }
 
 export const replaceCustomScalars = (
@@ -14,7 +14,7 @@ export const replaceCustomScalars = (
 ): ReplaceCustomScalarsResult => {
 	const replacements = introspection.replaceCustomScalarTypeFields;
 	if (!replacements || replacements.length < 1) {
-		return { schemaSDL, customScalarTypeFields: [], customScalarTypeNames: [] };
+		return { schemaSDL, customScalarTypeFields: [], customScalarTypeNames: new Set<string>() };
 	}
 	const replacementsByParentName = getCustomScalarReplacementsByParent(replacements);
 	const replacementsByInterfaceName = new Map<string, Map<string, string>>();
@@ -103,7 +103,7 @@ export const replaceCustomScalars = (
 		return {
 			schemaSDL: schema,
 			customScalarTypeFields: Array.from(replacementScalars),
-			customScalarTypeNames: Array.from(replacementScalarTypeNames),
+			customScalarTypeNames: replacementScalarTypeNames,
 		};
 	}
 
@@ -148,7 +148,7 @@ export const replaceCustomScalars = (
 	return {
 		schemaSDL: schema,
 		customScalarTypeFields: Array.from(replacementScalars),
-		customScalarTypeNames: Array.from(replacementScalarTypeNames),
+		customScalarTypeNames: replacementScalarTypeNames,
 	};
 };
 

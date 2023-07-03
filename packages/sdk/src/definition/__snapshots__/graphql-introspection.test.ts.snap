@@ -2,7 +2,7 @@
 
 exports[`introspection via http 1`] = `
 Api {
-  "CustomJsonScalars": [],
+  "CustomJsonScalars": Set {},
   "DataSources": [
     {
       "ChildNodes": [
@@ -1446,7 +1446,7 @@ enum WunderGraphDateTimeFormat {
 
 exports[`introspection via string 1`] = `
 Api {
-  "CustomJsonScalars": [],
+  "CustomJsonScalars": Set {},
   "DataSources": [
     {
       "ChildNodes": [
