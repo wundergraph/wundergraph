@@ -34,7 +34,7 @@ type featureCheck struct {
 }
 
 func isFeatureOIDCEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
-	providers := cfg.Api.GetAuthenticationConfig().GetCookieBased().GetProviders()
+	providers := cfg.GetApi().GetAuthenticationConfig().GetCookieBased().GetProviders()
 	for _, p := range providers {
 		if p.Kind == wgpb.AuthProviderKind_AuthProviderAuth0 {
 			return true, nil
@@ -44,7 +44,7 @@ func isFeatureOIDCEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
 }
 
 func isFeatureAuth0Enabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
-	providers := cfg.Api.GetAuthenticationConfig().GetCookieBased().GetProviders()
+	providers := cfg.GetApi().GetAuthenticationConfig().GetCookieBased().GetProviders()
 	for _, p := range providers {
 		if p.Kind == wgpb.AuthProviderKind_AuthProviderOIDC {
 			return true, nil
@@ -54,15 +54,15 @@ func isFeatureAuth0Enabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
 }
 
 func isFeaturePrometheusEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
-	return loadvariable.Bool(cfg.Api.GetNodeOptions().GetPrometheus().GetEnabled())
+	return loadvariable.Bool(cfg.GetApi().GetNodeOptions().GetPrometheus().GetEnabled())
 }
 
 func isFeatureOpenTelemetryEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
-	return loadvariable.Bool(cfg.Api.GetNodeOptions().GetOpenTelemetry().GetEnabled())
+	return loadvariable.Bool(cfg.GetApi().GetNodeOptions().GetOpenTelemetry().GetEnabled())
 }
 
 func isFeatureGraphQLEndpointEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
-	return cfg.Api.GetEnableGraphqlEndpoint(), nil
+	return cfg.GetApi().GetEnableGraphqlEndpoint(), nil
 }
 
 func isFeatureSchemaExtensionEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
@@ -70,11 +70,11 @@ func isFeatureSchemaExtensionEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, 
 }
 
 func isFeatureHttpProxyEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
-	defaultHttpProxy := loadvariable.String(cfg.Api.GetNodeOptions().GetDefaultHttpProxyUrl())
+	defaultHttpProxy := loadvariable.String(cfg.GetApi().GetNodeOptions().GetDefaultHttpProxyUrl())
 	if defaultHttpProxy != "" {
 		return true, nil
 	}
-	for _, ds := range cfg.Api.GetEngineConfiguration().GetDatasourceConfigurations() {
+	for _, ds := range cfg.GetApi().GetEngineConfiguration().GetDatasourceConfigurations() {
 		if proxy := loadvariable.String(ds.GetCustomRest().GetFetch().GetHttpProxyUrl()); proxy != "" {
 			return true, nil
 		}
@@ -86,7 +86,7 @@ func isFeatureHttpProxyEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error)
 }
 
 func isFeatureMTLSEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
-	for _, ds := range cfg.Api.GetEngineConfiguration().GetDatasourceConfigurations() {
+	for _, ds := range cfg.GetApi().GetEngineConfiguration().GetDatasourceConfigurations() {
 		if ds.GetCustomRest().GetFetch().GetMTLS() != nil {
 			return true, nil
 		}
@@ -110,15 +110,15 @@ func isFeatureCustomFloatScalarsEnabled(cfg *wgpb.WunderGraphConfiguration) (boo
 }
 
 func isFeatureS3UploadsEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
-	return len(cfg.Api.GetS3UploadConfiguration()) > 0, nil
+	return len(cfg.GetApi().GetS3UploadConfiguration()) > 0, nil
 }
 
 func isFeatureTokenAuthEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
-	return cfg.Api.GetAuthenticationConfig().GetJwksBased() != nil, nil
+	return cfg.GetApi().GetAuthenticationConfig().GetJwksBased() != nil, nil
 }
 
 func isFeatureORMEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
-	return cfg.Api.GetExperimentalConfig().GetOrm(), nil
+	return cfg.GetApi().GetExperimentalConfig().GetOrm(), nil
 }
 
 func featureChecks() []*featureCheck {

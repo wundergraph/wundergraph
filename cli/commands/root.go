@@ -118,20 +118,18 @@ var rootCmd = &cobra.Command{
 
 			metrics := []*telemetry.Metric{cmdUsageMetric}
 
-			clientInfo := &telemetry.MetricClientInfo{
-				WunderctlVersion: BuildInfo.Version,
-				IsCI:             os.Getenv("CI") != "" || os.Getenv("ci") != "",
-				IsWGCloud:        os.Getenv("WG_CLOUD") != "",
-				AnonymousID:      viper.GetString("anonymousid"),
+			wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+			if err != nil {
+				return err
+			}
+
+			clientInfo, err := telemetry.NewClientInfo(BuildInfo.Version, viper.GetString("anonymousid"), wunderGraphDir)
+			if err != nil {
+				return err
 			}
 
 			// Check if this command should also other telemetry data
 			if telemetry.HasAnnotations(telemetry.AnnotationDataSources, cmd.Annotations) || telemetry.HasAnnotations(telemetry.AnnotationFeatures, cmd.Annotations) {
-				wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
-				if err != nil {
-					return err
-				}
-
 				if telemetry.HasAnnotations(telemetry.AnnotationDataSources, cmd.Annotations) {
 					dataSourcesMetrics, err := telemetry.DataSourceMetrics(wunderGraphDir)
 					if err != nil {

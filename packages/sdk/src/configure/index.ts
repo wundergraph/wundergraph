@@ -1083,7 +1083,7 @@ export const configureWunderGraphApplication = <
 			);
 			await updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
 
-			const storedConfig = storedWunderGraphConfig(resolved);
+			const storedConfig = storedWunderGraphConfig(resolved, apis.length);
 			const configData = WunderGraphConfiguration.encode(storedConfig).finish();
 			fs.writeFileSync(path.join(generated, WunderGraphConfigurationFilename), configData);
 			if (WG_GENERATE_CONFIG_JSON) {
@@ -1140,13 +1140,14 @@ const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputV
 	return output;
 };
 
-const configEnabledFeatures = (config: ResolvedWunderGraphConfig) => {
+const configEnabledFeatures = (config: ResolvedWunderGraphConfig, apiCount: number) => {
 	const apis = config.application.Apis;
 	const schemaExtension = apis.find((api) => api.Features?.schemaExtension ?? false) !== undefined;
 	const customJSONScalars = apis.find((api) => api.Features?.customJSONScalars ?? false) !== undefined;
 	const customIntScalars = apis.find((api) => api.Features?.customIntScalars ?? false) !== undefined;
 	const customFloatScalars = apis.find((api) => api.Features?.customFloatScalars ?? false) !== undefined;
 	return {
+		apiCount,
 		schemaExtension,
 		customJSONScalars,
 		customIntScalars,
@@ -1154,7 +1155,7 @@ const configEnabledFeatures = (config: ResolvedWunderGraphConfig) => {
 	};
 };
 
-const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig) => {
+const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: number) => {
 	const operations: Operation[] = config.application.Operations.map((op) => ({
 		content: removeHookVariables(op.Content),
 		name: op.Name,
@@ -1275,7 +1276,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig) => {
 		},
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
 		configHash: configurationHash(config),
-		enabledFeatures: configEnabledFeatures(config),
+		enabledFeatures: configEnabledFeatures(config, apiCount),
 	};
 	return out;
 };

@@ -7,12 +7,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"runtime"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
 	"go.uber.org/zap"
+
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 var userAgent = "wg-telemetry-client"
@@ -190,13 +193,51 @@ type GraphQLError struct {
 }
 
 type MetricClientInfo struct {
-	OsName           string `json:"osName,omitempty"`
-	CpuCount         int    `json:"cpuCount,omitempty"`
-	IsCI             bool   `json:"isCI"`
-	IsWGCloud        bool   `json:"isWGCloud"`
-	WunderctlVersion string `json:"wunderctlVersion,omitempty"`
-	AnonymousID      string `json:"anonymousID,omitempty"`
-	GitRepoURLHash   string `json:"gitRepoURLHash,omitempty"`
+	OsName                   string `json:"osName,omitempty"`
+	CpuCount                 int    `json:"cpuCount,omitempty"`
+	IsCI                     bool   `json:"isCI"`
+	IsWGCloud                bool   `json:"isWGCloud"`
+	WunderctlVersion         string `json:"wunderctlVersion,omitempty"`
+	AnonymousID              string `json:"anonymousID,omitempty"`
+	GitRepoURLHash           string `json:"gitRepoURLHash,omitempty"`
+	APICount                 int    `json:"apiCount"`
+	AuthProviderCount        int    `json:"authProviderCount"`
+	GraphQLOperationCount    int    `json:"graphqlOperationCount"`
+	TypeScriptOperationCount int    `json:"typeScriptOperationCount"`
+}
+
+func NewClientInfo(version string, anonymousID string, wunderGraphDir string) (*MetricClientInfo, error) {
+	config, err := readWunderGraphConfig(wunderGraphDir)
+	if err != nil {
+		return nil, err
+	}
+
+	graphQLOperationCount := 0
+	typeScriptOperationCount := 0
+
+	for _, op := range config.GetApi().GetOperations() {
+		switch op.Engine {
+		case wgpb.OperationExecutionEngine_ENGINE_GRAPHQL:
+			graphQLOperationCount++
+		case wgpb.OperationExecutionEngine_ENGINE_NODEJS:
+			typeScriptOperationCount++
+		}
+	}
+
+	auth := config.GetApi().GetAuthenticationConfig()
+	cookieBasedAuthProviderCount := len(auth.GetCookieBased().GetProviders())
+	tokenBasedAuthProviderCount := len(auth.GetJwksBased().GetProviders())
+
+	return &MetricClientInfo{
+		WunderctlVersion:         version,
+		IsCI:                     os.Getenv("CI") != "" || os.Getenv("ci") != "",
+		IsWGCloud:                os.Getenv("WG_CLOUD") != "",
+		AnonymousID:              anonymousID,
+		APICount:                 int(config.GetEnabledFeatures().GetApiCount()),
+		AuthProviderCount:        cookieBasedAuthProviderCount + tokenBasedAuthProviderCount,
+		GraphQLOperationCount:    graphQLOperationCount,
+		TypeScriptOperationCount: typeScriptOperationCount,
+	}, nil
 }
 
 func (c *client) Send(metrics []*Metric) error {

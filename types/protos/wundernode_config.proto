@@ -465,11 +465,14 @@ message WunderGraphConfiguration {
 	EnabledFeatures enabledFeatures = 6;
 }
 
+// Used for reporting enabled features from the TS side
+// to the Go side.
 message EnabledFeatures {
-	bool schemaExtension = 1;
-	bool customJSONScalars = 2;
-	bool customIntScalars = 3;
-	bool customFloatScalars = 4;
+	int32 apiCount = 1;
+	bool schemaExtension = 2;
+	bool customJSONScalars = 3;
+	bool customIntScalars = 4;
+	bool customFloatScalars = 5;
 }
 
 message S3UploadProfileHooksConfiguration {

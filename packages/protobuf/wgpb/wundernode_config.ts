@@ -1089,7 +1089,12 @@ export interface WunderGraphConfiguration {
   enabledFeatures: EnabledFeatures | undefined;
 }
 
+/**
+ * Used for reporting enabled features from the TS side
+ * to the Go side.
+ */
 export interface EnabledFeatures {
+  apiCount: number;
   schemaExtension: boolean;
   customJSONScalars: boolean;
   customIntScalars: boolean;
@@ -5664,22 +5669,31 @@ export const WunderGraphConfiguration = {
 };
 
 function createBaseEnabledFeatures(): EnabledFeatures {
-  return { schemaExtension: false, customJSONScalars: false, customIntScalars: false, customFloatScalars: false };
+  return {
+    apiCount: 0,
+    schemaExtension: false,
+    customJSONScalars: false,
+    customIntScalars: false,
+    customFloatScalars: false,
+  };
 }
 
 export const EnabledFeatures = {
   encode(message: EnabledFeatures, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.apiCount !== 0) {
+      writer.uint32(8).int32(message.apiCount);
+    }
     if (message.schemaExtension === true) {
-      writer.uint32(8).bool(message.schemaExtension);
+      writer.uint32(16).bool(message.schemaExtension);
     }
     if (message.customJSONScalars === true) {
-      writer.uint32(16).bool(message.customJSONScalars);
+      writer.uint32(24).bool(message.customJSONScalars);
     }
     if (message.customIntScalars === true) {
-      writer.uint32(24).bool(message.customIntScalars);
+      writer.uint32(32).bool(message.customIntScalars);
     }
     if (message.customFloatScalars === true) {
-      writer.uint32(32).bool(message.customFloatScalars);
+      writer.uint32(40).bool(message.customFloatScalars);
     }
     return writer;
   },
@@ -5692,15 +5706,18 @@ export const EnabledFeatures = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.schemaExtension = reader.bool();
+          message.apiCount = reader.int32();
           break;
         case 2:
-          message.customJSONScalars = reader.bool();
+          message.schemaExtension = reader.bool();
           break;
         case 3:
-          message.customIntScalars = reader.bool();
+          message.customJSONScalars = reader.bool();
           break;
         case 4:
+          message.customIntScalars = reader.bool();
+          break;
+        case 5:
           message.customFloatScalars = reader.bool();
           break;
         default:
@@ -5713,6 +5730,7 @@ export const EnabledFeatures = {
 
   fromJSON(object: any): EnabledFeatures {
     return {
+      apiCount: isSet(object.apiCount) ? Number(object.apiCount) : 0,
       schemaExtension: isSet(object.schemaExtension) ? Boolean(object.schemaExtension) : false,
       customJSONScalars: isSet(object.customJSONScalars) ? Boolean(object.customJSONScalars) : false,
       customIntScalars: isSet(object.customIntScalars) ? Boolean(object.customIntScalars) : false,
@@ -5722,6 +5740,7 @@ export const EnabledFeatures = {
 
   toJSON(message: EnabledFeatures): unknown {
     const obj: any = {};
+    message.apiCount !== undefined && (obj.apiCount = Math.round(message.apiCount));
     message.schemaExtension !== undefined && (obj.schemaExtension = message.schemaExtension);
     message.customJSONScalars !== undefined && (obj.customJSONScalars = message.customJSONScalars);
     message.customIntScalars !== undefined && (obj.customIntScalars = message.customIntScalars);
@@ -5731,6 +5750,7 @@ export const EnabledFeatures = {
 
   fromPartial<I extends Exact<DeepPartial<EnabledFeatures>, I>>(object: I): EnabledFeatures {
     const message = createBaseEnabledFeatures();
+    message.apiCount = object.apiCount ?? 0;
     message.schemaExtension = object.schemaExtension ?? false;
     message.customJSONScalars = object.customJSONScalars ?? false;
     message.customIntScalars = object.customIntScalars ?? false;
