@@ -153,7 +153,6 @@ export const introspectGraphql = async (
 			customScalarTypeNames.add(customJsonScalar);
 		}
 	}
-	// const mergedCustomScalarTypeNames = Array.from(customScalarTypeNames);
 	const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
 	const schemaDocumentNode = parse(schemaSDL);
 	const graphQLSchema = buildSchema(schemaSDL);
