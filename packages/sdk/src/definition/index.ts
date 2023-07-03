@@ -63,6 +63,13 @@ export interface ApiIntrospectionOptions {
 	apiID?: string;
 }
 
+export interface ApiFeatures {
+	schemaExtension?: boolean;
+	customJSONScalars?: boolean;
+	customIntScalars?: boolean;
+	customFloatScalars?: boolean;
+}
+
 export interface RenameType {
 	from: string;
 	to: string;
@@ -92,7 +99,8 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[]
+		customJsonScalars?: string[],
+		features?: ApiFeatures
 	) {
 		this.Schema = schema;
 		this.Namespace = namespace;
@@ -102,6 +110,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
 		this.CustomJsonScalars = customJsonScalars;
 		this.Namespace = namespace;
+		this.Features = features;
 	}
 
 	DefaultFlushInterval: number = 500;
@@ -112,6 +121,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	interpolateVariableDefinitionAsJSON: string[];
 	CustomJsonScalars?: string[];
 	Namespace: string;
+	Features?: ApiFeatures;
 
 	get schemaSha256() {
 		const hash = createHash('sha256');

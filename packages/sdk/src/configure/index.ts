@@ -1140,6 +1140,20 @@ const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputV
 	return output;
 };
 
+const configEnabledFeatures = (config: ResolvedWunderGraphConfig) => {
+	const apis = config.application.Apis;
+	const schemaExtension = apis.find((api) => api.Features?.schemaExtension ?? false) !== undefined;
+	const customJSONScalars = apis.find((api) => api.Features?.customJSONScalars ?? false) !== undefined;
+	const customIntScalars = apis.find((api) => api.Features?.customIntScalars ?? false) !== undefined;
+	const customFloatScalars = apis.find((api) => api.Features?.customFloatScalars ?? false) !== undefined;
+	return {
+		schemaExtension,
+		customJSONScalars,
+		customIntScalars,
+		customFloatScalars,
+	};
+};
+
 const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig) => {
 	const operations: Operation[] = config.application.Operations.map((op) => ({
 		content: removeHookVariables(op.Content),
@@ -1261,6 +1275,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig) => {
 		},
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
 		configHash: configurationHash(config),
+		enabledFeatures: configEnabledFeatures(config),
 	};
 	return out;
 };

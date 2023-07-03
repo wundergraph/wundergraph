@@ -1086,6 +1086,14 @@ export interface WunderGraphConfiguration {
   environmentIds: string[];
   dangerouslyEnableGraphQLEndpoint: boolean;
   configHash: string;
+  enabledFeatures: EnabledFeatures | undefined;
+}
+
+export interface EnabledFeatures {
+  schemaExtension: boolean;
+  customJSONScalars: boolean;
+  customIntScalars: boolean;
+  customFloatScalars: boolean;
 }
 
 export interface S3UploadProfileHooksConfiguration {
@@ -5543,7 +5551,14 @@ export const ArgumentConfiguration = {
 };
 
 function createBaseWunderGraphConfiguration(): WunderGraphConfiguration {
-  return { api: undefined, apiId: "", environmentIds: [], dangerouslyEnableGraphQLEndpoint: false, configHash: "" };
+  return {
+    api: undefined,
+    apiId: "",
+    environmentIds: [],
+    dangerouslyEnableGraphQLEndpoint: false,
+    configHash: "",
+    enabledFeatures: undefined,
+  };
 }
 
 export const WunderGraphConfiguration = {
@@ -5562,6 +5577,9 @@ export const WunderGraphConfiguration = {
     }
     if (message.configHash !== "") {
       writer.uint32(42).string(message.configHash);
+    }
+    if (message.enabledFeatures !== undefined) {
+      EnabledFeatures.encode(message.enabledFeatures, writer.uint32(50).fork()).ldelim();
     }
     return writer;
   },
@@ -5588,6 +5606,9 @@ export const WunderGraphConfiguration = {
         case 5:
           message.configHash = reader.string();
           break;
+        case 6:
+          message.enabledFeatures = EnabledFeatures.decode(reader, reader.uint32());
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -5605,6 +5626,7 @@ export const WunderGraphConfiguration = {
         ? Boolean(object.dangerouslyEnableGraphQLEndpoint)
         : false,
       configHash: isSet(object.configHash) ? String(object.configHash) : "",
+      enabledFeatures: isSet(object.enabledFeatures) ? EnabledFeatures.fromJSON(object.enabledFeatures) : undefined,
     };
   },
 
@@ -5620,6 +5642,8 @@ export const WunderGraphConfiguration = {
     message.dangerouslyEnableGraphQLEndpoint !== undefined &&
       (obj.dangerouslyEnableGraphQLEndpoint = message.dangerouslyEnableGraphQLEndpoint);
     message.configHash !== undefined && (obj.configHash = message.configHash);
+    message.enabledFeatures !== undefined &&
+      (obj.enabledFeatures = message.enabledFeatures ? EnabledFeatures.toJSON(message.enabledFeatures) : undefined);
     return obj;
   },
 
@@ -5632,6 +5656,85 @@ export const WunderGraphConfiguration = {
     message.environmentIds = object.environmentIds?.map((e) => e) || [];
     message.dangerouslyEnableGraphQLEndpoint = object.dangerouslyEnableGraphQLEndpoint ?? false;
     message.configHash = object.configHash ?? "";
+    message.enabledFeatures = (object.enabledFeatures !== undefined && object.enabledFeatures !== null)
+      ? EnabledFeatures.fromPartial(object.enabledFeatures)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseEnabledFeatures(): EnabledFeatures {
+  return { schemaExtension: false, customJSONScalars: false, customIntScalars: false, customFloatScalars: false };
+}
+
+export const EnabledFeatures = {
+  encode(message: EnabledFeatures, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.schemaExtension === true) {
+      writer.uint32(8).bool(message.schemaExtension);
+    }
+    if (message.customJSONScalars === true) {
+      writer.uint32(16).bool(message.customJSONScalars);
+    }
+    if (message.customIntScalars === true) {
+      writer.uint32(24).bool(message.customIntScalars);
+    }
+    if (message.customFloatScalars === true) {
+      writer.uint32(32).bool(message.customFloatScalars);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): EnabledFeatures {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEnabledFeatures();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.schemaExtension = reader.bool();
+          break;
+        case 2:
+          message.customJSONScalars = reader.bool();
+          break;
+        case 3:
+          message.customIntScalars = reader.bool();
+          break;
+        case 4:
+          message.customFloatScalars = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): EnabledFeatures {
+    return {
+      schemaExtension: isSet(object.schemaExtension) ? Boolean(object.schemaExtension) : false,
+      customJSONScalars: isSet(object.customJSONScalars) ? Boolean(object.customJSONScalars) : false,
+      customIntScalars: isSet(object.customIntScalars) ? Boolean(object.customIntScalars) : false,
+      customFloatScalars: isSet(object.customFloatScalars) ? Boolean(object.customFloatScalars) : false,
+    };
+  },
+
+  toJSON(message: EnabledFeatures): unknown {
+    const obj: any = {};
+    message.schemaExtension !== undefined && (obj.schemaExtension = message.schemaExtension);
+    message.customJSONScalars !== undefined && (obj.customJSONScalars = message.customJSONScalars);
+    message.customIntScalars !== undefined && (obj.customIntScalars = message.customIntScalars);
+    message.customFloatScalars !== undefined && (obj.customFloatScalars = message.customFloatScalars);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<EnabledFeatures>, I>>(object: I): EnabledFeatures {
+    const message = createBaseEnabledFeatures();
+    message.schemaExtension = object.schemaExtension ?? false;
+    message.customJSONScalars = object.customJSONScalars ?? false;
+    message.customIntScalars = object.customIntScalars ?? false;
+    message.customFloatScalars = object.customFloatScalars ?? false;
     return message;
   },
 };

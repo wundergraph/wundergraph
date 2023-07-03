@@ -8,14 +8,138 @@ import (
 type Feature string
 
 const (
-	FeatureOIDC          = Feature("oidc")
-	FeaturePrometheus    = Feature("prometheus")
-	FeatureOpenTelemetry = Feature("opentelemetry")
+	FeatureOIDC               = Feature("oidc")
+	FeatureAuth0              = Feature("auth0")
+	FeaturePrometheus         = Feature("prometheus")
+	FeatureOpenTelemetry      = Feature("opentelemetry")
+	FeatureGraphQLEndpoint    = Feature("graphql-endpoint")
+	FeatureSchemaExtension    = Feature("schema-extension")
+	FeatureHttpProxy          = Feature("http-proxy")
+	FeatureMTLS               = Feature("mtls")
+	FeatureCustomJSONScalars  = Feature("custom-json-scalars")
+	FeatureCustomIntScalars   = Feature("custom-int-scalars")
+	FeatureCustomFloatScalars = Feature("custom-float-scalars")
+	FeatureS3Uploads          = Feature("s3-uploads")
+	FeatureTokenAuth          = Feature("token-auth")
+	FeatureORM                = Feature("orm")
 )
 
 const (
 	featureNameTag = "WG_TAG_FEATURE_NAME"
 )
+
+type featureCheck struct {
+	Name  Feature
+	Check func(cfg *wgpb.WunderGraphConfiguration) (bool, error)
+}
+
+func isFeatureOIDCEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	providers := cfg.Api.GetAuthenticationConfig().GetCookieBased().GetProviders()
+	for _, p := range providers {
+		if p.Kind == wgpb.AuthProviderKind_AuthProviderAuth0 {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func isFeatureAuth0Enabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	providers := cfg.Api.GetAuthenticationConfig().GetCookieBased().GetProviders()
+	for _, p := range providers {
+		if p.Kind == wgpb.AuthProviderKind_AuthProviderOIDC {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func isFeaturePrometheusEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	return loadvariable.Bool(cfg.Api.GetNodeOptions().GetPrometheus().GetEnabled())
+}
+
+func isFeatureOpenTelemetryEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	return loadvariable.Bool(cfg.Api.GetNodeOptions().GetOpenTelemetry().GetEnabled())
+}
+
+func isFeatureGraphQLEndpointEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	return cfg.Api.GetEnableGraphqlEndpoint(), nil
+}
+
+func isFeatureSchemaExtensionEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	return cfg.GetEnabledFeatures().GetSchemaExtension(), nil
+}
+
+func isFeatureHttpProxyEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	defaultHttpProxy := loadvariable.String(cfg.Api.GetNodeOptions().GetDefaultHttpProxyUrl())
+	if defaultHttpProxy != "" {
+		return true, nil
+	}
+	for _, ds := range cfg.Api.GetEngineConfiguration().GetDatasourceConfigurations() {
+		if proxy := loadvariable.String(ds.GetCustomRest().GetFetch().GetHttpProxyUrl()); proxy != "" {
+			return true, nil
+		}
+		if proxy := loadvariable.String(ds.GetCustomGraphql().GetFetch().GetHttpProxyUrl()); proxy != "" {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func isFeatureMTLSEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	for _, ds := range cfg.Api.GetEngineConfiguration().GetDatasourceConfigurations() {
+		if ds.GetCustomRest().GetFetch().GetMTLS() != nil {
+			return true, nil
+		}
+		if ds.GetCustomGraphql().GetFetch().GetMTLS() != nil {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func isFeatureCustomJSONScalarsEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	return cfg.GetEnabledFeatures().GetCustomJSONScalars(), nil
+}
+
+func isFeatureCustomIntScalarsEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	return cfg.GetEnabledFeatures().GetCustomIntScalars(), nil
+}
+
+func isFeatureCustomFloatScalarsEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	return cfg.GetEnabledFeatures().GetCustomFloatScalars(), nil
+}
+
+func isFeatureS3UploadsEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	return len(cfg.Api.GetS3UploadConfiguration()) > 0, nil
+}
+
+func isFeatureTokenAuthEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	return cfg.Api.GetAuthenticationConfig().GetJwksBased() != nil, nil
+}
+
+func isFeatureORMEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	return cfg.Api.GetExperimentalConfig().GetOrm(), nil
+}
+
+func featureChecks() []*featureCheck {
+	// Same order as Feature declarations
+	return []*featureCheck{
+		{FeatureOIDC, isFeatureOIDCEnabled},
+		{FeatureAuth0, isFeatureAuth0Enabled},
+		{FeaturePrometheus, isFeaturePrometheusEnabled},
+		{FeatureOpenTelemetry, isFeatureOpenTelemetryEnabled},
+		{FeatureGraphQLEndpoint, isFeatureGraphQLEndpointEnabled},
+		{FeatureSchemaExtension, isFeatureSchemaExtensionEnabled},
+		{FeatureHttpProxy, isFeatureHttpProxyEnabled},
+		{FeatureMTLS, isFeatureMTLSEnabled},
+		{FeatureCustomJSONScalars, isFeatureCustomJSONScalarsEnabled},
+		{FeatureCustomIntScalars, isFeatureCustomIntScalarsEnabled},
+		{FeatureCustomFloatScalars, isFeatureCustomFloatScalarsEnabled},
+		{FeatureS3Uploads, isFeatureS3UploadsEnabled},
+		{FeatureTokenAuth, isFeatureTokenAuthEnabled},
+		{FeatureORM, isFeatureORMEnabled},
+	}
+}
 
 // NewFeatureMetric creates a data metric which tracks the usage
 // of the given featureName
@@ -35,26 +159,14 @@ func FeatureMetrics(wunderGraphDir string) ([]*Metric, error) {
 		return nil, err
 	}
 	var metrics []*Metric
-	providers := config.Api.GetAuthenticationConfig().GetCookieBased().GetProviders()
-	for _, p := range providers {
-		if p.Kind == wgpb.AuthProviderKind_AuthProviderAuth0 || p.Kind == wgpb.AuthProviderKind_AuthProviderOIDC {
-			metrics = append(metrics, NewFeatureMetric(FeatureOIDC))
-			break
+	for _, feat := range featureChecks() {
+		enabled, err := feat.Check(config)
+		if err != nil {
+			return nil, err
 		}
-	}
-	usePrometheus, err := loadvariable.Bool(config.Api.GetNodeOptions().GetPrometheus().GetEnabled())
-	if err != nil {
-		return nil, err
-	}
-	if usePrometheus {
-		metrics = append(metrics, NewFeatureMetric(FeaturePrometheus))
-	}
-	useOpenTelemetry, err := loadvariable.Bool(config.Api.GetNodeOptions().GetOpenTelemetry().GetEnabled())
-	if err != nil {
-		return nil, err
-	}
-	if useOpenTelemetry {
-		metrics = append(metrics, NewFeatureMetric(FeatureOpenTelemetry))
+		if enabled {
+			metrics = append(metrics, NewFeatureMetric(feat.Name))
+		}
 	}
 	return metrics, nil
 }

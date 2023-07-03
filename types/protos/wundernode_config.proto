@@ -462,6 +462,14 @@ message WunderGraphConfiguration {
 	repeated string environmentIds = 3;
 	bool dangerouslyEnableGraphQLEndpoint = 4;
 	string configHash = 5;
+	EnabledFeatures enabledFeatures = 6;
+}
+
+message EnabledFeatures {
+	bool schemaExtension = 1;
+	bool customJSONScalars = 2;
+	bool customIntScalars = 3;
+	bool customFloatScalars = 4;
 }
 
 message S3UploadProfileHooksConfiguration {
