@@ -7,6 +7,7 @@ on:
     paths:
       - 'testapps/**/*'
       - 'packages/**/*'
+      - '.github/actions/node/action.yaml'
       - '.github/workflows/packages-ci.yaml'
 
   pull_request:

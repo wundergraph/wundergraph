@@ -16,7 +16,9 @@ export const OBJECT = Object;
  */
 export const deepClone = <T>(v: T): T => {
 	if (typeof structuredClone === 'function') {
-		return structuredClone(v);
+		try {
+			return structuredClone(v);
+		} catch {}
 	}
 	return JSON.parse(JSON.stringify(v));
 };

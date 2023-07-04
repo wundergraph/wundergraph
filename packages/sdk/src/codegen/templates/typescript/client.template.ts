@@ -15,7 +15,7 @@ import type {
 	FetchUserRequestOptions,
 	UploadValidationOptions,
 	QueryRequestOptions,
-  MutationRequestOptions,
+	MutationRequestOptions,
 	ClientOperationErrors,
 	ExtractProfileName,
 	ExtractMeta,
@@ -118,6 +118,7 @@ export class WunderGraphClient extends Client {
 	>(options: OperationName extends string ? QueryRequestOptions<OperationName, Input> : OperationRequestOptions) {
 		return super.query<OperationRequestOptions, Response['data'], Response['error']>(options);
 	}
+
 	mutate<
 		OperationName extends Extract<keyof Operations['mutations'], string>,
 		Input extends Operations['mutations'][OperationName]['input'] = Operations['mutations'][OperationName]['input'],
@@ -125,6 +126,7 @@ export class WunderGraphClient extends Client {
 	>(options: OperationName extends string ? MutationRequestOptions<OperationName, Input> : OperationRequestOptions) {
 		return super.mutate<OperationRequestOptions, Response['data'], Response['error']>(options);
 	}
+
 	subscribe<
 		OperationName extends Extract<keyof Operations["subscriptions"], string>,
 		Input extends Operations["subscriptions"][OperationName]["input"] = Operations["subscriptions"][OperationName]["input"],
@@ -198,6 +200,14 @@ export type Subscriptions = {
         requiresAuthentication: {{requiresAuthentication}}
     }
 {{/each}}
+{{#each liveQueries}}
+    "{{operationPath}}": {
+        {{#if hasInput}}input: {{inputTypename}}{{else}}input?: undefined{{/if}}
+    		response: {{#if isTypeScriptOperation}}{ data?: {{responseDataTypename}}, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{responseTypename}}['data'], error?: ClientOperationErrors }{{/if}}
+        liveQuery: true
+        requiresAuthentication: {{requiresAuthentication}}
+    }
+{{/each}}
 }
 
 export type LiveQueries = {
@@ -211,5 +221,5 @@ export type LiveQueries = {
 {{/each}}
 }
 
-export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, UserRole,{{#if hasS3Providers}}S3Providers{{else}}{}{{/if}}{{#if hasAuthProviders}},keyof typeof AuthProviderId{{/if}}> {}
+export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, LiveQueries, UserRole,{{#if hasS3Providers}}S3Providers{{else}}{}{{/if}}{{#if hasAuthProviders}},keyof typeof AuthProviderId{{/if}}> {}
 `;

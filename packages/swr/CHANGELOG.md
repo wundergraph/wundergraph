@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.12](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.15.11...@wundergraph/swr@0.15.12) (2023-06-22)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.15.11](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.15.10...@wundergraph/swr@0.15.11) (2023-06-21)
+
+### Bug Fixes
+
+* produce JSONPatch patches with removals in the right order ([#1060](https://github.com/wundergraph/wundergraph/issues/1060)) ([461b6a4](https://github.com/wundergraph/wundergraph/commit/461b6a446a59f3b81e01a1840f151f716e138416)) (@fiam)
+
 ## [0.15.10](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.15.9...@wundergraph/swr@0.15.10) (2023-06-09)
 
 **Note:** Version bump only for package @wundergraph/swr

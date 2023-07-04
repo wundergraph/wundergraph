@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/solid-query",
-  "version": "0.4.44",
+  "version": "0.4.46",
   "license": "Apache-2.0",
   "description": "WunderGraph Solid Query Integration",
   "main": "./dist/index.js",

@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.12](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.3.11...@wundergraph/react-relay@0.3.12) (2023-06-22)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.3.11](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.3.10...@wundergraph/react-relay@0.3.11) (2023-06-21)
+
+### Bug Fixes
+
+* produce JSONPatch patches with removals in the right order ([#1060](https://github.com/wundergraph/wundergraph/issues/1060)) ([461b6a4](https://github.com/wundergraph/wundergraph/commit/461b6a446a59f3b81e01a1840f151f716e138416)) (@fiam)
+
 ## [0.3.10](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.3.9...@wundergraph/react-relay@0.3.10) (2023-06-09)
 
 **Note:** Version bump only for package @wundergraph/react-relay
