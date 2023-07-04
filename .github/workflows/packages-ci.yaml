@@ -81,6 +81,9 @@ jobs:
       - name: Run testsuite
         run: pnpm test:suite:ci
 
+      - name: Run testsuite typecheck
+        run: pnpm test:suite:typecheck
+
       - name: Determine changed files
         id: changed
         uses: ./.github/actions/changed
