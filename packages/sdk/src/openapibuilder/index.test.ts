@@ -301,6 +301,83 @@ describe('OpenAPI builder', () => {
 		expect(personDefinition).toEqual(personSchema?.definitions?.['Person']);
 	});
 
+	test('rename different types with same name', () => {
+		const userASchema: JSONSchema = {
+			type: 'object',
+			properties: {
+				name: { type: 'string' },
+				surname: { type: 'string' },
+			},
+			required: ['name', 'surname'],
+			additionalProperties: false,
+		};
+		const userBSchema: JSONSchema = {
+			type: 'object',
+			properties: {
+				username: { type: 'string' },
+				age: { type: 'number' },
+			},
+			required: ['username', 'age'],
+			additionalProperties: false,
+		};
+
+		const operations = [
+			{
+				Name: 'GetUserA',
+				PathName: 'users/getA',
+				OperationType: OperationType.QUERY,
+				ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+				VariablesSchema: emptySchema,
+				ResponseSchema: {
+					type: 'object',
+					properties: {
+						data: {
+							$ref: '#/definitions/User',
+						},
+					},
+					additionalProperties: false,
+					definitions: {
+						User: userASchema,
+					},
+				},
+			},
+			{
+				Name: 'GetUserB',
+				PathName: 'users/getB',
+				OperationType: OperationType.QUERY,
+				ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+				VariablesSchema: emptySchema,
+				ResponseSchema: {
+					type: 'object',
+					properties: {
+						data: {
+							$ref: '#/definitions/User',
+						},
+					},
+					additionalProperties: false,
+					definitions: {
+						User: userBSchema,
+					},
+				},
+			},
+		] as unknown as GraphQLOperation[];
+
+		const result = build(operations);
+		const operationA = result.paths['/users/getA'].get;
+		const operationB = result.paths['/users/getB'].get;
+
+		const responseASchema = operationA?.responses?.['200']?.content?.['application/json']?.schema;
+		expect((responseASchema?.properties?.['data'] as JSONSchema7)?.$ref).toBe('#/components/schemas/User');
+
+		const responseBSchema = operationB?.responses?.['200']?.content?.['application/json']?.schema;
+		expect((responseBSchema?.properties?.['data'] as JSONSchema7)?.$ref).toBe('#/components/schemas/User_2');
+
+		const schemas = result?.components?.schemas;
+
+		expect(schemas?.['User']).toEqual(userASchema);
+		expect(schemas?.['User_2']).toEqual(userBSchema);
+	});
+
 	test('OpenAPI Builder', async () => {
 		const builder = new OpenApiBuilder({
 			title: 'WunderGraph',
