@@ -16,7 +16,7 @@ import (
 
 var (
 	// Overridden at build time
-	LicensingPublicKey = "GgFgWHflzJJ82PPExCx4ZiVaz0f2btWSl8R3UGn65LU6OIeL4l5z4ZC0qxOIygSxCXgQQXH0UcGgBhv7d8DGpPkcJcvmt96W0eKcqWtv3BW1TrKAPKCfRwcfvmjoSHOwFEA"
+	licensingPublicKey = ""
 )
 
 func startLicenseHTTPServer(licenseCh chan<- string) (string, error) {
@@ -72,7 +72,7 @@ var licenseTrialCmd = &cobra.Command{
 			fmt.Println("generate your license using your browser and then come back to this window")
 		}
 		licenseKey := <-licenseCh
-		m := licensing.NewManager(LicensingPublicKey)
+		m := licensing.NewManager(licensingPublicKey)
 		license, err := m.Write(licenseKey)
 		if err != nil {
 			return fmt.Errorf("error installing license: %s", err)
@@ -97,7 +97,7 @@ var licenseInstallCmd = &cobra.Command{
 			return errors.New("license key argument is required")
 		}
 		licenseKey := args[0]
-		m := licensing.NewManager(LicensingPublicKey)
+		m := licensing.NewManager(licensingPublicKey)
 		if _, err := m.Write(licenseKey); err != nil {
 			return fmt.Errorf("error installing license: %s", err)
 		}
@@ -109,7 +109,7 @@ var licenseRemoveCmd = &cobra.Command{
 	Use:   "remove",
 	Short: "Removes the installed WunderGraph license",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		m := licensing.NewManager(LicensingPublicKey)
+		m := licensing.NewManager(licensingPublicKey)
 		if err := m.Remove(); err != nil {
 			return fmt.Errorf("could not remove license: %w", err)
 		}
@@ -121,7 +121,7 @@ var licenseShowCmd = &cobra.Command{
 	Use:   "show",
 	Short: "Shows the installed WunderGraph license",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		m := licensing.NewManager(LicensingPublicKey)
+		m := licensing.NewManager(licensingPublicKey)
 		license, err := m.Read()
 		if err != nil {
 			return fmt.Errorf("could not show license: %w", err)

@@ -26,7 +26,7 @@ builds:
     env:
       - CGO_ENABLED=0
     ldflags:
-      - -w -s -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=ci -X main.githubAuthDemoClientID={{.Env.GH_AUTH_DEMO_CLIENT_ID}} -X main.githubAuthDemoClientSecret={{.Env.GH_AUTH_DEMO_CLIENT_SECRET}}
+      - -w -s -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=ci -X main.githubAuthDemoClientID={{.Env.GH_AUTH_DEMO_CLIENT_ID}} -X main.githubAuthDemoClientSecret={{.Env.GH_AUTH_DEMO_CLIENT_SECRET}} -X main.licensingPublicKey={{.Env.LICENSING_PUBLIC_KEY}}
     goos:
       - linux
     goarch:
