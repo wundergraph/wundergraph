@@ -28,14 +28,17 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.1
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hetiansu5/urlquery v1.2.7
+	github.com/hyperboloide/lk v0.0.0-20230325114855-ce3fecd34798
 	github.com/jensneuse/goprisma v0.2.0
 	github.com/joho/godotenv v1.4.0
+	github.com/jxskiss/base62 v1.1.0
 	github.com/klauspost/compress v1.15.15
 	github.com/mattn/go-isatty v0.0.18
 	github.com/minio/minio-go/v7 v7.0.14
 	github.com/muesli/termenv v0.15.1
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pires/go-proxyproto v0.6.2
+	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
 	github.com/prometheus/client_golang v1.15.1
 	github.com/qri-io/jsonschema v0.2.1
 	github.com/rs/cors v1.7.0
@@ -52,6 +55,7 @@ require (
 	github.com/valyala/fasthttp v1.44.0
 	github.com/wI2L/jsondiff v0.4.0
 	github.com/wundergraph/graphql-go-tools v1.63.2
+	go.mongodb.org/mongo-driver v1.12.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.42.0
 	go.opentelemetry.io/otel v1.16.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.16.0
@@ -127,8 +131,6 @@ require (
 	github.com/nats-io/nats.go v1.19.1 // indirect
 	github.com/nats-io/nkeys v0.3.0 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/onsi/ginkgo v1.15.0 // indirect
-	github.com/onsi/gomega v1.10.5 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
