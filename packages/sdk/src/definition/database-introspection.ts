@@ -54,7 +54,7 @@ const introspectDatabase = async (
 			url: '',
 			schemaExtension: introspection.schemaExtension,
 		},
-		[]
+		new Set<string>()
 	);
 	const jsonFields = [...jsonTypeFields, ...jsonResponseFields];
 	jsonFields.forEach((field) => {
@@ -161,7 +161,7 @@ type databaseConstructor<T> = (
 	fields: FieldConfiguration[],
 	types: TypeConfiguration[],
 	interpolateVariableDefinitionAsJSON: string[],
-	customJsonScalars?: string[] | undefined
+	customJsonScalars?: Set<string>
 ) => T;
 
 type DbApi = Api<DatabaseApiCustom>;
@@ -204,7 +204,7 @@ export const introspectPostgresql = introspectDatabaseWithCache(
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[] | undefined
+		customJsonScalars?: Set<string>
 	) =>
 		new PostgresqlApi(
 			schema,
@@ -225,7 +225,7 @@ export const introspectMySQL = introspectDatabaseWithCache(
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[] | undefined
+		customJsonScalars?: Set<string>
 	) =>
 		new MySQLApi(schema, namespace, dataSources, fields, types, interpolateVariableDefinitionAsJSON, customJsonScalars),
 	mysql
@@ -238,7 +238,7 @@ export const introspectPlanetScale = introspectDatabaseWithCache(
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[] | undefined
+		customJsonScalars?: Set<string>
 	) =>
 		new PlanetscaleApi(
 			schema,
@@ -259,7 +259,7 @@ export const introspectSQLite = introspectDatabaseWithCache(
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[] | undefined
+		customJsonScalars?: Set<string>
 	) =>
 		new SQLiteApi(
 			schema,
@@ -280,7 +280,7 @@ export const introspectSQLServer = introspectDatabaseWithCache(
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[] | undefined
+		customJsonScalars?: Set<string>
 	) =>
 		new SQLServerApi(
 			schema,
@@ -301,7 +301,7 @@ export const introspectMongoDB = introspectDatabaseWithCache(
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[] | undefined
+		customJsonScalars?: Set<string>
 	) =>
 		new MongoDBApi(
 			schema,

@@ -41,6 +41,9 @@ describe('replaceCustomScalars Tests', () => {
 				},
 				{
 					starter: 'water',
+					attributes: {
+						skills: 'high',
+					},
 					details: {
 						name: 'Gary',
 						age: 10,
@@ -85,6 +88,9 @@ describe('replaceCustomScalars Tests', () => {
 				details: {
 					name,
 					age,
+				},
+				hair: {
+					short: true,
 				},
 			});
 		});

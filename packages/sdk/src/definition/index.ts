@@ -18,7 +18,7 @@ import {
 	UpstreamAuthentication,
 	UpstreamAuthenticationKind,
 } from '@wundergraph/protobuf';
-import { applyNameSpaceToGraphQLSchema } from './namespacing';
+import { applyNameSpaceToCustomJsonScalars, applyNameSpaceToGraphQLSchema } from './namespacing';
 import { InputVariable, mapInputVariable } from '../configure/variables';
 import { introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
@@ -92,7 +92,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[]
+		customJsonScalars?: Set<string>
 	) {
 		this.Schema = schema;
 		this.Namespace = namespace;
@@ -100,7 +100,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		this.Fields = fields;
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
-		this.CustomJsonScalars = customJsonScalars;
+		this.CustomJsonScalars = applyNameSpaceToCustomJsonScalars(namespace, customJsonScalars);
 		this.Namespace = namespace;
 	}
 
@@ -110,7 +110,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	Fields: FieldConfiguration[];
 	Types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
-	CustomJsonScalars?: string[];
+	CustomJsonScalars: Set<string>;
 	Namespace: string;
 
 	get schemaSha256() {
@@ -250,7 +250,8 @@ interface GraphQLIntrospectionOptions {
 	customFloatScalars?: string[];
 	customIntScalars?: string[];
 	/*
-		customJSONScalars is deprecated; the types are now detected automatically.
+		The customJSONScalars array no longer needs to contain new replacement JSON scalars.
+		However, original JSON scalars will default to type string if not included in this array.
 	 */
 	customJSONScalars?: string[];
 	// switching internal to true will mark the origin as an internal GraphQL API

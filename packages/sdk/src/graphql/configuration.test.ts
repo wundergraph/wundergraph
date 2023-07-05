@@ -627,7 +627,7 @@ describe('configuration', () => {
 		({ schema: tSchema, serviceSDL: tServiceSDL, argumentReplacements: tArgumentReplacements, config }) => {
 			const schema = parse(tSchema);
 			const serviceSDL = tServiceSDL === undefined ? undefined : parse(tServiceSDL);
-			const nodes = configuration(schema, { url: '' }, [], serviceSDL, tArgumentReplacements);
+			const nodes = configuration(schema, { url: '' }, new Set<string>(), serviceSDL, tArgumentReplacements);
 			assert.equal(pretty(nodes), pretty(config));
 		}
 	);
