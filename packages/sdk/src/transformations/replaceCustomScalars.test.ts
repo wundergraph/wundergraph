@@ -149,13 +149,10 @@ describe('replaceCustomScalars Tests', () => {
 				fieldName: 'geo',
 			},
 		]);
-		assert.deepEqual(customScalarTypeNames, [
-			'Location',
-			'Geography',
-			'AnotherGeography',
-			'LocationInput',
-			'GeographyInput',
-		]);
+		assert.deepEqual(
+			customScalarTypeNames,
+			new Set<string>(['Location', 'Geography', 'AnotherGeography', 'LocationInput', 'GeographyInput'])
+		);
 	});
 
 	test('that only exact parent type and field names are changed', async () => {
@@ -295,7 +292,7 @@ describe('replaceCustomScalars Tests', () => {
 				fieldName: 'baseStats',
 			},
 		]);
-		assert.deepEqual(customScalarTypeNames, ['BaseStats', 'Power', 'BaseStatsInput', 'PowerInput']);
+		assert.deepEqual(customScalarTypeNames, new Set<string>(['BaseStats', 'Power', 'BaseStatsInput', 'PowerInput']));
 	});
 
 	test('that non-changes are ignored', async () => {
@@ -343,6 +340,6 @@ describe('replaceCustomScalars Tests', () => {
 		const { schemaSDL, customScalarTypeFields, customScalarTypeNames } = replaceCustomScalars(schema, introspection);
 		assert.equal(customScalarTypeFields.length, 0);
 		assert.deepEqual(customScalarTypeFields, []);
-		assert.deepEqual(customScalarTypeNames, []);
+		assert.deepEqual(customScalarTypeNames, new Set<string>());
 	});
 });

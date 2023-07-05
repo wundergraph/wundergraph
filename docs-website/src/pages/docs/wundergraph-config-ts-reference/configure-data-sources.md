@@ -63,11 +63,21 @@ const countries = introspect.graphql({
 | `loadSchemaFromString`          | A function that returns the schema as a string. This is useful if you want to use a local schema file. |
 | `customFloatScalars`            | An array of custom float scalars.                                                                      |
 | `customIntScalars`              | An array of custom int scalars.                                                                        |
+| `customJSONScalars`             | An array of custom JSON scalars.                                                                       |
 | `internal`                      | Whether the GraphQL service is internal. Defaults to `false`                                           |
 | `skipRenameRootFields`          | An array of root fields to skip renaming.                                                              |
 | `schemaExtension`               | A string that is appended to the schema. Useful for adding custom scalars.                             |
 | `replaceCustomScalarTypeFields` | An array of custom scalar type fields to replace.                                                      |
 | `httpProxyUrl`                  | HTTP(S) proxy to use, overriding the default one (if any). Set to `null` to disable.                   |
+
+Note that if you are not replacing a custom JSON scalar using the `replaceCustomScalarTypeFields` array, any JSON
+scalars that do not appear in `customJSONScalars` will be inferred as a TypeScript `string`.
+
+The JSON scalar types should be entered into this array _without_ any namespacing (simply how they appear in the
+original GraphQL schema).
+
+JSON scalars that you have defined to be replaced will be automatically inferred as a JSON object.
+Consequently, these replacement definitions do not need to be explicitly defined in the `customJSONScalars` array.
 
 ## Databases
 

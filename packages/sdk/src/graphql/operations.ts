@@ -132,7 +132,7 @@ export interface ParsedOperations {
 export interface ParseOperationsOptions {
 	keepFromClaimVariables?: boolean;
 	interpolateVariableDefinitionAsJSON?: string[];
-	customJsonScalars?: string[];
+	customJsonScalars?: Set<string>;
 	customClaims?: Record<string, CustomClaim>;
 }
 
@@ -160,6 +160,7 @@ export const parseGraphQLOperations = (
 	const parsed: ParsedOperations = {
 		operations: [],
 	};
+	const customJsonScalars = options.customJsonScalars ?? new Set<string>();
 	const wgRoleEnum = parsedGraphQLSchema.getType('WG_ROLE')?.astNode;
 	loadOperationsOutput.graphql_operation_files?.forEach((operationFile) => {
 		try {
@@ -202,7 +203,7 @@ export const parseGraphQLOperations = (
 								[],
 								options.keepFromClaimVariables,
 								false,
-								options.customJsonScalars || []
+								customJsonScalars
 							),
 							InterpolationVariablesSchema: operationVariablesToJSONSchema(
 								parsedGraphQLSchema,
@@ -210,7 +211,7 @@ export const parseGraphQLOperations = (
 								options.interpolateVariableDefinitionAsJSON || [],
 								options.keepFromClaimVariables,
 								false,
-								options.customJsonScalars || []
+								customJsonScalars
 							),
 							InternalVariablesSchema: operationVariablesToJSONSchema(
 								parsedGraphQLSchema,
@@ -218,7 +219,7 @@ export const parseGraphQLOperations = (
 								[],
 								true,
 								false,
-								options.customJsonScalars || []
+								customJsonScalars
 							),
 							InjectedVariablesSchema: operationVariablesToJSONSchema(
 								parsedGraphQLSchema,
@@ -226,9 +227,15 @@ export const parseGraphQLOperations = (
 								[],
 								true,
 								true,
-								options.customJsonScalars || []
+								customJsonScalars
 							),
-							ResponseSchema: operationResponseToJSONSchema(parsedGraphQLSchema, ast, node, transformations),
+							ResponseSchema: operationResponseToJSONSchema(
+								parsedGraphQLSchema,
+								ast,
+								node,
+								transformations,
+								customJsonScalars
+							),
 							AuthenticationConfig: {
 								required: false,
 							},
@@ -822,7 +829,7 @@ export const operationVariablesToJSONSchema = (
 	interpolateVariableDefinitionAsJSON: string[],
 	keepInternalVariables: boolean = false,
 	keepInjectedVariables: boolean = false,
-	customJsonScalars: string[]
+	customJsonScalars: Set<string>
 ): JSONSchema => {
 	const schema: JSONSchema = {
 		type: 'object',
@@ -942,7 +949,7 @@ const typeSchema = (
 	type: TypeNode,
 	name: string,
 	nonNull: boolean,
-	customJsonScalars: string[]
+	customJsonScalars: Set<string>
 ): JSONSchema => {
 	switch (type.kind) {
 		case 'NonNullType':
@@ -1004,7 +1011,7 @@ const typeSchema = (
 				case 'JSON':
 					return {};
 				default:
-					if (customJsonScalars.includes(type.name.value)) {
+					if (customJsonScalars.has(type.name.value)) {
 						return {};
 					}
 
@@ -1116,7 +1123,8 @@ export const operationResponseToJSONSchema = (
 	graphQLSchema: GraphQLSchema,
 	operationDocument: DocumentNode,
 	operationNode: OperationDefinitionNode,
-	transformations: PostResolveTransformation[]
+	transformations: PostResolveTransformation[],
+	customJsonScalars: Set<string>
 ): JSONSchema => {
 	const dataSchema: JSONSchema = {
 		type: 'object',
@@ -1138,7 +1146,8 @@ export const operationResponseToJSONSchema = (
 		typeName,
 		dataSchema,
 		['data'],
-		transformations
+		transformations,
+		customJsonScalars
 	);
 	return schema;
 };
@@ -1163,7 +1172,8 @@ const resolveSelections = (
 	parentTypeName: string,
 	parentObject: JSONSchema,
 	documentPath: string[],
-	transformations: PostResolveTransformation[]
+	transformations: PostResolveTransformation[],
+	customJsonScalars: Set<string>
 ) => {
 	const parentType = graphQLSchema.getType(parentTypeName);
 	if (!parentType || !parentType.astNode) {
@@ -1200,7 +1210,8 @@ const resolveSelections = (
 						typeName,
 						parentObject,
 						documentPath,
-						transformations
+						transformations,
+						customJsonScalars
 					);
 					delete parentObject.required; // union root fields are always optional
 					return;
@@ -1218,7 +1229,8 @@ const resolveSelections = (
 							typeName,
 							parentObject,
 							documentPath,
-							transformations
+							transformations,
+							customJsonScalars
 						);
 						delete parentObject.required; // union root fields are always optional
 						return;
@@ -1272,7 +1284,8 @@ const resolveSelections = (
 					definition.type,
 					parentObject,
 					[...documentPath, propName],
-					transformations
+					transformations,
+					customJsonScalars
 				);
 
 				const transformDirective = selection.directives?.find((d) => d.name.value === 'transform');
@@ -1293,7 +1306,8 @@ const resolveSelections = (
 					parentTypeName,
 					parentObject,
 					documentPath,
-					transformations
+					transformations,
+					customJsonScalars
 				);
 				break;
 			case 'InlineFragment':
@@ -1304,7 +1318,8 @@ const resolveSelections = (
 					parentTypeName,
 					parentObject,
 					documentPath,
-					transformations
+					transformations,
+					customJsonScalars
 				);
 				break;
 		}
@@ -1319,7 +1334,8 @@ const resolveFieldSchema = (
 	fieldType: TypeNode,
 	parent: JSONSchema,
 	documentPath: string[],
-	transformations: PostResolveTransformation[]
+	transformations: PostResolveTransformation[],
+	customJsonScalars: Set<string>
 ): JSONSchema => {
 	switch (fieldType.kind) {
 		case 'NonNullType':
@@ -1334,7 +1350,8 @@ const resolveFieldSchema = (
 						fieldType.type,
 						parent,
 						documentPath,
-						transformations
+						transformations,
+						customJsonScalars
 					);
 				case 'array':
 					parent.minItems = 1;
@@ -1346,7 +1363,8 @@ const resolveFieldSchema = (
 						fieldType.type,
 						parent,
 						documentPath,
-						transformations
+						transformations,
+						customJsonScalars
 					);
 				default:
 					return {};
@@ -1362,7 +1380,8 @@ const resolveFieldSchema = (
 					fieldType.type,
 					parent,
 					[...documentPath, '[]'],
-					transformations
+					transformations,
+					customJsonScalars
 				),
 			};
 		case 'NamedType':
@@ -1390,6 +1409,9 @@ const resolveFieldSchema = (
 				case 'JSON':
 					return {};
 				default:
+					if (customJsonScalars.has(fieldType.name.value)) {
+						return {};
+					}
 					let schema: JSONSchema = {};
 					const namedType = graphQLSchema.getType(fieldType.name.value);
 					if (namedType === null || namedType === undefined || !namedType.astNode) {
@@ -1422,7 +1444,8 @@ const resolveFieldSchema = (
 								namedType.name,
 								schema,
 								documentPath,
-								transformations
+								transformations,
+								customJsonScalars
 							);
 							break;
 					}

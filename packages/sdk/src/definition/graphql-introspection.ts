@@ -11,9 +11,9 @@ import {
 	ObjectTypeDefinitionNode,
 	ObjectTypeExtensionNode,
 	parse,
+	print,
 	printSchema,
 	visit,
-	print,
 } from 'graphql';
 import { AxiosError, AxiosProxyConfig, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { HttpsProxyAgent, HttpsProxyAgentOptions } from 'https-proxy-agent';
@@ -146,6 +146,11 @@ export const introspectGraphql = async (
 			serviceSDL = await fetchFederationServiceSDL(resolveVariable(introspection.url), introspectionHeaders, {
 				apiNamespace: introspection.apiNamespace,
 			});
+		}
+	}
+	if (introspection.customJSONScalars) {
+		for (const customJsonScalar of introspection.customJSONScalars) {
+			customScalarTypeNames.add(customJsonScalar);
 		}
 	}
 	const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
@@ -481,7 +486,7 @@ export const buildSubgraphSchema = (schemaDocumentNode: DocumentNode): GraphQLSc
 
 const subgraphSchemaWithoutExtensions = (schemaAST: DocumentNode): DocumentNode => {
 	return visit(schemaAST, {
-		ObjectTypeExtension(node) {
+		ObjectTypeExtension() {
 			return null;
 		},
 	});
