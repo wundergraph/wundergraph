@@ -660,7 +660,7 @@ importers:
         specifier: ^4.2.5
         version: 4.2.5
       '@wundergraph/wunderctl':
-        specifier: workspace:^0.160.0
+        specifier: workspace:^0.161.0
         version: link:../wunderctl
       axios:
         specifier: ^0.26.1
