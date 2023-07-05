@@ -20,7 +20,7 @@
     "watch:sdk": "pnpm -r run --filter='./packages/sdk' watch",
     "test": "pnpm run -r --parallel --filter='!./packages/testsuite' test",
     "test:suite:ci": "pnpm run -r --filter='./packages/testsuite' test:ci",
-    "test:suite:typecheck": "pnpm run -r --filter='./packages/testsuite' test:typecheck",
+    "test:suite:types": "pnpm run -r --filter='./packages/testsuite' test:types",
     "format": "prettier --write --loglevel warn '**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}'",
     "format:examples": "prettier --write --loglevel warn 'examples/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}'",
     "format:testapps": "prettier --write --loglevel warn 'testapps/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}'",
