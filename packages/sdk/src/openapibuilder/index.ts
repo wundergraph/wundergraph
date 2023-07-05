@@ -224,10 +224,11 @@ export class OpenApiBuilder {
 		return isValidOpenApiSchemaName(name) ? name : objectHash(name);
 	}
 
-	private rewriteSchemaRefs(spec: OpenApiSpec, schema: JSONSchema7Definition) {
+	private rewriteSchemaRefs(spec: OpenApiSpec, schema: JSONSchema7Definition, renames: Map<string, string>) {
 		if (typeof schema === 'boolean') {
 			return;
 		}
+		const localRenames: Map<string, string> = new Map();
 		// Move definitions to spec
 		if (schema?.definitions) {
 			if (!spec.components) {
@@ -240,47 +241,68 @@ export class OpenApiBuilder {
 				const definition = schema.definitions[key];
 				if (typeof definition !== 'boolean') {
 					const name = this.validComponentsSchemaName(key);
-					this.rewriteSchemaRefs(spec, definition);
 					const prevSchema = spec.components.schemas?.[name];
 					if (prevSchema && JSON.stringify(prevSchema) !== JSON.stringify(definition)) {
-						throw new Error(
-							`could not merge schemas for ${name}: ${JSON.stringify(prevSchema)} != ${JSON.stringify(definition)}`
-						);
+						// Types have the same name but different definition, we need to rename the
+						// new one
+						let ii = 2;
+						while (true) {
+							const rename = `${name}_${ii}`;
+							const prevRenamedSchema = spec.components.schemas?.[rename];
+							if (!prevRenamedSchema || JSON.stringify(prevRenamedSchema) === JSON.stringify(definition)) {
+								spec.components.schemas[rename] = definition;
+								localRenames.set(name, rename);
+								break;
+							}
+							ii++;
+							if (ii > 100) {
+								throw new Error(
+									`could not merge schemas for ${name}: ${JSON.stringify(prevSchema)} != ${JSON.stringify(definition)}`
+								);
+							}
+						}
+					} else {
+						spec.components.schemas[name] = definition;
 					}
-					spec.components.schemas[name] = definition;
+					this.rewriteSchemaRefs(spec, definition, new Map([...renames, ...localRenames]));
 				}
 			}
 			delete schema.definitions;
 		}
 		// Rewrite references
+		const allRenames = new Map([...renames, ...localRenames]);
 		if (schema?.$ref) {
 			// Replace #/definitions with #/components/schema (if needed)
 			schema.$ref = schema.$ref.replace(/#\/definitions\/([^\/])/, `#/components/schemas/$1`);
 			const componentsSchemas = '#/components/schemas/';
 			if (schema.$ref.startsWith(componentsSchemas)) {
 				const refName = schema.$ref.substring(componentsSchemas.length);
-				const renamed = this.validComponentsSchemaName(refName);
+				let renamed = this.validComponentsSchemaName(refName);
+				const finalRename = allRenames.get(renamed);
+				if (finalRename) {
+					renamed = finalRename;
+				}
 				schema.$ref = componentsSchemas + renamed;
 			}
 		}
 		if (schema?.properties) {
 			for (const key of Object.keys(schema.properties)) {
 				const prop = schema.properties[key];
-				this.rewriteSchemaRefs(spec, prop);
+				this.rewriteSchemaRefs(spec, prop, allRenames);
 			}
 		}
 		if (schema?.items && typeof schema.items !== 'boolean') {
 			if (Array.isArray(schema.items)) {
 				for (const item of schema.items) {
-					this.rewriteSchemaRefs(spec, item);
+					this.rewriteSchemaRefs(spec, item, allRenames);
 				}
 			} else {
-				this.rewriteSchemaRefs(spec, schema.items);
+				this.rewriteSchemaRefs(spec, schema.items, allRenames);
 			}
 		}
 		if (schema?.anyOf) {
 			for (const item of schema.anyOf) {
-				this.rewriteSchemaRefs(spec, item);
+				this.rewriteSchemaRefs(spec, item, allRenames);
 			}
 		}
 	}
@@ -289,7 +311,7 @@ export class OpenApiBuilder {
 		for (const input of Object.values(op.requestBody?.content ?? {})) {
 			if (input.schema) {
 				const schema = deepClone(input.schema);
-				this.rewriteSchemaRefs(spec, schema);
+				this.rewriteSchemaRefs(spec, schema, new Map());
 				input.schema = schema;
 			}
 		}
@@ -297,7 +319,7 @@ export class OpenApiBuilder {
 			for (const contents of Object.values(response.content)) {
 				if (contents.schema) {
 					const schema = deepClone(contents.schema);
-					this.rewriteSchemaRefs(spec, schema);
+					this.rewriteSchemaRefs(spec, schema, new Map());
 					contents.schema = schema;
 				}
 			}
