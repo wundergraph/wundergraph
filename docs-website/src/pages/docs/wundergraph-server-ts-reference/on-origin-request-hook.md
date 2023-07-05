@@ -9,18 +9,28 @@ Using this hook, you're able to completely rewrite the request, headers, etc.
 
 This hook is useful, e.g. when you'd like to sign requests or when you have to get a one time short-lived access token.
 
-Similar to all other hooks,
-the `customResolve` hook is called with the following parameters:
+The `onOriginRequest` hook is called with the following parameters:
 
 - `user`: The user object when the user is authenticated
 - `clientRequest`: The original client request object, including Headers
 - `log`: The logger object
 - `operations`: The operations client, used to call other (internal) operations
 - `internalClient`: The internal client object, _deprecated_
-- `response`: The response object (only for postResolve hooks)
-- `input`: The input object (only for Operation hooks)
+- `request`: The HTTP request to be sent to the remote service
+- `operation`: The operation (name and type) that triggered the hook.
 
-With the `internalClient`,
+The hook must return a Promise to one of:
+
+- A `WunderGraphRequest` representing the new request to be sent
+- `SKIP` to skip the hook and use the original request
+- `CANCEL` to cancel the HTTP request entirely
+
+Additionally, at configuration time it is possible to decide which operations will trigger this hook.
+Setting `enableForAllOperations: true` will call the hook in every operation, while setting it to `false`
+and specifying individual operation names in `enableForOperations` property allows for more fine grained
+control.
+
+With the `operations` client,
 you're able to securely call into all defined Operations,
 e.g. to talk to a database or another service to enrich a response or manipulate the inputs of an Operation.
 
@@ -31,7 +41,7 @@ export default configureWunderGraphServer(() => ({
     global: {
       httpTransport: {
         onOriginRequest: {
-          enableForAllOperations: true,
+          enableForAllOperations: true, // Trigger this hook for all operations
           hook: async ({ request }) => {
             request.headers.set('X-Wundergraph-Test', 'test');
             console.log('onOriginRequest', request.headers);

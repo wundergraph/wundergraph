@@ -19,6 +19,7 @@ require (
 	github.com/go-cmd/cmd v1.4.1
 	github.com/gofrs/flock v0.8.1
 	github.com/golang-jwt/jwt/v4 v4.4.2
+	github.com/golang/protobuf v1.5.3
 	github.com/gorilla/csrf v1.7.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/securecookie v1.1.1
@@ -30,19 +31,18 @@ require (
 	github.com/jensneuse/goprisma v0.2.0
 	github.com/joho/godotenv v1.4.0
 	github.com/klauspost/compress v1.15.15
-	github.com/mattbaird/jsonpatch v0.0.0-20200820163806-098863c1fc24
 	github.com/mattn/go-isatty v0.0.18
 	github.com/minio/minio-go/v7 v7.0.14
 	github.com/muesli/termenv v0.15.1
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pires/go-proxyproto v0.6.2
-	github.com/prisma/prisma-client-go v0.16.2
 	github.com/prometheus/client_golang v1.15.1
 	github.com/qri-io/jsonschema v0.2.1
 	github.com/rs/cors v1.7.0
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.0
 	github.com/sebdah/goldie/v2 v2.5.3
 	github.com/segmentio/ksuid v1.0.4
+	github.com/shopspring/decimal v1.3.1
 	github.com/smallnest/ringbuffer v0.0.0-20210227121335-0a58434b36f2
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.10.1
@@ -50,7 +50,8 @@ require (
 	github.com/tidwall/gjson v1.11.0
 	github.com/tidwall/sjson v1.1.5
 	github.com/valyala/fasthttp v1.44.0
-	github.com/wundergraph/graphql-go-tools v1.63.1
+	github.com/wI2L/jsondiff v0.4.0
+	github.com/wundergraph/graphql-go-tools v1.63.2
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.42.0
 	go.opentelemetry.io/otel v1.16.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.16.0
@@ -80,7 +81,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.2.0 // indirect
-	github.com/evanphx/json-patch v0.5.2 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/gin-gonic/gin v1.8.2 // indirect
@@ -88,7 +88,6 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/validator/v10 v10.11.2 // indirect
 	github.com/goccy/go-json v0.10.0 // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect

@@ -84,7 +84,7 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 		return streamClosers, fmt.Errorf("authentication config missing")
 	}
 
-	planConfig, err := i.loader.Load(*api.EngineConfiguration, api.Options.ServerUrl)
+	planConfig, err := i.loader.Load(api.EngineConfiguration, api.Options.ServerUrl)
 	if err != nil {
 		return streamClosers, err
 	}
@@ -531,5 +531,5 @@ func NewRequestFromWunderGraphClientRequest(ctx context.Context, body []byte) (*
 		return request, nil
 	}
 
-	return nil, nil
+	return nil, fmt.Errorf("__wg.clientRequest not found in %s", string(body))
 }

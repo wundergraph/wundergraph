@@ -1,5 +1,4 @@
 import type { InternalClient, InternalClientFactory } from './internal-client';
-import type { FastifyLoggerInstance } from 'fastify';
 import type { Headers } from '@whatwg-node/fetch';
 import type { GraphQLServerConfig } from './plugins/graphql';
 import type { ConfigurationVariable, WunderGraphConfiguration } from '@wundergraph/protobuf';
@@ -9,6 +8,7 @@ import type { ListenOptions, LoggerLevel, ResolvedListenOptions } from '../confi
 import { OperationsClient } from './operations-client';
 import { GraphQLError } from '../client';
 import { TelemetryOptions } from './trace/trace';
+import { RequestLogger } from './logger';
 
 declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
@@ -88,7 +88,7 @@ export interface BaseRequestContext<
 	/**
 	 * The request logger.
 	 */
-	log: FastifyLoggerInstance;
+	log: RequestLogger;
 	/**
 	 * The internal client that is used to communicate with the server.
 	 * @deprecated Use `operations` instead.
@@ -158,14 +158,14 @@ export interface ClientRequestHeaders extends Headers {}
 
 export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
 
-export interface ClientRequest<H = ClientRequestHeaders> {
+export interface ClientRequest {
 	method: RequestMethod;
 	requestURI: string;
 	/**
 	 * Contains all client request headers. You can manipulate the map to add or remove headers.
 	 * This might impact upstream hooks. Global hooks don't take changes into account.
 	 */
-	headers: H;
+	headers: ClientRequestHeaders;
 }
 
 export interface WunderGraphRequest {
@@ -194,6 +194,14 @@ export interface WunderGraphUser<Role extends string = any, CustomClaims extends
 	provider?: string;
 	providerId?: string;
 	userId?: string;
+	/**
+	 * expires indicates the Unix timestamp in milliseconds when the user expires. After that,
+	 * if needs to be revalidated (via the revalidate hook) in order to take effect. If expires
+	 * is <= 0 or undefined, the session lasts forever.
+	 *
+	 * @default undefined
+	 */
+	expires?: number;
 	name?: string;
 	firstName?: string;
 	lastName?: string;
@@ -232,6 +240,11 @@ export interface ServerRunOptions {
 	config: WunderGraphConfiguration;
 	gracefulShutdown: boolean;
 	clientFactory: InternalClientFactory;
+}
+
+export interface CreateServerOptions extends ServerRunOptions {
+	serverHost: string;
+	serverPort: number;
 }
 
 /***

@@ -176,7 +176,7 @@ class RESTApiBuilder {
 			applyNamespaceToExistingRootFieldConfigurations(this.fields, schema, this.apiNamespace),
 			[],
 			[],
-			[]
+			new Set<string>()
 		);
 	};
 	private traversePath = (

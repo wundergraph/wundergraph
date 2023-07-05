@@ -56,7 +56,7 @@ func startHooksServer(ctx context.Context) error {
 		return err
 	}
 
-	configFile := filepath.Join(wunderGraphDir, "generated", configJsonFilename)
+	configFile := filepath.Join(wunderGraphDir, "generated", serializedConfigFilename)
 	if !files.FileExists(configFile) {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
 	}

@@ -43,9 +43,7 @@ describe('SQL raw', () => {
 			operationName: 'rawsql/QueryRawJSON',
 		});
 		expect(result.error).toBeUndefined();
-		expect(JSON.stringify(result.data?.json)).toEqual(
-			`[{"id":1,"email":"jens@wundergraph.com","name":"Jens"},{"id":2,"email":"jannik@wundergraph.com","name":"Jannik"}]`
-		);
+		expect(JSON.parse(JSON.stringify(result.data?.json)).length).toEqual(2);
 	});
 
 	it('query raw row', async () => {

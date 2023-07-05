@@ -50,6 +50,8 @@ type Tokens = {
 	withCountryAndWrongCurrency: string;
 	withNotAllowedByPostAuthenticationSub: string;
 	withNotAllowedByRevalidationSub: string;
+	expiresIn1Second: string;
+	expiresNow: string;
 };
 
 let tokens: Tokens | undefined;
@@ -113,6 +115,8 @@ beforeAll(async () => {
 		withCountryAndWrongCurrency: await makeToken({ cc: 'PT', currency: 'USD' }, privateKey),
 		withNotAllowedByPostAuthenticationSub: await makeToken({ sub: 'notAllowedByPostAuthentication' }, privateKey),
 		withNotAllowedByRevalidationSub: await makeToken({ sub: 'notAllowedByRevalidation' }, privateKey),
+		expiresIn1Second: await makeToken({ sub: 'expiresIn1Second' }, privateKey),
+		expiresNow: await makeToken({ sub: 'expiresNow' }, privateKey),
 	};
 
 	await wg.start();
@@ -487,5 +491,33 @@ describe('Test requireAuthentication directive', () => {
 		});
 		expect(result.error).toBeUndefined();
 		expect(result.data?.echo_string).toBe(`string: ${input}`);
+	});
+});
+
+describe('test session expiration', () => {
+	it('should have a default of never expiring', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.default);
+		const user = await client.fetchUser();
+		expect(user.expires).toBeUndefined();
+	});
+
+	it('should include session expiration when declared', async () => {
+		const client = wg.client();
+		// Expiration in the hook is set to 1000ms
+		client.setAuthorizationToken(tokens!.expiresIn1Second);
+		const user = await client.fetchUser();
+		const now = Date.now();
+		expect(user.expires).toBeGreaterThanOrEqual(now);
+		expect(user.expires).toBeLessThanOrEqual(now + 1000);
+	});
+
+	it('should revalidate the session after expiration', async () => {
+		const client = wg.client();
+		// Expiration in the hook is set to 0ms, but the revalidation hook will set it to 60000ms
+		client.setAuthorizationToken(tokens!.expiresNow);
+		const user = await client.fetchUser();
+		const now = Date.now();
+		expect(user.expires).toBeGreaterThanOrEqual(now + 50 * 1000);
 	});
 });

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Operation, OperationType } from '@wundergraph/protobuf';
 import { ClientRequest } from './types';
+import { encodeRawClientRequest } from './server';
 
 export interface OperationArgsWithInput<T = void> {
 	input: T;
@@ -91,7 +92,7 @@ export const internalClientFactory = (operations: Operation[], baseNodeUrl: stri
 		operationName: string;
 		input?: any;
 		extraHeaders?: { [key: string]: string };
-		clientRequest: any;
+		clientRequest?: ClientRequest;
 	}): Promise<any> => {
 		const url = `${baseNodeUrl}/operations/${options.operationName}`;
 		const headers = Object.assign(
@@ -101,13 +102,14 @@ export const internalClientFactory = (operations: Operation[], baseNodeUrl: stri
 				...(options.extraHeaders || {}),
 			}
 		);
-		const res = await axios.post(
-			url,
-			JSON.stringify({ input: options.input, __wg: { clientRequest: options.clientRequest } }),
-			{
-				headers,
-			}
-		);
+		const __wg = {
+			clientRequest: options.clientRequest
+				? encodeRawClientRequest(options.clientRequest, options.extraHeaders)
+				: undefined,
+		};
+		const res = await axios.post(url, JSON.stringify({ input: options.input, __wg }), {
+			headers,
+		});
 		return res.data;
 	};
 

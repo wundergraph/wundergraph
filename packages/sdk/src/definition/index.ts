@@ -18,7 +18,7 @@ import {
 	UpstreamAuthentication,
 	UpstreamAuthenticationKind,
 } from '@wundergraph/protobuf';
-import { applyNameSpaceToGraphQLSchema } from './namespacing';
+import { applyNameSpaceToCustomJsonScalars, applyNameSpaceToGraphQLSchema } from './namespacing';
 import { InputVariable, mapInputVariable } from '../configure/variables';
 import { introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
@@ -34,6 +34,8 @@ import {
 	introspectSQLServer,
 } from './database-introspection';
 import { introspectSoap } from './soap-introspection';
+
+export type { OpenAPIIntrospection } from './openapi-introspection';
 
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
@@ -90,7 +92,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[]
+		customJsonScalars?: Set<string>
 	) {
 		this.Schema = schema;
 		this.Namespace = namespace;
@@ -98,7 +100,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		this.Fields = fields;
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
-		this.CustomJsonScalars = customJsonScalars;
+		this.CustomJsonScalars = applyNameSpaceToCustomJsonScalars(namespace, customJsonScalars);
 		this.Namespace = namespace;
 	}
 
@@ -108,7 +110,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	Fields: FieldConfiguration[];
 	Types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
-	CustomJsonScalars?: string[];
+	CustomJsonScalars: Set<string>;
 	Namespace: string;
 
 	get schemaSha256() {
@@ -248,7 +250,8 @@ interface GraphQLIntrospectionOptions {
 	customFloatScalars?: string[];
 	customIntScalars?: string[];
 	/*
-		customJSONScalars is deprecated; the types are now detected automatically.
+		The customJSONScalars array no longer needs to contain new replacement JSON scalars.
+		However, original JSON scalars will default to type string if not included in this array.
 	 */
 	customJSONScalars?: string[];
 	// switching internal to true will mark the origin as an internal GraphQL API
@@ -397,40 +400,6 @@ export interface GraphQLUpstream extends HTTPUpstream {
 	subscriptionsURL?: InputVariable;
 	subscriptionsUseSSE?: boolean;
 	introspection?: IntrospectionFetchOptions & GraphqlIntrospectionHeaders;
-}
-
-export interface OpenAPIIntrospectionFile {
-	kind: 'file';
-	filePath: string;
-}
-
-export interface OpenAPIIntrospectionString {
-	kind: 'string';
-	openAPISpec: string;
-}
-
-export interface OpenAPIIntrospectionObject {
-	kind: 'object';
-	openAPIObject: {};
-}
-
-export type OpenAPIIntrospectionSource =
-	| OpenAPIIntrospectionFile
-	| OpenAPIIntrospectionString
-	| OpenAPIIntrospectionObject;
-
-export interface OpenAPIIntrospection extends HTTPUpstream {
-	source: OpenAPIIntrospectionSource;
-	// statusCodeUnions set to true will make all responses return a union type of all possible response objects,
-	// mapped by status code
-	// by default, only the status 200 response is mapped, which keeps the GraphQL API flat
-	// by enabling statusCodeUnions, you have to unwrap the response union via fragments for each response
-	statusCodeUnions?: boolean;
-	baseURL?: InputVariable;
-	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
-	// this is useful for specifying type definitions for JSON objects
-	schemaExtension?: string;
-	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
 export interface StaticApiCustom {

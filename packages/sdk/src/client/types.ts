@@ -1,5 +1,6 @@
 import type { RequiredKeysOf, SetRequired } from 'type-fest';
-import { GraphQLError, ResponseError } from './errors';
+import { GraphQLError } from './errors';
+import { WunderGraphUser } from '../server';
 
 export type Headers = { [key: string]: string };
 
@@ -34,6 +35,7 @@ export interface OperationsDefinition<
 	Queries extends OperationDefinition = OperationDefinition,
 	Mutations extends OperationDefinition = OperationDefinition,
 	Subscriptions extends OperationDefinition = OperationDefinition,
+	LiveQueries extends OperationDefinition = OperationDefinition,
 	UserRole extends string = string,
 	S3Provider extends S3ProviderDefinition = S3ProviderDefinition,
 	AuthProvider extends string = string
@@ -44,6 +46,7 @@ export interface OperationsDefinition<
 	queries: Queries;
 	mutations: Mutations;
 	subscriptions: Subscriptions;
+	liveQueries: LiveQueries;
 }
 
 export interface OperationDefinition {
@@ -164,38 +167,7 @@ export interface FetchUserRequestOptions {
 	revalidate?: boolean;
 }
 
-export interface User<Role extends string = any, CustomClaims extends {} = {}> {
-	provider?: string;
-	providerId?: string;
-	userId?: string;
-	name?: string;
-	firstName?: string;
-	lastName?: string;
-	middleName?: string;
-	nickName?: string;
-	preferredUsername?: string;
-	profile?: string;
-	picture?: string;
-	website?: string;
-	email?: string;
-	emailVerified?: boolean;
-	gender?: string;
-	birthDate?: string;
-	zoneInfo?: string;
-	locale?: string;
-	location?: string;
-
-	roles?: Role[];
-	customAttributes?: string[];
-	customClaims?: {
-		[key: string]: any;
-	} & CustomClaims;
-	accessToken?: JSONObject;
-	rawAccessToken?: string;
-	idToken?: JSONObject;
-	rawIdToken?: string;
-}
-
+export type User<Role extends string = any, CustomClaims extends {} = {}> = WunderGraphUser<Role, CustomClaims>;
 export interface LogoutOptions {
 	/**
 	 * Whether to log out the user from the OpenID Connect provider.

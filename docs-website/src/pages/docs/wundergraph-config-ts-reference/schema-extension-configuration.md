@@ -13,11 +13,18 @@ WunderGraph also allows you to directly integrate with databases like PostgreSQL
 support `JSON` data types.
 
 But that's not all.
-With a generic `JSON` scalar, users can use any unspecific JSON value as an input without any guarantee on its contents.
+With a generic `JSON` scalar, users can use any legal JSON value as an input without any guarantee on its
+contents.
 With Custom Schema Extensions, you'll automatically receive JSON Schema validation for the input while being able to
 store the same value in a JSON/JSONB column.
 
 ## Enabling Schema Extensions
+
+{% callout type="note" %}
+If you are _replacing_ a JSON scalar, you do not need to include it in the `customJSONScalars` array.
+However, if it is not being replaced, the scalar type will be inferred as a TypeScript `string` unless it is added to
+the `customJSONScalars` array.
+{% /callout %}
 
 There are two mandatory steps to enabling Schema Extensions.
 First, you must provide the `schemaExtension` itself in your `wundergraph.config.ts` file.

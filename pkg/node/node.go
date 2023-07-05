@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/dgraph-io/ristretto"
+	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/mux"
 	"github.com/pires/go-proxyproto"
 	"github.com/rs/cors"
@@ -864,16 +865,15 @@ func (n *Node) filePollConfig(filePath string) error {
 func (n *Node) reloadFileConfig(filePath string) error {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		n.log.Error("reloadFileConfig ioutil.ReadFile", zap.String("filePath", filePath), zap.Error(err))
+		n.log.Error("reloadFileConfig os.ReadFile", zap.String("filePath", filePath), zap.Error(err))
 		return err
 	}
 	if len(data) == 0 {
 		return errors.New("empty config file")
 	}
 	var graphConfig wgpb.WunderGraphConfiguration
-	err = json.Unmarshal(data, &graphConfig)
-	if err != nil {
-		n.log.Error("reloadFileConfig json.Unmarshal", zap.String("filePath", filePath), zap.Error(err))
+	if err := proto.Unmarshal(data, &graphConfig); err != nil {
+		n.log.Error("decoding config file", zap.Error(err))
 		return err
 	}
 

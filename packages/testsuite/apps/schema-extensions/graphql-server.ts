@@ -4,10 +4,13 @@ import { createServer, YogaNodeServerInstance } from '@graphql-yoga/node';
 const typeDefs = /* GraphQL */ `
 	scalar HumanJSON
 
+	scalar HairStyle
+
 	interface Human {
 		details: HumanJSON!
 	}
 
+	scalar Attributes
 	scalar TrainerJSON
 
 	interface Trainer {
@@ -24,6 +27,7 @@ const typeDefs = /* GraphQL */ `
 	type Friend implements Human {
 		id: ID!
 		details: HumanJSON!
+		hair: HairStyle!
 	}
 
 	type Rival implements Human & Trainer {
@@ -31,6 +35,7 @@ const typeDefs = /* GraphQL */ `
 		starter: String!
 		details: HumanJSON!
 		teamData: TrainerJSON!
+		attributes: Attributes
 	}
 
 	union Character = Friend | Rival | GymLeader
@@ -38,6 +43,7 @@ const typeDefs = /* GraphQL */ `
 	input FriendInput {
 		id: ID!
 		details: HumanJSON!
+		hair: HairStyle
 	}
 
 	type Query {
@@ -75,6 +81,7 @@ const gary = {
 				"highestLevel": 65,
 				"typeSpeciality": "N/A",
 			}`,
+	attributes: `{"skills": "high"}`,
 };
 
 const oak = {
@@ -83,6 +90,7 @@ const oak = {
 				"name": "Professor Oak",
 				"age": 50,
 			}`,
+	hair: `{"short": true}`,
 };
 
 const resolvers = {
@@ -105,6 +113,7 @@ const resolvers = {
 			return {
 				id: args.input.id,
 				details: args.input.details,
+				hair: { short: true },
 			};
 		},
 	},

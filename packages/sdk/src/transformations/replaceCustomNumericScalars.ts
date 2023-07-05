@@ -1,5 +1,7 @@
 import { GraphQLIntrospection } from '../definition';
-import { parse, print, visit } from 'graphql';
+import { parse, visit } from 'graphql';
+import { printSchemaWithDirectives } from '@graphql-tools/utils';
+import { buildASTSchema } from 'graphql/index';
 
 export interface ArgumentReplacement {
 	fieldName: string;
@@ -123,6 +125,6 @@ export const replaceCustomNumericScalars = (
 		},
 	});
 
-	const schema = print(cleanAst);
+	const schema = printSchemaWithDirectives(buildASTSchema(cleanAst));
 	return { schemaSDL: schema, argumentReplacements };
 };

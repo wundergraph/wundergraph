@@ -1,23 +1,37 @@
 import {
+	buildASTSchema,
 	GraphQLSchema,
 	Kind,
 	NameNode,
 	OperationTypeDefinitionNode,
 	OperationTypeNode,
 	parse,
-	print,
-	printSchema,
 	SchemaDefinitionNode,
 	StringValueNode,
 	visit,
 } from 'graphql';
+import { printSchemaWithDirectives } from '@graphql-tools/utils';
+
+const federationDirectives = ['key', 'extends', 'external', 'requires', 'provides'];
+const omnigraphDirectives = [
+	// omnigraph/openapi directives:
+	'enum',
+	'example',
+	'globalOptions',
+	'httpOperation',
+	'regexp',
+	'resolveRoot',
+	'typescript',
+	// omnigraph/soap directives:
+	'soap',
+];
 
 /*
 	cleanupSchema - cleans up the upstream schema by removing service fields, federation directives,
 	and replacing the operation type names with the standard names. 
  */
 export const cleanupSchema = (schema: GraphQLSchema): string => {
-	const printed = printSchema(schema);
+	const printed = printSchemaWithDirectives(schema);
 	const ast = parse(printed);
 	const queryTypeName = schema.getQueryType()?.name;
 	const mutationTypeName = schema.getMutationType()?.name;
@@ -167,13 +181,13 @@ export const cleanupSchema = (schema: GraphQLSchema): string => {
 			};
 		},
 		DirectiveDefinition: (node) => {
-			switch (node.name.value) {
-				case 'key':
-				case 'extends':
-				case 'external':
-				case 'requires':
-				case 'provides':
-					return null;
+			if (federationDirectives.includes(node.name.value) || omnigraphDirectives.includes(node.name.value)) {
+				return null;
+			}
+		},
+		Directive: (node) => {
+			if (federationDirectives.includes(node.name.value) || omnigraphDirectives.includes(node.name.value)) {
+				return null;
 			}
 		},
 		FieldDefinition: {
@@ -238,5 +252,5 @@ export const cleanupSchema = (schema: GraphQLSchema): string => {
 		},
 	});
 
-	return print(cleanAst);
+	return printSchemaWithDirectives(buildASTSchema(cleanAst));
 };

@@ -13,12 +13,13 @@ import { resolveConfigurationVariable } from '../configure/variables';
 import { onParentProcessExit } from '../utils/process';
 import { customGqlServerMountPath } from './util';
 
-import type { WunderGraphConfiguration } from '@wundergraph/protobuf';
+import { EngineConfiguration, InternedString, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { ConfigurationVariableKind, DataSourceKind } from '@wundergraph/protobuf';
 import type { WebhooksConfig } from '../webhooks/types';
 import type { HooksRouteConfig } from './plugins/hooks';
 import type { WebHookRouteConfig } from './plugins/webhooks';
 import type {
+	ClientRequest,
 	FastifyRequestBody,
 	HooksConfiguration,
 	ServerRunOptions,
@@ -35,8 +36,12 @@ import { NamespacingExecutor } from '../orm';
 import type { OperationsAsyncContext } from './operations-context';
 import configureTracerProvider from './trace/trace';
 import { propagation } from '@opentelemetry/api';
-import { TracerConfig } from './types';
+import { CreateServerOptions, TracerConfig } from './types';
 import { loadTraceConfigFromWgConfig } from './trace/config';
+import { TelemetryPluginOptions } from './plugins/telemetry';
+import { createLogger } from './logger';
+
+export const WunderGraphConfigurationFilename = 'wundergraph.wgconfig';
 
 const isProduction = process.env.NODE_ENV === 'production';
 let WG_CONFIG: WunderGraphConfiguration;
@@ -65,10 +70,10 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 		process.exit(1);
 	}
 	try {
-		const configContent = fs.readFileSync(path.join(process.env.WG_DIR_ABS!, 'generated', 'wundergraph.config.json'), {
-			encoding: 'utf8',
-		});
-		WG_CONFIG = JSON.parse(configContent);
+		const configContent = fs.readFileSync(
+			path.join(process.env.WG_DIR_ABS!, 'generated', WunderGraphConfigurationFilename)
+		);
+		WG_CONFIG = WunderGraphConfiguration.decode(configContent);
 
 		if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.nodeInternalUrl) {
 			const nodeInternalURL = resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.nodeInternalUrl);
@@ -77,7 +82,7 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 			throw new Error('User defined api is not set.');
 		}
 	} catch (err: any) {
-		logger.fatal(err, 'Could not load wundergraph.config.json. Did you forget to run `wunderctl generate` ?');
+		logger.fatal(err, 'Could not load wundergraph configuration file. Did you forget to run `wunderctl generate` ?');
 		process.exit(1);
 	}
 }
@@ -165,7 +170,11 @@ export const startServer = async (opts: ServerRunOptions) => {
 		const host = resolveConfigurationVariable(opts.config.api.serverOptions.listen.host);
 		const port = parseInt(portString, 10);
 
-		const fastify = await createServer(opts);
+		const fastify = await createServer({
+			...opts,
+			serverPort: port,
+			serverHost: host,
+		});
 
 		await fastify.listen({
 			port: port,
@@ -193,6 +202,56 @@ export const createClientRequest = (body: FastifyRequestBody) => {
 };
 
 /**
+ * Returns the headers that should be forwarded from the ClientRequest as headers
+ * in the next request sent to the node
+ * @param request A ClientRequest
+ * @returns A record with the headers where keys are the names and values are the header values
+ */
+export const forwardedHeaders = (request: ClientRequest) => {
+	const forwardedHeaders = ['Authorization', 'X-Request-Id'];
+	const headers: Record<string, string> = {};
+	if (request?.headers) {
+		for (const header of forwardedHeaders) {
+			const value = request.headers.get(header);
+			if (value) {
+				headers[header] = value;
+			}
+		}
+	}
+	return headers;
+};
+
+/**
+ * Converts a ClientRequest to its raw form, so it can be encoded in the body and sent to the node
+ * @param request A ClientRequest instance
+ * @returns A raw clientRequest as plain object
+ */
+export const encodeRawClientRequest = (request: ClientRequest, extraHeaders?: Record<string, string>) => {
+	const headers: Record<string, string> = {};
+	request.headers.forEach((value, key) => {
+		if (headers[key]) {
+			if (value) {
+				headers[key] += `,${value}`;
+			}
+		} else {
+			headers[key] = value;
+		}
+	});
+	// To allow operations to access the headers set in extraHeaders, override
+	// the header values in the clientRequest sent to the node
+	if (extraHeaders != null) {
+		for (const key of Object.keys(extraHeaders)) {
+			headers[key] = extraHeaders[key];
+		}
+	}
+	return {
+		headers,
+		requestURI: request.requestURI,
+		method: request.method,
+	};
+};
+
+/**
  * rawClientRequest returns the raw JSON encoded client request
  * @param body Request body
  * @returns Client request as raw JSON, as received in the request body
@@ -201,13 +260,23 @@ export const rawClientRequest = (body: FastifyRequestBody) => {
 	return body.__wg.clientRequest;
 };
 
+const loadInternedString = (engineConfig: EngineConfiguration, str: InternedString) => {
+	const s = engineConfig.stringStorage[str.key];
+	if (s === undefined) {
+		throw new Error(`could not load interned string ${str.key}`);
+	}
+	return s;
+};
+
 export const createServer = async ({
 	wundergraphDir,
 	serverConfig,
 	config,
 	gracefulShutdown,
 	clientFactory,
-}: ServerRunOptions): Promise<FastifyInstance> => {
+	serverHost,
+	serverPort,
+}: CreateServerOptions): Promise<FastifyInstance> => {
 	if (config.api?.serverOptions?.logger?.level && process.env.WG_DEBUG_MODE !== 'true') {
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
@@ -323,7 +392,13 @@ export const createServer = async ({
 				logger
 			);
 
-			await fastify.register(require('./plugins/telemetry'), tracerProvider);
+			await fastify.register<TelemetryPluginOptions>(require('./plugins/telemetry'), {
+				provider: tracerProvider.provider,
+				serverInfo: {
+					host: serverHost,
+					port: serverPort,
+				},
+			});
 		}
 	}
 
@@ -347,13 +422,13 @@ export const createServer = async ({
 			}
 
 			req.ctx = {
-				log: req.log,
+				log: createLogger(req.log),
 				user: req.body.__wg.user!,
 				clientRequest,
-				internalClient: clientFactory(headers, req.body.__wg.clientRequest),
+				internalClient: clientFactory(headers, clientRequest),
 				operations: new OperationsClient({
 					baseURL: nodeInternalURL,
-					clientRequest: req.body.__wg.clientRequest,
+					clientRequest,
 					extraHeaders: headers,
 					tracer: fastify.tracer,
 					traceContext: req.telemetry?.context,
@@ -388,7 +463,9 @@ export const createServer = async ({
 				return;
 			}
 
-			const schema = ds.customGraphql?.upstreamSchema;
+			const schema = ds.customGraphql?.upstreamSchema
+				? loadInternedString(config.api!.engineConfiguration!, ds.customGraphql?.upstreamSchema)
+				: undefined;
 			let serverName, mountPath;
 
 			if (ds.customGraphql?.fetch?.path?.staticVariableContent) {
@@ -472,6 +549,9 @@ export const createServer = async ({
 					throw new Error(
 						`ORM is not enabled for your application. Set "experimental.orm" to "true" in your \`wundergraph.config.ts\` to enable.`
 					);
+				},
+				withClientRequest() {
+					return this;
 				},
 		  } as any);
 

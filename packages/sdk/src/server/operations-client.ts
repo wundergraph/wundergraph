@@ -1,3 +1,7 @@
+import { SpanKind, Tracer, trace, Context, propagation, Span } from '@opentelemetry/api';
+import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
+// Web API compatible fetch API for nodejs.
+import { fetch } from '@whatwg-node/fetch';
 import {
 	Client,
 	ClientConfig,
@@ -7,13 +11,10 @@ import {
 	QueryRequestOptions,
 	SubscriptionRequestOptions,
 } from '../client';
-import { SpanKind, Tracer, trace, Context, propagation, Span } from '@opentelemetry/api';
-import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
 import { Attributes, Components } from './trace/attributes';
 import { attachErrorToSpan, setStatusFromResponseCode } from './trace/util';
-
-// Web API compatible fetch API for nodejs.
-import { fetch } from '@whatwg-node/fetch';
+import { ClientRequest } from './types';
+import { encodeRawClientRequest, forwardedHeaders } from './server';
 
 export interface Operation<Input extends object, Response> {
 	input: Input;
@@ -34,7 +35,7 @@ export interface OperationsClientConfig extends Omit<ClientConfig, 'csrfEnabled'
 	/**
 	 * raw JSON encoded client request
 	 */
-	clientRequest: any;
+	clientRequest: ClientRequest;
 	tracer?: Tracer;
 	traceContext?: Context;
 }
@@ -57,8 +58,6 @@ export type InternalOperationsDefinition<
 	mutations: Mutations;
 	subscriptions: Subscriptions;
 };
-
-const forwardedHeaders = ['Authorization', 'X-Request-Id'];
 
 /**
  * This client is used to execute custom operations on the Hooks server (server side only).
@@ -84,14 +83,7 @@ export class OperationsClient<
 		});
 
 		this.clientRequest = clientRequest;
-		if (clientRequest?.headers) {
-			for (const header of forwardedHeaders) {
-				const value = clientRequest.headers[header];
-				if (value) {
-					this.baseHeaders[header] = value;
-				}
-			}
-		}
+		Object.assign(this.baseHeaders, forwardedHeaders(clientRequest));
 		this.tracer = options.tracer;
 		this.traceContext = options.traceContext;
 	}
@@ -122,7 +114,10 @@ export class OperationsClient<
 		options: OperationName extends string ? QueryRequestOptions<OperationName, Input> : OperationRequestOptions
 	): Promise<ClientResponse<TResponse['data'], TResponse['error']>> => {
 		const searchParams = this.searchParams();
-		const params: any = { input: options.input, __wg: { clientRequest: this.clientRequest } };
+		const params: any = {
+			input: options.input,
+			__wg: { clientRequest: encodeRawClientRequest(this.clientRequest, this.options.extraHeaders) },
+		};
 
 		if (options.subscribeOnce) {
 			searchParams.set('wg_subscribe_once', '');

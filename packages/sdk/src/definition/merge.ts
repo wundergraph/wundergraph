@@ -1,14 +1,14 @@
 import {
-	ASTNode,
+	buildASTSchema,
 	buildSchema,
 	BuildSchemaOptions,
+	DocumentNode,
 	GraphQLSchema,
 	Kind,
 	ObjectTypeDefinitionNode,
 	parse,
 	ParseOptions,
 	print,
-	printSchema,
 	visit,
 } from 'graphql';
 import { mergeSchemas } from '@graphql-tools/schema';
@@ -20,23 +20,38 @@ import {
 } from '@wundergraph/protobuf';
 import { Api, DataSource, StaticApiCustom } from './index';
 import { WellKnownClaim, WellKnownClaimValues } from '../graphql/operations';
+import { printSchemaWithDirectives } from '@graphql-tools/utils';
 
-export const mergeApis = <T extends {} = {}>(roles: string[], customClaims: string[], ...apis: Api<T>[]): Api<T> => {
-	const dataSources: DataSource<T>[] = apis
+export interface mergeApiInput<T extends {} = {}> {
+	roles: string[];
+	customClaims: string[];
+	apis: Api<T>[];
+	ignoreDescriptionConflicts?: boolean;
+}
+
+export const mergeApis = <T extends {} = {}>(input: mergeApiInput<T>): Api<T> => {
+	const dataSources: DataSource<T>[] = input.apis
 		.map((api) => api.DataSources || [])
 		.reduce((previousValue, currentValue) => [...previousValue, ...currentValue], []);
 
-	const jsonScalars: string[] = [];
-	apis.forEach((api) => {
+	const jsonScalars = new Set<string>();
+	input.apis.forEach((api) => {
 		if (api.CustomJsonScalars) {
-			jsonScalars.push(...api.CustomJsonScalars);
+			api.CustomJsonScalars.forEach((item) => jsonScalars.add(item));
 		}
 	});
 
-	const fields = mergeApiFields(apis);
-	const types = mergeTypeConfigurations(apis);
-	const schema = mergeApiSchemas(roles, customClaims, apis, dataSources, fields);
-	const interpolateVariableDefinitionAsJSON = apis.flatMap((api) => api.interpolateVariableDefinitionAsJSON);
+	const fields = mergeApiFields(input.apis);
+	const types = mergeTypeConfigurations(input.apis);
+	const schema = mergeApiSchemas(
+		input.roles,
+		input.customClaims,
+		input.apis,
+		dataSources,
+		fields,
+		!!input.ignoreDescriptionConflicts
+	);
+	const interpolateVariableDefinitionAsJSON = input.apis.flatMap((api) => api.interpolateVariableDefinitionAsJSON);
 	return new Api(schema, '', dataSources, fields, types, interpolateVariableDefinitionAsJSON, jsonScalars);
 };
 
@@ -469,20 +484,102 @@ Without authentication, the operation will return an Unauthorized error with sta
 directive @requireAuthentication on QUERY | MUTATION | SUBSCRIPTION 
 `;
 
+interface DescriptionInfo {
+	block: boolean | undefined;
+	value: string;
+}
+type DescriptionsMap = Map<string, DescriptionInfo>;
+
+const collectAndReplaceDescriptions = (descriptions: DescriptionsMap, schemaSDL: string): GraphQLSchema => {
+	const schemaAST = parse(schemaSDL);
+
+	const modifiedAst = visit(schemaAST, {
+		leave(node, key, parent, path, ancestors) {
+			const nodeHasDescription = 'description' in node && !!node.description && node.description.value.trim() !== '';
+			if (!nodeHasDescription) {
+				return node;
+			}
+
+			let mapKey: string;
+			switch (node.kind) {
+				case Kind.SCHEMA_DEFINITION:
+					mapKey = `${node.kind}`;
+					break;
+				default:
+					mapKey = `${node.kind}-${node.name && node.name.value}`;
+			}
+
+			if (!descriptions.has(mapKey)) {
+				descriptions.set(mapKey, {
+					block: node.description.block || node.description.value.includes('\n'),
+					value: node.description.value,
+				});
+			}
+
+			return {
+				...node,
+				description: {
+					...node.description,
+					value: `replaced-${mapKey}`,
+				},
+			};
+		},
+	});
+
+	return buildASTSchema(modifiedAst, {
+		assumeValidSDL: true,
+	});
+};
+
+const restoreDescriptions = (descriptions: DescriptionsMap, schemaAST: DocumentNode): DocumentNode => {
+	return visit(schemaAST, {
+		leave: function (node) {
+			const nodeHasReplacedDescription =
+				'description' in node && !!node.description && node.description.value.startsWith('replaced-');
+
+			if (!nodeHasReplacedDescription) {
+				return node;
+			}
+
+			const mapKey = node.description.value.replace('replaced-', '');
+			if (!descriptions.has(mapKey)) {
+				return node;
+			}
+
+			const descriptionInfo = descriptions.get(mapKey);
+
+			return {
+				...node,
+				description: {
+					...node.description,
+					...descriptionInfo,
+				},
+			};
+		},
+	});
+};
+
 const mergeApiSchemas = <T extends {} = {}>(
 	roles: string[],
 	customClaims: string[],
 	apis: Api<T>[],
 	dataSources: DataSource[],
-	fields: FieldConfiguration[]
+	fields: FieldConfiguration[],
+	ignoreDescriptionConflicts: boolean
 ): string => {
+	const descriptions = new Map<string, DescriptionInfo>();
+
 	const graphQLSchemas = apis
-		.map((api, i) => {
-			return api.Schema
-				? buildSchema(api.Schema, {
-						assumeValidSDL: true,
-				  })
-				: null;
+		.map((api) => {
+			if (api.Schema) {
+				if (ignoreDescriptionConflicts) {
+					return collectAndReplaceDescriptions(descriptions, api.Schema);
+				}
+				return buildSchema(api.Schema, {
+					assumeValidSDL: true,
+				});
+			}
+			return null;
 		})
 		.flatMap((schema) => (schema ? [schema] : []));
 
@@ -538,7 +635,7 @@ const mergeApiSchemas = <T extends {} = {}>(
 		rootTypeNames.push(subscriptionTypeName);
 	}
 
-	const printed = printSchema(mergedGraphQLSchema);
+	const printed = printSchemaWithDirectives(mergedGraphQLSchema);
 
 	const ast = parse(printed);
 	const filtered = visit(ast, {
@@ -638,10 +735,17 @@ const mergeApiSchemas = <T extends {} = {}>(
 		},
 	});
 	const withoutEmptyDescription = removeEmptyDescriptions(filtered);
-	return print(withoutEmptyDescription);
+
+	if (ignoreDescriptionConflicts) {
+		return printSchemaWithDirectives(
+			buildASTSchema(restoreDescriptions(descriptions, withoutEmptyDescription), { assumeValidSDL: true })
+		);
+	}
+
+	return printSchemaWithDirectives(buildASTSchema(withoutEmptyDescription, { assumeValidSDL: true }));
 };
 
-const removeEmptyDescriptions = (astNode: ASTNode): ASTNode => {
+const removeEmptyDescriptions = (astNode: DocumentNode): DocumentNode => {
 	return visit(astNode, {
 		enter: (node) => {
 			switch (node.kind) {

@@ -1,12 +1,13 @@
 package telemetry
 
 import (
-	"encoding/json"
 	"fmt"
 	"net"
 	"net/url"
 	"os"
 	"path/filepath"
+
+	"google.golang.org/protobuf/proto"
 
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -89,15 +90,13 @@ func dataSourceMetric(dataSourceTag string, urlVariable *wgpb.ConfigurationVaria
 }
 
 func DataSourceMetrics(wunderGraphDir string) ([]*Metric, error) {
-	configFile := filepath.Join(wunderGraphDir, "generated", "wundergraph.config.json")
-	f, err := os.Open(configFile)
+	configFile := filepath.Join(wunderGraphDir, "generated", "wundergraph.wgconfig")
+	configData, err := os.ReadFile(configFile)
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
-	dec := json.NewDecoder(f)
 	var wgConfig wgpb.WunderGraphConfiguration
-	if err := dec.Decode(&wgConfig); err != nil {
+	if err := proto.Unmarshal(configData, &wgConfig); err != nil {
 		return nil, err
 	}
 	var metrics []*Metric

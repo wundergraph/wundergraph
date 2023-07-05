@@ -3,7 +3,7 @@ import { FieldDefinitionNode, InputValueDefinitionNode, Kind, parse, parseType, 
 import { DatabaseIntrospection } from '../definition';
 import { SingleTypeField } from '@wundergraph/protobuf';
 import { DMMF } from '@prisma/generator-helper';
-import { NamedTypeNode } from 'graphql/language/ast';
+import { NamedTypeNode, ObjectTypeDefinitionNode } from 'graphql/language/ast';
 import { startCase } from 'lodash';
 import * as fs from 'fs';
 import hash from 'object-hash';
@@ -181,6 +181,16 @@ const listInputFields = [
 	'delete',
 ];
 
+export const nodeTypeIsList = (node: TypeNode): boolean => {
+	if (node.kind === Kind.LIST_TYPE) {
+		return true;
+	}
+	if (node.kind === Kind.NON_NULL_TYPE) {
+		return nodeTypeIsList(node.type);
+	}
+	return false;
+};
+
 export const cleanupPrismaSchema = (
 	introspection: DatabaseIntrospection,
 	result: PrismaDatabaseIntrospectionResult
@@ -199,11 +209,14 @@ export const cleanupPrismaSchema = (
 	let currentValidParentTypeName = '';
 	let currentParentInterfaces: string[] = [];
 	const replacementScalars: Set<SingleTypeField> = new Set<SingleTypeField>();
+	let currentObjectDefinition: ObjectTypeDefinitionNode | undefined;
+	let currentFieldDefinition: FieldDefinitionNode | undefined;
 
 	const document = parse(result.graphql_schema);
 	const cleaned = visit(document, {
 		ObjectTypeDefinition: {
 			enter: (node) => {
+				currentObjectDefinition = node;
 				const nodeName = node.name.value;
 				if (nodeName === 'Mutation') {
 					// we don't like the prisma schema using just JSON, so we rewrite the fields
@@ -233,6 +246,7 @@ export const cleanupPrismaSchema = (
 				}
 			},
 			leave: () => {
+				currentObjectDefinition = undefined;
 				currentValidParentTypeName = '';
 				customScalarReplacementName = '';
 				currentParentInterfaces = [];
@@ -240,6 +254,7 @@ export const cleanupPrismaSchema = (
 		},
 		FieldDefinition: {
 			enter: (node) => {
+				currentFieldDefinition = node;
 				customScalarReplacementName = handleScalarReplacementForChild(
 					node,
 					replacementsByParentName,
@@ -251,6 +266,7 @@ export const cleanupPrismaSchema = (
 				);
 			},
 			leave: (_) => {
+				currentFieldDefinition = undefined;
 				customScalarReplacementName = '';
 			},
 		},
@@ -294,6 +310,33 @@ export const cleanupPrismaSchema = (
 						const modified: InputValueDefinitionNode = {
 							...node,
 							type: parseType(`[${print(node.type)}]`),
+						};
+						return modified;
+					}
+				}
+
+				// Prisma accepts both a list and a single instance to *Many* methods and the DMMF
+				// declares the argument type with both types. However, the generated GraphQL schema
+				// by Prisma picks only the first of those types which, to make matters worse, is
+				// not deterministic. Make sure that we only make the argument type a list if it wasn't
+				// a list before.
+				if (currentObjectDefinition && currentFieldDefinition && !nodeTypeIsList(node.type)) {
+					const dmmfObject = result?.dmmf?.schema?.outputObjectTypes?.prisma.find(
+						(x) => x.name === currentObjectDefinition?.name.value
+					);
+					const dmmfField = dmmfObject?.fields.find((x) => x.name === currentFieldDefinition?.name.value);
+					const dmmfArg = dmmfField?.args.find((x) => x.name === node.name.value);
+					const isList = dmmfArg?.inputTypes.find((arg) => arg.isList === true);
+					if (isList) {
+						let type: TypeNode;
+						if (node.type.kind === Kind.NON_NULL_TYPE) {
+							type = parseType(`[${print(node.type.type)}]!`);
+						} else {
+							type = parseType(`[${print(node.type)}]`);
+						}
+						const modified: InputValueDefinitionNode = {
+							...node,
+							type,
 						};
 						return modified;
 					}
