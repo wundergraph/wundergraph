@@ -302,7 +302,7 @@ describe('OpenAPI builder', () => {
 	});
 
 	test('rename different types with same name', () => {
-		const userASchema: JSONSchema = {
+		const userSchema: JSONSchema = {
 			type: 'object',
 			properties: {
 				name: { type: 'string' },
@@ -311,13 +311,22 @@ describe('OpenAPI builder', () => {
 			required: ['name', 'surname'],
 			additionalProperties: false,
 		};
-		const userBSchema: JSONSchema = {
+		const user2Schema: JSONSchema = {
 			type: 'object',
 			properties: {
 				username: { type: 'string' },
 				age: { type: 'number' },
 			},
 			required: ['username', 'age'],
+			additionalProperties: false,
+		};
+		const user3Schema: JSONSchema = {
+			type: 'object',
+			properties: {
+				username: { type: 'string' },
+				city: { type: 'string' },
+			},
+			required: ['username', 'city'],
 			additionalProperties: false,
 		};
 
@@ -337,7 +346,7 @@ describe('OpenAPI builder', () => {
 					},
 					additionalProperties: false,
 					definitions: {
-						User: userASchema,
+						User: userSchema,
 					},
 				},
 			},
@@ -356,15 +365,75 @@ describe('OpenAPI builder', () => {
 					},
 					additionalProperties: false,
 					definitions: {
-						User: userBSchema,
+						User: user2Schema,
 					},
 				},
+			},
+			{
+				Name: 'GetUserC',
+				PathName: 'users/getC',
+				OperationType: OperationType.QUERY,
+				ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+				VariablesSchema: emptySchema,
+				ResponseSchema: {
+					type: 'object',
+					properties: {
+						data: {
+							$ref: '#/definitions/User',
+						},
+					},
+					additionalProperties: false,
+					definitions: {
+						User: user3Schema,
+					},
+				},
+			},
+			{
+				Name: 'GetUserD',
+				PathName: 'users/getD',
+				OperationType: OperationType.QUERY,
+				ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+				VariablesSchema: emptySchema,
+				ResponseSchema: {
+					type: 'object',
+					properties: {
+						data: {
+							$ref: '#/definitions/User',
+						},
+					},
+					additionalProperties: false,
+					definitions: {
+						User: user2Schema,
+					},
+				},
+			},
+			{
+				Name: 'SetUserE',
+				PathName: 'users/setE',
+				OperationType: OperationType.MUTATION,
+				ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+				VariablesSchema: {
+					type: 'object',
+					properties: {
+						data: {
+							$ref: '#/definitions/User',
+						},
+					},
+					additionalProperties: false,
+					definitions: {
+						User: user3Schema,
+					},
+				},
+				ResponseSchema: emptySchema,
 			},
 		] as unknown as GraphQLOperation[];
 
 		const result = build(operations);
 		const operationA = result.paths['/users/getA'].get;
 		const operationB = result.paths['/users/getB'].get;
+		const operationC = result.paths['/users/getC'].get;
+		const operationD = result.paths['/users/getD'].get;
+		const operationE = result.paths['/users/setE'].post;
 
 		const responseASchema = operationA?.responses?.['200']?.content?.['application/json']?.schema;
 		expect((responseASchema?.properties?.['data'] as JSONSchema7)?.$ref).toBe('#/components/schemas/User');
@@ -372,10 +441,20 @@ describe('OpenAPI builder', () => {
 		const responseBSchema = operationB?.responses?.['200']?.content?.['application/json']?.schema;
 		expect((responseBSchema?.properties?.['data'] as JSONSchema7)?.$ref).toBe('#/components/schemas/User_2');
 
+		const responseCSchema = operationC?.responses?.['200']?.content?.['application/json']?.schema;
+		expect((responseCSchema?.properties?.['data'] as JSONSchema7)?.$ref).toBe('#/components/schemas/User_3');
+
+		const responseDSchema = operationD?.responses?.['200']?.content?.['application/json']?.schema;
+		expect((responseDSchema?.properties?.['data'] as JSONSchema7)?.$ref).toBe('#/components/schemas/User_2');
+
+		const inputESchema = operationE?.requestBody?.content?.['application/json']?.schema;
+		expect((inputESchema?.properties?.['data'] as JSONSchema7)?.$ref).toBe('#/components/schemas/User_3');
+
 		const schemas = result?.components?.schemas;
 
-		expect(schemas?.['User']).toEqual(userASchema);
-		expect(schemas?.['User_2']).toEqual(userBSchema);
+		expect(schemas?.['User']).toEqual(userSchema);
+		expect(schemas?.['User_2']).toEqual(user2Schema);
+		expect(schemas?.['User_3']).toEqual(user3Schema);
 	});
 
 	test('OpenAPI Builder', async () => {
