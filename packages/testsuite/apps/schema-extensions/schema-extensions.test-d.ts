@@ -1,12 +1,12 @@
 import { expectTypeOf, test } from 'vitest';
-import { CharactersResponseData, CreateFriendResponseData, JSONValue } from './.wundergraph/generated/models';
+import { CharactersResponseData, CreateFriendResponseData, JSONObject } from './.wundergraph/generated/models';
 
 test('output types are properly replaced', () => {
-	const attributes: Required<CharactersResponseData['pocket_characters'][number]>['attributes'] = {};
-	expectTypeOf(attributes).toEqualTypeOf<JSONValue>;
+	const attributes: CharactersResponseData['pocket_characters'][number]['attributes'] = {};
+	expectTypeOf(attributes).toEqualTypeOf<JSONObject>();
 });
 
 test('input types are properly replaced', () => {
-	const hair: Required<CreateFriendResponseData['pocket_createFriend']>['hair'] = {};
-	expectTypeOf(hair).toEqualTypeOf<JSONValue>;
+	const hair: CreateFriendResponseData['pocket_createFriend']['hair'] = {};
+	expectTypeOf(hair).toEqualTypeOf<JSONObject>();
 });

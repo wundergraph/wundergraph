@@ -5,7 +5,6 @@
   "description": "Integration tests for WunderGraph SDK",
   "scripts": {
     "test": "VITEST_MIN_THREADS=2 VITEST_MAX_THREADS=4 vitest run",
-    "test:types": "vitest typecheck",
     "test:ci": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage"
