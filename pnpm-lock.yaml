@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -283,7 +283,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.167.0
+        specifier: workspace:^0.167.1
         version: link:../sdk
       typescript:
         specifier: ^4.7.2
@@ -27261,7 +27261,7 @@ packages:
     resolution: {directory: packages/sdk, type: directory}
     id: file:packages/sdk
     name: '@wundergraph/sdk'
-    version: 0.167.0
+    version: 0.167.1
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.3.0
