@@ -68,7 +68,7 @@ export const applyNameSpaceToCustomJsonScalars = (namespace: string, customJsonS
 	if (!customJsonScalars) {
 		return new Set<string>();
 	}
-	if (namespace === undefined || namespace === '' || customJsonScalars.size < 1) {
+	if (!namespace || customJsonScalars.size < 1) {
 		return customJsonScalars;
 	}
 	const namespacedScalars = new Set<string>();

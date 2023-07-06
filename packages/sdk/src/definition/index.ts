@@ -18,7 +18,7 @@ import {
 	UpstreamAuthentication,
 	UpstreamAuthenticationKind,
 } from '@wundergraph/protobuf';
-import { applyNameSpaceToCustomJsonScalars, applyNameSpaceToGraphQLSchema } from './namespacing';
+import { applyNameSpaceToGraphQLSchema } from './namespacing';
 import { InputVariable, mapInputVariable } from '../configure/variables';
 import { introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
@@ -100,7 +100,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		this.Fields = fields;
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
-		this.CustomJsonScalars = applyNameSpaceToCustomJsonScalars(namespace, customJsonScalars);
+		this.CustomJsonScalars = customJsonScalars ?? new Set();
 		this.Namespace = namespace;
 	}
 
