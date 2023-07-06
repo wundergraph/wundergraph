@@ -152,7 +152,7 @@ export type UseUserHook<Operations extends OperationsDefinition> = {
 };
 
 export type UseUploadOptions = Omit<
-	SWRMutationConfiguration<string[], ResponseError, UploadRequestOptions, 'uploadFiles'>,
+	SWRMutationConfiguration<string[], ResponseError, 'uploadFiles', UploadRequestOptions>,
 	'fetcher'
 >;
 
