@@ -100,7 +100,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		this.Fields = fields;
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
-		this.CustomJsonScalars = customJsonScalars ?? new Set();
+		this.CustomJsonScalars = customJsonScalars ?? new Set<string>();
 		this.Namespace = namespace;
 	}
 

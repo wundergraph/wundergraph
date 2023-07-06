@@ -64,7 +64,7 @@ const wellKnownDirectives: string[] = ['include', 'skip', 'deprecated', 'specifi
 const omnigraphOpenApiDirectives: string[] = ['oneOf'];
 const knownDirectives: string[] = [...wellKnownDirectives, ...omnigraphOpenApiDirectives];
 
-export const applyNameSpaceToCustomJsonScalars = (namespace: string, customJsonScalars?: Set<string>): Set<string> => {
+export const applyNameSpaceToCustomJsonScalars = (namespace?: string, customJsonScalars?: Set<string>): Set<string> => {
 	if (!customJsonScalars) {
 		return new Set<string>();
 	}

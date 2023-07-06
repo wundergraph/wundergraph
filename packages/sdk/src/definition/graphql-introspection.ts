@@ -233,7 +233,7 @@ export const introspectGraphql = async (
 		applyNameSpaceToFieldConfigurations(Fields, graphQLSchema, skipRenameRootFields, introspection.apiNamespace),
 		generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
 		[],
-		applyNameSpaceToCustomJsonScalars(introspection.apiNamespace ?? '', customScalarTypeNames)
+		applyNameSpaceToCustomJsonScalars(introspection.apiNamespace, customScalarTypeNames)
 	);
 };
 
