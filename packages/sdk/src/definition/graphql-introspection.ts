@@ -11,15 +11,16 @@ import {
 	ObjectTypeDefinitionNode,
 	ObjectTypeExtensionNode,
 	parse,
+	print,
 	printSchema,
 	visit,
-	print,
 } from 'graphql';
 import { AxiosError, AxiosProxyConfig, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { HttpsProxyAgent, HttpsProxyAgentOptions } from 'https-proxy-agent';
 import { ConfigurationVariableKind, DataSourceKind, HTTPHeader, HTTPMethod } from '@wundergraph/protobuf';
 import { cleanupSchema } from '../graphql/schema';
 import {
+	applyNameSpaceToCustomJsonScalars,
 	applyNamespaceToDirectiveConfiguration,
 	applyNameSpaceToFieldConfigurations,
 	applyNameSpaceToGraphQLSchema,
@@ -148,6 +149,11 @@ export const introspectGraphql = async (
 			});
 		}
 	}
+	if (introspection.customJSONScalars) {
+		for (const customJsonScalar of introspection.customJSONScalars) {
+			customScalarTypeNames.add(customJsonScalar);
+		}
+	}
 	const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
 	const schemaDocumentNode = parse(schemaSDL);
 	const graphQLSchema = buildSchema(schemaSDL);
@@ -227,7 +233,7 @@ export const introspectGraphql = async (
 		applyNameSpaceToFieldConfigurations(Fields, graphQLSchema, skipRenameRootFields, introspection.apiNamespace),
 		generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
 		[],
-		customScalarTypeNames,
+		applyNameSpaceToCustomJsonScalars(introspection.apiNamespace, customScalarTypeNames),
 		{
 			schemaExtension: introspection.schemaExtension !== undefined,
 			customJSONScalars: introspection.customJSONScalars !== undefined,
@@ -487,7 +493,7 @@ export const buildSubgraphSchema = (schemaDocumentNode: DocumentNode): GraphQLSc
 
 const subgraphSchemaWithoutExtensions = (schemaAST: DocumentNode): DocumentNode => {
 	return visit(schemaAST, {
-		ObjectTypeExtension(node) {
+		ObjectTypeExtension() {
 			return null;
 		},
 	});

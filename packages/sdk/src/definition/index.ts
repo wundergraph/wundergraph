@@ -99,7 +99,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[],
+		customJsonScalars?: Set<string>,
 		features?: ApiFeatures
 	) {
 		this.Schema = schema;
@@ -108,7 +108,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		this.Fields = fields;
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
-		this.CustomJsonScalars = customJsonScalars;
+		this.CustomJsonScalars = customJsonScalars ?? new Set<string>();
 		this.Namespace = namespace;
 		this.Features = features;
 	}
@@ -119,7 +119,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	Fields: FieldConfiguration[];
 	Types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
-	CustomJsonScalars?: string[];
+	CustomJsonScalars: Set<string>;
 	Namespace: string;
 	Features?: ApiFeatures;
 
@@ -260,7 +260,8 @@ interface GraphQLIntrospectionOptions {
 	customFloatScalars?: string[];
 	customIntScalars?: string[];
 	/*
-		customJSONScalars is deprecated; the types are now detected automatically.
+		The customJSONScalars array no longer needs to contain new replacement JSON scalars.
+		However, original JSON scalars will default to type string if not included in this array.
 	 */
 	customJSONScalars?: string[];
 	// switching internal to true will mark the origin as an internal GraphQL API

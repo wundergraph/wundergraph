@@ -3,11 +3,8 @@ import {
 	buildSchema,
 	BuildSchemaOptions,
 	DocumentNode,
-	FieldDefinitionNode,
 	GraphQLSchema,
-	InputValueDefinitionNode,
 	Kind,
-	NameNode,
 	ObjectTypeDefinitionNode,
 	parse,
 	ParseOptions,
@@ -37,10 +34,10 @@ export const mergeApis = <T extends {} = {}>(input: mergeApiInput<T>): Api<T> =>
 		.map((api) => api.DataSources || [])
 		.reduce((previousValue, currentValue) => [...previousValue, ...currentValue], []);
 
-	const jsonScalars: string[] = [];
+	const jsonScalars = new Set<string>();
 	input.apis.forEach((api) => {
 		if (api.CustomJsonScalars) {
-			jsonScalars.push(...api.CustomJsonScalars);
+			api.CustomJsonScalars.forEach((item) => jsonScalars.add(item));
 		}
 	});
 
@@ -573,7 +570,7 @@ const mergeApiSchemas = <T extends {} = {}>(
 	const descriptions = new Map<string, DescriptionInfo>();
 
 	const graphQLSchemas = apis
-		.map((api, i) => {
+		.map((api) => {
 			if (api.Schema) {
 				if (ignoreDescriptionConflicts) {
 					return collectAndReplaceDescriptions(descriptions, api.Schema);

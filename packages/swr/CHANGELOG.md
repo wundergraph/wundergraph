@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.15.13...@wundergraph/swr@0.16.0) (2023-07-06)
+
+### Features
+
+* updated SWR to 2.2.0 ([#1109](https://github.com/wundergraph/wundergraph/issues/1109)) ([09ef6ef](https://github.com/wundergraph/wundergraph/commit/09ef6efa2d386598d94f8d0a3a22ec351e93ef16)) (@Pagebakers)
+
+## [0.15.13](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.15.12...@wundergraph/swr@0.15.13) (2023-07-05)
+
+**Note:** Version bump only for package @wundergraph/swr
+
 ## [0.15.12](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.15.11...@wundergraph/swr@0.15.12) (2023-06-22)
 
 **Note:** Version bump only for package @wundergraph/swr

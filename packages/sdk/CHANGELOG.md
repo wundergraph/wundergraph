@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.167.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.167.0...@wundergraph/sdk@0.167.1) (2023-07-06)
+
+### Bug Fixes
+
+* customJSONScalars are ignored when introspection is fetched from cache ([#1110](https://github.com/wundergraph/wundergraph/issues/1110)) ([47deeb9](https://github.com/wundergraph/wundergraph/commit/47deeb91ae37cd5a2cbf97ff05edf8afac5c64b4)) (@fiam)
+
+## [0.167.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.166.1...@wundergraph/sdk@0.167.0) (2023-07-05)
+
+### Features
+
+* reimplement customJSONScalars ([#1099](https://github.com/wundergraph/wundergraph/issues/1099)) ([a5d49cb](https://github.com/wundergraph/wundergraph/commit/a5d49cbff29afb00d39d6d938800fc800faf139d)) (@Aenimus)
+* support different types with the same when generating OAS ([#1103](https://github.com/wundergraph/wundergraph/issues/1103)) ([dd4aaca](https://github.com/wundergraph/wundergraph/commit/dd4aaca3d10f327de3cd4db07d672f41e4f76c94)) (@fiam)
+
 ## [0.166.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.166.0...@wundergraph/sdk@0.166.1) (2023-06-22)
 
 ### Bug Fixes

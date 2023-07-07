@@ -20,11 +20,11 @@ import { buildGenerator, getProgramFromFiles, JsonSchemaGenerator, programFromCo
 import { ZodType } from 'zod';
 import {
 	Api,
+	ApiIntrospectionOptions,
 	DatabaseApiCustom,
 	DataSource,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
-	ApiIntrospectionOptions,
 	RESTApiCustom,
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
@@ -882,7 +882,7 @@ export const configureWunderGraphApplication = <
 				wgDirAbs,
 				resolved,
 				loadedOperations,
-				app.EngineConfiguration.CustomJsonScalars || []
+				app.EngineConfiguration.CustomJsonScalars || new Set<string>()
 			);
 			app.Operations = operations.operations;
 			app.InvalidOperationNames = loadedOperations.invalid || [];
@@ -1543,7 +1543,7 @@ const resolveOperationsConfigurations = async (
 	wgDirAbs: string,
 	config: ResolvedWunderGraphConfig,
 	loadedOperations: LoadOperationsOutput,
-	customJsonScalars: string[]
+	customJsonScalars: Set<string>
 ): Promise<ParsedOperations> => {
 	const customClaims = mapRecordValues(config.authentication.customClaims ?? {}, (key, claim) => {
 		let claimType: ValueType;
