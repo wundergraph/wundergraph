@@ -47,7 +47,7 @@ var upCmd = &cobra.Command{
 	Use:         UpCmdName,
 	Short:       "Starts WunderGraph in development mode",
 	Long:        "Start the WunderGraph application in development mode and watch for changes",
-	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources),
+	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources | telemetry.AnnotationFeatures),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()

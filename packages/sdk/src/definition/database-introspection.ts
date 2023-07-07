@@ -2,6 +2,7 @@ import { IntrospectionCacheConfiguration, introspectWithCache } from './introspe
 import { DatabaseSchema, mongodb, mysql, planetscale, postgresql, prisma, sqlite, sqlserver } from '../db/types';
 import {
 	Api,
+	ApiFeatures,
 	ApiIntrospectionOptions,
 	ApiType,
 	DatabaseApiCustom,
@@ -161,7 +162,8 @@ type databaseConstructor<T> = (
 	fields: FieldConfiguration[],
 	types: TypeConfiguration[],
 	interpolateVariableDefinitionAsJSON: string[],
-	customJsonScalars?: Set<string>
+	customJsonScalars: Set<string> | undefined,
+	features: ApiFeatures
 ) => T;
 
 type DbApi = Api<DatabaseApiCustom>;
@@ -182,7 +184,11 @@ function introspectDatabaseWithCache<TApi extends Api<ApiType>>(
 			dataSources,
 			fields,
 			types,
-			interpolateVariableDefinitionAsJSON
+			interpolateVariableDefinitionAsJSON,
+			undefined,
+			{
+				schemaExtension: introspection.schemaExtension !== undefined,
+			}
 		);
 	};
 
