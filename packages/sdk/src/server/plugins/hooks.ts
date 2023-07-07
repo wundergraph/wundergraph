@@ -5,6 +5,7 @@ import {
 	HooksConfigurationOperationType,
 	OperationHookFunction,
 	OperationHooksConfiguration,
+	RequestMethod,
 	UploadHooks,
 	WunderGraphFile,
 	WunderGraphRequest,
@@ -45,6 +46,14 @@ export interface GlobalHooksRouteConfig {
 	category: string;
 	hookName: string;
 }
+
+const requestFromWunderGraphRequest = (req: WunderGraphRequest): Request => {
+	return new Request(req.requestURI, {
+		method: req.method,
+		headers: req.headers,
+		body: JSON.stringify(req.body),
+	});
+};
 
 const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fastify, config) => {
 	const headersToObject = (headers: ClientRequestHeaders) => {
@@ -269,6 +278,79 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				reply.code(500);
 				return { hook: 'onOriginResponse', error: err };
 			}
+		}
+	);
+
+	const onOriginTransportHandler = config.global?.httpTransport?.onOriginTransport?.hook;
+	const onOriginTransportHookName = 'onOriginTransport';
+
+	fastify.post<
+		{
+			Body: {
+				request: WunderGraphRequest;
+				operationName: string;
+				operationType: 'query' | 'mutation' | 'subscription';
+			};
+		},
+		GlobalHooksRouteConfig
+	>(
+		'/global/httpTransport/onOriginTransport',
+		{ config: { kind: 'global-hook', category: 'httpTransport', hookName: onOriginTransportHookName } },
+		async (request, reply) => {
+			reply.type('application/json');
+			if (!onOriginTransportHandler) {
+				request.log.error({ hook: onOriginTransportHookName }, 'no handler for hook');
+				reply.code(500);
+				return;
+			}
+			let result: Response | null | undefined;
+			try {
+				result = await onOriginTransportHandler({
+					...requestContext(request),
+					operation: {
+						name: request.body.operationName,
+						type: request.body.operationType,
+					},
+					request: requestFromWunderGraphRequest(request.body.request),
+				});
+			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
+				request.log.error(err);
+				reply.code(500);
+				return { hook: onOriginTransportHookName, error: err };
+			}
+
+			let response: WunderGraphResponse | undefined;
+
+			if (result != null) {
+				// TODO: We might want to switch that to text, otherwise
+				// we require the body to be JSON representable
+				const body = await result.json();
+				response = {
+					method: request.method as RequestMethod,
+					requestURI: result.url,
+					headers: headersToObject(result.headers) as any, // TODO
+					body,
+					status: result.statusText,
+					statusCode: result.status,
+				};
+			}
+
+			reply.code(200);
+
+			return {
+				op: request.body.operationName,
+				hook: onOriginTransportHookName,
+				response: {
+					skip: result === undefined,
+					cancel: result === null,
+					response,
+				},
+			};
 		}
 	);
 

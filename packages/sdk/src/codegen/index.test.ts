@@ -276,6 +276,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 								},
 								httpTransportOnResponse: false,
 								httpTransportOnRequest: false,
+								httpTransportOnTransport: false,
 								customResolve: false,
 							},
 							VariablesConfiguration: {
@@ -370,6 +371,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 								},
 								httpTransportOnResponse: false,
 								httpTransportOnRequest: false,
+								httpTransportOnTransport: false,
 								customResolve: false,
 							},
 							VariablesConfiguration: {
@@ -514,6 +516,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 								},
 								httpTransportOnResponse: false,
 								httpTransportOnRequest: false,
+								httpTransportOnTransport: false,
 								customResolve: false,
 							},
 							VariablesConfiguration: {
@@ -592,6 +595,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 								},
 								httpTransportOnResponse: false,
 								httpTransportOnRequest: false,
+								httpTransportOnTransport: false,
 								customResolve: false,
 							},
 							VariablesConfiguration: {
@@ -619,6 +623,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 								customResolve: false,
 								httpTransportOnRequest: false,
 								httpTransportOnResponse: false,
+								httpTransportOnTransport: false,
 								mockResolve: {
 									enable: false,
 									subscriptionPollingIntervalMillis: 0,

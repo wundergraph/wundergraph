@@ -988,6 +988,16 @@ export const configureWunderGraphApplication = <
 				}
 			}
 
+			if (config.server?.hooks?.global?.httpTransport?.onOriginTransport) {
+				const enableForAllOperations = true;
+				if (enableForAllOperations) {
+					app.Operations = app.Operations.map((op) => ({
+						...op,
+						HooksConfiguration: { ...op.HooksConfiguration, httpTransportOnTransport: true },
+					}));
+				}
+			}
+
 			if (config.server?.hooks?.global?.wsTransport?.onConnectionInit) {
 				const enableForDataSources = config.server?.hooks?.global?.wsTransport?.onConnectionInit.enableForDataSources;
 				app.EngineConfiguration.DataSources = app.EngineConfiguration.DataSources.map((ds) => {
@@ -1512,6 +1522,7 @@ const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFi
 			},
 			httpTransportOnResponse: false,
 			httpTransportOnRequest: false,
+			httpTransportOnTransport: false,
 			customResolve: false,
 		},
 		VariablesConfiguration: {

@@ -191,6 +191,7 @@ const expectedTransformOperations: ParsedOperations = {
 				},
 				httpTransportOnResponse: false,
 				httpTransportOnRequest: false,
+				httpTransportOnTransport: false,
 				customResolve: false,
 			},
 			VariablesConfiguration: {
@@ -285,6 +286,7 @@ const expectedTransformOperations: ParsedOperations = {
 				},
 				httpTransportOnResponse: false,
 				httpTransportOnRequest: false,
+				httpTransportOnTransport: false,
 				customResolve: false,
 			},
 			VariablesConfiguration: {
@@ -405,6 +407,7 @@ const expectedTransformOperations: ParsedOperations = {
 				},
 				httpTransportOnResponse: false,
 				httpTransportOnRequest: false,
+				httpTransportOnTransport: false,
 				customResolve: false,
 			},
 			VariablesConfiguration: {
@@ -583,6 +586,7 @@ const fromClaimParsed: ParsedOperations = {
 				},
 				httpTransportOnResponse: false,
 				httpTransportOnRequest: false,
+				httpTransportOnTransport: false,
 				customResolve: false,
 			},
 			VariablesConfiguration: {
@@ -813,6 +817,7 @@ const jsonSchemaDirectiveParsed: ParsedOperations = {
 				},
 				httpTransportOnResponse: false,
 				httpTransportOnRequest: false,
+				httpTransportOnTransport: false,
 				customResolve: false,
 			},
 			VariablesConfiguration: {
