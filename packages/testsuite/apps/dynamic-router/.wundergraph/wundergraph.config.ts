@@ -1,20 +1,21 @@
 import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
+import { url1, url2, url3 } from './datasources';
 
 const s1 = introspect.graphql({
 	apiNamespace: 's1',
-	url: 'http://0.0.0.0:6001/graphql',
+	url: url1,
 });
 
 const s2 = introspect.graphql({
 	apiNamespace: 's2',
-	url: 'http://0.0.0.0:6002/graphql',
+	url: url2,
 });
 
 const s3 = introspect.graphql({
 	apiNamespace: 's3',
-	url: 'http://0.0.0.0:6003/graphql',
+	url: url3,
 });
 
 // configureWunderGraph emits the configuration
