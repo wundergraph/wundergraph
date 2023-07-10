@@ -17,7 +17,6 @@ import { FastifyRequest } from 'fastify';
 import { trace } from '@opentelemetry/api';
 import { Attributes } from '../trace/attributes';
 import { attachErrorToSpan } from '../trace/util';
-import { runHookQueriesPreResolve } from '../../integrations/hooks';
 import { WunderGraphIntegration } from '../../integrations/types';
 
 const maximumRecursionLimit = 16;
@@ -393,14 +392,6 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		async (request, reply) => {
 			reply.type('application/json').code(200);
 			try {
-				await runHookQueriesPreResolve({
-					config,
-					context: {
-						operationName,
-						...requestContext(request),
-						input: request.body.input,
-					},
-				});
 				await hookFunction({
 					...requestContext(request),
 					input: request.body.input,

@@ -39,6 +39,10 @@
       "types": "./dist/integrations/index.d.ts",
       "default": "./dist/integrations/index.js"
     },
+    "./dynamic-router": {
+      "types": "./dist/dynamic-router/index.d.ts",
+      "default": "./dist/dynamic-router/index.js"
+    },
     "./dist/*": {
       "types": "./dist/*.d.ts",
       "default": "./dist/*.js"
@@ -69,6 +73,9 @@
       ],
       "integrations": [
         "./dist/integrations"
+      ],
+      "dynamic-router": [
+        "./dist/dynamic-router"
       ]
     }
   },

@@ -1,6 +1,12 @@
-import { AsyncApiIntrospector, CodeGen } from '../configure';
+import { AsyncApiIntrospector, CodeGen, S3UploadConfiguration } from '../configure';
 import { AuthenticationHookRequest } from '../server';
-import { AuthProviderConfig, AuthProviderTypes, WunderGraphConfig, WunderGraphAppConfig } from './types';
+import {
+	AuthProviderConfig,
+	AuthProviderTypes,
+	WunderGraphConfig,
+	WunderGraphAppConfig,
+	WunderGraphEnterpriseIntegration,
+} from './types';
 import logger from '../logger';
 import { FastifyHooksOptions } from '../server/plugins/hooks';
 
@@ -51,7 +57,6 @@ export const runHookConfigSetup = async ({ config }: { config: WunderGraphConfig
 				...config,
 			}),
 			custom: {},
-			...config.operations,
 		},
 		apis: [],
 		authentication: {
@@ -86,6 +91,12 @@ export const runHookConfigSetup = async ({ config }: { config: WunderGraphConfig
 					}
 					wgConfig.authentication[type]?.providers?.push(authProvider);
 				},
+				addS3Provider: (s3Provider: S3UploadConfiguration) => {
+					if (!wgConfig.s3UploadProvider) {
+						wgConfig.s3UploadProvider = [];
+					}
+					wgConfig.s3UploadProvider?.push(s3Provider);
+				},
 				addCodeGeneration: (codeGen: CodeGen) => {
 					if (!wgConfig.generate) {
 						wgConfig.generate = {
@@ -118,23 +129,22 @@ export const runHookConfigGenerated = async ({ config }: { config: WunderGraphCo
 	}
 };
 
-interface HookContext extends AuthenticationHookRequest {
-	operationName: string;
-	input: any;
+interface HookContext {
+	request: Request;
 }
 
-export const runHookQueriesPreResolve = async ({
+export const runHookHttpTransport = async ({
 	config,
 	context,
 }: {
 	config: FastifyHooksOptions;
 	context: HookContext;
 }) => {
-	for (const integration of config.integrations) {
-		if (integration.hooks?.['hooks:queries:preResolve']) {
+	for (const integration of config.integrations as WunderGraphEnterpriseIntegration[]) {
+		if (integration.hooks?.['hooks:http:originTransport']) {
 			await withTakingALongTimeMsg({
 				name: integration.name,
-				hookResult: integration.hooks['hooks:queries:preResolve'](context),
+				hookResult: integration.hooks['hooks:http:originTransport'](context),
 			});
 		}
 	}

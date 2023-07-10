@@ -306,7 +306,7 @@ export interface S3UploadProfile {
 
 export type S3UploadProfiles = Record<string, S3UploadProfile>;
 
-interface S3UploadConfiguration {
+export interface S3UploadConfiguration {
 	name: string;
 	endpoint: InputVariable;
 	accessKeyID: InputVariable;
