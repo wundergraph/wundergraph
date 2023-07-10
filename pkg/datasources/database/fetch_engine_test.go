@@ -11,6 +11,7 @@ var platforms = []string{
 	"darwin",
 	"linux",
 	"windows",
+	"linux-musl-arm64-openssl-3.0.x",
 }
 
 func tmpDir(t *testing.T) string {
@@ -53,10 +54,14 @@ func TestEngineAvailability(t *testing.T) {
 	for _, engineName := range engines {
 		for _, platform := range platforms {
 			url := engine.GetEngineURL(engineName, platform)
-			resp, err := http.Head(url)
-			if err != nil || resp.StatusCode != 200 {
-				t.Fatalf("Engine %s unavaiable for platform %s", engineName, platform)
-			}
+			t.Run(engineName+"_"+platform, func(t *testing.T) {
+				t.Parallel()
+				t.Logf("testing URL %s", url)
+				resp, err := http.Head(url)
+				if err != nil || resp.StatusCode != 200 {
+					t.Fatalf("Engine %s unavailable for platform %s", engineName, platform)
+				}
+			})
 		}
 	}
 }
