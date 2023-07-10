@@ -118,26 +118,39 @@ var rootCmd = &cobra.Command{
 
 			metrics := []*telemetry.Metric{cmdUsageMetric}
 
-			clientInfo := &telemetry.MetricClientInfo{
-				WunderctlVersion: BuildInfo.Version,
-				IsCI:             os.Getenv("CI") != "" || os.Getenv("ci") != "",
-				AnonymousID:      viper.GetString("anonymousid"),
+			wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+			if err != nil {
+				return err
 			}
 
-			// Check if this command should also send data source related telemetry
-			if telemetry.HasAnnotations(telemetry.AnnotationDataSources, cmd.Annotations) {
-				wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
-				if err != nil {
-					return err
-				}
-				dataSourcesMetrics, err := telemetry.DataSourceMetrics(wunderGraphDir)
-				if err != nil {
-					if rootFlags.TelemetryDebugMode {
-						log.Error("could not generate data sources telemetry data", zap.Error(err))
+			clientInfo, err := telemetry.NewClientInfo(BuildInfo.Version, viper.GetString("anonymousid"), wunderGraphDir)
+			if err != nil {
+				return err
+			}
 
+			// Check if this command should also other telemetry data
+			if telemetry.HasAnnotations(telemetry.AnnotationDataSources, cmd.Annotations) || telemetry.HasAnnotations(telemetry.AnnotationFeatures, cmd.Annotations) {
+				if telemetry.HasAnnotations(telemetry.AnnotationDataSources, cmd.Annotations) {
+					dataSourcesMetrics, err := telemetry.DataSourceMetrics(wunderGraphDir)
+					if err != nil {
+						if rootFlags.TelemetryDebugMode {
+							log.Error("could not generate data sources telemetry data", zap.Error(err))
+
+						}
 					}
+					metrics = append(metrics, dataSourcesMetrics...)
 				}
-				metrics = append(metrics, dataSourcesMetrics...)
+
+				if telemetry.HasAnnotations(telemetry.AnnotationFeatures, cmd.Annotations) {
+					featureMetrics, err := telemetry.FeatureMetrics(wunderGraphDir)
+					if err != nil {
+						if rootFlags.TelemetryDebugMode {
+							log.Error("could not generate features telemetry data", zap.Error(err))
+
+						}
+					}
+					metrics = append(metrics, featureMetrics...)
+				}
 			}
 
 			TelemetryClient = telemetry.NewClient(
