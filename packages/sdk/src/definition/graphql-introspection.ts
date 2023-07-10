@@ -233,7 +233,13 @@ export const introspectGraphql = async (
 		applyNameSpaceToFieldConfigurations(Fields, graphQLSchema, skipRenameRootFields, introspection.apiNamespace),
 		generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
 		[],
-		applyNameSpaceToCustomJsonScalars(introspection.apiNamespace, customScalarTypeNames)
+		applyNameSpaceToCustomJsonScalars(introspection.apiNamespace, customScalarTypeNames),
+		{
+			schemaExtension: introspection.schemaExtension !== undefined,
+			customJSONScalars: introspection.customJSONScalars !== undefined,
+			customIntScalars: introspection.customIntScalars !== undefined,
+			customFloatScalars: introspection.customFloatScalars !== undefined,
+		}
 	);
 };
 
