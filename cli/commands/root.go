@@ -31,6 +31,11 @@ const (
 	wunderctlBinaryPathEnvKey = "WUNDERCTL_BINARY_PATH"
 
 	defaultNodeGracefulTimeoutSeconds = 10
+
+	// Telemetry requires the configuration to be generated, so
+	// we need  need to wait a bit for it
+	telemetryReloadWait     = 100 * time.Millisecond
+	maxTelemetryLoadRetries = 20
 )
 
 var (
@@ -55,6 +60,80 @@ var (
 	cyan   = color.New(color.FgHiCyan)
 	white  = color.New(color.FgHiWhite)
 )
+
+func sendTelemetry(cmd *cobra.Command) error {
+	// Check if we want to track telemetry for this command
+	if !rootFlags.Telemetry || !telemetry.HasAnnotations(telemetry.AnnotationCommand, cmd.Annotations) {
+		return nil
+	}
+	cmdMetricName := telemetry.CobraFullCommandPathMetricName(cmd)
+
+	metricDurationName := telemetry.DurationMetricSuffix(cmdMetricName)
+	cmdDurationMetric = telemetry.NewDurationMetric(metricDurationName)
+
+	metricUsageName := telemetry.UsageMetricSuffix(cmdMetricName)
+	cmdUsageMetric := telemetry.NewUsageMetric(metricUsageName)
+
+	metrics := []*telemetry.Metric{cmdUsageMetric}
+
+	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+	if err != nil {
+		return err
+	}
+
+	var clientInfo *telemetry.MetricClientInfo
+	retries := 0
+	for {
+		clientInfo, err = telemetry.NewClientInfo(BuildInfo.Version, viper.GetString("anonymousid"), wunderGraphDir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				// Configuration is not yet available, wait a bit to try to report all telemetry
+				if retries < maxTelemetryLoadRetries {
+					retries++
+					time.Sleep(telemetryReloadWait)
+					continue
+				}
+			}
+			return err
+		}
+		break
+	}
+
+	// Check if this command should also other telemetry data
+	if telemetry.HasAnnotations(telemetry.AnnotationDataSources, cmd.Annotations) || telemetry.HasAnnotations(telemetry.AnnotationFeatures, cmd.Annotations) {
+		if telemetry.HasAnnotations(telemetry.AnnotationDataSources, cmd.Annotations) {
+			dataSourcesMetrics, err := telemetry.DataSourceMetrics(wunderGraphDir)
+			if err != nil {
+				if rootFlags.TelemetryDebugMode {
+					log.Error("could not generate data sources telemetry data", zap.Error(err))
+
+				}
+			}
+			metrics = append(metrics, dataSourcesMetrics...)
+		}
+
+		if telemetry.HasAnnotations(telemetry.AnnotationFeatures, cmd.Annotations) {
+			featureMetrics, err := telemetry.FeatureMetrics(wunderGraphDir)
+			if err != nil {
+				if rootFlags.TelemetryDebugMode {
+					log.Error("could not generate features telemetry data", zap.Error(err))
+
+				}
+			}
+			metrics = append(metrics, featureMetrics...)
+		}
+	}
+
+	TelemetryClient = telemetry.NewClient(
+		viper.GetString("API_URL"), clientInfo,
+		telemetry.WithTimeout(3*time.Second),
+		telemetry.WithLogger(log),
+		telemetry.WithDebug(rootFlags.TelemetryDebugMode),
+		telemetry.WithAuthToken(os.Getenv("WG_TELEMETRY_AUTH_TOKEN")),
+	)
+
+	return TelemetryClient.Send(metrics)
+}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -106,75 +185,19 @@ var rootCmd = &cobra.Command{
 			)
 		}
 
-		// Check if we want to track telemetry for this command
-		if rootFlags.Telemetry && telemetry.HasAnnotations(telemetry.AnnotationCommand, cmd.Annotations) {
-			cmdMetricName := telemetry.CobraFullCommandPathMetricName(cmd)
+		// Send telemetry in a goroutine to not block the command
+		go func() {
+			err := sendTelemetry(cmd)
 
-			metricDurationName := telemetry.DurationMetricSuffix(cmdMetricName)
-			cmdDurationMetric = telemetry.NewDurationMetric(metricDurationName)
-
-			metricUsageName := telemetry.UsageMetricSuffix(cmdMetricName)
-			cmdUsageMetric := telemetry.NewUsageMetric(metricUsageName)
-
-			metrics := []*telemetry.Metric{cmdUsageMetric}
-
-			wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
-			if err != nil {
-				return err
-			}
-
-			clientInfo, err := telemetry.NewClientInfo(BuildInfo.Version, viper.GetString("anonymousid"), wunderGraphDir)
-			if err != nil {
-				return err
-			}
-
-			// Check if this command should also other telemetry data
-			if telemetry.HasAnnotations(telemetry.AnnotationDataSources, cmd.Annotations) || telemetry.HasAnnotations(telemetry.AnnotationFeatures, cmd.Annotations) {
-				if telemetry.HasAnnotations(telemetry.AnnotationDataSources, cmd.Annotations) {
-					dataSourcesMetrics, err := telemetry.DataSourceMetrics(wunderGraphDir)
-					if err != nil {
-						if rootFlags.TelemetryDebugMode {
-							log.Error("could not generate data sources telemetry data", zap.Error(err))
-
-						}
-					}
-					metrics = append(metrics, dataSourcesMetrics...)
-				}
-
-				if telemetry.HasAnnotations(telemetry.AnnotationFeatures, cmd.Annotations) {
-					featureMetrics, err := telemetry.FeatureMetrics(wunderGraphDir)
-					if err != nil {
-						if rootFlags.TelemetryDebugMode {
-							log.Error("could not generate features telemetry data", zap.Error(err))
-
-						}
-					}
-					metrics = append(metrics, featureMetrics...)
+			// AddMetric the usage of the command immediately
+			if rootFlags.TelemetryDebugMode {
+				if err != nil {
+					log.Error("Could not send telemetry data", zap.Error(err))
+				} else {
+					log.Info("Telemetry data sent")
 				}
 			}
-
-			TelemetryClient = telemetry.NewClient(
-				viper.GetString("API_URL"), clientInfo,
-				telemetry.WithTimeout(3*time.Second),
-				telemetry.WithLogger(log),
-				telemetry.WithDebug(rootFlags.TelemetryDebugMode),
-				telemetry.WithAuthToken(os.Getenv("WG_TELEMETRY_AUTH_TOKEN")),
-			)
-
-			// Send telemetry in a goroutine to not block the command
-			go func() {
-				err := TelemetryClient.Send(metrics)
-
-				// AddMetric the usage of the command immediately
-				if rootFlags.TelemetryDebugMode {
-					if err != nil {
-						log.Error("Could not send telemetry data", zap.Error(err))
-					} else {
-						log.Info("Telemetry data sent")
-					}
-				}
-			}()
-		}
+		}()
 
 		return nil
 	},
