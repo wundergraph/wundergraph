@@ -29,6 +29,13 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
+const (
+	userCookieName = "user"
+	idCookieName   = "id"
+
+	authenticationCookieMaxAge = int((time.Hour * 24 * 365 * 10) / time.Second)
+)
+
 func init() {
 	gob.Register(User{})
 	gob.Register(map[string]interface{}(nil))
@@ -180,6 +187,10 @@ type User struct {
 	ZoneInfo          string `json:"zoneInfo,omitempty"`
 	Locale            string `json:"locale,omitempty"`
 	Location          string `json:"location,omitempty"`
+	// Expires indicate the unix timestamp in milliseconds when this User is
+	// considered as expired. This can only be set from the authentication
+	// hooks.
+	Expires *int64 `json:"expires,omitempty"`
 
 	CustomClaims     map[string]interface{} `json:"customClaims,omitempty"`
 	CustomAttributes []string               `json:"customAttributes,omitempty"`
@@ -202,6 +213,7 @@ func (u *User) ToPublic(publicClaims []string) *User {
 		return u
 	}
 	cpy := &User{
+		Expires:          u.Expires,
 		CustomAttributes: u.CustomAttributes,
 		Roles:            u.Roles,
 	}
@@ -263,6 +275,16 @@ func (u *User) copyWellKnownClaim(claim string, from *User) bool {
 	return true
 }
 
+// HasExpired returns true iff the user has expired, as configured by the
+// authentication hooks (via User.Expired)
+func (u *User) HasExpired() bool {
+	if u != nil && u.Expires != nil {
+		expires := *u.Expires
+		return expires > 0 && time.UnixMilli(expires).Before(time.Now())
+	}
+	return false
+}
+
 func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http.Request, domain string, insecureCookies bool) error {
 
 	rawIdToken := u.RawIDToken
@@ -281,17 +303,17 @@ func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http
 
 	u.ETag = fmt.Sprintf("W/\"%d\"", hash.Sum64())
 
-	encoded, err := s.Encode("user", *u)
+	encoded, err := s.Encode(userCookieName, *u)
 	if err != nil {
 		return err
 	}
 
 	cookie := &http.Cookie{
-		Name:     "user",
+		Name:     userCookieName,
 		Value:    encoded,
 		Path:     "/",
 		Domain:   removeSubdomain(sanitizeDomain(domain)),
-		MaxAge:   int((time.Hour * 24 * 30).Seconds()),
+		MaxAge:   authenticationCookieMaxAge,
 		Secure:   !insecureCookies,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
@@ -305,11 +327,11 @@ func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http
 	}
 
 	cookie = &http.Cookie{
-		Name:     "id",
+		Name:     idCookieName,
 		Value:    encoded,
 		Path:     "/",
 		Domain:   removeSubdomain(sanitizeDomain(domain)),
-		MaxAge:   int((time.Hour * 24 * 30).Seconds()),
+		MaxAge:   authenticationCookieMaxAge,
 		Secure:   !insecureCookies,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
@@ -321,7 +343,25 @@ func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http
 }
 
 func (u *User) Load(loader *UserLoader, r *http.Request) error {
+	if err := u.loadUser(loader, r); err != nil {
+		return err
+	}
+	if u.HasExpired() {
+		loader.log.Debug("user has expired, revalidating")
+		revalidated, err := loader.hooks.RevalidateAuthentication(r.Context(), u)
+		if err != nil {
+			loader.log.Error("revalidating authentication", zap.Error(err))
+			return err
+		}
+		if revalidated.HasExpired() {
+			return errors.New("user has expired")
+		}
+		*u = *revalidated
+	}
+	return nil
+}
 
+func (u *User) loadUser(loader *UserLoader, r *http.Request) error {
 	authorizationHeader := r.Header.Get("Authorization")
 	// If the request is tagged as an attempt to load the userInfo for a token, don't
 	// do anything. Otherwise setting an operation as the endPoint causes an infinite
@@ -361,19 +401,19 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 		}
 	}
 
-	cookie, err := r.Cookie("user")
+	cookie, err := r.Cookie(userCookieName)
 	if err != nil {
 		return err
 	}
-	err = loader.s.Decode("user", cookie.Value, u)
+	err = loader.s.Decode(userCookieName, cookie.Value, u)
 	if err == nil {
 		u.FromCookie = true
 	}
-	cookie, err = r.Cookie("id")
+	cookie, err = r.Cookie(idCookieName)
 	if err != nil {
 		return err
 	}
-	err = loader.s.Decode("id", cookie.Value, &u.RawIDToken)
+	err = loader.s.Decode(idCookieName, cookie.Value, &u.RawIDToken)
 	u.IdToken = tryParseJWT(u.RawIDToken)
 	return err
 }
@@ -615,6 +655,7 @@ func (e *RBACEnforcer) containsOne(slice []string, one string) bool {
 type LoadUserConfig struct {
 	Log           *zap.Logger
 	Cookie        *securecookie.SecureCookie
+	CSRFSecret    []byte
 	JwksProviders []*wgpb.JwksAuthProvider
 	Hooks         Hooks
 }
@@ -737,8 +778,14 @@ type UserHandler struct {
 
 func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	user := UserFromContext(r.Context())
+	// Make sure we never cache responses in a public cache, since the response
+	// varies depending on the user but it might be a 2xx
+	w.Header().Set("Cache-Control", "private, max-age=0, stale-while-revalidate=60")
 	if user == nil {
-		http.NotFound(w, r)
+		// Return a 204 instead of a 4xx. Returning a 4xx would cause an error to be shown
+		// on the developer console in the browser when this is hit to test if the current
+		// user is authenticated. Keep this in sync with packages/sdk/src/client/client.ts
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 
@@ -767,7 +814,6 @@ func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if user.ETag != "" {
 		w.Header()["ETag"] = []string{user.ETag}
-		w.Header().Set("Cache-Control", "private, max-age=0, stale-while-revalidate=60")
 	}
 
 	encoder := json.NewEncoder(w)
@@ -907,7 +953,7 @@ func RequiresAuthentication(handler http.Handler) http.Handler {
 }
 
 func resetUserCookies(w http.ResponseWriter, r *http.Request, secure bool) {
-	for _, name := range []string{"user", "id"} {
+	for _, name := range []string{"user", idCookieName} {
 		userCookie := &http.Cookie{
 			Name:     name,
 			Value:    "",

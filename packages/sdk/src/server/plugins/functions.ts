@@ -4,13 +4,19 @@ import type { ORM } from '@wundergraph/orm';
 
 import { InternalClientFactory } from '../internal-client';
 import type { TypeScriptOperationFile } from '../../graphql/operations';
-import type { NodeJSOperation } from '../../operations/operations';
-import { HandlerContext } from '../../operations/operations';
+import type { NodeJSOperation } from '../../operations';
+import { HandlerContext } from '../../operations';
 import process from 'node:process';
 import { OperationsClient } from '../operations-client';
 import { InternalError, OperationError } from '../../client/errors';
 import { Logger } from '../../logger';
 import type { AsyncStore, OperationsAsyncContext } from '../operations-context';
+import { propagation, trace } from '@opentelemetry/api';
+import { createClientRequest } from '../server';
+import { FastifyRequestBody } from '../types';
+import { Attributes } from '../trace/attributes';
+import { attachErrorToSpan } from '../trace/util';
+import { createLogger } from '../logger';
 
 interface FastifyFunctionsOptions {
 	operationsRequestContext: OperationsAsyncContext;
@@ -21,6 +27,11 @@ interface FastifyFunctionsOptions {
 	globalContext: any;
 	createContext: (globalContext: any) => Promise<any>;
 	releaseContext: (requestContext: any) => Promise<void>;
+}
+
+interface FunctionRouteConfig {
+	kind: 'function';
+	functionName?: string;
 }
 
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {
@@ -43,29 +54,43 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 			if (!maybeImplementation) {
 				continue;
 			}
-			fastify.route({
+			fastify.route<{ Body: FastifyRequestBody }, FunctionRouteConfig>({
 				url: routeUrl,
 				method: ['POST'],
-				config: {},
-				handler: async (request, reply) => {
+				config: {
+					kind: 'function',
+					functionName: operation.operation_name,
+				},
+				handler: async (req, reply) => {
 					let requestContext;
 					const implementation = maybeImplementation!;
 					try {
+						const headers: { [key: string]: string } = {
+							'x-request-id': req.id,
+						};
+
+						if (req.telemetry) {
+							propagation.inject(req.telemetry.context, headers);
+						}
+
 						requestContext = await config.createContext(config.globalContext);
-						const clientRequest = (request.body as any)?.__wg.clientRequest;
+						const clientRequest = createClientRequest(req.body);
 						const operationClient = new OperationsClient({
 							baseURL: nodeURL,
 							clientRequest,
+							extraHeaders: headers,
+							tracer: fastify.tracer,
+							traceContext: req.telemetry?.context,
 						});
 						const ctx: HandlerContext<any, any, any, any, any, any, any> = {
-							log: fastify.log,
-							user: (request.body as any)?.__wg.user!,
-							internalClient: internalClientFactory(undefined, clientRequest),
+							log: createLogger(fastify.log),
+							user: (req.body as any)?.__wg.user!,
+							internalClient: internalClientFactory(headers, clientRequest),
 							clientRequest,
-							input: (request.body as any)?.input,
+							input: (req.body as any)?.input,
 							operations: operationClient,
 							context: requestContext,
-							graph: orm,
+							graph: orm.withClientRequest(clientRequest),
 						};
 
 						switch (implementation.type) {
@@ -83,7 +108,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 
 									reply.hijack();
 
-									const subscribeOnce = request.headers['x-wg-subscribe-once'] === 'true';
+									const subscribeOnce = req.headers['x-wg-subscribe-once'] === 'true';
 									const gen = implementation.subscriptionHandler(ctx);
 
 									reply.raw.once('close', async () => {
@@ -133,24 +158,29 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 						}
 
 						return;
-					} catch (e: any) {
+					} catch (err: any) {
+						// Mark the request as errored and attach information about the error
+						if (req.telemetry) {
+							attachErrorToSpan(req.telemetry.parentSpan, err);
+						}
+
 						let statusCode: number = 500;
 						const response: { errors: OperationError[] } = {
 							errors: [],
 						};
 
-						if (e instanceof OperationError) {
-							if (e.statusCode) {
-								statusCode = e.statusCode;
+						if (err instanceof OperationError) {
+							if (err.statusCode) {
+								statusCode = err.statusCode;
 							}
-							response.errors.push(e);
-						} else if (e instanceof Error) {
-							response.errors.push(new InternalError({ message: e.message }));
+							response.errors.push(err);
+						} else if (err instanceof Error) {
+							response.errors.push(new InternalError({ message: err.message }));
 						} else {
 							response.errors.push(new InternalError());
 						}
 
-						fastify.log.error(e);
+						fastify.log.error(err);
 
 						if (implementation.type === 'subscription') {
 							// Raw write because we hijacked the reply
@@ -173,6 +203,20 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 			fastify.log.error(err, `Failed to register function at ${operation.module_path}`);
 		}
 	}
+
+	fastify.addHook('onRequest', async (req, resp) => {
+		if (req.telemetry) {
+			const routeConfig = req.routeConfig as FunctionRouteConfig;
+			const span = trace.getSpan(req.telemetry.context);
+			if (span) {
+				if (routeConfig?.kind === 'function') {
+					span.setAttributes({
+						[Attributes.WG_FUNCTION_NAME]: routeConfig.functionName,
+					});
+				}
+			}
+		}
+	});
 };
 
 export default FastifyFunctionsPlugin;

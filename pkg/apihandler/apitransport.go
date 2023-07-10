@@ -14,12 +14,17 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/websocket"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	otrace "go.opentelemetry.io/otel/trace"
 
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/metrics"
+	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/trace"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -34,7 +39,16 @@ type apiTransportFactory struct {
 }
 
 func (f *apiTransportFactory) RoundTripper(transport *http.Transport, enableStreamingMode bool) http.RoundTripper {
-	return NewApiTransport(transport, enableStreamingMode, f.opts)
+	rt := NewApiTransport(transport, enableStreamingMode, f.opts)
+
+	if f.opts.EnableTracing {
+		return trace.NewTransport(
+			rt,
+			otelhttp.WithSpanOptions(otrace.WithAttributes(trace.ApiTransportAttribute)),
+		)
+	}
+
+	return rt
 }
 
 func (f *apiTransportFactory) DefaultTransportTimeout() time.Duration {
@@ -54,15 +68,12 @@ type ApiTransport struct {
 	onResponseHook             map[string]struct{}
 	hooksClient                *hooks.Client
 	enableStreamingMode        bool
+	requestCounter             *outgoingRequestCounter
 }
 
-func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, enableRequestLogging bool) ApiTransportFactory {
+func NewApiTransportFactory(opts ApiTransportOptions) ApiTransportFactory {
 	return &apiTransportFactory{
-		opts: ApiTransportOptions{
-			API:                  api,
-			HooksClient:          hooksClient,
-			EnableRequestLogging: enableRequestLogging,
-		},
+		opts: opts,
 	}
 }
 
@@ -70,9 +81,12 @@ type ApiTransportOptions struct {
 	API                  *Api
 	HooksClient          *hooks.Client
 	EnableRequestLogging bool
+	EnableTracing        bool
+	Metrics              metrics.Metrics
 }
 
 func NewApiTransport(httpTransport *http.Transport, enableStreamingMode bool, opts ApiTransportOptions) http.RoundTripper {
+
 	transport := &ApiTransport{
 		httpTransport:              httpTransport,
 		enableRequestLogging:       opts.EnableRequestLogging,
@@ -82,6 +96,7 @@ func NewApiTransport(httpTransport *http.Transport, enableStreamingMode bool, op
 		onRequestHook:              map[string]struct{}{},
 		hooksClient:                opts.HooksClient,
 		enableStreamingMode:        enableStreamingMode,
+		requestCounter:             newOutgoingRequestCounter(opts.Metrics),
 	}
 
 	if dataSourceConfigurations := opts.API.EngineConfiguration.GetDatasourceConfigurations(); dataSourceConfigurations != nil {
@@ -155,7 +170,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 	// if you're doing this after calling the onRequest hook, it won't work
 	isUpgradeRequest := websocket.IsWebSocketUpgrade(request)
 
-	metaData := getOperationMetaData(request)
+	metaData := operation.GetOperationMetaData(request.Context())
 	if metaData != nil {
 		_, onRequestHook = t.onRequestHook[metaData.OperationName]
 		_, onResponseHook = t.onResponseHook[metaData.OperationName]
@@ -179,7 +194,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 
 	start := time.Now()
 	res, err = t.httpTransport.RoundTrip(request)
-	duration := time.Since(start).Milliseconds()
+	duration := time.Since(start)
 	if err != nil {
 		return nil, err
 	}
@@ -190,11 +205,13 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 		if t.enableRequestLogging {
 			fmt.Printf("\n\n--- DebugTransport ---\n\nRequest:\n\n%s\n\nDuration: %d ms\n\n--- DebugTransport\n\n",
 				string(requestDump),
-				duration,
+				duration.Milliseconds(),
 			)
 		}
 		return
 	}
+
+	t.requestCounter.Inc(request, res, duration)
 
 	if t.enableRequestLogging {
 		var responseDump []byte
@@ -277,7 +294,7 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 	return t.httpTransport.RoundTrip(req)
 }
 
-func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationMetaData, buf *bytes.Buffer) (*http.Request, error) {
+func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *operation.OperationMetaData, buf *bytes.Buffer) (*http.Request, error) {
 	var (
 		body []byte
 		err  error
@@ -336,7 +353,7 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 	return r, nil
 }
 
-func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *OperationMetaData, buf *bytes.Buffer) (*http.Response, error) {
+func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *operation.OperationMetaData, buf *bytes.Buffer) (*http.Response, error) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err

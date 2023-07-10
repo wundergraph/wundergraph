@@ -139,11 +139,12 @@ class RESTApiBuilder {
 			}
 		});
 		const filtered = this.filterEmptyTypes(this.graphQLSchema);
-		const { schemaSDL: replaced } = transformSchema.replaceCustomScalars(
-			print(filtered) + '\n' + (this.introspection.schemaExtension || ''),
+		const { schemaSDL: schemaWithCustomScalarReplacements } = transformSchema.replaceCustomScalars(
+			`${print(filtered)}\n${this.introspection.schemaExtension || ''}`,
 			this.introspection
 		);
-		const schema = buildASTSchema(parse(replaced));
+
+		const schema = buildASTSchema(parse(schemaWithCustomScalarReplacements));
 		const schemaString = printSchema(schema);
 		const dataSources = this.dataSources.map((ds) => {
 			return {
@@ -175,7 +176,7 @@ class RESTApiBuilder {
 			applyNamespaceToExistingRootFieldConfigurations(this.fields, schema, this.apiNamespace),
 			[],
 			[],
-			[]
+			new Set<string>()
 		);
 	};
 	private traversePath = (

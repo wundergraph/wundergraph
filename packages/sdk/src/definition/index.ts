@@ -35,6 +35,8 @@ import {
 } from './database-introspection';
 import { introspectSoap } from './soap-introspection';
 
+export type { OpenAPIIntrospection } from './openapi-introspection';
+
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
 export const WG_ENABLE_INTROSPECTION_CACHE = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
@@ -59,6 +61,13 @@ export interface ApiIntrospectionOptions {
 	 */
 	httpProxyUrl?: string;
 	apiID?: string;
+}
+
+export interface ApiFeatures {
+	schemaExtension?: boolean;
+	customJSONScalars?: boolean;
+	customIntScalars?: boolean;
+	customFloatScalars?: boolean;
 }
 
 export interface RenameType {
@@ -90,7 +99,8 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[]
+		customJsonScalars?: Set<string>,
+		features?: ApiFeatures
 	) {
 		this.Schema = schema;
 		this.Namespace = namespace;
@@ -98,8 +108,9 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		this.Fields = fields;
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
-		this.CustomJsonScalars = customJsonScalars;
+		this.CustomJsonScalars = customJsonScalars ?? new Set<string>();
 		this.Namespace = namespace;
+		this.Features = features;
 	}
 
 	DefaultFlushInterval: number = 500;
@@ -108,8 +119,9 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	Fields: FieldConfiguration[];
 	Types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
-	CustomJsonScalars?: string[];
+	CustomJsonScalars: Set<string>;
 	Namespace: string;
+	Features?: ApiFeatures;
 
 	get schemaSha256() {
 		const hash = createHash('sha256');
@@ -247,6 +259,10 @@ interface GraphQLIntrospectionOptions {
 	loadSchemaFromString?: string | (() => string);
 	customFloatScalars?: string[];
 	customIntScalars?: string[];
+	/*
+		The customJSONScalars array no longer needs to contain new replacement JSON scalars.
+		However, original JSON scalars will default to type string if not included in this array.
+	 */
 	customJSONScalars?: string[];
 	// switching internal to true will mark the origin as an internal GraphQL API
 	// this will forward the original request and user info to the internal upstream
@@ -275,9 +291,25 @@ export interface GraphQLFederationIntrospection extends IntrospectionConfigurati
 }
 
 export interface ReplaceCustomScalarTypeFieldConfiguration {
+	/**
+	 * entityName is the type name for the parent of the field whose response type you wish to replace
+	 * entityName must match exactly (including case)
+	 **/
 	entityName: string;
+	/**
+	 * fieldName is the type name for the field whose response type you wish to replace
+	 * fieldName must match exactly (including case)
+	 **/
 	fieldName: string;
+	/**
+	 * inputTypeReplacement is deprecated
+	 * If you wish to replace Input types, add an entire new configuration object into the array
+	 **/
 	inputTypeReplacement?: string;
+	/**
+	 * responseTypeRepalcement is the replacement response type for fieldName
+	 * responseTypeReplacement must match exactly (including case)
+	 **/
 	responseTypeReplacement: string;
 }
 
@@ -378,40 +410,6 @@ export interface GraphQLUpstream extends HTTPUpstream {
 	subscriptionsURL?: InputVariable;
 	subscriptionsUseSSE?: boolean;
 	introspection?: IntrospectionFetchOptions & GraphqlIntrospectionHeaders;
-}
-
-export interface OpenAPIIntrospectionFile {
-	kind: 'file';
-	filePath: string;
-}
-
-export interface OpenAPIIntrospectionString {
-	kind: 'string';
-	openAPISpec: string;
-}
-
-export interface OpenAPIIntrospectionObject {
-	kind: 'object';
-	openAPIObject: {};
-}
-
-export type OpenAPIIntrospectionSource =
-	| OpenAPIIntrospectionFile
-	| OpenAPIIntrospectionString
-	| OpenAPIIntrospectionObject;
-
-export interface OpenAPIIntrospection extends HTTPUpstream {
-	source: OpenAPIIntrospectionSource;
-	// statusCodeUnions set to true will make all responses return a union type of all possible response objects,
-	// mapped by status code
-	// by default, only the status 200 response is mapped, which keeps the GraphQL API flat
-	// by enabling statusCodeUnions, you have to unwrap the response union via fragments for each response
-	statusCodeUnions?: boolean;
-	baseURL?: InputVariable;
-	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
-	// this is useful for specifying type definitions for JSON objects
-	schemaExtension?: string;
-	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
 export interface StaticApiCustom {

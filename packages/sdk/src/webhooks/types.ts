@@ -1,4 +1,4 @@
-import { ClientRequest, InternalClient, OperationsClient } from '../server';
+import { ClientRequest, InternalClient, OperationsClient, RequestLogger } from '../server';
 import { RequestMethod } from '../server/types';
 import { WebhookVerifierKind } from './verifiers';
 import { EnvironmentVariable } from '../configure/variables';
@@ -7,9 +7,13 @@ export interface Webhook<
 	TInternalClient extends InternalClient = InternalClient,
 	Event extends WebhookHttpEvent = WebhookHttpEvent,
 	Response extends WebhookHttpResponse = WebhookHttpResponse,
-	TOperationsClient extends OperationsClient = OperationsClient
+	TOperationsClient extends OperationsClient = OperationsClient,
+	TypedORM = any
 > {
-	handler: (event: Event, context: WebhookRequestContext<TInternalClient, TOperationsClient>) => Promise<Response>;
+	handler: (
+		event: Event,
+		context: WebhookRequestContext<TInternalClient, TOperationsClient, TypedORM>
+	) => Promise<Response>;
 }
 export interface WebhookHttpResponse<ResponseBody = unknown, Headers extends WebhookHeaders = WebhookHeaders> {
 	statusCode?: number;
@@ -21,7 +25,8 @@ export type WebhookQuery = Record<string, string | string[]>;
 export interface WebhookRequestContext<
 	TInternalClient extends InternalClient = InternalClient,
 	TOperationsClient extends OperationsClient = OperationsClient,
-	TCustomContext = any
+	TCustomContext = any,
+	TypedORM = any
 > {
 	/**
 	 * The internal client is used to make requests to the WunderGraph API.
@@ -36,7 +41,7 @@ export interface WebhookRequestContext<
 	/**
 	 * The logger is used to log messages.
 	 */
-	log: WebhookLogger;
+	log: RequestLogger;
 	/**
 	 * The operations client is used to make requests to the WunderGraph API.
 	 */
@@ -45,16 +50,8 @@ export interface WebhookRequestContext<
 	 * Custom context
 	 */
 	context: TCustomContext;
-}
-interface LogFn {
-	<T extends object>(obj: T, msg?: string, ...args: any[]): void;
-	(obj: unknown, msg?: string, ...args: any[]): void;
-	(msg: string, ...args: any[]): void;
-}
-export interface WebhookLogger {
-	info: LogFn;
-	debug: LogFn;
-	error: LogFn;
+
+	graph: TypedORM;
 }
 export interface WebhookHttpEvent<
 	Body = unknown,

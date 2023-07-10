@@ -38,6 +38,25 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
         ],
         "type": "object",
       },
+      "Person": {
+        "additionalProperties": false,
+        "properties": {
+          "age": {
+            "type": "number",
+          },
+          "name": {
+            "type": "string",
+          },
+          "surname": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "name",
+          "surname",
+        ],
+        "type": "object",
+      },
     },
   },
   "info": {
@@ -150,7 +169,11 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
             "application/json": {
               "schema": {
                 "additionalProperties": false,
-                "properties": {},
+                "properties": {
+                  "data": {
+                    "$ref": "#/components/schemas/Person",
+                  },
+                },
                 "type": "object",
               },
             },

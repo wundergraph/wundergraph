@@ -42,7 +42,7 @@
     "react-relay": "^15.0.0",
     "relay-runtime": "^15.0.0",
     "stripe": "^11.12.0",
-    "swr": "^2.0.0",
+    "swr": "^2.2.0",
     "zod": "^3.20.2"
   },
   "devDependencies": {

@@ -6,7 +6,7 @@ export default createOperation.subscription({
 	input: z.object({
 		id: z.string(),
 	}),
-	handler: async function* ({ input, log }) {
+	handler: async function* ({ input, log, operations }) {
 		try {
 			// setup your subscription here, e.g. connect to a queue / stream
 			for (let i = 0; i < 10; i++) {

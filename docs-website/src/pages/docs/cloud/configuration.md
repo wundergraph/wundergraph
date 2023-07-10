@@ -4,6 +4,12 @@ pageTitle: WunderGraph - WunderGraph Cloud Workspace Configuration (wg.toml)
 description: Configure your WunderGraph Cloud Project
 ---
 
+{% callout title="Priority of build scripts" %}
+WunderGraph Cloud will prioritise build scripts in the following order:
+
+`wg.toml` > `package.json build:wundergraph` > `package.json build`
+{% /callout %}
+
 Optionally, WunderGraph Cloud uses a `wg.toml` file to configure your cloud project. This file is located in the root of your repository.
 You can configure multiple projects in a single repository. This is useful, if you have a monorepo with multiple WunderGraph projects. If you have a single workspace, you can skip this section and we will auto-detect your repository.
 In the future, we might add more configuration options to this file.

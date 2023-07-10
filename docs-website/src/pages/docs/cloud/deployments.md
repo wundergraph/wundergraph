@@ -6,7 +6,8 @@ description: How to deploy to WunderGraph Cloud
 
 # Introduction
 
-WunderGraph Cloud is currently in private alpha. If you haven't done so already, sign up using the banner on the top of this page.
+WunderGraph Cloud is your DevOps Superhero. Forget about managing infrastructure and focus on building your product.
+If you haven't done so already, [sign up](https://cloud.wundergraph.com/).
 
 # Requirements
 
@@ -98,6 +99,12 @@ Follow the steps from the `Import your repository` and `Deploy your project`.
 - See changes live in less than a minute.
 
 # Build script convention
+
+{% callout title="Priority of build scripts" %}
+WunderGraph Cloud will prioritise build scripts in the following order:
+
+`wg.toml` > `package.json build:wundergraph` > `package.json build`
+{% /callout %}
 
 - If your `package.json` file contains a build:wundergraph script, WunderGraph Cloud will execute it during deployment.
 - If no build:wundergraph script, WunderGraph Cloud will fall back to build script.

@@ -28,7 +28,7 @@ class FakeFileSystem implements CodeGenOutWriter {
 test('GenerateCode', async () => {
 	const out = await RunTemplateTest(new FakeTemplate(), new FakeTemplate());
 	expect(out).toEqual({
-		'generated/testFile.txt': 'MyReviews+CreatePet+NewPets',
+		'generated/testFile.txt': 'ClosestPlanets+MyReviews+CreatePet+NewPets+MutationWithUnionInput',
 	});
 });
 
@@ -104,6 +104,52 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						environmentVariableDefaultValue: '',
 						placeholderVariableName: '',
 					},
+					prometheus: {
+						enabled: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						port: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
+					openTelemetry: {
+						enabled: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						sampler: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						authToken: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						exporterHttpEndpoint: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
 				},
 				serverOptions: {
 					serverUrl: {
@@ -145,6 +191,98 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 					EnableSingleFlight: true,
 					S3UploadProvider: [],
 					Operations: [
+						{
+							Name: 'ClosestPlanets',
+							PathName: 'ClosestPlanets',
+							Content: 'query ClosestPlanets ($where: db_NodeWhereInput) {\n name \n}',
+							OperationType: OperationType.QUERY,
+							ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+							VariablesSchema: {
+								type: 'object',
+								properties: {
+									where: {
+										$ref: '#/definitions/db_NodeWhereInput',
+									},
+								},
+								additionalProperties: false,
+								definitions: {
+									db_NodeWhereInput: {
+										additionalProperties: false,
+										type: ['object', 'null'],
+										properties: {
+											AND: {
+												$ref: '#/definitions/db_NodeWhereInput',
+											},
+										},
+									},
+								},
+							},
+							InterpolationVariablesSchema: {
+								type: 'object',
+								properties: {},
+								additionalProperties: false,
+							},
+							InternalVariablesSchema: {
+								type: 'object',
+								properties: {},
+								additionalProperties: false,
+							},
+							InjectedVariablesSchema: {
+								type: 'object',
+								properties: {},
+								additionalProperties: false,
+							},
+							ResponseSchema: {
+								type: 'object',
+								properties: {
+									data: {
+										type: 'object',
+										properties: {
+											name: {
+												type: 'array',
+												items: {
+													type: 'string',
+													'x-graphql-enum-name': 'Planets',
+													enum: ['mercury', 'venus', 'earth'],
+												},
+											},
+										},
+										additionalProperties: false,
+									},
+								},
+								additionalProperties: false,
+								required: ['data'],
+							},
+							AuthenticationConfig: {
+								required: false,
+							},
+							AuthorizationConfig: {
+								claims: [],
+								roleConfig: {
+									requireMatchAll: [],
+									requireMatchAny: [],
+									denyMatchAll: [],
+									denyMatchAny: [],
+								},
+							},
+							HooksConfiguration: {
+								preResolve: false,
+								postResolve: false,
+								mutatingPreResolve: false,
+								mutatingPostResolve: false,
+								mockResolve: {
+									enable: false,
+									subscriptionPollingIntervalMillis: 0,
+								},
+								httpTransportOnResponse: false,
+								httpTransportOnRequest: false,
+								customResolve: false,
+							},
+							VariablesConfiguration: {
+								injectVariables: [],
+							},
+							Internal: false,
+						},
 						{
 							Name: 'MyReviews',
 							PathName: 'MyReviews',
@@ -461,6 +599,253 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							},
 							Internal: false,
 						},
+						{
+							AuthenticationConfig: {
+								required: false,
+							},
+							AuthorizationConfig: {
+								claims: [],
+								roleConfig: {
+									denyMatchAll: [],
+									denyMatchAny: [],
+									requireMatchAll: [],
+									requireMatchAny: [],
+								},
+							},
+							Content:
+								'mutation($input:TestType_Input!){test_endpoint(input:$input){...on A_const_container{A_const}...on mutation_test_endpoint_oneOf_1{B}}}',
+							ExecutionEngine: 0,
+							HooksConfiguration: {
+								customResolve: false,
+								httpTransportOnRequest: false,
+								httpTransportOnResponse: false,
+								mockResolve: {
+									enable: false,
+									subscriptionPollingIntervalMillis: 0,
+								},
+								mutatingPostResolve: false,
+								mutatingPreResolve: false,
+								postResolve: false,
+								preResolve: false,
+							},
+							InjectedVariablesSchema: {
+								additionalProperties: false,
+								definitions: {
+									TestType_Input: {
+										oneOf: [
+											{
+												additionalProperties: false,
+												properties: {
+													A_const: {
+														enum: ['A'],
+														type: ['string', 'null'],
+														'x-graphql-enum-name': 'A_const',
+													},
+												},
+												type: 'object',
+											},
+											{
+												additionalProperties: false,
+												properties: {
+													mutation_test_endpoint_oneOf_1_Input: {
+														$ref: '#/definitions/mutation_test_endpoint_oneOf_1_Input',
+													},
+												},
+												type: 'object',
+											},
+										],
+										type: 'object',
+									},
+									mutation_test_endpoint_oneOf_1_Input: {
+										additionalProperties: false,
+										properties: {
+											B: {
+												type: ['string', 'null'],
+											},
+										},
+										type: ['object', 'null'],
+									},
+								},
+								properties: {
+									input: {
+										$ref: '#/definitions/TestType_Input',
+									},
+								},
+								required: ['input'],
+								type: 'object',
+							},
+							Internal: false,
+							InternalVariablesSchema: {
+								additionalProperties: false,
+								definitions: {
+									TestType_Input: {
+										oneOf: [
+											{
+												additionalProperties: false,
+												properties: {
+													A_const: {
+														enum: ['A'],
+														type: ['string', 'null'],
+														'x-graphql-enum-name': 'A_const',
+													},
+												},
+												type: 'object',
+											},
+											{
+												additionalProperties: false,
+												properties: {
+													mutation_test_endpoint_oneOf_1_Input: {
+														$ref: '#/definitions/mutation_test_endpoint_oneOf_1_Input',
+													},
+												},
+												type: 'object',
+											},
+										],
+										type: 'object',
+									},
+									mutation_test_endpoint_oneOf_1_Input: {
+										additionalProperties: false,
+										properties: {
+											B: {
+												type: ['string', 'null'],
+											},
+										},
+										type: ['object', 'null'],
+									},
+								},
+								properties: {
+									input: {
+										$ref: '#/definitions/TestType_Input',
+									},
+								},
+								required: ['input'],
+								type: 'object',
+							},
+							InterpolationVariablesSchema: {
+								additionalProperties: false,
+								definitions: {
+									TestType_Input: {
+										oneOf: [
+											{
+												additionalProperties: false,
+												properties: {
+													A_const: {
+														enum: ['A'],
+														type: ['string', 'null'],
+														'x-graphql-enum-name': 'A_const',
+													},
+												},
+												type: 'object',
+											},
+											{
+												additionalProperties: false,
+												properties: {
+													mutation_test_endpoint_oneOf_1_Input: {
+														$ref: '#/definitions/mutation_test_endpoint_oneOf_1_Input',
+													},
+												},
+												type: 'object',
+											},
+										],
+										type: 'object',
+									},
+									mutation_test_endpoint_oneOf_1_Input: {
+										additionalProperties: false,
+										properties: {
+											B: {
+												type: ['string', 'null'],
+											},
+										},
+										type: ['object', 'null'],
+									},
+								},
+								properties: {
+									input: {
+										$ref: '#/definitions/TestType_Input',
+									},
+								},
+								required: ['input'],
+								type: 'object',
+							},
+							Name: 'MutationWithUnionInput',
+							OperationType: 1,
+							PathName: 'MutationWithUnionInput',
+							PostResolveTransformations: undefined,
+							ResponseSchema: {
+								additionalProperties: false,
+								properties: {
+									data: {
+										additionalProperties: false,
+										properties: {
+											test_endpoint: {
+												additionalProperties: false,
+												properties: {
+													A_const: {
+														enum: ['A'],
+														type: 'string',
+													},
+													B: {
+														type: 'string',
+													},
+												},
+												type: 'object',
+											},
+										},
+										type: 'object',
+									},
+								},
+								type: 'object',
+							},
+							VariablesConfiguration: {
+								injectVariables: [],
+							},
+							VariablesSchema: {
+								additionalProperties: false,
+								definitions: {
+									TestType_Input: {
+										oneOf: [
+											{
+												additionalProperties: false,
+												properties: {
+													A_const: {
+														enum: ['A'],
+														type: ['string', 'null'],
+														'x-graphql-enum-name': 'A_const',
+													},
+												},
+												type: 'object',
+											},
+											{
+												additionalProperties: false,
+												properties: {
+													mutation_test_endpoint_oneOf_1_Input: {
+														$ref: '#/definitions/mutation_test_endpoint_oneOf_1_Input',
+													},
+												},
+												type: 'object',
+											},
+										],
+										type: 'object',
+									},
+									mutation_test_endpoint_oneOf_1_Input: {
+										additionalProperties: false,
+										properties: {
+											B: {
+												type: ['string', 'null'],
+											},
+										},
+										type: ['object', 'null'],
+									},
+								},
+								properties: {
+									input: {
+										$ref: '#/definitions/TestType_Input',
+									},
+								},
+								required: ['input'],
+								type: 'object',
+							},
+						},
 					],
 					InvalidOperationNames: [],
 					CorsConfiguration: {
@@ -498,6 +883,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						secureCookieBlockKey: mapInputVariable(''),
 						csrfTokenSecret: mapInputVariable(''),
 					},
+					timeoutSeconds: mapInputVariable(0),
 					customClaims: {},
 					publicClaims: [],
 				},

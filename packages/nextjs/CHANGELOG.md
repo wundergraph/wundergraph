@@ -3,6 +3,72 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.13...@wundergraph/nextjs@0.12.0) (2023-07-06)
+
+### Features
+
+* updated SWR to 2.2.0 ([#1109](https://github.com/wundergraph/wundergraph/issues/1109)) ([09ef6ef](https://github.com/wundergraph/wundergraph/commit/09ef6efa2d386598d94f8d0a3a22ec351e93ef16)) (@Pagebakers)
+
+## [0.11.13](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.12...@wundergraph/nextjs@0.11.13) (2023-07-05)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.12](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.11...@wundergraph/nextjs@0.11.12) (2023-06-22)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.11](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.10...@wundergraph/nextjs@0.11.11) (2023-06-21)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.10](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.9...@wundergraph/nextjs@0.11.10) (2023-06-09)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.9](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.8...@wundergraph/nextjs@0.11.9) (2023-06-06)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.8](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.7...@wundergraph/nextjs@0.11.8) (2023-06-05)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.7](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.6...@wundergraph/nextjs@0.11.7) (2023-06-04)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.6](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.5...@wundergraph/nextjs@0.11.6) (2023-06-02)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.4...@wundergraph/nextjs@0.11.5) (2023-06-02)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.3...@wundergraph/nextjs@0.11.4) (2023-06-01)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.2...@wundergraph/nextjs@0.11.3) (2023-05-31)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.1...@wundergraph/nextjs@0.11.2) (2023-05-31)
+
+### Bug Fixes
+
+* missing ts generator in nextjs package ([#1021](https://github.com/wundergraph/wundergraph/issues/1021)) ([06d6107](https://github.com/wundergraph/wundergraph/commit/06d610726d8096508dcd779913c7b1da9559c656)) (@thisisnithin)
+
+## [0.11.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.11.0...@wundergraph/nextjs@0.11.1) (2023-05-26)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.11.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.10.29...@wundergraph/nextjs@0.11.0) (2023-05-25)
+
+### Features
+
+* add tsup to build nextjs and swr packages ([#993](https://github.com/wundergraph/wundergraph/issues/993)) ([2685e03](https://github.com/wundergraph/wundergraph/commit/2685e03cf7e103ed634fc98963ce622cf700b398)) (@Pagebakers)
+
 ## [0.10.29](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.10.28...@wundergraph/nextjs@0.10.29) (2023-05-16)
 
 **Note:** Version bump only for package @wundergraph/nextjs

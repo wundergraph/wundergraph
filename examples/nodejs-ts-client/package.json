@@ -13,7 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.158.0"
+    "@wundergraph/sdk": "^0.167.1"
   },
   "devDependencies": {
     "@jest/globals": "^29.3.1",

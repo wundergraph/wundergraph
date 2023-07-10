@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/orm",
-  "version": "0.0.3",
+  "version": "0.2.0",
   "license": "Apache-2.0",
   "description": "WunderGraph ORM",
   "main": "./dist/src/index.js",
@@ -43,13 +43,14 @@
     "url": "git+https://github.com/wundergraph/wundergraph.git"
   },
   "dependencies": {
+    "@graphql-tools/utils": "^9.2.1",
     "@timkendall/tql": "1.0.0-rc.8",
     "graphql": "^16.6.0",
+    "hotscript": "^1.0.10",
     "ix": "^5.0.0",
     "outvariant": "^1.4.0",
     "remeda": "^1.9.1",
     "ts-poet": "^6.4.1",
-    "hotscript": "^1.0.10",
     "type-fest": "^3.5.2"
   },
   "devDependencies": {

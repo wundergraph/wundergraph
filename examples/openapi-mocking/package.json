@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.158.0",
+    "@wundergraph/sdk": "^0.167.1",
     "graphql": "^16.3.0"
   },
   "devDependencies": {

@@ -14,6 +14,9 @@ import { OperationType, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/utils';
 import { Headers } from '@whatwg-node/fetch';
 import { FastifyRequest } from 'fastify';
+import { trace } from '@opentelemetry/api';
+import { Attributes } from '../trace/attributes';
+import { attachErrorToSpan } from '../trace/util';
 import { runHookQueriesPreResolve } from '../../integrations/hooks';
 import { WunderGraphIntegration } from '../../integrations/types';
 
@@ -36,7 +39,14 @@ export interface FastifyHooksOptions extends HooksConfiguration {
 
 export interface HooksRouteConfig {
 	kind: 'hook';
-	operationName?: string;
+	operationName: string;
+	hookName: string;
+}
+
+export interface GlobalHooksRouteConfig {
+	kind: 'global-hook';
+	category: string;
+	hookName: string;
 }
 
 const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fastify, config) => {
@@ -59,65 +69,101 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 
 		// authentication
 		if (config.authentication?.postAuthentication) {
-			fastify.post<{ Body: {} }>('/authentication/postAuthentication', async (request, reply) => {
-				try {
-					await config.authentication?.postAuthentication?.(request.ctx);
-				} catch (err) {
-					request.log.error(err);
-					reply.code(500).send({ hook: 'postAuthentication', error: err });
+			fastify.post<any, GlobalHooksRouteConfig>(
+				'/authentication/postAuthentication',
+				{ config: { kind: 'global-hook', category: 'authentication', hookName: 'postAuthentication' } },
+				async (request, reply) => {
+					try {
+						await config.authentication?.postAuthentication?.(request.ctx);
+					} catch (err) {
+						// Mark the request as errored and attach information about the error
+						if (request.telemetry) {
+							attachErrorToSpan(request.telemetry.parentSpan, err);
+						}
+
+						request.log.error(err);
+						reply.code(500).send({ hook: 'postAuthentication', error: err });
+					}
+					reply.code(200).send({
+						hook: 'postAuthentication',
+					});
 				}
-				reply.code(200).send({
-					hook: 'postAuthentication',
-				});
-			});
+			);
 		}
 
 		if (config.authentication?.mutatingPostAuthentication) {
-			fastify.post('/authentication/mutatingPostAuthentication', async (request, reply) => {
-				try {
-					const out = await config.authentication?.mutatingPostAuthentication?.(request.ctx);
-					reply.code(200).send({
-						hook: 'mutatingPostAuthentication',
-						response: out,
-						setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
-					});
-				} catch (err) {
-					request.log.error(err);
-					reply.code(500).send({ hook: 'mutatingPostAuthentication', error: err });
+			fastify.post<any, GlobalHooksRouteConfig>(
+				'/authentication/mutatingPostAuthentication',
+				{ config: { kind: 'global-hook', category: 'authentication', hookName: 'mutatingPostAuthentication' } },
+				async (request, reply) => {
+					try {
+						const out = await config.authentication?.mutatingPostAuthentication?.(request.ctx);
+						reply.code(200).send({
+							hook: 'mutatingPostAuthentication',
+							response: out,
+							setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
+						});
+					} catch (err) {
+						// Mark the request as errored and attach information about the error
+						if (request.telemetry) {
+							attachErrorToSpan(request.telemetry.parentSpan, err);
+						}
+
+						request.log.error(err);
+						reply.code(500).send({ hook: 'mutatingPostAuthentication', error: err });
+					}
 				}
-			});
+			);
 		}
 
 		if (config.authentication?.revalidate) {
-			fastify.post<{ Body: {} }>('/authentication/revalidateAuthentication', async (request, reply) => {
-				try {
-					const out = await config.authentication?.revalidate?.(request.ctx);
-					reply.code(200).send({
-						hook: 'revalidateAuthentication',
-						response: out,
-						setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
-					});
-				} catch (err) {
-					request.log.error(err);
-					reply.code(500).send({ hook: 'revalidateAuthentication', error: err });
+			fastify.post<any, GlobalHooksRouteConfig>(
+				'/authentication/revalidateAuthentication',
+				{ config: { kind: 'global-hook', category: 'authentication', hookName: 'postLogout' } },
+				async (request, reply) => {
+					try {
+						const out = await config.authentication?.revalidate?.(request.ctx);
+						reply.code(200).send({
+							hook: 'revalidateAuthentication',
+							response: out,
+							setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
+						});
+					} catch (err) {
+						// Mark the request as errored and attach information about the error
+						if (request.telemetry) {
+							attachErrorToSpan(request.telemetry.parentSpan, err);
+						}
+
+						request.log.error(err);
+						reply.code(500).send({ hook: 'revalidateAuthentication', error: err });
+					}
 				}
-			});
+			);
 		}
 
 		if (config.authentication?.postLogout) {
-			fastify.post('/authentication/postLogout', async (request, reply) => {
-				try {
-					const out = await config.authentication?.postLogout?.(request.ctx);
-					reply.code(200).send({
-						hook: 'postLogout',
-						response: out,
-						setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
-					});
-				} catch (err) {
-					request.log.error(err);
-					reply.code(500).send({ hook: 'postLogout', error: err });
+			fastify.post<any, GlobalHooksRouteConfig>(
+				'/authentication/postLogout',
+				{ config: { kind: 'global-hook', category: 'authentication', hookName: 'postLogout' } },
+				async (request, reply) => {
+					try {
+						const out = await config.authentication?.postLogout?.(request.ctx);
+						reply.code(200).send({
+							hook: 'postLogout',
+							response: out,
+							setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
+						});
+					} catch (err) {
+						// Mark the request as errored and attach information about the error
+						if (request.telemetry) {
+							attachErrorToSpan(request.telemetry.parentSpan, err);
+						}
+
+						request.log.error(err);
+						reply.code(500).send({ hook: 'postLogout', error: err });
+					}
 				}
-			});
+			);
 		}
 	});
 
@@ -125,112 +171,152 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 
 	// httpTransport
 
-	fastify.post<{
-		Body: { request: WunderGraphRequest; operationName: string; operationType: 'query' | 'mutation' | 'subscription' };
-	}>('/global/httpTransport/onOriginRequest', async (request, reply) => {
-		reply.type('application/json').code(200);
-		try {
-			const maybeHookOut = await config.global?.httpTransport?.onOriginRequest?.hook({
-				...requestContext(request),
-				operation: {
-					name: request.body.operationName,
-					type: request.body.operationType,
-				},
-				request: {
-					...request.body.request,
-					headers: new Headers(request.body.request.headers),
-				},
-			});
-			const hookOut = maybeHookOut || 'skip';
-			return {
-				op: request.body.operationName,
-				hook: 'onOriginRequest',
-				response: {
-					skip: hookOut === 'skip',
-					cancel: hookOut === 'cancel',
-					request:
-						hookOut !== 'skip' && hookOut !== 'cancel'
-							? { ...hookOut, headers: headersToObject(hookOut.headers) }
-							: undefined,
-				},
-			};
-		} catch (err) {
-			request.log.error(err);
-			reply.code(500);
-			return { hook: 'onOriginRequest', error: err };
-		}
-	});
-
-	fastify.post<{
-		Body: {
-			response: WunderGraphResponse;
-			operationName: string;
-			operationType: 'query' | 'mutation' | 'subscription';
-		};
-	}>('/global/httpTransport/onOriginResponse', async (request, reply) => {
-		reply.type('application/json').code(200);
-		try {
-			const maybeHookOut = await config.global?.httpTransport?.onOriginResponse?.hook({
-				...requestContext(request),
-				response: {
-					...request.body.response,
-					headers: new Headers(request.body.response.headers),
-				},
-				operation: {
-					name: request.body.operationName,
-					type: request.body.operationType,
-				},
-			});
-			const hookOut = maybeHookOut || 'skip';
-			return {
-				op: request.body.operationName,
-				hook: 'onOriginResponse',
-				response: {
-					skip: hookOut === 'skip',
-					cancel: hookOut === 'cancel',
-					response:
-						hookOut !== 'skip' && hookOut !== 'cancel'
-							? { ...hookOut, headers: headersToObject(hookOut.headers) }
-							: undefined,
-				},
-			};
-		} catch (err) {
-			request.log.error(err);
-			reply.code(500);
-			return { hook: 'onOriginResponse', error: err };
-		}
-	});
-
-	// wsTransport
-	if (config.global?.wsTransport?.onConnectionInit) {
-		fastify.post<{
+	fastify.post<
+		{
 			Body: {
-				dataSourceId: string;
 				request: WunderGraphRequest;
+				operationName: string;
+				operationType: 'query' | 'mutation' | 'subscription';
 			};
-		}>(`/global/wsTransport/onConnectionInit`, async (request, reply) => {
+		},
+		GlobalHooksRouteConfig
+	>(
+		'/global/httpTransport/onOriginRequest',
+		{ config: { kind: 'global-hook', category: 'httpTransport', hookName: 'onOriginRequest' } },
+		async (request, reply) => {
 			reply.type('application/json').code(200);
 			try {
-				const resp = await config.global?.wsTransport?.onConnectionInit?.hook({
-					dataSourceId: request.body.dataSourceId,
+				const maybeHookOut = await config.global?.httpTransport?.onOriginRequest?.hook({
 					...requestContext(request),
+					operation: {
+						name: request.body.operationName,
+						type: request.body.operationType,
+					},
 					request: {
 						...request.body.request,
 						headers: new Headers(request.body.request.headers),
 					},
 				});
+				const hookOut = maybeHookOut || 'skip';
 				return {
-					hook: 'onConnectionInit',
-					response: resp,
+					op: request.body.operationName,
+					hook: 'onOriginRequest',
+					response: {
+						skip: hookOut === 'skip',
+						cancel: hookOut === 'cancel',
+						request:
+							hookOut !== 'skip' && hookOut !== 'cancel'
+								? { ...hookOut, headers: headersToObject(hookOut.headers) }
+								: undefined,
+					},
 				};
 			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
 				request.log.error(err);
-				reply.code(504).send({ hook: 'onConnectionInit', error: err });
+				reply.code(500);
+				return { hook: 'onOriginRequest', error: err };
 			}
-			reply.code(200).send({
-				hook: 'onConnectionInit',
-			});
-		});
+		}
+	);
+
+	fastify.post<
+		{
+			Body: {
+				response: WunderGraphResponse;
+				operationName: string;
+				operationType: 'query' | 'mutation' | 'subscription';
+			};
+		},
+		GlobalHooksRouteConfig
+	>(
+		'/global/httpTransport/onOriginResponse',
+		{ config: { kind: 'global-hook', category: 'httpTransport', hookName: 'onOriginResponse' } },
+		async (request, reply) => {
+			reply.type('application/json').code(200);
+			try {
+				const maybeHookOut = await config.global?.httpTransport?.onOriginResponse?.hook({
+					...requestContext(request),
+					response: {
+						...request.body.response,
+						headers: new Headers(request.body.response.headers),
+					},
+					operation: {
+						name: request.body.operationName,
+						type: request.body.operationType,
+					},
+				});
+				const hookOut = maybeHookOut || 'skip';
+				return {
+					op: request.body.operationName,
+					hook: 'onOriginResponse',
+					response: {
+						skip: hookOut === 'skip',
+						cancel: hookOut === 'cancel',
+						response:
+							hookOut !== 'skip' && hookOut !== 'cancel'
+								? { ...hookOut, headers: headersToObject(hookOut.headers) }
+								: undefined,
+					},
+				};
+			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
+				request.log.error(err);
+				reply.code(500);
+				return { hook: 'onOriginResponse', error: err };
+			}
+		}
+	);
+
+	// wsTransport
+	if (config.global?.wsTransport?.onConnectionInit) {
+		fastify.post<
+			{
+				Body: {
+					dataSourceId: string;
+					request: WunderGraphRequest;
+				};
+			},
+			GlobalHooksRouteConfig
+		>(
+			`/global/wsTransport/onConnectionInit`,
+			{ config: { kind: 'global-hook', category: 'wsTransport', hookName: 'onConnectionInit' } },
+			async (request, reply) => {
+				reply.type('application/json').code(200);
+				try {
+					const resp = await config.global?.wsTransport?.onConnectionInit?.hook({
+						dataSourceId: request.body.dataSourceId,
+						...requestContext(request),
+						request: {
+							...request.body.request,
+							headers: new Headers(request.body.request.headers),
+						},
+					});
+					return {
+						hook: 'onConnectionInit',
+						response: resp,
+					};
+				} catch (err) {
+					// Mark the request as errored and attach information about the error
+					if (request.telemetry) {
+						attachErrorToSpan(request.telemetry.parentSpan, err);
+					}
+
+					request.log.error(err);
+					reply.code(504).send({ hook: 'onConnectionInit', error: err });
+				}
+				reply.code(200).send({
+					hook: 'onConnectionInit',
+				});
+			}
+		);
 	}
 
 	const queries =
@@ -243,14 +329,18 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 
 	const requestContext = (req: FastifyRequest) => {
 		const body = req.body as any;
+		const extraHeaders: Record<string, string> = {};
 		if (body?.cycleCounter) {
 			if (body.cycleCounter > maximumRecursionLimit) {
 				const errorMessage = `maximum recursion limit reached (${maximumRecursionLimit})`;
 				req.log.error(errorMessage);
 				throw new Error(errorMessage);
 			}
-			req.ctx.internalClient = req.ctx.internalClient.withHeaders({ 'Wg-Cycle-Counter': body.cycleCounter });
-			req.ctx.operations = req.ctx.operations.withHeaders({ 'Wg-Cycle-Counter': body.cycleCounter });
+			extraHeaders['Wg-Cycle-Counter'] = body.cycleCounter;
+		}
+		if (Object.keys(extraHeaders).length) {
+			req.ctx.internalClient = req.ctx.internalClient.withHeaders(extraHeaders);
+			req.ctx.operations = req.ctx.operations.withHeaders(extraHeaders);
 		}
 		return req.ctx;
 	};
@@ -279,6 +369,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
 				request.log.error(err);
 				reply.code(500);
 				return { op: operationName, hook: 'mock', error: err };
@@ -316,6 +411,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
 				request.log.error(err);
 				reply.code(500);
 				return { op: operationName, hook: 'preResolve', error: err };
@@ -346,6 +446,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
 				request.log.error(err);
 				reply.code(500);
 				return { op: operationName, hook: 'postResolve', error: err };
@@ -376,6 +481,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
 				request.log.error(err);
 				reply.code(500);
 				return { op: operationName, hook: 'mutatingPreResolve', error: err };
@@ -407,6 +517,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
 				request.log.error(err);
 				reply.code(500);
 				return { op: operationName, hook: 'mutatingPostResolve', error: err };
@@ -437,6 +552,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
+				// Mark the request as errored and attach information about the error
+				if (request.telemetry) {
+					attachErrorToSpan(request.telemetry.parentSpan, err);
+				}
+
 				request.log.error(err);
 				reply.code(500);
 				return { op: operationName, hook: 'customResolve', error: err };
@@ -449,7 +569,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			if (mockResolveOp) {
 				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/mockResolve`,
-					{ config: { operationName, kind: 'hook' } },
+					{ config: { operationName, kind: 'hook', hookName: 'mockResolve' } },
 					mockResolve(operationName, mockResolveOp)
 				);
 			}
@@ -458,7 +578,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			if (preResolveOp) {
 				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/preResolve`,
-					{ config: { operationName, kind: 'hook' } },
+					{ config: { operationName, kind: 'hook', hookName: 'preResolve' } },
 					preResolve(operationName, preResolveOp)
 				);
 			}
@@ -467,7 +587,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			if (postResolveOp) {
 				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/postResolve`,
-					{ config: { operationName, kind: 'hook' } },
+					{ config: { operationName, kind: 'hook', hookName: 'postResolve' } },
 					postResolve(operationName, postResolveOp)
 				);
 			}
@@ -476,7 +596,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			if (mutatingPreResolveOp) {
 				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/mutatingPreResolve`,
-					{ config: { operationName, kind: 'hook' } },
+					{ config: { operationName, kind: 'hook', hookName: 'mutatingPreResolve' } },
 					mutatingPreResolve(operationName, mutatingPreResolveOp)
 				);
 			}
@@ -485,7 +605,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			if (mutatingPostResolveOp) {
 				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/mutatingPostResolve`,
-					{ config: { operationName, kind: 'hook' } },
+					{ config: { operationName, kind: 'hook', hookName: 'mutatingPostResolve' } },
 					mutatingPostResolve(operationName, mutatingPostResolveOp)
 				);
 			}
@@ -494,7 +614,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			if (customResolveOp) {
 				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/customResolve`,
-					{ config: { operationName, kind: 'hook' } },
+					{ config: { operationName, kind: 'hook', hookName: 'customResolve' } },
 					customResolve(operationName, customResolveOp)
 				);
 			}
@@ -595,6 +715,26 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		const registered = registerUploadHooks(uploadOperations);
 		fastify.log.debug(`Registered (${registered}) upload hooks`);
 	}
+
+	fastify.addHook('onRequest', async (req, resp) => {
+		if (req.telemetry) {
+			const routeConfig = req.routeConfig as GlobalHooksRouteConfig | HooksRouteConfig | undefined;
+			const span = trace.getSpan(req.telemetry.context);
+			if (span) {
+				if (routeConfig?.kind === 'hook') {
+					span.setAttributes({
+						[Attributes.WG_HOOK_NAME]: routeConfig.hookName,
+						[Attributes.WG_OPERATION_NAME]: routeConfig.operationName,
+					});
+				} else if (routeConfig?.kind === 'global-hook') {
+					span.setAttributes({
+						[Attributes.WG_HOOK_NAME]: routeConfig.hookName,
+						[Attributes.WG_HOOK_CATEGORY]: routeConfig.category,
+					});
+				}
+			}
+		}
+	});
 };
 
 export default FastifyHooksPlugin;

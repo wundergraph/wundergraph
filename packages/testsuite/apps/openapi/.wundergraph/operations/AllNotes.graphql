@@ -1,0 +1,6 @@
+query {
+	notes_all {
+		id
+		text
+	}
+}

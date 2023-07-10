@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
+	"time"
 
 	"fmt"
 	"strings"
@@ -50,7 +51,7 @@ var upCmd = &cobra.Command{
 	Use:         UpCmdName,
 	Short:       "Starts WunderGraph in development mode",
 	Long:        "Start the WunderGraph application in development mode and watch for changes",
-	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources),
+	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources | telemetry.AnnotationFeatures),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
@@ -143,7 +144,7 @@ var upCmd = &cobra.Command{
 			zap.String("builtBy", BuildInfo.BuiltBy),
 		)
 
-		configJsonPath := filepath.Join(wunderGraphDir, "generated", configJsonFilename)
+		configFilePath := filepath.Join(wunderGraphDir, "generated", serializedConfigFilename)
 		webhooksDir := filepath.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
 		configOutFile := filepath.Join("generated", "bundle", "config.cjs")
 		serverOutFile := filepath.Join("generated", "bundle", "server.cjs")
@@ -151,7 +152,7 @@ var upCmd = &cobra.Command{
 		operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
 		generatedBundleOutDir := filepath.Join("generated", "bundle")
 
-		if port, err := helpers.ServerPortFromConfig(configJsonPath); err == nil {
+		if port, err := helpers.ServerPortFromConfig(configFilePath); err == nil {
 			helpers.KillExistingHooksProcess(port, log)
 		}
 
@@ -256,7 +257,7 @@ var upCmd = &cobra.Command{
 				OutFile:       serverOutFile,
 				Logger:        log,
 				WatchPaths: []*watcher.WatchPath{
-					{Path: configJsonPath},
+					{Path: configFilePath},
 				},
 			})
 
@@ -448,7 +449,7 @@ var upCmd = &cobra.Command{
 		configFileChangeChan := make(chan struct{})
 		configWatcher := watcher.NewWatcher("config", &watcher.Config{
 			WatchPaths: []*watcher.WatchPath{
-				{Path: configJsonPath},
+				{Path: configFilePath},
 			},
 		}, log)
 
@@ -476,7 +477,7 @@ var upCmd = &cobra.Command{
 		n := node.New(ctx, BuildInfo, wunderGraphDir, nodeLogger)
 
 		go func() {
-			configFile := filepath.Join(wunderGraphDir, "generated", "wundergraph.config.json")
+			configFile := filepath.Join(wunderGraphDir, "generated", serializedConfigFilename)
 			options := []node.Option{
 				node.WithConfigFileChange(configFileChangeChan),
 				node.WithFileSystemConfig(configFile),
@@ -484,6 +485,7 @@ var upCmd = &cobra.Command{
 				node.WithIntrospection(true),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
 				node.WithRequestLogging(rootFlags.DebugMode),
+				node.WithTraceBatchTimeout(1000 * time.Millisecond),
 				node.WithDevMode(),
 			}
 
@@ -523,7 +525,13 @@ var upCmd = &cobra.Command{
 
 		// trigger server reload after initial config build
 		// because no fs event is fired as build is already done
-		configFileChangeChan <- struct{}{}
+		// Make sure we don't get stuck here if the node has already
+		// exited when we reach this point (and no one is reading from
+		// configFileChangeChan)
+		select {
+		case configFileChangeChan <- struct{}{}:
+		case <-ctx.Done():
+		}
 
 		// wait for context to be canceled (signal, context cancellation or via cancel())
 		<-ctx.Done()

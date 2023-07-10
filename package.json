@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.152.1",
+  "version": "0.163.0",
   "name": "wundergraph",
   "license": "Apache-2.0",
   "author": {
@@ -19,7 +19,7 @@
     "watch:libs": "pnpm -r --parallel run --filter='./packages/*' --filter='!./docs-website' build --watch",
     "watch:sdk": "pnpm -r run --filter='./packages/sdk' watch",
     "test": "pnpm run -r --parallel --filter='!./packages/testsuite' test",
-    "test:suite": "pnpm run -r --filter='./packages/testsuite' test",
+    "test:suite:ci": "pnpm run -r --filter='./packages/testsuite' test:ci",
     "format": "prettier --write --loglevel warn '**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}'",
     "format:examples": "prettier --write --loglevel warn 'examples/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}'",
     "format:testapps": "prettier --write --loglevel warn 'testapps/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}'",
@@ -39,7 +39,7 @@
   },
   "engines": {
     "node": ">=16.0.0",
-    "pnpm": ">=7.14.0 < 8"
+    "pnpm": "8"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}": [

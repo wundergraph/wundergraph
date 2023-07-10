@@ -12,6 +12,8 @@ const (
 	AnnotationCommand Annotation = 1 << iota
 	// AnnotationDataSources indicates the data sources should be reported as telemetry
 	AnnotationDataSources
+	// AnnotationFeatures indicates that the used features should be reported as telemetry
+	AnnotationFeatures
 )
 
 const (

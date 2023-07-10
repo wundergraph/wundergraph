@@ -12,7 +12,16 @@ import { AuthenticationResponse, configureWunderGraphServer } from '@wundergraph
 
 export default configureWunderGraphServer(() => ({
 	hooks: {
-		queries: {},
+		queries: {
+			NestedUserID: {
+				mutatingPostResolve: async ({ response, user }) => {
+					response.data!.userId = user?.userId;
+					return {
+						...response,
+					};
+				},
+			},
+		},
 		mutations: {},
 		authentication: {
 			postAuthentication: async (hook) => {},
@@ -21,6 +30,24 @@ export default configureWunderGraphServer(() => ({
 					return {
 						status: 'deny',
 						message: 'denied by mutatingPostAuthentication',
+					};
+				}
+				if (hook.user.userId === 'expiresIn1Second') {
+					return {
+						status: 'ok',
+						user: {
+							...hook.user,
+							expires: Date.now() + 1 * 1000,
+						},
+					};
+				}
+				if (hook.user.userId === 'expiresNow') {
+					return {
+						status: 'ok',
+						user: {
+							...hook.user,
+							expires: Date.now() - 1,
+						},
 					};
 				}
 				const customClaims = hook.user.customClaims ?? {};
@@ -39,6 +66,18 @@ export default configureWunderGraphServer(() => ({
 					return {
 						status: 'deny',
 						message: 'denied by revalidate',
+					};
+				}
+				if (hook.user.userId === 'expiresIn1Second') {
+					throw new Error('should not need to revalidate');
+				}
+				if (hook.user.userId === 'expiresNow') {
+					return {
+						status: 'ok',
+						user: {
+							...hook.user,
+							expires: Date.now() + 60 * 1000,
+						},
 					};
 				}
 				return {

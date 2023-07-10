@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`introspectSoap introspection kind:file should introspect wsdl greeting.wsdl succesfully 1`] = `
+"schema {
+  query: Query
+  mutation: Mutation
+}
+
+directive @soap(bindingNamespace: String, elementName: String, endpoint: String) on FIELD_DEFINITION
+
+"The \`BigInt\` scalar type represents non-fractional signed whole numeric values."
+scalar BigInt
+
+type Mutation {
+  NumberConversion_NumberConversion_NumberConversionSoap_NumberToDollars(NumberToDollars: NumberConversion_NumberToDollars_Input): NumberConversion_NumberToDollarsResponse @soap(elementName: "NumberToDollarsResponse", bindingNamespace: "http://www.dataaccess.com/webservicesserver/", endpoint: "https://www.dataaccess.com/webservicesserver/NumberConversion.wso")
+  NumberConversion_NumberConversion_NumberConversionSoap_NumberToWords(NumberToWords: NumberConversion_NumberToWords_Input): NumberConversion_NumberToWordsResponse @soap(elementName: "NumberToWordsResponse", bindingNamespace: "http://www.dataaccess.com/webservicesserver/", endpoint: "https://www.dataaccess.com/webservicesserver/NumberConversion.wso")
+}
+
+type NumberConversion_NumberToDollarsResponse {
+  NumberToDollarsResult: String!
+}
+
+input NumberConversion_NumberToDollars_Input {
+  dNum: Float
+}
+
+type NumberConversion_NumberToWordsResponse {
+  NumberToWordsResult: String!
+}
+
+input NumberConversion_NumberToWords_Input {
+  ubiNum: BigInt
+}
+
+type Query {
+  placeholder: Void
+}
+
+"Represents NULL values"
+scalar Void"
+`;
+
+exports[`introspectSoap introspection kind:file should introspect wsdl greeting.wsdl succesfully: wg_schema 1`] = `
+"schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Mutation {
+  NumberConversion_NumberConversion_NumberConversionSoap_NumberToDollars(NumberToDollars: NumberConversion_NumberToDollars_Input): NumberConversion_NumberToDollarsResponse
+  NumberConversion_NumberConversion_NumberConversionSoap_NumberToWords(NumberToWords: NumberConversion_NumberToWords_Input): NumberConversion_NumberToWordsResponse
+}
+
+type NumberConversion_NumberToDollarsResponse {
+  NumberToDollarsResult: String!
+}
+
+input NumberConversion_NumberToDollars_Input {
+  dNum: Float
+}
+
+type NumberConversion_NumberToWordsResponse {
+  NumberToWordsResult: String!
+}
+
+input NumberConversion_NumberToWords_Input {
+  ubiNum: Int
+}
+
+type Query {
+  placeholder: Void
+}
+
+"Represents NULL values"
+scalar Void"
+`;

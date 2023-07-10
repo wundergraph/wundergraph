@@ -2,7 +2,6 @@ package commands
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
@@ -118,7 +118,7 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 		opts[i](&options)
 	}
 
-	configFile := filepath.Join(n.WundergraphDir, "generated", configJsonFilename)
+	configFile := filepath.Join(n.WundergraphDir, "generated", serializedConfigFilename)
 	if !files.FileExists(configFile) {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
 	}
@@ -135,8 +135,7 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 	}
 
 	var graphConfig wgpb.WunderGraphConfiguration
-	err = json.Unmarshal(data, &graphConfig)
-	if err != nil {
+	if err := proto.Unmarshal(data, &graphConfig); err != nil {
 		log.Error("Failed to unmarshal", zap.String("filePath", configFile), zap.Error(err))
 		return errors.New("failed to unmarshal config file")
 	}
@@ -151,6 +150,7 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 		node.WithStaticWunderNodeConfig(wunderNodeConfig),
 		node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
 		node.WithIntrospection(enableIntrospection),
+		node.WithTraceBatchTimeout(otelBatchTimeout),
 	}
 
 	if shutdownAfterIdle > 0 {

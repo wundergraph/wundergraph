@@ -1,12 +1,21 @@
 import { RunTemplateTest } from '../../index.test';
-import { TypeScriptInputModels, TypeScriptResponseDataModels, TypeScriptResponseModels } from './index';
+import {
+	TypeScriptEnumModels,
+	TypeScriptInputModels,
+	TypeScriptResponseDataModels,
+	TypeScriptResponseModels,
+} from './index';
 
 test('TypeScriptInputModels', async () => {
-	const out = await RunTemplateTest(new TypeScriptInputModels());
+	const out = await RunTemplateTest(new TypeScriptEnumModels(), new TypeScriptInputModels());
 	expect(out).toMatchSnapshot();
 });
 
 test('TypeScriptResponseModels', async () => {
-	const out = await RunTemplateTest(new TypeScriptResponseModels(), new TypeScriptResponseDataModels());
+	const out = await RunTemplateTest(
+		new TypeScriptEnumModels(),
+		new TypeScriptResponseModels(),
+		new TypeScriptResponseDataModels()
+	);
 	expect(out).toMatchSnapshot();
 });

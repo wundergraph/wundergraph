@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"syscall"
 
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -25,19 +25,14 @@ func ServerPortFromConfig(configJsonPath string) (int, error) {
 		return 0, errors.New("config file is empty")
 	}
 
-	var graphConfig struct {
-		Api *struct {
-			ServerOptions *wgpb.ServerOptions `json:"serverOptions,omitempty"`
-		} `json:"api,omitempty"`
+	var graphConfig wgpb.WunderGraphConfiguration
+	if err := proto.Unmarshal(data, &graphConfig); err != nil {
+		return 0, fmt.Errorf("error decoding config: %w", err)
 	}
-	if err := json.Unmarshal(data, &graphConfig); err != nil {
-		return 0, err
-	}
-
 	if graphConfig.Api != nil && graphConfig.Api.ServerOptions != nil {
 		variable := graphConfig.Api.ServerOptions.GetListen().GetPort()
 		if variable != nil {
-			return loadvariable.Int(variable), nil
+			return loadvariable.Int(variable)
 		}
 	}
 	return 0, errors.New("configuration is invalid")

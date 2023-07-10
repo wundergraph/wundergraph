@@ -33,6 +33,7 @@ func TestNode(t *testing.T) {
 	logger := logging.New(true, false, zapcore.DebugLevel)
 
 	userService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "67b77eab-d1a5-4cd8-b908-8443f24502b6", r.Header.Get("X-Request-Id"))
 		assert.Equal(t, http.MethodPost, r.Method)
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
@@ -233,7 +234,7 @@ func TestNode(t *testing.T) {
 				}`,
 	}
 
-	actual = withHeaders.POST("/graphql").WithJSON(failingRequest).Expect().Status(http.StatusOK).Body().Raw()
+	actual = withHeaders.POST("/graphql").WithJSON(failingRequest).Expect().Status(http.StatusBadRequest).Body().Raw()
 	g.Assert(t, "post_my_reviews_graphql_returns_valid_graphql_error", prettyJSON(actual))
 }
 
@@ -509,6 +510,9 @@ var (
 
 func federationPlanConfiguration(userServiceURL, productServiceURL, reviewServiceURL string) *wgpb.EngineConfiguration {
 	return &wgpb.EngineConfiguration{
+		StringStorage: map[string]string{
+			"": "",
+		},
 		DatasourceConfigurations: []*wgpb.DataSourceConfiguration{
 			{
 				Kind: wgpb.DataSourceKind_GRAPHQL,

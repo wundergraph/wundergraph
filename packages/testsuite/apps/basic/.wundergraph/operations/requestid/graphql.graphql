@@ -1,0 +1,5 @@
+query {
+	requestId: countries_country(code: "ES") {
+		code
+	}
+}

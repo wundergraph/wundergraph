@@ -35,4 +35,12 @@ export default {
 		// 	schema: ...
 		// }),
 	],
-} as WunderGraphConfig;
+	options: {
+		openTelemetry: {
+			enabled: true,
+		},
+		prometheus: {
+			enabled: true,
+		},
+	},
+} satisfies WunderGraphConfig;

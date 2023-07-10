@@ -7,17 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docker/go-units"
-
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
-)
-
-const (
-	defaultInMemoryCacheSize    = int64(128 * units.MB)
-	wgInMemoryCacheConfigEnvKey = "WG_IN_MEMORY_CACHE"
 )
 
 type Server struct {
@@ -88,6 +81,27 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 		}
 	}
 
+	prometheusConfig := graphConfig.GetApi().GetNodeOptions().GetPrometheus()
+
+	prometheusEnabled, err := loadvariable.Bool(prometheusConfig.GetEnabled())
+	if err != nil {
+		return nil, err
+	}
+	prometheusPort, err := loadvariable.Int(prometheusConfig.GetPort())
+	if err != nil {
+		return nil, err
+	}
+
+	openTelemetryOptions := graphConfig.Api.GetNodeOptions().GetOpenTelemetry()
+	otelEnabled, err := loadvariable.Bool(openTelemetryOptions.GetEnabled())
+	if err != nil {
+		return nil, err
+	}
+	otelSampler, err := loadvariable.Float64(openTelemetryOptions.GetSampler())
+	if err != nil {
+		return nil, err
+	}
+
 	config := WunderNodeConfig{
 		Api: &apihandler.Api{
 			PrimaryHost:           fmt.Sprintf("%s:%d", listener.Host, listener.Port),
@@ -112,6 +126,16 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 				},
 				DefaultTimeout:      defaultRequestTimeout,
 				DefaultHTTPProxyURL: defaultHTTPProxyURL,
+				Prometheus: apihandler.PrometheusOptions{
+					Enabled: prometheusEnabled,
+					Port:    prometheusPort,
+				},
+				OpenTelemetry: apihandler.OpenTelemetry{
+					Enabled:              otelEnabled,
+					AuthToken:            loadvariable.String(openTelemetryOptions.GetAuthToken()),
+					ExporterHTTPEndpoint: loadvariable.String(openTelemetryOptions.GetExporterHttpEndpoint()),
+					Sampler:              otelSampler,
+				},
 			},
 		},
 		Server: &Server{

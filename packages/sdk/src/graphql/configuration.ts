@@ -24,6 +24,7 @@ export interface GraphQLConfiguration {
 export const configuration = (
 	schema: DocumentNode,
 	introspection: GraphQLIntrospection,
+	customJSONScalars: Set<string>,
 	serviceSDL?: DocumentNode,
 	argumentReplacements?: ArgumentReplacement[]
 ): GraphQLConfiguration => {
@@ -35,9 +36,9 @@ export const configuration = (
 	};
 	const replacements = argumentReplacements || [];
 	if (serviceSDL !== undefined) {
-		visitSchema(serviceSDL, config, introspection.customJSONScalars || [], true, replacements);
+		visitSchema(serviceSDL, config, customJSONScalars, true, replacements);
 	} else {
-		visitSchema(schema, config, introspection.customJSONScalars || [], false, replacements);
+		visitSchema(schema, config, customJSONScalars, false, replacements);
 	}
 	if (introspection.schemaExtension) {
 		applySchemaExtension(config, introspection.schemaExtension);
@@ -87,7 +88,7 @@ interface JsonTypeField {
 const visitSchema = (
 	schema: DocumentNode,
 	config: GraphQLConfiguration,
-	customJsonScalars: string[],
+	customJsonScalars: Set<string>,
 	isFederation: boolean,
 	argumentReplacements: ArgumentReplacement[]
 ) => {
@@ -98,10 +99,9 @@ const visitSchema = (
 	let isEntity = false;
 	let isExternalField = false;
 	let entityFields: string[] = [];
-	let jsonFields: JsonTypeField[] = [];
+	const jsonFields: JsonTypeField[] = [];
 
-	const jsonScalars = [DefaultJsonType];
-	jsonScalars.push(...customJsonScalars);
+	const jsonScalars = new Set<string>([DefaultJsonType, ...customJsonScalars]);
 
 	const RootNodeNames = rootNodeNames(schema, isFederation);
 	const isNodeRoot = (typeName: string) => {
@@ -199,7 +199,7 @@ const visitSchema = (
 			enter: (node) => {
 				fieldName = node.name.value;
 
-				if (isJsonField(node.type, jsonScalars)) {
+				if (jsonScalars.has(resolveNamedTypeName(node.type))) {
 					jsonFields.push({ typeName: typeName!, fieldName: fieldName! });
 				}
 			},
@@ -449,18 +449,6 @@ const addJsonFieldConfigurations = (config: GraphQLConfiguration, jsonFields: Js
 
 const findField = (fields: FieldConfiguration[], typeName: string, fieldName: string) => {
 	return fields.find((f) => f.typeName === typeName && f.fieldName === fieldName);
-};
-
-const isJsonField = (type: TypeNode, jsonScalars: string[]) => {
-	const namedTypeName = resolveNamedTypeName(type);
-
-	for (const jsonType of jsonScalars) {
-		if (namedTypeName === jsonType) {
-			return true;
-		}
-	}
-
-	return false;
 };
 
 const resolveNamedTypeName = (type: TypeNode): string => {

@@ -1,7 +1,7 @@
 import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { CodeGenerationConfig } from '../../../configure';
 import prettier from 'prettier';
-import { JSONSchema7, JSONSchema7 as JSONSchema } from 'json-schema';
+import { JSONSchema7, JSONSchema7 as JSONSchema, JSONSchema7Type } from 'json-schema';
 import {
 	hasInjectedInput,
 	hasInput,
@@ -18,6 +18,13 @@ import { visitJSONSchema } from '../../jsonschema';
 import { OperationExecutionEngine } from '@wundergraph/protobuf';
 import { GraphQLOperation } from '../../../graphql/operations';
 import { TypeScriptOperationErrors } from './ts-operation-errors';
+import { deepClone } from '../../../utils/helper';
+
+declare module 'json-schema' {
+	export interface JSONSchema7 {
+		'x-graphql-enum-name'?: string;
+	}
+}
 
 export const formatTypeScript = (input: string): string => {
 	return prettier.format(input, {
@@ -117,7 +124,7 @@ export class TypeScriptResponseModels implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const content = generationConfig.config.application.Operations.map((op) => {
 			const dataName = '#/definitions/' + operationResponseDataTypename(op);
-			const responseSchema = JSON.parse(JSON.stringify(op.ResponseSchema)) as JSONSchema7;
+			const responseSchema = deepClone(op.ResponseSchema);
 			if (responseSchema.properties) {
 				responseSchema.properties['data'] = {
 					$ref: dataName,
@@ -178,6 +185,46 @@ export class TypeScriptResponseDataModels implements Template {
 	}
 }
 
+export class TypeScriptEnumModels implements Template {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		let enumMap: Map<string, Array<JSONSchema7Type>> = new Map();
+
+		generationConfig.config.application.Operations.forEach((op, index) => {
+			const schemas: JSONSchema[] = [
+				op.VariablesSchema,
+				op.InjectedVariablesSchema,
+				op.InternalVariablesSchema,
+				op.ResponseSchema,
+				op.InterpolationVariablesSchema,
+			];
+
+			for (const index in schemas) {
+				enumMap = extractEnums(schemas[index], enumMap);
+			}
+		});
+
+		const content = Array.from(enumMap.entries())
+			.map(([name, values]) => {
+				return `export const ${name} = {\n  ${values
+					.map((value) => `${value}: '${value}'`)
+					.join(',\n  ')}\n} as const;\n\nexport type ${name}Values = typeof ${name}[keyof typeof ${name}];\n`;
+			})
+			.join('\n\n');
+
+		return Promise.resolve([
+			{
+				path: 'models.ts',
+				content: formatTypeScript(content),
+				header: doNotEditHeader,
+			},
+		]);
+	}
+
+	dependencies(): Template[] {
+		return [new BaseTypeScriptDataModel()];
+	}
+}
+
 export class BaseTypeScriptDataModel implements Template {
 	precedence = 10;
 
@@ -220,20 +267,20 @@ export class BaseTypeScriptDataModel implements Template {
 				});
 		});
 
-		const graphQLTypeImport = "import type { GraphQLError } from '@wundergraph/sdk/client';";
-
 		const models = Array.from(definitions.entries())
 			.map(([definitionName, definition]) => JSONSchemaToTypescriptInterface(definition, definitionName, false))
 			.join('\n\n');
 
 		const functionImports = typescriptFunctionsImports(generationConfig);
+		const graphQLTypeImport = "import type { GraphQLError } from '@wundergraph/sdk/client';";
+		const imports = functionImports + graphQLTypeImport;
 
-		const content = functionImports + models;
+		const content = '\n' + imports + '\n\n' + models + '\n\n' + typeScriptJsonDefinition + '\n';
 
 		return Promise.resolve([
 			{
 				path: 'models.ts',
-				content: formatTypeScript('\n' + content + '\n\n' + typeScriptJsonDefinition + '\n' + graphQLTypeImport),
+				content: formatTypeScript(content),
 				header: doNotEditHeader,
 			},
 		]);
@@ -262,8 +309,7 @@ const typescriptFunctionsImports = (generationConfig: CodeGenerationConfig): str
 	return (
 		ops.map((op) => `import type function_${op.Name} from '${relImport(op)}';\n`).join('') +
 		'import type {ExtractInput,ExtractResponse} from "@wundergraph/sdk/operations";\n' +
-		'import type { OperationErrors } from "./ts-operation-errors";\n' +
-		'\n'
+		'import type { OperationErrors } from "./ts-operation-errors";\n'
 	);
 };
 
@@ -307,13 +353,23 @@ const JSONSchemaToTypescriptInterface = (
 		return `export type ${interfaceName} = JSONObject;`;
 	}
 
+	const isUnion = !!schema.oneOf;
+
 	let out = '';
 	const writeType = (name: string, isRequired: boolean, typeName: string) => {
 		out += `${name + (isRequired ? '' : '?')}: ${typeName}\n`;
 	};
+	const writeEnumType = (enumName: string) => {
+		out += `${enumName}Values`;
+	};
 	visitJSONSchema(schema, {
 		root: {
 			enter: () => {
+				if (isUnion) {
+					out += `export type ${interfaceName} = `;
+					return;
+				}
+
 				out += `export interface ${interfaceName} {\n`;
 			},
 			leave: () => {
@@ -326,7 +382,9 @@ const JSONSchemaToTypescriptInterface = (
 						out += `errors?: GraphQLError[];\n`;
 					}
 				}
-				out += '}';
+				if (!isUnion) {
+					out += '}';
+				}
 			},
 		},
 		number: (name, isRequired, isArray) => {
@@ -345,9 +403,18 @@ const JSONSchemaToTypescriptInterface = (
 				out += name === '' ? '[]' : '[],';
 			},
 		},
-		string: (name, isRequired, isArray, enumValues) => {
+		string: (name, isRequired, isArray, enumValues, enumName) => {
 			if (enumValues !== undefined) {
 				const values = enumValues.map((v) => `"${v}"`).join(' | ');
+
+				if (enumName && name) {
+					writeType(name, isRequired, enumName + 'Values');
+					return;
+				} else if (enumName) {
+					writeEnumType(enumName);
+					return;
+				}
+
 				if (isArray) {
 					out += ' (' + values + ') ';
 				} else {
@@ -363,7 +430,7 @@ const JSONSchemaToTypescriptInterface = (
 		},
 		object: {
 			enter: (name, isRequired, isArray) => {
-				if (isArray) {
+				if (isArray || isUnion) {
 					out += '{\n';
 				} else {
 					writeType(name, isRequired, '{');
@@ -371,7 +438,7 @@ const JSONSchemaToTypescriptInterface = (
 			},
 			leave: (name, isRequired, isArray) => {
 				out += '}';
-				if (!isArray) {
+				if (!isArray && !isUnion) {
 					out += ',\n';
 				}
 			},
@@ -397,6 +464,13 @@ const JSONSchemaToTypescriptInterface = (
 				writeType(name, isRequired, typeName);
 			}
 		},
+		oneOf: {
+			afterEach: (index, count) => {
+				if (index !== count - 1) {
+					out += ' | ';
+				}
+			},
+		},
 	});
 	return out;
 };
@@ -414,4 +488,51 @@ export const loadFile = (file: string | (() => string)): string => {
 	} catch (e) {
 		return file as string;
 	}
+};
+
+export const extractEnums = (schema: JSONSchema, enumMap: Map<string, Array<JSONSchema7Type>>): Map<string, any> => {
+	const visitedRefs: string[] = [];
+
+	const traverseSchema = (obj: JSONSchema) => {
+		if (obj.enum && obj['x-graphql-enum-name']) {
+			const name = obj['x-graphql-enum-name'];
+			if (!enumMap.get(name)) {
+				enumMap.set(name, obj.enum);
+			}
+		}
+
+		if (obj.$ref) {
+			const refName = obj.$ref.split('/').pop() as string;
+			const refSchema = schema.definitions?.[refName];
+			if (refSchema && typeof refSchema !== 'boolean' && !visitedRefs.includes(refName)) {
+				visitedRefs.push(refName);
+				traverseSchema(refSchema);
+			}
+		}
+
+		if (obj.properties) {
+			for (const prop in obj.properties) {
+				const property = obj.properties[prop];
+				if (typeof property !== 'boolean') {
+					traverseSchema(property);
+				}
+			}
+		}
+
+		if (obj.oneOf) {
+			for (const item of obj.oneOf) {
+				if (typeof item !== 'boolean') {
+					traverseSchema(item);
+				}
+			}
+		}
+
+		if (obj.items && typeof obj.items !== 'boolean' && !Array.isArray(obj.items)) {
+			traverseSchema(obj.items);
+		}
+	};
+
+	traverseSchema(schema);
+
+	return enumMap;
 };

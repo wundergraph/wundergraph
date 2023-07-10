@@ -1,0 +1,3 @@
+mutation ($id: Int!) {
+	notes_deleteNote(noteID: $id)
+}

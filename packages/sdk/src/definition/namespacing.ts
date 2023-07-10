@@ -1,6 +1,6 @@
 import {
-	buildSchema,
 	DirectiveDefinitionNode,
+	DirectiveNode,
 	DocumentNode,
 	EnumTypeDefinitionNode,
 	FieldDefinitionNode,
@@ -18,16 +18,13 @@ import {
 } from 'graphql';
 import { NamedTypeNode } from 'graphql/language/ast';
 import {
-	DataSourceCustomDatabase,
-	DataSourceKind,
 	DirectiveConfiguration,
 	FieldConfiguration,
+	SingleTypeField,
 	TypeConfiguration,
 	TypeField,
-	SingleTypeField,
 } from '@wundergraph/protobuf';
 import { isRootType } from '../graphql/configuration';
-import { Api, DataSource } from './index';
 
 export const wellKnownTypeNames: string[] = [
 	'Query',
@@ -64,6 +61,22 @@ const uniqueWellKnownTypes = (schema: DocumentNode): string[] => {
 };
 
 const wellKnownDirectives: string[] = ['include', 'skip', 'deprecated', 'specifiedBy'];
+const omnigraphOpenApiDirectives: string[] = ['oneOf'];
+const knownDirectives: string[] = [...wellKnownDirectives, ...omnigraphOpenApiDirectives];
+
+export const applyNameSpaceToCustomJsonScalars = (namespace?: string, customJsonScalars?: Set<string>): Set<string> => {
+	if (!customJsonScalars) {
+		return new Set<string>();
+	}
+	if (!namespace || customJsonScalars.size < 1) {
+		return customJsonScalars;
+	}
+	const namespacedScalars = new Set<string>();
+	for (const scalar of customJsonScalars) {
+		namespacedScalars.add(`${namespace}_${scalar}`);
+	}
+	return namespacedScalars;
+};
 
 export const applyNameSpaceToGraphQLSchema = (
 	schema: string,
@@ -205,10 +218,25 @@ export const applyNameSpaceToGraphQLSchema = (
 		},
 		DirectiveDefinition: {
 			enter: (node) => {
-				if (wellKnownDirectives.find((d) => d === node.name.value) !== undefined) {
+				if (knownDirectives.find((d) => d === node.name.value) !== undefined) {
 					return; // skip well known
 				}
 				const updated: DirectiveDefinitionNode = {
+					...node,
+					name: {
+						...node.name,
+						value: namespace + '_' + node.name.value,
+					},
+				};
+				return updated;
+			},
+		},
+		Directive: {
+			enter: (node) => {
+				if (knownDirectives.find((d) => d === node.name.value) !== undefined) {
+					return; // skip well known
+				}
+				const updated: DirectiveNode = {
 					...node,
 					name: {
 						...node.name,
@@ -477,7 +505,7 @@ export const applyNamespaceToDirectiveConfiguration = (
 	}
 	const out: DirectiveConfiguration[] = [];
 	schema.getDirectives().forEach((directive) => {
-		if (wellKnownDirectives.find((w) => w === directive.name) !== undefined) {
+		if (knownDirectives.find((w) => w === directive.name) !== undefined) {
 			return;
 		}
 		out.push({
@@ -486,42 +514,4 @@ export const applyNamespaceToDirectiveConfiguration = (
 		});
 	});
 	return out;
-};
-
-export const applyNamespaceToApi = (api: Api<unknown>, apiNamespace: string, skipRenameRootFields: string[]) => {
-	const schema = buildSchema(api.Schema);
-	const datasources = api.DataSources.map((ds) => ({
-		...ds,
-		RootNodes: applyNameSpaceToTypeFields(ds.RootNodes, schema, apiNamespace),
-		ChildNodes: applyNameSpaceToTypeFields(ds.ChildNodes, schema, apiNamespace),
-		Custom: applyNamespaceToDataSourceCustom(ds, apiNamespace),
-	}));
-	const appliedSchema = applyNameSpaceToGraphQLSchema(api.Schema, skipRenameRootFields, apiNamespace);
-	const fields = applyNamespaceToExistingRootFieldConfigurationsWithPathRewrite(api.Fields, schema, apiNamespace);
-	const types = generateTypeConfigurationsForNamespaceWithExisting(api.Schema, api.Types, apiNamespace);
-	const interpolateVariableDefinitionAsJSON = api.interpolateVariableDefinitionAsJSON.map(
-		(type) => `${apiNamespace}_${type}`
-	);
-	return new Api(appliedSchema, apiNamespace, datasources, fields, types, interpolateVariableDefinitionAsJSON);
-};
-
-const applyNamespaceToDataSourceCustom = (datasource: DataSource, namespace?: string): any => {
-	switch (datasource.Kind) {
-		case DataSourceKind.SQLSERVER:
-		case DataSourceKind.MYSQL:
-		case DataSourceKind.POSTGRESQL:
-		case DataSourceKind.SQLITE:
-		case DataSourceKind.MONGODB:
-			const custom = datasource.Custom as DataSourceCustomDatabase;
-			return {
-				...custom,
-				jsonTypeFields: applyNameSpaceToSingleTypeFields(
-					custom.jsonTypeFields,
-					buildSchema(custom.graphqlSchema),
-					namespace
-				),
-			};
-		default:
-			return datasource.Custom;
-	}
 };

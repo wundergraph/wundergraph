@@ -211,6 +211,7 @@ exports[`complex operations with variables: testCase_1_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "QueryMode",
           "enum": [
             "default",
             "insensitive"
@@ -508,6 +509,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "QueryMode",
           "enum": [
             "default",
             "insensitive"
@@ -1865,6 +1867,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "QueryMode",
           "enum": [
             "default",
             "insensitive"
@@ -2070,6 +2073,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "membership",
           "enum": [
             "owner",
             "maintainer",
@@ -2087,6 +2091,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
               "string",
               "null"
             ],
+            "x-graphql-enum-name": "membership",
             "enum": [
               "owner",
               "maintainer",
@@ -2105,6 +2110,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
               "string",
               "null"
             ],
+            "x-graphql-enum-name": "membership",
             "enum": [
               "owner",
               "maintainer",
@@ -2118,6 +2124,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "membership",
           "enum": [
             "owner",
             "maintainer",
@@ -2202,6 +2209,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "user_role",
           "enum": [
             "user",
             "admin"
@@ -2217,6 +2225,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
               "string",
               "null"
             ],
+            "x-graphql-enum-name": "user_role",
             "enum": [
               "user",
               "admin"
@@ -2233,6 +2242,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
               "string",
               "null"
             ],
+            "x-graphql-enum-name": "user_role",
             "enum": [
               "user",
               "admin"
@@ -2244,6 +2254,7 @@ exports[`complex operations with variables: testCase_2_variablesJSONSchema 1`] =
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "user_role",
           "enum": [
             "user",
             "admin"
@@ -2542,6 +2553,7 @@ exports[`operationVariablesToJSONSchema: testCase_1_variablesJSONSchema 1`] = `
             "string",
             "null"
           ],
+          "x-graphql-enum-name": "EnumInput",
           "enum": [
             "A",
             "B"
@@ -2549,6 +2561,7 @@ exports[`operationVariablesToJSONSchema: testCase_1_variablesJSONSchema 1`] = `
         },
         "nonNullEnum": {
           "type": "string",
+          "x-graphql-enum-name": "EnumInput",
           "enum": [
             "A",
             "B"
@@ -2963,6 +2976,306 @@ exports[`parseGraphQLOperations 1`] = `
       "VariablesSchema": {
         "additionalProperties": false,
         "properties": {},
+        "type": "object",
+      },
+    },
+    {
+      "AuthenticationConfig": {
+        "required": false,
+      },
+      "AuthorizationConfig": {
+        "claims": [],
+        "roleConfig": {
+          "denyMatchAll": [],
+          "denyMatchAny": [],
+          "requireMatchAll": [],
+          "requireMatchAny": [],
+        },
+      },
+      "Content": "mutation($input:TestType_Input!){test_endpoint(input:$input){...on A_const_container{A_const}...on mutation_test_endpoint_oneOf_1{B}}}",
+      "ExecutionEngine": 0,
+      "HooksConfiguration": {
+        "customResolve": false,
+        "httpTransportOnRequest": false,
+        "httpTransportOnResponse": false,
+        "mockResolve": {
+          "enable": false,
+          "subscriptionPollingIntervalMillis": 0,
+        },
+        "mutatingPostResolve": false,
+        "mutatingPreResolve": false,
+        "postResolve": false,
+        "preResolve": false,
+      },
+      "InjectedVariablesSchema": {
+        "additionalProperties": false,
+        "definitions": {
+          "TestType_Input": {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "A_const": {
+                    "enum": [
+                      "A",
+                    ],
+                    "type": [
+                      "string",
+                      "null",
+                    ],
+                    "x-graphql-enum-name": "A_const",
+                  },
+                },
+                "type": "object",
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "mutation_test_endpoint_oneOf_1_Input": {
+                    "$ref": "#/definitions/mutation_test_endpoint_oneOf_1_Input",
+                  },
+                },
+                "type": "object",
+              },
+            ],
+            "type": "object",
+          },
+          "mutation_test_endpoint_oneOf_1_Input": {
+            "additionalProperties": false,
+            "properties": {
+              "B": {
+                "type": [
+                  "string",
+                  "null",
+                ],
+              },
+            },
+            "type": [
+              "object",
+              "null",
+            ],
+          },
+        },
+        "properties": {
+          "input": {
+            "$ref": "#/definitions/TestType_Input",
+          },
+        },
+        "required": [
+          "input",
+        ],
+        "type": "object",
+      },
+      "Internal": false,
+      "InternalVariablesSchema": {
+        "additionalProperties": false,
+        "definitions": {
+          "TestType_Input": {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "A_const": {
+                    "enum": [
+                      "A",
+                    ],
+                    "type": [
+                      "string",
+                      "null",
+                    ],
+                    "x-graphql-enum-name": "A_const",
+                  },
+                },
+                "type": "object",
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "mutation_test_endpoint_oneOf_1_Input": {
+                    "$ref": "#/definitions/mutation_test_endpoint_oneOf_1_Input",
+                  },
+                },
+                "type": "object",
+              },
+            ],
+            "type": "object",
+          },
+          "mutation_test_endpoint_oneOf_1_Input": {
+            "additionalProperties": false,
+            "properties": {
+              "B": {
+                "type": [
+                  "string",
+                  "null",
+                ],
+              },
+            },
+            "type": [
+              "object",
+              "null",
+            ],
+          },
+        },
+        "properties": {
+          "input": {
+            "$ref": "#/definitions/TestType_Input",
+          },
+        },
+        "required": [
+          "input",
+        ],
+        "type": "object",
+      },
+      "InterpolationVariablesSchema": {
+        "additionalProperties": false,
+        "definitions": {
+          "TestType_Input": {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "A_const": {
+                    "enum": [
+                      "A",
+                    ],
+                    "type": [
+                      "string",
+                      "null",
+                    ],
+                    "x-graphql-enum-name": "A_const",
+                  },
+                },
+                "type": "object",
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "mutation_test_endpoint_oneOf_1_Input": {
+                    "$ref": "#/definitions/mutation_test_endpoint_oneOf_1_Input",
+                  },
+                },
+                "type": "object",
+              },
+            ],
+            "type": "object",
+          },
+          "mutation_test_endpoint_oneOf_1_Input": {
+            "additionalProperties": false,
+            "properties": {
+              "B": {
+                "type": [
+                  "string",
+                  "null",
+                ],
+              },
+            },
+            "type": [
+              "object",
+              "null",
+            ],
+          },
+        },
+        "properties": {
+          "input": {
+            "$ref": "#/definitions/TestType_Input",
+          },
+        },
+        "required": [
+          "input",
+        ],
+        "type": "object",
+      },
+      "Name": "MutationWithUnionInput",
+      "OperationType": 1,
+      "PathName": "MutationWithUnionInput",
+      "PostResolveTransformations": undefined,
+      "ResponseSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "additionalProperties": false,
+            "properties": {
+              "test_endpoint": {
+                "additionalProperties": false,
+                "properties": {
+                  "A_const": {
+                    "enum": [
+                      "A",
+                    ],
+                    "type": "string",
+                  },
+                  "B": {
+                    "type": "string",
+                  },
+                },
+                "type": "object",
+              },
+            },
+            "type": "object",
+          },
+        },
+        "type": "object",
+      },
+      "VariablesConfiguration": {
+        "injectVariables": [],
+      },
+      "VariablesSchema": {
+        "additionalProperties": false,
+        "definitions": {
+          "TestType_Input": {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "A_const": {
+                    "enum": [
+                      "A",
+                    ],
+                    "type": [
+                      "string",
+                      "null",
+                    ],
+                    "x-graphql-enum-name": "A_const",
+                  },
+                },
+                "type": "object",
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "mutation_test_endpoint_oneOf_1_Input": {
+                    "$ref": "#/definitions/mutation_test_endpoint_oneOf_1_Input",
+                  },
+                },
+                "type": "object",
+              },
+            ],
+            "type": "object",
+          },
+          "mutation_test_endpoint_oneOf_1_Input": {
+            "additionalProperties": false,
+            "properties": {
+              "B": {
+                "type": [
+                  "string",
+                  "null",
+                ],
+              },
+            },
+            "type": [
+              "object",
+              "null",
+            ],
+          },
+        },
+        "properties": {
+          "input": {
+            "$ref": "#/definitions/TestType_Input",
+          },
+        },
+        "required": [
+          "input",
+        ],
         "type": "object",
       },
     },

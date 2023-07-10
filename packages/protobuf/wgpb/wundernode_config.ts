@@ -1,4 +1,6 @@
 /* eslint-disable */
+import Long from "long";
+import _m0 from "protobufjs/minimal";
 
 export const protobufPackage = "wgpb";
 
@@ -746,6 +748,7 @@ export interface CookieBasedAuthentication {
   hashKey: ConfigurationVariable | undefined;
   blockKey: ConfigurationVariable | undefined;
   csrfSecret: ConfigurationVariable | undefined;
+  timeoutSeconds: ConfigurationVariable | undefined;
 }
 
 export interface AuthProvider {
@@ -892,6 +895,17 @@ export interface EngineConfiguration {
   fieldConfigurations: FieldConfiguration[];
   graphqlSchema: string;
   typeConfigurations: TypeConfiguration[];
+  stringStorage: { [key: string]: string };
+}
+
+export interface EngineConfiguration_StringStorageEntry {
+  key: string;
+  value: string;
+}
+
+export interface InternedString {
+  /** key to index into EngineConfiguration.stringStorage */
+  key: string;
 }
 
 export interface DataSourceConfiguration {
@@ -930,15 +944,17 @@ export interface DataSourceCustomGraphQL {
   fetch: FetchConfiguration | undefined;
   subscription: GraphQLSubscriptionConfiguration | undefined;
   federation: GraphQLFederationConfiguration | undefined;
-  upstreamSchema: string;
+  upstreamSchema: InternedString | undefined;
   hooksConfiguration: GraphQLDataSourceHooksConfiguration | undefined;
   customScalarTypeFields: SingleTypeField[];
 }
 
 export interface DataSourceCustomDatabase {
   databaseURL: ConfigurationVariable | undefined;
-  prismaSchema: string;
-  graphqlSchema: string;
+  prismaSchema: InternedString | undefined;
+  graphqlSchema:
+    | InternedString
+    | undefined;
   /** closeTimeoutSeconds define that the database connection will be closed after the given amount of seconds of inactivity */
   closeTimeoutSeconds: number;
   jsonTypeFields: SingleTypeField[];
@@ -1070,6 +1086,19 @@ export interface WunderGraphConfiguration {
   environmentIds: string[];
   dangerouslyEnableGraphQLEndpoint: boolean;
   configHash: string;
+  enabledFeatures: EnabledFeatures | undefined;
+}
+
+/**
+ * Used for reporting enabled features from the TS side
+ * to the Go side.
+ */
+export interface EnabledFeatures {
+  apiCount: number;
+  schemaExtension: boolean;
+  customJSONScalars: boolean;
+  customIntScalars: boolean;
+  customFloatScalars: boolean;
 }
 
 export interface S3UploadProfileHooksConfiguration {
@@ -1135,6 +1164,11 @@ export interface NodeLogging {
   level: ConfigurationVariable | undefined;
 }
 
+export interface PrometheusOptions {
+  enabled: ConfigurationVariable | undefined;
+  port: ConfigurationVariable | undefined;
+}
+
 export interface NodeOptions {
   nodeUrl: ConfigurationVariable | undefined;
   publicNodeUrl: ConfigurationVariable | undefined;
@@ -1144,6 +1178,15 @@ export interface NodeOptions {
   listenInternal: InternalListenerOptions | undefined;
   nodeInternalUrl: ConfigurationVariable | undefined;
   defaultHttpProxyUrl: ConfigurationVariable | undefined;
+  openTelemetry: TelemetryOptions | undefined;
+  prometheus: PrometheusOptions | undefined;
+}
+
+export interface TelemetryOptions {
+  enabled: ConfigurationVariable | undefined;
+  exporterHttpEndpoint: ConfigurationVariable | undefined;
+  sampler: ConfigurationVariable | undefined;
+  authToken: ConfigurationVariable | undefined;
 }
 
 export interface ServerLogging {
@@ -1255,6 +1298,49 @@ function createBaseApiAuthenticationConfig(): ApiAuthenticationConfig {
 }
 
 export const ApiAuthenticationConfig = {
+  encode(message: ApiAuthenticationConfig, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.cookieBased !== undefined) {
+      CookieBasedAuthentication.encode(message.cookieBased, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.hooks !== undefined) {
+      ApiAuthenticationHooks.encode(message.hooks, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.jwksBased !== undefined) {
+      JwksBasedAuthentication.encode(message.jwksBased, writer.uint32(26).fork()).ldelim();
+    }
+    for (const v of message.publicClaims) {
+      writer.uint32(34).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ApiAuthenticationConfig {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseApiAuthenticationConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.cookieBased = CookieBasedAuthentication.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.hooks = ApiAuthenticationHooks.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.jwksBased = JwksBasedAuthentication.decode(reader, reader.uint32());
+          break;
+        case 4:
+          message.publicClaims.push(reader.string());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): ApiAuthenticationConfig {
     return {
       cookieBased: isSet(object.cookieBased) ? CookieBasedAuthentication.fromJSON(object.cookieBased) : undefined,
@@ -1301,6 +1387,31 @@ function createBaseJwksBasedAuthentication(): JwksBasedAuthentication {
 }
 
 export const JwksBasedAuthentication = {
+  encode(message: JwksBasedAuthentication, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.providers) {
+      JwksAuthProvider.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): JwksBasedAuthentication {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseJwksBasedAuthentication();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.providers.push(JwksAuthProvider.decode(reader, reader.uint32()));
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): JwksBasedAuthentication {
     return {
       providers: Array.isArray(object?.providers) ? object.providers.map((e: any) => JwksAuthProvider.fromJSON(e)) : [],
@@ -1329,6 +1440,49 @@ function createBaseJwksAuthProvider(): JwksAuthProvider {
 }
 
 export const JwksAuthProvider = {
+  encode(message: JwksAuthProvider, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.jwksUrl !== undefined) {
+      ConfigurationVariable.encode(message.jwksUrl, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.jwksJson !== undefined) {
+      ConfigurationVariable.encode(message.jwksJson, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.userInfoEndpoint !== undefined) {
+      ConfigurationVariable.encode(message.userInfoEndpoint, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.userInfoCacheTtlSeconds !== 0) {
+      writer.uint32(32).int64(message.userInfoCacheTtlSeconds);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): JwksAuthProvider {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseJwksAuthProvider();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.jwksUrl = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.jwksJson = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.userInfoEndpoint = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 4:
+          message.userInfoCacheTtlSeconds = longToNumber(reader.int64() as Long);
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): JwksAuthProvider {
     return {
       jwksUrl: isSet(object.jwksUrl) ? ConfigurationVariable.fromJSON(object.jwksUrl) : undefined,
@@ -1380,6 +1534,49 @@ function createBaseApiAuthenticationHooks(): ApiAuthenticationHooks {
 }
 
 export const ApiAuthenticationHooks = {
+  encode(message: ApiAuthenticationHooks, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.postAuthentication === true) {
+      writer.uint32(8).bool(message.postAuthentication);
+    }
+    if (message.mutatingPostAuthentication === true) {
+      writer.uint32(16).bool(message.mutatingPostAuthentication);
+    }
+    if (message.revalidateAuthentication === true) {
+      writer.uint32(24).bool(message.revalidateAuthentication);
+    }
+    if (message.postLogout === true) {
+      writer.uint32(32).bool(message.postLogout);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ApiAuthenticationHooks {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseApiAuthenticationHooks();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.postAuthentication = reader.bool();
+          break;
+        case 2:
+          message.mutatingPostAuthentication = reader.bool();
+          break;
+        case 3:
+          message.revalidateAuthentication = reader.bool();
+          break;
+        case 4:
+          message.postLogout = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): ApiAuthenticationHooks {
     return {
       postAuthentication: isSet(object.postAuthentication) ? Boolean(object.postAuthentication) : false,
@@ -1421,10 +1618,72 @@ function createBaseCookieBasedAuthentication(): CookieBasedAuthentication {
     hashKey: undefined,
     blockKey: undefined,
     csrfSecret: undefined,
+    timeoutSeconds: undefined,
   };
 }
 
 export const CookieBasedAuthentication = {
+  encode(message: CookieBasedAuthentication, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.providers) {
+      AuthProvider.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    for (const v of message.authorizedRedirectUris) {
+      ConfigurationVariable.encode(v!, writer.uint32(18).fork()).ldelim();
+    }
+    for (const v of message.authorizedRedirectUriRegexes) {
+      ConfigurationVariable.encode(v!, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.hashKey !== undefined) {
+      ConfigurationVariable.encode(message.hashKey, writer.uint32(34).fork()).ldelim();
+    }
+    if (message.blockKey !== undefined) {
+      ConfigurationVariable.encode(message.blockKey, writer.uint32(42).fork()).ldelim();
+    }
+    if (message.csrfSecret !== undefined) {
+      ConfigurationVariable.encode(message.csrfSecret, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.timeoutSeconds !== undefined) {
+      ConfigurationVariable.encode(message.timeoutSeconds, writer.uint32(58).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): CookieBasedAuthentication {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCookieBasedAuthentication();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.providers.push(AuthProvider.decode(reader, reader.uint32()));
+          break;
+        case 2:
+          message.authorizedRedirectUris.push(ConfigurationVariable.decode(reader, reader.uint32()));
+          break;
+        case 3:
+          message.authorizedRedirectUriRegexes.push(ConfigurationVariable.decode(reader, reader.uint32()));
+          break;
+        case 4:
+          message.hashKey = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 5:
+          message.blockKey = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 6:
+          message.csrfSecret = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 7:
+          message.timeoutSeconds = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): CookieBasedAuthentication {
     return {
       providers: Array.isArray(object?.providers) ? object.providers.map((e: any) => AuthProvider.fromJSON(e)) : [],
@@ -1437,6 +1696,7 @@ export const CookieBasedAuthentication = {
       hashKey: isSet(object.hashKey) ? ConfigurationVariable.fromJSON(object.hashKey) : undefined,
       blockKey: isSet(object.blockKey) ? ConfigurationVariable.fromJSON(object.blockKey) : undefined,
       csrfSecret: isSet(object.csrfSecret) ? ConfigurationVariable.fromJSON(object.csrfSecret) : undefined,
+      timeoutSeconds: isSet(object.timeoutSeconds) ? ConfigurationVariable.fromJSON(object.timeoutSeconds) : undefined,
     };
   },
 
@@ -1467,6 +1727,8 @@ export const CookieBasedAuthentication = {
       (obj.blockKey = message.blockKey ? ConfigurationVariable.toJSON(message.blockKey) : undefined);
     message.csrfSecret !== undefined &&
       (obj.csrfSecret = message.csrfSecret ? ConfigurationVariable.toJSON(message.csrfSecret) : undefined);
+    message.timeoutSeconds !== undefined &&
+      (obj.timeoutSeconds = message.timeoutSeconds ? ConfigurationVariable.toJSON(message.timeoutSeconds) : undefined);
     return obj;
   },
 
@@ -1486,6 +1748,9 @@ export const CookieBasedAuthentication = {
     message.csrfSecret = (object.csrfSecret !== undefined && object.csrfSecret !== null)
       ? ConfigurationVariable.fromPartial(object.csrfSecret)
       : undefined;
+    message.timeoutSeconds = (object.timeoutSeconds !== undefined && object.timeoutSeconds !== null)
+      ? ConfigurationVariable.fromPartial(object.timeoutSeconds)
+      : undefined;
     return message;
   },
 };
@@ -1495,6 +1760,49 @@ function createBaseAuthProvider(): AuthProvider {
 }
 
 export const AuthProvider = {
+  encode(message: AuthProvider, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.kind !== 0) {
+      writer.uint32(16).int32(message.kind);
+    }
+    if (message.githubConfig !== undefined) {
+      GithubAuthProviderConfig.encode(message.githubConfig, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.oidcConfig !== undefined) {
+      OpenIDConnectAuthProviderConfig.encode(message.oidcConfig, writer.uint32(34).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): AuthProvider {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAuthProvider();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.id = reader.string();
+          break;
+        case 2:
+          message.kind = reader.int32() as any;
+          break;
+        case 3:
+          message.githubConfig = GithubAuthProviderConfig.decode(reader, reader.uint32());
+          break;
+        case 4:
+          message.oidcConfig = OpenIDConnectAuthProviderConfig.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): AuthProvider {
     return {
       id: isSet(object.id) ? String(object.id) : "",
@@ -1534,6 +1842,37 @@ function createBaseGithubAuthProviderConfig(): GithubAuthProviderConfig {
 }
 
 export const GithubAuthProviderConfig = {
+  encode(message: GithubAuthProviderConfig, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.clientId !== undefined) {
+      ConfigurationVariable.encode(message.clientId, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.clientSecret !== undefined) {
+      ConfigurationVariable.encode(message.clientSecret, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): GithubAuthProviderConfig {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGithubAuthProviderConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.clientId = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.clientSecret = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): GithubAuthProviderConfig {
     return {
       clientId: isSet(object.clientId) ? ConfigurationVariable.fromJSON(object.clientId) : undefined,
@@ -1567,6 +1906,37 @@ function createBaseOpenIDConnectQueryParameter(): OpenIDConnectQueryParameter {
 }
 
 export const OpenIDConnectQueryParameter = {
+  encode(message: OpenIDConnectQueryParameter, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.name !== undefined) {
+      ConfigurationVariable.encode(message.name, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.value !== undefined) {
+      ConfigurationVariable.encode(message.value, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): OpenIDConnectQueryParameter {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOpenIDConnectQueryParameter();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.name = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.value = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): OpenIDConnectQueryParameter {
     return {
       name: isSet(object.name) ? ConfigurationVariable.fromJSON(object.name) : undefined,
@@ -1599,6 +1969,49 @@ function createBaseOpenIDConnectAuthProviderConfig(): OpenIDConnectAuthProviderC
 }
 
 export const OpenIDConnectAuthProviderConfig = {
+  encode(message: OpenIDConnectAuthProviderConfig, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.issuer !== undefined) {
+      ConfigurationVariable.encode(message.issuer, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.clientId !== undefined) {
+      ConfigurationVariable.encode(message.clientId, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.clientSecret !== undefined) {
+      ConfigurationVariable.encode(message.clientSecret, writer.uint32(26).fork()).ldelim();
+    }
+    for (const v of message.queryParameters) {
+      OpenIDConnectQueryParameter.encode(v!, writer.uint32(34).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): OpenIDConnectAuthProviderConfig {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOpenIDConnectAuthProviderConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.issuer = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.clientId = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.clientSecret = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 4:
+          message.queryParameters.push(OpenIDConnectQueryParameter.decode(reader, reader.uint32()));
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): OpenIDConnectAuthProviderConfig {
     return {
       issuer: isSet(object.issuer) ? ConfigurationVariable.fromJSON(object.issuer) : undefined,
@@ -1666,6 +2079,121 @@ function createBaseOperation(): Operation {
 }
 
 export const Operation = {
+  encode(message: Operation, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.name !== "") {
+      writer.uint32(10).string(message.name);
+    }
+    if (message.content !== "") {
+      writer.uint32(18).string(message.content);
+    }
+    if (message.operationType !== 0) {
+      writer.uint32(24).int32(message.operationType);
+    }
+    if (message.variablesSchema !== "") {
+      writer.uint32(34).string(message.variablesSchema);
+    }
+    if (message.responseSchema !== "") {
+      writer.uint32(42).string(message.responseSchema);
+    }
+    if (message.cacheConfig !== undefined) {
+      OperationCacheConfig.encode(message.cacheConfig, writer.uint32(58).fork()).ldelim();
+    }
+    if (message.authenticationConfig !== undefined) {
+      OperationAuthenticationConfig.encode(message.authenticationConfig, writer.uint32(66).fork()).ldelim();
+    }
+    if (message.liveQueryConfig !== undefined) {
+      OperationLiveQueryConfig.encode(message.liveQueryConfig, writer.uint32(74).fork()).ldelim();
+    }
+    if (message.authorizationConfig !== undefined) {
+      OperationAuthorizationConfig.encode(message.authorizationConfig, writer.uint32(82).fork()).ldelim();
+    }
+    if (message.hooksConfiguration !== undefined) {
+      OperationHooksConfiguration.encode(message.hooksConfiguration, writer.uint32(90).fork()).ldelim();
+    }
+    if (message.variablesConfiguration !== undefined) {
+      OperationVariablesConfiguration.encode(message.variablesConfiguration, writer.uint32(98).fork()).ldelim();
+    }
+    if (message.internal === true) {
+      writer.uint32(104).bool(message.internal);
+    }
+    if (message.interpolationVariablesSchema !== "") {
+      writer.uint32(114).string(message.interpolationVariablesSchema);
+    }
+    for (const v of message.postResolveTransformations) {
+      PostResolveTransformation.encode(v!, writer.uint32(122).fork()).ldelim();
+    }
+    if (message.engine !== 0) {
+      writer.uint32(128).int32(message.engine);
+    }
+    if (message.path !== "") {
+      writer.uint32(138).string(message.path);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): Operation {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOperation();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.name = reader.string();
+          break;
+        case 2:
+          message.content = reader.string();
+          break;
+        case 3:
+          message.operationType = reader.int32() as any;
+          break;
+        case 4:
+          message.variablesSchema = reader.string();
+          break;
+        case 5:
+          message.responseSchema = reader.string();
+          break;
+        case 7:
+          message.cacheConfig = OperationCacheConfig.decode(reader, reader.uint32());
+          break;
+        case 8:
+          message.authenticationConfig = OperationAuthenticationConfig.decode(reader, reader.uint32());
+          break;
+        case 9:
+          message.liveQueryConfig = OperationLiveQueryConfig.decode(reader, reader.uint32());
+          break;
+        case 10:
+          message.authorizationConfig = OperationAuthorizationConfig.decode(reader, reader.uint32());
+          break;
+        case 11:
+          message.hooksConfiguration = OperationHooksConfiguration.decode(reader, reader.uint32());
+          break;
+        case 12:
+          message.variablesConfiguration = OperationVariablesConfiguration.decode(reader, reader.uint32());
+          break;
+        case 13:
+          message.internal = reader.bool();
+          break;
+        case 14:
+          message.interpolationVariablesSchema = reader.string();
+          break;
+        case 15:
+          message.postResolveTransformations.push(PostResolveTransformation.decode(reader, reader.uint32()));
+          break;
+        case 16:
+          message.engine = reader.int32() as any;
+          break;
+        case 17:
+          message.path = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): Operation {
     return {
       name: isSet(object.name) ? String(object.name) : "",
@@ -1768,9 +2296,8 @@ export const Operation = {
         : undefined;
     message.internal = object.internal ?? false;
     message.interpolationVariablesSchema = object.interpolationVariablesSchema ?? "";
-    message.postResolveTransformations = object.postResolveTransformations?.map((e) =>
-      PostResolveTransformation.fromPartial(e)
-    ) || [];
+    message.postResolveTransformations =
+      object.postResolveTransformations?.map((e) => PostResolveTransformation.fromPartial(e)) || [];
     message.engine = object.engine ?? 0;
     message.path = object.path ?? "";
     return message;
@@ -1782,6 +2309,43 @@ function createBasePostResolveTransformation(): PostResolveTransformation {
 }
 
 export const PostResolveTransformation = {
+  encode(message: PostResolveTransformation, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.kind !== 0) {
+      writer.uint32(8).int32(message.kind);
+    }
+    if (message.depth !== 0) {
+      writer.uint32(16).int64(message.depth);
+    }
+    if (message.get !== undefined) {
+      PostResolveGetTransformation.encode(message.get, writer.uint32(26).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): PostResolveTransformation {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePostResolveTransformation();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.kind = reader.int32() as any;
+          break;
+        case 2:
+          message.depth = longToNumber(reader.int64() as Long);
+          break;
+        case 3:
+          message.get = PostResolveGetTransformation.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): PostResolveTransformation {
     return {
       kind: isSet(object.kind) ? postResolveTransformationKindFromJSON(object.kind) : 0,
@@ -1814,6 +2378,37 @@ function createBasePostResolveGetTransformation(): PostResolveGetTransformation 
 }
 
 export const PostResolveGetTransformation = {
+  encode(message: PostResolveGetTransformation, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.from) {
+      writer.uint32(10).string(v!);
+    }
+    for (const v of message.to) {
+      writer.uint32(18).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): PostResolveGetTransformation {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePostResolveGetTransformation();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.from.push(reader.string());
+          break;
+        case 2:
+          message.to.push(reader.string());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): PostResolveGetTransformation {
     return {
       from: Array.isArray(object?.from) ? object.from.map((e: any) => String(e)) : [],
@@ -1849,6 +2444,31 @@ function createBaseOperationVariablesConfiguration(): OperationVariablesConfigur
 }
 
 export const OperationVariablesConfiguration = {
+  encode(message: OperationVariablesConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.injectVariables) {
+      VariableInjectionConfiguration.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): OperationVariablesConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOperationVariablesConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.injectVariables.push(VariableInjectionConfiguration.decode(reader, reader.uint32()));
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): OperationVariablesConfiguration {
     return {
       injectVariables: Array.isArray(object?.injectVariables)
@@ -1883,6 +2503,49 @@ function createBaseVariableInjectionConfiguration(): VariableInjectionConfigurat
 }
 
 export const VariableInjectionConfiguration = {
+  encode(message: VariableInjectionConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.variablePathComponents) {
+      writer.uint32(10).string(v!);
+    }
+    if (message.variableKind !== 0) {
+      writer.uint32(16).int32(message.variableKind);
+    }
+    if (message.dateFormat !== "") {
+      writer.uint32(26).string(message.dateFormat);
+    }
+    if (message.environmentVariableName !== "") {
+      writer.uint32(34).string(message.environmentVariableName);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): VariableInjectionConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseVariableInjectionConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.variablePathComponents.push(reader.string());
+          break;
+        case 2:
+          message.variableKind = reader.int32() as any;
+          break;
+        case 3:
+          message.dateFormat = reader.string();
+          break;
+        case 4:
+          message.environmentVariableName = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): VariableInjectionConfiguration {
     return {
       variablePathComponents: Array.isArray(object?.variablePathComponents)
@@ -1924,6 +2587,31 @@ function createBaseGraphQLDataSourceHooksConfiguration(): GraphQLDataSourceHooks
 }
 
 export const GraphQLDataSourceHooksConfiguration = {
+  encode(message: GraphQLDataSourceHooksConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.onWSTransportConnectionInit === true) {
+      writer.uint32(8).bool(message.onWSTransportConnectionInit);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): GraphQLDataSourceHooksConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGraphQLDataSourceHooksConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.onWSTransportConnectionInit = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): GraphQLDataSourceHooksConfiguration {
     return {
       onWSTransportConnectionInit: isSet(object.onWSTransportConnectionInit)
@@ -1962,6 +2650,73 @@ function createBaseOperationHooksConfiguration(): OperationHooksConfiguration {
 }
 
 export const OperationHooksConfiguration = {
+  encode(message: OperationHooksConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.preResolve === true) {
+      writer.uint32(8).bool(message.preResolve);
+    }
+    if (message.postResolve === true) {
+      writer.uint32(16).bool(message.postResolve);
+    }
+    if (message.mutatingPreResolve === true) {
+      writer.uint32(24).bool(message.mutatingPreResolve);
+    }
+    if (message.mutatingPostResolve === true) {
+      writer.uint32(32).bool(message.mutatingPostResolve);
+    }
+    if (message.mockResolve !== undefined) {
+      MockResolveHookConfiguration.encode(message.mockResolve, writer.uint32(42).fork()).ldelim();
+    }
+    if (message.httpTransportOnRequest === true) {
+      writer.uint32(48).bool(message.httpTransportOnRequest);
+    }
+    if (message.httpTransportOnResponse === true) {
+      writer.uint32(56).bool(message.httpTransportOnResponse);
+    }
+    if (message.customResolve === true) {
+      writer.uint32(64).bool(message.customResolve);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): OperationHooksConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOperationHooksConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.preResolve = reader.bool();
+          break;
+        case 2:
+          message.postResolve = reader.bool();
+          break;
+        case 3:
+          message.mutatingPreResolve = reader.bool();
+          break;
+        case 4:
+          message.mutatingPostResolve = reader.bool();
+          break;
+        case 5:
+          message.mockResolve = MockResolveHookConfiguration.decode(reader, reader.uint32());
+          break;
+        case 6:
+          message.httpTransportOnRequest = reader.bool();
+          break;
+        case 7:
+          message.httpTransportOnResponse = reader.bool();
+          break;
+        case 8:
+          message.customResolve = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): OperationHooksConfiguration {
     return {
       preResolve: isSet(object.preResolve) ? Boolean(object.preResolve) : false,
@@ -2010,6 +2765,37 @@ function createBaseMockResolveHookConfiguration(): MockResolveHookConfiguration 
 }
 
 export const MockResolveHookConfiguration = {
+  encode(message: MockResolveHookConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.enable === true) {
+      writer.uint32(8).bool(message.enable);
+    }
+    if (message.subscriptionPollingIntervalMillis !== 0) {
+      writer.uint32(16).int64(message.subscriptionPollingIntervalMillis);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MockResolveHookConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMockResolveHookConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.enable = reader.bool();
+          break;
+        case 2:
+          message.subscriptionPollingIntervalMillis = longToNumber(reader.int64() as Long);
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): MockResolveHookConfiguration {
     return {
       enable: isSet(object.enable) ? Boolean(object.enable) : false,
@@ -2040,6 +2826,37 @@ function createBaseOperationAuthorizationConfig(): OperationAuthorizationConfig 
 }
 
 export const OperationAuthorizationConfig = {
+  encode(message: OperationAuthorizationConfig, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.claims) {
+      ClaimConfig.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.roleConfig !== undefined) {
+      OperationRoleConfig.encode(message.roleConfig, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): OperationAuthorizationConfig {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOperationAuthorizationConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.claims.push(ClaimConfig.decode(reader, reader.uint32()));
+          break;
+        case 2:
+          message.roleConfig = OperationRoleConfig.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): OperationAuthorizationConfig {
     return {
       claims: Array.isArray(object?.claims) ? object.claims.map((e: any) => ClaimConfig.fromJSON(e)) : [],
@@ -2074,6 +2891,49 @@ function createBaseOperationRoleConfig(): OperationRoleConfig {
 }
 
 export const OperationRoleConfig = {
+  encode(message: OperationRoleConfig, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.requireMatchAll) {
+      writer.uint32(10).string(v!);
+    }
+    for (const v of message.requireMatchAny) {
+      writer.uint32(18).string(v!);
+    }
+    for (const v of message.denyMatchAll) {
+      writer.uint32(26).string(v!);
+    }
+    for (const v of message.denyMatchAny) {
+      writer.uint32(34).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): OperationRoleConfig {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOperationRoleConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.requireMatchAll.push(reader.string());
+          break;
+        case 2:
+          message.requireMatchAny.push(reader.string());
+          break;
+        case 3:
+          message.denyMatchAll.push(reader.string());
+          break;
+        case 4:
+          message.denyMatchAny.push(reader.string());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): OperationRoleConfig {
     return {
       requireMatchAll: Array.isArray(object?.requireMatchAll) ? object.requireMatchAll.map((e: any) => String(e)) : [],
@@ -2123,6 +2983,49 @@ function createBaseCustomClaim(): CustomClaim {
 }
 
 export const CustomClaim = {
+  encode(message: CustomClaim, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.name !== "") {
+      writer.uint32(10).string(message.name);
+    }
+    for (const v of message.jsonPathComponents) {
+      writer.uint32(18).string(v!);
+    }
+    if (message.type !== 0) {
+      writer.uint32(24).int32(message.type);
+    }
+    if (message.required === true) {
+      writer.uint32(32).bool(message.required);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): CustomClaim {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCustomClaim();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.name = reader.string();
+          break;
+        case 2:
+          message.jsonPathComponents.push(reader.string());
+          break;
+        case 3:
+          message.type = reader.int32() as any;
+          break;
+        case 4:
+          message.required = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): CustomClaim {
     return {
       name: isSet(object.name) ? String(object.name) : "",
@@ -2162,6 +3065,43 @@ function createBaseClaimConfig(): ClaimConfig {
 }
 
 export const ClaimConfig = {
+  encode(message: ClaimConfig, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.variablePathComponents) {
+      writer.uint32(10).string(v!);
+    }
+    if (message.claimType !== 0) {
+      writer.uint32(16).int32(message.claimType);
+    }
+    if (message.custom !== undefined) {
+      CustomClaim.encode(message.custom, writer.uint32(26).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ClaimConfig {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseClaimConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.variablePathComponents.push(reader.string());
+          break;
+        case 2:
+          message.claimType = reader.int32() as any;
+          break;
+        case 3:
+          message.custom = CustomClaim.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): ClaimConfig {
     return {
       variablePathComponents: Array.isArray(object?.variablePathComponents)
@@ -2200,6 +3140,37 @@ function createBaseOperationLiveQueryConfig(): OperationLiveQueryConfig {
 }
 
 export const OperationLiveQueryConfig = {
+  encode(message: OperationLiveQueryConfig, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.enable === true) {
+      writer.uint32(8).bool(message.enable);
+    }
+    if (message.pollingIntervalSeconds !== 0) {
+      writer.uint32(16).int64(message.pollingIntervalSeconds);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): OperationLiveQueryConfig {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOperationLiveQueryConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.enable = reader.bool();
+          break;
+        case 2:
+          message.pollingIntervalSeconds = longToNumber(reader.int64() as Long);
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): OperationLiveQueryConfig {
     return {
       enable: isSet(object.enable) ? Boolean(object.enable) : false,
@@ -2228,6 +3199,31 @@ function createBaseOperationAuthenticationConfig(): OperationAuthenticationConfi
 }
 
 export const OperationAuthenticationConfig = {
+  encode(message: OperationAuthenticationConfig, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.authRequired === true) {
+      writer.uint32(8).bool(message.authRequired);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): OperationAuthenticationConfig {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOperationAuthenticationConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.authRequired = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): OperationAuthenticationConfig {
     return { authRequired: isSet(object.authRequired) ? Boolean(object.authRequired) : false };
   },
@@ -2258,6 +3254,55 @@ function createBaseOperationCacheConfig(): OperationCacheConfig {
 }
 
 export const OperationCacheConfig = {
+  encode(message: OperationCacheConfig, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.enable !== undefined) {
+      writer.uint32(8).bool(message.enable);
+    }
+    if (message.maxAge !== undefined) {
+      writer.uint32(16).int64(message.maxAge);
+    }
+    if (message.public !== undefined) {
+      writer.uint32(24).bool(message.public);
+    }
+    if (message.staleWhileRevalidate !== undefined) {
+      writer.uint32(32).int64(message.staleWhileRevalidate);
+    }
+    if (message.mustRevalidate !== undefined) {
+      writer.uint32(40).bool(message.mustRevalidate);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): OperationCacheConfig {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOperationCacheConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.enable = reader.bool();
+          break;
+        case 2:
+          message.maxAge = longToNumber(reader.int64() as Long);
+          break;
+        case 3:
+          message.public = reader.bool();
+          break;
+        case 4:
+          message.staleWhileRevalidate = longToNumber(reader.int64() as Long);
+          break;
+        case 5:
+          message.mustRevalidate = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): OperationCacheConfig {
     return {
       enable: isSet(object.enable) ? Boolean(object.enable) : undefined,
@@ -2296,10 +3341,69 @@ function createBaseEngineConfiguration(): EngineConfiguration {
     fieldConfigurations: [],
     graphqlSchema: "",
     typeConfigurations: [],
+    stringStorage: {},
   };
 }
 
 export const EngineConfiguration = {
+  encode(message: EngineConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.defaultFlushInterval !== 0) {
+      writer.uint32(8).int64(message.defaultFlushInterval);
+    }
+    for (const v of message.datasourceConfigurations) {
+      DataSourceConfiguration.encode(v!, writer.uint32(18).fork()).ldelim();
+    }
+    for (const v of message.fieldConfigurations) {
+      FieldConfiguration.encode(v!, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.graphqlSchema !== "") {
+      writer.uint32(34).string(message.graphqlSchema);
+    }
+    for (const v of message.typeConfigurations) {
+      TypeConfiguration.encode(v!, writer.uint32(42).fork()).ldelim();
+    }
+    Object.entries(message.stringStorage).forEach(([key, value]) => {
+      EngineConfiguration_StringStorageEntry.encode({ key: key as any, value }, writer.uint32(50).fork()).ldelim();
+    });
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): EngineConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEngineConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.defaultFlushInterval = longToNumber(reader.int64() as Long);
+          break;
+        case 2:
+          message.datasourceConfigurations.push(DataSourceConfiguration.decode(reader, reader.uint32()));
+          break;
+        case 3:
+          message.fieldConfigurations.push(FieldConfiguration.decode(reader, reader.uint32()));
+          break;
+        case 4:
+          message.graphqlSchema = reader.string();
+          break;
+        case 5:
+          message.typeConfigurations.push(TypeConfiguration.decode(reader, reader.uint32()));
+          break;
+        case 6:
+          const entry6 = EngineConfiguration_StringStorageEntry.decode(reader, reader.uint32());
+          if (entry6.value !== undefined) {
+            message.stringStorage[entry6.key] = entry6.value;
+          }
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): EngineConfiguration {
     return {
       defaultFlushInterval: isSet(object.defaultFlushInterval) ? Number(object.defaultFlushInterval) : 0,
@@ -2313,6 +3417,12 @@ export const EngineConfiguration = {
       typeConfigurations: Array.isArray(object?.typeConfigurations)
         ? object.typeConfigurations.map((e: any) => TypeConfiguration.fromJSON(e))
         : [],
+      stringStorage: isObject(object.stringStorage)
+        ? Object.entries(object.stringStorage).reduce<{ [key: string]: string }>((acc, [key, value]) => {
+          acc[key] = String(value);
+          return acc;
+        }, {})
+        : {},
     };
   },
 
@@ -2337,6 +3447,12 @@ export const EngineConfiguration = {
     } else {
       obj.typeConfigurations = [];
     }
+    obj.stringStorage = {};
+    if (message.stringStorage) {
+      Object.entries(message.stringStorage).forEach(([k, v]) => {
+        obj.stringStorage[k] = v;
+      });
+    }
     return obj;
   },
 
@@ -2348,6 +3464,119 @@ export const EngineConfiguration = {
     message.fieldConfigurations = object.fieldConfigurations?.map((e) => FieldConfiguration.fromPartial(e)) || [];
     message.graphqlSchema = object.graphqlSchema ?? "";
     message.typeConfigurations = object.typeConfigurations?.map((e) => TypeConfiguration.fromPartial(e)) || [];
+    message.stringStorage = Object.entries(object.stringStorage ?? {}).reduce<{ [key: string]: string }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = String(value);
+        }
+        return acc;
+      },
+      {},
+    );
+    return message;
+  },
+};
+
+function createBaseEngineConfiguration_StringStorageEntry(): EngineConfiguration_StringStorageEntry {
+  return { key: "", value: "" };
+}
+
+export const EngineConfiguration_StringStorageEntry = {
+  encode(message: EngineConfiguration_StringStorageEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== "") {
+      writer.uint32(18).string(message.value);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): EngineConfiguration_StringStorageEntry {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEngineConfiguration_StringStorageEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.key = reader.string();
+          break;
+        case 2:
+          message.value = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): EngineConfiguration_StringStorageEntry {
+    return { key: isSet(object.key) ? String(object.key) : "", value: isSet(object.value) ? String(object.value) : "" };
+  },
+
+  toJSON(message: EngineConfiguration_StringStorageEntry): unknown {
+    const obj: any = {};
+    message.key !== undefined && (obj.key = message.key);
+    message.value !== undefined && (obj.value = message.value);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<EngineConfiguration_StringStorageEntry>, I>>(
+    object: I,
+  ): EngineConfiguration_StringStorageEntry {
+    const message = createBaseEngineConfiguration_StringStorageEntry();
+    message.key = object.key ?? "";
+    message.value = object.value ?? "";
+    return message;
+  },
+};
+
+function createBaseInternedString(): InternedString {
+  return { key: "" };
+}
+
+export const InternedString = {
+  encode(message: InternedString, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): InternedString {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseInternedString();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.key = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): InternedString {
+    return { key: isSet(object.key) ? String(object.key) : "" };
+  },
+
+  toJSON(message: InternedString): unknown {
+    const obj: any = {};
+    message.key !== undefined && (obj.key = message.key);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<InternedString>, I>>(object: I): InternedString {
+    const message = createBaseInternedString();
+    message.key = object.key ?? "";
     return message;
   },
 };
@@ -2369,6 +3598,91 @@ function createBaseDataSourceConfiguration(): DataSourceConfiguration {
 }
 
 export const DataSourceConfiguration = {
+  encode(message: DataSourceConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.kind !== 0) {
+      writer.uint32(8).int32(message.kind);
+    }
+    for (const v of message.rootNodes) {
+      TypeField.encode(v!, writer.uint32(18).fork()).ldelim();
+    }
+    for (const v of message.childNodes) {
+      TypeField.encode(v!, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.overrideFieldPathFromAlias === true) {
+      writer.uint32(32).bool(message.overrideFieldPathFromAlias);
+    }
+    if (message.customRest !== undefined) {
+      DataSourceCustomREST.encode(message.customRest, writer.uint32(42).fork()).ldelim();
+    }
+    if (message.customGraphql !== undefined) {
+      DataSourceCustomGraphQL.encode(message.customGraphql, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.customStatic !== undefined) {
+      DataSourceCustomStatic.encode(message.customStatic, writer.uint32(58).fork()).ldelim();
+    }
+    if (message.customDatabase !== undefined) {
+      DataSourceCustomDatabase.encode(message.customDatabase, writer.uint32(66).fork()).ldelim();
+    }
+    for (const v of message.directives) {
+      DirectiveConfiguration.encode(v!, writer.uint32(74).fork()).ldelim();
+    }
+    if (message.requestTimeoutSeconds !== 0) {
+      writer.uint32(80).int64(message.requestTimeoutSeconds);
+    }
+    if (message.id !== "") {
+      writer.uint32(90).string(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): DataSourceConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDataSourceConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.kind = reader.int32() as any;
+          break;
+        case 2:
+          message.rootNodes.push(TypeField.decode(reader, reader.uint32()));
+          break;
+        case 3:
+          message.childNodes.push(TypeField.decode(reader, reader.uint32()));
+          break;
+        case 4:
+          message.overrideFieldPathFromAlias = reader.bool();
+          break;
+        case 5:
+          message.customRest = DataSourceCustomREST.decode(reader, reader.uint32());
+          break;
+        case 6:
+          message.customGraphql = DataSourceCustomGraphQL.decode(reader, reader.uint32());
+          break;
+        case 7:
+          message.customStatic = DataSourceCustomStatic.decode(reader, reader.uint32());
+          break;
+        case 8:
+          message.customDatabase = DataSourceCustomDatabase.decode(reader, reader.uint32());
+          break;
+        case 9:
+          message.directives.push(DirectiveConfiguration.decode(reader, reader.uint32()));
+          break;
+        case 10:
+          message.requestTimeoutSeconds = longToNumber(reader.int64() as Long);
+          break;
+        case 11:
+          message.id = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): DataSourceConfiguration {
     return {
       kind: isSet(object.kind) ? dataSourceKindFromJSON(object.kind) : 0,
@@ -2457,6 +3771,37 @@ function createBaseDirectiveConfiguration(): DirectiveConfiguration {
 }
 
 export const DirectiveConfiguration = {
+  encode(message: DirectiveConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.directiveName !== "") {
+      writer.uint32(10).string(message.directiveName);
+    }
+    if (message.renameTo !== "") {
+      writer.uint32(18).string(message.renameTo);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): DirectiveConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDirectiveConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.directiveName = reader.string();
+          break;
+        case 2:
+          message.renameTo = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): DirectiveConfiguration {
     return {
       directiveName: isSet(object.directiveName) ? String(object.directiveName) : "",
@@ -2484,6 +3829,49 @@ function createBaseDataSourceCustomREST(): DataSourceCustomREST {
 }
 
 export const DataSourceCustomREST = {
+  encode(message: DataSourceCustomREST, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.fetch !== undefined) {
+      FetchConfiguration.encode(message.fetch, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.subscription !== undefined) {
+      RESTSubscriptionConfiguration.encode(message.subscription, writer.uint32(18).fork()).ldelim();
+    }
+    for (const v of message.statusCodeTypeMappings) {
+      StatusCodeTypeMapping.encode(v!, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.defaultTypeName !== "") {
+      writer.uint32(34).string(message.defaultTypeName);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): DataSourceCustomREST {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDataSourceCustomREST();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.fetch = FetchConfiguration.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.subscription = RESTSubscriptionConfiguration.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.statusCodeTypeMappings.push(StatusCodeTypeMapping.decode(reader, reader.uint32()));
+          break;
+        case 4:
+          message.defaultTypeName = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): DataSourceCustomREST {
     return {
       fetch: isSet(object.fetch) ? FetchConfiguration.fromJSON(object.fetch) : undefined,
@@ -2535,6 +3923,43 @@ function createBaseStatusCodeTypeMapping(): StatusCodeTypeMapping {
 }
 
 export const StatusCodeTypeMapping = {
+  encode(message: StatusCodeTypeMapping, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.statusCode !== 0) {
+      writer.uint32(8).int64(message.statusCode);
+    }
+    if (message.typeName !== "") {
+      writer.uint32(18).string(message.typeName);
+    }
+    if (message.injectStatusCodeIntoBody === true) {
+      writer.uint32(24).bool(message.injectStatusCodeIntoBody);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): StatusCodeTypeMapping {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseStatusCodeTypeMapping();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.statusCode = longToNumber(reader.int64() as Long);
+          break;
+        case 2:
+          message.typeName = reader.string();
+          break;
+        case 3:
+          message.injectStatusCodeIntoBody = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): StatusCodeTypeMapping {
     return {
       statusCode: isSet(object.statusCode) ? Number(object.statusCode) : 0,
@@ -2567,13 +3992,68 @@ function createBaseDataSourceCustomGraphQL(): DataSourceCustomGraphQL {
     fetch: undefined,
     subscription: undefined,
     federation: undefined,
-    upstreamSchema: "",
+    upstreamSchema: undefined,
     hooksConfiguration: undefined,
     customScalarTypeFields: [],
   };
 }
 
 export const DataSourceCustomGraphQL = {
+  encode(message: DataSourceCustomGraphQL, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.fetch !== undefined) {
+      FetchConfiguration.encode(message.fetch, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.subscription !== undefined) {
+      GraphQLSubscriptionConfiguration.encode(message.subscription, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.federation !== undefined) {
+      GraphQLFederationConfiguration.encode(message.federation, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.upstreamSchema !== undefined) {
+      InternedString.encode(message.upstreamSchema, writer.uint32(34).fork()).ldelim();
+    }
+    if (message.hooksConfiguration !== undefined) {
+      GraphQLDataSourceHooksConfiguration.encode(message.hooksConfiguration, writer.uint32(42).fork()).ldelim();
+    }
+    for (const v of message.customScalarTypeFields) {
+      SingleTypeField.encode(v!, writer.uint32(50).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): DataSourceCustomGraphQL {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDataSourceCustomGraphQL();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.fetch = FetchConfiguration.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.subscription = GraphQLSubscriptionConfiguration.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.federation = GraphQLFederationConfiguration.decode(reader, reader.uint32());
+          break;
+        case 4:
+          message.upstreamSchema = InternedString.decode(reader, reader.uint32());
+          break;
+        case 5:
+          message.hooksConfiguration = GraphQLDataSourceHooksConfiguration.decode(reader, reader.uint32());
+          break;
+        case 6:
+          message.customScalarTypeFields.push(SingleTypeField.decode(reader, reader.uint32()));
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): DataSourceCustomGraphQL {
     return {
       fetch: isSet(object.fetch) ? FetchConfiguration.fromJSON(object.fetch) : undefined,
@@ -2581,7 +4061,7 @@ export const DataSourceCustomGraphQL = {
         ? GraphQLSubscriptionConfiguration.fromJSON(object.subscription)
         : undefined,
       federation: isSet(object.federation) ? GraphQLFederationConfiguration.fromJSON(object.federation) : undefined,
-      upstreamSchema: isSet(object.upstreamSchema) ? String(object.upstreamSchema) : "",
+      upstreamSchema: isSet(object.upstreamSchema) ? InternedString.fromJSON(object.upstreamSchema) : undefined,
       hooksConfiguration: isSet(object.hooksConfiguration)
         ? GraphQLDataSourceHooksConfiguration.fromJSON(object.hooksConfiguration)
         : undefined,
@@ -2599,7 +4079,8 @@ export const DataSourceCustomGraphQL = {
       : undefined);
     message.federation !== undefined &&
       (obj.federation = message.federation ? GraphQLFederationConfiguration.toJSON(message.federation) : undefined);
-    message.upstreamSchema !== undefined && (obj.upstreamSchema = message.upstreamSchema);
+    message.upstreamSchema !== undefined &&
+      (obj.upstreamSchema = message.upstreamSchema ? InternedString.toJSON(message.upstreamSchema) : undefined);
     message.hooksConfiguration !== undefined && (obj.hooksConfiguration = message.hooksConfiguration
       ? GraphQLDataSourceHooksConfiguration.toJSON(message.hooksConfiguration)
       : undefined);
@@ -2622,7 +4103,9 @@ export const DataSourceCustomGraphQL = {
     message.federation = (object.federation !== undefined && object.federation !== null)
       ? GraphQLFederationConfiguration.fromPartial(object.federation)
       : undefined;
-    message.upstreamSchema = object.upstreamSchema ?? "";
+    message.upstreamSchema = (object.upstreamSchema !== undefined && object.upstreamSchema !== null)
+      ? InternedString.fromPartial(object.upstreamSchema)
+      : undefined;
     message.hooksConfiguration = (object.hooksConfiguration !== undefined && object.hooksConfiguration !== null)
       ? GraphQLDataSourceHooksConfiguration.fromPartial(object.hooksConfiguration)
       : undefined;
@@ -2634,8 +4117,8 @@ export const DataSourceCustomGraphQL = {
 function createBaseDataSourceCustomDatabase(): DataSourceCustomDatabase {
   return {
     databaseURL: undefined,
-    prismaSchema: "",
-    graphqlSchema: "",
+    prismaSchema: undefined,
+    graphqlSchema: undefined,
     closeTimeoutSeconds: 0,
     jsonTypeFields: [],
     jsonInputVariables: [],
@@ -2643,11 +4126,66 @@ function createBaseDataSourceCustomDatabase(): DataSourceCustomDatabase {
 }
 
 export const DataSourceCustomDatabase = {
+  encode(message: DataSourceCustomDatabase, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.databaseURL !== undefined) {
+      ConfigurationVariable.encode(message.databaseURL, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.prismaSchema !== undefined) {
+      InternedString.encode(message.prismaSchema, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.graphqlSchema !== undefined) {
+      InternedString.encode(message.graphqlSchema, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.closeTimeoutSeconds !== 0) {
+      writer.uint32(32).int64(message.closeTimeoutSeconds);
+    }
+    for (const v of message.jsonTypeFields) {
+      SingleTypeField.encode(v!, writer.uint32(42).fork()).ldelim();
+    }
+    for (const v of message.jsonInputVariables) {
+      writer.uint32(50).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): DataSourceCustomDatabase {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDataSourceCustomDatabase();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.databaseURL = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.prismaSchema = InternedString.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.graphqlSchema = InternedString.decode(reader, reader.uint32());
+          break;
+        case 4:
+          message.closeTimeoutSeconds = longToNumber(reader.int64() as Long);
+          break;
+        case 5:
+          message.jsonTypeFields.push(SingleTypeField.decode(reader, reader.uint32()));
+          break;
+        case 6:
+          message.jsonInputVariables.push(reader.string());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): DataSourceCustomDatabase {
     return {
       databaseURL: isSet(object.databaseURL) ? ConfigurationVariable.fromJSON(object.databaseURL) : undefined,
-      prismaSchema: isSet(object.prismaSchema) ? String(object.prismaSchema) : "",
-      graphqlSchema: isSet(object.graphqlSchema) ? String(object.graphqlSchema) : "",
+      prismaSchema: isSet(object.prismaSchema) ? InternedString.fromJSON(object.prismaSchema) : undefined,
+      graphqlSchema: isSet(object.graphqlSchema) ? InternedString.fromJSON(object.graphqlSchema) : undefined,
       closeTimeoutSeconds: isSet(object.closeTimeoutSeconds) ? Number(object.closeTimeoutSeconds) : 0,
       jsonTypeFields: Array.isArray(object?.jsonTypeFields)
         ? object.jsonTypeFields.map((e: any) => SingleTypeField.fromJSON(e))
@@ -2662,8 +4200,10 @@ export const DataSourceCustomDatabase = {
     const obj: any = {};
     message.databaseURL !== undefined &&
       (obj.databaseURL = message.databaseURL ? ConfigurationVariable.toJSON(message.databaseURL) : undefined);
-    message.prismaSchema !== undefined && (obj.prismaSchema = message.prismaSchema);
-    message.graphqlSchema !== undefined && (obj.graphqlSchema = message.graphqlSchema);
+    message.prismaSchema !== undefined &&
+      (obj.prismaSchema = message.prismaSchema ? InternedString.toJSON(message.prismaSchema) : undefined);
+    message.graphqlSchema !== undefined &&
+      (obj.graphqlSchema = message.graphqlSchema ? InternedString.toJSON(message.graphqlSchema) : undefined);
     message.closeTimeoutSeconds !== undefined && (obj.closeTimeoutSeconds = Math.round(message.closeTimeoutSeconds));
     if (message.jsonTypeFields) {
       obj.jsonTypeFields = message.jsonTypeFields.map((e) => e ? SingleTypeField.toJSON(e) : undefined);
@@ -2683,8 +4223,12 @@ export const DataSourceCustomDatabase = {
     message.databaseURL = (object.databaseURL !== undefined && object.databaseURL !== null)
       ? ConfigurationVariable.fromPartial(object.databaseURL)
       : undefined;
-    message.prismaSchema = object.prismaSchema ?? "";
-    message.graphqlSchema = object.graphqlSchema ?? "";
+    message.prismaSchema = (object.prismaSchema !== undefined && object.prismaSchema !== null)
+      ? InternedString.fromPartial(object.prismaSchema)
+      : undefined;
+    message.graphqlSchema = (object.graphqlSchema !== undefined && object.graphqlSchema !== null)
+      ? InternedString.fromPartial(object.graphqlSchema)
+      : undefined;
     message.closeTimeoutSeconds = object.closeTimeoutSeconds ?? 0;
     message.jsonTypeFields = object.jsonTypeFields?.map((e) => SingleTypeField.fromPartial(e)) || [];
     message.jsonInputVariables = object.jsonInputVariables?.map((e) => e) || [];
@@ -2697,6 +4241,37 @@ function createBaseGraphQLFederationConfiguration(): GraphQLFederationConfigurat
 }
 
 export const GraphQLFederationConfiguration = {
+  encode(message: GraphQLFederationConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.enabled === true) {
+      writer.uint32(8).bool(message.enabled);
+    }
+    if (message.serviceSdl !== "") {
+      writer.uint32(18).string(message.serviceSdl);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): GraphQLFederationConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGraphQLFederationConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.enabled = reader.bool();
+          break;
+        case 2:
+          message.serviceSdl = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): GraphQLFederationConfiguration {
     return {
       enabled: isSet(object.enabled) ? Boolean(object.enabled) : false,
@@ -2726,6 +4301,31 @@ function createBaseDataSourceCustomStatic(): DataSourceCustomStatic {
 }
 
 export const DataSourceCustomStatic = {
+  encode(message: DataSourceCustomStatic, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.data !== undefined) {
+      ConfigurationVariable.encode(message.data, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): DataSourceCustomStatic {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDataSourceCustomStatic();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.data = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): DataSourceCustomStatic {
     return { data: isSet(object.data) ? ConfigurationVariable.fromJSON(object.data) : undefined };
   },
@@ -2750,6 +4350,43 @@ function createBaseGraphQLSubscriptionConfiguration(): GraphQLSubscriptionConfig
 }
 
 export const GraphQLSubscriptionConfiguration = {
+  encode(message: GraphQLSubscriptionConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.enabled === true) {
+      writer.uint32(8).bool(message.enabled);
+    }
+    if (message.url !== undefined) {
+      ConfigurationVariable.encode(message.url, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.useSSE === true) {
+      writer.uint32(24).bool(message.useSSE);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): GraphQLSubscriptionConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGraphQLSubscriptionConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.enabled = reader.bool();
+          break;
+        case 2:
+          message.url = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.useSSE = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): GraphQLSubscriptionConfiguration {
     return {
       enabled: isSet(object.enabled) ? Boolean(object.enabled) : false,
@@ -2796,6 +4433,94 @@ function createBaseFetchConfiguration(): FetchConfiguration {
 }
 
 export const FetchConfiguration = {
+  encode(message: FetchConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.url !== undefined) {
+      ConfigurationVariable.encode(message.url, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.method !== 0) {
+      writer.uint32(16).int32(message.method);
+    }
+    Object.entries(message.header).forEach(([key, value]) => {
+      FetchConfiguration_HeaderEntry.encode({ key: key as any, value }, writer.uint32(26).fork()).ldelim();
+    });
+    if (message.body !== undefined) {
+      ConfigurationVariable.encode(message.body, writer.uint32(34).fork()).ldelim();
+    }
+    for (const v of message.query) {
+      URLQueryConfiguration.encode(v!, writer.uint32(42).fork()).ldelim();
+    }
+    if (message.upstreamAuthentication !== undefined) {
+      UpstreamAuthentication.encode(message.upstreamAuthentication, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.urlEncodeBody === true) {
+      writer.uint32(56).bool(message.urlEncodeBody);
+    }
+    if (message.mTLS !== undefined) {
+      MTLSConfiguration.encode(message.mTLS, writer.uint32(66).fork()).ldelim();
+    }
+    if (message.baseUrl !== undefined) {
+      ConfigurationVariable.encode(message.baseUrl, writer.uint32(74).fork()).ldelim();
+    }
+    if (message.path !== undefined) {
+      ConfigurationVariable.encode(message.path, writer.uint32(82).fork()).ldelim();
+    }
+    if (message.httpProxyUrl !== undefined) {
+      ConfigurationVariable.encode(message.httpProxyUrl, writer.uint32(90).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): FetchConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseFetchConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.url = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.method = reader.int32() as any;
+          break;
+        case 3:
+          const entry3 = FetchConfiguration_HeaderEntry.decode(reader, reader.uint32());
+          if (entry3.value !== undefined) {
+            message.header[entry3.key] = entry3.value;
+          }
+          break;
+        case 4:
+          message.body = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 5:
+          message.query.push(URLQueryConfiguration.decode(reader, reader.uint32()));
+          break;
+        case 6:
+          message.upstreamAuthentication = UpstreamAuthentication.decode(reader, reader.uint32());
+          break;
+        case 7:
+          message.urlEncodeBody = reader.bool();
+          break;
+        case 8:
+          message.mTLS = MTLSConfiguration.decode(reader, reader.uint32());
+          break;
+        case 9:
+          message.baseUrl = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 10:
+          message.path = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 11:
+          message.httpProxyUrl = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): FetchConfiguration {
     return {
       url: isSet(object.url) ? ConfigurationVariable.fromJSON(object.url) : undefined,
@@ -2807,9 +4532,7 @@ export const FetchConfiguration = {
         }, {})
         : {},
       body: isSet(object.body) ? ConfigurationVariable.fromJSON(object.body) : undefined,
-      query: Array.isArray(object?.query)
-        ? object.query.map((e: any) => URLQueryConfiguration.fromJSON(e))
-        : [],
+      query: Array.isArray(object?.query) ? object.query.map((e: any) => URLQueryConfiguration.fromJSON(e)) : [],
       upstreamAuthentication: isSet(object.upstreamAuthentication)
         ? UpstreamAuthentication.fromJSON(object.upstreamAuthentication)
         : undefined,
@@ -2892,6 +4615,37 @@ function createBaseFetchConfiguration_HeaderEntry(): FetchConfiguration_HeaderEn
 }
 
 export const FetchConfiguration_HeaderEntry = {
+  encode(message: FetchConfiguration_HeaderEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== undefined) {
+      HTTPHeader.encode(message.value, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): FetchConfiguration_HeaderEntry {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseFetchConfiguration_HeaderEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.key = reader.string();
+          break;
+        case 2:
+          message.value = HTTPHeader.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): FetchConfiguration_HeaderEntry {
     return {
       key: isSet(object.key) ? String(object.key) : "",
@@ -2923,6 +4677,43 @@ function createBaseMTLSConfiguration(): MTLSConfiguration {
 }
 
 export const MTLSConfiguration = {
+  encode(message: MTLSConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== undefined) {
+      ConfigurationVariable.encode(message.key, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.cert !== undefined) {
+      ConfigurationVariable.encode(message.cert, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.insecureSkipVerify === true) {
+      writer.uint32(24).bool(message.insecureSkipVerify);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MTLSConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMTLSConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.key = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.cert = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.insecureSkipVerify = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): MTLSConfiguration {
     return {
       key: isSet(object.key) ? ConfigurationVariable.fromJSON(object.key) : undefined,
@@ -2957,6 +4748,49 @@ function createBaseUpstreamAuthentication(): UpstreamAuthentication {
 }
 
 export const UpstreamAuthentication = {
+  encode(message: UpstreamAuthentication, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.kind !== 0) {
+      writer.uint32(8).int32(message.kind);
+    }
+    if (message.jwtConfig !== undefined) {
+      JwtUpstreamAuthenticationConfig.encode(message.jwtConfig, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.jwtWithAccessTokenExchangeConfig !== undefined) {
+      JwtUpstreamAuthenticationWithAccessTokenExchange.encode(
+        message.jwtWithAccessTokenExchangeConfig,
+        writer.uint32(26).fork(),
+      ).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): UpstreamAuthentication {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUpstreamAuthentication();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.kind = reader.int32() as any;
+          break;
+        case 2:
+          message.jwtConfig = JwtUpstreamAuthenticationConfig.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.jwtWithAccessTokenExchangeConfig = JwtUpstreamAuthenticationWithAccessTokenExchange.decode(
+            reader,
+            reader.uint32(),
+          );
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): UpstreamAuthentication {
     return {
       kind: isSet(object.kind) ? upstreamAuthenticationKindFromJSON(object.kind) : 0,
@@ -2998,6 +4832,37 @@ function createBaseJwtUpstreamAuthenticationConfig(): JwtUpstreamAuthenticationC
 }
 
 export const JwtUpstreamAuthenticationConfig = {
+  encode(message: JwtUpstreamAuthenticationConfig, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.secret !== undefined) {
+      ConfigurationVariable.encode(message.secret, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.signingMethod !== 0) {
+      writer.uint32(16).int32(message.signingMethod);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): JwtUpstreamAuthenticationConfig {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseJwtUpstreamAuthenticationConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.secret = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.signingMethod = reader.int32() as any;
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): JwtUpstreamAuthenticationConfig {
     return {
       secret: isSet(object.secret) ? ConfigurationVariable.fromJSON(object.secret) : undefined,
@@ -3030,6 +4895,46 @@ function createBaseJwtUpstreamAuthenticationWithAccessTokenExchange(): JwtUpstre
 }
 
 export const JwtUpstreamAuthenticationWithAccessTokenExchange = {
+  encode(
+    message: JwtUpstreamAuthenticationWithAccessTokenExchange,
+    writer: _m0.Writer = _m0.Writer.create(),
+  ): _m0.Writer {
+    if (message.secret !== undefined) {
+      ConfigurationVariable.encode(message.secret, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.signingMethod !== 0) {
+      writer.uint32(16).int32(message.signingMethod);
+    }
+    if (message.accessTokenExchangeEndpoint !== undefined) {
+      ConfigurationVariable.encode(message.accessTokenExchangeEndpoint, writer.uint32(26).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): JwtUpstreamAuthenticationWithAccessTokenExchange {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseJwtUpstreamAuthenticationWithAccessTokenExchange();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.secret = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.signingMethod = reader.int32() as any;
+          break;
+        case 3:
+          message.accessTokenExchangeEndpoint = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): JwtUpstreamAuthenticationWithAccessTokenExchange {
     return {
       secret: isSet(object.secret) ? ConfigurationVariable.fromJSON(object.secret) : undefined,
@@ -3073,6 +4978,43 @@ function createBaseRESTSubscriptionConfiguration(): RESTSubscriptionConfiguratio
 }
 
 export const RESTSubscriptionConfiguration = {
+  encode(message: RESTSubscriptionConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.enabled === true) {
+      writer.uint32(8).bool(message.enabled);
+    }
+    if (message.pollingIntervalMillis !== 0) {
+      writer.uint32(16).int64(message.pollingIntervalMillis);
+    }
+    if (message.skipPublishSameResponse === true) {
+      writer.uint32(24).bool(message.skipPublishSameResponse);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): RESTSubscriptionConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRESTSubscriptionConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.enabled = reader.bool();
+          break;
+        case 2:
+          message.pollingIntervalMillis = longToNumber(reader.int64() as Long);
+          break;
+        case 3:
+          message.skipPublishSameResponse = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): RESTSubscriptionConfiguration {
     return {
       enabled: isSet(object.enabled) ? Boolean(object.enabled) : false,
@@ -3106,6 +5048,37 @@ function createBaseURLQueryConfiguration(): URLQueryConfiguration {
 }
 
 export const URLQueryConfiguration = {
+  encode(message: URLQueryConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.name !== "") {
+      writer.uint32(10).string(message.name);
+    }
+    if (message.value !== "") {
+      writer.uint32(18).string(message.value);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): URLQueryConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseURLQueryConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.name = reader.string();
+          break;
+        case 2:
+          message.value = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): URLQueryConfiguration {
     return {
       name: isSet(object.name) ? String(object.name) : "",
@@ -3133,6 +5106,31 @@ function createBaseHTTPHeader(): HTTPHeader {
 }
 
 export const HTTPHeader = {
+  encode(message: HTTPHeader, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.values) {
+      ConfigurationVariable.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): HTTPHeader {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseHTTPHeader();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.values.push(ConfigurationVariable.decode(reader, reader.uint32()));
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): HTTPHeader {
     return {
       values: Array.isArray(object?.values) ? object.values.map((e: any) => ConfigurationVariable.fromJSON(e)) : [],
@@ -3161,6 +5159,37 @@ function createBaseTypeConfiguration(): TypeConfiguration {
 }
 
 export const TypeConfiguration = {
+  encode(message: TypeConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.typeName !== "") {
+      writer.uint32(10).string(message.typeName);
+    }
+    if (message.renameTo !== "") {
+      writer.uint32(18).string(message.renameTo);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): TypeConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTypeConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.typeName = reader.string();
+          break;
+        case 2:
+          message.renameTo = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): TypeConfiguration {
     return {
       typeName: isSet(object.typeName) ? String(object.typeName) : "",
@@ -3196,6 +5225,67 @@ function createBaseFieldConfiguration(): FieldConfiguration {
 }
 
 export const FieldConfiguration = {
+  encode(message: FieldConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.typeName !== "") {
+      writer.uint32(10).string(message.typeName);
+    }
+    if (message.fieldName !== "") {
+      writer.uint32(18).string(message.fieldName);
+    }
+    if (message.disableDefaultFieldMapping === true) {
+      writer.uint32(24).bool(message.disableDefaultFieldMapping);
+    }
+    for (const v of message.path) {
+      writer.uint32(34).string(v!);
+    }
+    for (const v of message.argumentsConfiguration) {
+      ArgumentConfiguration.encode(v!, writer.uint32(50).fork()).ldelim();
+    }
+    for (const v of message.requiresFields) {
+      writer.uint32(58).string(v!);
+    }
+    if (message.unescapeResponseJson === true) {
+      writer.uint32(64).bool(message.unescapeResponseJson);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): FieldConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseFieldConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.typeName = reader.string();
+          break;
+        case 2:
+          message.fieldName = reader.string();
+          break;
+        case 3:
+          message.disableDefaultFieldMapping = reader.bool();
+          break;
+        case 4:
+          message.path.push(reader.string());
+          break;
+        case 6:
+          message.argumentsConfiguration.push(ArgumentConfiguration.decode(reader, reader.uint32()));
+          break;
+        case 7:
+          message.requiresFields.push(reader.string());
+          break;
+        case 8:
+          message.unescapeResponseJson = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): FieldConfiguration {
     return {
       typeName: isSet(object.typeName) ? String(object.typeName) : "",
@@ -3203,15 +5293,11 @@ export const FieldConfiguration = {
       disableDefaultFieldMapping: isSet(object.disableDefaultFieldMapping)
         ? Boolean(object.disableDefaultFieldMapping)
         : false,
-      path: Array.isArray(object?.path)
-        ? object.path.map((e: any) => String(e))
-        : [],
+      path: Array.isArray(object?.path) ? object.path.map((e: any) => String(e)) : [],
       argumentsConfiguration: Array.isArray(object?.argumentsConfiguration)
         ? object.argumentsConfiguration.map((e: any) => ArgumentConfiguration.fromJSON(e))
         : [],
-      requiresFields: Array.isArray(object?.requiresFields)
-        ? object.requiresFields.map((e: any) => String(e))
-        : [],
+      requiresFields: Array.isArray(object?.requiresFields) ? object.requiresFields.map((e: any) => String(e)) : [],
       unescapeResponseJson: isSet(object.unescapeResponseJson) ? Boolean(object.unescapeResponseJson) : false,
     };
   },
@@ -3262,6 +5348,37 @@ function createBaseTypeField(): TypeField {
 }
 
 export const TypeField = {
+  encode(message: TypeField, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.typeName !== "") {
+      writer.uint32(10).string(message.typeName);
+    }
+    for (const v of message.fieldNames) {
+      writer.uint32(18).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): TypeField {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTypeField();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.typeName = reader.string();
+          break;
+        case 2:
+          message.fieldNames.push(reader.string());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): TypeField {
     return {
       typeName: isSet(object.typeName) ? String(object.typeName) : "",
@@ -3293,6 +5410,37 @@ function createBaseSingleTypeField(): SingleTypeField {
 }
 
 export const SingleTypeField = {
+  encode(message: SingleTypeField, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.typeName !== "") {
+      writer.uint32(10).string(message.typeName);
+    }
+    if (message.fieldName !== "") {
+      writer.uint32(18).string(message.fieldName);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): SingleTypeField {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSingleTypeField();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.typeName = reader.string();
+          break;
+        case 2:
+          message.fieldName = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): SingleTypeField {
     return {
       typeName: isSet(object.typeName) ? String(object.typeName) : "",
@@ -3320,6 +5468,55 @@ function createBaseArgumentConfiguration(): ArgumentConfiguration {
 }
 
 export const ArgumentConfiguration = {
+  encode(message: ArgumentConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.name !== "") {
+      writer.uint32(10).string(message.name);
+    }
+    if (message.sourceType !== 0) {
+      writer.uint32(16).int32(message.sourceType);
+    }
+    for (const v of message.sourcePath) {
+      writer.uint32(26).string(v!);
+    }
+    if (message.renderConfiguration !== 0) {
+      writer.uint32(32).int32(message.renderConfiguration);
+    }
+    if (message.renameTypeTo !== "") {
+      writer.uint32(42).string(message.renameTypeTo);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ArgumentConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseArgumentConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.name = reader.string();
+          break;
+        case 2:
+          message.sourceType = reader.int32() as any;
+          break;
+        case 3:
+          message.sourcePath.push(reader.string());
+          break;
+        case 4:
+          message.renderConfiguration = reader.int32() as any;
+          break;
+        case 5:
+          message.renameTypeTo = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): ArgumentConfiguration {
     return {
       name: isSet(object.name) ? String(object.name) : "",
@@ -3359,10 +5556,72 @@ export const ArgumentConfiguration = {
 };
 
 function createBaseWunderGraphConfiguration(): WunderGraphConfiguration {
-  return { api: undefined, apiId: "", environmentIds: [], dangerouslyEnableGraphQLEndpoint: false, configHash: "" };
+  return {
+    api: undefined,
+    apiId: "",
+    environmentIds: [],
+    dangerouslyEnableGraphQLEndpoint: false,
+    configHash: "",
+    enabledFeatures: undefined,
+  };
 }
 
 export const WunderGraphConfiguration = {
+  encode(message: WunderGraphConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.api !== undefined) {
+      UserDefinedApi.encode(message.api, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.apiId !== "") {
+      writer.uint32(18).string(message.apiId);
+    }
+    for (const v of message.environmentIds) {
+      writer.uint32(26).string(v!);
+    }
+    if (message.dangerouslyEnableGraphQLEndpoint === true) {
+      writer.uint32(32).bool(message.dangerouslyEnableGraphQLEndpoint);
+    }
+    if (message.configHash !== "") {
+      writer.uint32(42).string(message.configHash);
+    }
+    if (message.enabledFeatures !== undefined) {
+      EnabledFeatures.encode(message.enabledFeatures, writer.uint32(50).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): WunderGraphConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWunderGraphConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.api = UserDefinedApi.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.apiId = reader.string();
+          break;
+        case 3:
+          message.environmentIds.push(reader.string());
+          break;
+        case 4:
+          message.dangerouslyEnableGraphQLEndpoint = reader.bool();
+          break;
+        case 5:
+          message.configHash = reader.string();
+          break;
+        case 6:
+          message.enabledFeatures = EnabledFeatures.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): WunderGraphConfiguration {
     return {
       api: isSet(object.api) ? UserDefinedApi.fromJSON(object.api) : undefined,
@@ -3372,6 +5631,7 @@ export const WunderGraphConfiguration = {
         ? Boolean(object.dangerouslyEnableGraphQLEndpoint)
         : false,
       configHash: isSet(object.configHash) ? String(object.configHash) : "",
+      enabledFeatures: isSet(object.enabledFeatures) ? EnabledFeatures.fromJSON(object.enabledFeatures) : undefined,
     };
   },
 
@@ -3387,6 +5647,8 @@ export const WunderGraphConfiguration = {
     message.dangerouslyEnableGraphQLEndpoint !== undefined &&
       (obj.dangerouslyEnableGraphQLEndpoint = message.dangerouslyEnableGraphQLEndpoint);
     message.configHash !== undefined && (obj.configHash = message.configHash);
+    message.enabledFeatures !== undefined &&
+      (obj.enabledFeatures = message.enabledFeatures ? EnabledFeatures.toJSON(message.enabledFeatures) : undefined);
     return obj;
   },
 
@@ -3399,6 +5661,100 @@ export const WunderGraphConfiguration = {
     message.environmentIds = object.environmentIds?.map((e) => e) || [];
     message.dangerouslyEnableGraphQLEndpoint = object.dangerouslyEnableGraphQLEndpoint ?? false;
     message.configHash = object.configHash ?? "";
+    message.enabledFeatures = (object.enabledFeatures !== undefined && object.enabledFeatures !== null)
+      ? EnabledFeatures.fromPartial(object.enabledFeatures)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseEnabledFeatures(): EnabledFeatures {
+  return {
+    apiCount: 0,
+    schemaExtension: false,
+    customJSONScalars: false,
+    customIntScalars: false,
+    customFloatScalars: false,
+  };
+}
+
+export const EnabledFeatures = {
+  encode(message: EnabledFeatures, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.apiCount !== 0) {
+      writer.uint32(8).int32(message.apiCount);
+    }
+    if (message.schemaExtension === true) {
+      writer.uint32(16).bool(message.schemaExtension);
+    }
+    if (message.customJSONScalars === true) {
+      writer.uint32(24).bool(message.customJSONScalars);
+    }
+    if (message.customIntScalars === true) {
+      writer.uint32(32).bool(message.customIntScalars);
+    }
+    if (message.customFloatScalars === true) {
+      writer.uint32(40).bool(message.customFloatScalars);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): EnabledFeatures {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEnabledFeatures();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.apiCount = reader.int32();
+          break;
+        case 2:
+          message.schemaExtension = reader.bool();
+          break;
+        case 3:
+          message.customJSONScalars = reader.bool();
+          break;
+        case 4:
+          message.customIntScalars = reader.bool();
+          break;
+        case 5:
+          message.customFloatScalars = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): EnabledFeatures {
+    return {
+      apiCount: isSet(object.apiCount) ? Number(object.apiCount) : 0,
+      schemaExtension: isSet(object.schemaExtension) ? Boolean(object.schemaExtension) : false,
+      customJSONScalars: isSet(object.customJSONScalars) ? Boolean(object.customJSONScalars) : false,
+      customIntScalars: isSet(object.customIntScalars) ? Boolean(object.customIntScalars) : false,
+      customFloatScalars: isSet(object.customFloatScalars) ? Boolean(object.customFloatScalars) : false,
+    };
+  },
+
+  toJSON(message: EnabledFeatures): unknown {
+    const obj: any = {};
+    message.apiCount !== undefined && (obj.apiCount = Math.round(message.apiCount));
+    message.schemaExtension !== undefined && (obj.schemaExtension = message.schemaExtension);
+    message.customJSONScalars !== undefined && (obj.customJSONScalars = message.customJSONScalars);
+    message.customIntScalars !== undefined && (obj.customIntScalars = message.customIntScalars);
+    message.customFloatScalars !== undefined && (obj.customFloatScalars = message.customFloatScalars);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<EnabledFeatures>, I>>(object: I): EnabledFeatures {
+    const message = createBaseEnabledFeatures();
+    message.apiCount = object.apiCount ?? 0;
+    message.schemaExtension = object.schemaExtension ?? false;
+    message.customJSONScalars = object.customJSONScalars ?? false;
+    message.customIntScalars = object.customIntScalars ?? false;
+    message.customFloatScalars = object.customFloatScalars ?? false;
     return message;
   },
 };
@@ -3408,6 +5764,37 @@ function createBaseS3UploadProfileHooksConfiguration(): S3UploadProfileHooksConf
 }
 
 export const S3UploadProfileHooksConfiguration = {
+  encode(message: S3UploadProfileHooksConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.preUpload === true) {
+      writer.uint32(8).bool(message.preUpload);
+    }
+    if (message.postUpload === true) {
+      writer.uint32(16).bool(message.postUpload);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): S3UploadProfileHooksConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseS3UploadProfileHooksConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.preUpload = reader.bool();
+          break;
+        case 2:
+          message.postUpload = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): S3UploadProfileHooksConfiguration {
     return {
       preUpload: isSet(object.preUpload) ? Boolean(object.preUpload) : false,
@@ -3445,6 +5832,67 @@ function createBaseS3UploadProfile(): S3UploadProfile {
 }
 
 export const S3UploadProfile = {
+  encode(message: S3UploadProfile, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.requireAuthentication === true) {
+      writer.uint32(8).bool(message.requireAuthentication);
+    }
+    if (message.maxAllowedUploadSizeBytes !== 0) {
+      writer.uint32(16).int32(message.maxAllowedUploadSizeBytes);
+    }
+    if (message.maxAllowedFiles !== 0) {
+      writer.uint32(24).int32(message.maxAllowedFiles);
+    }
+    for (const v of message.allowedMimeTypes) {
+      writer.uint32(34).string(v!);
+    }
+    for (const v of message.allowedFileExtensions) {
+      writer.uint32(42).string(v!);
+    }
+    if (message.metadataJSONSchema !== "") {
+      writer.uint32(50).string(message.metadataJSONSchema);
+    }
+    if (message.hooks !== undefined) {
+      S3UploadProfileHooksConfiguration.encode(message.hooks, writer.uint32(58).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): S3UploadProfile {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseS3UploadProfile();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.requireAuthentication = reader.bool();
+          break;
+        case 2:
+          message.maxAllowedUploadSizeBytes = reader.int32();
+          break;
+        case 3:
+          message.maxAllowedFiles = reader.int32();
+          break;
+        case 4:
+          message.allowedMimeTypes.push(reader.string());
+          break;
+        case 5:
+          message.allowedFileExtensions.push(reader.string());
+          break;
+        case 6:
+          message.metadataJSONSchema = reader.string();
+          break;
+        case 7:
+          message.hooks = S3UploadProfileHooksConfiguration.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): S3UploadProfile {
     return {
       requireAuthentication: isSet(object.requireAuthentication) ? Boolean(object.requireAuthentication) : false,
@@ -3512,6 +5960,76 @@ function createBaseS3UploadConfiguration(): S3UploadConfiguration {
 }
 
 export const S3UploadConfiguration = {
+  encode(message: S3UploadConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.name !== "") {
+      writer.uint32(10).string(message.name);
+    }
+    if (message.endpoint !== undefined) {
+      ConfigurationVariable.encode(message.endpoint, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.accessKeyID !== undefined) {
+      ConfigurationVariable.encode(message.accessKeyID, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.secretAccessKey !== undefined) {
+      ConfigurationVariable.encode(message.secretAccessKey, writer.uint32(34).fork()).ldelim();
+    }
+    if (message.bucketName !== undefined) {
+      ConfigurationVariable.encode(message.bucketName, writer.uint32(42).fork()).ldelim();
+    }
+    if (message.bucketLocation !== undefined) {
+      ConfigurationVariable.encode(message.bucketLocation, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.useSSL === true) {
+      writer.uint32(56).bool(message.useSSL);
+    }
+    Object.entries(message.uploadProfiles).forEach(([key, value]) => {
+      S3UploadConfiguration_UploadProfilesEntry.encode({ key: key as any, value }, writer.uint32(66).fork()).ldelim();
+    });
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): S3UploadConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseS3UploadConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.name = reader.string();
+          break;
+        case 2:
+          message.endpoint = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.accessKeyID = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 4:
+          message.secretAccessKey = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 5:
+          message.bucketName = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 6:
+          message.bucketLocation = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 7:
+          message.useSSL = reader.bool();
+          break;
+        case 8:
+          const entry8 = S3UploadConfiguration_UploadProfilesEntry.decode(reader, reader.uint32());
+          if (entry8.value !== undefined) {
+            message.uploadProfiles[entry8.key] = entry8.value;
+          }
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): S3UploadConfiguration {
     return {
       name: isSet(object.name) ? String(object.name) : "",
@@ -3594,6 +6112,37 @@ function createBaseS3UploadConfiguration_UploadProfilesEntry(): S3UploadConfigur
 }
 
 export const S3UploadConfiguration_UploadProfilesEntry = {
+  encode(message: S3UploadConfiguration_UploadProfilesEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== undefined) {
+      S3UploadProfile.encode(message.value, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): S3UploadConfiguration_UploadProfilesEntry {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseS3UploadConfiguration_UploadProfilesEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.key = reader.string();
+          break;
+        case 2:
+          message.value = S3UploadProfile.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): S3UploadConfiguration_UploadProfilesEntry {
     return {
       key: isSet(object.key) ? String(object.key) : "",
@@ -3638,6 +6187,97 @@ function createBaseUserDefinedApi(): UserDefinedApi {
 }
 
 export const UserDefinedApi = {
+  encode(message: UserDefinedApi, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.engineConfiguration !== undefined) {
+      EngineConfiguration.encode(message.engineConfiguration, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.enableGraphqlEndpoint === true) {
+      writer.uint32(40).bool(message.enableGraphqlEndpoint);
+    }
+    for (const v of message.operations) {
+      Operation.encode(v!, writer.uint32(50).fork()).ldelim();
+    }
+    for (const v of message.invalidOperationNames) {
+      writer.uint32(130).string(v!);
+    }
+    if (message.corsConfiguration !== undefined) {
+      CorsConfiguration.encode(message.corsConfiguration, writer.uint32(58).fork()).ldelim();
+    }
+    if (message.authenticationConfig !== undefined) {
+      ApiAuthenticationConfig.encode(message.authenticationConfig, writer.uint32(66).fork()).ldelim();
+    }
+    for (const v of message.s3UploadConfiguration) {
+      S3UploadConfiguration.encode(v!, writer.uint32(74).fork()).ldelim();
+    }
+    for (const v of message.allowedHostNames) {
+      ConfigurationVariable.encode(v!, writer.uint32(90).fork()).ldelim();
+    }
+    for (const v of message.webhooks) {
+      WebhookConfiguration.encode(v!, writer.uint32(98).fork()).ldelim();
+    }
+    if (message.serverOptions !== undefined) {
+      ServerOptions.encode(message.serverOptions, writer.uint32(114).fork()).ldelim();
+    }
+    if (message.nodeOptions !== undefined) {
+      NodeOptions.encode(message.nodeOptions, writer.uint32(122).fork()).ldelim();
+    }
+    if (message.experimentalConfig !== undefined) {
+      ExperimentalConfiguration.encode(message.experimentalConfig, writer.uint32(138).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): UserDefinedApi {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUserDefinedApi();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 3:
+          message.engineConfiguration = EngineConfiguration.decode(reader, reader.uint32());
+          break;
+        case 5:
+          message.enableGraphqlEndpoint = reader.bool();
+          break;
+        case 6:
+          message.operations.push(Operation.decode(reader, reader.uint32()));
+          break;
+        case 16:
+          message.invalidOperationNames.push(reader.string());
+          break;
+        case 7:
+          message.corsConfiguration = CorsConfiguration.decode(reader, reader.uint32());
+          break;
+        case 8:
+          message.authenticationConfig = ApiAuthenticationConfig.decode(reader, reader.uint32());
+          break;
+        case 9:
+          message.s3UploadConfiguration.push(S3UploadConfiguration.decode(reader, reader.uint32()));
+          break;
+        case 11:
+          message.allowedHostNames.push(ConfigurationVariable.decode(reader, reader.uint32()));
+          break;
+        case 12:
+          message.webhooks.push(WebhookConfiguration.decode(reader, reader.uint32()));
+          break;
+        case 14:
+          message.serverOptions = ServerOptions.decode(reader, reader.uint32());
+          break;
+        case 15:
+          message.nodeOptions = NodeOptions.decode(reader, reader.uint32());
+          break;
+        case 17:
+          message.experimentalConfig = ExperimentalConfiguration.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): UserDefinedApi {
     return {
       engineConfiguration: isSet(object.engineConfiguration)
@@ -3756,6 +6396,31 @@ function createBaseExperimentalConfiguration(): ExperimentalConfiguration {
 }
 
 export const ExperimentalConfiguration = {
+  encode(message: ExperimentalConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.orm === true) {
+      writer.uint32(8).bool(message.orm);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ExperimentalConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseExperimentalConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.orm = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): ExperimentalConfiguration {
     return { orm: isSet(object.orm) ? Boolean(object.orm) : false };
   },
@@ -3778,6 +6443,37 @@ function createBaseListenerOptions(): ListenerOptions {
 }
 
 export const ListenerOptions = {
+  encode(message: ListenerOptions, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.host !== undefined) {
+      ConfigurationVariable.encode(message.host, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.port !== undefined) {
+      ConfigurationVariable.encode(message.port, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ListenerOptions {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseListenerOptions();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.host = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.port = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): ListenerOptions {
     return {
       host: isSet(object.host) ? ConfigurationVariable.fromJSON(object.host) : undefined,
@@ -3809,6 +6505,31 @@ function createBaseInternalListenerOptions(): InternalListenerOptions {
 }
 
 export const InternalListenerOptions = {
+  encode(message: InternalListenerOptions, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.port !== undefined) {
+      ConfigurationVariable.encode(message.port, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): InternalListenerOptions {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseInternalListenerOptions();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.port = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): InternalListenerOptions {
     return { port: isSet(object.port) ? ConfigurationVariable.fromJSON(object.port) : undefined };
   },
@@ -3833,6 +6554,31 @@ function createBaseNodeLogging(): NodeLogging {
 }
 
 export const NodeLogging = {
+  encode(message: NodeLogging, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.level !== undefined) {
+      ConfigurationVariable.encode(message.level, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): NodeLogging {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseNodeLogging();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.level = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): NodeLogging {
     return { level: isSet(object.level) ? ConfigurationVariable.fromJSON(object.level) : undefined };
   },
@@ -3853,6 +6599,69 @@ export const NodeLogging = {
   },
 };
 
+function createBasePrometheusOptions(): PrometheusOptions {
+  return { enabled: undefined, port: undefined };
+}
+
+export const PrometheusOptions = {
+  encode(message: PrometheusOptions, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.enabled !== undefined) {
+      ConfigurationVariable.encode(message.enabled, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.port !== undefined) {
+      ConfigurationVariable.encode(message.port, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): PrometheusOptions {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePrometheusOptions();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.enabled = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.port = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PrometheusOptions {
+    return {
+      enabled: isSet(object.enabled) ? ConfigurationVariable.fromJSON(object.enabled) : undefined,
+      port: isSet(object.port) ? ConfigurationVariable.fromJSON(object.port) : undefined,
+    };
+  },
+
+  toJSON(message: PrometheusOptions): unknown {
+    const obj: any = {};
+    message.enabled !== undefined &&
+      (obj.enabled = message.enabled ? ConfigurationVariable.toJSON(message.enabled) : undefined);
+    message.port !== undefined && (obj.port = message.port ? ConfigurationVariable.toJSON(message.port) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<PrometheusOptions>, I>>(object: I): PrometheusOptions {
+    const message = createBasePrometheusOptions();
+    message.enabled = (object.enabled !== undefined && object.enabled !== null)
+      ? ConfigurationVariable.fromPartial(object.enabled)
+      : undefined;
+    message.port = (object.port !== undefined && object.port !== null)
+      ? ConfigurationVariable.fromPartial(object.port)
+      : undefined;
+    return message;
+  },
+};
+
 function createBaseNodeOptions(): NodeOptions {
   return {
     nodeUrl: undefined,
@@ -3863,10 +6672,91 @@ function createBaseNodeOptions(): NodeOptions {
     listenInternal: undefined,
     nodeInternalUrl: undefined,
     defaultHttpProxyUrl: undefined,
+    openTelemetry: undefined,
+    prometheus: undefined,
   };
 }
 
 export const NodeOptions = {
+  encode(message: NodeOptions, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.nodeUrl !== undefined) {
+      ConfigurationVariable.encode(message.nodeUrl, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.publicNodeUrl !== undefined) {
+      ConfigurationVariable.encode(message.publicNodeUrl, writer.uint32(34).fork()).ldelim();
+    }
+    if (message.listen !== undefined) {
+      ListenerOptions.encode(message.listen, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.logger !== undefined) {
+      NodeLogging.encode(message.logger, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.defaultRequestTimeoutSeconds !== 0) {
+      writer.uint32(40).int64(message.defaultRequestTimeoutSeconds);
+    }
+    if (message.listenInternal !== undefined) {
+      InternalListenerOptions.encode(message.listenInternal, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.nodeInternalUrl !== undefined) {
+      ConfigurationVariable.encode(message.nodeInternalUrl, writer.uint32(58).fork()).ldelim();
+    }
+    if (message.defaultHttpProxyUrl !== undefined) {
+      ConfigurationVariable.encode(message.defaultHttpProxyUrl, writer.uint32(66).fork()).ldelim();
+    }
+    if (message.openTelemetry !== undefined) {
+      TelemetryOptions.encode(message.openTelemetry, writer.uint32(74).fork()).ldelim();
+    }
+    if (message.prometheus !== undefined) {
+      PrometheusOptions.encode(message.prometheus, writer.uint32(82).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): NodeOptions {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseNodeOptions();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.nodeUrl = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 4:
+          message.publicNodeUrl = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.listen = ListenerOptions.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.logger = NodeLogging.decode(reader, reader.uint32());
+          break;
+        case 5:
+          message.defaultRequestTimeoutSeconds = longToNumber(reader.int64() as Long);
+          break;
+        case 6:
+          message.listenInternal = InternalListenerOptions.decode(reader, reader.uint32());
+          break;
+        case 7:
+          message.nodeInternalUrl = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 8:
+          message.defaultHttpProxyUrl = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 9:
+          message.openTelemetry = TelemetryOptions.decode(reader, reader.uint32());
+          break;
+        case 10:
+          message.prometheus = PrometheusOptions.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): NodeOptions {
     return {
       nodeUrl: isSet(object.nodeUrl) ? ConfigurationVariable.fromJSON(object.nodeUrl) : undefined,
@@ -3885,6 +6775,8 @@ export const NodeOptions = {
       defaultHttpProxyUrl: isSet(object.defaultHttpProxyUrl)
         ? ConfigurationVariable.fromJSON(object.defaultHttpProxyUrl)
         : undefined,
+      openTelemetry: isSet(object.openTelemetry) ? TelemetryOptions.fromJSON(object.openTelemetry) : undefined,
+      prometheus: isSet(object.prometheus) ? PrometheusOptions.fromJSON(object.prometheus) : undefined,
     };
   },
 
@@ -3909,6 +6801,10 @@ export const NodeOptions = {
     message.defaultHttpProxyUrl !== undefined && (obj.defaultHttpProxyUrl = message.defaultHttpProxyUrl
       ? ConfigurationVariable.toJSON(message.defaultHttpProxyUrl)
       : undefined);
+    message.openTelemetry !== undefined &&
+      (obj.openTelemetry = message.openTelemetry ? TelemetryOptions.toJSON(message.openTelemetry) : undefined);
+    message.prometheus !== undefined &&
+      (obj.prometheus = message.prometheus ? PrometheusOptions.toJSON(message.prometheus) : undefined);
     return obj;
   },
 
@@ -3936,6 +6832,103 @@ export const NodeOptions = {
     message.defaultHttpProxyUrl = (object.defaultHttpProxyUrl !== undefined && object.defaultHttpProxyUrl !== null)
       ? ConfigurationVariable.fromPartial(object.defaultHttpProxyUrl)
       : undefined;
+    message.openTelemetry = (object.openTelemetry !== undefined && object.openTelemetry !== null)
+      ? TelemetryOptions.fromPartial(object.openTelemetry)
+      : undefined;
+    message.prometheus = (object.prometheus !== undefined && object.prometheus !== null)
+      ? PrometheusOptions.fromPartial(object.prometheus)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseTelemetryOptions(): TelemetryOptions {
+  return { enabled: undefined, exporterHttpEndpoint: undefined, sampler: undefined, authToken: undefined };
+}
+
+export const TelemetryOptions = {
+  encode(message: TelemetryOptions, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.enabled !== undefined) {
+      ConfigurationVariable.encode(message.enabled, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.exporterHttpEndpoint !== undefined) {
+      ConfigurationVariable.encode(message.exporterHttpEndpoint, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.sampler !== undefined) {
+      ConfigurationVariable.encode(message.sampler, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.authToken !== undefined) {
+      ConfigurationVariable.encode(message.authToken, writer.uint32(34).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): TelemetryOptions {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTelemetryOptions();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.enabled = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.exporterHttpEndpoint = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.sampler = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 4:
+          message.authToken = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TelemetryOptions {
+    return {
+      enabled: isSet(object.enabled) ? ConfigurationVariable.fromJSON(object.enabled) : undefined,
+      exporterHttpEndpoint: isSet(object.exporterHttpEndpoint)
+        ? ConfigurationVariable.fromJSON(object.exporterHttpEndpoint)
+        : undefined,
+      sampler: isSet(object.sampler) ? ConfigurationVariable.fromJSON(object.sampler) : undefined,
+      authToken: isSet(object.authToken) ? ConfigurationVariable.fromJSON(object.authToken) : undefined,
+    };
+  },
+
+  toJSON(message: TelemetryOptions): unknown {
+    const obj: any = {};
+    message.enabled !== undefined &&
+      (obj.enabled = message.enabled ? ConfigurationVariable.toJSON(message.enabled) : undefined);
+    message.exporterHttpEndpoint !== undefined && (obj.exporterHttpEndpoint = message.exporterHttpEndpoint
+      ? ConfigurationVariable.toJSON(message.exporterHttpEndpoint)
+      : undefined);
+    message.sampler !== undefined &&
+      (obj.sampler = message.sampler ? ConfigurationVariable.toJSON(message.sampler) : undefined);
+    message.authToken !== undefined &&
+      (obj.authToken = message.authToken ? ConfigurationVariable.toJSON(message.authToken) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<TelemetryOptions>, I>>(object: I): TelemetryOptions {
+    const message = createBaseTelemetryOptions();
+    message.enabled = (object.enabled !== undefined && object.enabled !== null)
+      ? ConfigurationVariable.fromPartial(object.enabled)
+      : undefined;
+    message.exporterHttpEndpoint = (object.exporterHttpEndpoint !== undefined && object.exporterHttpEndpoint !== null)
+      ? ConfigurationVariable.fromPartial(object.exporterHttpEndpoint)
+      : undefined;
+    message.sampler = (object.sampler !== undefined && object.sampler !== null)
+      ? ConfigurationVariable.fromPartial(object.sampler)
+      : undefined;
+    message.authToken = (object.authToken !== undefined && object.authToken !== null)
+      ? ConfigurationVariable.fromPartial(object.authToken)
+      : undefined;
     return message;
   },
 };
@@ -3945,6 +6938,31 @@ function createBaseServerLogging(): ServerLogging {
 }
 
 export const ServerLogging = {
+  encode(message: ServerLogging, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.level !== undefined) {
+      ConfigurationVariable.encode(message.level, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ServerLogging {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseServerLogging();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.level = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): ServerLogging {
     return { level: isSet(object.level) ? ConfigurationVariable.fromJSON(object.level) : undefined };
   },
@@ -3970,6 +6988,43 @@ function createBaseServerOptions(): ServerOptions {
 }
 
 export const ServerOptions = {
+  encode(message: ServerOptions, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.serverUrl !== undefined) {
+      ConfigurationVariable.encode(message.serverUrl, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.listen !== undefined) {
+      ListenerOptions.encode(message.listen, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.logger !== undefined) {
+      ServerLogging.encode(message.logger, writer.uint32(26).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ServerOptions {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseServerOptions();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.serverUrl = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.listen = ListenerOptions.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.logger = ServerLogging.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): ServerOptions {
     return {
       serverUrl: isSet(object.serverUrl) ? ConfigurationVariable.fromJSON(object.serverUrl) : undefined,
@@ -4007,6 +7062,43 @@ function createBaseWebhookConfiguration(): WebhookConfiguration {
 }
 
 export const WebhookConfiguration = {
+  encode(message: WebhookConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.name !== "") {
+      writer.uint32(10).string(message.name);
+    }
+    if (message.filePath !== "") {
+      writer.uint32(18).string(message.filePath);
+    }
+    if (message.verifier !== undefined) {
+      WebhookVerifier.encode(message.verifier, writer.uint32(26).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): WebhookConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWebhookConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.name = reader.string();
+          break;
+        case 2:
+          message.filePath = reader.string();
+          break;
+        case 3:
+          message.verifier = WebhookVerifier.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): WebhookConfiguration {
     return {
       name: isSet(object.name) ? String(object.name) : "",
@@ -4040,6 +7132,49 @@ function createBaseWebhookVerifier(): WebhookVerifier {
 }
 
 export const WebhookVerifier = {
+  encode(message: WebhookVerifier, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.kind !== 0) {
+      writer.uint32(8).int32(message.kind);
+    }
+    if (message.secret !== undefined) {
+      ConfigurationVariable.encode(message.secret, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.signatureHeader !== "") {
+      writer.uint32(26).string(message.signatureHeader);
+    }
+    if (message.signatureHeaderPrefix !== "") {
+      writer.uint32(34).string(message.signatureHeaderPrefix);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): WebhookVerifier {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWebhookVerifier();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.kind = reader.int32() as any;
+          break;
+        case 2:
+          message.secret = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.signatureHeader = reader.string();
+          break;
+        case 4:
+          message.signatureHeaderPrefix = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): WebhookVerifier {
     return {
       kind: isSet(object.kind) ? webhookVerifierKindFromJSON(object.kind) : 0,
@@ -4083,14 +7218,67 @@ function createBaseCorsConfiguration(): CorsConfiguration {
 }
 
 export const CorsConfiguration = {
+  encode(message: CorsConfiguration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.allowedOrigins) {
+      ConfigurationVariable.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    for (const v of message.allowedMethods) {
+      writer.uint32(18).string(v!);
+    }
+    for (const v of message.allowedHeaders) {
+      writer.uint32(26).string(v!);
+    }
+    for (const v of message.exposedHeaders) {
+      writer.uint32(34).string(v!);
+    }
+    if (message.maxAge !== 0) {
+      writer.uint32(40).int64(message.maxAge);
+    }
+    if (message.allowCredentials === true) {
+      writer.uint32(48).bool(message.allowCredentials);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): CorsConfiguration {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCorsConfiguration();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.allowedOrigins.push(ConfigurationVariable.decode(reader, reader.uint32()));
+          break;
+        case 2:
+          message.allowedMethods.push(reader.string());
+          break;
+        case 3:
+          message.allowedHeaders.push(reader.string());
+          break;
+        case 4:
+          message.exposedHeaders.push(reader.string());
+          break;
+        case 5:
+          message.maxAge = longToNumber(reader.int64() as Long);
+          break;
+        case 6:
+          message.allowCredentials = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): CorsConfiguration {
     return {
       allowedOrigins: Array.isArray(object?.allowedOrigins)
         ? object.allowedOrigins.map((e: any) => ConfigurationVariable.fromJSON(e))
         : [],
-      allowedMethods: Array.isArray(object?.allowedMethods)
-        ? object.allowedMethods.map((e: any) => String(e))
-        : [],
+      allowedMethods: Array.isArray(object?.allowedMethods) ? object.allowedMethods.map((e: any) => String(e)) : [],
       allowedHeaders: Array.isArray(object?.allowedHeaders) ? object.allowedHeaders.map((e: any) => String(e)) : [],
       exposedHeaders: Array.isArray(object?.exposedHeaders) ? object.exposedHeaders.map((e: any) => String(e)) : [],
       maxAge: isSet(object.maxAge) ? Number(object.maxAge) : 0,
@@ -4148,6 +7336,55 @@ function createBaseConfigurationVariable(): ConfigurationVariable {
 }
 
 export const ConfigurationVariable = {
+  encode(message: ConfigurationVariable, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.kind !== 0) {
+      writer.uint32(8).int32(message.kind);
+    }
+    if (message.staticVariableContent !== "") {
+      writer.uint32(18).string(message.staticVariableContent);
+    }
+    if (message.environmentVariableName !== "") {
+      writer.uint32(26).string(message.environmentVariableName);
+    }
+    if (message.environmentVariableDefaultValue !== "") {
+      writer.uint32(34).string(message.environmentVariableDefaultValue);
+    }
+    if (message.placeholderVariableName !== "") {
+      writer.uint32(42).string(message.placeholderVariableName);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ConfigurationVariable {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseConfigurationVariable();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.kind = reader.int32() as any;
+          break;
+        case 2:
+          message.staticVariableContent = reader.string();
+          break;
+        case 3:
+          message.environmentVariableName = reader.string();
+          break;
+        case 4:
+          message.environmentVariableDefaultValue = reader.string();
+          break;
+        case 5:
+          message.placeholderVariableName = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): ConfigurationVariable {
     return {
       kind: isSet(object.kind) ? configurationVariableKindFromJSON(object.kind) : 0,
@@ -4187,6 +7424,61 @@ function createBaseBuildInfo(): BuildInfo {
 }
 
 export const BuildInfo = {
+  encode(message: BuildInfo, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.success === true) {
+      writer.uint32(8).bool(message.success);
+    }
+    if (message.sdk !== undefined) {
+      BuildInfoVersion.encode(message.sdk, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.wunderctl !== undefined) {
+      BuildInfoVersion.encode(message.wunderctl, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.node !== undefined) {
+      BuildInfoVersion.encode(message.node, writer.uint32(34).fork()).ldelim();
+    }
+    if (message.os !== undefined) {
+      BuildInfoOS.encode(message.os, writer.uint32(42).fork()).ldelim();
+    }
+    if (message.stats !== undefined) {
+      BuildInfoStats.encode(message.stats, writer.uint32(50).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BuildInfo {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBuildInfo();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.success = reader.bool();
+          break;
+        case 2:
+          message.sdk = BuildInfoVersion.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.wunderctl = BuildInfoVersion.decode(reader, reader.uint32());
+          break;
+        case 4:
+          message.node = BuildInfoVersion.decode(reader, reader.uint32());
+          break;
+        case 5:
+          message.os = BuildInfoOS.decode(reader, reader.uint32());
+          break;
+        case 6:
+          message.stats = BuildInfoStats.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): BuildInfo {
     return {
       success: isSet(object.success) ? Boolean(object.success) : false,
@@ -4235,6 +7527,31 @@ function createBaseBuildInfoVersion(): BuildInfoVersion {
 }
 
 export const BuildInfoVersion = {
+  encode(message: BuildInfoVersion, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.version !== "") {
+      writer.uint32(10).string(message.version);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BuildInfoVersion {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBuildInfoVersion();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.version = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): BuildInfoVersion {
     return { version: isSet(object.version) ? String(object.version) : "" };
   },
@@ -4257,6 +7574,55 @@ function createBaseBuildInfoOS(): BuildInfoOS {
 }
 
 export const BuildInfoOS = {
+  encode(message: BuildInfoOS, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.type !== "") {
+      writer.uint32(10).string(message.type);
+    }
+    if (message.platform !== "") {
+      writer.uint32(18).string(message.platform);
+    }
+    if (message.arch !== "") {
+      writer.uint32(26).string(message.arch);
+    }
+    if (message.version !== "") {
+      writer.uint32(34).string(message.version);
+    }
+    if (message.release !== "") {
+      writer.uint32(42).string(message.release);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BuildInfoOS {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBuildInfoOS();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.type = reader.string();
+          break;
+        case 2:
+          message.platform = reader.string();
+          break;
+        case 3:
+          message.arch = reader.string();
+          break;
+        case 4:
+          message.version = reader.string();
+          break;
+        case 5:
+          message.release = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): BuildInfoOS {
     return {
       type: isSet(object.type) ? String(object.type) : "",
@@ -4299,6 +7665,55 @@ function createBaseBuildInfoStats(): BuildInfoStats {
 }
 
 export const BuildInfoStats = {
+  encode(message: BuildInfoStats, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.totalApis !== 0) {
+      writer.uint32(8).int32(message.totalApis);
+    }
+    if (message.totalOperations !== 0) {
+      writer.uint32(16).int32(message.totalOperations);
+    }
+    if (message.totalWebhooks !== 0) {
+      writer.uint32(24).int32(message.totalWebhooks);
+    }
+    if (message.hasAuthenticationProvider === true) {
+      writer.uint32(32).bool(message.hasAuthenticationProvider);
+    }
+    if (message.hasUploadProvider === true) {
+      writer.uint32(40).bool(message.hasUploadProvider);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BuildInfoStats {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBuildInfoStats();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.totalApis = reader.int32();
+          break;
+        case 2:
+          message.totalOperations = reader.int32();
+          break;
+        case 3:
+          message.totalWebhooks = reader.int32();
+          break;
+        case 4:
+          message.hasAuthenticationProvider = reader.bool();
+          break;
+        case 5:
+          message.hasUploadProvider = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
   fromJSON(object: any): BuildInfoStats {
     return {
       totalApis: isSet(object.totalApis) ? Number(object.totalApis) : 0,
@@ -4362,6 +7777,18 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function longToNumber(long: Long): number {
+  if (long.gt(Number.MAX_SAFE_INTEGER)) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  return long.toNumber();
+}
+
+if (_m0.util.Long !== Long) {
+  _m0.util.Long = Long as any;
+  _m0.configure();
+}
 
 function isObject(value: any): boolean {
   return typeof value === "object" && value !== null;

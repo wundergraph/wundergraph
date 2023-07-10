@@ -7,6 +7,7 @@ on:
     paths:
       - 'testapps/**/*'
       - 'packages/**/*'
+      - '.github/actions/node/action.yaml'
       - '.github/workflows/packages-ci.yaml'
 
   pull_request:
@@ -78,7 +79,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run testsuite
-        run: pnpm test:suite
+        run: pnpm test:suite:ci
 
       - name: Determine changed files
         id: changed

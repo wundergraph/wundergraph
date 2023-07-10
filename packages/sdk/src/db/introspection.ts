@@ -1,9 +1,9 @@
 import { wunderctl } from '../wunderctlexec';
 import { FieldDefinitionNode, InputValueDefinitionNode, Kind, parse, parseType, print, TypeNode, visit } from 'graphql';
-import { DatabaseIntrospection, ReplaceCustomScalarTypeFieldConfiguration } from '../definition';
+import { DatabaseIntrospection } from '../definition';
 import { SingleTypeField } from '@wundergraph/protobuf';
 import { DMMF } from '@prisma/generator-helper';
-import { NamedTypeNode } from 'graphql/language/ast';
+import { NamedTypeNode, ObjectTypeDefinitionNode } from 'graphql/language/ast';
 import { startCase } from 'lodash';
 import * as fs from 'fs';
 import hash from 'object-hash';
@@ -11,6 +11,10 @@ import path from 'path';
 import { resolveVariable } from '../configure/variables';
 import { Logger } from '../logger';
 import { DatabaseSchema, prisma } from './types';
+import {
+	getCustomScalarReplacementsByParent,
+	handleScalarReplacementForChild,
+} from '../transformations/replaceCustomScalars';
 
 export interface PrismaDatabaseIntrospectionResult {
 	success: boolean;
@@ -177,6 +181,16 @@ const listInputFields = [
 	'delete',
 ];
 
+export const nodeTypeIsList = (node: TypeNode): boolean => {
+	if (node.kind === Kind.LIST_TYPE) {
+		return true;
+	}
+	if (node.kind === Kind.NON_NULL_TYPE) {
+		return nodeTypeIsList(node.type);
+	}
+	return false;
+};
+
 export const cleanupPrismaSchema = (
 	introspection: DatabaseIntrospection,
 	result: PrismaDatabaseIntrospectionResult
@@ -186,24 +200,25 @@ export const cleanupPrismaSchema = (
 	}
 	result.graphql_schema = result.graphql_schema + rowSchema;
 
-	let insideCustomScalarType = false;
-	let insideCustomScalarField = false;
-	let replaceCustomScalarType: ReplaceCustomScalarTypeFieldConfiguration | undefined;
-	let currentTypeName = '';
-	let replaceWith = '';
+	const replacementsByParentName = getCustomScalarReplacementsByParent(
+		introspection.replaceCustomScalarTypeFields || []
+	);
+	const replacementsByInterfaceName = new Map<string, Map<string, string>>();
+	let customScalarReplacementName = '';
 	let currentInputObjectTypeName = '';
+	let currentValidParentTypeName = '';
+	let currentParentInterfaces: string[] = [];
+	const replacementScalars: Set<SingleTypeField> = new Set<SingleTypeField>();
+	let currentObjectDefinition: ObjectTypeDefinitionNode | undefined;
+	let currentFieldDefinition: FieldDefinitionNode | undefined;
 
 	const document = parse(result.graphql_schema);
 	const cleaned = visit(document, {
 		ObjectTypeDefinition: {
 			enter: (node) => {
-				introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
-					if (node.name.value.startsWith(replace.entityName)) {
-						insideCustomScalarType = true;
-						currentTypeName = node.name.value;
-					}
-				});
-				if (node.name.value === 'Mutation') {
+				currentObjectDefinition = node;
+				const nodeName = node.name.value;
+				if (nodeName === 'Mutation') {
 					// we don't like the prisma schema using just JSON, so we rewrite the fields
 					return {
 						...node,
@@ -213,7 +228,7 @@ export const cleanupPrismaSchema = (
 						],
 					};
 				}
-				if (node.name.value === 'Query') {
+				if (nodeName === 'Query') {
 					// adding raw query fields to query instead of mutation (as prisma does)
 					// we're rewriting it later back to Mutation in the go engine
 					return {
@@ -221,63 +236,61 @@ export const cleanupPrismaSchema = (
 						fields: [...(node.fields || []), queryRawRowField(), queryRawJsonField()],
 					};
 				}
+				if (replacementsByParentName.get(nodeName)) {
+					const interfaces = node.interfaces;
+					if (interfaces) {
+						// Keep record of the implemented interfaces until a scalar is replaced
+						currentParentInterfaces = interfaces.map((i) => i.name.value);
+					}
+					currentValidParentTypeName = nodeName;
+				}
 			},
 			leave: () => {
-				insideCustomScalarType = false;
-				replaceCustomScalarType = undefined;
+				currentObjectDefinition = undefined;
+				currentValidParentTypeName = '';
+				customScalarReplacementName = '';
+				currentParentInterfaces = [];
 			},
 		},
 		FieldDefinition: {
 			enter: (node) => {
-				if (insideCustomScalarType) {
-					introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
-						if (node.name.value.match(replace.fieldName)) {
-							insideCustomScalarField = true;
-							replaceCustomScalarType = replace;
-							replaceWith = replace.responseTypeReplacement;
-						}
-					});
-
-					if (insideCustomScalarField) {
-						if (!result.jsonTypeFields.some((f) => f.typeName === currentTypeName && f.fieldName === node.name.value)) {
-							result.jsonTypeFields.push({
-								typeName: currentTypeName,
-								fieldName: node.name.value,
-							});
-						}
-					}
-				}
+				currentFieldDefinition = node;
+				customScalarReplacementName = handleScalarReplacementForChild(
+					node,
+					replacementsByParentName,
+					currentValidParentTypeName,
+					replacementScalars,
+					undefined,
+					currentParentInterfaces,
+					replacementsByInterfaceName
+				);
 			},
-			leave: () => {
-				insideCustomScalarField = false;
+			leave: (_) => {
+				currentFieldDefinition = undefined;
+				customScalarReplacementName = '';
 			},
 		},
 		InputObjectTypeDefinition: {
 			enter: (node) => {
 				currentInputObjectTypeName = node.name.value;
-				introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
-					if (node.name.value.startsWith(replace.entityName)) {
-						insideCustomScalarType = true;
-						currentTypeName = node.name.value;
-					}
-				});
+				if (replacementsByParentName.get(currentInputObjectTypeName)) {
+					currentValidParentTypeName = currentInputObjectTypeName;
+				}
 			},
 			leave: () => {
-				insideCustomScalarType = false;
-				replaceCustomScalarType = undefined;
+				currentValidParentTypeName = '';
+				customScalarReplacementName = '';
+				currentInputObjectTypeName = '';
 			},
 		},
 		InputValueDefinition: {
 			enter: (node) => {
-				if (insideCustomScalarType) {
-					introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
-						if (node.name.value.match(replace.fieldName) && replace.inputTypeReplacement) {
-							insideCustomScalarField = true;
-							replaceCustomScalarType = replace;
-							replaceWith = replace.inputTypeReplacement;
-						}
-					});
-				}
+				customScalarReplacementName = handleScalarReplacementForChild(
+					node,
+					replacementsByParentName,
+					currentValidParentTypeName,
+					replacementScalars
+				);
 
 				if (listInputFields.includes(node.name.value)) {
 					// potential list input field
@@ -301,9 +314,36 @@ export const cleanupPrismaSchema = (
 						return modified;
 					}
 				}
+
+				// Prisma accepts both a list and a single instance to *Many* methods and the DMMF
+				// declares the argument type with both types. However, the generated GraphQL schema
+				// by Prisma picks only the first of those types which, to make matters worse, is
+				// not deterministic. Make sure that we only make the argument type a list if it wasn't
+				// a list before.
+				if (currentObjectDefinition && currentFieldDefinition && !nodeTypeIsList(node.type)) {
+					const dmmfObject = result?.dmmf?.schema?.outputObjectTypes?.prisma.find(
+						(x) => x.name === currentObjectDefinition?.name.value
+					);
+					const dmmfField = dmmfObject?.fields.find((x) => x.name === currentFieldDefinition?.name.value);
+					const dmmfArg = dmmfField?.args.find((x) => x.name === node.name.value);
+					const isList = dmmfArg?.inputTypes.find((arg) => arg.isList === true);
+					if (isList) {
+						let type: TypeNode;
+						if (node.type.kind === Kind.NON_NULL_TYPE) {
+							type = parseType(`[${print(node.type.type)}]!`);
+						} else {
+							type = parseType(`[${print(node.type)}]`);
+						}
+						const modified: InputValueDefinitionNode = {
+							...node,
+							type,
+						};
+						return modified;
+					}
+				}
 			},
 			leave: () => {
-				insideCustomScalarField = false;
+				customScalarReplacementName = '';
 			},
 		},
 		NamedType: (node) => {
@@ -326,16 +366,19 @@ export const cleanupPrismaSchema = (
 				};
 			}
 			if (node.name.value === 'Json' || node.name.value === 'JsonNullValueInput') {
-				if (result.interpolateVariableDefinitionAsJSON.indexOf(replaceWith) === -1) {
-					result.interpolateVariableDefinitionAsJSON.push(replaceWith);
+				if (
+					customScalarReplacementName &&
+					result.interpolateVariableDefinitionAsJSON.indexOf(customScalarReplacementName) === -1
+				) {
+					result.interpolateVariableDefinitionAsJSON.push(customScalarReplacementName);
 				}
 
-				if (insideCustomScalarField && insideCustomScalarType && replaceCustomScalarType) {
+				if (customScalarReplacementName) {
 					return {
 						...node,
 						name: {
 							...node.name,
-							value: replaceWith,
+							value: customScalarReplacementName,
 						},
 					};
 				}
@@ -369,7 +412,51 @@ export const cleanupPrismaSchema = (
 			}
 		},
 	});
-	return print(cleaned);
+
+	for (const replacementScalar of replacementScalars) {
+		result.jsonTypeFields.push(replacementScalar);
+	}
+
+	if (replacementsByInterfaceName.size < 1) {
+		return print(cleaned);
+	}
+
+	const cleanedWithInterfaces = visit(cleaned, {
+		InterfaceTypeDefinition: {
+			enter: (node) => {
+				if (replacementsByInterfaceName.get(node.name.value)) {
+					currentValidParentTypeName = node.name.value;
+				} else {
+					// Skip this parent
+					return false;
+				}
+			},
+			leave: (_) => {
+				currentValidParentTypeName = '';
+				customScalarReplacementName = '';
+			},
+		},
+		FieldDefinition: {
+			enter: (node) => {
+				customScalarReplacementName = handleScalarReplacementForChild(
+					node,
+					replacementsByInterfaceName,
+					currentValidParentTypeName,
+					replacementScalars
+				);
+			},
+			leave: (_) => {
+				customScalarReplacementName = '';
+			},
+		},
+		NamedType: (node) => {
+			if (customScalarReplacementName) {
+				return { ...node, name: { ...node.name, value: customScalarReplacementName } };
+			}
+		},
+	});
+
+	return print(cleanedWithInterfaces);
 };
 
 const queryRawRowField = (): FieldDefinitionNode => ({

@@ -7,8 +7,8 @@ export default configureWunderGraphServer(() => ({
 	hooks: {
 		queries: {
 			Weather: {
-				preResolve: async (hook) => {
-					hook.log.info('preResolve hook for Weather');
+				preResolve: async ({ log, context }) => {
+					log.info('preResolve hook for Weather');
 				},
 			},
 		},

@@ -128,6 +128,22 @@ if (someType.__typename === 'A') {
 }
 ```
 
+### Add headers
+
+You can add headers to your ORM requests by using the `withHeaders` method. For example:
+
+```typescript
+const result = await graph
+  .withHeaders({
+    Authorization: 'Bearer token',
+  })
+  .from('people')
+  .query('user')
+  .select('id', 'firstName', 'friends.firstName', 'friends.lastName')
+  .where({ id: 'abc', fiends: { limit: 1 } })
+  .exec();
+```
+
 ### Interface Types
 
 An [interface](https://spec.graphql.org/October2021/#sec-Interfaces) defines a common set of properties that multiple objects can adhere to. For example, a `Query.node(id: ID!)` API (under the `foo` namespace) could be accessed like so:

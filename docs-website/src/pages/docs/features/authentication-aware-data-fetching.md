@@ -15,7 +15,7 @@ With that in mind, why are frameworks not offering an easy way to make data fetc
 WunderGraph allows you to configure in a declarative way if Operations are for anonymous users or not.
 Once configured, the generated client is fully aware of this and updates the UI accordingly.
 
-Let's have a look at a common configurion.
+Let's have a look at a common configuration.
 
 ```typescript
 const operations: ConfigureOperations = {

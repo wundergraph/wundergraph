@@ -1,4 +1,7 @@
-import fetch from 'cross-fetch';
+import { SpanKind, Tracer, trace, Context, propagation, Span } from '@opentelemetry/api';
+import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
+// Web API compatible fetch API for nodejs.
+import { fetch } from '@whatwg-node/fetch';
 import {
 	Client,
 	ClientConfig,
@@ -8,6 +11,10 @@ import {
 	QueryRequestOptions,
 	SubscriptionRequestOptions,
 } from '../client';
+import { Attributes, Components } from './trace/attributes';
+import { attachErrorToSpan, setStatusFromResponseCode } from './trace/util';
+import { ClientRequest } from './types';
+import { encodeRawClientRequest, forwardedHeaders } from './server';
 
 export interface Operation<Input extends object, Response> {
 	input: Input;
@@ -25,7 +32,12 @@ export interface Options {
 }
 
 export interface OperationsClientConfig extends Omit<ClientConfig, 'csrfEnabled'> {
-	clientRequest: any;
+	/**
+	 * raw JSON encoded client request
+	 */
+	clientRequest: ClientRequest;
+	tracer?: Tracer;
+	traceContext?: Context;
 }
 
 export type InternalOperation = {
@@ -47,18 +59,33 @@ export type InternalOperationsDefinition<
 	subscriptions: Subscriptions;
 };
 
+/**
+ * This client is used to execute custom operations on the Hooks server (server side only).
+ * The implementation is based on the `Client` class which is used on the web and server side.
+ * The implementation is an implementation detail and should not be used directly as a public API.
+ */
 export class OperationsClient<
 	Operations extends InternalOperationsDefinition = InternalOperationsDefinition
 > extends Client {
 	protected readonly csrfEnabled = false;
 
 	protected readonly clientRequest: any;
+	protected readonly tracer?: Tracer;
+	protected readonly traceContext?: Context;
 
 	constructor(options: OperationsClientConfig) {
 		const { clientRequest, customFetch = fetch, ...rest } = options;
-		super(rest);
+
+		super({
+			// fetch compatible but not the exact same type
+			customFetch: customFetch as any,
+			...rest,
+		});
 
 		this.clientRequest = clientRequest;
+		Object.assign(this.baseHeaders, forwardedHeaders(clientRequest));
+		this.tracer = options.tracer;
+		this.traceContext = options.traceContext;
 	}
 
 	protected operationUrl(operationName: string) {
@@ -87,14 +114,17 @@ export class OperationsClient<
 		options: OperationName extends string ? QueryRequestOptions<OperationName, Input> : OperationRequestOptions
 	): Promise<ClientResponse<TResponse['data'], TResponse['error']>> => {
 		const searchParams = this.searchParams();
-		const params: any = { input: options.input, __wg: { clientRequest: this.clientRequest } };
+		const params: any = {
+			input: options.input,
+			__wg: { clientRequest: encodeRawClientRequest(this.clientRequest, this.options.extraHeaders) },
+		};
 
 		if (options.subscribeOnce) {
 			searchParams.set('wg_subscribe_once', '');
 		}
 
 		const url = this.addUrlParams(this.operationUrl(options.operationName), searchParams);
-		const res = await this.fetchJson(url, {
+		const res = await this.makeRequest(url, {
 			method: 'POST',
 			body: this.stringifyInput(params),
 			signal: options.abortSignal,
@@ -102,6 +132,57 @@ export class OperationsClient<
 
 		return this.fetchResponseToClientResponse(res);
 	};
+
+	protected async makeRequest(url: string, init: RequestInit = {}) {
+		const method = init.method;
+		const spanName = `OperationsClient ${method}`;
+		let span: Span | undefined;
+
+		// Ensure that we have a headers object to inject into
+		init.headers = {
+			...init.headers,
+		};
+
+		if (this.traceContext && this.tracer) {
+			span = this.tracer.startSpan(
+				spanName,
+				{
+					kind: SpanKind.CLIENT,
+					attributes: {
+						[SemanticAttributes.HTTP_METHOD]: method,
+						[SemanticAttributes.HTTP_URL]: url,
+						[Attributes.WG_COMPONENT_NAME]: Components.OPERATIONS_CLIENT,
+					},
+				},
+				this.traceContext
+			);
+			// Inject the span context into the headers
+			propagation.inject(trace.setSpan(this.traceContext, span), init.headers);
+		}
+
+		try {
+			const res = await this.fetchJson(url, init);
+
+			if (span) {
+				setStatusFromResponseCode(span, res.status);
+				span.setAttributes({
+					[SemanticAttributes.HTTP_STATUS_CODE]: res.status,
+					[SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH]: res.headers.get('content-length') ?? 0,
+				});
+			}
+
+			return res;
+		} catch (err: any) {
+			if (span) {
+				// Mark the request as errored and attach information about the error
+				attachErrorToSpan(span, err);
+			}
+			// Rethrow the error, we don't want to change the error handling
+			throw err;
+		} finally {
+			span?.end();
+		}
+	}
 
 	public mutate = async <
 		OperationName extends Extract<keyof Operations['mutations'], string>,
@@ -142,7 +223,9 @@ export class OperationsClient<
 		return sub as any;
 	};
 
-	protected async fetchSubscription<Data = any, Error = any>(subscription: SubscriptionRequestOptions) {
+	protected async fetchSubscription<Data = any, Error = any>(
+		subscription: SubscriptionRequestOptions
+	): Promise<Response> {
 		const searchParams = this.searchParams();
 		const params: any = { input: subscription.input, __wg: { clientRequest: this.clientRequest } };
 
@@ -151,7 +234,7 @@ export class OperationsClient<
 		}
 
 		const url = this.addUrlParams(this.operationUrl(subscription.operationName), searchParams);
-		return await this.fetchJson(url, {
+		return await this.makeRequest(url, {
 			method: 'POST',
 			body: this.stringifyInput(params),
 			signal: subscription.abortSignal,
