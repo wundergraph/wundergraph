@@ -131,9 +131,13 @@ export const runHookConfigGenerated = async ({ config }: { config: WunderGraphCo
 
 interface HookContext {
 	request: Request;
+	operation: {
+		name: string;
+		type: 'query' | 'mutation' | 'subscription';
+	};
 }
 
-export const runHookHttpTransport = async ({
+export const runHookHttpOriginTransport = async ({
 	config,
 	context,
 }: {

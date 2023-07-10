@@ -19,6 +19,7 @@ import { trace } from '@opentelemetry/api';
 import { Attributes } from '../trace/attributes';
 import { attachErrorToSpan } from '../trace/util';
 import { WunderGraphIntegration } from '../../integrations/types';
+import { runHookHttpOriginTransport } from '../../integrations/hooks';
 
 const maximumRecursionLimit = 16;
 
@@ -300,20 +301,36 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		{ config: { kind: 'global-hook', category: 'httpTransport', hookName: onOriginTransportHookName } },
 		async (request, reply) => {
 			reply.type('application/json');
-			if (!onOriginTransportHandler) {
-				request.log.error({ hook: onOriginTransportHookName }, 'no handler for hook');
-				reply.code(500);
-				return;
-			}
+			// @TODO disable when EE license is not found?
+			// if (!onOriginTransportHandler) {
+			// 	request.log.error({ hook: onOriginTransportHookName }, 'no handler for hook');
+			// 	reply.code(500);
+			// 	return;
+			// }
 			let result: Response | null | undefined;
 			try {
-				result = await onOriginTransportHandler({
-					...requestContext(request),
-					operation: {
-						name: request.body.operationName,
-						type: request.body.operationType,
+				// result = await onOriginTransportHandler({
+				// 	...requestContext(request),
+				// 	operation: {
+				// 		name: request.body.operationName,
+				// 		type: request.body.operationType,
+				// 	},
+				// 	request: requestFromWunderGraphRequest(request.body.request),
+				// });
+
+				// @TODO these should only execute for the matched routes
+				// Instead of having to run the route matching again here, we could
+				// pass a hash of the match config.
+				runHookHttpOriginTransport({
+					config,
+					context: {
+						...requestContext(request),
+						operation: {
+							name: request.body.operationName,
+							type: request.body.operationType,
+						},
+						request: requestFromWunderGraphRequest(request.body.request),
 					},
-					request: requestFromWunderGraphRequest(request.body.request),
 				});
 			} catch (err) {
 				// Mark the request as errored and attach information about the error

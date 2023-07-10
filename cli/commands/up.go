@@ -575,10 +575,7 @@ import server from '../wundergraph.server';
 
 createWunderGraphApplication({
 	...config,
-    operations: { // do a deep merge here?
-        ...operations,
-        ...config?.operations
-    },
+    operations,
 }{{ if .HasWunderGraphServerTs }}, server{{ end }});`))
 )
 

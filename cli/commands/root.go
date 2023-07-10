@@ -107,7 +107,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Check if we want to track telemetry for this command
-		if rootFlags.Telemetry && telemetry.HasAnnotations(telemetry.AnnotationCommand, cmd.Annotations) {
+		if rootFlags.Telemetry && telemetry.HasAnnotations(telemetry.AnnotationCommand, cmd.Annotations) && false {
 			cmdMetricName := telemetry.CobraFullCommandPathMetricName(cmd)
 
 			metricDurationName := telemetry.DurationMetricSuffix(cmdMetricName)
