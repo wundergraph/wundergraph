@@ -834,6 +834,7 @@ export interface OperationHooksConfiguration {
   mockResolve: MockResolveHookConfiguration | undefined;
   httpTransportOnRequest: boolean;
   httpTransportOnResponse: boolean;
+  httpTransportOnTransport: boolean;
   customResolve: boolean;
 }
 
@@ -2645,6 +2646,7 @@ function createBaseOperationHooksConfiguration(): OperationHooksConfiguration {
     mockResolve: undefined,
     httpTransportOnRequest: false,
     httpTransportOnResponse: false,
+    httpTransportOnTransport: false,
     customResolve: false,
   };
 }
@@ -2672,8 +2674,11 @@ export const OperationHooksConfiguration = {
     if (message.httpTransportOnResponse === true) {
       writer.uint32(56).bool(message.httpTransportOnResponse);
     }
+    if (message.httpTransportOnTransport === true) {
+      writer.uint32(64).bool(message.httpTransportOnTransport);
+    }
     if (message.customResolve === true) {
-      writer.uint32(64).bool(message.customResolve);
+      writer.uint32(72).bool(message.customResolve);
     }
     return writer;
   },
@@ -2707,6 +2712,9 @@ export const OperationHooksConfiguration = {
           message.httpTransportOnResponse = reader.bool();
           break;
         case 8:
+          message.httpTransportOnTransport = reader.bool();
+          break;
+        case 9:
           message.customResolve = reader.bool();
           break;
         default:
@@ -2726,6 +2734,9 @@ export const OperationHooksConfiguration = {
       mockResolve: isSet(object.mockResolve) ? MockResolveHookConfiguration.fromJSON(object.mockResolve) : undefined,
       httpTransportOnRequest: isSet(object.httpTransportOnRequest) ? Boolean(object.httpTransportOnRequest) : false,
       httpTransportOnResponse: isSet(object.httpTransportOnResponse) ? Boolean(object.httpTransportOnResponse) : false,
+      httpTransportOnTransport: isSet(object.httpTransportOnTransport)
+        ? Boolean(object.httpTransportOnTransport)
+        : false,
       customResolve: isSet(object.customResolve) ? Boolean(object.customResolve) : false,
     };
   },
@@ -2740,6 +2751,7 @@ export const OperationHooksConfiguration = {
       (obj.mockResolve = message.mockResolve ? MockResolveHookConfiguration.toJSON(message.mockResolve) : undefined);
     message.httpTransportOnRequest !== undefined && (obj.httpTransportOnRequest = message.httpTransportOnRequest);
     message.httpTransportOnResponse !== undefined && (obj.httpTransportOnResponse = message.httpTransportOnResponse);
+    message.httpTransportOnTransport !== undefined && (obj.httpTransportOnTransport = message.httpTransportOnTransport);
     message.customResolve !== undefined && (obj.customResolve = message.customResolve);
     return obj;
   },
@@ -2755,6 +2767,7 @@ export const OperationHooksConfiguration = {
       : undefined;
     message.httpTransportOnRequest = object.httpTransportOnRequest ?? false;
     message.httpTransportOnResponse = object.httpTransportOnResponse ?? false;
+    message.httpTransportOnTransport = object.httpTransportOnTransport ?? false;
     message.customResolve = object.customResolve ?? false;
     return message;
   },

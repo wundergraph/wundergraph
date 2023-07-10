@@ -147,7 +147,8 @@ message OperationHooksConfiguration {
 	MockResolveHookConfiguration mockResolve = 5;
 	bool httpTransportOnRequest = 6;
 	bool httpTransportOnResponse = 7;
-	bool customResolve = 8;
+	bool httpTransportOnTransport = 8;
+	bool customResolve = 9;
 }
 
 message MockResolveHookConfiguration {

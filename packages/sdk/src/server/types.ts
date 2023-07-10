@@ -391,6 +391,14 @@ export type WsTransportHookRequest<
 	request: WunderGraphRequest;
 } & Context;
 
+export type HttpTransportRequest<Operations = string, Context extends BaseRequestContext = BaseRequestContext> = {
+	request: Request;
+	operation: {
+		name: Operations;
+		type: 'mutation' | 'query' | 'subscription';
+	};
+} & Context;
+
 // Any is used here because the exact type of the hooks is not known at compile time
 // We could work with an index signature + base type, but that would allow to add arbitrary data to the hooks
 export type OperationHooks = Record<string, any>;
@@ -499,6 +507,9 @@ export interface GlobalHooksConfig<
 			enableForOperations?: Operations[];
 			// enableForAllOperations will disregard the enableForOperations property and enable the hook for all operations
 			enableForAllOperations?: boolean;
+		};
+		onOriginTransport?: {
+			hook: (hook: HttpTransportRequest<Operations, Context>) => Promise<Response | null | undefined>;
 		};
 	};
 	wsTransport?: {
