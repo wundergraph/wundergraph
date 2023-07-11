@@ -144,7 +144,8 @@ const (
 	// HttpTransportOnRequest to the origin
 	HttpTransportOnRequest MiddlewareHook = "onOriginRequest"
 	// HttpTransportOnResponse from the origin
-	HttpTransportOnResponse MiddlewareHook = "onOriginResponse"
+	HttpTransportOnResponse  MiddlewareHook = "onOriginResponse"
+	HttpTransportOnTransport MiddlewareHook = "onOriginTransport"
 
 	WsTransportOnConnectionInit MiddlewareHook = "onConnectionInit"
 )

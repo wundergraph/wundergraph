@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.167.0",
+  "version": "0.167.1",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -39,6 +39,14 @@
       "types": "./dist/orm/index.d.ts",
       "default": "./dist/orm/index.js"
     },
+    "./integrations": {
+      "types": "./dist/integrations/index.d.ts",
+      "default": "./dist/integrations/index.js"
+    },
+    "./dynamic-router": {
+      "types": "./dist/dynamic-router/index.d.ts",
+      "default": "./dist/dynamic-router/index.js"
+    },
     "./dist/*": {
       "types": "./dist/*.d.ts",
       "default": "./dist/*.js"
@@ -69,6 +77,12 @@
       ],
       "orm": [
         "./dist/orm"
+      ],
+      "integrations": [
+        "./dist/integrations"
+      ],
+      "dynamic-router": [
+        "./dist/dynamic-router"
       ]
     }
   },
@@ -160,7 +174,7 @@
     "@wundergraph/orm": "workspace:*",
     "@wundergraph/protobuf": "workspace:^0.116.1",
     "@wundergraph/straightforward": "^4.2.5",
-    "@wundergraph/wunderctl": "workspace:^0.161.0",
+    "@wundergraph/wunderctl": "workspace:^0.163.0",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",

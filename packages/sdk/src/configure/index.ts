@@ -90,6 +90,8 @@ import { WunderGraphConfigurationFilename } from '../server/server';
 
 export const WG_GENERATE_CONFIG_JSON = process.env['WG_GENERATE_CONFIG_JSON'] === 'true';
 
+export * from './define-config';
+
 const utf8 = 'utf8';
 const generated = 'generated';
 const jsonExtension = 'json';
@@ -304,7 +306,7 @@ export interface S3UploadProfile {
 
 export type S3UploadProfiles = Record<string, S3UploadProfile>;
 
-interface S3UploadConfiguration {
+export interface S3UploadConfiguration {
 	name: string;
 	endpoint: InputVariable;
 	accessKeyID: InputVariable;
@@ -988,6 +990,16 @@ export const configureWunderGraphApplication = <
 				}
 			}
 
+			if (config.server?.hooks?.global?.httpTransport?.onOriginTransport) {
+				const enableForAllOperations = true;
+				if (enableForAllOperations) {
+					app.Operations = app.Operations.map((op) => ({
+						...op,
+						HooksConfiguration: { ...op.HooksConfiguration, httpTransportOnTransport: true },
+					}));
+				}
+			}
+
 			if (config.server?.hooks?.global?.wsTransport?.onConnectionInit) {
 				const enableForDataSources = config.server?.hooks?.global?.wsTransport?.onConnectionInit.enableForDataSources;
 				app.EngineConfiguration.DataSources = app.EngineConfiguration.DataSources.map((ds) => {
@@ -1083,7 +1095,7 @@ export const configureWunderGraphApplication = <
 			);
 			await updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
 
-			const storedConfig = storedWunderGraphConfig(resolved);
+			const storedConfig = storedWunderGraphConfig(resolved, apis.length);
 			const configData = WunderGraphConfiguration.encode(storedConfig).finish();
 			fs.writeFileSync(path.join(generated, WunderGraphConfigurationFilename), configData);
 			if (WG_GENERATE_CONFIG_JSON) {
@@ -1140,7 +1152,22 @@ const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputV
 	return output;
 };
 
-const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig) => {
+const configEnabledFeatures = (config: ResolvedWunderGraphConfig, apiCount: number) => {
+	const apis = config.application.Apis;
+	const schemaExtension = apis.find((api) => api.Features?.schemaExtension ?? false) !== undefined;
+	const customJSONScalars = apis.find((api) => api.Features?.customJSONScalars ?? false) !== undefined;
+	const customIntScalars = apis.find((api) => api.Features?.customIntScalars ?? false) !== undefined;
+	const customFloatScalars = apis.find((api) => api.Features?.customFloatScalars ?? false) !== undefined;
+	return {
+		apiCount,
+		schemaExtension,
+		customJSONScalars,
+		customIntScalars,
+		customFloatScalars,
+	};
+};
+
+const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: number) => {
 	const operations: Operation[] = config.application.Operations.map((op) => ({
 		content: removeHookVariables(op.Content),
 		name: op.Name,
@@ -1261,6 +1288,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig) => {
 		},
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
 		configHash: configurationHash(config),
+		enabledFeatures: configEnabledFeatures(config, apiCount),
 	};
 	return out;
 };
@@ -1513,6 +1541,7 @@ const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFi
 			},
 			httpTransportOnResponse: false,
 			httpTransportOnRequest: false,
+			httpTransportOnTransport: false,
 			customResolve: false,
 		},
 		VariablesConfiguration: {

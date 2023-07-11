@@ -147,7 +147,8 @@ message OperationHooksConfiguration {
 	MockResolveHookConfiguration mockResolve = 5;
 	bool httpTransportOnRequest = 6;
 	bool httpTransportOnResponse = 7;
-	bool customResolve = 8;
+	bool httpTransportOnTransport = 8;
+	bool customResolve = 9;
 }
 
 message MockResolveHookConfiguration {
@@ -462,6 +463,17 @@ message WunderGraphConfiguration {
 	repeated string environmentIds = 3;
 	bool dangerouslyEnableGraphQLEndpoint = 4;
 	string configHash = 5;
+	EnabledFeatures enabledFeatures = 6;
+}
+
+// Used for reporting enabled features from the TS side
+// to the Go side.
+message EnabledFeatures {
+	int32 apiCount = 1;
+	bool schemaExtension = 2;
+	bool customJSONScalars = 3;
+	bool customIntScalars = 4;
+	bool customFloatScalars = 5;
 }
 
 message S3UploadProfileHooksConfiguration {

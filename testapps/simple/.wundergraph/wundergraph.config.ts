@@ -1,17 +1,31 @@
-import { configureWunderGraphApplication, introspect } from '@wundergraph/sdk';
-import server from './wundergraph.server';
-import operations from './wundergraph.operations';
+import type { WunderGraphConfig } from '@wundergraph/sdk';
+import { graphql } from '@wundergraph/sdk/integrations';
+import { weather } from './weather-integration';
 
-const weather = introspect.graphql({
-	apiNamespace: 'weather',
-	url: 'https://weather-api.wundergraph.com/',
+import { dynamicRouter } from '@wundergraph/sdk/dynamic-router';
+
+const batcher = dynamicRouter({
+	match: {
+		operationType: 'query',
+		datasources: [''],
+	},
+	handler: ({ request, response }) => {
+		return {
+			status: 200,
+			body: 'Hello World',
+		};
+	},
 });
 
-// configureWunderGraph emits the configuration
-configureWunderGraphApplication({
-	apis: [weather],
-	server,
-	operations,
+export default {
+	integrations: [
+		weather(),
+		graphql({
+			apiNamespace: 'countries',
+			url: 'https://countries.trevorblades.com/',
+		}),
+		batcher,
+	],
 	options: {
 		openTelemetry: {
 			enabled: true,
@@ -20,4 +34,4 @@ configureWunderGraphApplication({
 			enabled: true,
 		},
 	},
-});
+} satisfies WunderGraphConfig;
