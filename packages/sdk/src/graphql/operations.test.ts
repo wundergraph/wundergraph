@@ -307,8 +307,8 @@ const expectedTransformOperations: ParsedOperations = {
 		},
 		{
 			Name: 'TopProducts',
-			PathName: 'TopProducts',
 			Description: '',
+			PathName: 'TopProducts',
 			Content:
 				'query TopProducts{topProducts{upc name price reviews{id body userName:author{name}productNames:author{reviews{product{name}}}}}}',
 			OperationType: OperationType.QUERY,
