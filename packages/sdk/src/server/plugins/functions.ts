@@ -17,6 +17,8 @@ import { FastifyRequestBody } from '../types';
 import { Attributes } from '../trace/attributes';
 import { attachErrorToSpan } from '../trace/util';
 import { createLogger } from '../logger';
+import { OpenaiAgentFactory } from '../../openai';
+import { Configuration, OpenAIApi } from 'openai';
 
 interface FastifyFunctionsOptions {
 	operationsRequestContext: OperationsAsyncContext;
@@ -37,6 +39,9 @@ interface FunctionRouteConfig {
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {
 	const { operations, internalClientFactory, orm, nodeURL, operationsRequestContext } = config;
 
+	const jsonSchemaFile = path.join(process.env.WG_DIR_ABS!, 'generated', 'bundle', 'jsonschema.cjs');
+	const jsonSchemas = (await import(jsonSchemaFile)).default;
+
 	for (const operation of operations) {
 		try {
 			let operationPath = operation.module_path;
@@ -45,7 +50,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 			}
 			const filePath = path.join(process.env.WG_DIR_ABS!, operationPath + '.cjs');
 			const routeUrl = `/functions/${operation.api_mount_path}`;
-			let maybeImplementation: NodeJSOperation<any, any, any, any, any, any, any, any, any, any> | undefined;
+			let maybeImplementation: NodeJSOperation<any, any, any, any, any, any, any, any, any, any, any> | undefined;
 			try {
 				maybeImplementation = (await import(filePath)).default;
 			} catch (e) {
@@ -82,8 +87,19 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							tracer: fastify.tracer,
 							traceContext: req.telemetry?.context,
 						});
-						const ctx: HandlerContext<any, any, any, any, any, any, any> = {
-							log: createLogger(fastify.log),
+						const configuration = new Configuration({
+							apiKey: process.env.OPENAI_API_KEY,
+						});
+						const openai = new OpenAIApi(configuration);
+						const log = createLogger(fastify.log);
+						const openAiAgentFactory = new OpenaiAgentFactory({
+							operationsClient: operationClient,
+							openAIClient: openai,
+							schemas: jsonSchemas,
+							log,
+						});
+						const ctx: HandlerContext<any, any, any, any, any, any, any, any> = {
+							log,
 							user: (req.body as any)?.__wg.user!,
 							internalClient: internalClientFactory(headers, clientRequest),
 							clientRequest,
@@ -91,6 +107,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							operations: operationClient,
 							context: requestContext,
 							graph: orm.withClientRequest(clientRequest),
+							openAI: openAiAgentFactory,
 						};
 
 						switch (implementation.type) {

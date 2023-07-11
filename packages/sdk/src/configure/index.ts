@@ -1467,6 +1467,7 @@ const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFi
 
 	const operation: TypeScriptOperation = {
 		Name: file.operation_name,
+		Description: implementation.description || file.module_path,
 		PathName: file.api_mount_path,
 		Content: '',
 		Errors: implementation.errors?.map((E) => new E()) || [],
@@ -1569,6 +1570,7 @@ const resolveOperationsConfigurations = async (
 		interpolateVariableDefinitionAsJSON: config.interpolateVariableDefinitionAsJSON,
 		customJsonScalars,
 		customClaims,
+		wgDirAbs: wgDirAbs,
 	});
 	const nodeJSOperations: TypeScriptOperation[] = [];
 	if (loadedOperations.typescript_operation_files) {
@@ -1621,12 +1623,15 @@ const loadAndApplyNodeJsOperationOverrides = async (
 // this function.
 const applyNodeJsOperationOverrides = (
 	operation: TypeScriptOperation,
-	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any>
+	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any, any>
 ): TypeScriptOperation => {
 	if (overrides.inputSchema) {
 		const schema = zodToJsonSchema(overrides.inputSchema) as any;
 		operation.VariablesSchema = schema;
 		operation.InternalVariablesSchema = schema;
+	}
+	if (overrides.description) {
+		operation.Description = overrides.description;
 	}
 	if (overrides.liveQuery) {
 		operation.LiveQuery = {
