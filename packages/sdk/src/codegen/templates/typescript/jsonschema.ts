@@ -22,6 +22,9 @@ export class JsonSchema implements Template {
 			queries,
 			mutations,
 			subscriptions,
+			hasQueries: queries.length > 0,
+			hasMutations: mutations.length > 0,
+			hasSubscriptions: subscriptions.length > 0,
 			queryNames: generationConfig.config.application.Operations.filter(
 				(op) => op.OperationType === OperationType.QUERY
 			)
@@ -66,6 +69,9 @@ interface Model {
 	queryNames: string;
 	mutationNames: string;
 	subscriptionNames: string;
+	hasQueries: boolean;
+	hasMutations: boolean;
+	hasSubscriptions: boolean;
 }
 
 const operationToModel = (op: GraphQLOperation) => ({

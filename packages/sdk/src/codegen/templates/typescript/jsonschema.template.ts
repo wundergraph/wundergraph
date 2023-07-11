@@ -49,11 +49,23 @@ const jsonSchema: Schema = {
     {{/each}}
 };
 
+{{#if hasQueries}}
 export type QueryNames = {{{queryNames}}};
+{{else}}
+export type QueryNames = never;
+{{/if}}
 
+{{#if hasMutations}}
 export type MutationNames = {{{mutationNames}}};
+{{else}}
+export type MutationNames = never;
+{{/if}}
 
+{{#if hasSubscriptions}}
 export type SubscriptionNames = {{{subscriptionNames}}};
+{{else}}
+export type SubscriptionNames = never;
+{{/if}}
 
 export default jsonSchema;
 `;
