@@ -175,6 +175,9 @@ func (e *Engine) BinaryPlatformName() string {
 
 	distro := getLinuxDistro()
 	if distro == "alpine" {
+		if runtime.GOARCH == "arm64" {
+			return "linux-musl-arm64-openssl-3.0.x"
+		}
 		return "linux-musl"
 	}
 
