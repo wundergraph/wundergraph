@@ -27,6 +27,10 @@
       "types": "./dist/operations/index.d.ts",
       "default": "./dist/operations/index.js"
     },
+    "./openapi": {
+      "types": "./dist/openai/index.d.ts",
+      "default": "./dist/openai/index.js"
+    },
     "./internal/logger": {
       "types": "./dist/logger/index.d.ts",
       "default": "./dist/logger/index.js"
@@ -56,6 +60,9 @@
       ],
       "operations": [
         "./dist/operations"
+      ],
+      "openai": [
+        "./dist/openai"
       ],
       "internal/logger": [
         "./dist/logger"
@@ -175,6 +182,7 @@
     "lodash": "^4.17.21",
     "long": "^5.2.0",
     "object-hash": "^2.2.0",
+    "openai": "^3.3.0",
     "openapi-types": "12.1.0",
     "pino": "^8.11.0",
     "pino-pretty": "^10.0.0",

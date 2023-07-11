@@ -3,15 +3,40 @@ import { CodeGenerationConfig } from '../../../configure';
 import { formatTypeScript } from './index';
 import Handlebars from 'handlebars';
 import { template } from './jsonschema.template';
+import { OperationType, operationTypeToJSON } from '@wundergraph/protobuf';
+import { GraphQLOperation } from '../../../graphql/operations';
 
 export class JsonSchema implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const queries = generationConfig.config.application.Operations.filter(
+			(op) => op.OperationType === OperationType.QUERY
+		).map(operationToModel);
+		const mutations = generationConfig.config.application.Operations.filter(
+			(op) => op.OperationType === OperationType.MUTATION
+		).map(operationToModel);
+		const subscriptions = generationConfig.config.application.Operations.filter(
+			(op) => op.OperationType === OperationType.SUBSCRIPTION
+		).map(operationToModel);
 		const model: Model = {
-			operations: generationConfig.config.application.Operations.map((op) => ({
-				name: op.Name,
-				inputSchema: JSON.stringify(op.VariablesSchema),
-				outputSchema: JSON.stringify(op.ResponseSchema),
-			})),
+			operations: [...queries, ...mutations, ...subscriptions],
+			queries,
+			mutations,
+			subscriptions,
+			queryNames: generationConfig.config.application.Operations.filter(
+				(op) => op.OperationType === OperationType.QUERY
+			)
+				.map((op) => `"${op.PathName}"`)
+				.join(' | '),
+			mutationNames: generationConfig.config.application.Operations.filter(
+				(op) => op.OperationType === OperationType.MUTATION
+			)
+				.map((op) => `"${op.PathName}"`)
+				.join(' | '),
+			subscriptionNames: generationConfig.config.application.Operations.filter(
+				(op) => op.OperationType === OperationType.SUBSCRIPTION
+			)
+				.map((op) => `"${op.PathName}"`)
+				.join(' | '),
 		};
 		const tmpl = Handlebars.compile(template);
 		const content = tmpl(model);
@@ -25,10 +50,28 @@ export class JsonSchema implements Template {
 	}
 }
 
-interface Model {
-	operations: {
-		name: string;
-		inputSchema: string;
-		outputSchema: string;
-	}[];
+interface Operation {
+	name: string;
+	inputSchema: string;
+	outputSchema: string;
+	operationType: string;
+	description: string;
 }
+
+interface Model {
+	operations: Operation[];
+	queries: Operation[];
+	mutations: Operation[];
+	subscriptions: Operation[];
+	queryNames: string;
+	mutationNames: string;
+	subscriptionNames: string;
+}
+
+const operationToModel = (op: GraphQLOperation) => ({
+	name: op.PathName,
+	inputSchema: JSON.stringify(op.VariablesSchema),
+	outputSchema: JSON.stringify(op.ResponseSchema),
+	operationType: operationTypeToJSON(op.OperationType),
+	description: op.Description,
+});

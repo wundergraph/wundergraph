@@ -1,4 +1,5 @@
 import {
+	extractOperationDescription,
 	isInternalOperationByAPIMountPath,
 	LoadOperationsOutput,
 	operationResponseToJSONSchema,
@@ -129,6 +130,7 @@ const expectedTransformOperations: ParsedOperations = {
 	operations: [
 		{
 			Name: 'GetName',
+			Description: '',
 			PathName: 'GetName',
 			Content: 'query GetName{name:me{name}}',
 			OperationType: OperationType.QUERY,
@@ -210,6 +212,7 @@ const expectedTransformOperations: ParsedOperations = {
 		},
 		{
 			Name: 'GetReviews',
+			Description: '',
 			PathName: 'GetReviews',
 			Content: 'query GetReviews{myReviews:me{name reviews{id body}}}',
 			OperationType: OperationType.QUERY,
@@ -305,6 +308,7 @@ const expectedTransformOperations: ParsedOperations = {
 		{
 			Name: 'TopProducts',
 			PathName: 'TopProducts',
+			Description: '',
 			Content:
 				'query TopProducts{topProducts{upc name price reviews{id body userName:author{name}productNames:author{reviews{product{name}}}}}}',
 			OperationType: OperationType.QUERY,
@@ -499,6 +503,7 @@ const fromClaimParsed: ParsedOperations = {
 	operations: [
 		{
 			Name: 'CreateUser',
+			Description: '',
 			PathName: 'CreateUser',
 			Content: 'mutation($email:String!@fromClaim(name:EMAIL)){createUser(email:$email){email}}',
 			OperationType: OperationType.MUTATION,
@@ -766,6 +771,7 @@ const jsonSchemaDirectiveParsed: ParsedOperations = {
 	operations: [
 		{
 			Name: 'nested_JsonSchemaQuery',
+			Description: '',
 			PathName: 'nested/JsonSchemaQuery',
 			Content: `query($nullableStringWithTitle:String@jsonSchema(title:"someTitle")$stringWithTitle:String!@jsonSchema(title:"someTitle")$stringWithDescription:String!@jsonSchema(description:"someDescription")$intWithMultipleOf:Int!@jsonSchema(multipleOf:10)$intWithMaximum:Int!@jsonSchema(maximum:10)$intWithExclusiveMaximum:Int!@jsonSchema(exclusiveMaximum:10)$intWithMinimum:Int!@jsonSchema(minimum:1)$intWithExclusiveMinimum:Int!@jsonSchema(exclusiveMinimum:1)$stringWithMaxLength:String!@jsonSchema(maxLength:3)$stringWithMinLength:String!@jsonSchema(minLength:5)$stringWithPattern:String!@jsonSchema(pattern:"foo")$arrayWithMaxItems:[String]!@jsonSchema(maxItems:5)$arrayWithMinItems:[String]!@jsonSchema(minItems:2)$arrayWithUniqueItems:[String]!@jsonSchema(uniqueItems:true)$email:String!@jsonSchema(commonPattern:EMAIL)$domain:String!@jsonSchema(commonPattern:DOMAIN)){root(input:{nullableStringWithTitle:$nullableStringWithTitle stringWithTitle:$stringWithTitle stringWithDescription:$stringWithDescription intWithMultipleOf:$intWithMultipleOf intWithMaximum:$intWithMaximum intWithExclusiveMaximum:$intWithExclusiveMaximum intWithMinimum:$intWithMinimum intWithExclusiveMinimum:$intWithExclusiveMinimum stringWithMaxLength:$stringWithMaxLength stringWithMinLength:$stringWithMinLength stringWithPattern:$stringWithPattern arrayWithMaxItems:$arrayWithMaxItems arrayWithMinItems:$arrayWithMinItems arrayWithUniqueItems:$arrayWithUniqueItems email:$email domain:$domain})}`,
 			OperationType: OperationType.QUERY,
@@ -1501,4 +1507,51 @@ test('isInternalOperationByAPIMountPath', () => {
 	internalPaths.forEach((path) => {
 		expect(isInternalOperationByAPIMountPath(path)).toBe(true);
 	});
+});
+
+test('extractOperationDescription no comment', () => {
+	const description = extractOperationDescription(`
+	query {
+    hello
+	}`);
+	expect(description).toBe('');
+});
+
+test('extractOperationDescription no comment named', () => {
+	const description = extractOperationDescription(`
+	query MyQuery {
+    	hello
+	}`);
+	expect(description).toBe('');
+});
+
+test('extractOperationDescription with comment', () => {
+	const description = extractOperationDescription(`
+	# This is a comment
+	query MyQuery {
+    	hello
+	}`);
+	expect(description).toBe('This is a comment');
+});
+
+test('extractOperationDescription with multi line comment', () => {
+	const description = extractOperationDescription(`
+	# This is a comment
+	# with multiple lines
+	query MyQuery {
+    	hello
+	}`);
+	expect(description).toBe('This is a comment with multiple lines');
+});
+
+test('extractOperationDescription with multi line comment and skip', () => {
+	const description = extractOperationDescription(`
+	# This will be ignored
+	
+	# This is a comment
+	# with multiple lines
+	query MyQuery {
+    	hello
+	}`);
+	expect(description).toBe('This is a comment with multiple lines');
 });
