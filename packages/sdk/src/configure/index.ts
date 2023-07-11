@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -86,6 +87,9 @@ import { GenerateConfig, OperationsGenerationConfig } from './codegeneration';
 import { generateOperations } from '../codegen/generateoperations';
 import { configurationHash } from '../codegen/templates/typescript/helpers';
 import templates from '../codegen/templates';
+import { WunderGraphConfigurationFilename } from '../server/server';
+
+export const WG_GENERATE_CONFIG_JSON = process.env['WG_GENERATE_CONFIG_JSON'] === 'true';
 
 const utf8 = 'utf8';
 const generated = 'generated';
@@ -741,7 +745,7 @@ const resolveApplication = async (
 	s3?: S3Provider,
 	hooks?: HooksConfiguration
 ): Promise<ResolvedApplication> => {
-	const merged = mergeApis(roles, customClaims, ...resolvedApis);
+	const merged = mergeApis({ roles, customClaims, apis: resolvedApis });
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
 	return {
 		Apis: resolvedApis,
@@ -917,7 +921,7 @@ export const configureWunderGraphApplication = <
 				wgDirAbs,
 				resolved,
 				loadedOperations,
-				app.EngineConfiguration.CustomJsonScalars || []
+				app.EngineConfiguration.CustomJsonScalars || new Set<string>()
 			);
 			app.Operations = operations.operations;
 			app.InvalidOperationNames = loadedOperations.invalid || [];
@@ -1118,16 +1122,11 @@ export const configureWunderGraphApplication = <
 			);
 			await updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
 
-			const configJsonPath = path.join(generated, 'wundergraph.config.json');
-			const configJSON = ResolvedWunderGraphConfigToJSON(resolved);
-			// config json exists
-			if (fs.existsSync(configJsonPath)) {
-				const existing = fs.readFileSync(configJsonPath, utf8);
-				if (configJSON !== existing) {
-					writeWunderGraphFileSync('config', configJSON);
-				}
-			} else {
-				writeWunderGraphFileSync('config', configJSON);
+			const storedConfig = storedWunderGraphConfig(resolved, apis.length);
+			const configData = WunderGraphConfiguration.encode(storedConfig).finish();
+			fs.writeFileSync(path.join(generated, WunderGraphConfigurationFilename), configData);
+			if (WG_GENERATE_CONFIG_JSON) {
+				writeWunderGraphFileSync('config', storedConfig);
 			}
 
 			const publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl));
@@ -1180,7 +1179,22 @@ const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputV
 	return output;
 };
 
-const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): string => {
+const configEnabledFeatures = (config: ResolvedWunderGraphConfig, apiCount: number) => {
+	const apis = config.application.Apis;
+	const schemaExtension = apis.find((api) => api.Features?.schemaExtension ?? false) !== undefined;
+	const customJSONScalars = apis.find((api) => api.Features?.customJSONScalars ?? false) !== undefined;
+	const customIntScalars = apis.find((api) => api.Features?.customIntScalars ?? false) !== undefined;
+	const customFloatScalars = apis.find((api) => api.Features?.customFloatScalars ?? false) !== undefined;
+	return {
+		apiCount,
+		schemaExtension,
+		customJSONScalars,
+		customIntScalars,
+		customFloatScalars,
+	};
+};
+
+const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: number) => {
 	const operations: Operation[] = config.application.Operations.map((op) => ({
 		content: removeHookVariables(op.Content),
 		name: op.Name,
@@ -1211,7 +1225,10 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 				}
 			}) || [],
 	}));
-	const dataSources: DataSourceConfiguration[] = config.application.EngineConfiguration.DataSources.map(mapDataSource);
+	const stringStorage: Record<string, string> = {};
+	const dataSources: DataSourceConfiguration[] = config.application.EngineConfiguration.DataSources.map((ds) =>
+		mapDataSource(stringStorage, ds)
+	);
 	const fields: FieldConfiguration[] = config.application.EngineConfiguration.Fields;
 	const types: TypeConfiguration[] = config.application.EngineConfiguration.Types;
 
@@ -1228,6 +1245,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 				datasourceConfigurations: dataSources,
 				fieldConfigurations: fields,
 				typeConfigurations: types,
+				stringStorage,
 			},
 			s3UploadConfiguration: config.application.S3UploadProvider.map((provider) => {
 				let uploadProfiles: { [key: string]: _S3UploadProfile } = {};
@@ -1297,12 +1315,27 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 		},
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
 		configHash: configurationHash(config),
+		enabledFeatures: configEnabledFeatures(config, apiCount),
 	};
-
-	return JSON.stringify(out, null, 2);
+	return out;
 };
 
-const mapDataSource = (source: DataSource): DataSourceConfiguration => {
+/**
+ * Stores the string s in the given stringStorage, returning a reference to it
+ *
+ * @param stringStorage Storage to store the string into
+ * @param s String to intern
+ * @returns InternedString pointing to s
+ */
+const internString = (stringStorage: Record<string, string>, s: string) => {
+	const key = crypto.createHash('sha1').update(s).digest('hex');
+	stringStorage[key] = s;
+	return {
+		key: key,
+	};
+};
+
+const mapDataSource = (stringStorage: Record<string, string>, source: DataSource): DataSourceConfiguration => {
 	const out: DataSourceConfiguration = {
 		id: source.Id || '',
 		kind: source.Kind,
@@ -1350,7 +1383,7 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 					url: graphql.Subscription.URL,
 					useSSE: graphql.Subscription.UseSSE,
 				},
-				upstreamSchema: graphql.UpstreamSchema,
+				upstreamSchema: internString(stringStorage, graphql.UpstreamSchema),
 				hooksConfiguration: graphql.HooksConfiguration,
 				customScalarTypeFields: graphql.CustomScalarTypeFields,
 			};
@@ -1364,8 +1397,8 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 			const database = source.Custom as DatabaseApiCustom;
 			out.customDatabase = {
 				databaseURL: database.databaseURL,
-				prismaSchema: database.prisma_schema,
-				graphqlSchema: database.graphql_schema,
+				prismaSchema: internString(stringStorage, database.prisma_schema),
+				graphqlSchema: internString(stringStorage, database.graphql_schema),
 				closeTimeoutSeconds: 30,
 				jsonTypeFields: database.jsonTypeFields,
 				jsonInputVariables: database.jsonInputVariables,
@@ -1562,7 +1595,7 @@ const resolveOperationsConfigurations = async (
 	wgDirAbs: string,
 	config: ResolvedWunderGraphConfig,
 	loadedOperations: LoadOperationsOutput,
-	customJsonScalars: string[]
+	customJsonScalars: Set<string>
 ): Promise<ParsedOperations> => {
 	const customClaims = mapRecordValues(config.authentication.customClaims ?? {}, (key, claim) => {
 		let claimType: ValueType;
@@ -1696,10 +1729,13 @@ const applyNodeJsOperationOverrides = (
 	return operation;
 };
 
+const wunderGraphFilePath = (fileName: string, extension: string) => {
+	return path.join(generated, `wundergraph.${fileName}.${extension}`);
+};
+
 const writeWunderGraphFileSync = (fileName: string, contents: object | string, extension = jsonExtension) => {
 	if (typeof contents !== 'string') {
 		contents = JSON.stringify(contents, null, 2);
 	}
-
-	fs.writeFileSync(path.join(generated, `wundergraph.${fileName}.${extension}`), contents, { encoding: utf8 });
+	fs.writeFileSync(wunderGraphFilePath(fileName, extension), contents, { encoding: utf8 });
 };

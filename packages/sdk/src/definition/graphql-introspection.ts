@@ -13,12 +13,14 @@ import {
 	parse,
 	print,
 	printSchema,
+	visit,
 } from 'graphql';
 import { AxiosError, AxiosProxyConfig, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { HttpsProxyAgent, HttpsProxyAgentOptions } from 'https-proxy-agent';
 import { ConfigurationVariableKind, DataSourceKind, HTTPHeader, HTTPMethod } from '@wundergraph/protobuf';
 import { cleanupSchema } from '../graphql/schema';
 import {
+	applyNameSpaceToCustomJsonScalars,
 	applyNamespaceToDirectiveConfiguration,
 	applyNameSpaceToFieldConfigurations,
 	applyNameSpaceToGraphQLSchema,
@@ -31,19 +33,20 @@ import * as https from 'https';
 import { IntrospectionCacheConfiguration, introspectWithCache } from './introspection-cache';
 import { mapInputVariable, resolveVariable } from '../configure/variables';
 import {
+	ApiIntrospectionOptions,
 	buildMTLSConfiguration,
 	buildUpstreamAuthentication,
 	GraphQLApi,
 	GraphQLIntrospection,
-	ApiIntrospectionOptions,
 } from './index';
 import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
 import { urlHash, urlIsLocalNetwork } from '../localcache';
 import { Logger } from '../logger';
-import { mergeSchemas } from '@graphql-tools/schema';
+
 import transformSchema from '../transformations/transformSchema';
 import { printSchemaWithDirectives } from '@graphql-tools/utils';
+import { mergeTypeDefs } from '@graphql-tools/merge';
 
 class MissingKeyError extends Error {
 	constructor(private key: string, private introspection: GraphQLIntrospection) {
@@ -146,6 +149,11 @@ export const introspectGraphql = async (
 			});
 		}
 	}
+	if (introspection.customJSONScalars) {
+		for (const customJsonScalar of introspection.customJSONScalars) {
+			customScalarTypeNames.add(customJsonScalar);
+		}
+	}
 	const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
 	const schemaDocumentNode = parse(schemaSDL);
 	const graphQLSchema = buildSchema(schemaSDL);
@@ -225,7 +233,13 @@ export const introspectGraphql = async (
 		applyNameSpaceToFieldConfigurations(Fields, graphQLSchema, skipRenameRootFields, introspection.apiNamespace),
 		generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
 		[],
-		customScalarTypeNames
+		applyNameSpaceToCustomJsonScalars(introspection.apiNamespace, customScalarTypeNames),
+		{
+			schemaExtension: introspection.schemaExtension !== undefined,
+			customJSONScalars: introspection.customJSONScalars !== undefined,
+			customIntScalars: introspection.customIntScalars !== undefined,
+			customFloatScalars: introspection.customFloatScalars !== undefined,
+		}
 	);
 };
 
@@ -464,20 +478,58 @@ type _Service {
   sdl: String
 }`;
 
-export const buildSubgraphSchema = (schema: DocumentNode): GraphQLSchema => {
-	const entities = findEntityNames(schema);
-	// union _Entity = User | Product
-	const entityDefinition = entities.length > 0 ? `union _Entity = ${entities.join(' | ')}` : '';
-	const subgraphSchema = print(schema);
-	const merged = mergeSchemas({
-		schemas: [
-			buildSchema(subgraphSchema, { assumeValidSDL: true }),
-			buildSchema(subgraphBaseSchema, { assumeValidSDL: true }),
-		],
+export const buildSubgraphSchema = (schemaDocumentNode: DocumentNode): GraphQLSchema => {
+	const subgraphWithoutExtensions = subgraphSchemaWithoutExtensions(schemaDocumentNode);
+	const subgraphExtensions = subgraphSchemaExtensions(schemaDocumentNode);
+
+	const mergedDocumentNode = mergeTypeDefs([subgraphWithoutExtensions, subgraphExtensions, subgraphBaseSchema]);
+	const sdlWithoutEntityUnion = print(mergedDocumentNode);
+
+	const entities = findEntityNames(schemaDocumentNode);
+	const sdlWithEntityUnion = replaceEntitiesScalar(entities, sdlWithoutEntityUnion);
+
+	return lexicographicSortSchema(buildSchema(sdlWithEntityUnion, { assumeValidSDL: true }));
+};
+
+const subgraphSchemaWithoutExtensions = (schemaAST: DocumentNode): DocumentNode => {
+	return visit(schemaAST, {
+		ObjectTypeExtension() {
+			return null;
+		},
 	});
-	const withoutEntityUnion = printSchema(merged);
-	const withEntityUnion = withoutEntityUnion.replace('scalar _Entity', entityDefinition);
-	return lexicographicSortSchema(buildSchema(withEntityUnion, { assumeValidSDL: true }));
+};
+
+const subgraphSchemaExtensions = (schemaAST: DocumentNode): DocumentNode => {
+	const extensionsAST = visit(schemaAST, {
+		ObjectTypeExtension(node) {
+			return node;
+		},
+		ObjectTypeDefinition() {
+			return null;
+		},
+	});
+
+	// Convert ObjectTypeExtension to ObjectTypeDefinition
+	return visit(extensionsAST, {
+		ObjectTypeExtension(node) {
+			return {
+				...node,
+				kind: 'ObjectTypeDefinition',
+			};
+		},
+	});
+};
+
+// Replace the _Entity scalar with a union of all the entity types if there are any entities
+const replaceEntitiesScalar = (entities: string[], schema: string): string => {
+	if (entities.length > 0) {
+		// union _Entity = User | Product
+		const entityDefinition = `union _Entity = ${entities.join(' | ')}`;
+
+		return schema.replace('scalar _Entity', entityDefinition);
+	}
+
+	return schema;
 };
 
 const findEntityNames = (schema: DocumentNode): string[] => {

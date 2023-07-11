@@ -2,7 +2,7 @@
 
 exports[`introspection via http 1`] = `
 Api {
-  "CustomJsonScalars": [],
+  "CustomJsonScalars": Set {},
   "DataSources": [
     {
       "ChildNodes": [
@@ -775,6 +775,7 @@ type _Service {
     },
   ],
   "DefaultFlushInterval": 500,
+  "Features": undefined,
   "Fields": [
     {
       "argumentsConfiguration": [],
@@ -1446,7 +1447,7 @@ enum WunderGraphDateTimeFormat {
 
 exports[`introspection via string 1`] = `
 Api {
-  "CustomJsonScalars": [],
+  "CustomJsonScalars": Set {},
   "DataSources": [
     {
       "ChildNodes": [
@@ -1539,13 +1540,13 @@ directive @provides(fields: String!) on FIELD_DEFINITION
 
 directive @requires(fields: String!) on FIELD_DEFINITION
 
-type Query {
+type Query @extends {
   _entities(representations: [_Any!]!): [_Entity]!
   _service: _Service!
   me: User
 }
 
-type User {
+type User @key(fields: "id") {
   id: ID!
   name: String
   username: String
@@ -1716,9 +1717,9 @@ directive @provides(fields: String!) on FIELD_DEFINITION
 
 directive @requires(fields: String!) on FIELD_DEFINITION
 
-type Product {
+type Product @extends @key(fields: "upc") {
   reviews: [Review]
-  upc: String!
+  upc: String! @external
 }
 
 type Query {
@@ -1726,17 +1727,17 @@ type Query {
   _service: _Service!
 }
 
-type Review {
-  author: User
+type Review @key(fields: "id") {
+  author: User @provides(fields: "username")
   body: String
   id: ID!
   product: Product
 }
 
-type User {
-  id: ID!
+type User @extends @key(fields: "id") {
+  id: ID! @external
   reviews: [Review]
-  username: String
+  username: String @external
 }
 
 scalar _Any
@@ -1901,24 +1902,24 @@ directive @provides(fields: String!) on FIELD_DEFINITION
 
 directive @requires(fields: String!) on FIELD_DEFINITION
 
-type Mutation {
+type Mutation @extends {
   setPrice(price: Int!, upc: String!): Product
 }
 
-type Product {
+type Product @key(fields: "upc") {
   name: String
   price: Int
   upc: String!
   weight: Int
 }
 
-type Query {
+type Query @extends {
   _entities(representations: [_Any!]!): [_Entity]!
   _service: _Service!
   topProducts(first: Int = 5, random: Boolean): [Product]
 }
 
-type Subscription {
+type Subscription @extends {
   updatedPrice: Product!
 }
 
@@ -2075,12 +2076,12 @@ directive @provides(fields: String!) on FIELD_DEFINITION
 
 directive @requires(fields: String!) on FIELD_DEFINITION
 
-type Product {
+type Product @extends @key(fields: "upc") {
   inStock: Boolean
-  price: Int
-  shippingEstimate: Int
-  upc: String!
-  weight: Int
+  price: Int @external
+  shippingEstimate: Int @requires(fields: "price weight")
+  upc: String! @external
+  weight: Int @external
 }
 
 type Query {
@@ -2205,6 +2206,7 @@ type _Service {
     },
   ],
   "DefaultFlushInterval": 500,
+  "Features": undefined,
   "Fields": [
     {
       "argumentsConfiguration": [],

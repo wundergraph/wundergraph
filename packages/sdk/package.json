@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.165.0",
+  "version": "0.167.1",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -135,6 +135,7 @@
     "@graphql-mesh/cross-helpers": "^0.4.0",
     "@graphql-mesh/types": "0.94.0",
     "@graphql-mesh/utils": "0.94.0",
+    "@graphql-tools/merge": "^9.0.0",
     "@graphql-tools/schema": "^8.5.1",
     "@graphql-tools/utils": "^9.2.1",
     "@omnigraph/json-schema": "0.94.2",
@@ -150,9 +151,9 @@
     "@prisma/generator-helper": "^3.9.2",
     "@whatwg-node/fetch": "^0.9.4",
     "@wundergraph/orm": "workspace:*",
-    "@wundergraph/protobuf": "workspace:^0.116.0",
+    "@wundergraph/protobuf": "workspace:^0.116.1",
     "@wundergraph/straightforward": "^4.2.5",
-    "@wundergraph/wunderctl": "workspace:^0.159.0",
+    "@wundergraph/wunderctl": "workspace:^0.163.0",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",
@@ -175,7 +176,7 @@
     "lodash": "^4.17.21",
     "long": "^5.2.0",
     "object-hash": "^2.2.0",
-    "openapi-types": "^10.0.0",
+    "openapi-types": "12.1.0",
     "pino": "^8.11.0",
     "pino-pretty": "^10.0.0",
     "postman-collection": "^4.1.1",

@@ -5,7 +5,8 @@ description: WunderGraph Cloud documentation
 isIndexFile: true
 ---
 
-WunderGraph Cloud is currently in public beta. If you haven't done so already, [sign up](https://cloud.wundergraph.com/).
+WunderGraph Cloud re-imagines the API Gateway. Deploy Serverless API Gateways across the globe in seconds. Preview every Pull Request and get insights into your API usage with Analytics and Distributed Tracing.
+If you haven't done so already, [sign up](https://cloud.wundergraph.com/).
 
 {% quick-links %}
 {% quick-link title="Workspace Configuration (wg.toml)" icon="cloud" href="/docs/cloud/configuration" description="WunderGraph Cloud Workspace Configuration." /%}

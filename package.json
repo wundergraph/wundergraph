@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.159.0",
+  "version": "0.163.0",
   "name": "wundergraph",
   "license": "Apache-2.0",
   "author": {
@@ -39,7 +39,7 @@
   },
   "engines": {
     "node": ">=16.0.0",
-    "pnpm": ">=7.14.0 < 8"
+    "pnpm": "8"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}": [

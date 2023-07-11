@@ -72,6 +72,21 @@ export default function HomePage() {
 
 			<div>
 				<Heading level={2} className="mb-12">
+					Overview
+				</Heading>
+
+				<QuickLinks>
+					<QuickLink
+						title="Introduction to WunderGraph"
+						description="Understand the big picture of WunderGraph, why we've built it and how it works."
+						href="/introduction-to-wundergraph"
+						more
+					/>
+				</QuickLinks>
+			</div>
+
+			<div>
+				<Heading level={2} className="mb-12">
 					Getting Started
 				</Heading>
 

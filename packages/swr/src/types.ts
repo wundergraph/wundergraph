@@ -112,7 +112,7 @@ export type UseSubscriptionResponse<Data, Error = ResponseError> = Omit<
 };
 
 export type UseMutationOptions<Data, Error, Input, OperationName extends string> = Omit<
-	SWRMutationConfiguration<Data, Error, Input, OperationName>,
+	SWRMutationConfiguration<Data, Error, OperationName, Input>,
 	'fetcher'
 > & {
 	operationName: OperationName;
@@ -125,7 +125,7 @@ export type UseMutationHook<Operations extends OperationsDefinition, ExtraOption
 		Response extends Operations['mutations'][OperationName]['response'] = Operations['mutations'][OperationName]['response']
 	>(
 		options: UseMutationOptions<Response['data'], Response['error'], Input, OperationName> & ExtraOptions
-	): SWRMutationResponse<Response['data'], Response['error'], Input>;
+	): SWRMutationResponse<Response['data'], Response['error'], OperationName, Input>;
 };
 
 export interface UseSubscribeToProps extends SubscriptionRequestOptions {
@@ -152,7 +152,7 @@ export type UseUserHook<Operations extends OperationsDefinition> = {
 };
 
 export type UseUploadOptions = Omit<
-	SWRMutationConfiguration<string[], ResponseError, UploadRequestOptions, 'uploadFiles'>,
+	SWRMutationConfiguration<string[], ResponseError, 'uploadFiles', UploadRequestOptions>,
 	'fetcher'
 >;
 

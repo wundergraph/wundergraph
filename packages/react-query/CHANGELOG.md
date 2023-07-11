@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.48](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.47...@wundergraph/react-query@0.8.48) (2023-07-06)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.47](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.46...@wundergraph/react-query@0.8.47) (2023-07-05)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.46](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.45...@wundergraph/react-query@0.8.46) (2023-06-22)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.45](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.44...@wundergraph/react-query@0.8.45) (2023-06-21)
+
+### Bug Fixes
+
+* produce JSONPatch patches with removals in the right order ([#1060](https://github.com/wundergraph/wundergraph/issues/1060)) ([461b6a4](https://github.com/wundergraph/wundergraph/commit/461b6a446a59f3b81e01a1840f151f716e138416)) (@fiam)
+
 ## [0.8.44](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.43...@wundergraph/react-query@0.8.44) (2023-06-09)
 
 **Note:** Version bump only for package @wundergraph/react-query

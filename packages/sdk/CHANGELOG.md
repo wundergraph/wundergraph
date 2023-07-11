@@ -3,6 +3,41 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.167.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.167.0...@wundergraph/sdk@0.167.1) (2023-07-06)
+
+### Bug Fixes
+
+* customJSONScalars are ignored when introspection is fetched from cache ([#1110](https://github.com/wundergraph/wundergraph/issues/1110)) ([47deeb9](https://github.com/wundergraph/wundergraph/commit/47deeb91ae37cd5a2cbf97ff05edf8afac5c64b4)) (@fiam)
+
+## [0.167.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.166.1...@wundergraph/sdk@0.167.0) (2023-07-05)
+
+### Features
+
+* reimplement customJSONScalars ([#1099](https://github.com/wundergraph/wundergraph/issues/1099)) ([a5d49cb](https://github.com/wundergraph/wundergraph/commit/a5d49cbff29afb00d39d6d938800fc800faf139d)) (@Aenimus)
+* support different types with the same when generating OAS ([#1103](https://github.com/wundergraph/wundergraph/issues/1103)) ([dd4aaca](https://github.com/wundergraph/wundergraph/commit/dd4aaca3d10f327de3cd4db07d672f41e4f76c94)) (@fiam)
+
+## [0.166.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.166.0...@wundergraph/sdk@0.166.1) (2023-06-22)
+
+### Bug Fixes
+
+* delete unknown directives from the schema generated from OAS ([#1086](https://github.com/wundergraph/wundergraph/issues/1086)) ([938e7ed](https://github.com/wundergraph/wundergraph/commit/938e7edf02fb8a28cd95d550387ca69fe489f33e)), closes [#1083](https://github.com/wundergraph/wundergraph/issues/1083) (@fiam)
+* federation introspection ([#1073](https://github.com/wundergraph/wundergraph/issues/1073)) ([12c9307](https://github.com/wundergraph/wundergraph/commit/12c9307750c968082e1798dbd3d8ca5af9d668a0)) (@devsergiy)
+
+## [0.166.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.165.0...@wundergraph/sdk@0.166.0) (2023-06-21)
+
+### Features
+
+* use 204 to signal there's no authenticated user ([#1063](https://github.com/wundergraph/wundergraph/issues/1063)) ([7821a5c](https://github.com/wundergraph/wundergraph/commit/7821a5cee15817c854d614250892990221328464)) (@fiam)
+
+### Bug Fixes
+
+* produce JSONPatch patches with removals in the right order ([#1060](https://github.com/wundergraph/wundergraph/issues/1060)) ([461b6a4](https://github.com/wundergraph/wundergraph/commit/461b6a446a59f3b81e01a1840f151f716e138416)) (@fiam)
+* update [@ominigrah](https://github.com/ominigrah) / [@graph-mesh](https://github.com/graph-mesh) dependencies to fix security warning ([#1055](https://github.com/wundergraph/wundergraph/issues/1055)) ([c1184a2](https://github.com/wundergraph/wundergraph/commit/c1184a210d3a1340030342a69a6bb7df3ccb643a)) (@fiam)
+
+### Performance Improvements
+
+* improve config generation/loading performance ([#1070](https://github.com/wundergraph/wundergraph/issues/1070)) ([5ba5a7a](https://github.com/wundergraph/wundergraph/commit/5ba5a7a5c9302fdb73e9a6d15a82fcaf28db62fa)), closes [#1020](https://github.com/wundergraph/wundergraph/issues/1020) (@fiam)
+
 ## [0.165.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.164.1...@wundergraph/sdk@0.165.0) (2023-06-09)
 
 ### Features

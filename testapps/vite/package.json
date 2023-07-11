@@ -15,22 +15,22 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@wundergraph/swr": "workspace:*",
     "@wundergraph/sdk": "workspace:*",
-    "swr": "^2.1.5",
+    "@wundergraph/swr": "workspace:*",
     "react": "^18.1.0",
-    "react-dom": "^18.1.0"
+    "react-dom": "^18.1.0",
+    "swr": "^2.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
-    "@vitejs/plugin-react": "^2.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
     "concurrently": "^6.0.0",
     "graphql": "^16.3.0",
     "open-cli": "^7.0.1",
     "react-router-dom": "^6.4.3",
     "typescript": "^4.6.4",
-    "vite": "^3.0.0",
+    "vite": "^4.3.9",
     "wait-on": "^6.0.0"
   }
 }

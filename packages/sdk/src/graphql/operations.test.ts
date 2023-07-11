@@ -1112,9 +1112,9 @@ const subTest = (rawSchema: string, testCase: TestCase[]) => {
 		const operation = queryDocument.definitions.find(
 			(node) => node.kind === 'OperationDefinition'
 		) as OperationDefinitionNode;
-		const actual = operationResponseToJSONSchema(schema, queryDocument, operation, []);
+		const actual = operationResponseToJSONSchema(schema, queryDocument, operation, [], new Set<string>());
 		expect(pretty(actual)).toMatchSnapshot(`testCase_${i}_responseJSONSchema`);
-		const actualVariables = operationVariablesToJSONSchema(schema, operation, [], false, false, []);
+		const actualVariables = operationVariablesToJSONSchema(schema, operation, [], false, false, new Set<string>());
 		expect(pretty(actualVariables)).toMatchSnapshot(`testCase_${i}_variablesJSONSchema`);
 	});
 };

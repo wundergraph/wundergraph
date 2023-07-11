@@ -3,6 +3,7 @@ import objectHash from 'object-hash';
 import type { GraphQLOperation } from '../../../graphql/operations';
 import type { ResolvedApplication, ResolvedWunderGraphConfig } from '../../../configure';
 import { OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
+import { deepClone } from '../../../utils/helper';
 
 export const isNotInternal = (op: GraphQLOperation): boolean => !op.Internal;
 
@@ -21,7 +22,7 @@ const filteredOperations = (application: ResolvedApplication, includeInternal: b
 	includeInternal ? application.Operations : application.Operations.filter((op) => !op.Internal);
 
 export const filterNodeJSOperations = (application: ResolvedApplication): ResolvedApplication => {
-	const copy = JSON.parse(JSON.stringify(application)) as ResolvedApplication;
+	const copy = deepClone(application);
 	copy.Operations = copy.Operations.filter((op) => op.ExecutionEngine !== OperationExecutionEngine.ENGINE_NODEJS);
 	return copy;
 };
