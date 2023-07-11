@@ -25,7 +25,6 @@ import (
 
 const (
 	serializedConfigFilename = "wundergraph.wgconfig"
-	configEntryPointFilename = "wundergraph.config.ts"
 	serverEntryPointFilename = "wundergraph.server.ts"
 
 	wunderctlBinaryPathEnvKey = "WUNDERCTL_BINARY_PATH"
