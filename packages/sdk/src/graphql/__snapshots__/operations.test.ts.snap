@@ -2633,11 +2633,13 @@ exports[`parseGraphQLOperations 1`] = `
         },
       },
       "Content": "{me{name reviews{id body}}}",
+      "Description": "",
       "ExecutionEngine": 0,
       "HooksConfiguration": {
         "customResolve": false,
         "httpTransportOnRequest": false,
         "httpTransportOnResponse": false,
+        "httpTransportOnTransport": false,
         "mockResolve": {
           "enable": false,
           "subscriptionPollingIntervalMillis": 0,
@@ -2729,11 +2731,13 @@ exports[`parseGraphQLOperations 1`] = `
         },
       },
       "Content": "mutation($petInput:PetInput!){postPets(petInput:$petInput){name}}",
+      "Description": "",
       "ExecutionEngine": 0,
       "HooksConfiguration": {
         "customResolve": false,
         "httpTransportOnRequest": false,
         "httpTransportOnResponse": false,
+        "httpTransportOnTransport": false,
         "mockResolve": {
           "enable": false,
           "subscriptionPollingIntervalMillis": 0,
@@ -2915,11 +2919,13 @@ exports[`parseGraphQLOperations 1`] = `
         },
       },
       "Content": "subscription@internalOperation{newPets{name}}",
+      "Description": "",
       "ExecutionEngine": 0,
       "HooksConfiguration": {
         "customResolve": false,
         "httpTransportOnRequest": false,
         "httpTransportOnResponse": false,
+        "httpTransportOnTransport": false,
         "mockResolve": {
           "enable": false,
           "subscriptionPollingIntervalMillis": 0,
@@ -2993,11 +2999,13 @@ exports[`parseGraphQLOperations 1`] = `
         },
       },
       "Content": "mutation($input:TestType_Input!){test_endpoint(input:$input){...on A_const_container{A_const}...on mutation_test_endpoint_oneOf_1{B}}}",
+      "Description": "",
       "ExecutionEngine": 0,
       "HooksConfiguration": {
         "customResolve": false,
         "httpTransportOnRequest": false,
         "httpTransportOnResponse": false,
+        "httpTransportOnTransport": false,
         "mockResolve": {
           "enable": false,
           "subscriptionPollingIntervalMillis": 0,

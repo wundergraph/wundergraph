@@ -422,8 +422,6 @@ var upCmd = &cobra.Command{
 
 		configEntry := configEntryPointFilename
 
-		
-
 		if IsDefineConfig(filepath.Join(wunderGraphDir, configEntry)) {
 			EnsureWunderGraphApplicationTS(wunderGraphDir)
 			configEntry = filepath.Join("generated", "wundergraph.application.ts")
@@ -572,7 +570,6 @@ func init() {
 	rootCmd.AddCommand(upCmd)
 }
 
-
 const (
 	wunderGraphApplicationTs = "wundergraph.application.ts"
 )
@@ -599,12 +596,12 @@ type wunderGraphApplicationTemplateData struct {
 }
 
 func IsDefineConfig(configEntry string) bool {
-    b, err := os.ReadFile(configEntry)
-    if err != nil {
-        return false
-    }
-    s := string(b)
-    return strings.Contains(s, "export default defineConfig") || strings.Contains(s, "WunderGraphConfig")
+	b, err := os.ReadFile(configEntry)
+	if err != nil {
+		return false
+	}
+	s := string(b)
+	return strings.Contains(s, "export default defineConfig") || strings.Contains(s, "WunderGraphConfig")
 }
 
 func EnsureWunderGraphApplicationTS(wunderGraphDir string) error {

@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -725,6 +725,9 @@ importers:
       object-hash:
         specifier: ^2.2.0
         version: 2.2.0
+      openai:
+        specifier: ^3.3.0
+        version: 3.3.0(debug@4.3.4)
       openapi-types:
         specifier: 12.1.0
         version: 12.1.0
@@ -1182,6 +1185,9 @@ importers:
       graphql:
         specifier: ^16.3.0
         version: 16.6.0
+      openai:
+        specifier: ^3.3.0
+        version: 3.3.0
       pg:
         specifier: ^8.7.3
         version: 8.8.0
@@ -1194,6 +1200,9 @@ importers:
       zod:
         specifier: ^3.21.4
         version: 3.21.4
+      zod-to-json-schema:
+        specifier: ^3.20.2
+        version: 3.20.2(zod@3.21.4)
 
   testapps/expo:
     dependencies:
@@ -10466,6 +10475,14 @@ packages:
       - debug
     dev: true
 
+  /axios@0.26.1:
+    resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
+    dependencies:
+      follow-redirects: 1.15.2
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
   /axios@0.26.1(debug@4.3.4):
     resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
     dependencies:
@@ -14605,7 +14622,6 @@ packages:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       mime-types: 2.1.35
-    dev: true
 
   /formdata-node@4.4.1:
     resolution: {integrity: sha512-0iirZp3uVDjVGt9p49aTaqjk84TrglENEDuqfdlZQ1roC9CWlPk6Avf8EEnZNcAqPonwkG35x4n3ww/1THYAeQ==}
@@ -21209,6 +21225,24 @@ packages:
       is-docker: 2.2.1
       is-wsl: 2.2.0
 
+  /openai@3.3.0:
+    resolution: {integrity: sha512-uqxI/Au+aPRnsaQRe8CojU0eCR7I0mBiKjD3sNMzY6DaC1ZVrc85u98mtJW6voDug8fgGN+DIZmTDxTthxb7dQ==}
+    dependencies:
+      axios: 0.26.1
+      form-data: 4.0.0
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
+  /openai@3.3.0(debug@4.3.4):
+    resolution: {integrity: sha512-uqxI/Au+aPRnsaQRe8CojU0eCR7I0mBiKjD3sNMzY6DaC1ZVrc85u98mtJW6voDug8fgGN+DIZmTDxTthxb7dQ==}
+    dependencies:
+      axios: 0.26.1(debug@4.3.4)
+      form-data: 4.0.0
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
   /openapi-types@12.1.0:
     resolution: {integrity: sha512-XpeCy01X6L5EpP+6Hc3jWN7rMZJ+/k1lwki/kTmWzbVhdPie3jd5O2ZtedEx8Yp58icJ0osVldLMrTB/zslQXA==}
     dev: false
@@ -27261,7 +27295,6 @@ packages:
     resolution: {directory: packages/sdk, type: directory}
     id: file:packages/sdk
     name: '@wundergraph/sdk'
-    version: 0.167.1
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.3.0
@@ -27308,6 +27341,7 @@ packages:
       lodash: 4.17.21
       long: 5.2.1
       object-hash: 2.2.0
+      openai: 3.3.0(debug@4.3.4)
       openapi-types: 12.1.0
       pino: 8.11.0
       pino-pretty: 10.0.0
