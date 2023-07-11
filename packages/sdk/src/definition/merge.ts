@@ -30,8 +30,20 @@ export interface mergeApiInput<T extends {} = {}> {
 }
 
 export const mergeApis = <T extends {} = {}>(input: mergeApiInput<T>): Api<T> => {
+	const assignedIds = new Map<string, number>();
+
+	const assignId = <TAPI, TDataSource>(api: Api<TAPI>, ds: DataSource<TDataSource>) => {
+		if (ds.Id === undefined && api.Namespace) {
+			const prev = assignedIds.get(api.Namespace);
+			const next = prev ?? 0 + 1;
+			ds.Id = next == 1 ? api.Namespace : `${api.Namespace}_${next}`;
+			assignedIds.set(api.Namespace, next);
+		}
+		return ds;
+	};
+
 	const dataSources: DataSource<T>[] = input.apis
-		.map((api) => api.DataSources || [])
+		.map((api) => api.DataSources.map((ds) => assignId(api, ds)) || [])
 		.reduce((previousValue, currentValue) => [...previousValue, ...currentValue], []);
 
 	const jsonScalars = new Set<string>();

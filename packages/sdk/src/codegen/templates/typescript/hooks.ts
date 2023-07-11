@@ -17,17 +17,12 @@ export class WunderGraphHooksPlugin implements Template {
 		const _internalMutations = operations(application, OperationType.MUTATION, true);
 		const _subscriptions = operations(application, OperationType.SUBSCRIPTION, false);
 		const _uploadProviders = application.S3UploadProvider;
-		console.log(
-			'DSSS',
-			application.EngineConfiguration.DataSources.filter((ds) => ds.Id !== undefined && ds.Id !== '')
-		);
 		const content = tmpl({
 			modelImports: modelImports(application, true),
 			operationNamesUnion: application.Operations.map((o) => `"${o.Name}"`).join(' | ') || 'never',
 			dataSourcesUnion:
 				application.EngineConfiguration.DataSources.filter((ds) => ds.Id !== undefined && ds.Id !== '')
 					.map((ds) => {
-						console.log('DS', ds);
 						return `"${ds.Id}"`;
 					})
 					.filter((ds, i, arr) => arr.indexOf(ds) === i)
