@@ -775,6 +775,7 @@ type _Service {
     },
   ],
   "DefaultFlushInterval": 500,
+  "Features": undefined,
   "Fields": [
     {
       "argumentsConfiguration": [],
@@ -2205,6 +2206,7 @@ type _Service {
     },
   ],
   "DefaultFlushInterval": 500,
+  "Features": undefined,
   "Fields": [
     {
       "argumentsConfiguration": [],
