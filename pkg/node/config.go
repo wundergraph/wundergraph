@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
+	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -102,6 +103,18 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 		return nil, err
 	}
 
+	var apiHooks []*hooks.Hook
+	for _, hook := range graphConfig.GetHooks() {
+		matcher := hook.GetMatcher()
+		apiHooks = append(apiHooks, &hooks.Hook{
+			Type: hook.Type,
+			Matcher: hooks.HookMatcher{
+				OperationType: matcher.GetOperationType(),
+				DataSources:   matcher.GetDatasources(),
+			},
+		})
+	}
+
 	config := WunderNodeConfig{
 		Api: &apihandler.Api{
 			PrimaryHost:           fmt.Sprintf("%s:%d", listener.Host, listener.Port),
@@ -137,6 +150,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 					Sampler:              otelSampler,
 				},
 			},
+			Hooks: apiHooks,
 		},
 		Server: &Server{
 			GracefulShutdownTimeout: 0,

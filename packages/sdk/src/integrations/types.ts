@@ -29,7 +29,7 @@ export interface WunderGraphIntegration {
 export interface WunderGraphEnterpriseIntegration {
 	name: string;
 	hooks: WunderGraphIntegration['hooks'] & {
-		'hooks:http:originTransport'?: <Context>(context: Context) => void;
+		'http:transport'?: <Context>(context: Context) => void;
 	};
 }
 

@@ -62,7 +62,7 @@ func (f *apiTransportFactory) DefaultHTTPProxyURL() *url.URL {
 type operationTransportHooks struct {
 	OnRequest   bool
 	OnResponse  bool
-	OnTransport bool
+	OnTransport hooks.Matcher
 }
 
 type ApiTransport struct {

@@ -179,6 +179,29 @@ export function injectVariableKindToJSON(object: InjectVariableKind): string {
   }
 }
 
+export enum HookType {
+  HTTP_TRANSPORT = 0,
+}
+
+export function hookTypeFromJSON(object: any): HookType {
+  switch (object) {
+    case 0:
+    case "HTTP_TRANSPORT":
+      return HookType.HTTP_TRANSPORT;
+    default:
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum HookType");
+  }
+}
+
+export function hookTypeToJSON(object: HookType): string {
+  switch (object) {
+    case HookType.HTTP_TRANSPORT:
+      return "HTTP_TRANSPORT";
+    default:
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum HookType");
+  }
+}
+
 export enum ClaimType {
   /** ISSUER - iss */
   ISSUER = 0,
@@ -826,6 +849,16 @@ export interface GraphQLDataSourceHooksConfiguration {
   onWSTransportConnectionInit: boolean;
 }
 
+export interface HookMatcher {
+  operationType?: OperationType | undefined;
+  datasources: string[];
+}
+
+export interface Hook {
+  type: HookType;
+  matcher: HookMatcher | undefined;
+}
+
 export interface OperationHooksConfiguration {
   preResolve: boolean;
   postResolve: boolean;
@@ -834,7 +867,6 @@ export interface OperationHooksConfiguration {
   mockResolve: MockResolveHookConfiguration | undefined;
   httpTransportOnRequest: boolean;
   httpTransportOnResponse: boolean;
-  httpTransportOnTransport: boolean;
   customResolve: boolean;
 }
 
@@ -1088,6 +1120,7 @@ export interface WunderGraphConfiguration {
   dangerouslyEnableGraphQLEndpoint: boolean;
   configHash: string;
   enabledFeatures: EnabledFeatures | undefined;
+  hooks: Hook[];
 }
 
 /**
@@ -2637,6 +2670,131 @@ export const GraphQLDataSourceHooksConfiguration = {
   },
 };
 
+function createBaseHookMatcher(): HookMatcher {
+  return { operationType: undefined, datasources: [] };
+}
+
+export const HookMatcher = {
+  encode(message: HookMatcher, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.operationType !== undefined) {
+      writer.uint32(8).int32(message.operationType);
+    }
+    for (const v of message.datasources) {
+      writer.uint32(18).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): HookMatcher {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseHookMatcher();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.operationType = reader.int32() as any;
+          break;
+        case 2:
+          message.datasources.push(reader.string());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): HookMatcher {
+    return {
+      operationType: isSet(object.operationType) ? operationTypeFromJSON(object.operationType) : undefined,
+      datasources: Array.isArray(object?.datasources) ? object.datasources.map((e: any) => String(e)) : [],
+    };
+  },
+
+  toJSON(message: HookMatcher): unknown {
+    const obj: any = {};
+    message.operationType !== undefined &&
+      (obj.operationType = message.operationType !== undefined
+        ? operationTypeToJSON(message.operationType)
+        : undefined);
+    if (message.datasources) {
+      obj.datasources = message.datasources.map((e) => e);
+    } else {
+      obj.datasources = [];
+    }
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<HookMatcher>, I>>(object: I): HookMatcher {
+    const message = createBaseHookMatcher();
+    message.operationType = object.operationType ?? undefined;
+    message.datasources = object.datasources?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBaseHook(): Hook {
+  return { type: 0, matcher: undefined };
+}
+
+export const Hook = {
+  encode(message: Hook, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.type !== 0) {
+      writer.uint32(8).int32(message.type);
+    }
+    if (message.matcher !== undefined) {
+      HookMatcher.encode(message.matcher, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): Hook {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseHook();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.type = reader.int32() as any;
+          break;
+        case 2:
+          message.matcher = HookMatcher.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Hook {
+    return {
+      type: isSet(object.type) ? hookTypeFromJSON(object.type) : 0,
+      matcher: isSet(object.matcher) ? HookMatcher.fromJSON(object.matcher) : undefined,
+    };
+  },
+
+  toJSON(message: Hook): unknown {
+    const obj: any = {};
+    message.type !== undefined && (obj.type = hookTypeToJSON(message.type));
+    message.matcher !== undefined && (obj.matcher = message.matcher ? HookMatcher.toJSON(message.matcher) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<Hook>, I>>(object: I): Hook {
+    const message = createBaseHook();
+    message.type = object.type ?? 0;
+    message.matcher = (object.matcher !== undefined && object.matcher !== null)
+      ? HookMatcher.fromPartial(object.matcher)
+      : undefined;
+    return message;
+  },
+};
+
 function createBaseOperationHooksConfiguration(): OperationHooksConfiguration {
   return {
     preResolve: false,
@@ -2646,7 +2804,6 @@ function createBaseOperationHooksConfiguration(): OperationHooksConfiguration {
     mockResolve: undefined,
     httpTransportOnRequest: false,
     httpTransportOnResponse: false,
-    httpTransportOnTransport: false,
     customResolve: false,
   };
 }
@@ -2674,11 +2831,8 @@ export const OperationHooksConfiguration = {
     if (message.httpTransportOnResponse === true) {
       writer.uint32(56).bool(message.httpTransportOnResponse);
     }
-    if (message.httpTransportOnTransport === true) {
-      writer.uint32(64).bool(message.httpTransportOnTransport);
-    }
     if (message.customResolve === true) {
-      writer.uint32(72).bool(message.customResolve);
+      writer.uint32(64).bool(message.customResolve);
     }
     return writer;
   },
@@ -2712,9 +2866,6 @@ export const OperationHooksConfiguration = {
           message.httpTransportOnResponse = reader.bool();
           break;
         case 8:
-          message.httpTransportOnTransport = reader.bool();
-          break;
-        case 9:
           message.customResolve = reader.bool();
           break;
         default:
@@ -2734,9 +2885,6 @@ export const OperationHooksConfiguration = {
       mockResolve: isSet(object.mockResolve) ? MockResolveHookConfiguration.fromJSON(object.mockResolve) : undefined,
       httpTransportOnRequest: isSet(object.httpTransportOnRequest) ? Boolean(object.httpTransportOnRequest) : false,
       httpTransportOnResponse: isSet(object.httpTransportOnResponse) ? Boolean(object.httpTransportOnResponse) : false,
-      httpTransportOnTransport: isSet(object.httpTransportOnTransport)
-        ? Boolean(object.httpTransportOnTransport)
-        : false,
       customResolve: isSet(object.customResolve) ? Boolean(object.customResolve) : false,
     };
   },
@@ -2751,7 +2899,6 @@ export const OperationHooksConfiguration = {
       (obj.mockResolve = message.mockResolve ? MockResolveHookConfiguration.toJSON(message.mockResolve) : undefined);
     message.httpTransportOnRequest !== undefined && (obj.httpTransportOnRequest = message.httpTransportOnRequest);
     message.httpTransportOnResponse !== undefined && (obj.httpTransportOnResponse = message.httpTransportOnResponse);
-    message.httpTransportOnTransport !== undefined && (obj.httpTransportOnTransport = message.httpTransportOnTransport);
     message.customResolve !== undefined && (obj.customResolve = message.customResolve);
     return obj;
   },
@@ -2767,7 +2914,6 @@ export const OperationHooksConfiguration = {
       : undefined;
     message.httpTransportOnRequest = object.httpTransportOnRequest ?? false;
     message.httpTransportOnResponse = object.httpTransportOnResponse ?? false;
-    message.httpTransportOnTransport = object.httpTransportOnTransport ?? false;
     message.customResolve = object.customResolve ?? false;
     return message;
   },
@@ -5576,6 +5722,7 @@ function createBaseWunderGraphConfiguration(): WunderGraphConfiguration {
     dangerouslyEnableGraphQLEndpoint: false,
     configHash: "",
     enabledFeatures: undefined,
+    hooks: [],
   };
 }
 
@@ -5598,6 +5745,9 @@ export const WunderGraphConfiguration = {
     }
     if (message.enabledFeatures !== undefined) {
       EnabledFeatures.encode(message.enabledFeatures, writer.uint32(50).fork()).ldelim();
+    }
+    for (const v of message.hooks) {
+      Hook.encode(v!, writer.uint32(58).fork()).ldelim();
     }
     return writer;
   },
@@ -5627,6 +5777,9 @@ export const WunderGraphConfiguration = {
         case 6:
           message.enabledFeatures = EnabledFeatures.decode(reader, reader.uint32());
           break;
+        case 7:
+          message.hooks.push(Hook.decode(reader, reader.uint32()));
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -5645,6 +5798,7 @@ export const WunderGraphConfiguration = {
         : false,
       configHash: isSet(object.configHash) ? String(object.configHash) : "",
       enabledFeatures: isSet(object.enabledFeatures) ? EnabledFeatures.fromJSON(object.enabledFeatures) : undefined,
+      hooks: Array.isArray(object?.hooks) ? object.hooks.map((e: any) => Hook.fromJSON(e)) : [],
     };
   },
 
@@ -5662,6 +5816,11 @@ export const WunderGraphConfiguration = {
     message.configHash !== undefined && (obj.configHash = message.configHash);
     message.enabledFeatures !== undefined &&
       (obj.enabledFeatures = message.enabledFeatures ? EnabledFeatures.toJSON(message.enabledFeatures) : undefined);
+    if (message.hooks) {
+      obj.hooks = message.hooks.map((e) => e ? Hook.toJSON(e) : undefined);
+    } else {
+      obj.hooks = [];
+    }
     return obj;
   },
 
@@ -5677,6 +5836,7 @@ export const WunderGraphConfiguration = {
     message.enabledFeatures = (object.enabledFeatures !== undefined && object.enabledFeatures !== null)
       ? EnabledFeatures.fromPartial(object.enabledFeatures)
       : undefined;
+    message.hooks = object.hooks?.map((e) => Hook.fromPartial(e)) || [];
     return message;
   },
 };

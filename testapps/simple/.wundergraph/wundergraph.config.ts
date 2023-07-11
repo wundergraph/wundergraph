@@ -7,7 +7,7 @@ import { dynamicRouter } from '@wundergraph/sdk/dynamic-router';
 const batcher = dynamicRouter({
 	match: {
 		operationType: 'query',
-		datasources: [''],
+		datasources: ['countries'],
 	},
 	handler: ({ request, response }) => {
 		return {

@@ -65,6 +65,8 @@ import {
 	ValueType,
 	WebhookConfiguration,
 	WunderGraphConfiguration,
+	Hook,
+	HookType,
 } from '@wundergraph/protobuf';
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
@@ -87,6 +89,8 @@ import { generateOperations } from '../codegen/generateoperations';
 import { configurationHash } from '../codegen/templates/typescript/helpers';
 import templates from '../codegen/templates';
 import { WunderGraphConfigurationFilename } from '../server/server';
+import { WunderGraphAppConfig, WunderGraphEnterpriseIntegration, WunderGraphIntegration } from '../integrations/types';
+import { DynamicRouterConfig } from '../dynamic-router';
 
 export const WG_GENERATE_CONFIG_JSON = process.env['WG_GENERATE_CONFIG_JSON'] === 'true';
 
@@ -365,6 +369,7 @@ export interface ResolvedWunderGraphConfig {
 	experimental: {
 		orm: boolean;
 	};
+	integrations: WunderGraphIntegration[];
 }
 
 export interface CodeGenerationConfig {
@@ -547,6 +552,7 @@ const resolveConfig = async (
 		experimental: {
 			orm: config.experimental?.orm ?? false,
 		},
+		integrations: (config as WunderGraphAppConfig).integrations,
 	};
 
 	const appConfig = config.links ? addLinks(resolvedConfig, config.links) : resolvedConfig;
@@ -990,16 +996,6 @@ export const configureWunderGraphApplication = <
 				}
 			}
 
-			if (config.server?.hooks?.global?.httpTransport?.onOriginTransport) {
-				const enableForAllOperations = true;
-				if (enableForAllOperations) {
-					app.Operations = app.Operations.map((op) => ({
-						...op,
-						HooksConfiguration: { ...op.HooksConfiguration, httpTransportOnTransport: true },
-					}));
-				}
-			}
-
 			if (config.server?.hooks?.global?.wsTransport?.onConnectionInit) {
 				const enableForDataSources = config.server?.hooks?.global?.wsTransport?.onConnectionInit.enableForDataSources;
 				app.EngineConfiguration.DataSources = app.EngineConfiguration.DataSources.map((ds) => {
@@ -1205,6 +1201,31 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 	const fields: FieldConfiguration[] = config.application.EngineConfiguration.Fields;
 	const types: TypeConfiguration[] = config.application.EngineConfiguration.Types;
 
+	const hooks: Hook[] = [];
+	const operationTypes = {
+		query: OperationType.QUERY,
+		mutation: OperationType.MUTATION,
+		subscription: OperationType.SUBSCRIPTION,
+	};
+	for (const integration of config.integrations as WunderGraphEnterpriseIntegration[]) {
+		const httpTransport = integration.hooks['http:transport'];
+		if (httpTransport) {
+			const config = httpTransport as unknown as DynamicRouterConfig;
+			if (config.match) {
+				const matches = Array.isArray(config.match) ? config.match : [config.match];
+				for (const match of matches) {
+					hooks.push({
+						type: HookType.HTTP_TRANSPORT,
+						matcher: {
+							operationType: match.operationType ? operationTypes[match.operationType] : undefined,
+							datasources: (match as { datasources?: string[] }).datasources ?? [],
+						},
+					});
+				}
+			}
+		}
+	}
+
 	const out: WunderGraphConfiguration = {
 		apiId: config.deployment.api.id,
 		environmentIds: [config.deployment.environment.id],
@@ -1289,6 +1310,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
 		configHash: configurationHash(config),
 		enabledFeatures: configEnabledFeatures(config, apiCount),
+		hooks,
 	};
 	return out;
 };
@@ -1540,7 +1562,6 @@ const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFi
 			},
 			httpTransportOnResponse: false,
 			httpTransportOnRequest: false,
-			httpTransportOnTransport: false,
 			customResolve: false,
 		},
 		VariablesConfiguration: {

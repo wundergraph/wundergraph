@@ -98,7 +98,6 @@ export interface GraphQLOperation {
 		};
 		httpTransportOnRequest: boolean;
 		httpTransportOnResponse: boolean;
-		httpTransportOnTransport: boolean;
 		customResolve: boolean;
 	};
 	VariablesConfiguration: {
@@ -260,7 +259,6 @@ export const parseGraphQLOperations = (
 								},
 								httpTransportOnResponse: false,
 								httpTransportOnRequest: false,
-								httpTransportOnTransport: false,
 								customResolve: false,
 							},
 							VariablesConfiguration: {

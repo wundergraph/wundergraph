@@ -58,6 +58,7 @@ export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) 
 				customIntScalars: false,
 				customFloatScalars: false,
 			},
+			hooks: [],
 		},
 		serverConfig,
 		gracefulShutdown: false,

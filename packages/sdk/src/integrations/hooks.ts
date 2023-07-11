@@ -145,10 +145,10 @@ export const runHookHttpOriginTransport = async ({
 	context: HookContext;
 }) => {
 	for (const integration of config.integrations as WunderGraphEnterpriseIntegration[]) {
-		if (integration.hooks?.['hooks:http:originTransport']) {
+		if (integration.hooks?.['http:transport']) {
 			await withTakingALongTimeMsg({
 				name: integration.name,
-				hookResult: integration.hooks['hooks:http:originTransport'](context),
+				hookResult: integration.hooks['http:transport'](context),
 			});
 		}
 	}
