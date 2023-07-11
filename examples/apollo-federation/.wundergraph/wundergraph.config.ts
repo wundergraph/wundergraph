@@ -6,16 +6,16 @@ import operations from './wundergraph.operations';
 const federatedApi = introspect.federation({
 	upstreams: [
 		{
-			url: 'https://wg-federation-demo-accounts.fly.dev/graphql',
+			url: 'http://localhost:4001/graphql',
 		},
 		{
-			url: 'https://wg-federation-demo-products.fly.dev/graphql',
+			url: 'http://localhost:4003/graphql',
 		},
 		{
-			url: 'https://wg-federation-demo-reviews.fly.dev/graphql',
+			url: 'http://localhost:4002/graphql',
 		},
 		{
-			url: 'https://wg-federation-demo-inventory.fly.dev/graphql',
+			url: 'http://localhost:4004/graphql',
 		},
 	],
 });

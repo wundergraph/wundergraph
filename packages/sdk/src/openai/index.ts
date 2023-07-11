@@ -11,7 +11,7 @@ export interface IOpenaiAgentFactory<Schemas> {
 		functions: FunctionConfiguration<Schemas>[];
 		structuredOutputSchema?: StructuredOutputSchema;
 		model?: string;
-	}): IOpenApiAgent<StructuredOutputSchema>;
+	}): IOpenaiAgent<StructuredOutputSchema>;
 	parseUserInput<Schema extends AnyZodObject>(input: {
 		userInput: string;
 		schema: Schema;
@@ -114,7 +114,7 @@ export class OpenaiAgentFactory<Schemas> implements IOpenaiAgentFactory<Schemas>
 	}
 }
 
-export interface IOpenApiAgent<StructuredOutputSchema = unknown> {
+export interface IOpenaiAgent<StructuredOutputSchema = unknown> {
 	execWithPrompt(config: { prompt: string; outPrompt?: string; debug?: boolean }): Promise<
 		StructuredOutputSchema extends AnyZodObject
 			? {
@@ -127,7 +127,7 @@ export interface IOpenApiAgent<StructuredOutputSchema = unknown> {
 	>;
 }
 
-export class OpenApiAgent<StructuredOutputSchema = unknown> implements IOpenApiAgent<StructuredOutputSchema> {
+export class OpenApiAgent<StructuredOutputSchema = unknown> implements IOpenaiAgent<StructuredOutputSchema> {
 	private readonly openAIClient: OpenAIApi;
 	private readonly functions: ChatCompletionFunctions[];
 	private readonly model: string;
@@ -301,11 +301,11 @@ export class OpenApiAgent<StructuredOutputSchema = unknown> implements IOpenApiA
 					const structuredResponse = JSON.parse(completions.data.choices[0].message!.function_call!.arguments!);
 					this.outputZodSchema.parse(structuredResponse);
 					return {
-						structuredOutput: structuredResponse as any,
+						structuredOutput: structuredResponse,
 					} as any;
 				}
 			}
-		} catch (e) {
+		} catch (e: any) {
 			this.log.error('OpenAI error', e as any);
 			throw e;
 		}

@@ -27,7 +27,7 @@
       "types": "./dist/operations/index.d.ts",
       "default": "./dist/operations/index.js"
     },
-    "./openapi": {
+    "./openai": {
       "types": "./dist/openai/index.d.ts",
       "default": "./dist/openai/index.js"
     },
