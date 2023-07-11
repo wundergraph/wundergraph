@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/url"
 
+	"github.com/wundergraph/wundergraph/pkg/config"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
@@ -86,7 +87,7 @@ func dataSourceMetric(dataSourceTag string, urlVariable *wgpb.ConfigurationVaria
 }
 
 func DataSourceMetrics(wunderGraphDir string) ([]*Metric, error) {
-	wgConfig, err := readWunderGraphConfig(wunderGraphDir)
+	wgConfig, err := config.WunderGraphApplicationConfig(wunderGraphDir)
 	if err != nil {
 		return nil, err
 	}

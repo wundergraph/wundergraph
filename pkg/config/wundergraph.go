@@ -1,4 +1,4 @@
-package telemetry
+package config
 
 import (
 	"os"
@@ -9,7 +9,9 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
-func readWunderGraphConfig(wunderGraphDir string) (*wgpb.WunderGraphConfiguration, error) {
+// WunderGraphApplicationConfig returns the configuration for the WunderGraph application
+// at the given directory
+func WunderGraphApplicationConfig(wunderGraphDir string) (*wgpb.WunderGraphConfiguration, error) {
 	configFile := filepath.Join(wunderGraphDir, "generated", "wundergraph.wgconfig")
 	configData, err := os.ReadFile(configFile)
 	if err != nil {

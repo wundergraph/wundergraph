@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/go-retryablehttp"
 	"go.uber.org/zap"
 
+	"github.com/wundergraph/wundergraph/pkg/config"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -207,7 +208,7 @@ type MetricClientInfo struct {
 }
 
 func NewClientInfo(version string, anonymousID string, wunderGraphDir string) (*MetricClientInfo, error) {
-	config, err := readWunderGraphConfig(wunderGraphDir)
+	config, err := config.WunderGraphApplicationConfig(wunderGraphDir)
 	if err != nil {
 		return nil, err
 	}
