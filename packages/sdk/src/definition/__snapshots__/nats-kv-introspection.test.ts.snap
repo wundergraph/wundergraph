@@ -1055,7 +1055,8 @@ exports[`nats kv introspection should work for nested models 2`] = `
     }
   ],
   "Types": [],
-  "interpolateVariableDefinitionAsJSON": []
+  "interpolateVariableDefinitionAsJSON": [],
+  "CustomJsonScalars": {}
 }"
 `;
 
@@ -1808,6 +1809,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
     }
   ],
   "Types": [],
-  "interpolateVariableDefinitionAsJSON": []
+  "interpolateVariableDefinitionAsJSON": [],
+  "CustomJsonScalars": {}
 }"
 `;
