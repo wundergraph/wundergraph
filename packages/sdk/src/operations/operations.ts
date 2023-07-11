@@ -220,7 +220,7 @@ const createMutation =
 		errors = [],
 	}: {
 		input?: Input;
-		description: string;
+		description?: string;
 		errors?: { new (): OperationError }[];
 		response?: ZodResponse;
 		handler: ZodResponse extends z.ZodObject<any>
