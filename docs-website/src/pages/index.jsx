@@ -79,7 +79,7 @@ export default function HomePage() {
 					<QuickLink
 						title="Introduction to WunderGraph"
 						description="Understand the big picture of WunderGraph, why we've built it and how it works."
-						href="/introduction-to-wundergraph"
+						href="/introduction"
 						more
 					/>
 				</QuickLinks>
