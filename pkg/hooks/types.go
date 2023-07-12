@@ -7,10 +7,13 @@
  */
 package hooks
 
-import "github.com/wundergraph/wundergraph/pkg/wgpb"
+import (
+	"github.com/wundergraph/wundergraph/pkg/operation"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
+)
 
 type HookMatcher struct {
-	OperationType wgpb.OperationType
+	OperationType operation.Type
 	DataSources   []string
 }
 
@@ -32,7 +35,7 @@ type Hook struct {
 }
 
 type HookCheck struct {
-	OperationType wgpb.OperationType
+	OperationType operation.Type
 	DataSourceID  string
 }
 
@@ -49,7 +52,7 @@ type hookExecutor struct {
 }
 
 func (e *hookExecutor) Matches(check *HookCheck) bool {
-	if check.OperationType != wgpb.OperationType_INVALID && e.matcher.OperationType != wgpb.OperationType_INVALID && e.matcher.OperationType != check.OperationType {
+	if check.OperationType != operation.TypeInvalid && e.matcher.OperationType != operation.TypeInvalid && e.matcher.OperationType != check.OperationType {
 		return false
 	}
 	if len(check.DataSourceID) > 0 && len(e.matcher.DataSources) > 0 && !e.matcher.containsDataSource(check.DataSourceID) {

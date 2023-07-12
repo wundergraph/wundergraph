@@ -32,7 +32,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/pool"
-	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 type GraphQLHandlerOptions struct {
@@ -189,17 +188,10 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	opType := wgpb.OperationType_INVALID
+	opType := operation.TypeInvalid
 
 	if len(shared.Doc.OperationDefinitions) > 0 {
-		switch shared.Doc.OperationDefinitions[0].OperationType {
-		case ast.OperationTypeQuery:
-			opType = wgpb.OperationType_QUERY
-		case ast.OperationTypeMutation:
-			opType = wgpb.OperationType_MUTATION
-		case ast.OperationTypeSubscription:
-			opType = wgpb.OperationType_SUBSCRIPTION
-		}
+		opType = operation.TypeFromASTOperationType(shared.Doc.OperationDefinitions[0].OperationType)
 	}
 
 	shared.Ctx = shared.Ctx.WithContext(operation.WithMetadata(shared.Ctx.Context(), &operation.Metadata{

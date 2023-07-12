@@ -11,6 +11,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -110,7 +111,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 			ID:   hook.GetId(),
 			Type: hook.Type,
 			Matcher: hooks.HookMatcher{
-				OperationType: matcher.GetOperationType(),
+				OperationType: operation.TypeFromOperationType(matcher.GetOperationType()),
 				DataSources:   matcher.GetDatasources(),
 			},
 		})

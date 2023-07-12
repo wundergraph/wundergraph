@@ -22,6 +22,10 @@ export default {
 			namespace: 'countries',
 			url: 'https://countries.trevorblades.com/',
 		}),
+		graphql({
+			namespace: 'countries',
+			url: 'https://countries.trevorblades.com/',
+		}),
 	],
 	integrations: [batcher],
 	options: {

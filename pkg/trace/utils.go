@@ -29,7 +29,7 @@ func SetOperationAttributes(ctx context.Context) {
 		if metaData != nil {
 			span.SetAttributes(
 				WgOperationName.String(metaData.OperationName),
-				WgOperationType.String(metaData.GetOperationTypeString()),
+				WgOperationType.String(metaData.OperationType.String()),
 			)
 		}
 	}

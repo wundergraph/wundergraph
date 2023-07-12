@@ -330,7 +330,7 @@ func (t *ApiTransport) sendRequestHook(r *http.Request, metaData *operation.Meta
 			Body:       body,
 		},
 		OperationName: metaData.OperationName,
-		OperationType: metaData.GetOperationTypeString(),
+		OperationType: metaData.OperationType.String(),
 	}
 	hookData, err := json.Marshal(payload)
 	if err != nil {
@@ -429,7 +429,7 @@ func (t *ApiTransport) handleOnResponseHook(resp *http.Response, metaData *opera
 			Status:     resp.Status,
 		},
 		OperationName: metaData.OperationName,
-		OperationType: metaData.GetOperationTypeString(),
+		OperationType: metaData.OperationType.String(),
 	}
 	hookData, err := json.Marshal(payload)
 	if err != nil {
