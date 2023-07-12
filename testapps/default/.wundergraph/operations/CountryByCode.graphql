@@ -1,0 +1,9 @@
+# load the contry data by code
+query ($code: ID!) {
+	countries_country(code: $code) {
+		code
+		name
+		currencies
+		capital
+	}
+}
