@@ -204,7 +204,9 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 	setRequestHost(request)
 
 	start := time.Now()
-	res, err = t.runHooks(request, metaData, buf)
+	if metaData != nil {
+		res, err = t.runHooks(request, metaData, buf)
+	}
 	if err == nil && res == nil {
 		res, err = t.httpTransport.RoundTrip(request)
 	}
