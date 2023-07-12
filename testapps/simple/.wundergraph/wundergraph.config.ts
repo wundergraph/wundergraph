@@ -9,8 +9,14 @@ const batcher = dynamicRouter({
 		operationType: 'query',
 		datasources: ['weather'],
 	},
-	handler: ({ request }) => {
-		return fetch(request);
+	handler: async ({ request }) => {
+		const response = await fetch(request);
+
+		console.log('WEATHER', await response.json());
+
+		return {
+			...response,
+		};
 	},
 });
 
@@ -24,11 +30,6 @@ export default {
 	],
 	integrations: [batcher],
 	operations: {
-		defaultConfig: {
-			authentication: {
-				required: true,
-			},
-		},
 		custom: {
 			Weather: {
 				caching: {
