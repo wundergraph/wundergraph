@@ -350,11 +350,13 @@ export class OpenApiBuilder {
 				case OperationType.QUERY:
 				case OperationType.SUBSCRIPTION:
 					opPath = {
+						description: op.Description ? op.Description : undefined,
 						get: this.queryOperation(op),
 					};
 					break;
 				case OperationType.MUTATION:
 					opPath = {
+						description: op.Description ? op.Description : undefined,
 						post: this.mutationOperation(op),
 					};
 					break;
