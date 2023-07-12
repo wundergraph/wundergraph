@@ -18,8 +18,10 @@ import { FastifyRequest } from 'fastify';
 import { trace } from '@opentelemetry/api';
 import { Attributes } from '../trace/attributes';
 import { attachErrorToSpan } from '../trace/util';
-import { WunderGraphIntegration } from '../../integrations/types';
+import { WunderGraphEnterpriseIntegration, WunderGraphIntegration } from '../../integrations/types';
 import { runHookHttpOriginTransport } from '../../integrations/hooks';
+import { hookID } from '../util';
+import { DynamicRouterConfig } from '../../dynamic-router';
 
 const maximumRecursionLimit = 16;
 
@@ -284,94 +286,81 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		}
 	);
 
-	const onOriginTransportHandler = config.global?.httpTransport?.onOriginTransport?.hook;
-	const onOriginTransportHookName = 'onOriginTransport';
-
-	fastify.post<
-		{
-			Body: {
-				request: WunderGraphRequest;
-				operationName: string;
-				operationType: 'query' | 'mutation' | 'subscription';
-			};
-		},
-		GlobalHooksRouteConfig
-	>(
-		'/global/httpTransport/onOriginTransport',
-		{ config: { kind: 'global-hook', category: 'httpTransport', hookName: onOriginTransportHookName } },
-		async (request, reply) => {
-			reply.type('application/json');
-			// @TODO disable when EE license is not found?
-			// if (!onOriginTransportHandler) {
-			// 	request.log.error({ hook: onOriginTransportHookName }, 'no handler for hook');
-			// 	reply.code(500);
-			// 	return;
-			// }
-			let result: Response | null | undefined;
-			try {
-				// result = await onOriginTransportHandler({
-				// 	...requestContext(request),
-				// 	operation: {
-				// 		name: request.body.operationName,
-				// 		type: request.body.operationType,
-				// 	},
-				// 	request: requestFromWunderGraphRequest(request.body.request),
-				// });
-
-				// @TODO these should only execute for the matched routes
-				// Instead of having to run the route matching again here, we could
-				// pass a hash of the match config.
-				runHookHttpOriginTransport({
-					config,
-					context: {
-						...requestContext(request),
-						operation: {
-							name: request.body.operationName,
-							type: request.body.operationType,
-						},
-						request: requestFromWunderGraphRequest(request.body.request),
+	for (const integration of config.integrations as WunderGraphEnterpriseIntegration[]) {
+		const httpTransport = integration.hooks['http:transport'];
+		if (httpTransport) {
+			const onOriginTransportHookName = 'onOriginTransport';
+			const config = httpTransport as unknown as DynamicRouterConfig;
+			const matches = Array.isArray(config.match) ? config.match : [config.match];
+			for (const match of matches) {
+				const id = hookID(match);
+				fastify.post<
+					{
+						Body: {
+							request: WunderGraphRequest;
+							operationName: string;
+							operationType: 'query' | 'mutation' | 'subscription';
+						};
 					},
-				});
-			} catch (err) {
-				// Mark the request as errored and attach information about the error
-				if (request.telemetry) {
-					attachErrorToSpan(request.telemetry.parentSpan, err);
-				}
+					GlobalHooksRouteConfig
+				>(
+					`/global/httpTransport/onOriginTransport/${id}`,
+					{ config: { kind: 'global-hook', category: 'httpTransport', hookName: onOriginTransportHookName } },
+					async (request, reply) => {
+						reply.type('application/json');
+						let result: Response | null | undefined;
+						try {
+							result = await config.handler({
+								...requestContext(request),
+								// operation: {
+								// 	name: request.body.operationName,
+								// 	type: request.body.operationType,
+								// },
+								request: requestFromWunderGraphRequest(request.body.request),
+							});
+						} catch (err) {
+							// Mark the request as errored and attach information about the error
+							if (request.telemetry) {
+								attachErrorToSpan(request.telemetry.parentSpan, err);
+							}
 
-				request.log.error(err);
-				reply.code(500);
-				return { hook: onOriginTransportHookName, error: err };
+							request.log.error(err);
+							reply.code(500);
+							return { hook: onOriginTransportHookName, error: err };
+						}
+
+						let response: WunderGraphResponse | undefined;
+
+						if (result != null) {
+							// TODO: We might want to switch that to text, otherwise
+							// we require the body to be JSON representable
+							const body = await result.json();
+							response = {
+								method: request.method as RequestMethod,
+								requestURI: result.url,
+								headers: headersToObject(result.headers) as any, // TODO
+								body,
+								status: result.statusText,
+								statusCode: result.status,
+							};
+						}
+
+						reply.code(200);
+
+						return {
+							op: request.body.operationName,
+							hook: onOriginTransportHookName,
+							response: {
+								skip: result === undefined,
+								cancel: result === null,
+								response,
+							},
+						};
+					}
+				);
 			}
-
-			let response: WunderGraphResponse | undefined;
-
-			if (result != null) {
-				// TODO: We might want to switch that to text, otherwise
-				// we require the body to be JSON representable
-				const body = await result.json();
-				response = {
-					method: request.method as RequestMethod,
-					requestURI: result.url,
-					headers: headersToObject(result.headers) as any, // TODO
-					body,
-					status: result.statusText,
-					statusCode: result.status,
-				};
-			}
-
-			reply.code(200);
-
-			return {
-				op: request.body.operationName,
-				hook: onOriginTransportHookName,
-				response: {
-					skip: result === undefined,
-					cancel: result === null,
-					response,
-				},
-			};
 		}
-	);
+	}
 
 	// wsTransport
 	if (config.global?.wsTransport?.onConnectionInit) {

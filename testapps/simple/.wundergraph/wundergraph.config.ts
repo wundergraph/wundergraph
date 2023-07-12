@@ -7,13 +7,11 @@ import { dynamicRouter } from '@wundergraph/sdk/dynamic-router';
 const batcher = dynamicRouter({
 	match: {
 		operationType: 'query',
-		datasources: ['countries'],
+		datasources: ['weather'],
 	},
-	handler: ({ request, response }) => {
-		return {
-			status: 200,
-			body: 'Hello World',
-		};
+
+	handler: ({ request }) => {
+		return fetch(request);
 	},
 });
 

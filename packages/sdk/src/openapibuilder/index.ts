@@ -162,6 +162,8 @@ export class OpenApiBuilder {
 	private commonOperation(op: GraphQLOperation) {
 		let operationType: OperationTypeName;
 		switch (op.OperationType) {
+			case OperationType.INVALID:
+				throw new Error(`operation ${op.Name} has an invalid type`);
 			case OperationType.QUERY:
 				operationType = 'query';
 				break;

@@ -42,8 +42,13 @@ type FactoryResolver interface {
 
 // Defined again here to avoid circular reference to apihandler.ApiTransportFactory
 
+type ApiTransportFactoryRoundTripperOptions struct {
+	DataSourceID        string
+	EnableStreamingMode bool
+}
+
 type ApiTransportFactory interface {
-	RoundTripper(transport *http.Transport, enableStreamingMode bool) http.RoundTripper
+	RoundTripper(transport *http.Transport, opts ApiTransportFactoryRoundTripperOptions) http.RoundTripper
 	DefaultTransportTimeout() time.Duration
 	DefaultHTTPProxyURL() *url.URL
 }
@@ -63,11 +68,15 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 	log *zap.Logger, hooksClient *hooks.Client) *DefaultFactoryResolver {
 
 	defaultHttpClient := &http.Client{
-		Timeout:   transportFactory.DefaultTransportTimeout(),
-		Transport: transportFactory.RoundTripper(baseTransport, false),
+		Timeout: transportFactory.DefaultTransportTimeout(),
+		Transport: transportFactory.RoundTripper(baseTransport, ApiTransportFactoryRoundTripperOptions{
+			EnableStreamingMode: false,
+		}),
 	}
 	streamingClient := &http.Client{
-		Transport: transportFactory.RoundTripper(baseTransport, true),
+		Transport: transportFactory.RoundTripper(baseTransport, ApiTransportFactoryRoundTripperOptions{
+			EnableStreamingMode: true,
+		}),
 	}
 
 	return &DefaultFactoryResolver{
@@ -93,9 +102,15 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 
 // requiresDedicatedHTTPClient returns true iff the given FetchConfiguration requires a dedicated HTTP client
 func (d *DefaultFactoryResolver) requiresDedicatedHTTPClient(ds *wgpb.DataSourceConfiguration, cfg *wgpb.FetchConfiguration) bool {
-	// when a custom timeout is specified, we can't use the shared http.Client
-	if ds != nil && ds.RequestTimeoutSeconds > 0 {
-		return true
+	if ds != nil {
+		// if the data source has an ID we need a custom transport to store it
+		if ds.GetId() != "" {
+			return true
+		}
+		// when a custom timeout is specified, we can't use the shared http.Client
+		if ds.RequestTimeoutSeconds > 0 {
+			return true
+		}
 	}
 	if cfg != nil {
 		// when mTLS is enabled, we need to create a new client
@@ -202,8 +217,11 @@ func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration,
 	}
 
 	return &http.Client{
-		Timeout:   timeout,
-		Transport: d.transportFactory.RoundTripper(transport, false),
+		Timeout: timeout,
+		Transport: d.transportFactory.RoundTripper(transport, ApiTransportFactoryRoundTripperOptions{
+			DataSourceID:        ds.GetId(),
+			EnableStreamingMode: false,
+		}),
 	}, nil
 }
 
