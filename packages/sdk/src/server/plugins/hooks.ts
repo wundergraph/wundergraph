@@ -18,7 +18,7 @@ import { FastifyRequest } from 'fastify';
 import { trace } from '@opentelemetry/api';
 import { Attributes } from '../trace/attributes';
 import { attachErrorToSpan } from '../trace/util';
-import { WunderGraphEnterpriseIntegration, WunderGraphIntegration } from '../../integrations/types';
+import { InternalIntergration, WunderGraphIntegration } from '../../integrations/types';
 import { runHookHttpOriginTransport } from '../../integrations/hooks';
 import { hookID } from '../util';
 import { DynamicRouterConfig } from '../../dynamic-router';
@@ -37,7 +37,7 @@ export interface GraphQLError {
 
 export interface FastifyHooksOptions extends HooksConfiguration {
 	config: WunderGraphConfiguration;
-	integrations: WunderGraphIntegration[];
+	integrations: InternalIntergration[];
 }
 
 export interface HooksRouteConfig {
@@ -286,7 +286,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		}
 	);
 
-	for (const integration of config.integrations as WunderGraphEnterpriseIntegration[]) {
+	for (const integration of config.integrations) {
 		const httpTransport = integration.hooks['http:transport'];
 		if (httpTransport) {
 			const onOriginTransportHookName = 'onOriginTransport';
