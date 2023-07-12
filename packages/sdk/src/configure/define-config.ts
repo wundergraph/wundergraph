@@ -15,13 +15,14 @@ export const createWunderGraphApplication = async <
 	config: WunderGraphConfig,
 	server?: WunderGraphHooksAndServerConfig
 ) => {
-	const applicationConfig = await runHookConfigSetup({ config });
+	const appConfig = await runHookConfigSetup({ config });
 
-	applicationConfig.server = server;
+	appConfig.server = server;
 
-	configureWunderGraphApplication<TCustomClaim, TPublicClaim>(applicationConfig);
+	configureWunderGraphApplication<TCustomClaim, TPublicClaim>(appConfig);
 
 	await runHookConfigGenerated({
-		config: applicationConfig,
+		config,
+		appConfig,
 	});
 };

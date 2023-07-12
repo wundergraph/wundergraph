@@ -1,10 +1,10 @@
+import { AsyncApiIntrospector, CodeGen, S3UploadConfiguration, WunderGraphConfigApplicationConfig } from '../configure';
 import {
-	AsyncApiIntrospector,
-	CodeGen,
-	S3UploadConfiguration,
-	WunderGraphConfigApplicationConfig,
-	WunderGraphCorsConfiguration,
-} from '../configure';
+	BaseOperationConfiguration,
+	MutationConfiguration,
+	QueryConfiguration,
+	SubscriptionConfiguration,
+} from '../configure/operations';
 import { NodeOptions } from '../configure/options';
 
 export interface ConfigSetupOptions {
@@ -18,7 +18,7 @@ export interface ConfigSetupOptions {
 }
 
 export interface WunderGraphConfigWithAppConfig extends WunderGraphConfig {
-	applicationConfig: WunderGraphConfigApplicationConfig<any, any>;
+	appConfig: WunderGraphConfigApplicationConfig<any, any>;
 }
 
 export interface WunderGraphAppConfig
@@ -32,7 +32,7 @@ export interface WunderGraphDatasource {
 
 export interface WunderGraphIntegrationHooks {
 	'config:setup'?: (options: ConfigSetupOptions) => void;
-	'config:generated'?: (config: WunderGraphConfig) => void;
+	'config:generated'?: (config: WunderGraphConfigWithAppConfig) => void;
 }
 
 export interface WunderGraphIntegration {
@@ -59,9 +59,30 @@ export type TokenAuthProvider = any;
 
 export type WunderGraphNodeOptions = Pick<NodeOptions, 'defaultHttpProxyUrl' | 'defaultRequestTimeoutSeconds'>;
 
+/**
+ * Customize configuration for queries, mutations and subscriptions
+ *
+ * @see Docs https://docs.wundergraph.com/docs/wundergraph-operations-ts-reference/custom-operations-configuration
+ */
+export interface CustomOperationsConfiguration {}
+
+/**
+ * Configuration for queries, mutations and subscriptions
+ *
+ * @see Docs https://docs.wundergraph.com/docs/wundergraph-operations-ts-reference
+ */
+export interface WunderGraphConfigOperations {
+	defaultConfig?: BaseOperationConfiguration;
+	queries?: QueryConfiguration;
+	mutations?: MutationConfiguration;
+	subscriptions?: SubscriptionConfiguration;
+	custom?: CustomOperationsConfiguration;
+}
+
 export interface WunderGraphConfig
 	extends Pick<WunderGraphConfigApplicationConfig<any, any>, 'cors' | 'experimental' | 'security' | 'authorization'> {
 	datasources: WunderGraphDatasource[];
 	integrations?: WunderGraphIntegration[];
 	options?: WunderGraphNodeOptions;
+	operations?: WunderGraphConfigOperations;
 }

@@ -23,6 +23,20 @@ export default {
 		}),
 	],
 	integrations: [batcher],
+	operations: {
+		defaultConfig: {
+			authentication: {
+				required: true,
+			},
+		},
+		custom: {
+			Weather: {
+				caching: {
+					enable: true,
+				},
+			},
+		},
+	},
 	security: {
 		enableGraphQLEndpoint: true,
 	},
