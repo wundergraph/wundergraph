@@ -9,6 +9,7 @@ import {
 import logger from '../logger';
 import { FastifyHooksOptions } from '../server/plugins/hooks';
 import merge from 'lodash/merge';
+import { OperationsConfiguration } from '../configure/operations';
 
 async function withTakingALongTimeMsg<T>({
 	name,
@@ -32,6 +33,7 @@ export const runHookConfigSetup = async ({ config }: { config: WunderGraphConfig
 
 	let wgConfig: WunderGraphAppConfig = {
 		...config,
+		// @todo move this to the app config
 		operations: {
 			defaultConfig: merge(
 				{
@@ -72,7 +74,13 @@ export const runHookConfigSetup = async ({ config }: { config: WunderGraphConfig
 					},
 					operations.subscriptions || {}
 				),
-			custom: operations.custom || ({} as any),
+			custom: Object.entries(operations.custom || {}).reduce<OperationsConfiguration['custom']>((acc, [key, value]) => {
+				if (!acc) {
+					acc = {};
+				}
+				acc[key] = (config: any) => merge(config, value);
+				return acc;
+			}, {}),
 		},
 		apis: [],
 		authentication: {

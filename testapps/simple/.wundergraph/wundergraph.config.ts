@@ -4,10 +4,28 @@ import { weather } from './weather-datasource';
 
 import { dynamicRouter } from '@wundergraph/sdk/dynamic-router';
 
-const batcher = dynamicRouter({
+const route = dynamicRouter({
 	match: {
 		operationType: 'query',
 		datasources: ['weather'],
+	},
+	handler: async ({ request }) => {
+		const response = await fetch(request);
+
+		const { data } = await response.json();
+
+		data.weather_getCityByName.name = 'Override';
+
+		console.log('WEATHER', data);
+
+		return new Response(JSON.stringify({ data }));
+	},
+});
+
+const route2 = dynamicRouter({
+	match: {
+		operationType: 'query',
+		datasources: ['countries_1'],
 	},
 	handler: ({ request }) => {
 		return fetch(request);
@@ -26,22 +44,8 @@ export default {
 			url: 'https://countries.trevorblades.com/',
 		}),
 	],
-	integrations: [batcher],
-	operations: {
-		defaultConfig: {
-			authentication: {
-				required: true,
-			},
-		},
-		custom: {
-			Weather: {
-				caching: {
-					enable: true,
-				},
-			},
-		},
-	},
+	integrations: [route, route2],
 	security: {
-		enableGraphQLEndpoint: true,
+		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production',
 	},
 } satisfies WunderGraphConfig;
