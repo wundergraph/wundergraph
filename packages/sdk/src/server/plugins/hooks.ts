@@ -19,7 +19,6 @@ import { trace } from '@opentelemetry/api';
 import { Attributes } from '../trace/attributes';
 import { attachErrorToSpan } from '../trace/util';
 import { InternalIntergration, WunderGraphIntegration } from '../../integrations/types';
-import { runHookHttpOriginTransport } from '../../integrations/hooks';
 import { hookID } from '../util';
 import { DynamicRouterConfig } from '../../dynamic-router';
 

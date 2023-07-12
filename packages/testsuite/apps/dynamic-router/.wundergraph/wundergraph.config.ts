@@ -1,42 +1,111 @@
-import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect } from '@wundergraph/sdk';
-import server from './wundergraph.server';
-import operations from './wundergraph.operations';
+import type { WunderGraphConfig } from '@wundergraph/sdk';
+import { graphql } from '@wundergraph/sdk/integrations';
+
+import { dynamicRouter } from '@wundergraph/sdk/dynamic-router';
+
 import { url1, url2, url3 } from './datasources';
 
-const s1 = introspect.graphql({
-	apiNamespace: 's1',
-	url: url1,
-});
+const mergeGraphQLResponses = async (responses: Response[]): Promise<Response> => {
+	// If any of the responses has a non-200 status code, return it
+	const failed = responses.find((r) => r.status !== 200);
+	if (failed) {
+		return failed;
+	}
+	// Merge the data in the responses
+	const payloads = await Promise.all(responses.map((r) => r.json()));
+	// If any response has a GraphQL error, return it
+	const errorIndex = payloads.findIndex((p) => p.error !== undefined);
+	if (errorIndex >= 0) {
+		return new Response(JSON.stringify(payloads[errorIndex]), responses[errorIndex]);
+	}
+	const data: any = {};
+	payloads.forEach((p) => {
+		const payloadData = p.data;
+		for (const key of Object.keys(payloadData)) {
+			const value = payloadData[key];
+			const prev = data[key];
+			if (prev) {
+				if (Array.isArray(prev) && Array.isArray(value)) {
+					data[key] = [...prev, ...value];
+				} else if (Array.isArray(prev)) {
+					data[key] = [...prev, value];
+				} else if (Array.isArray(value)) {
+					data[key] = [prev, ...value];
+				} else {
+					data[key] = [prev, value];
+				}
+			} else {
+				data[key] = value;
+			}
+		}
+	});
+	return new Response(JSON.stringify({ data }), responses[0]);
+};
 
-const s2 = introspect.graphql({
-	apiNamespace: 's2',
-	url: url2,
-});
-
-const s3 = introspect.graphql({
-	apiNamespace: 's3',
-	url: url3,
-});
-
-// configureWunderGraph emits the configuration
-configureWunderGraphApplication({
-	apis: [s1, s2, s3],
-	server,
-	operations,
-	generate: {
-		codeGenerators: [],
+const batcher = dynamicRouter({
+	match: {
+		operationType: 'query',
+		datasources: ['s1'],
 	},
-	cors: {
-		...cors.allowAll,
-		allowedOrigins:
-			process.env.NODE_ENV === 'production'
-				? [
-						// change this before deploying to production to the actual domain where you're deploying your app
-						'http://localhost:3000',
-				  ]
-				: ['http://localhost:3000', new EnvironmentVariable('WG_ALLOWED_ORIGIN')],
+	handler: async ({ request }) => {
+		const data = await request.text();
+		const p1 = fetch(
+			new Request(url1, {
+				method: request.method,
+				headers: request.headers,
+				body: data,
+			})
+		);
+		const p2 = fetch(
+			new Request(url2, {
+				method: request.method,
+				headers: request.headers,
+				body: data,
+			})
+		);
+		const p3 = fetch(
+			new Request(url3, {
+				method: request.method,
+				headers: request.headers,
+				body: data,
+			})
+		);
+		const responses = await Promise.all([p1, p2, p3]);
+		return mergeGraphQLResponses(responses);
+	},
+});
+
+export default {
+	datasources: [
+		graphql({
+			namespace: 's1',
+			url: url1,
+		}),
+		graphql({
+			namespace: 's2',
+			url: url2,
+		}),
+		graphql({
+			namespace: 's3',
+			url: url3,
+		}),
+	],
+	integrations: [batcher],
+	operations: {
+		defaultConfig: {
+			authentication: {
+				required: false,
+			},
+		},
+		custom: {
+			Weather: {
+				caching: {
+					enable: true,
+				},
+			},
+		},
 	},
 	security: {
-		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production' || process.env.GITPOD_WORKSPACE_ID !== undefined,
+		enableGraphQLEndpoint: true,
 	},
-});
+} satisfies WunderGraphConfig;
