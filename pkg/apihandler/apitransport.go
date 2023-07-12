@@ -179,7 +179,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 	// if you're doing this after calling the onRequest hook, it won't work
 	isUpgradeRequest := websocket.IsWebSocketUpgrade(request)
 
-	metaData := operation.GetOperationMetaData(request.Context())
+	metaData := operation.MetadataFromContext(request.Context())
 	if metaData != nil {
 		operationHooks = t.operationHooks[metaData.OperationName]
 	}
@@ -310,7 +310,7 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 	return t.httpTransport.RoundTrip(req)
 }
 
-func (t *ApiTransport) sendRequestHook(r *http.Request, metaData *operation.OperationMetaData, buf *bytes.Buffer, hook hooks.MiddlewareHook, hookID string, result interface{}) error {
+func (t *ApiTransport) sendRequestHook(r *http.Request, metaData *operation.Metadata, buf *bytes.Buffer, hook hooks.MiddlewareHook, hookID string, result interface{}) error {
 	var (
 		body []byte
 		err  error
@@ -330,7 +330,7 @@ func (t *ApiTransport) sendRequestHook(r *http.Request, metaData *operation.Oper
 			Body:       body,
 		},
 		OperationName: metaData.OperationName,
-		OperationType: metaData.GetOperationTypeString(),
+		OperationType: metaData.OperationType.String(),
 	}
 	hookData, err := json.Marshal(payload)
 	if err != nil {
@@ -349,7 +349,7 @@ func (t *ApiTransport) sendRequestHook(r *http.Request, metaData *operation.Oper
 	return json.Unmarshal(out.Response, &result)
 }
 
-func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *operation.OperationMetaData, buf *bytes.Buffer) (*http.Request, error) {
+func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *operation.Metadata, buf *bytes.Buffer) (*http.Request, error) {
 	var response hooks.OnRequestHookResponse
 	if err := t.sendRequestHook(r, metaData, buf, hooks.HttpTransportOnRequest, "", &response); err != nil {
 		return nil, err
@@ -413,7 +413,7 @@ func (t *ApiTransport) decodeOnResponseHookResponse(resp *http.Response, hookRes
 	return resp, nil
 }
 
-func (t *ApiTransport) handleOnResponseHook(resp *http.Response, metaData *operation.OperationMetaData, buf *bytes.Buffer) (*http.Response, error) {
+func (t *ApiTransport) handleOnResponseHook(resp *http.Response, metaData *operation.Metadata, buf *bytes.Buffer) (*http.Response, error) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -429,7 +429,7 @@ func (t *ApiTransport) handleOnResponseHook(resp *http.Response, metaData *opera
 			Status:     resp.Status,
 		},
 		OperationName: metaData.OperationName,
-		OperationType: metaData.GetOperationTypeString(),
+		OperationType: metaData.OperationType.String(),
 	}
 	hookData, err := json.Marshal(payload)
 	if err != nil {
@@ -459,7 +459,7 @@ func (t *ApiTransport) handleOnResponseHook(resp *http.Response, metaData *opera
 	return newResp, nil
 }
 
-func (t *ApiTransport) runHooks(r *http.Request, metaData *operation.OperationMetaData, buf *bytes.Buffer) (*http.Response, error) {
+func (t *ApiTransport) runHooks(r *http.Request, metaData *operation.Metadata, buf *bytes.Buffer) (*http.Response, error) {
 	check := hooks.HookCheck{
 		OperationType: metaData.OperationType,
 		DataSourceID:  t.dataSourceID,
