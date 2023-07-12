@@ -4,7 +4,7 @@ import { weather } from './weather-datasource';
 
 import { dynamicRouter } from '@wundergraph/sdk/dynamic-router';
 
-const batcher = dynamicRouter({
+const route = dynamicRouter({
 	match: {
 		operationType: 'query',
 		datasources: ['weather'],
@@ -22,6 +22,16 @@ const batcher = dynamicRouter({
 	},
 });
 
+const route2 = dynamicRouter({
+	match: {
+		operationType: 'query',
+		datasources: ['countries_1'],
+	},
+	handler: ({ request }) => {
+		return fetch(request);
+	},
+});
+
 export default {
 	datasources: [
 		weather(),
@@ -34,8 +44,8 @@ export default {
 			url: 'https://countries.trevorblades.com/',
 		}),
 	],
-	integrations: [batcher],
+	integrations: [route, route2],
 	security: {
-		enableGraphQLEndpoint: true,
+		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production',
 	},
 } satisfies WunderGraphConfig;
