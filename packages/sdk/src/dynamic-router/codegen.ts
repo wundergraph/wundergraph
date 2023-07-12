@@ -20,7 +20,7 @@ export class DynamicRouterTemplate implements Template {
 			},
 		]);
 	}
-	dependencies(): Template[] {
+	dependencies() {
 		return [templates.typescript.client, templates.typescript.fastifyHooksPlugin];
 	}
 }

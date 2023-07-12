@@ -11,7 +11,12 @@ export const graphql = defineDatasource<GraphQLDatasourceOptions>((config) => {
 		hooks: {
 			'config:setup': async (options) => {
 				const { introspect } = await import('../definition');
-				options.addApi(introspect.graphql(config));
+				options.addApi(
+					introspect.graphql({
+						apiNamespace: config.namespace,
+						...config,
+					})
+				);
 			},
 		},
 	};
