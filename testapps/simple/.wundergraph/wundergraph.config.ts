@@ -12,11 +12,13 @@ const batcher = dynamicRouter({
 	handler: async ({ request }) => {
 		const response = await fetch(request);
 
-		console.log('WEATHER', await response.json());
+		const { data } = await response.json();
 
-		return {
-			...response,
-		};
+		data.weather_getCityByName.name = 'Override';
+
+		console.log('WEATHER', data);
+
+		return new Response(JSON.stringify({ data }));
 	},
 });
 
@@ -33,15 +35,6 @@ export default {
 		}),
 	],
 	integrations: [batcher],
-	operations: {
-		custom: {
-			Weather: {
-				caching: {
-					enable: true,
-				},
-			},
-		},
-	},
 	security: {
 		enableGraphQLEndpoint: true,
 	},
