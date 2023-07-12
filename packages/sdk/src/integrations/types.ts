@@ -25,6 +25,10 @@ export interface WunderGraphAppConfig
 	extends Omit<WunderGraphConfig, 'operations' | 'options'>,
 		WunderGraphConfigApplicationConfig<any, any> {}
 
+export interface WunderGraphDatasourceHooks {
+	'config:setup'?: (options: Pick<ConfigSetupOptions, 'addApi'>) => void;
+}
+
 export interface WunderGraphDatasource {
 	name: string;
 	hooks: WunderGraphIntegrationHooks;
