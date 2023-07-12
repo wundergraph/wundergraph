@@ -18,6 +18,7 @@ import (
 	otrace "go.opentelemetry.io/otel/trace"
 
 	"github.com/wundergraph/wundergraph/pkg/authentication"
+	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
@@ -28,18 +29,12 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
-type ApiTransportFactory interface {
-	RoundTripper(transport *http.Transport, enableStreamingMode bool) http.RoundTripper
-	DefaultTransportTimeout() time.Duration
-	DefaultHTTPProxyURL() *url.URL
-}
-
 type apiTransportFactory struct {
 	opts ApiTransportOptions
 }
 
-func (f *apiTransportFactory) RoundTripper(transport *http.Transport, enableStreamingMode bool) http.RoundTripper {
-	rt := NewApiTransport(transport, enableStreamingMode, f.opts)
+func (f *apiTransportFactory) RoundTripper(transport *http.Transport, opts engineconfigloader.ApiTransportFactoryRoundTripperOptions) http.RoundTripper {
+	rt := NewApiTransport(transport, opts, f.opts)
 
 	if f.opts.EnableTracing {
 		return trace.NewTransport(
@@ -60,9 +55,8 @@ func (f *apiTransportFactory) DefaultHTTPProxyURL() *url.URL {
 }
 
 type operationTransportHooks struct {
-	OnRequest   bool
-	OnResponse  bool
-	OnTransport hooks.Matcher
+	OnRequest  bool
+	OnResponse bool
 }
 
 type ApiTransport struct {
@@ -74,9 +68,11 @@ type ApiTransport struct {
 	hooksClient                *hooks.Client
 	enableStreamingMode        bool
 	requestCounter             *outgoingRequestCounter
+	dataSourceID               string
+	hooks                      []hooks.Executor
 }
 
-func NewApiTransportFactory(opts ApiTransportOptions) ApiTransportFactory {
+func NewApiTransportFactory(opts ApiTransportOptions) engineconfigloader.ApiTransportFactory {
 	return &apiTransportFactory{
 		opts: opts,
 	}
@@ -90,20 +86,32 @@ type ApiTransportOptions struct {
 	Metrics              metrics.Metrics
 }
 
-func NewApiTransport(httpTransport *http.Transport, enableStreamingMode bool, opts ApiTransportOptions) http.RoundTripper {
+func NewApiTransport(httpTransport *http.Transport, roundTripperOpts engineconfigloader.ApiTransportFactoryRoundTripperOptions, transportOpts ApiTransportOptions) http.RoundTripper {
+
+	api := transportOpts.API
+
+	var hookExecutors []hooks.Executor
+
+	for _, hook := range api.Hooks {
+		if hook.Type == wgpb.HookType_HTTP_TRANSPORT {
+			hookExecutors = append(hookExecutors, hook.Executor())
+		}
+	}
 
 	transport := &ApiTransport{
 		httpTransport:              httpTransport,
-		enableRequestLogging:       opts.EnableRequestLogging,
-		api:                        opts.API,
+		enableRequestLogging:       transportOpts.EnableRequestLogging,
+		api:                        api,
 		upstreamAuthConfigurations: map[string]*wgpb.UpstreamAuthentication{},
 		operationHooks:             make(map[string]operationTransportHooks),
-		hooksClient:                opts.HooksClient,
-		enableStreamingMode:        enableStreamingMode,
-		requestCounter:             newOutgoingRequestCounter(opts.Metrics),
+		hooksClient:                transportOpts.HooksClient,
+		enableStreamingMode:        roundTripperOpts.EnableStreamingMode,
+		requestCounter:             newOutgoingRequestCounter(transportOpts.Metrics),
+		dataSourceID:               roundTripperOpts.DataSourceID,
+		hooks:                      hookExecutors,
 	}
 
-	if dataSourceConfigurations := opts.API.EngineConfiguration.GetDatasourceConfigurations(); dataSourceConfigurations != nil {
+	if dataSourceConfigurations := api.EngineConfiguration.GetDatasourceConfigurations(); dataSourceConfigurations != nil {
 		for _, configuration := range dataSourceConfigurations {
 			switch configuration.Kind {
 			case wgpb.DataSourceKind_GRAPHQL:
@@ -126,11 +134,10 @@ func NewApiTransport(httpTransport *http.Transport, enableStreamingMode bool, op
 		}
 	}
 
-	for _, op := range opts.API.Operations {
+	for _, op := range api.Operations {
 		operationHooks := operationTransportHooks{
-			OnRequest:   op.HooksConfiguration.HttpTransportOnRequest,
-			OnResponse:  op.HooksConfiguration.HttpTransportOnResponse,
-			OnTransport: op.HooksConfiguration.HttpTransportOnTransport,
+			OnRequest:  op.HooksConfiguration.HttpTransportOnRequest,
+			OnResponse: op.HooksConfiguration.HttpTransportOnResponse,
 		}
 		transport.operationHooks[op.Name] = operationHooks
 	}
@@ -197,13 +204,8 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 	setRequestHost(request)
 
 	start := time.Now()
-	if operationHooks.OnTransport {
-		res, err = t.handleOnTransportHook(request, metaData, buf)
-		if err == nil && res == nil {
-			// Hook skipped the fetch
-			res, err = t.httpTransport.RoundTrip(request)
-		}
-	} else {
+	res, err = t.runHooks(request, metaData, buf)
+	if err == nil && res == nil {
 		res, err = t.httpTransport.RoundTrip(request)
 	}
 	duration := time.Since(start)
@@ -306,7 +308,7 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 	return t.httpTransport.RoundTrip(req)
 }
 
-func (t *ApiTransport) sendRequestHook(r *http.Request, metaData *operation.OperationMetaData, buf *bytes.Buffer, hook hooks.MiddlewareHook, result interface{}) error {
+func (t *ApiTransport) sendRequestHook(r *http.Request, metaData *operation.OperationMetaData, buf *bytes.Buffer, hook hooks.MiddlewareHook, hookID string, result interface{}) error {
 	var (
 		body []byte
 		err  error
@@ -338,7 +340,7 @@ func (t *ApiTransport) sendRequestHook(r *http.Request, metaData *operation.Oper
 		}
 	}
 
-	out, err := t.hooksClient.DoGlobalRequest(r.Context(), hook, hookData, buf)
+	out, err := t.hooksClient.DoGlobalRequest(r.Context(), hook, hookID, hookData, buf)
 	if err != nil {
 		return err
 	}
@@ -347,7 +349,7 @@ func (t *ApiTransport) sendRequestHook(r *http.Request, metaData *operation.Oper
 
 func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *operation.OperationMetaData, buf *bytes.Buffer) (*http.Request, error) {
 	var response hooks.OnRequestHookResponse
-	if err := t.sendRequestHook(r, metaData, buf, hooks.HttpTransportOnRequest, &response); err != nil {
+	if err := t.sendRequestHook(r, metaData, buf, hooks.HttpTransportOnRequest, "", &response); err != nil {
 		return nil, err
 	}
 	if response.Skip {
@@ -437,7 +439,7 @@ func (t *ApiTransport) handleOnResponseHook(resp *http.Response, metaData *opera
 		}
 	}
 
-	result, err := t.hooksClient.DoGlobalRequest(resp.Request.Context(), hooks.HttpTransportOnResponse, hookData, buf)
+	result, err := t.hooksClient.DoGlobalRequest(resp.Request.Context(), hooks.HttpTransportOnResponse, "", hookData, buf)
 	if err != nil {
 		return nil, err
 	}
@@ -455,12 +457,21 @@ func (t *ApiTransport) handleOnResponseHook(resp *http.Response, metaData *opera
 	return newResp, nil
 }
 
-func (t *ApiTransport) handleOnTransportHook(r *http.Request, metaData *operation.OperationMetaData, buf *bytes.Buffer) (*http.Response, error) {
-	var hookResponse hooks.OnResponseHookResponse
-	if err := t.sendRequestHook(r, metaData, buf, hooks.HttpTransportOnTransport, &hookResponse); err != nil {
-		return nil, err
+func (t *ApiTransport) runHooks(r *http.Request, metaData *operation.OperationMetaData, buf *bytes.Buffer) (*http.Response, error) {
+	check := hooks.HookCheck{
+		OperationType: metaData.OperationType,
+		DataSourceID:  t.dataSourceID,
 	}
-	return t.decodeOnResponseHookResponse(nil, &hookResponse)
+	for _, hook := range t.hooks {
+		if hook.Matches(&check) {
+			var hookResponse hooks.OnResponseHookResponse
+			if err := t.sendRequestHook(r, metaData, buf, hooks.HttpTransportOnTransport, hook.HookID(), &hookResponse); err != nil {
+				return nil, err
+			}
+			return t.decodeOnResponseHookResponse(nil, &hookResponse)
+		}
+	}
+	return nil, nil
 }
 
 func (t *ApiTransport) handleUpstreamAuthentication(request *http.Request, auth *wgpb.UpstreamAuthentication) error {

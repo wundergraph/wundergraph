@@ -1,6 +1,7 @@
 import { EnvironmentVariable, mapInputVariable, resolveVariable } from '../configure/variables';
 import { defaultHost, defaultServerPort, isCloud, ListenOptions, LoggerLevel, WgEnv } from '../configure/options';
 import { ResolvedServerOptions, ServerOptions, MandatoryServerOptions } from './types';
+import objectHash from 'object-hash';
 
 export const customGqlServerMountPath = (name: string): string => {
 	return `/gqls/${name}/graphql`;
@@ -50,4 +51,17 @@ export const resolveServerOptions = (options: MandatoryServerOptions): ResolvedS
 			level: mapInputVariable(options.logger.level),
 		},
 	};
+};
+
+interface hookMatch {
+	operationType?: string;
+	datasources?: string[];
+}
+
+export const hookID = (match: hookMatch) => {
+	const m = {
+		operationType: match.operationType ?? '',
+		datasources: match.datasources ?? [],
+	};
+	return objectHash(m);
 };

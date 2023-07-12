@@ -81,3 +81,5 @@ export type { RequestLogger } from './logger';
 export { OperationsClient } from './operations-client';
 
 export type { Operation, Operations, InternalOperationsDefinition } from './operations-client';
+
+export { hookID } from './util';

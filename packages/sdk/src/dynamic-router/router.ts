@@ -7,7 +7,7 @@ export interface RouteMatcher {
 
 export interface DynamicRouterConfig {
 	match: RouteMatcher | RouteMatcher[];
-	handler: (context: DynamicRouterContext) => any;
+	handler: (context: DynamicRouterContext) => Promise<Response>;
 }
 
 // interface DynamicRouterConfig {
@@ -16,7 +16,6 @@ export interface DynamicRouterConfig {
 
 export interface DynamicRouterContext {
 	request: Request;
-	response: Response;
 }
 
 export const dynamicRouter = defineIntegration((config: DynamicRouterConfig) => {

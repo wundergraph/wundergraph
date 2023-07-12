@@ -81,7 +81,7 @@ import { getWebhooks } from '../webhooks';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
 import logger, { FatalLogger, Logger } from '../logger';
-import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
+import { hookID, resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { GenerateConfig, OperationsGenerationConfig } from './codegeneration';
@@ -1214,7 +1214,9 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 			if (config.match) {
 				const matches = Array.isArray(config.match) ? config.match : [config.match];
 				for (const match of matches) {
+					const id = hookID(match);
 					hooks.push({
+						id,
 						type: HookType.HTTP_TRANSPORT,
 						matcher: {
 							operationType: match.operationType ? operationTypes[match.operationType] : undefined,

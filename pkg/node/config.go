@@ -107,6 +107,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 	for _, hook := range graphConfig.GetHooks() {
 		matcher := hook.GetMatcher()
 		apiHooks = append(apiHooks, &hooks.Hook{
+			ID:   hook.GetId(),
 			Type: hook.Type,
 			Matcher: hooks.HookMatcher{
 				OperationType: matcher.GetOperationType(),

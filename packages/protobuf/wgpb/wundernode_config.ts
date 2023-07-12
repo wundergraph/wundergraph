@@ -413,20 +413,24 @@ export function valueTypeToJSON(object: ValueType): string {
 }
 
 export enum OperationType {
-  QUERY = 0,
-  MUTATION = 1,
-  SUBSCRIPTION = 2,
+  INVALID = 0,
+  QUERY = 1,
+  MUTATION = 2,
+  SUBSCRIPTION = 3,
 }
 
 export function operationTypeFromJSON(object: any): OperationType {
   switch (object) {
     case 0:
+    case "INVALID":
+      return OperationType.INVALID;
+    case 1:
     case "QUERY":
       return OperationType.QUERY;
-    case 1:
+    case 2:
     case "MUTATION":
       return OperationType.MUTATION;
-    case 2:
+    case 3:
     case "SUBSCRIPTION":
       return OperationType.SUBSCRIPTION;
     default:
@@ -436,6 +440,8 @@ export function operationTypeFromJSON(object: any): OperationType {
 
 export function operationTypeToJSON(object: OperationType): string {
   switch (object) {
+    case OperationType.INVALID:
+      return "INVALID";
     case OperationType.QUERY:
       return "QUERY";
     case OperationType.MUTATION:
@@ -855,6 +861,7 @@ export interface HookMatcher {
 }
 
 export interface Hook {
+  id: string;
   type: HookType;
   matcher: HookMatcher | undefined;
 }
@@ -2736,16 +2743,19 @@ export const HookMatcher = {
 };
 
 function createBaseHook(): Hook {
-  return { type: 0, matcher: undefined };
+  return { id: "", type: 0, matcher: undefined };
 }
 
 export const Hook = {
   encode(message: Hook, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
     if (message.type !== 0) {
-      writer.uint32(8).int32(message.type);
+      writer.uint32(16).int32(message.type);
     }
     if (message.matcher !== undefined) {
-      HookMatcher.encode(message.matcher, writer.uint32(18).fork()).ldelim();
+      HookMatcher.encode(message.matcher, writer.uint32(26).fork()).ldelim();
     }
     return writer;
   },
@@ -2758,9 +2768,12 @@ export const Hook = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.type = reader.int32() as any;
+          message.id = reader.string();
           break;
         case 2:
+          message.type = reader.int32() as any;
+          break;
+        case 3:
           message.matcher = HookMatcher.decode(reader, reader.uint32());
           break;
         default:
@@ -2773,6 +2786,7 @@ export const Hook = {
 
   fromJSON(object: any): Hook {
     return {
+      id: isSet(object.id) ? String(object.id) : "",
       type: isSet(object.type) ? hookTypeFromJSON(object.type) : 0,
       matcher: isSet(object.matcher) ? HookMatcher.fromJSON(object.matcher) : undefined,
     };
@@ -2780,6 +2794,7 @@ export const Hook = {
 
   toJSON(message: Hook): unknown {
     const obj: any = {};
+    message.id !== undefined && (obj.id = message.id);
     message.type !== undefined && (obj.type = hookTypeToJSON(message.type));
     message.matcher !== undefined && (obj.matcher = message.matcher ? HookMatcher.toJSON(message.matcher) : undefined);
     return obj;
@@ -2787,6 +2802,7 @@ export const Hook = {
 
   fromPartial<I extends Exact<DeepPartial<Hook>, I>>(object: I): Hook {
     const message = createBaseHook();
+    message.id = object.id ?? "";
     message.type = object.type ?? 0;
     message.matcher = (object.matcher !== undefined && object.matcher !== null)
       ? HookMatcher.fromPartial(object.matcher)
