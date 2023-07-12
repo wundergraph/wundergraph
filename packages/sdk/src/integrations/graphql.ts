@@ -1,16 +1,18 @@
 import type { GraphQLIntrospection } from '../definition';
+import { defineDatasource } from './define-datasource';
 
-export interface GraphQLIntegration extends GraphQLIntrospection {}
+export interface GraphQLDatasourceOptions extends Omit<GraphQLIntrospection, 'apiNamespace'> {
+	namespace: string;
+}
 
-export const graphql = (config: GraphQLIntegration) => {
+export const graphql = defineDatasource<GraphQLDatasourceOptions>((config) => {
 	return {
 		name: 'graphql',
 		hooks: {
-			'config:setup': async (options: any) => {
+			'config:setup': async (options) => {
 				const { introspect } = await import('../definition');
-
 				options.addApi(introspect.graphql(config));
 			},
 		},
 	};
-};
+});

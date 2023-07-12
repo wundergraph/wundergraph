@@ -1,11 +1,10 @@
 import { AsyncApiIntrospector, CodeGen, S3UploadConfiguration } from '../configure';
-import { AuthenticationHookRequest } from '../server';
 import {
 	AuthProviderConfig,
 	AuthProviderTypes,
 	WunderGraphConfig,
 	WunderGraphAppConfig,
-	WunderGraphEnterpriseIntegration,
+	InternalIntergration,
 } from './types';
 import logger from '../logger';
 import { FastifyHooksOptions } from '../server/plugins/hooks';
@@ -69,7 +68,9 @@ export const runHookConfigSetup = async ({ config }: { config: WunderGraphConfig
 		},
 	};
 
-	for (const integration of config.integrations) {
+	const integrations = config.datasources.concat(config.integrations || []);
+
+	for (const integration of integrations) {
 		if (integration.hooks?.['config:setup']) {
 			const options = {
 				addApi: (api: AsyncApiIntrospector<any>) => {
@@ -119,7 +120,8 @@ export const runHookConfigSetup = async ({ config }: { config: WunderGraphConfig
 };
 
 export const runHookConfigGenerated = async ({ config }: { config: WunderGraphConfig }) => {
-	for (const integration of config.integrations) {
+	const integrations = config.integrations || [];
+	for (const integration of integrations) {
 		if (integration.hooks?.['config:generated']) {
 			await withTakingALongTimeMsg({
 				name: integration.name,
@@ -144,7 +146,7 @@ export const runHookHttpOriginTransport = async ({
 	config: FastifyHooksOptions;
 	context: HookContext;
 }) => {
-	for (const integration of config.integrations as WunderGraphEnterpriseIntegration[]) {
+	for (const integration of config.integrations as InternalIntergration[]) {
 		if (integration.hooks?.['http:transport']) {
 			await withTakingALongTimeMsg({
 				name: integration.name,

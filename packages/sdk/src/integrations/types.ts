@@ -18,19 +18,28 @@ export interface WunderGraphAppConfig
 	extends Omit<WunderGraphConfig, 'operations'>,
 		WunderGraphConfigApplicationConfig<any, any> {}
 
-export interface WunderGraphIntegration {
+export interface WunderGraphDatasource {
 	name: string;
-	hooks: {
-		'config:setup'?: (options: ConfigSetupOptions) => void;
-		'config:generated'?: (config: WunderGraphConfig) => void;
-	};
+	hooks: WunderGraphIntegrationHooks;
 }
 
-export interface WunderGraphEnterpriseIntegration {
+export interface WunderGraphIntegrationHooks {
+	'config:setup'?: (options: ConfigSetupOptions) => void;
+	'config:generated'?: (config: WunderGraphConfig) => void;
+}
+
+export interface WunderGraphIntegration {
 	name: string;
-	hooks: WunderGraphIntegration['hooks'] & {
-		'http:transport'?: <Context>(context: Context) => void;
-	};
+	hooks: WunderGraphIntegrationHooks;
+}
+
+export interface WunderGraphEnterpriseIntegrationHooks {
+	'http:transport'?: <Context>(context: Context) => void;
+}
+
+export interface InternalIntergration {
+	name: string;
+	hooks: WunderGraphIntegrationHooks & WunderGraphEnterpriseIntegrationHooks;
 }
 
 export type AuthProviderTypes = 'tokenBased' | 'cookieBased';
@@ -43,5 +52,6 @@ export type TokenAuthProvider = any;
 
 export interface WunderGraphConfig
 	extends Pick<WunderGraphConfigApplicationConfig<any, any>, 'cors' | 'experimental' | 'options' | 'security'> {
-	integrations: WunderGraphIntegration[];
+	datasources: WunderGraphDatasource[];
+	integrations?: WunderGraphIntegration[];
 }
