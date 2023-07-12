@@ -25,7 +25,7 @@ func TracerFromContext(ctx context.Context) (tracer trace.Tracer) {
 func SetOperationAttributes(ctx context.Context) {
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
-		metaData := operation.GetOperationMetaData(ctx)
+		metaData := operation.MetadataFromContext(ctx)
 		if metaData != nil {
 			span.SetAttributes(
 				WgOperationName.String(metaData.OperationName),

@@ -30,7 +30,9 @@ import (
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
 	"github.com/wundergraph/wundergraph/pkg/graphiql"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 type GraphQLHandlerOptions struct {
@@ -186,6 +188,23 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.writeRequestErrors(shared.Report, w, requestLogger)
 		return
 	}
+
+	opType := wgpb.OperationType_INVALID
+
+	if len(shared.Doc.OperationDefinitions) > 0 {
+		switch shared.Doc.OperationDefinitions[0].OperationType {
+		case ast.OperationTypeQuery:
+			opType = wgpb.OperationType_QUERY
+		case ast.OperationTypeMutation:
+			opType = wgpb.OperationType_MUTATION
+		case ast.OperationTypeSubscription:
+			opType = wgpb.OperationType_SUBSCRIPTION
+		}
+	}
+
+	shared.Ctx = shared.Ctx.WithContext(operation.WithMetadata(shared.Ctx.Context(), &operation.Metadata{
+		OperationType: opType,
+	}))
 
 	// create a hash of the query to use as a key for the prepared plan cache
 	// in this hash, we include the printed operation
