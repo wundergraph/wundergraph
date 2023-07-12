@@ -197,7 +197,7 @@ export interface WunderGraphConfigApplicationConfig<
 		 */
 		publicClaims?: TPublicClaim[];
 	};
-	links?: LinkConfiguration;
+
 	security?: SecurityConfig;
 
 	/**
@@ -210,6 +210,9 @@ export interface WunderGraphConfigApplicationConfig<
 
 	/** @deprecated: Not used anymore */
 	dotGraphQLConfig?: any;
+
+	/** @deprecated */
+	links?: LinkConfiguration;
 }
 
 export interface TokenAuthProvider {

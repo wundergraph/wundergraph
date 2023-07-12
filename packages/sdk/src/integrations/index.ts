@@ -14,4 +14,7 @@ export type {
 	WunderGraphEnterpriseIntegrationHooks,
 	WunderGraphIntegration,
 	WunderGraphIntegrationHooks,
+	WunderGraphNodeOptions,
+	CustomOperationsConfiguration,
+	WunderGraphConfigOperations,
 } from './types';

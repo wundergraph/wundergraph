@@ -12,7 +12,5 @@ export default configureWunderGraphServer(() => ({
 				},
 			},
 		},
-		mutations: {},
 	},
-	graphqlServers: [],
 }));

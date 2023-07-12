@@ -8,6 +8,7 @@ import {
 } from './types';
 import logger from '../logger';
 import { FastifyHooksOptions } from '../server/plugins/hooks';
+import merge from 'lodash/merge';
 
 async function withTakingALongTimeMsg<T>({
 	name,
@@ -27,35 +28,51 @@ async function withTakingALongTimeMsg<T>({
 }
 
 export const runHookConfigSetup = async ({ config }: { config: WunderGraphConfig }) => {
+	const operations = config.operations || {};
+
 	let wgConfig: WunderGraphAppConfig = {
 		...config,
 		operations: {
-			// @todo these defaults and having to set them here is ugly and not intuitive
-			defaultConfig: {
-				authentication: {
-					required: false,
+			defaultConfig: merge(
+				{
+					authentication: {
+						required: false,
+					},
 				},
-			},
-			queries: (config) => ({
-				...config,
-				caching: {
-					enable: false,
-					staleWhileRevalidate: 60,
-					maxAge: 60,
-					public: true,
-				},
-				liveQuery: {
-					enable: true,
-					pollingIntervalSeconds: 1,
-				},
-			}),
-			mutations: (config) => ({
-				...config,
-			}),
-			subscriptions: (config) => ({
-				...config,
-			}),
-			custom: {},
+				operations.defaultConfig || {}
+			),
+			queries: (config) =>
+				merge(
+					{
+						...config,
+						caching: {
+							enable: false,
+							staleWhileRevalidate: 60,
+							maxAge: 60,
+							public: true,
+						},
+						liveQuery: {
+							enable: true,
+							pollingIntervalSeconds: 1,
+						},
+					},
+					operations.queries || {}
+				),
+			mutations: (config) =>
+				merge(
+					{
+						...config,
+					},
+					operations.mutations || {}
+				),
+			subscriptions: (config) =>
+				merge(
+					{
+						...config,
+					},
+					operations.subscriptions || {}
+				),
+			custom: operations.custom || ({} as any),
 		},
 		apis: [],
 		authentication: {
@@ -119,13 +136,24 @@ export const runHookConfigSetup = async ({ config }: { config: WunderGraphConfig
 	return wgConfig;
 };
 
-export const runHookConfigGenerated = async ({ config }: { config: WunderGraphConfig }) => {
+export const runHookConfigGenerated = async ({
+	config,
+	appConfig,
+}: {
+	config: WunderGraphConfig;
+	appConfig: WunderGraphAppConfig;
+}) => {
+	const configWithAppConfig = {
+		...config,
+		appConfig,
+	};
+
 	const integrations = config.integrations || [];
 	for (const integration of integrations) {
 		if (integration.hooks?.['config:generated']) {
 			await withTakingALongTimeMsg({
 				name: integration.name,
-				hookResult: integration.hooks['config:generated'](config),
+				hookResult: integration.hooks['config:generated'](configWithAppConfig),
 			});
 		}
 	}

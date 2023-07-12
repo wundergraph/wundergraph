@@ -9,7 +9,6 @@ const batcher = dynamicRouter({
 		operationType: 'query',
 		datasources: ['weather'],
 	},
-
 	handler: ({ request }) => {
 		return fetch(request);
 	},
@@ -28,12 +27,21 @@ export default {
 		}),
 	],
 	integrations: [batcher],
-	options: {
-		openTelemetry: {
-			enabled: true,
+	operations: {
+		defaultConfig: {
+			authentication: {
+				required: true,
+			},
 		},
-		prometheus: {
-			enabled: true,
+		custom: {
+			Weather: {
+				caching: {
+					enable: true,
+				},
+			},
 		},
+	},
+	security: {
+		enableGraphQLEndpoint: true,
 	},
 } satisfies WunderGraphConfig;

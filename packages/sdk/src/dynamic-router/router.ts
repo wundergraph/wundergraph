@@ -10,10 +10,6 @@ export interface DynamicRouterConfig {
 	handler: (context: DynamicRouterContext) => Promise<Response>;
 }
 
-// interface DynamicRouterConfig {
-// 	routes: DynamicRouterRoute[];
-// }
-
 export interface DynamicRouterContext {
 	request: Request;
 }

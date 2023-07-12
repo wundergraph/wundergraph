@@ -1,7 +1,6 @@
 import { WunderGraphHooksAndServerConfig } from '../server';
 import { WellKnownClaim } from '../graphql/operations';
 import { configureWunderGraphApplication } from '.';
-import path from 'path';
 import { runHookConfigGenerated, runHookConfigSetup } from '../integrations/hooks';
 import { WunderGraphConfig } from '../integrations/types';
 
@@ -16,24 +15,14 @@ export const createWunderGraphApplication = async <
 	config: WunderGraphConfig,
 	server?: WunderGraphHooksAndServerConfig
 ) => {
-	const applicationConfig = await runHookConfigSetup({ config });
+	const appConfig = await runHookConfigSetup({ config });
 
-	// applicationConfig.server = await resolveServerConfig();
-	applicationConfig.server = server;
+	appConfig.server = server;
 
-	configureWunderGraphApplication<TCustomClaim, TPublicClaim>(applicationConfig);
+	configureWunderGraphApplication<TCustomClaim, TPublicClaim>(appConfig);
 
 	await runHookConfigGenerated({
-		config: applicationConfig,
+		config,
+		appConfig,
 	});
-};
-
-const resolveServerConfig = async () => {
-	if (!process.env.WG_DIR_ABS) {
-		return;
-	}
-
-	return (await import(path.resolve(process.env.WG_DIR_ABS, 'generated/bundle/server.cjs')))?.default as
-		| WunderGraphHooksAndServerConfig
-		| undefined;
 };
