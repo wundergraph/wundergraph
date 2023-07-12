@@ -89,7 +89,7 @@ import { generateOperations } from '../codegen/generateoperations';
 import { configurationHash } from '../codegen/templates/typescript/helpers';
 import templates from '../codegen/templates';
 import { WunderGraphConfigurationFilename } from '../server/server';
-import { WunderGraphAppConfig, WunderGraphEnterpriseIntegration, WunderGraphIntegration } from '../integrations/types';
+import { InternalIntergration, WunderGraphAppConfig } from '../integrations/types';
 import { DynamicRouterConfig } from '../dynamic-router';
 
 export const WG_GENERATE_CONFIG_JSON = process.env['WG_GENERATE_CONFIG_JSON'] === 'true';
@@ -369,7 +369,7 @@ export interface ResolvedWunderGraphConfig {
 	experimental: {
 		orm: boolean;
 	};
-	integrations: WunderGraphIntegration[];
+	integrations: InternalIntergration[];
 }
 
 export interface CodeGenerationConfig {
@@ -552,7 +552,7 @@ const resolveConfig = async (
 		experimental: {
 			orm: config.experimental?.orm ?? false,
 		},
-		integrations: (config as WunderGraphAppConfig).integrations,
+		integrations: (config as WunderGraphAppConfig).integrations || [],
 	};
 
 	const appConfig = config.links ? addLinks(resolvedConfig, config.links) : resolvedConfig;
@@ -1207,7 +1207,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 		mutation: OperationType.MUTATION,
 		subscription: OperationType.SUBSCRIPTION,
 	};
-	for (const integration of config.integrations as WunderGraphEnterpriseIntegration[]) {
+	for (const integration of config.integrations) {
 		const httpTransport = integration.hooks['http:transport'];
 		if (httpTransport) {
 			const config = httpTransport as unknown as DynamicRouterConfig;

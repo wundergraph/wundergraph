@@ -1,6 +1,6 @@
 import type { WunderGraphConfig } from '@wundergraph/sdk';
 import { graphql } from '@wundergraph/sdk/integrations';
-import { weather } from './weather-integration';
+import { weather } from './weather-datasource';
 
 import { dynamicRouter } from '@wundergraph/sdk/dynamic-router';
 
@@ -18,14 +18,14 @@ const batcher = dynamicRouter({
 });
 
 export default {
-	integrations: [
+	datasources: [
 		weather(),
 		graphql({
-			apiNamespace: 'countries',
+			namespace: 'countries',
 			url: 'https://countries.trevorblades.com/',
 		}),
-		batcher,
 	],
+	integrations: [batcher],
 	options: {
 		openTelemetry: {
 			enabled: true,
