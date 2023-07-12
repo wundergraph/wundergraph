@@ -1,4 +1,11 @@
-import { AsyncApiIntrospector, CodeGen, S3UploadConfiguration, WunderGraphConfigApplicationConfig } from '../configure';
+import {
+	AsyncApiIntrospector,
+	CodeGen,
+	S3UploadConfiguration,
+	WunderGraphConfigApplicationConfig,
+	WunderGraphCorsConfiguration,
+} from '../configure';
+import { NodeOptions } from '../configure/options';
 
 export interface ConfigSetupOptions {
 	addApi: (api: AsyncApiIntrospector<any>) => void;
@@ -15,7 +22,7 @@ export interface WunderGraphConfigWithAppConfig extends WunderGraphConfig {
 }
 
 export interface WunderGraphAppConfig
-	extends Omit<WunderGraphConfig, 'operations'>,
+	extends Omit<WunderGraphConfig, 'operations' | 'options'>,
 		WunderGraphConfigApplicationConfig<any, any> {}
 
 export interface WunderGraphDatasource {
@@ -50,8 +57,11 @@ export type AuthProviderConfig = {
 export type CookieAuthProvider = any;
 export type TokenAuthProvider = any;
 
+export type WunderGraphNodeOptions = Pick<NodeOptions, 'defaultHttpProxyUrl' | 'defaultRequestTimeoutSeconds'>;
+
 export interface WunderGraphConfig
-	extends Pick<WunderGraphConfigApplicationConfig<any, any>, 'cors' | 'experimental' | 'options' | 'security'> {
+	extends Pick<WunderGraphConfigApplicationConfig<any, any>, 'cors' | 'experimental' | 'security' | 'authorization'> {
 	datasources: WunderGraphDatasource[];
 	integrations?: WunderGraphIntegration[];
+	options?: WunderGraphNodeOptions;
 }
