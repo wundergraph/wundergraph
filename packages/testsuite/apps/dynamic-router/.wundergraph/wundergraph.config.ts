@@ -1,11 +1,14 @@
 import type { WunderGraphConfig } from '@wundergraph/sdk';
 import { graphql } from '@wundergraph/sdk/integrations';
+import _ from 'lodash';
 
 import { dynamicRouter } from '@wundergraph/sdk/dynamic-router';
 
 import { url1, url2, url3 } from './datasources';
 
-const mergeGraphQLResponses = async (responses: Response[]): Promise<Response> => {
+type DataMerger = (prev: any, cur: any) => any;
+
+const mergeGraphQLResponses = async (responses: Response[], merger: DataMerger): Promise<Response> => {
 	// If any of the responses has a non-200 status code, return it
 	const failed = responses.find((r) => r.status !== 200);
 	if (failed) {
@@ -18,35 +21,43 @@ const mergeGraphQLResponses = async (responses: Response[]): Promise<Response> =
 	if (errorIndex >= 0) {
 		return new Response(JSON.stringify(payloads[errorIndex]), responses[errorIndex]);
 	}
-	const data: any = {};
+	let data: any = {};
 	payloads.forEach((p) => {
 		const payloadData = p.data;
-		for (const key of Object.keys(payloadData)) {
-			const value = payloadData[key];
-			const prev = data[key];
-			if (prev) {
-				if (Array.isArray(prev) && Array.isArray(value)) {
-					data[key] = [...prev, ...value];
-				} else if (Array.isArray(prev)) {
-					data[key] = [...prev, value];
-				} else if (Array.isArray(value)) {
-					data[key] = [prev, ...value];
-				} else {
-					data[key] = [prev, value];
-				}
-			} else {
-				data[key] = value;
-			}
-		}
+		data = merger(data, payloadData);
 	});
 	return new Response(JSON.stringify({ data }), responses[0]);
 };
 
-const batcher = dynamicRouter({
+const graphQLMerger = (data: any, cur: any) => {
+	const objMerger = (objValue: any, srcValue: any) => {
+		if (_.isArray(objValue)) {
+			return objValue.concat(srcValue);
+		}
+	};
+	_.keys(cur).forEach((k) => {
+		data[k] = _.concat(data[k] ?? [], cur[k]);
+		if (data[k].find((x: any) => x.id !== undefined)) {
+			data[k] = data[k].reduce((acc: any[], cur: any) => {
+				const prev = acc.find((x) => x.id === cur.id);
+				if (prev) {
+					_.mergeWith(prev, cur, objMerger);
+				} else {
+					acc.push(cur);
+				}
+				return acc;
+			}, []);
+		}
+	});
+	return data;
+};
+
+const router1 = dynamicRouter({
 	match: {
 		operationType: 'query',
-		datasources: ['s1'],
+		datasources: ['merged'],
 	},
+
 	handler: async ({ request }) => {
 		const data = await request.text();
 		const p1 = fetch(
@@ -71,39 +82,80 @@ const batcher = dynamicRouter({
 			})
 		);
 		const responses = await Promise.all([p1, p2, p3]);
-		return mergeGraphQLResponses(responses);
+		return mergeGraphQLResponses(responses, graphQLMerger);
+	},
+});
+
+const router2 = dynamicRouter({
+	match: {
+		operationType: 'query',
+		datasources: ['faster'],
+	},
+
+	handler: async ({ request }) => {
+		const data = await request.text();
+		const p1 = fetch(
+			new Request(url1, {
+				method: request.method,
+				headers: request.headers,
+				body: data,
+			})
+		);
+		const p2 = fetch(
+			new Request(url2, {
+				method: request.method,
+				headers: request.headers,
+				body: data,
+			})
+		);
+		const p3 = fetch(
+			new Request(url3, {
+				method: request.method,
+				headers: request.headers,
+				body: data,
+			})
+		);
+		const promises = [p1, p2, p3];
+		// This would return the fast, but since all servers are in
+		// localhost it's usually p1
+		//return Promise.any(promises);
+		// Return a random choice instead
+		return promises[Math.floor(Math.random() * promises.length)];
 	},
 });
 
 export default {
 	datasources: [
 		graphql({
-			namespace: 's1',
+			id: 'merged',
+			namespace: '',
 			url: url1,
 		}),
 		graphql({
-			namespace: 's2',
+			namespace: 'faster',
+			url: url1,
+		}),
+		graphql({
+			namespace: 'origin1',
+			url: url1,
+		}),
+		graphql({
+			namespace: 'origin2',
 			url: url2,
 		}),
 		graphql({
-			namespace: 's3',
+			namespace: 'origin3',
 			url: url3,
 		}),
 	],
-	integrations: [batcher],
+	integrations: [router1, router2],
 	operations: {
 		defaultConfig: {
 			authentication: {
 				required: false,
 			},
 		},
-		custom: {
-			Weather: {
-				caching: {
-					enable: true,
-				},
-			},
-		},
+		custom: {},
 	},
 	security: {
 		enableGraphQLEndpoint: true,
