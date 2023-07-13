@@ -18,7 +18,7 @@ import {
 	UpstreamAuthentication,
 	UpstreamAuthenticationKind,
 } from '@wundergraph/protobuf';
-import { applyNameSpaceToCustomJsonScalars, applyNameSpaceToGraphQLSchema } from './namespacing';
+import { applyNameSpaceToGraphQLSchema } from './namespacing';
 import { InputVariable, mapInputVariable } from '../configure/variables';
 import { introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
@@ -63,6 +63,13 @@ export interface ApiIntrospectionOptions {
 	apiID?: string;
 }
 
+export interface ApiFeatures {
+	schemaExtension?: boolean;
+	customJSONScalars?: boolean;
+	customIntScalars?: boolean;
+	customFloatScalars?: boolean;
+}
+
 export interface RenameType {
 	from: string;
 	to: string;
@@ -92,7 +99,8 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: Set<string>
+		customJsonScalars?: Set<string>,
+		features?: ApiFeatures
 	) {
 		this.Schema = schema;
 		this.Namespace = namespace;
@@ -100,8 +108,9 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		this.Fields = fields;
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
-		this.CustomJsonScalars = applyNameSpaceToCustomJsonScalars(namespace, customJsonScalars);
+		this.CustomJsonScalars = customJsonScalars ?? new Set<string>();
 		this.Namespace = namespace;
+		this.Features = features;
 	}
 
 	DefaultFlushInterval: number = 500;
@@ -112,6 +121,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	interpolateVariableDefinitionAsJSON: string[];
 	CustomJsonScalars: Set<string>;
 	Namespace: string;
+	Features?: ApiFeatures;
 
 	get schemaSha256() {
 		const hash = createHash('sha256');

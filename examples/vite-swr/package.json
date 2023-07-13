@@ -16,11 +16,11 @@
     "test": "jest"
   },
   "dependencies": {
-    "@wundergraph/sdk": "^0.166.0",
-    "@wundergraph/swr": "^0.15.11",
+    "@wundergraph/sdk": "^0.167.1",
+    "@wundergraph/swr": "^0.16.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
-    "swr": "^2.1.5"
+    "swr": "^2.2.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.3.1",

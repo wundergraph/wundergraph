@@ -64,11 +64,11 @@ const wellKnownDirectives: string[] = ['include', 'skip', 'deprecated', 'specifi
 const omnigraphOpenApiDirectives: string[] = ['oneOf'];
 const knownDirectives: string[] = [...wellKnownDirectives, ...omnigraphOpenApiDirectives];
 
-export const applyNameSpaceToCustomJsonScalars = (namespace: string, customJsonScalars?: Set<string>): Set<string> => {
+export const applyNameSpaceToCustomJsonScalars = (namespace?: string, customJsonScalars?: Set<string>): Set<string> => {
 	if (!customJsonScalars) {
 		return new Set<string>();
 	}
-	if (namespace === undefined || namespace === '' || customJsonScalars.size < 1) {
+	if (!namespace || customJsonScalars.size < 1) {
 		return customJsonScalars;
 	}
 	const namespacedScalars = new Set<string>();

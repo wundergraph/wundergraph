@@ -1083,7 +1083,7 @@ export const configureWunderGraphApplication = <
 			);
 			await updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
 
-			const storedConfig = storedWunderGraphConfig(resolved);
+			const storedConfig = storedWunderGraphConfig(resolved, apis.length);
 			const configData = WunderGraphConfiguration.encode(storedConfig).finish();
 			fs.writeFileSync(path.join(generated, WunderGraphConfigurationFilename), configData);
 			if (WG_GENERATE_CONFIG_JSON) {
@@ -1140,7 +1140,22 @@ const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputV
 	return output;
 };
 
-const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig) => {
+const configEnabledFeatures = (config: ResolvedWunderGraphConfig, apiCount: number) => {
+	const apis = config.application.Apis;
+	const schemaExtension = apis.find((api) => api.Features?.schemaExtension ?? false) !== undefined;
+	const customJSONScalars = apis.find((api) => api.Features?.customJSONScalars ?? false) !== undefined;
+	const customIntScalars = apis.find((api) => api.Features?.customIntScalars ?? false) !== undefined;
+	const customFloatScalars = apis.find((api) => api.Features?.customFloatScalars ?? false) !== undefined;
+	return {
+		apiCount,
+		schemaExtension,
+		customJSONScalars,
+		customIntScalars,
+		customFloatScalars,
+	};
+};
+
+const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: number) => {
 	const operations: Operation[] = config.application.Operations.map((op) => ({
 		content: removeHookVariables(op.Content),
 		name: op.Name,
@@ -1261,6 +1276,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig) => {
 		},
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
 		configHash: configurationHash(config),
+		enabledFeatures: configEnabledFeatures(config, apiCount),
 	};
 	return out;
 };
@@ -1467,6 +1483,7 @@ const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFi
 
 	const operation: TypeScriptOperation = {
 		Name: file.operation_name,
+		Description: implementation.description || file.module_path,
 		PathName: file.api_mount_path,
 		Content: '',
 		Errors: implementation.errors?.map((E) => new E()) || [],
@@ -1569,6 +1586,7 @@ const resolveOperationsConfigurations = async (
 		interpolateVariableDefinitionAsJSON: config.interpolateVariableDefinitionAsJSON,
 		customJsonScalars,
 		customClaims,
+		wgDirAbs: wgDirAbs,
 	});
 	const nodeJSOperations: TypeScriptOperation[] = [];
 	if (loadedOperations.typescript_operation_files) {
@@ -1621,12 +1639,15 @@ const loadAndApplyNodeJsOperationOverrides = async (
 // this function.
 const applyNodeJsOperationOverrides = (
 	operation: TypeScriptOperation,
-	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any>
+	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any, any>
 ): TypeScriptOperation => {
 	if (overrides.inputSchema) {
 		const schema = zodToJsonSchema(overrides.inputSchema) as any;
 		operation.VariablesSchema = schema;
 		operation.InternalVariablesSchema = schema;
+	}
+	if (overrides.description) {
+		operation.Description = overrides.description;
 	}
 	if (overrides.liveQuery) {
 		operation.LiveQuery = {
