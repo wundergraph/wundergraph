@@ -660,7 +660,7 @@ importers:
         specifier: ^4.2.5
         version: 4.2.5
       '@wundergraph/wunderctl':
-        specifier: workspace:^0.163.0
+        specifier: workspace:^0.164.0
         version: link:../wunderctl
       axios:
         specifier: ^0.26.1
@@ -10672,7 +10672,7 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-      '@babel/compat-data': 7.22.5
+      '@babel/compat-data': 7.20.14
       '@babel/core': 7.22.5
       '@babel/helper-define-polyfill-provider': 0.3.3(@babel/core@7.22.5)
       semver: 6.3.0
