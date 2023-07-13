@@ -1,5 +1,5 @@
 query {
-	topProducts: federated_topProducts(random: true) {
+	topProducts: topProducts(random: true) {
 		upc
 		name
 		price

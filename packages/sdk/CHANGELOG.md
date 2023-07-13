@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.168.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.167.1...@wundergraph/sdk@0.168.0) (2023-07-13)
+
+### Features
+
+* add support for feature usage telemetry ([#1096](https://github.com/wundergraph/wundergraph/issues/1096)) ([30a0b12](https://github.com/wundergraph/wundergraph/commit/30a0b129899d8296aa6a027d1ecafde469a0ead2)) (@fiam)
+* add support for openai ([#1121](https://github.com/wundergraph/wundergraph/issues/1121)) ([146ae11](https://github.com/wundergraph/wundergraph/commit/146ae11ef85ecb3691833115060fc2244daf1667)) (@fiam)
+
 ## [0.167.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.167.0...@wundergraph/sdk@0.167.1) (2023-07-06)
 
 ### Bug Fixes
