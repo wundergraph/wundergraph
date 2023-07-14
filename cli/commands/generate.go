@@ -81,6 +81,7 @@ var generateCmd = &cobra.Command{
 		if codeServerFilePath != "" {
 			serverOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "server.cjs")
 			ormOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "orm.cjs")
+			jsonSchemaOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "jsonschema.cjs")
 			webhooksDir := filepath.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
 			operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
 			generatedBundleOutDir := filepath.Join("generated", "bundle")
@@ -114,6 +115,16 @@ var generateCmd = &cobra.Command{
 				AbsWorkingDir: wunderGraphDir,
 				EntryPoints:   []string{ormEntryPointFilename},
 				OutFile:       ormOutFile,
+				Logger:        log,
+			})
+
+			jsonSchemaEntryPointFilename := filepath.Join(wunderGraphDir, "generated", "jsonschema.ts")
+			jsonSchemaBundler := bundler.NewBundler(bundler.Config{
+				Name:          "jsonschema-bundler",
+				Production:    true,
+				AbsWorkingDir: wunderGraphDir,
+				EntryPoints:   []string{jsonSchemaEntryPointFilename},
+				OutFile:       jsonSchemaOutFile,
 				Logger:        log,
 			})
 
@@ -168,6 +179,11 @@ var generateCmd = &cobra.Command{
 				wg.Go(func() error {
 					// bundle (the generated) orm
 					return ormBundler.Bundle()
+				})
+
+				wg.Go(func() error {
+					// bundle jsonschema
+					return jsonSchemaBundler.Bundle()
 				})
 
 				wg.Go(func() error {
