@@ -56,7 +56,7 @@ const initLogger = (destination: DestinationStream): pino.Logger => {
 	};
 
 	if (enablePretty) {
-		const stream = pretty({
+		const config = {
 			colorize: true,
 			colorizeObjects: false,
 			translateTime: 'HH:MM:ss TT', // https://www.npmjs.com/package/dateformat
@@ -67,7 +67,11 @@ const initLogger = (destination: DestinationStream): pino.Logger => {
 			destination: destination,
 			messageFormat: '{msg}',
 			singleLine: true,
-		});
+		};
+		// XXX: This is supported by pino-pretty but not listed in its types
+		// See https://github.com/pinojs/pino-pretty/blob/e510233be8c0b6068e9e279fc1ecc66e5dde08e7/index.js#L71
+		(config as any).customColors = '20:magenta,30:blue,40:yellow,50:red,message:whiteBright';
+		const stream = pretty(config);
 
 		return pino(options, stream);
 	}
