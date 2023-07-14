@@ -15,17 +15,18 @@
   "loglevel": "verbose",
   "changelogPreset": "conventional-changelog-conventionalcommits",
   "packages": [
-    "packages/nextjs",
-    "packages/sdk",
-    "packages/protobuf",
-    "packages/golang-client",
-    "packages/swr",
     "packages/create-wundergraph-app",
+    "packages/golang-client",
+    "packages/nextjs",
+    "packages/orm",
+    "packages/protobuf",
     "packages/react-query",
+    "packages/react-relay",
+    "packages/sdk",
     "packages/solid-query",
     "packages/svelte-query",
-    "packages/react-relay",
-    "packages/orm"
+    "packages/swr",
+    "packages/vue-query"
   ],
   "npmClient": "pnpm",
   "version": "independent"
