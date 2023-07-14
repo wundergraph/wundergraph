@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.169.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.168.0...@wundergraph/sdk@0.169.0) (2023-07-14)
+
+### Features
+
+* improve openai ([#1126](https://github.com/wundergraph/wundergraph/issues/1126)) ([31c9449](https://github.com/wundergraph/wundergraph/commit/31c94497c483ebb7fdcf32dc7f74e919cf39eb6e)) (@jensneuse)
+
+### Bug Fixes
+
+* make errors in wunderctl and prisma introspection more visible ([#1122](https://github.com/wundergraph/wundergraph/issues/1122)) ([f7474cd](https://github.com/wundergraph/wundergraph/commit/f7474cd1be8adfde6ef39750a90c0aeca3d3da97)) (@fiam)
+
 ## [0.168.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.167.1...@wundergraph/sdk@0.168.0) (2023-07-13)
 
 ### Features
