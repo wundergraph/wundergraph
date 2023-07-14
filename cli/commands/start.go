@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/wundergraph/wundergraph/pkg/licensing"
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
 )
 
@@ -34,11 +35,13 @@ var startCmd = &cobra.Command{
 
 		g, ctx := errgroup.WithContext(sigCtx)
 
-		n, err := NewWunderGraphNode(ctx)
+		n, wunderGraphDir, err := NewWunderGraphNode(ctx)
 		if err != nil {
 			log.Error("Could not create node: %w", zap.Error(err))
 			return err
 		}
+
+		go licensing.NewManager(licensingPublicKey).FeatureCheck(wunderGraphDir, os.Stderr)
 
 		if !excludeServer {
 			g.Go(func() error {

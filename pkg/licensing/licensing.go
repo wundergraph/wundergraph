@@ -2,21 +2,29 @@
 package licensing
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
+	"github.com/fatih/color"
+	"github.com/google/uuid"
 	"github.com/hyperboloide/lk"
 	"github.com/jxskiss/base62"
 	"github.com/wundergraph/wundergraph/pkg/config"
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/wundergraph/wundergraph/pkg/features"
+)
+
+const (
+	trialMessageInterval = 5 * time.Minute
 )
 
 var (
-	// ErrNoPublicKey indicates no public key is avaiable to validate licenses
+	// ErrNoPublicKey indicates no public key is available to validate licenses
 	ErrNoPublicKey = errors.New("public key for license signature is not available")
 	// ErrNoLicenseFound is returned when trying to load a stored license and no data is found
 	ErrNoLicenseFound = errors.New("no license found")
@@ -43,10 +51,12 @@ const (
 
 // License represents decoded license data
 type License struct {
+	// ID is the unique license ID
+	ID uuid.UUID `json:"u"`
 	// Email used to register the license
-	Email string `bson:"e"`
+	Email string `json:"e"`
 	// ExpiresAt is the license expiration date
-	ExpiresAt time.Time `bson:"exp"`
+	ExpiresAt time.Time `json:"exp"`
 }
 
 // IsExpired returns true iff the license expiration is in the past
@@ -123,7 +133,7 @@ func (m *Manager) decodeLicense(licenseKey string) (*License, error) {
 	}
 
 	var ll License
-	if err := bson.Unmarshal(license.Data, &ll); err != nil {
+	if err := json.Unmarshal(license.Data, &ll); err != nil {
 		return nil, fmt.Errorf("decoding license: %w", err)
 	}
 	return &ll, nil
@@ -183,6 +193,47 @@ func (m *Manager) Validate() error {
 	}
 	if license.IsExpired() {
 		return ErrLicenseExpired
+	}
+	return nil
+}
+
+func (m *Manager) FeatureCheck(wunderGraphDir string, w io.Writer) error {
+	verr := m.Validate()
+	if verr == nil {
+		// We have a license, stop here
+		return nil
+	}
+	var enterpriseFeaturesNames []string
+	for {
+		feats, err := features.EnabledFeatures(wunderGraphDir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				time.Sleep(100 * time.Millisecond)
+				continue
+			}
+			return err
+		}
+		for _, feat := range feats {
+			if features.IsEnterprise(feat) {
+				enterpriseFeaturesNames = append(enterpriseFeaturesNames, string(feat))
+			}
+		}
+		break
+	}
+	if len(enterpriseFeaturesNames) > 0 {
+		go func() {
+			warnFprintf := color.New(color.FgYellow).FprintfFunc()
+			boldWarnFprintf := color.New(color.FgYellow, color.Bold).FprintfFunc()
+			boldFprintf := color.New(color.FgGreen, color.Bold).FprintfFunc()
+
+			for {
+				warnFprintf(w, "The following features require a WunderGraph Enterprise License: %s\n", strings.Join(enterpriseFeaturesNames, ", "))
+				warnFprintf(w, "Since no license has been found, trial mode has been enabled\n")
+				boldWarnFprintf(w, "TRIAL MODE IS NOT ALLOWED FOR PRODUCTION USE\n")
+				boldFprintf(w, "See https://wundergraph.com to purchase a WunderGraph Enterprise License\n")
+				time.Sleep(trialMessageInterval)
+			}
+		}()
 	}
 	return nil
 }

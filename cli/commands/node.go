@@ -16,6 +16,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/licensing"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
@@ -41,11 +42,13 @@ var nodeStartCmd = &cobra.Command{
 
 		g, ctx := errgroup.WithContext(sigCtx)
 
-		n, err := NewWunderGraphNode(ctx)
+		n, wunderGraphDir, err := NewWunderGraphNode(ctx)
 		if err != nil {
 			log.Error("Could not create node: %w", zap.Error(err))
 			return err
 		}
+
+		go licensing.NewManager(licensingPublicKey).FeatureCheck(wunderGraphDir, os.Stderr)
 
 		g.Go(func() error {
 			return StartWunderGraphNode(n,
@@ -75,15 +78,15 @@ func init() {
 	nodeStartCmd.Flags().IntVar(&shutdownAfterIdle, "shutdown-after-idle", 0, "Shutdown the server after given seconds in idle when no requests have been served")
 }
 
-func NewWunderGraphNode(ctx context.Context) (*node.Node, error) {
+func NewWunderGraphNode(ctx context.Context) (*node.Node, string, error) {
 	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	nodeLogger := logging.
 		New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevel)
-	return node.New(ctx, BuildInfo, wunderGraphDir, nodeLogger), nil
+	return node.New(ctx, BuildInfo, wunderGraphDir, nodeLogger), wunderGraphDir, nil
 }
 
 type options struct {
