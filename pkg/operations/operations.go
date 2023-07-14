@@ -110,11 +110,15 @@ import type { Role } from "./wundergraph.server";
 import type { CustomClaims } from "./claims";
 import { createOperationFactory } from "@wundergraph/sdk/operations";
 
-
-import server from '../wundergraph.server';
+{{ if .HasWunderGraphServerTs }}
+import type server from '../wundergraph.server';
 
 type ContextField = Required<Required<Required<typeof server>['context']>['request']>['create'];
 export type ContextType = ContextField extends (...args: any) => any ? Awaited<ReturnType<ContextField>> : never;
+
+{{ else }}
+export type ContextType = never;
+{{ end }}
 
 import type { Queries, Mutations } from "./jsonschema";
 import type { IOpenaiAgentFactory } from "@wundergraph/sdk/openai"
