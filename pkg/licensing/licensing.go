@@ -15,6 +15,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hyperboloide/lk"
 	"github.com/jxskiss/base62"
+
 	"github.com/wundergraph/wundergraph/pkg/config"
 	"github.com/wundergraph/wundergraph/pkg/features"
 )
