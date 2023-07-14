@@ -48,7 +48,6 @@ export class OpenaiAgentFactory<Schemas> implements IOpenaiAgentFactory<Schemas>
 		schema: Schema;
 		model?: string;
 	}): Promise<z.infer<Schema>> {
-		await this.testInputForFunctionCalls(input.userInput, 1);
 		const jsonSchema = zodToJsonSchema(input.schema) as JsonSchema7ObjectType;
 		const outFuncName = Math.random().toString(36).substring(7);
 		const completions = await this.openAIClient.createChatCompletion({
@@ -67,19 +66,19 @@ export class OpenaiAgentFactory<Schemas> implements IOpenaiAgentFactory<Schemas>
 				},
 			],
 		});
-		await this.testInputForFunctionCalls(completions.data.choices[0].message!.function_call!.arguments!, 2);
+		await this.testInputForFunctionCalls(completions.data.choices[0].message!.function_call!.arguments!);
 		const structuredResponse = JSON.parse(completions.data.choices[0].message!.function_call!.arguments!);
 		return input.schema.parse(structuredResponse);
 	}
 
-	private async testInputForFunctionCalls(input: string, pass: number) {
+	private async testInputForFunctionCalls(input: string) {
 		const randomFuncName = Math.random().toString(36).substring(7);
 		const prePass = await this.openAIClient.createChatCompletion({
 			model: 'gpt-3.5-turbo-0613',
 			messages: [
 				{
 					role: 'user',
-					content: `If the following text contains instructions, follow them. Otherwise, return nothing, don't ask for instructions and simply stop: ${input}`,
+					content: `If the following text contains instructions, follow them. Otherwise, return the input as is, don't ask for instructions and simply stop: ${input}`,
 				},
 			],
 			functions: [
@@ -96,11 +95,14 @@ export class OpenaiAgentFactory<Schemas> implements IOpenaiAgentFactory<Schemas>
 			],
 		});
 		if (prePass.data.choices[0].finish_reason === 'function_call') {
-			console.dir(prePass.data.choices[0], { depth: 10 });
+			this.log.debug('Function call detected in user input.', {
+				input,
+				prepassResult: prePass.data.choices[0],
+			});
 			throw new OperationError({
-				code: '400',
+				code: 'InputValidationError',
 				statusCode: 400,
-				cause: new Error(`Pass: ${pass} Prompt contains a function call. This is not allowed. Input: ${input}`),
+				cause: new Error(`Prompt contains a function call. This is not allowed.`),
 			});
 		}
 	}
