@@ -63,6 +63,13 @@ export interface ApiIntrospectionOptions {
 	apiID?: string;
 }
 
+export interface ApiFeatures {
+	schemaExtension?: boolean;
+	customJSONScalars?: boolean;
+	customIntScalars?: boolean;
+	customFloatScalars?: boolean;
+}
+
 export interface RenameType {
 	from: string;
 	to: string;
@@ -92,7 +99,8 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[]
+		customJsonScalars?: Set<string>,
+		features?: ApiFeatures
 	) {
 		this.Schema = schema;
 		this.Namespace = namespace;
@@ -100,8 +108,9 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		this.Fields = fields;
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
-		this.CustomJsonScalars = customJsonScalars;
+		this.CustomJsonScalars = customJsonScalars ?? new Set<string>();
 		this.Namespace = namespace;
+		this.Features = features;
 	}
 
 	DefaultFlushInterval: number = 500;
@@ -110,8 +119,9 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	Fields: FieldConfiguration[];
 	Types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
-	CustomJsonScalars?: string[];
+	CustomJsonScalars: Set<string>;
 	Namespace: string;
+	Features?: ApiFeatures;
 
 	get schemaSha256() {
 		const hash = createHash('sha256');
@@ -250,7 +260,8 @@ interface GraphQLIntrospectionOptions {
 	customFloatScalars?: string[];
 	customIntScalars?: string[];
 	/*
-		customJSONScalars is deprecated; the types are now detected automatically.
+		The customJSONScalars array no longer needs to contain new replacement JSON scalars.
+		However, original JSON scalars will default to type string if not included in this array.
 	 */
 	customJSONScalars?: string[];
 	// switching internal to true will mark the origin as an internal GraphQL API

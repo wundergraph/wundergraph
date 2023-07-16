@@ -112,6 +112,7 @@ func (e *Engine) IntrospectPrismaDatabaseSchema(ctx context.Context, introspecti
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, e.introspectionEnginePath)
+	cmd.Stderr = os.Stderr
 	out, err := cmd.StdoutPipe()
 	if err != nil {
 		return "", err
@@ -157,8 +158,9 @@ Loop:
 	}
 
 	var response IntrospectionResponse
-	err = json.NewDecoder(&buf).Decode(&response)
-	if err != nil {
+	if err := json.Unmarshal(buf.Bytes(), &response); err != nil {
+		// Make sure we print the
+		fmt.Fprintf(os.Stderr, "%s\n", buf.String())
 		return "", err
 	}
 	if response.Error != nil {

@@ -47,7 +47,7 @@ var upCmd = &cobra.Command{
 	Use:         UpCmdName,
 	Short:       "Starts WunderGraph in development mode",
 	Long:        "Start the WunderGraph application in development mode and watch for changes",
-	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources),
+	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources | telemetry.AnnotationFeatures),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
@@ -145,6 +145,7 @@ var upCmd = &cobra.Command{
 		configOutFile := filepath.Join("generated", "bundle", "config.cjs")
 		serverOutFile := filepath.Join("generated", "bundle", "server.cjs")
 		ormOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "orm.cjs")
+		jsonSchemaOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "jsonschema.cjs")
 		operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
 		generatedBundleOutDir := filepath.Join("generated", "bundle")
 
@@ -246,6 +247,16 @@ var upCmd = &cobra.Command{
 				Logger:        log,
 			})
 
+			jsonSchemaEntryPointFilename := filepath.Join(wunderGraphDir, "generated", "jsonschema.ts")
+			jsonSchemaBundler := bundler.NewBundler(bundler.Config{
+				Name:          "jsonschema-bundler",
+				Production:    true,
+				AbsWorkingDir: wunderGraphDir,
+				EntryPoints:   []string{jsonSchemaEntryPointFilename},
+				OutFile:       jsonSchemaOutFile,
+				Logger:        log,
+			})
+
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "hooks-bundler",
 				EntryPoints:   []string{serverEntryPointFilename},
@@ -322,6 +333,10 @@ var upCmd = &cobra.Command{
 
 				wg.Go(func() error {
 					return hooksBundler.Bundle()
+				})
+
+				wg.Go(func() error {
+					return jsonSchemaBundler.Bundle()
 				})
 
 				if webhooksBundler != nil {
@@ -512,7 +527,13 @@ var upCmd = &cobra.Command{
 
 		// trigger server reload after initial config build
 		// because no fs event is fired as build is already done
-		configFileChangeChan <- struct{}{}
+		// Make sure we don't get stuck here if the node has already
+		// exited when we reach this point (and no one is reading from
+		// configFileChangeChan)
+		select {
+		case configFileChangeChan <- struct{}{}:
+		case <-ctx.Done():
+		}
 
 		// wait for context to be canceled (signal, context cancellation or via cancel())
 		<-ctx.Done()
