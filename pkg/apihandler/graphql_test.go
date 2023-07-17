@@ -9,12 +9,14 @@ import (
 	"github.com/dgraph-io/ristretto"
 	"github.com/gavv/httpexpect/v2"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
+	"golang.org/x/sync/singleflight"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
 	"github.com/wundergraph/graphql-go-tools/pkg/asttransform"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
+
 	"github.com/wundergraph/wundergraph/pkg/pool"
-	"go.uber.org/zap"
-	"golang.org/x/sync/singleflight"
 )
 
 const (
