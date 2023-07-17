@@ -15,6 +15,8 @@ export interface NatsKVIntrospection {
 	apiNamespace: string;
 	model: z.AnyZodObject;
 	history?: number;
+	serverURL?: string;
+	token?: string;
 }
 
 export const introspectNatsKV = async (introspection: NatsKVIntrospection) => {
@@ -40,20 +42,6 @@ export const introspectNatsKV = async (introspection: NatsKVIntrospection) => {
 			Directives: [],
 			Kind: DataSourceKind.NATSKV,
 			Custom: {
-				serverURL: {
-					kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
-					environmentVariableName: 'WG_NATS_URL',
-					environmentVariableDefaultValue: 'nats://localhost:4222',
-					placeholderVariableName: '',
-					staticVariableContent: '',
-				},
-				token: {
-					kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
-					environmentVariableName: 'WG_NATS_AUTH',
-					environmentVariableDefaultValue: '',
-					placeholderVariableName: '',
-					staticVariableContent: '',
-				},
 				bucketPrefix: {
 					kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
 					environmentVariableName: 'WG_NATS_PREFIX',
@@ -61,6 +49,8 @@ export const introspectNatsKV = async (introspection: NatsKVIntrospection) => {
 					placeholderVariableName: '',
 					staticVariableContent: '',
 				},
+				serverURL: introspection.serverURL ?? '',
+				token: introspection.token ?? '',
 				history: introspection.history ?? 1,
 				bucketName: introspection.apiNamespace,
 				operation: NatsKvOperation.NATSKV_GET,

@@ -1018,11 +1018,11 @@ export interface DirectiveConfiguration {
 }
 
 export interface DataSourceCustomNatsKv {
-  serverURL: ConfigurationVariable | undefined;
+  serverURL: string;
   bucketName: string;
   operation: NatsKvOperation;
   history: number;
-  token: ConfigurationVariable | undefined;
+  token: string;
   bucketPrefix: ConfigurationVariable | undefined;
 }
 
@@ -3937,13 +3937,13 @@ export const DirectiveConfiguration = {
 };
 
 function createBaseDataSourceCustomNatsKv(): DataSourceCustomNatsKv {
-  return { serverURL: undefined, bucketName: "", operation: 0, history: 0, token: undefined, bucketPrefix: undefined };
+  return { serverURL: "", bucketName: "", operation: 0, history: 0, token: "", bucketPrefix: undefined };
 }
 
 export const DataSourceCustomNatsKv = {
   encode(message: DataSourceCustomNatsKv, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.serverURL !== undefined) {
-      ConfigurationVariable.encode(message.serverURL, writer.uint32(10).fork()).ldelim();
+    if (message.serverURL !== "") {
+      writer.uint32(10).string(message.serverURL);
     }
     if (message.bucketName !== "") {
       writer.uint32(18).string(message.bucketName);
@@ -3954,8 +3954,8 @@ export const DataSourceCustomNatsKv = {
     if (message.history !== 0) {
       writer.uint32(32).int32(message.history);
     }
-    if (message.token !== undefined) {
-      ConfigurationVariable.encode(message.token, writer.uint32(42).fork()).ldelim();
+    if (message.token !== "") {
+      writer.uint32(42).string(message.token);
     }
     if (message.bucketPrefix !== undefined) {
       ConfigurationVariable.encode(message.bucketPrefix, writer.uint32(50).fork()).ldelim();
@@ -3971,7 +3971,7 @@ export const DataSourceCustomNatsKv = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.serverURL = ConfigurationVariable.decode(reader, reader.uint32());
+          message.serverURL = reader.string();
           break;
         case 2:
           message.bucketName = reader.string();
@@ -3983,7 +3983,7 @@ export const DataSourceCustomNatsKv = {
           message.history = reader.int32();
           break;
         case 5:
-          message.token = ConfigurationVariable.decode(reader, reader.uint32());
+          message.token = reader.string();
           break;
         case 6:
           message.bucketPrefix = ConfigurationVariable.decode(reader, reader.uint32());
@@ -3998,24 +3998,22 @@ export const DataSourceCustomNatsKv = {
 
   fromJSON(object: any): DataSourceCustomNatsKv {
     return {
-      serverURL: isSet(object.serverURL) ? ConfigurationVariable.fromJSON(object.serverURL) : undefined,
+      serverURL: isSet(object.serverURL) ? String(object.serverURL) : "",
       bucketName: isSet(object.bucketName) ? String(object.bucketName) : "",
       operation: isSet(object.operation) ? natsKvOperationFromJSON(object.operation) : 0,
       history: isSet(object.history) ? Number(object.history) : 0,
-      token: isSet(object.token) ? ConfigurationVariable.fromJSON(object.token) : undefined,
+      token: isSet(object.token) ? String(object.token) : "",
       bucketPrefix: isSet(object.bucketPrefix) ? ConfigurationVariable.fromJSON(object.bucketPrefix) : undefined,
     };
   },
 
   toJSON(message: DataSourceCustomNatsKv): unknown {
     const obj: any = {};
-    message.serverURL !== undefined &&
-      (obj.serverURL = message.serverURL ? ConfigurationVariable.toJSON(message.serverURL) : undefined);
+    message.serverURL !== undefined && (obj.serverURL = message.serverURL);
     message.bucketName !== undefined && (obj.bucketName = message.bucketName);
     message.operation !== undefined && (obj.operation = natsKvOperationToJSON(message.operation));
     message.history !== undefined && (obj.history = Math.round(message.history));
-    message.token !== undefined &&
-      (obj.token = message.token ? ConfigurationVariable.toJSON(message.token) : undefined);
+    message.token !== undefined && (obj.token = message.token);
     message.bucketPrefix !== undefined &&
       (obj.bucketPrefix = message.bucketPrefix ? ConfigurationVariable.toJSON(message.bucketPrefix) : undefined);
     return obj;
@@ -4023,15 +4021,11 @@ export const DataSourceCustomNatsKv = {
 
   fromPartial<I extends Exact<DeepPartial<DataSourceCustomNatsKv>, I>>(object: I): DataSourceCustomNatsKv {
     const message = createBaseDataSourceCustomNatsKv();
-    message.serverURL = (object.serverURL !== undefined && object.serverURL !== null)
-      ? ConfigurationVariable.fromPartial(object.serverURL)
-      : undefined;
+    message.serverURL = object.serverURL ?? "";
     message.bucketName = object.bucketName ?? "";
     message.operation = object.operation ?? 0;
     message.history = object.history ?? 0;
-    message.token = (object.token !== undefined && object.token !== null)
-      ? ConfigurationVariable.fromPartial(object.token)
-      : undefined;
+    message.token = object.token ?? "";
     message.bucketPrefix = (object.bucketPrefix !== undefined && object.bucketPrefix !== null)
       ? ConfigurationVariable.fromPartial(object.bucketPrefix)
       : undefined;

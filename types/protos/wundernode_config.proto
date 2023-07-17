@@ -291,11 +291,11 @@ enum DataSourceKind {
 }
 
 message DataSourceCustom_NatsKv {
-	ConfigurationVariable serverURL = 1;
+	string serverURL = 1;
 	string bucketName = 2;
 	NatsKvOperation operation = 3;
 	int32 history = 4;
-	ConfigurationVariable token = 5;
+	string token = 5;
 	ConfigurationVariable bucketPrefix = 6;
 }
 

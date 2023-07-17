@@ -248,11 +248,11 @@ export class PrismaApi extends Api<DatabaseApiCustom> {}
 export class NatsKvApi extends Api<NatsKvApiCustom> {}
 
 export interface NatsKvApiCustom {
-	serverURL: ConfigurationVariable;
+	serverURL: string;
 	bucketName: string;
 	operation: NatsKvOperation;
 	history: number;
-	token: ConfigurationVariable;
+	token: string;
 	bucketPrefix: ConfigurationVariable;
 	schema: any;
 }

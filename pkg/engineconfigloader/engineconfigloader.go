@@ -499,9 +499,9 @@ func (l *EngineConfigLoader) Load(engineConfig *wgpb.EngineConfiguration, wgServ
 			config := nats.Configuration{
 				Operation: in.CustomNatsKv.GetOperation(),
 				Bucket:    bucketName,
-				ServerURL: loadvariable.String(in.CustomNatsKv.GetServerURL()),
+				ServerURL: in.CustomNatsKv.GetServerURL(),
 				History:   in.CustomNatsKv.GetHistory(),
-				Token:     loadvariable.String(in.CustomNatsKv.GetToken()),
+				Token:     in.CustomNatsKv.GetToken(),
 			}
 			out.Custom = nats.ConfigJson(config)
 		case wgpb.DataSourceKind_POSTGRESQL,
