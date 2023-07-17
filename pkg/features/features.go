@@ -161,5 +161,5 @@ func EnabledFeatures(wunderGraphDir string) ([]Feature, error) {
 
 // IsEnterprise returns true iff feat is only available with an enterprise license
 func IsEnterprise(feat Feature) bool {
-	return true
+	return false
 }
