@@ -46,4 +46,4 @@ const kv = introspect.natsKV({
 
 ## Local Development and Testing
 
-By default WunderGraph runs a test server for NATS. It is recommended to disable this in production using `WG_DISABLE_EMBEDDED_NATS`. This is automatically set on WunderGraph Cloud.
+By default WunderGraph runs a test server for NATS. It is recommended to disable this in production using `WG_DISABLE_EMBEDDED_NATS=false`. This is automatically set on WunderGraph Cloud.
