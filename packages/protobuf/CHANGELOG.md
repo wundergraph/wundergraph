@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.117.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.116.1...@wundergraph/protobuf@0.117.0) (2023-07-13)
+
+### Features
+
+* add support for feature usage telemetry ([#1096](https://github.com/wundergraph/wundergraph/issues/1096)) ([30a0b12](https://github.com/wundergraph/wundergraph/commit/30a0b129899d8296aa6a027d1ecafde469a0ead2)) (@fiam)
+
 ## [0.116.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.116.0...@wundergraph/protobuf@0.116.1) (2023-06-21)
 
 ### Performance Improvements

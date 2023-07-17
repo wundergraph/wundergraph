@@ -16,6 +16,7 @@ import {
 	ShareIcon,
 	WrenchIcon,
 	SunIcon,
+	SparklesIcon,
 } from '@heroicons/react/24/solid';
 
 const navigation = [
@@ -595,6 +596,18 @@ const navigation = [
 						href: '/docs/storage/minio',
 					},
 				],
+			},
+		],
+	},
+	{
+		title: 'OpenAI',
+		href: '/docs/openai',
+		icon: <SparklesIcon />,
+		links: [
+			{
+				title: 'Overview',
+				navTitle: 'OpenAI',
+				href: '/docs/openai',
 			},
 		],
 	},
