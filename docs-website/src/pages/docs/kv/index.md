@@ -12,19 +12,15 @@ This can now serve as a datasource for WunderGraph.
 
 ## Parameters
 
+- `serverURL` (string, optional): The endpoint for your NATS server. Defaults to nats://localhost:4222 for the embedded test server.
+
+- `token` (string, optional): The authorization token for your NATS server.
+
 - `apiNamespace` (string): The namespace to be used for the datasource
 
 - `model` (Zod schema): The model is defined using Zod, a TypeScript-first schema declaration library. It describes the shape of the data to be stored in the NATS KV.
 
 - `history` (number): The history parameter specifies the number of past revisions of the kv store that can be accessed.
-
-## Endpoint and Authentication
-
-The introspection uses two environment variables namely `WG_NATS_URL` for the server endpoint and `WG_NATS_AUTH` for the authentication token.
-
-### Prefixing buckets
-
-Buckets can be prefixed with a custom name. This is also set using the environment variable `WG_NATS_PREFIX`
 
 ## How it works
 
@@ -46,4 +42,4 @@ const kv = introspect.natsKV({
 
 ## Local Development and Testing
 
-By default WunderGraph runs a test server for NATS. It is recommended to disable this in production using `WG_DISABLE_EMBEDDED_NATS=true`. This is automatically set on WunderGraph Cloud.
+By default WunderGraph runs a test server of NATS for development purposes with the endpoint nats://localhost:4222. It is recommended to disable this in production using `WG_DISABLE_EMBEDDED_NATS=true`. This is automatically set and disabled on WunderGraph Cloud.
