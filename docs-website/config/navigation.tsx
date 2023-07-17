@@ -10,13 +10,14 @@ import {
 	ComputerDesktopIcon,
 	CubeIcon,
 	HomeIcon,
+	KeyIcon,
 	ListBulletIcon,
 	LockClosedIcon,
 	ServerIcon,
 	ShareIcon,
-	WrenchIcon,
-	SunIcon,
 	SparklesIcon,
+	SunIcon,
+	WrenchIcon,
 } from '@heroicons/react/24/solid';
 
 const navigation = [
@@ -610,6 +611,11 @@ const navigation = [
 				href: '/docs/openai',
 			},
 		],
+	},
+	{
+		title: 'Key Value',
+		href: '/docs/kv',
+		icon: <KeyIcon />,
 	},
 	{ type: 'divider' },
 	{
