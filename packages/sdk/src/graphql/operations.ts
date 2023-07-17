@@ -9,6 +9,7 @@ import {
 	VariableInjectionConfiguration,
 } from '@wundergraph/protobuf';
 import {
+	BREAK,
 	buildSchema,
 	ConstArgumentNode,
 	ConstDirectiveNode,
@@ -56,6 +57,7 @@ export const isInternalOperationByAPIMountPath = (path: string) => {
 
 export interface GraphQLOperation {
 	Name: string;
+	Description: string;
 	PathName: string;
 	Content: string;
 	OperationType: OperationType;
@@ -134,10 +136,12 @@ export interface ParseOperationsOptions {
 	interpolateVariableDefinitionAsJSON?: string[];
 	customJsonScalars?: Set<string>;
 	customClaims?: Record<string, CustomClaim>;
+	wgDirAbs?: string;
 }
 
 const defaultParseOptions: ParseOperationsOptions = {
 	keepFromClaimVariables: false,
+	wgDirAbs: '',
 };
 
 const defaultVariableInjectionConfiguration: Omit<
@@ -193,6 +197,7 @@ export const parseGraphQLOperations = (
 
 						const operation: GraphQLOperation = {
 							Name: operationFile.operation_name,
+							Description: loadOperationDescription(operationFile, options.wgDirAbs),
 							PathName: operationFile.api_mount_path,
 							Content: stripIgnoredCharacters(removeTransformDirectives(content)),
 							OperationType: parseOperationTypeNode(node.operation),
@@ -435,6 +440,15 @@ const jsonSchemaUpdater = (arg: ConstArgumentNode) => {
 		}
 		(schema as any)[propName] = value;
 	};
+};
+
+const loadOperationDescription = (operationFile: GraphQLOperationFile, wgDirAbs?: string): string => {
+	if (!wgDirAbs) {
+		return '';
+	}
+	const operationFileContentPath = path.join(wgDirAbs, 'operations', operationFile.file_path);
+	const operationFileContent = fs.readFileSync(operationFileContentPath, 'utf-8');
+	return extractOperationDescription(operationFileContent);
 };
 
 const handleJsonSchemaDirectives = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
@@ -1574,6 +1588,35 @@ export const removeHookVariables = (operation: string): string => {
 		},
 	});
 	return print(updated);
+};
+
+export const extractOperationDescription = (operation: string): string => {
+	let line = -1;
+	const document = parse(operation);
+	visit(document, {
+		OperationDefinition: (node) => {
+			line = node.loc?.startToken.line || -1;
+			return BREAK;
+		},
+	});
+	if (line <= 0) {
+		return '';
+	}
+	const operationComment: string[] = [];
+	const lines = operation.split('\n');
+	for (let i = line - 2; i >= 0; i--) {
+		const trimmed = lines[i].trim();
+		if (trimmed.startsWith('#')) {
+			operationComment.push(trimmed.slice(1).trim());
+		} else {
+			break;
+		}
+	}
+	const out = operationComment.reverse().join(' ');
+	if (out.startsWith('This file is auto generated')) {
+		return '';
+	}
+	return out;
 };
 
 export const removeTransformDirectives = (operation: string): string => {

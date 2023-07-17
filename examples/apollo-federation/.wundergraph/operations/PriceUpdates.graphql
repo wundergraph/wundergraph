@@ -1,5 +1,5 @@
 subscription {
-	federated_updatedPrice {
+	updatedPrice {
 		upc
 		price
 		name

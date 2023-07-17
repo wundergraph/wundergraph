@@ -354,11 +354,17 @@ export class OpenApiBuilder {
 					opPath = {
 						get: this.queryOperation(op),
 					};
+					if (op.Description && op.Description !== '') {
+						opPath.description = op.Description;
+					}
 					break;
 				case OperationType.MUTATION:
 					opPath = {
 						post: this.mutationOperation(op),
 					};
+					if (op.Description && op.Description !== '') {
+						opPath.description = op.Description;
+					}
 					break;
 			}
 			if (opPath) {
