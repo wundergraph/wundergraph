@@ -103,7 +103,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -170,7 +170,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -237,7 +237,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -304,7 +304,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -371,7 +371,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -438,7 +438,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -505,7 +505,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -572,7 +572,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -639,7 +639,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -706,7 +706,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -773,7 +773,7 @@ exports[`nats kv introspection should work for nested models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -1011,7 +1011,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -1052,7 +1052,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -1093,7 +1093,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -1134,7 +1134,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -1175,7 +1175,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -1216,7 +1216,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -1257,7 +1257,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -1298,7 +1298,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -1339,7 +1339,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -1380,7 +1380,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",
@@ -1421,7 +1421,7 @@ exports[`nats kv introspection should work for simple models 2`] = `
           "placeholderVariableName": "",
           "staticVariableContent": ""
         },
-        "serverURL": "",
+        "serverURL": "nats://localhost:4222",
         "token": "",
         "history": 1,
         "bucketName": "token",

@@ -49,7 +49,7 @@ export const introspectNatsKV = async (introspection: NatsKVIntrospection) => {
 					placeholderVariableName: '',
 					staticVariableContent: '',
 				},
-				serverURL: introspection.serverURL ?? '',
+				serverURL: introspection.serverURL ?? 'nats://localhost:4222',
 				token: introspection.token ?? '',
 				history: introspection.history ?? 1,
 				bucketName: introspection.apiNamespace,
