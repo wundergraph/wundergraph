@@ -92,7 +92,7 @@ func parseOpenSSLVersion(str string) string {
 	r := regexp.MustCompile(`^(Open|Libre)SSL\s(\d+\.\d+)\.\d+`)
 	matches := r.FindStringSubmatch(str)
 	if len(matches) > 0 {
-		majorMinor := matches[1]
+		majorMinor := matches[2]
 		if majorMinor == "3.1" {
 			// Prisma provides no binaries for 3.1, use 3.0
 			majorMinor = "3.0"
