@@ -142,7 +142,7 @@
     "ts-jest": "^29.0.1",
     "tsd": "^0.24.1",
     "type-fest": "^3.5.2",
-    "typescript": "^4.8.2"
+    "typescript": "^5.1.6"
   },
   "dependencies": {
     "@fastify/formbody": "^7.3.0",
