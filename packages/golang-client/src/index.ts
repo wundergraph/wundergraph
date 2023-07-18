@@ -5,7 +5,7 @@ import {
 	TemplateOutputFile,
 	TypeScriptEnumModels,
 } from '@wundergraph/sdk';
-import { hasInput, visitJSONSchema } from '@wundergraph/sdk/internal';
+import { hasInput, visitJSONSchema } from '@wundergraph/sdk/internal/codegen';
 import { JSONSchema7 as JSONSchema, JSONSchema7 } from 'json-schema';
 import execa from 'execa';
 import { capitalize } from 'lodash';
