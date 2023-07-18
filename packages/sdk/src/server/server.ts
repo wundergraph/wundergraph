@@ -443,8 +443,7 @@ export const createServer = async ({
 
 		if (serverConfig?.hooks && Object.keys(serverConfig.hooks).length > 0) {
 			await fastify.register(require('./plugins/hooks'), {
-				// @todo improve this
-				integrations: (serverConfig as any).integrations,
+				integrations: serverConfig.integrations || [],
 				...serverConfig.hooks,
 				config,
 			});

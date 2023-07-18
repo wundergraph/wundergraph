@@ -9,6 +9,7 @@ import { OperationsClient } from './operations-client';
 import { GraphQLError } from '../client';
 import { TelemetryOptions } from './trace/trace';
 import { RequestLogger } from './logger';
+import { InternalIntergration } from '../integrations/types';
 
 declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
@@ -316,6 +317,7 @@ export interface WunderGraphHooksAndServerConfig<
 	hooks?: GeneratedHooksConfig;
 	graphqlServers?: GraphQLServerConfig[];
 	options?: ServerOptions;
+	integrations?: InternalIntergration[];
 }
 
 export interface OnConnectionInitHookRequestBody extends FastifyRequestBody {

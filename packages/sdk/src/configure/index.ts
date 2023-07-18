@@ -1210,7 +1210,8 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 		mutation: OperationType.MUTATION,
 		subscription: OperationType.SUBSCRIPTION,
 	};
-	for (const integration of config.integrations) {
+	const integrations = config.integrations || [];
+	for (const integration of integrations) {
 		const httpTransport = integration.hooks['http:transport'];
 		if (httpTransport) {
 			const config = httpTransport as unknown as DynamicRouterConfig;

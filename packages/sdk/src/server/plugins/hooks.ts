@@ -285,7 +285,8 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		}
 	);
 
-	for (const integration of config.integrations) {
+	const integrations = config.integrations || [];
+	for (const integration of integrations) {
 		const httpTransport = integration.hooks['http:transport'];
 		if (httpTransport) {
 			const onOriginTransportHookName = 'onOriginTransport';
