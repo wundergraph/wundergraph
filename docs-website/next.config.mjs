@@ -11,7 +11,7 @@ const nextConfig = {
 		return [
 			{
 				source: '/manifesto',
-				destination: '/introduction-to-wundergraph',
+				destination: '/introduction',
 				permanent: false,
 			},
 			{

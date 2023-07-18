@@ -193,6 +193,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 					Operations: [
 						{
 							Name: 'ClosestPlanets',
+							Description: '',
 							PathName: 'ClosestPlanets',
 							Content: 'query ClosestPlanets ($where: db_NodeWhereInput) {\n name \n}',
 							OperationType: OperationType.QUERY,
@@ -285,6 +286,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						},
 						{
 							Name: 'MyReviews',
+							Description: '',
 							PathName: 'MyReviews',
 							Content: 'query MyReviews {\n  me {\n    name\n    reviews {\n      id\n      body\n    }\n  }\n}',
 							OperationType: OperationType.QUERY,
@@ -379,6 +381,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						},
 						{
 							Name: 'CreatePet',
+							Description: '',
 							PathName: 'CreatePet',
 							Content:
 								'mutation CreatePet($petInput: PetInput!) {\n  postPets(petInput: $petInput) {\n    name\n  }\n}',
@@ -523,6 +526,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						},
 						{
 							Name: 'NewPets',
+							Description: '',
 							PathName: 'NewPets',
 							Content: 'subscription NewPets {\n  newPets {\n    name\n  }\n}',
 							OperationType: OperationType.SUBSCRIPTION,
@@ -614,6 +618,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							},
 							Content:
 								'mutation($input:TestType_Input!){test_endpoint(input:$input){...on A_const_container{A_const}...on mutation_test_endpoint_oneOf_1{B}}}',
+							Description: '',
 							ExecutionEngine: 0,
 							HooksConfiguration: {
 								customResolve: false,
