@@ -65,7 +65,7 @@
     "react-dom": "^18.1.0",
     "swr": "^2.2.0",
     "tsup": "^6.7.0",
-    "typescript": "^4.8.2"
+    "typescript": "^5.1.6"
   },
   "peerDependencies": {
     "@wundergraph/sdk": ">=0.91.0",

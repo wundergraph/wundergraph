@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "cpy-cli": "^4.1.0",
-    "typescript": "^4.8.2"
+    "typescript": "^5.1.6"
   },
   "sideEffects": false
 }

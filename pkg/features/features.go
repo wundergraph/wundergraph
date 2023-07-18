@@ -2,8 +2,11 @@
 package features
 
 import (
+<<<<<<< HEAD
 	"os"
 
+=======
+>>>>>>> origin/main
 	"github.com/wundergraph/wundergraph/pkg/config"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -26,7 +29,10 @@ const (
 	S3Uploads          = Feature("s3-uploads")
 	TokenAuth          = Feature("token-auth")
 	ORM                = Feature("orm")
+<<<<<<< HEAD
 	OpenAI             = Feature("openai")
+=======
+>>>>>>> origin/main
 )
 
 type featureCheck struct {
