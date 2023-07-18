@@ -5,6 +5,9 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 )
 
 var platforms = []string{
@@ -29,12 +32,14 @@ func TestFetchEngine(t *testing.T) {
 
 	engine := NewEngine(&http.Client{
 		Timeout: time.Second * 5,
-	}, nil, dir)
+	}, zap.NewNop(), dir)
 
 	var engines = []string{"query-engine", "migration-engine"}
 
 	for _, engineName := range engines {
-		if err := engine.FetchEngine(dir, engineName, engine.BinaryPlatformName()); err != nil {
+		platformName, err := engine.BinaryPlatformName()
+		assert.NoError(t, err)
+		if err := engine.FetchEngine(dir, engineName, platformName); err != nil {
 			t.Fatalf("FetchEngine failed for %s: %s", engineName, err)
 		}
 	}
@@ -47,7 +52,7 @@ func TestEngineAvailability(t *testing.T) {
 
 	engine := NewEngine(&http.Client{
 		Timeout: time.Second * 5,
-	}, nil, dir)
+	}, zap.NewNop(), dir)
 
 	var engines = []string{"query-engine", "migration-engine"}
 

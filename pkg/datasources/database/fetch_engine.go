@@ -8,9 +8,12 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
+
+	"go.uber.org/zap"
 )
 
 var (
@@ -86,21 +89,52 @@ var binaryNameWithSSLCache string
 
 // parseOpenSSLVersion returns the OpenSSL version, ignoring the patch version; e.g. 1.1.x
 func parseOpenSSLVersion(str string) string {
-	r := regexp.MustCompile(`^OpenSSL\s(\d+\.\d+)\.\d+`)
+	r := regexp.MustCompile(`^(Open|Libre)SSL\s(\d+\.\d+)\.\d+`)
 	matches := r.FindStringSubmatch(str)
 	if len(matches) > 0 {
-		return matches[1] + ".x"
+		majorMinor := matches[1]
+		if majorMinor == "3.1" {
+			// Prisma provides no binaries for 3.1, use 3.0
+			majorMinor = "3.0"
+		}
+		return majorMinor + ".x"
 	}
 	// default to 1.1.x
 	return "1.1.x"
 }
 
-func getOpenSSL() string {
-	out, _ := exec.Command("openssl", "version", "-v").CombinedOutput()
-	if out == nil {
-		return ""
+// getOpenSSLByTestingLib tries to determine the OpenSSL version by
+// checking for shared library files in the filesystem. If no libraries
+// can be found it returns an empty string (Note: this only succeeds on
+// Linux)
+func getOpenSSLByTestingLib() string {
+	sslSuffixes := map[string]string{
+		"3": "3.0.x",
+		"1": "1.1.x",
 	}
-	return parseOpenSSLVersion(string(out))
+	libPaths := []string{"/lib", "/usr/lib"}
+	for _, p := range libPaths {
+		for suffix, version := range sslSuffixes {
+			ssl := filepath.Join(p, fmt.Sprintf("libssl.so.%s", suffix))
+			if _, err := os.Stat(ssl); err == nil {
+				return version
+			}
+		}
+	}
+	return ""
+}
+
+// getOpenSSL tries to determine the openssl version by calling the openssl
+// command, falling back to getOpenSSLByTestingLib()
+func getOpenSSL() (string, error) {
+	out, err := exec.Command("openssl", "version", "-v").CombinedOutput()
+	if err != nil {
+		if v := getOpenSSLByTestingLib(); v != "" {
+			return v, nil
+		}
+		return "", fmt.Errorf("could not determine openssl version: %s (%w)", string(out), err)
+	}
+	return parseOpenSSLVersion(string(out)), nil
 }
 
 func parseLinuxDistro(str string) string {
@@ -163,29 +197,35 @@ func checkForExtension(platform, path string) string {
 
 // BinaryPlatformName returns the name of the prisma binary which should be used,
 // for example "darwin" or "linux-openssl-1.1.x"
-func (e *Engine) BinaryPlatformName() string {
+func (e *Engine) BinaryPlatformName() (string, error) {
 	if binaryNameWithSSLCache != "" {
-		return binaryNameWithSSLCache
+		return binaryNameWithSSLCache, nil
 	}
 
 	platformName := runtime.GOOS
 	if platformName != "linux" {
-		return platformName
+		return platformName, nil
 	}
 
 	distro := getLinuxDistro()
 	if distro == "alpine" {
-		if runtime.GOARCH == "arm64" {
-			return "linux-musl-arm64-openssl-3.0.x"
-		}
-		return "linux-musl"
+		distro = "linux-musl"
 	}
 
-	ssl := getOpenSSL()
-	name := fmt.Sprintf("%s-openssl-%s", distro, ssl)
+	ssl, err := getOpenSSL()
+	if err != nil {
+		return "", err
+	}
+
+	arch := ""
+	if runtime.GOARCH == "arm64" {
+		arch = "-arm64"
+	}
+
+	name := fmt.Sprintf("%s%s-openssl-%s", distro, arch, ssl)
 	binaryNameWithSSLCache = name
 
-	return name
+	return name, nil
 }
 
 func (e *Engine) GetEngineURL(engineName string, binaryPlatformName string) string {
@@ -205,6 +245,7 @@ func (e *Engine) FetchEngine(toDir string, engineName string, binaryPlatformName
 		return nil
 	}
 
+	e.log.Debug("downloading", zap.String("url", url))
 	if err := download(url, to); err != nil {
 		return fmt.Errorf("could not download %s to %s: %w", url, to, err)
 	}
