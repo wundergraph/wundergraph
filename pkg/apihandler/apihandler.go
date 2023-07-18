@@ -852,6 +852,11 @@ type SubscriptionResolver interface {
 	ResolveGraphQLSubscription(ctx *resolve.Context, subscription *resolve.GraphQLSubscription, writer resolve.FlushWriter) (err error)
 }
 
+type GraphQLResolver interface {
+	QueryResolver
+	SubscriptionResolver
+}
+
 type liveQueryConfig struct {
 	enabled                bool
 	pollingIntervalSeconds int64
