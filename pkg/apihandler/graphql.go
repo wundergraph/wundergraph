@@ -40,7 +40,7 @@ type GraphQLHandlerOptions struct {
 	Internal        bool
 	PlanConfig      plan.Configuration
 	Definition      *ast.Document
-	Resolver        *resolve.Resolver
+	Resolver        GraphQLResolver
 	RenameTypeNames []resolve.RenameTypeName
 	Pool            *pool.Pool
 	Cache           *ristretto.Cache
@@ -100,7 +100,7 @@ func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, _ *http.Requ
 type GraphQLHandler struct {
 	planConfig plan.Configuration
 	definition *ast.Document
-	resolver   *resolve.Resolver
+	resolver   GraphQLResolver
 	log        *zap.Logger
 	pool       *pool.Pool
 	sf         *singleflight.Group
@@ -200,6 +200,11 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// add the extracted variables to the hash
 	_, err = shared.Hash.Write(shared.Doc.Input.Variables)
 	if err != nil {
+		requestLogger.Error("hash write failed", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if _, err := shared.Hash.Write(requestOperationName); err != nil {
 		requestLogger.Error("hash write failed", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
