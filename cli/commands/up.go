@@ -113,7 +113,7 @@ var upCmd = &cobra.Command{
 		if enableTUI {
 			licensingOutput = io.Discard
 		}
-		go licensing.NewManager(licensingPublicKey).FeatureCheck(wunderGraphDir, licensingOutput)
+		go licensing.NewManager(licensingPublicKey).LicenseCheck(wunderGraphDir, cancel, licensingOutput)
 
 		if clearCache {
 			if cacheDir, _ := helpers.LocalWunderGraphCacheDir(wunderGraphDir); cacheDir != "" {

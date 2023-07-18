@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	trialMessageInterval = 5 * time.Minute
+	trialRuntimeDurationMinutes = 15
 )
 
 var (
@@ -186,23 +186,29 @@ func (m *Manager) Remove() error {
 }
 
 // Validate reads the stored license using Manager.Read() and checks whether it's expired. If the
-// license is not found, not valid or expired it returns an error. Otherwise, it returns nil.
-func (m *Manager) Validate() error {
+// license is not found, not valid or expired it returns an error. Otherwise, it returns the license.
+func (m *Manager) Validate() (*License, error) {
 	license, err := m.Read()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if license.IsExpired() {
-		return ErrLicenseExpired
+		return license, ErrLicenseExpired
 	}
-	return nil
+	return license, nil
 }
 
-func (m *Manager) FeatureCheck(wunderGraphDir string, w io.Writer) error {
-	verr := m.Validate()
+func (m *Manager) LicenseCheck(wunderGraphDir string, exit func(), w io.Writer) error {
+	warnFprintf := color.New(color.FgYellow).FprintfFunc()
+	license, verr := m.Validate()
 	if verr == nil {
+		okFprintf := color.New(color.FgGreen).FprintfFunc()
+		okFprintf(w, "WunderGraph Enterprise License %s detected\nEnterprise features are now enabled\n", license.Email)
 		// We have a license, stop here
 		return nil
+	}
+	if verr == ErrLicenseExpired {
+		warnFprintf(w, "Your WunderGraph Enterprise License is expired")
 	}
 	var enterpriseFeaturesNames []string
 	for {
@@ -223,17 +229,22 @@ func (m *Manager) FeatureCheck(wunderGraphDir string, w io.Writer) error {
 	}
 	if len(enterpriseFeaturesNames) > 0 {
 		go func() {
-			warnFprintf := color.New(color.FgYellow).FprintfFunc()
 			boldWarnFprintf := color.New(color.FgYellow, color.Bold).FprintfFunc()
 			boldFprintf := color.New(color.FgGreen, color.Bold).FprintfFunc()
 
-			for {
+			printLicenseHeader := func() {
 				warnFprintf(w, "The following features require a WunderGraph Enterprise License: %s\n", strings.Join(enterpriseFeaturesNames, ", "))
 				warnFprintf(w, "Since no license has been found, trial mode has been enabled\n")
 				boldWarnFprintf(w, "TRIAL MODE IS NOT ALLOWED FOR PRODUCTION USE\n")
 				boldFprintf(w, "See https://wundergraph.com to purchase a WunderGraph Enterprise License\n")
-				time.Sleep(trialMessageInterval)
 			}
+
+			printLicenseHeader()
+			boldWarnFprintf(w, "Exiting in %d minutes\n", trialRuntimeDurationMinutes)
+			time.Sleep(trialRuntimeDurationMinutes * time.Minute)
+			printLicenseHeader()
+			boldWarnFprintf(w, "Exiting after %d minutes\n", trialRuntimeDurationMinutes)
+			exit()
 		}()
 	}
 	return nil

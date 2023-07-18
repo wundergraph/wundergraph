@@ -30,7 +30,9 @@ var startCmd = &cobra.Command{
 	Long:        `Start runs WunderGraph Node and Server as a single process in production mode`,
 	Annotations: telemetry.Annotations(telemetry.AnnotationCommand),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		cancelCtx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		sigCtx, stop := signal.NotifyContext(cancelCtx, os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
 		g, ctx := errgroup.WithContext(sigCtx)
@@ -41,7 +43,7 @@ var startCmd = &cobra.Command{
 			return err
 		}
 
-		go licensing.NewManager(licensingPublicKey).FeatureCheck(wunderGraphDir, os.Stderr)
+		go licensing.NewManager(licensingPublicKey).LicenseCheck(wunderGraphDir, cancel, os.Stderr)
 
 		if !excludeServer {
 			g.Go(func() error {
