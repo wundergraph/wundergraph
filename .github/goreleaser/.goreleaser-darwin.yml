@@ -29,7 +29,7 @@ builds:
     #      - SDKROOT=/Applications/Xcode_12.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk
     #      - MACOSX_DEPLOYMENT_TARGET=11.1
     ldflags:
-      - -w -s -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=ci -X main.githubAuthDemoClientID={{.Env.GH_AUTH_DEMO_CLIENT_ID}} -X main.githubAuthDemoClientSecret={{.Env.GH_AUTH_DEMO_CLIENT_SECRET}}
+      - -w -s -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=ci -X main.githubAuthDemoClientID={{.Env.GH_AUTH_DEMO_CLIENT_ID}} -X main.githubAuthDemoClientSecret={{.Env.GH_AUTH_DEMO_CLIENT_SECRET}} -X github.com/wundergraph/wundergraph/cli/commands.licensingPublicKey={{.Env.LICENSING_PUBLIC_KEY}}
     goos:
       - darwin
     goarch:
