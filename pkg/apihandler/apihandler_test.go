@@ -3,6 +3,7 @@ package apihandler
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -43,6 +44,10 @@ func (f *FakeResolver) ResolveGraphQLResponse(ctx *resolve.Context, response *re
 	f.invocations++
 	_, err = writer.Write(f.resolve(ctx, response, data))
 	return
+}
+
+func (f *FakeResolver) ResolveGraphQLSubscription(ctx *resolve.Context, subscription *resolve.GraphQLSubscription, writer resolve.FlushWriter) error {
+	return errors.New("unimplemented")
 }
 
 type FakeSubscriptionResolver struct {
