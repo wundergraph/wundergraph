@@ -1,0 +1,10 @@
+query ($key: String!) {
+	kv_history(key: $key) {
+		key
+		revision
+		created
+		value {
+			token
+		}
+	}
+}

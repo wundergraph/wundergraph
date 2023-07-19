@@ -10,6 +10,7 @@ import {
 	FieldConfiguration,
 	GraphQLDataSourceHooksConfiguration,
 	MTLSConfiguration,
+	NatsKvOperation,
 	SigningMethod,
 	SingleTypeField,
 	StatusCodeTypeMapping,
@@ -34,6 +35,7 @@ import {
 	introspectSQLServer,
 } from './database-introspection';
 import { introspectSoap } from './soap-introspection';
+import { introspectNatsKV } from './nats-kv-introspection';
 
 export type { OpenAPIIntrospection } from './openapi-introspection';
 
@@ -242,6 +244,18 @@ export class SQLServerApi extends Api<DatabaseApiCustom> {}
 export class MongoDBApi extends Api<DatabaseApiCustom> {}
 
 export class PrismaApi extends Api<DatabaseApiCustom> {}
+
+export class NatsKvApi extends Api<NatsKvApiCustom> {}
+
+export interface NatsKvApiCustom {
+	serverURL: string;
+	bucketName: string;
+	operation: NatsKvOperation;
+	history: number;
+	token: string;
+	bucketPrefix: ConfigurationVariable;
+	schema: any;
+}
 
 export interface DataSource<Custom = unknown> {
 	Id?: string;
@@ -483,6 +497,7 @@ export const introspect = {
 	openApi: introspectOpenApi,
 	openApiV2: introspectOpenApiV2,
 	soap: introspectSoap,
+	natsKV: introspectNatsKV,
 };
 
 export const buildUpstreamAuthentication = (upstream: HTTPUpstream): UpstreamAuthentication | undefined => {

@@ -26,6 +26,9 @@ configureWunderGraphApplication({
 	apis: [notes, unions],
 	server,
 	operations,
+	options: {
+		defaultRequestTimeoutSeconds: 1,
+	},
 	codeGenerators: [
 		{
 			templates: [

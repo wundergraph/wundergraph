@@ -1,15 +1,19 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/fatih/color"
 	"github.com/joho/godotenv"
 	"github.com/mattn/go-isatty"
+	natsServer "github.com/nats-io/nats-server/v2/server"
+	natsTest "github.com/nats-io/nats-server/v2/test"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -381,4 +385,37 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.TelemetryDebugMode, "telemetry-debug", isTelemetryDebugEnabled, "Enables the debug mode for telemetry. Understand what telemetry is being sent to us.")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, prettyLoggingFlagName, false, "Enables pretty logging")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "Directory of your wundergraph.config.ts")
+}
+
+func configureEmbeddedNatsBlocking(ctx context.Context) {
+
+	disable := os.Getenv("WG_DISABLE_EMBEDDED_NATS")
+	if disable == "true" {
+		return
+	}
+
+	log.Debug("Embedded NATS server enabled")
+
+	// only for testing, debugging and development purposes
+	// in production, the user should run a dedicated NATS server
+	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+	if err != nil {
+		return
+	}
+	storageDir := filepath.Join(wunderGraphDir, "generated", "nats-server", "storage")
+	if err := os.MkdirAll(storageDir, 0755); err != nil {
+		return
+	}
+	srv := natsTest.RunServer(&natsServer.Options{
+		JetStream: true,
+		StoreDir:  storageDir,
+	})
+	if srv == nil {
+		log.Debug("Embedded NATS server could not be started")
+		return
+	}
+	log.Debug("Embedded NATS server started")
+	<-ctx.Done()
+	srv.Shutdown()
+	log.Debug("Embedded NATS server stopped")
 }

@@ -2,6 +2,8 @@
 package features
 
 import (
+	"os"
+
 	"github.com/wundergraph/wundergraph/pkg/config"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -24,6 +26,7 @@ const (
 	S3Uploads          = Feature("s3-uploads")
 	TokenAuth          = Feature("token-auth")
 	ORM                = Feature("orm")
+	OpenAI             = Feature("openai")
 )
 
 type featureCheck struct {
@@ -119,6 +122,10 @@ func isFeatureORMEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
 	return cfg.GetApi().GetExperimentalConfig().GetOrm(), nil
 }
 
+func isFeatureOpenAIEnabled(_ *wgpb.WunderGraphConfiguration) (bool, error) {
+	return os.Getenv("OPENAI_API_KEY") != "", nil
+}
+
 func featureChecks() []*featureCheck {
 	// Same order as Feature declarations
 	return []*featureCheck{
@@ -136,6 +143,7 @@ func featureChecks() []*featureCheck {
 		{S3Uploads, isFeatureS3UploadsEnabled},
 		{TokenAuth, isFeatureTokenAuthEnabled},
 		{ORM, isFeatureORMEnabled},
+		{OpenAI, isFeatureOpenAIEnabled},
 	}
 }
 
