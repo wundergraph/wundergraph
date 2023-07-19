@@ -463,6 +463,7 @@ export enum DataSourceKind {
   MONGODB = 6,
   SQLITE = 7,
   PRISMA = 8,
+  NATSKV = 9,
 }
 
 export function dataSourceKindFromJSON(object: any): DataSourceKind {
@@ -494,6 +495,9 @@ export function dataSourceKindFromJSON(object: any): DataSourceKind {
     case 8:
     case "PRISMA":
       return DataSourceKind.PRISMA;
+    case 9:
+    case "NATSKV":
+      return DataSourceKind.NATSKV;
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum DataSourceKind");
   }
@@ -519,8 +523,93 @@ export function dataSourceKindToJSON(object: DataSourceKind): string {
       return "SQLITE";
     case DataSourceKind.PRISMA:
       return "PRISMA";
+    case DataSourceKind.NATSKV:
+      return "NATSKV";
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum DataSourceKind");
+  }
+}
+
+export enum NatsKvOperation {
+  NATSKV_GET = 0,
+  NATSKV_GETREVISION = 1,
+  NATSKV_KEYS = 2,
+  NATSKV_HISTORY = 3,
+  NATSKV_PUT = 4,
+  NATSKV_CREATE = 5,
+  NATSKV_UPDATE = 6,
+  NATSKV_DELETE = 7,
+  NATSKV_PURGE = 8,
+  NATSKV_WATCH = 9,
+  NATSKV_WATCHALL = 10,
+}
+
+export function natsKvOperationFromJSON(object: any): NatsKvOperation {
+  switch (object) {
+    case 0:
+    case "NATSKV_GET":
+      return NatsKvOperation.NATSKV_GET;
+    case 1:
+    case "NATSKV_GETREVISION":
+      return NatsKvOperation.NATSKV_GETREVISION;
+    case 2:
+    case "NATSKV_KEYS":
+      return NatsKvOperation.NATSKV_KEYS;
+    case 3:
+    case "NATSKV_HISTORY":
+      return NatsKvOperation.NATSKV_HISTORY;
+    case 4:
+    case "NATSKV_PUT":
+      return NatsKvOperation.NATSKV_PUT;
+    case 5:
+    case "NATSKV_CREATE":
+      return NatsKvOperation.NATSKV_CREATE;
+    case 6:
+    case "NATSKV_UPDATE":
+      return NatsKvOperation.NATSKV_UPDATE;
+    case 7:
+    case "NATSKV_DELETE":
+      return NatsKvOperation.NATSKV_DELETE;
+    case 8:
+    case "NATSKV_PURGE":
+      return NatsKvOperation.NATSKV_PURGE;
+    case 9:
+    case "NATSKV_WATCH":
+      return NatsKvOperation.NATSKV_WATCH;
+    case 10:
+    case "NATSKV_WATCHALL":
+      return NatsKvOperation.NATSKV_WATCHALL;
+    default:
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum NatsKvOperation");
+  }
+}
+
+export function natsKvOperationToJSON(object: NatsKvOperation): string {
+  switch (object) {
+    case NatsKvOperation.NATSKV_GET:
+      return "NATSKV_GET";
+    case NatsKvOperation.NATSKV_GETREVISION:
+      return "NATSKV_GETREVISION";
+    case NatsKvOperation.NATSKV_KEYS:
+      return "NATSKV_KEYS";
+    case NatsKvOperation.NATSKV_HISTORY:
+      return "NATSKV_HISTORY";
+    case NatsKvOperation.NATSKV_PUT:
+      return "NATSKV_PUT";
+    case NatsKvOperation.NATSKV_CREATE:
+      return "NATSKV_CREATE";
+    case NatsKvOperation.NATSKV_UPDATE:
+      return "NATSKV_UPDATE";
+    case NatsKvOperation.NATSKV_DELETE:
+      return "NATSKV_DELETE";
+    case NatsKvOperation.NATSKV_PURGE:
+      return "NATSKV_PURGE";
+    case NatsKvOperation.NATSKV_WATCH:
+      return "NATSKV_WATCH";
+    case NatsKvOperation.NATSKV_WATCHALL:
+      return "NATSKV_WATCHALL";
+    default:
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum NatsKvOperation");
   }
 }
 
@@ -960,11 +1049,21 @@ export interface DataSourceConfiguration {
   directives: DirectiveConfiguration[];
   requestTimeoutSeconds: number;
   id: string;
+  customNatsKv: DataSourceCustomNatsKv | undefined;
 }
 
 export interface DirectiveConfiguration {
   directiveName: string;
   renameTo: string;
+}
+
+export interface DataSourceCustomNatsKv {
+  serverURL: string;
+  bucketName: string;
+  operation: NatsKvOperation;
+  history: number;
+  token: string;
+  bucketPrefix: ConfigurationVariable | undefined;
 }
 
 export interface DataSourceCustomREST {
@@ -3769,6 +3868,7 @@ function createBaseDataSourceConfiguration(): DataSourceConfiguration {
     directives: [],
     requestTimeoutSeconds: 0,
     id: "",
+    customNatsKv: undefined,
   };
 }
 
@@ -3806,6 +3906,9 @@ export const DataSourceConfiguration = {
     }
     if (message.id !== "") {
       writer.uint32(90).string(message.id);
+    }
+    if (message.customNatsKv !== undefined) {
+      DataSourceCustomNatsKv.encode(message.customNatsKv, writer.uint32(98).fork()).ldelim();
     }
     return writer;
   },
@@ -3850,6 +3953,9 @@ export const DataSourceConfiguration = {
         case 11:
           message.id = reader.string();
           break;
+        case 12:
+          message.customNatsKv = DataSourceCustomNatsKv.decode(reader, reader.uint32());
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -3877,6 +3983,7 @@ export const DataSourceConfiguration = {
         : [],
       requestTimeoutSeconds: isSet(object.requestTimeoutSeconds) ? Number(object.requestTimeoutSeconds) : 0,
       id: isSet(object.id) ? String(object.id) : "",
+      customNatsKv: isSet(object.customNatsKv) ? DataSourceCustomNatsKv.fromJSON(object.customNatsKv) : undefined,
     };
   },
 
@@ -3913,6 +4020,8 @@ export const DataSourceConfiguration = {
     message.requestTimeoutSeconds !== undefined &&
       (obj.requestTimeoutSeconds = Math.round(message.requestTimeoutSeconds));
     message.id !== undefined && (obj.id = message.id);
+    message.customNatsKv !== undefined &&
+      (obj.customNatsKv = message.customNatsKv ? DataSourceCustomNatsKv.toJSON(message.customNatsKv) : undefined);
     return obj;
   },
 
@@ -3937,6 +4046,9 @@ export const DataSourceConfiguration = {
     message.directives = object.directives?.map((e) => DirectiveConfiguration.fromPartial(e)) || [];
     message.requestTimeoutSeconds = object.requestTimeoutSeconds ?? 0;
     message.id = object.id ?? "";
+    message.customNatsKv = (object.customNatsKv !== undefined && object.customNatsKv !== null)
+      ? DataSourceCustomNatsKv.fromPartial(object.customNatsKv)
+      : undefined;
     return message;
   },
 };
@@ -3995,6 +4107,103 @@ export const DirectiveConfiguration = {
     const message = createBaseDirectiveConfiguration();
     message.directiveName = object.directiveName ?? "";
     message.renameTo = object.renameTo ?? "";
+    return message;
+  },
+};
+
+function createBaseDataSourceCustomNatsKv(): DataSourceCustomNatsKv {
+  return { serverURL: "", bucketName: "", operation: 0, history: 0, token: "", bucketPrefix: undefined };
+}
+
+export const DataSourceCustomNatsKv = {
+  encode(message: DataSourceCustomNatsKv, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.serverURL !== "") {
+      writer.uint32(10).string(message.serverURL);
+    }
+    if (message.bucketName !== "") {
+      writer.uint32(18).string(message.bucketName);
+    }
+    if (message.operation !== 0) {
+      writer.uint32(24).int32(message.operation);
+    }
+    if (message.history !== 0) {
+      writer.uint32(32).int32(message.history);
+    }
+    if (message.token !== "") {
+      writer.uint32(42).string(message.token);
+    }
+    if (message.bucketPrefix !== undefined) {
+      ConfigurationVariable.encode(message.bucketPrefix, writer.uint32(50).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): DataSourceCustomNatsKv {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDataSourceCustomNatsKv();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.serverURL = reader.string();
+          break;
+        case 2:
+          message.bucketName = reader.string();
+          break;
+        case 3:
+          message.operation = reader.int32() as any;
+          break;
+        case 4:
+          message.history = reader.int32();
+          break;
+        case 5:
+          message.token = reader.string();
+          break;
+        case 6:
+          message.bucketPrefix = ConfigurationVariable.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): DataSourceCustomNatsKv {
+    return {
+      serverURL: isSet(object.serverURL) ? String(object.serverURL) : "",
+      bucketName: isSet(object.bucketName) ? String(object.bucketName) : "",
+      operation: isSet(object.operation) ? natsKvOperationFromJSON(object.operation) : 0,
+      history: isSet(object.history) ? Number(object.history) : 0,
+      token: isSet(object.token) ? String(object.token) : "",
+      bucketPrefix: isSet(object.bucketPrefix) ? ConfigurationVariable.fromJSON(object.bucketPrefix) : undefined,
+    };
+  },
+
+  toJSON(message: DataSourceCustomNatsKv): unknown {
+    const obj: any = {};
+    message.serverURL !== undefined && (obj.serverURL = message.serverURL);
+    message.bucketName !== undefined && (obj.bucketName = message.bucketName);
+    message.operation !== undefined && (obj.operation = natsKvOperationToJSON(message.operation));
+    message.history !== undefined && (obj.history = Math.round(message.history));
+    message.token !== undefined && (obj.token = message.token);
+    message.bucketPrefix !== undefined &&
+      (obj.bucketPrefix = message.bucketPrefix ? ConfigurationVariable.toJSON(message.bucketPrefix) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<DataSourceCustomNatsKv>, I>>(object: I): DataSourceCustomNatsKv {
+    const message = createBaseDataSourceCustomNatsKv();
+    message.serverURL = object.serverURL ?? "";
+    message.bucketName = object.bucketName ?? "";
+    message.operation = object.operation ?? 0;
+    message.history = object.history ?? 0;
+    message.token = object.token ?? "";
+    message.bucketPrefix = (object.bucketPrefix !== undefined && object.bucketPrefix !== null)
+      ? ConfigurationVariable.fromPartial(object.bucketPrefix)
+      : undefined;
     return message;
   },
 };

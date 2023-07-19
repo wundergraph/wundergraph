@@ -36,6 +36,7 @@ var startCmd = &cobra.Command{
 		defer stop()
 
 		g, ctx := errgroup.WithContext(sigCtx)
+		go configureEmbeddedNatsBlocking(ctx)
 
 		n, wunderGraphDir, err := NewWunderGraphNode(ctx)
 		if err != nil {

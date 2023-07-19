@@ -191,6 +191,7 @@
     "fast-uri": "^2.2.0",
     "fastify": "^4.10.2",
     "fastify-plugin": "^4.4.0",
+    "get-graphql-from-jsonschema": "^8.1.0",
     "get-port": "^5.1.1",
     "graphql": "^16.6.0",
     "graphql-helix": "^1.13.0",

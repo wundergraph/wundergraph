@@ -24,6 +24,7 @@ import (
 
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/datasources/database"
+	"github.com/wundergraph/wundergraph/pkg/datasources/nats"
 	oas_datasource "github.com/wundergraph/wundergraph/pkg/datasources/oas"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
@@ -59,6 +60,7 @@ type DefaultFactoryResolver struct {
 	graphql          *graphql_datasource.Factory
 	rest             *oas_datasource.Factory
 	static           *staticdatasource.Factory
+	natsKv           *nats.Factory
 	database         *database.Factory
 	hooksClient      *hooks.Client
 	log              *zap.Logger
@@ -95,6 +97,7 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 			Client: defaultHttpClient,
 			Log:    log,
 		},
+		natsKv:      &nats.Factory{},
 		hooksClient: hooksClient,
 		log:         log,
 	}
@@ -298,6 +301,8 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 		return d.rest, nil
 	case wgpb.DataSourceKind_STATIC:
 		return d.static, nil
+	case wgpb.DataSourceKind_NATSKV:
+		return d.natsKv, nil
 	case wgpb.DataSourceKind_POSTGRESQL,
 		wgpb.DataSourceKind_MYSQL,
 		wgpb.DataSourceKind_SQLSERVER,
@@ -313,7 +318,7 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 		}
 		return d.database, nil
 	default:
-		return nil, fmt.Errorf("invalid datasource kind %q", ds.Kind)
+		return nil, fmt.Errorf("datasource factory resolver - undefined kind:%q", ds.Kind)
 	}
 }
 
@@ -502,6 +507,21 @@ func (l *EngineConfigLoader) Load(engineConfig *wgpb.EngineConfiguration, wgServ
 				UpstreamSchema:         graphqlSchema,
 				CustomScalarTypeFields: customScalarTypeFields,
 			})
+		case wgpb.DataSourceKind_NATSKV:
+			bucketName := in.CustomNatsKv.GetBucketName()
+			prefix := loadvariable.String(in.CustomNatsKv.GetBucketPrefix())
+			if prefix != "" {
+				bucketName = strings.Join([]string{prefix, bucketName}, ".")
+			}
+
+			config := nats.Configuration{
+				Operation: in.CustomNatsKv.GetOperation(),
+				Bucket:    bucketName,
+				ServerURL: in.CustomNatsKv.GetServerURL(),
+				History:   in.CustomNatsKv.GetHistory(),
+				Token:     in.CustomNatsKv.GetToken(),
+			}
+			out.Custom = nats.ConfigJson(config)
 		case wgpb.DataSourceKind_POSTGRESQL,
 			wgpb.DataSourceKind_MYSQL,
 			wgpb.DataSourceKind_SQLSERVER,

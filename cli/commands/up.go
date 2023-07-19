@@ -55,6 +55,8 @@ var upCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
+		go configureEmbeddedNatsBlocking(ctx)
+
 		// Enable TUI only if stdout is a terminal
 		if !isatty.IsTerminal(os.Stdout.Fd()) {
 			// Always use JSON when not in a terminal
