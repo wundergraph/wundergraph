@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -22,6 +23,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/cli"
 	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/licensing"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/operations"
@@ -47,10 +49,12 @@ var upCmd = &cobra.Command{
 	Use:         UpCmdName,
 	Short:       "Starts WunderGraph in development mode",
 	Long:        "Start the WunderGraph application in development mode and watch for changes",
-	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources),
+	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources | telemetry.AnnotationFeatures),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
+
+		go configureEmbeddedNatsBlocking(ctx)
 
 		// Enable TUI only if stdout is a terminal
 		if !isatty.IsTerminal(os.Stdout.Fd()) {
@@ -107,6 +111,12 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
+		var licensingOutput io.Writer = os.Stderr
+		if enableTUI {
+			licensingOutput = io.Discard
+		}
+		go licensing.NewManager(licensingPublicKey).LicenseCheck(wunderGraphDir, cancel, licensingOutput)
+
 		if clearCache {
 			if cacheDir, _ := helpers.LocalWunderGraphCacheDir(wunderGraphDir); cacheDir != "" {
 				if err := os.RemoveAll(cacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -145,6 +155,7 @@ var upCmd = &cobra.Command{
 		configOutFile := filepath.Join("generated", "bundle", "config.cjs")
 		serverOutFile := filepath.Join("generated", "bundle", "server.cjs")
 		ormOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "orm.cjs")
+		jsonSchemaOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "jsonschema.cjs")
 		operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
 		generatedBundleOutDir := filepath.Join("generated", "bundle")
 
@@ -246,6 +257,16 @@ var upCmd = &cobra.Command{
 				Logger:        log,
 			})
 
+			jsonSchemaEntryPointFilename := filepath.Join(wunderGraphDir, "generated", "jsonschema.ts")
+			jsonSchemaBundler := bundler.NewBundler(bundler.Config{
+				Name:          "jsonschema-bundler",
+				Production:    true,
+				AbsWorkingDir: wunderGraphDir,
+				EntryPoints:   []string{jsonSchemaEntryPointFilename},
+				OutFile:       jsonSchemaOutFile,
+				Logger:        log,
+			})
+
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "hooks-bundler",
 				EntryPoints:   []string{serverEntryPointFilename},
@@ -322,6 +343,10 @@ var upCmd = &cobra.Command{
 
 				wg.Go(func() error {
 					return hooksBundler.Bundle()
+				})
+
+				wg.Go(func() error {
+					return jsonSchemaBundler.Bundle()
 				})
 
 				if webhooksBundler != nil {

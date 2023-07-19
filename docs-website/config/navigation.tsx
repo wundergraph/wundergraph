@@ -14,8 +14,9 @@ import {
 	LockClosedIcon,
 	ServerIcon,
 	ShareIcon,
-	WrenchIcon,
+	SparklesIcon,
 	SunIcon,
+	WrenchIcon,
 } from '@heroicons/react/24/solid';
 
 const navigation = [
@@ -548,6 +549,10 @@ const navigation = [
 				title: 'FaunaDB',
 				href: '/docs/databases/faunadb',
 			},
+			{
+				title: 'Key Value',
+				href: '/docs/databases/kv',
+			},
 		],
 	},
 	// {
@@ -595,6 +600,18 @@ const navigation = [
 						href: '/docs/storage/minio',
 					},
 				],
+			},
+		],
+	},
+	{
+		title: 'OpenAI',
+		href: '/docs/openai',
+		icon: <SparklesIcon />,
+		links: [
+			{
+				title: 'Overview',
+				navTitle: 'OpenAI',
+				href: '/docs/openai',
 			},
 		],
 	},

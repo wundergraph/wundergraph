@@ -2,7 +2,7 @@
 
 exports[`Introspection introspect GraphQL API with interface type definitions 1`] = `
 GraphQLApi {
-  "CustomJsonScalars": [],
+  "CustomJsonScalars": Set {},
   "DataSources": [
     {
       "ChildNodes": [
@@ -117,6 +117,12 @@ interface User {
     },
   ],
   "DefaultFlushInterval": 500,
+  "Features": {
+    "customFloatScalars": false,
+    "customIntScalars": false,
+    "customJSONScalars": false,
+    "schemaExtension": false,
+  },
   "Fields": [
     {
       "argumentsConfiguration": [],

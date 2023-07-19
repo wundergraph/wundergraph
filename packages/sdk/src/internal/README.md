@@ -7,5 +7,5 @@ This is only intended for internal plugin development. No api compatibility guar
 > **Warning**: The api may change at any time.
 
 ```ts
-import { visitJSONSchema } from '@wundergraph/sdk/internal';
+import { serialize } from '@wundergraph/sdk/internal';
 ```

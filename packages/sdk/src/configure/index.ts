@@ -20,11 +20,12 @@ import { buildGenerator, getProgramFromFiles, JsonSchemaGenerator, programFromCo
 import { ZodType } from 'zod';
 import {
 	Api,
+	ApiIntrospectionOptions,
 	DatabaseApiCustom,
 	DataSource,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
-	ApiIntrospectionOptions,
+	NatsKvApiCustom,
 	RESTApiCustom,
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
@@ -819,6 +820,44 @@ export const configureWunderGraphApplication = <
 			writeWunderGraphFileSync('schema', schemaContent, 'graphql');
 
 			/**
+			 * NATS
+			 */
+
+			const natsKVApis = apis.filter((a) => a.DataSources.filter((d) => d.Kind === DataSourceKind.NATSKV).length > 1);
+
+			const buckets: {
+				name: string;
+				schema: any;
+			}[] = [];
+
+			natsKVApis.forEach((kvAPI) => {
+				kvAPI.DataSources.filter((d) => d.Kind === DataSourceKind.NATSKV).forEach((ds) => {
+					const custom = ds.Custom as NatsKvApiCustom;
+					const exists = buckets.find((b) => b.name === custom.bucketName);
+					if (!exists) {
+						buckets.push({
+							name: custom.bucketName,
+							schema: custom.schema,
+						});
+					}
+				});
+			});
+
+			const natsConfig = {
+				kv: {
+					buckets,
+				},
+			};
+
+			const natsDir = 'generated/nats';
+			if (!fs.existsSync(natsDir)) {
+				fs.mkdirSync(natsDir, { recursive: true });
+			}
+			fs.writeFileSync(path.join(natsDir, 'config.json'), JSON.stringify(natsConfig, null, 2), {
+				encoding: utf8,
+			});
+
+			/**
 			 * Webhooks
 			 */
 
@@ -882,7 +921,7 @@ export const configureWunderGraphApplication = <
 				wgDirAbs,
 				resolved,
 				loadedOperations,
-				app.EngineConfiguration.CustomJsonScalars || []
+				app.EngineConfiguration.CustomJsonScalars || new Set<string>()
 			);
 			app.Operations = operations.operations;
 			app.InvalidOperationNames = loadedOperations.invalid || [];
@@ -1083,7 +1122,7 @@ export const configureWunderGraphApplication = <
 			);
 			await updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
 
-			const storedConfig = storedWunderGraphConfig(resolved);
+			const storedConfig = storedWunderGraphConfig(resolved, apis.length);
 			const configData = WunderGraphConfiguration.encode(storedConfig).finish();
 			fs.writeFileSync(path.join(generated, WunderGraphConfigurationFilename), configData);
 			if (WG_GENERATE_CONFIG_JSON) {
@@ -1140,7 +1179,22 @@ const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputV
 	return output;
 };
 
-const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig) => {
+const configEnabledFeatures = (config: ResolvedWunderGraphConfig, apiCount: number) => {
+	const apis = config.application.Apis;
+	const schemaExtension = apis.find((api) => api.Features?.schemaExtension ?? false) !== undefined;
+	const customJSONScalars = apis.find((api) => api.Features?.customJSONScalars ?? false) !== undefined;
+	const customIntScalars = apis.find((api) => api.Features?.customIntScalars ?? false) !== undefined;
+	const customFloatScalars = apis.find((api) => api.Features?.customFloatScalars ?? false) !== undefined;
+	return {
+		apiCount,
+		schemaExtension,
+		customJSONScalars,
+		customIntScalars,
+		customFloatScalars,
+	};
+};
+
+const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: number) => {
 	const operations: Operation[] = config.application.Operations.map((op) => ({
 		content: removeHookVariables(op.Content),
 		name: op.Name,
@@ -1261,6 +1315,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig) => {
 		},
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
 		configHash: configurationHash(config),
+		enabledFeatures: configEnabledFeatures(config, apiCount),
 	};
 	return out;
 };
@@ -1291,6 +1346,7 @@ const mapDataSource = (stringStorage: Record<string, string>, source: DataSource
 		customStatic: undefined,
 		overrideFieldPathFromAlias: source.Kind === DataSourceKind.GRAPHQL,
 		customDatabase: undefined,
+		customNatsKv: undefined,
 		directives: source.Directives,
 		requestTimeoutSeconds: source.RequestTimeoutSeconds,
 	};
@@ -1347,6 +1403,18 @@ const mapDataSource = (stringStorage: Record<string, string>, source: DataSource
 				jsonTypeFields: database.jsonTypeFields,
 				jsonInputVariables: database.jsonInputVariables,
 			};
+			break;
+		case DataSourceKind.NATSKV:
+			const natskv = source.Custom as NatsKvApiCustom;
+			out.customNatsKv = {
+				serverURL: natskv.serverURL,
+				bucketName: natskv.bucketName,
+				operation: natskv.operation,
+				history: natskv.history,
+				token: natskv.token,
+				bucketPrefix: natskv.bucketPrefix,
+			};
+			break;
 	}
 
 	return out;
@@ -1467,6 +1535,7 @@ const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFi
 
 	const operation: TypeScriptOperation = {
 		Name: file.operation_name,
+		Description: implementation.description || file.module_path,
 		PathName: file.api_mount_path,
 		Content: '',
 		Errors: implementation.errors?.map((E) => new E()) || [],
@@ -1527,7 +1596,7 @@ const resolveOperationsConfigurations = async (
 	wgDirAbs: string,
 	config: ResolvedWunderGraphConfig,
 	loadedOperations: LoadOperationsOutput,
-	customJsonScalars: string[]
+	customJsonScalars: Set<string>
 ): Promise<ParsedOperations> => {
 	const customClaims = mapRecordValues(config.authentication.customClaims ?? {}, (key, claim) => {
 		let claimType: ValueType;
@@ -1569,6 +1638,7 @@ const resolveOperationsConfigurations = async (
 		interpolateVariableDefinitionAsJSON: config.interpolateVariableDefinitionAsJSON,
 		customJsonScalars,
 		customClaims,
+		wgDirAbs: wgDirAbs,
 	});
 	const nodeJSOperations: TypeScriptOperation[] = [];
 	if (loadedOperations.typescript_operation_files) {
@@ -1621,12 +1691,15 @@ const loadAndApplyNodeJsOperationOverrides = async (
 // this function.
 const applyNodeJsOperationOverrides = (
 	operation: TypeScriptOperation,
-	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any>
+	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any, any>
 ): TypeScriptOperation => {
 	if (overrides.inputSchema) {
 		const schema = zodToJsonSchema(overrides.inputSchema) as any;
 		operation.VariablesSchema = schema;
 		operation.InternalVariablesSchema = schema;
+	}
+	if (overrides.description) {
+		operation.Description = overrides.description;
 	}
 	if (overrides.liveQuery) {
 		operation.LiveQuery = {

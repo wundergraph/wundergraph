@@ -61,6 +61,7 @@ const pocket = introspect.graphql({
 			typeSpeciality: String
 	}
 	`,
+	customJSONScalars: ['Attributes', 'HairStyle'],
 	replaceCustomScalarTypeFields: [
 		{
 			entityName: 'GymLeader',

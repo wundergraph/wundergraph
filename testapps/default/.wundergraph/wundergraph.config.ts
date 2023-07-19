@@ -8,6 +8,7 @@ import {
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 import generate from './wundergraph.generate';
+import { z } from 'zod';
 
 const jsp = introspect.openApiV2({
 	id: 'jsp',
@@ -107,9 +108,17 @@ const usersPost = introspect.prisma({
 	},
 });
 
+const kv = introspect.natsKV({
+	apiNamespace: 'kv',
+	model: z.object({
+		token: z.string(),
+	}),
+	history: 10,
+});
+
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [jsp, weather, countries, spacex, chinook, db, jsp2, usersPost, federatedApi],
+	apis: [jsp, weather, countries, spacex, chinook, db, jsp2, usersPost, federatedApi, kv],
 	server,
 	operations,
 	generate,

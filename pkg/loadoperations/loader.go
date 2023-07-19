@@ -250,7 +250,7 @@ func (e infoError) IsInfo() bool  { return true }
 func (e infoError) Error() string { return string(e) }
 
 func (l *Loader) loadOperation(file GraphQLOperationFile, normalizer *astnormalization.OperationNormalizer, fragments string, schemaDocument *ast.Document) (string, error) {
-	content, err := ioutil.ReadFile(filepath.Join(l.operationsRootPath, file.FilePath))
+	content, err := os.ReadFile(filepath.Join(l.operationsRootPath, file.FilePath))
 	if err != nil {
 		return "", fmt.Errorf("error reading file: %w", err)
 	}
