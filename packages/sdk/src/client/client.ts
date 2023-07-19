@@ -136,10 +136,13 @@ export class Client {
 			init.signal = controller.signal;
 		}
 
+		// Only add credentials / mode if we are in a browser context,
+		// otherwise it will throw on runtimes like Cloudflare Workers.
+		const extraInit: RequestInit = typeof window !== 'undefined' ? { credentials: 'include', mode: 'cors' } : {};
+
 		try {
 			const resp = await fetchImpl(input, {
-				credentials: 'include',
-				mode: 'cors',
+				...extraInit,
 				...init,
 			});
 			return resp;

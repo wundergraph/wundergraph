@@ -15,10 +15,6 @@
       "types": "./dist/testing/index.d.ts",
       "default": "./dist/testing/index.js"
     },
-    "./internal": {
-      "types": "./dist/internal/index.d.ts",
-      "default": "./dist/internal/index.js"
-    },
     "./server": {
       "types": "./dist/server/index.d.ts",
       "default": "./dist/server/index.js"
@@ -31,9 +27,17 @@
       "types": "./dist/openai/index.d.ts",
       "default": "./dist/openai/index.js"
     },
+    "./internal": {
+      "types": "./dist/internal/index.d.ts",
+      "default": "./dist/internal/index.js"
+    },
     "./internal/logger": {
       "types": "./dist/logger/index.d.ts",
       "default": "./dist/logger/index.js"
+    },
+    "./internal/codegen": {
+      "types": "./dist/codegen/index.d.ts",
+      "default": "./dist/codegen/index.js"
     },
     "./orm": {
       "types": "./dist/orm/index.d.ts",
@@ -52,9 +56,6 @@
       "testing": [
         "./dist/testing"
       ],
-      "internal": [
-        "./dist/internal"
-      ],
       "server": [
         "./dist/server"
       ],
@@ -64,8 +65,14 @@
       "openai": [
         "./dist/openai"
       ],
+      "internal": [
+        "./dist/internal"
+      ],
       "internal/logger": [
         "./dist/logger"
+      ],
+      "internal/codegen": [
+        "./dist/codegen"
       ],
       "orm": [
         "./dist/orm"
@@ -135,7 +142,7 @@
     "ts-jest": "^29.0.1",
     "tsd": "^0.24.1",
     "type-fest": "^3.5.2",
-    "typescript": "^4.8.2"
+    "typescript": "^5.1.6"
   },
   "dependencies": {
     "@fastify/formbody": "^7.3.0",

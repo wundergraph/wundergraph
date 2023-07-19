@@ -107,3 +107,6 @@ export const mergeTemplateOutput = (outFiles: TemplateOutputFile[]): TemplateOut
 	});
 	return merged;
 };
+
+export { visitJSONSchema } from './jsonschema';
+export { hasInput, modelImports } from './templates/typescript/helpers';
