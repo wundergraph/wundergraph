@@ -269,6 +269,7 @@ message DataSourceConfiguration {
 	repeated DirectiveConfiguration directives = 9;
 	int64 requestTimeoutSeconds = 10;
 	string id = 11;
+	DataSourceCustom_NatsKv customNatsKv = 12;
 }
 
 message DirectiveConfiguration {
@@ -286,6 +287,30 @@ enum DataSourceKind {
 	MONGODB = 6;
 	SQLITE = 7;
 	PRISMA = 8;
+	NATSKV = 9;
+}
+
+message DataSourceCustom_NatsKv {
+	string serverURL = 1;
+	string bucketName = 2;
+	NatsKvOperation operation = 3;
+	int32 history = 4;
+	string token = 5;
+	ConfigurationVariable bucketPrefix = 6;
+}
+
+enum NatsKvOperation {
+	NATSKV_GET = 0;
+	NATSKV_GETREVISION = 1;
+	NATSKV_KEYS = 2;
+	NATSKV_HISTORY = 3;
+	NATSKV_PUT = 4;
+	NATSKV_CREATE = 5;
+	NATSKV_UPDATE = 6;
+	NATSKV_DELETE = 7;
+	NATSKV_PURGE = 8;
+	NATSKV_WATCH = 9;
+	NATSKV_WATCHALL = 10;
 }
 
 message DataSourceCustom_REST {

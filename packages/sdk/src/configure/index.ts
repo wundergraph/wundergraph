@@ -25,6 +25,7 @@ import {
 	DataSource,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
+	NatsKvApiCustom,
 	RESTApiCustom,
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
@@ -819,6 +820,44 @@ export const configureWunderGraphApplication = <
 			writeWunderGraphFileSync('schema', schemaContent, 'graphql');
 
 			/**
+			 * NATS
+			 */
+
+			const natsKVApis = apis.filter((a) => a.DataSources.filter((d) => d.Kind === DataSourceKind.NATSKV).length > 1);
+
+			const buckets: {
+				name: string;
+				schema: any;
+			}[] = [];
+
+			natsKVApis.forEach((kvAPI) => {
+				kvAPI.DataSources.filter((d) => d.Kind === DataSourceKind.NATSKV).forEach((ds) => {
+					const custom = ds.Custom as NatsKvApiCustom;
+					const exists = buckets.find((b) => b.name === custom.bucketName);
+					if (!exists) {
+						buckets.push({
+							name: custom.bucketName,
+							schema: custom.schema,
+						});
+					}
+				});
+			});
+
+			const natsConfig = {
+				kv: {
+					buckets,
+				},
+			};
+
+			const natsDir = 'generated/nats';
+			if (!fs.existsSync(natsDir)) {
+				fs.mkdirSync(natsDir, { recursive: true });
+			}
+			fs.writeFileSync(path.join(natsDir, 'config.json'), JSON.stringify(natsConfig, null, 2), {
+				encoding: utf8,
+			});
+
+			/**
 			 * Webhooks
 			 */
 
@@ -1307,6 +1346,7 @@ const mapDataSource = (stringStorage: Record<string, string>, source: DataSource
 		customStatic: undefined,
 		overrideFieldPathFromAlias: source.Kind === DataSourceKind.GRAPHQL,
 		customDatabase: undefined,
+		customNatsKv: undefined,
 		directives: source.Directives,
 		requestTimeoutSeconds: source.RequestTimeoutSeconds,
 	};
@@ -1363,6 +1403,18 @@ const mapDataSource = (stringStorage: Record<string, string>, source: DataSource
 				jsonTypeFields: database.jsonTypeFields,
 				jsonInputVariables: database.jsonInputVariables,
 			};
+			break;
+		case DataSourceKind.NATSKV:
+			const natskv = source.Custom as NatsKvApiCustom;
+			out.customNatsKv = {
+				serverURL: natskv.serverURL,
+				bucketName: natskv.bucketName,
+				operation: natskv.operation,
+				history: natskv.history,
+				token: natskv.token,
+				bucketPrefix: natskv.bucketPrefix,
+			};
+			break;
 	}
 
 	return out;
