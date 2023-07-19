@@ -2665,7 +2665,7 @@ exports[`parseGraphQLOperations 1`] = `
         "type": "object",
       },
       "Name": "MyReviews",
-      "OperationType": 0,
+      "OperationType": 1,
       "PathName": "MyReviews",
       "PostResolveTransformations": undefined,
       "ResponseSchema": {
@@ -2843,7 +2843,7 @@ exports[`parseGraphQLOperations 1`] = `
         "type": "object",
       },
       "Name": "CreatePet",
-      "OperationType": 1,
+      "OperationType": 2,
       "PathName": "CreatePet",
       "PostResolveTransformations": undefined,
       "ResponseSchema": {
@@ -2949,7 +2949,7 @@ exports[`parseGraphQLOperations 1`] = `
         "type": "object",
       },
       "Name": "NewPets",
-      "OperationType": 2,
+      "OperationType": 3,
       "PathName": "NewPets",
       "PostResolveTransformations": undefined,
       "ResponseSchema": {
@@ -3190,7 +3190,7 @@ exports[`parseGraphQLOperations 1`] = `
         "type": "object",
       },
       "Name": "MutationWithUnionInput",
-      "OperationType": 1,
+      "OperationType": 2,
       "PathName": "MutationWithUnionInput",
       "PostResolveTransformations": undefined,
       "ResponseSchema": {

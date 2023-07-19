@@ -143,7 +143,7 @@ type _Service {
           "renameTo": "requires",
         },
       ],
-      "Id": undefined,
+      "Id": "federated_1",
       "Kind": 2,
       "RequestTimeoutSeconds": 0,
       "RootNodes": [
@@ -336,7 +336,7 @@ type _Service {
           "renameTo": "requires",
         },
       ],
-      "Id": undefined,
+      "Id": "federated_2",
       "Kind": 2,
       "RequestTimeoutSeconds": 0,
       "RootNodes": [
@@ -522,7 +522,7 @@ type _Service {
           "renameTo": "requires",
         },
       ],
-      "Id": undefined,
+      "Id": "federated_3",
       "Kind": 2,
       "RequestTimeoutSeconds": 0,
       "RootNodes": [
@@ -691,7 +691,7 @@ type _Service {
           "renameTo": "requires",
         },
       ],
-      "Id": undefined,
+      "Id": "federated_4",
       "Kind": 2,
       "RequestTimeoutSeconds": 0,
       "RootNodes": [
@@ -1585,7 +1585,7 @@ type _Service {
           "renameTo": "requires",
         },
       ],
-      "Id": undefined,
+      "Id": "federated_1",
       "Kind": 2,
       "RequestTimeoutSeconds": 0,
       "RootNodes": [
@@ -1773,7 +1773,7 @@ type _Service {
           "renameTo": "requires",
         },
       ],
-      "Id": undefined,
+      "Id": "federated_2",
       "Kind": 2,
       "RequestTimeoutSeconds": 0,
       "RootNodes": [
@@ -1956,7 +1956,7 @@ type _Service {
           "renameTo": "requires",
         },
       ],
-      "Id": undefined,
+      "Id": "federated_3",
       "Kind": 2,
       "RequestTimeoutSeconds": 0,
       "RootNodes": [
@@ -2122,7 +2122,7 @@ type _Service {
           "renameTo": "requires",
         },
       ],
-      "Id": undefined,
+      "Id": "federated_4",
       "Kind": 2,
       "RequestTimeoutSeconds": 0,
       "RootNodes": [
