@@ -346,8 +346,8 @@ func init() {
 
 func configureEmbeddedNatsBlocking(ctx context.Context) {
 
-	_, disable := os.LookupEnv("WG_DISABLE_EMBEDDED_NATS")
-	if disable {
+	disable := os.Getenv("WG_DISABLE_EMBEDDED_NATS")
+	if disable == "true" {
 		return
 	}
 
