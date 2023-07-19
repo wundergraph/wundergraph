@@ -113,6 +113,7 @@ const kv = introspect.natsKV({
 	model: z.object({
 		token: z.string(),
 	}),
+	history: 10,
 });
 
 // configureWunderGraph emits the configuration

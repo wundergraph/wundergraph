@@ -10,7 +10,6 @@ import {
 	ComputerDesktopIcon,
 	CubeIcon,
 	HomeIcon,
-	KeyIcon,
 	ListBulletIcon,
 	LockClosedIcon,
 	ServerIcon,
@@ -550,6 +549,10 @@ const navigation = [
 				title: 'FaunaDB',
 				href: '/docs/databases/faunadb',
 			},
+			{
+				title: 'Key Value',
+				href: '/docs/databases/kv',
+			},
 		],
 	},
 	// {
@@ -611,11 +614,6 @@ const navigation = [
 				href: '/docs/openai',
 			},
 		],
-	},
-	{
-		title: 'Key Value',
-		href: '/docs/kv',
-		icon: <KeyIcon />,
 	},
 	{ type: 'divider' },
 	{
