@@ -1,6 +1,6 @@
 export { defineIntegration } from './define-integration';
 export { defineDatasource } from './define-datasource';
-export { graphql, type GraphQLDatasourceOptions } from './graphql';
+export { graphql, type GraphQLDatasourceOptions } from './datasources/graphql';
 export type {
 	AuthProviderConfig,
 	AuthProviderTypes,
