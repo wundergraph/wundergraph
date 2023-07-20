@@ -1,6 +1,5 @@
 import type { WunderGraphConfig } from '@wundergraph/sdk';
 import { graphql } from '@wundergraph/sdk/datasources';
-import _ from 'lodash';
 
 import { dynamicTransport, mergeGraphQLRequests } from '@wundergraph/sdk/advanced-hooks';
 
