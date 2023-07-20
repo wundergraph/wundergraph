@@ -18,9 +18,9 @@ export default defineWorkspace([
 		},
 	},
 	{
-		root: 'apps/dynamic-router',
+		root: 'apps/advanced-hooks',
 		test: {
-			globalSetup: 'apps/dynamic-router/test-setup.ts',
+			globalSetup: 'apps/advanced-hooks/test-setup.ts',
 			testTimeout: 15000,
 			hookTimeout: 20000,
 		},
