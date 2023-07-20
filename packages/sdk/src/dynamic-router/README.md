@@ -55,6 +55,8 @@ export default configureWunderGraphServer(() => ({
 ### Injecting headers
 
 ```ts
+import { dynamicRouter } from '@wundergraph/sdk/dynamic-router';
+
 const router = dynamicRouter({
   match: {
     datasources: ['gql'],
@@ -76,29 +78,14 @@ const router = dynamicRouter({
 ### Fetch and merge multiple requests
 
 ```ts
+import { dynamicRouter, mergeGraphQLRequests } from '@wundergraph/sdk/dynamic-router';
+
 const router = dynamicRouter({
   match: {
     datasources: ['gql'],
   },
   handler: async ({ request }) => {
-    const data = await request.text();
-    const p1 = fetch(
-      new Request('https://server1.org/graphql', {
-        method: request.method,
-        headers: request.headers,
-        body: data,
-      })
-    );
-    const p2 = fetch(
-      new Request('https://server2.org/graphql', {
-        method: request.method,
-        headers: request.headers,
-        body: data,
-      })
-    );
-    const responses = await Promise.all([p1, p2]);
-
-    return mergeResponses(responses);
+    return mergeGraphQLRequests(request, ['https://server1.org/graphql', 'https://server2.org/graphql']);
   },
 });
 ```
