@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	levelMinChars = 5 // pad logging levels to this size, so they look aligned
+	levelMinChars         = 5 // pad logging levels to this size, so they look aligned
+	prettyTimestampFormat = "15:04:05.000"
 )
 
 type printerFunc func(w io.Writer, a ...interface{})
@@ -167,18 +168,21 @@ func (p *Prettifier) PrettifyJSON(r io.Reader) (*buffer.Buffer, error) {
 	}
 	secondaryTextPrinter := p.secondaryTextPrinter()
 	buf := p.pool.Get()
-	s := logTime.Format("15:04:05.000")
+	s := logTime.Format(prettyTimestampFormat)
 	secondaryTextPrinter(buf, s)
 	buf.WriteByte(' ')
 	levelPrinter := p.levelPrinter(level)
 	levelPrinter(buf, strings.ToUpper(level))
-	levelPrinter(buf, strings.Repeat(" ", levelMinChars-len(level)))
-	buf.WriteByte(' ')
+	remaining := levelMinChars - len(level)
+	if remaining > 0 {
+		levelPrinter(buf, strings.Repeat(" ", remaining))
+	}
 	if component != "" {
-		secondaryTextPrinter(buf, component)
 		buf.WriteByte(' ')
+		secondaryTextPrinter(buf, component)
 	}
 	if caller != "" {
+		buf.WriteByte(' ')
 		if component != "" {
 			secondaryTextPrinter(buf, "(")
 		}
@@ -186,22 +190,16 @@ func (p *Prettifier) PrettifyJSON(r io.Reader) (*buffer.Buffer, error) {
 		if component != "" {
 			secondaryTextPrinter(buf, ")")
 		}
-		buf.WriteByte(' ')
 	}
 	if message != "" {
-		buf.WriteString(message)
 		buf.WriteByte(' ')
+		buf.WriteString(message)
 	}
-	first := true
 	for _, key := range o.Keys() {
 		if _, found := p.ignoredKeys[key]; found {
 			continue
 		}
-		if first {
-			first = false
-		} else {
-			buf.WriteByte(' ')
-		}
+		buf.WriteByte(' ')
 		buf.WriteString(key)
 		secondaryTextPrinter(buf, "=")
 		value, _ := o.Get(key)
@@ -214,7 +212,7 @@ func (p *Prettifier) PrettifyJSON(r io.Reader) (*buffer.Buffer, error) {
 			} else {
 				fmt.Fprintf(buf, "%v", x)
 			}
-		case []interface{}:
+		case []interface{}, orderedmap.OrderedMap:
 			// These might be arbitrarily nested, display them as JSON
 			j, err := json.Marshal(x)
 			if err == nil {
