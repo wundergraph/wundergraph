@@ -51,9 +51,9 @@
       "types": "./dist/integrations/datasources/index.d.ts",
       "default": "./dist/integrations/datasources/index.js"
     },
-    "./dynamic-router": {
-      "types": "./dist/dynamic-router/index.d.ts",
-      "default": "./dist/dynamic-router/index.js"
+    "./advanced-hooks": {
+      "types": "./dist/advanced-hooks/index.d.ts",
+      "default": "./dist/advanced-hooks/index.js"
     },
     "./dist/*": {
       "types": "./dist/*.d.ts",
@@ -95,8 +95,8 @@
       "integrations": [
         "./dist/integrations"
       ],
-      "dynamic-router": [
-        "./dist/dynamic-router"
+      "advanced-hooks": [
+        "./dist/advanced-hooks"
       ]
     }
   },

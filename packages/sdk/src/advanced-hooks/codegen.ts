@@ -14,7 +14,7 @@ import templates from '../codegen/templates';
 import { formatTypeScript } from '../codegen/templates/typescript';
 import { Template, TemplateOutputFile } from '../codegen';
 
-export class DynamicRouterTemplate implements Template {
+export class AdvancedHooksTemplate implements Template {
 	async generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const config = generationConfig.config;
 		const tmpl = Handlebars.compile(handlebarTemplate);
@@ -22,7 +22,7 @@ export class DynamicRouterTemplate implements Template {
 		const content = tmpl({});
 		return Promise.resolve([
 			{
-				path: 'dynamic-router.d.ts',
+				path: 'advanced-hooks.d.ts',
 				content: formatTypeScript(content),
 				doNotEditHeader: true,
 			},

@@ -2,9 +2,9 @@ import type { WunderGraphConfig } from '@wundergraph/sdk';
 import { graphql } from '@wundergraph/sdk/datasources';
 import { weather } from './weather-datasource';
 
-import { dynamicRouter } from '@wundergraph/sdk/dynamic-router';
+import { dynamicTransport } from '@wundergraph/sdk/advanced-hooks';
 
-const route = dynamicRouter({
+const route = dynamicTransport({
 	match: {
 		operationType: 'query',
 		datasources: ['weather'],
@@ -22,7 +22,7 @@ const route = dynamicRouter({
 	},
 });
 
-const route2 = dynamicRouter({
+const route2 = dynamicTransport({
 	match: {
 		operationType: 'query',
 		datasources: ['countries_1'],

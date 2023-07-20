@@ -7,28 +7,28 @@
  */
 
 import { defineIntegration } from '../integrations';
-import { DynamicRouterTemplate } from './codegen';
+import { AdvancedHooksTemplate } from './codegen';
 
 export interface RouteMatcher {
 	operationType?: 'query' | 'mutation' | 'subscription';
 }
 
-export interface DynamicRouterConfig {
+export interface DynamicTransportConfig {
 	match: RouteMatcher | RouteMatcher[];
-	handler: (context: DynamicRouterContext) => Promise<Response>;
+	handler: (context: DynamicTransportContext) => Promise<Response>;
 }
 
-export interface DynamicRouterContext {
+export interface DynamicTransportContext {
 	request: Request;
 }
 
-export const dynamicRouter = defineIntegration((config: DynamicRouterConfig) => {
+export const dynamicTransport = defineIntegration((config: DynamicTransportConfig) => {
 	return {
-		name: 'dynamic-router',
+		name: 'dynamic-transport',
 		hooks: {
 			'config:setup': async (options) => {
 				options.addCodeGeneration({
-					templates: [new DynamicRouterTemplate()],
+					templates: [new AdvancedHooksTemplate()],
 				});
 			},
 			'http:transport': {

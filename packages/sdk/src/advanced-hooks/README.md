@@ -1,6 +1,6 @@
-# Dynamic Router
+# Dynamic Transport
 
-The Dynamic Router integration allows you to rewrite HTTP origin requests on the gateway level.
+The Dynamic Transport integration allows you to rewrite HTTP origin requests on the gateway level.
 This enables use cases like:
 
 - Rewriting GraphQL requests to a different GraphQL endpoint
@@ -14,10 +14,10 @@ This enables use cases like:
 ```typescript
 // wundergraph.config.ts
 import type { WunderGraphConfig } from '@wundergraph/sdk';
-import { dynamicRouter } from '@wundergraph/sdk/dynamic-router';
+import { dynamicTransport } from '@wundergraph/sdk/advanced-hooks';
 import { graphql } from '@wundergraph/sdk/datasources';
 
-const router = dynamicRouter({
+const transport = dynamicTransport({
   match: [
     {
       datasources: ['gql'],
@@ -35,7 +35,7 @@ export default {
       url: 'https://api.example.com/graphql',
     }),
   ],
-  integrations: [router],
+  integrations: [transport],
 } satisfies WunderGraphConfig;
 ```
 
@@ -55,7 +55,7 @@ export default configureWunderGraphServer(() => ({
 ### Injecting headers
 
 ```ts
-const router = dynamicRouter({
+const transport = dynamicTransport({
   match: {
     datasources: ['gql'],
   },
@@ -64,7 +64,7 @@ const router = dynamicRouter({
     headers.set('x-custom-header', 'custom-value');
 
     return fetch(
-      new Request({
+      new Request(request.url, {
         ...request,
         headers,
       })
@@ -76,7 +76,7 @@ const router = dynamicRouter({
 ### Fetch and merge multiple requests
 
 ```ts
-const router = dynamicRouter({
+const transport = dynamicTransport({
   match: {
     datasources: ['gql'],
   },
@@ -105,10 +105,10 @@ const router = dynamicRouter({
 
 ## Configuration properties
 
-| Property  | Type               | Description                                                                                                              |
-| --------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| `match`   | `Match \| Match[]` | A matcher or an array of matchers. An array will trigger the route if one or more matchers in the array match a request. |
-| `handler` | `Handler`          | The handler function that is called when a match is found.                                                               |
+| Property  | Type               | Description                                                                                                                |
+| --------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `match`   | `Match \| Match[]` | A matcher or an array of matchers. An array will trigger the handler if one or more matchers in the array match a request. |
+| `handler` | `Handler`          | The handler function that is called when a match is found.                                                                 |
 
 ### Match
 
@@ -125,5 +125,5 @@ const router = dynamicRouter({
 
 ## License
 
-The Dynamic Router is licensed under the WunderGraph Community License.
+Advanced hooks are licensed under the WunderGraph Community License.
 https://github.com/wundergraph/wundergraph/blob/main/LICENSE.COMMUNITY

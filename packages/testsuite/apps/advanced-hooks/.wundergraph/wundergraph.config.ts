@@ -2,7 +2,7 @@ import type { WunderGraphConfig } from '@wundergraph/sdk';
 import { graphql } from '@wundergraph/sdk/datasources';
 import _ from 'lodash';
 
-import { dynamicRouter } from '@wundergraph/sdk/dynamic-router';
+import { dynamicTransport } from '@wundergraph/sdk/advanced-hooks';
 
 import { url1, url2, url3 } from './datasources';
 
@@ -52,7 +52,7 @@ const graphQLMerger = (data: any, cur: any) => {
 	return data;
 };
 
-const router1 = dynamicRouter({
+const router1 = dynamicTransport({
 	match: {
 		operationType: 'query',
 		datasources: ['merged'],
@@ -86,7 +86,7 @@ const router1 = dynamicRouter({
 	},
 });
 
-const router2 = dynamicRouter({
+const router2 = dynamicTransport({
 	match: {
 		operationType: 'query',
 		datasources: ['faster'],

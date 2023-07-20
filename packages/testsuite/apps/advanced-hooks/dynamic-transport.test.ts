@@ -17,7 +17,7 @@ afterAll(async () => {
 	await Promise.all(graphQLServers.map((s) => s.stop()));
 });
 
-describe('test dynamic router', () => {
+describe('test dynamic transport', () => {
 	const alice = `hello I'm Alice`;
 	const bob = `hello I'm Bob`;
 	const mallory = `hello I'm Mallory`;

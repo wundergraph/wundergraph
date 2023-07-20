@@ -91,7 +91,7 @@ import { configurationHash } from '../codegen/templates/typescript/helpers';
 import templates from '../codegen/templates';
 import { WunderGraphConfigurationFilename } from '../server/server';
 import { InternalIntergration, WunderGraphAppConfig } from '../integrations/types';
-import { DynamicRouterConfig } from '../dynamic-router';
+import { DynamicTransportConfig } from '../advanced-hooks';
 
 export const WG_GENERATE_CONFIG_JSON = process.env['WG_GENERATE_CONFIG_JSON'] === 'true';
 
@@ -1253,7 +1253,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 	for (const integration of integrations) {
 		const httpTransport = integration.hooks['http:transport'];
 		if (httpTransport) {
-			const config = httpTransport as unknown as DynamicRouterConfig;
+			const config = httpTransport as unknown as DynamicTransportConfig;
 			if (config.match) {
 				const matches = Array.isArray(config.match) ? config.match : [config.match];
 				for (const match of matches) {

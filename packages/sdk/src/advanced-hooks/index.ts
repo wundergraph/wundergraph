@@ -6,4 +6,9 @@
  * @see https://github.com/wundergraph/wundergraph/blob/main/LICENSE.COMMUNITY
  */
 
-export { type DynamicRouterConfig, type DynamicRouterContext, type RouteMatcher, dynamicRouter } from './router';
+export {
+	type DynamicTransportConfig,
+	type DynamicTransportContext,
+	type RouteMatcher,
+	dynamicTransport,
+} from './http-transport';
