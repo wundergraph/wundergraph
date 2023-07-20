@@ -56,11 +56,9 @@ export default configureWunderGraphServer(() => ({
 
 ```ts
 const router = dynamicRouter({
-  match: [
-    {
-      datasources: ['gql'],
-    },
-  ],
+  match: {
+    datasources: ['gql'],
+  },
   handler: async ({ request }) => {
     const headers = new Headers(request.headers);
     headers.set('x-custom-header', 'custom-value');
@@ -79,11 +77,9 @@ const router = dynamicRouter({
 
 ```ts
 const router = dynamicRouter({
-  match: [
-    {
-      datasources: ['gql'],
-    },
-  ],
+  match: {
+    datasources: ['gql'],
+  },
   handler: async ({ request }) => {
     const data = await request.text();
     const p1 = fetch(
@@ -109,10 +105,10 @@ const router = dynamicRouter({
 
 ## Configuration properties
 
-| Property  | Type      | Description                                                |
-| --------- | --------- | ---------------------------------------------------------- |
-| `match`   | `Match[]` | An array of matchers.                                      |
-| `handler` | `Handler` | The handler function that is called when a match is found. |
+| Property  | Type               | Description                                                                                                              |
+| --------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `match`   | `Match \| Match[]` | A matcher or an array of matchers. An array will trigger the route if one or more matchers in the array match a request. |
+| `handler` | `Handler`          | The handler function that is called when a match is found.                                                               |
 
 ### Match
 
