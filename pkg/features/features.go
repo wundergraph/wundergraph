@@ -27,6 +27,7 @@ const (
 	TokenAuth          = Feature("token-auth")
 	ORM                = Feature("orm")
 	OpenAI             = Feature("openai")
+	AdvancedHooks      = Feature("advanced-hooks")
 )
 
 type featureCheck struct {
@@ -126,6 +127,10 @@ func isFeatureOpenAIEnabled(_ *wgpb.WunderGraphConfiguration) (bool, error) {
 	return os.Getenv("OPENAI_API_KEY") != "", nil
 }
 
+func isFeatureAdvancedHooksEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	return len(cfg.GetHooks()) > 0, nil
+}
+
 func featureChecks() []*featureCheck {
 	// Same order as Feature declarations
 	return []*featureCheck{
@@ -144,6 +149,7 @@ func featureChecks() []*featureCheck {
 		{TokenAuth, isFeatureTokenAuthEnabled},
 		{ORM, isFeatureORMEnabled},
 		{OpenAI, isFeatureOpenAIEnabled},
+		{AdvancedHooks, isFeatureAdvancedHooksEnabled},
 	}
 }
 
@@ -167,7 +173,14 @@ func EnabledFeatures(wunderGraphDir string) ([]Feature, error) {
 	return features, nil
 }
 
+var (
+	enterpriseFeatures = map[Feature]struct{}{
+		AdvancedHooks: struct{}{},
+	}
+)
+
 // IsEnterprise returns true iff feat is only available with an enterprise license
 func IsEnterprise(feat Feature) bool {
-	return false
+	_, found := enterpriseFeatures[feat]
+	return found
 }

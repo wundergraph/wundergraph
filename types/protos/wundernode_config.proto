@@ -504,6 +504,7 @@ message WunderGraphConfiguration {
 	bool dangerouslyEnableGraphQLEndpoint = 4;
 	string configHash = 5;
 	EnabledFeatures enabledFeatures = 6;
+	// New-style hooks
 	repeated Hook hooks = 7;
 }
 
