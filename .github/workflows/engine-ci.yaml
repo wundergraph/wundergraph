@@ -75,7 +75,7 @@ jobs:
         with:
           # keep in sync with local version
           version: v1.52.2
-          args: --timeout 2m
+          args: --timeout 3m
 
       - name: Run unit and integration tests
         run: go test -race ./...
