@@ -125,5 +125,5 @@ const router = dynamicRouter({
 
 ## License
 
-This integrations is licensed under the WunderGraph Community License.
+The Dynamic Router is licensed under the WunderGraph Community License.
 https://github.com/wundergraph/wundergraph/blob/main/LICENSE.COMMUNITY
