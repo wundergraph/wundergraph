@@ -1,4 +1,4 @@
-import { defineDatasource, GraphQLDatasourceOptions } from '@wundergraph/sdk/integrations';
+import { defineDatasource, GraphQLDatasourceOptions } from '@wundergraph/sdk/datasources';
 
 export const weather = defineDatasource<Partial<Omit<GraphQLDatasourceOptions, 'url'>>>((config) => {
 	const { namespace = 'weather', ...rest } = config || {};

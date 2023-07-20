@@ -1,5 +1,5 @@
 import type { GraphQLIntrospection } from '../../definition';
-import { defineDatasource } from '../define-datasource';
+import { defineDatasource } from './define-datasource';
 
 export interface GraphQLDatasourceOptions extends Omit<GraphQLIntrospection, 'apiNamespace'> {
 	namespace?: string;

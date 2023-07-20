@@ -47,6 +47,10 @@
       "types": "./dist/integrations/index.d.ts",
       "default": "./dist/integrations/index.js"
     },
+    "./datasources": {
+      "types": "./dist/integrations/datasources/index.d.ts",
+      "default": "./dist/integrations/datasources/index.js"
+    },
     "./dynamic-router": {
       "types": "./dist/dynamic-router/index.d.ts",
       "default": "./dist/dynamic-router/index.js"
@@ -84,6 +88,9 @@
       ],
       "orm": [
         "./dist/orm"
+      ],
+      "datasources": [
+        "./dist/integrations/datasources"
       ],
       "integrations": [
         "./dist/integrations"

@@ -1225,7 +1225,10 @@ export interface WunderGraphConfiguration {
   environmentIds: string[];
   dangerouslyEnableGraphQLEndpoint: boolean;
   configHash: string;
-  enabledFeatures: EnabledFeatures | undefined;
+  enabledFeatures:
+    | EnabledFeatures
+    | undefined;
+  /** New-style hooks */
   hooks: Hook[];
 }
 

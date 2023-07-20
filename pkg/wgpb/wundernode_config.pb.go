@@ -4551,7 +4551,8 @@ type WunderGraphConfiguration struct {
 	DangerouslyEnableGraphQLEndpoint bool             `protobuf:"varint,4,opt,name=dangerouslyEnableGraphQLEndpoint,proto3" json:"dangerouslyEnableGraphQLEndpoint,omitempty"`
 	ConfigHash                       string           `protobuf:"bytes,5,opt,name=configHash,proto3" json:"configHash,omitempty"`
 	EnabledFeatures                  *EnabledFeatures `protobuf:"bytes,6,opt,name=enabledFeatures,proto3" json:"enabledFeatures,omitempty"`
-	Hooks                            []*Hook          `protobuf:"bytes,7,rep,name=hooks,proto3" json:"hooks,omitempty"`
+	// New-style hooks
+	Hooks []*Hook `protobuf:"bytes,7,rep,name=hooks,proto3" json:"hooks,omitempty"`
 }
 
 func (x *WunderGraphConfiguration) Reset() {

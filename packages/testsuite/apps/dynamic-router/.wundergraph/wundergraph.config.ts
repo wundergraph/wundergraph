@@ -1,5 +1,5 @@
 import type { WunderGraphConfig } from '@wundergraph/sdk';
-import { graphql } from '@wundergraph/sdk/integrations';
+import { graphql } from '@wundergraph/sdk/datasources';
 import _ from 'lodash';
 
 import { dynamicRouter } from '@wundergraph/sdk/dynamic-router';
