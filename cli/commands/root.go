@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
+	"net"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -39,6 +40,9 @@ const (
 	// we need  need to wait a bit for it
 	telemetryReloadWait     = 100 * time.Millisecond
 	maxTelemetryLoadRetries = 20
+
+	natsDisableEmbeddedServerKey = "WG_DISABLE_EMBEDDED_NATS"
+	natsEmbeddedServerURLKey     = "WG_NATS_EMBEDDED_SERVER_URL"
 )
 
 var (
@@ -290,6 +294,7 @@ func cacheConfigurationEnv(isCacheEnabled bool) []string {
 
 type configScriptEnvOptions struct {
 	WunderGraphDir                string
+	NATSServerURL                 string
 	RootFlags                     helpers.RootFlags
 	EnableCache                   bool
 	DefaultPollingIntervalSeconds int
@@ -302,6 +307,9 @@ func configScriptEnv(opts configScriptEnvOptions) []string {
 	var env []string
 	env = append(env, helpers.CliEnv(opts.RootFlags)...)
 	env = append(env, commonScriptEnv(opts.WunderGraphDir)...)
+	if opts.NATSServerURL != "" {
+		env = append(env, fmt.Sprintf("%s=%s", natsEmbeddedServerURLKey, opts.NATSServerURL))
+	}
 	env = append(env, cacheConfigurationEnv(opts.EnableCache)...)
 	env = append(env, "WG_PRETTY_GRAPHQL_VALIDATION_ERRORS=true")
 	env = append(env, fmt.Sprintf("WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS=%d", opts.DefaultPollingIntervalSeconds))
@@ -343,11 +351,11 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "Directory of your wundergraph.config.ts")
 }
 
-func configureEmbeddedNatsBlocking(ctx context.Context) {
-
-	disable := os.Getenv("WG_DISABLE_EMBEDDED_NATS")
-	if disable == "true" {
-		return
+// startEmbeddedNats starts the embedded NATS server and returns its URL.
+// if the server can't be started, it logs any errors and returns an empty string
+func startEmbeddedNats(ctx context.Context, log *zap.Logger) string {
+	if os.Getenv(natsDisableEmbeddedServerKey) == "true" {
+		return ""
 	}
 
 	log.Debug("Embedded NATS server enabled")
@@ -356,22 +364,41 @@ func configureEmbeddedNatsBlocking(ctx context.Context) {
 	// in production, the user should run a dedicated NATS server
 	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 	if err != nil {
-		return
+		log.Warn("could not find WunderGraph directory for NATS", zap.Error(err))
+		return ""
 	}
 	storageDir := filepath.Join(wunderGraphDir, "generated", "nats-server", "storage")
 	if err := os.MkdirAll(storageDir, 0755); err != nil {
-		return
+		log.Warn("could not initialize NATS storage dir", zap.Error(err))
+		return ""
 	}
+	// Select a random TCP port to avoid conflicts with other software
+	// starting a NATS server in the default port (e.g. Docker Desktop)
+	listener, err := net.Listen("tcp", ":0")
+	if err != nil {
+		log.Error("could not select random port for NATS", zap.Error(err))
+		return ""
+	}
+	randomPort := listener.Addr().(*net.TCPAddr).Port
+	listener.Close()
 	srv := natsTest.RunServer(&natsServer.Options{
+		Port:      randomPort,
 		JetStream: true,
 		StoreDir:  storageDir,
 	})
 	if srv == nil {
-		log.Debug("Embedded NATS server could not be started")
-		return
+		log.Warn("Embedded NATS server could not be started")
+		return ""
 	}
-	log.Debug("Embedded NATS server started")
-	<-ctx.Done()
-	srv.Shutdown()
-	log.Debug("Embedded NATS server stopped")
+	serverURL := fmt.Sprintf("nats://localhost:%d", randomPort)
+	if err := os.Setenv(natsEmbeddedServerURLKey, serverURL); err != nil {
+		log.Warn("could not set NATS embedded server URL variable", zap.Error(err))
+	}
+	log.Debug("embedded NATS server started", zap.String("url", serverURL))
+	go func() {
+		<-ctx.Done()
+		srv.Shutdown()
+		log.Debug("Embedded NATS server stopped")
+	}()
+	return serverURL
 }

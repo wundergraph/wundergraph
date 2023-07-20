@@ -44,12 +44,15 @@ var generateCmd = &cobra.Command{
 
 		ctx := context.Background()
 
+		natsServerURL := startEmbeddedNats(ctx, log)
+
 		configOutFile := filepath.Join("generated", "bundle", "config.cjs")
 
 		// XXX: generate never uses the cache
 		scriptEnv := configScriptEnv(configScriptEnvOptions{
 			RootFlags:      rootFlags,
 			WunderGraphDir: wunderGraphDir,
+			NATSServerURL:  natsServerURL,
 		})
 		// Run scripts in prod mode
 		scriptEnv = append(scriptEnv, "NODE_ENV=production")
