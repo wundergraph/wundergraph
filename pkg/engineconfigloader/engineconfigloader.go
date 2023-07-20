@@ -33,8 +33,9 @@ import (
 )
 
 type EngineConfigLoader struct {
-	wundergraphDir string
-	resolvers      []FactoryResolver
+	wunderGraphDir       string
+	natsDefaultServerURL string
+	resolvers            []FactoryResolver
 }
 
 type FactoryResolver interface {
@@ -322,10 +323,16 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 	}
 }
 
-func New(wundergraphDir string, resolvers ...FactoryResolver) *EngineConfigLoader {
+type EngineConfigLoaderOptions struct {
+	WunderGraphDir       string
+	NATSDefaultServerURL string
+}
+
+func New(opts EngineConfigLoaderOptions, resolvers ...FactoryResolver) *EngineConfigLoader {
 	return &EngineConfigLoader{
-		wundergraphDir: wundergraphDir,
-		resolvers:      resolvers,
+		wunderGraphDir:       opts.WunderGraphDir,
+		natsDefaultServerURL: opts.NATSDefaultServerURL,
+		resolvers:            resolvers,
 	}
 }
 
@@ -514,10 +521,18 @@ func (l *EngineConfigLoader) Load(engineConfig *wgpb.EngineConfiguration, wgServ
 				bucketName = strings.Join([]string{prefix, bucketName}, ".")
 			}
 
+			natsServerURL := in.CustomNatsKv.GetServerURL()
+			if natsServerURL == "" {
+				if l.natsDefaultServerURL == "" {
+					return nil, errors.New("could not determine default NATS server URL")
+				}
+				natsServerURL = l.natsDefaultServerURL
+			}
+
 			config := nats.Configuration{
 				Operation: in.CustomNatsKv.GetOperation(),
 				Bucket:    bucketName,
-				ServerURL: in.CustomNatsKv.GetServerURL(),
+				ServerURL: natsServerURL,
 				History:   in.CustomNatsKv.GetHistory(),
 				Token:     in.CustomNatsKv.GetToken(),
 			}
@@ -545,7 +560,7 @@ func (l *EngineConfigLoader) Load(engineConfig *wgpb.EngineConfiguration, wgServ
 				PrismaSchema:        l.addDataSourceToPrismaSchema(prismaSchema, databaseURL, in.Kind),
 				GraphqlSchema:       graphqlSchema,
 				CloseTimeoutSeconds: in.CustomDatabase.CloseTimeoutSeconds,
-				WunderGraphDir:      l.wundergraphDir,
+				WunderGraphDir:      l.wunderGraphDir,
 			}
 			for _, field := range in.CustomDatabase.JsonTypeFields {
 				config.JsonTypeFields = append(config.JsonTypeFields, database.SingleTypeField{

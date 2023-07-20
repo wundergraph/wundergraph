@@ -42,7 +42,6 @@ const (
 	maxTelemetryLoadRetries = 20
 
 	natsDisableEmbeddedServerKey = "WG_DISABLE_EMBEDDED_NATS"
-	natsEmbeddedServerURLKey     = "WG_NATS_EMBEDDED_SERVER_URL"
 )
 
 var (
@@ -294,7 +293,6 @@ func cacheConfigurationEnv(isCacheEnabled bool) []string {
 
 type configScriptEnvOptions struct {
 	WunderGraphDir                string
-	NATSServerURL                 string
 	RootFlags                     helpers.RootFlags
 	EnableCache                   bool
 	DefaultPollingIntervalSeconds int
@@ -307,9 +305,6 @@ func configScriptEnv(opts configScriptEnvOptions) []string {
 	var env []string
 	env = append(env, helpers.CliEnv(opts.RootFlags)...)
 	env = append(env, commonScriptEnv(opts.WunderGraphDir)...)
-	if opts.NATSServerURL != "" {
-		env = append(env, fmt.Sprintf("%s=%s", natsEmbeddedServerURLKey, opts.NATSServerURL))
-	}
 	env = append(env, cacheConfigurationEnv(opts.EnableCache)...)
 	env = append(env, "WG_PRETTY_GRAPHQL_VALIDATION_ERRORS=true")
 	env = append(env, fmt.Sprintf("WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS=%d", opts.DefaultPollingIntervalSeconds))
@@ -391,9 +386,6 @@ func startEmbeddedNats(ctx context.Context, log *zap.Logger) string {
 		return ""
 	}
 	serverURL := fmt.Sprintf("nats://localhost:%d", randomPort)
-	if err := os.Setenv(natsEmbeddedServerURLKey, serverURL); err != nil {
-		log.Warn("could not set NATS embedded server URL variable", zap.Error(err))
-	}
 	log.Debug("embedded NATS server started", zap.String("url", serverURL))
 	go func() {
 		<-ctx.Done()

@@ -55,7 +55,7 @@ var upCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		natsServerURL := startEmbeddedNats(ctx, log)
+		natsEmbeddedServerURL := startEmbeddedNats(ctx, log)
 
 		// Enable TUI only if stdout is a terminal
 		if !isatty.IsTerminal(os.Stdout.Fd()) {
@@ -172,14 +172,12 @@ var upCmd = &cobra.Command{
 			FirstRunEnv: configScriptEnv(configScriptEnvOptions{
 				RootFlags:      rootFlags,
 				WunderGraphDir: wunderGraphDir,
-				NATSServerURL:  natsServerURL,
 				EnableCache:    !disableCache,
 				FirstRun:       true,
 			}),
 			ScriptEnv: configScriptEnv(configScriptEnvOptions{
 				RootFlags:      rootFlags,
 				WunderGraphDir: wunderGraphDir,
-				NATSServerURL:  natsServerURL,
 				EnableCache:    !disableCache,
 			}),
 			Streaming: devTUI == nil,
@@ -501,6 +499,7 @@ var upCmd = &cobra.Command{
 				node.WithRequestLogging(rootFlags.DebugMode),
 				node.WithTraceBatchTimeout(1000 * time.Millisecond),
 				node.WithDevMode(),
+				node.WithNATSDefaultServerURL(natsEmbeddedServerURL),
 			}
 
 			if devTUI != nil {

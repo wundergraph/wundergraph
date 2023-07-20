@@ -11,8 +11,6 @@ import {
 } from './namespacing';
 import { buildSchema } from 'graphql';
 
-const WgNatsEmbeddedServerURLKey = 'WG_NATS_EMBEDDED_SERVER_URL';
-
 export interface NatsKVIntrospection {
 	apiNamespace: string;
 	model: z.AnyZodObject;
@@ -34,14 +32,6 @@ export const introspectNatsKV = async (introspection: NatsKVIntrospection) => {
 			rootName: 'Value',
 			direction: 'output',
 		});
-		let serverURL = introspection.serverURL;
-		if (serverURL === undefined) {
-			const builtinNatsServerURL = process.env[WgNatsEmbeddedServerURLKey];
-			if (!builtinNatsServerURL) {
-				throw new Error(`could not determine builtin NATS server URL, ${WgNatsEmbeddedServerURLKey} is empty`);
-			}
-			serverURL = builtinNatsServerURL;
-		}
 		const inputOutput = [...inputSchema.typeDefinitions, ...outputSchema.typeDefinitions];
 		const unnamespacedSchema = kvTemplate + inputOutput.join('\n\n').replace(new RegExp('T0', 'g'), '');
 		const graphqlSchema = buildSchema(unnamespacedSchema);
@@ -59,7 +49,7 @@ export const introspectNatsKV = async (introspection: NatsKVIntrospection) => {
 					placeholderVariableName: '',
 					staticVariableContent: '',
 				},
-				serverURL,
+				serverURL: introspection.serverURL ?? '',
 				token: introspection.token ?? '',
 				history: introspection.history ?? 1,
 				bucketName: introspection.apiNamespace,
