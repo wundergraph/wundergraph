@@ -18,10 +18,18 @@ afterAll(async () => {
 });
 
 describe('test dynamic router', () => {
-	test('it works', async () => {
+	const alice = `hello I'm Alice`;
+	const bob = `hello I'm Bob`;
+	const mallory = `hello I'm Mallory`;
+	test('direct queries to origin', async () => {
 		const client = wg.client();
-		expect((await client.query({ operationName: 'HelloS1' })).data?.s1_hello).toStrictEqual([`hello I'm 1`]);
-		expect((await client.query({ operationName: 'HelloS2' })).data?.s2_hello).toStrictEqual([`hello I'm 2`]);
-		expect((await client.query({ operationName: 'HelloS3' })).data?.s3_hello).toStrictEqual([`hello I'm 3`]);
+		expect((await client.query({ operationName: 'Hello1' })).data?.origin1_hello).toStrictEqual([alice]);
+		expect((await client.query({ operationName: 'Hello2' })).data?.origin2_hello).toStrictEqual([bob]);
+		expect((await client.query({ operationName: 'Hello3' })).data?.origin3_hello).toStrictEqual([mallory]);
+	});
+	test('query all origins at the same time', async () => {
+		const client = wg.client();
+		const result = await client.query({ operationName: 'HelloAll' });
+		expect(result.data?.hello).toStrictEqual([alice, bob, mallory]);
 	});
 });
