@@ -312,10 +312,6 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 						try {
 							result = await config.handler({
 								...requestContext(request),
-								// operation: {
-								// 	name: request.body.operationName,
-								// 	type: request.body.operationType,
-								// },
 								request: requestFromWunderGraphRequest(request.body.request),
 							});
 						} catch (err) {
@@ -332,8 +328,9 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 						let response: WunderGraphResponse | undefined;
 
 						if (result != null) {
-							// TODO: We might want to switch that to text, otherwise
-							// we require the body to be JSON representable
+							// XXX: This requires the body to be JSON-representable.
+							// Consider changing the hooks protocol to allow any type of payload
+							// in the future.
 							const body = await result.json();
 							response = {
 								method: request.method as RequestMethod,
