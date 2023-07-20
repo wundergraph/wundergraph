@@ -65,10 +65,14 @@ const router = dynamicRouter({
     const headers = new Headers(request.headers);
     headers.set('x-custom-header', 'custom-value');
 
+    const body = await request.text();
+    const method = request.method;
     return fetch(
-      new Request({
+      new Request(request.url, {
         ...request,
         headers,
+        method: request.method,
+        body,
       })
     );
   },
