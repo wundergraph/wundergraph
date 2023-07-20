@@ -27,6 +27,7 @@
   "devDependencies": {
     "@graphql-yoga/node": "^2.13.13",
     "@prisma/client": "^4.15.0",
+    "@types/lodash": "^4.14.178",
     "execa": "5.1.1",
     "fastify": "^4.10.2",
     "graphql-request": "^6.0.0",

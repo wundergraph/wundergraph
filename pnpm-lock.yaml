@@ -1058,6 +1058,9 @@ importers:
       '@prisma/client':
         specifier: ^4.15.0
         version: 4.15.0(prisma@4.15.0)
+      '@types/lodash':
+        specifier: ^4.14.178
+        version: 4.14.195
       execa:
         specifier: 5.1.1
         version: 5.1.1
@@ -11124,7 +11127,6 @@ packages:
 
   /@types/lodash@4.14.195:
     resolution: {integrity: sha512-Hwx9EUgdwf2GLarOjQp5ZH8ZmblzcbTBC2wtQWNKARBSxM9ezRIAUpeDTgoQRAFB0+8CNWXVA9+MaSOzOF3nPg==}
-    dev: false
 
   /@types/long@4.0.2:
     resolution: {integrity: sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==}
