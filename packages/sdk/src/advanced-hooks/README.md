@@ -55,6 +55,8 @@ export default configureWunderGraphServer(() => ({
 ### Injecting headers
 
 ```ts
+import { dynamicTransport } from '@wundergraph/sdk/advanced-hooks';
+
 const transport = dynamicTransport({
   match: {
     datasources: ['gql'],
@@ -63,10 +65,14 @@ const transport = dynamicTransport({
     const headers = new Headers(request.headers);
     headers.set('x-custom-header', 'custom-value');
 
+    const body = await request.text();
+    const method = request.method;
     return fetch(
       new Request(request.url, {
         ...request,
         headers,
+        method: request.method,
+        body,
       })
     );
   },
@@ -76,29 +82,14 @@ const transport = dynamicTransport({
 ### Fetch and merge multiple requests
 
 ```ts
+import { dynamicTransport, mergeGraphQLRequests } from '@wundergraph/sdk/advanced-hooks';
+
 const transport = dynamicTransport({
   match: {
     datasources: ['gql'],
   },
   handler: async ({ request }) => {
-    const data = await request.text();
-    const p1 = fetch(
-      new Request('https://server1.org/graphql', {
-        method: request.method,
-        headers: request.headers,
-        body: data,
-      })
-    );
-    const p2 = fetch(
-      new Request('https://server2.org/graphql', {
-        method: request.method,
-        headers: request.headers,
-        body: data,
-      })
-    );
-    const responses = await Promise.all([p1, p2]);
-
-    return mergeResponses(responses);
+    return mergeGraphQLRequests(request, ['https://server1.org/graphql', 'https://server2.org/graphql']);
   },
 });
 ```

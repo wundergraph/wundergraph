@@ -25,7 +25,7 @@ const route = dynamicTransport({
 const route2 = dynamicTransport({
 	match: {
 		operationType: 'query',
-		datasources: ['countries_1'],
+		datasources: ['countries'],
 	},
 	handler: ({ request }) => {
 		return fetch(request);

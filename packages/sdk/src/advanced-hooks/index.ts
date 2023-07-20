@@ -12,3 +12,4 @@ export {
 	type RouteMatcher,
 	dynamicTransport,
 } from './http-transport';
+export { mergeGraphQLRequests, mergeGraphQLResponses } from './merge';
