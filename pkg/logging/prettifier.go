@@ -17,8 +17,10 @@ const (
 	levelMinChars = 5 // pad logging levels to this size, so they look aligned
 )
 
+type printerFunc func(w io.Writer, a ...interface{})
+
 var (
-	levelPrinters = map[string]func(w io.Writer, a ...interface{}){
+	levelPrinters = map[string]printerFunc{
 		"trace": color.New(color.FgCyan).FprintFunc(),
 		"debug": color.New(color.FgMagenta).FprintFunc(),
 		"info":  color.New(color.FgBlue).FprintFunc(),
@@ -28,6 +30,9 @@ var (
 	}
 
 	grayPrinter = color.New(color.FgHiBlack).FprintFunc()
+	fmtPrinter  = func(w io.Writer, a ...interface{}) {
+		fmt.Fprint(w, a...)
+	}
 )
 
 func float64ToTimestamp(f float64) (time.Time, bool) {
@@ -50,6 +55,7 @@ func float64ToTimestamp(f float64) (time.Time, bool) {
 }
 
 type PrettifierConfig struct {
+	DisableColor  bool
 	LevelKey      string
 	MessageKey    string
 	CallerKey     string
@@ -61,6 +67,7 @@ type PrettifierConfig struct {
 
 type Prettifier struct {
 	pool          buffer.Pool
+	disableColor  bool
 	levelKey      string
 	messageKey    string
 	componentKey  string
@@ -100,6 +107,7 @@ func NewPrettifier(config PrettifierConfig) *Prettifier {
 		ignoredKeys[k] = struct{}{}
 	}
 	return &Prettifier{
+		disableColor:  config.DisableColor,
 		pool:          buffer.NewPool(),
 		levelKey:      levelKey,
 		messageKey:    messageKey,
@@ -157,30 +165,26 @@ func (p *Prettifier) PrettifyJSON(r io.Reader) (*buffer.Buffer, error) {
 	} else {
 		logTime = time.Now()
 	}
+	secondaryTextPrinter := p.secondaryTextPrinter()
 	buf := p.pool.Get()
 	s := logTime.Format("15:04:05.000")
-	grayPrinter(buf, s)
+	secondaryTextPrinter(buf, s)
 	buf.WriteByte(' ')
-	levelPrinter := levelPrinters[level]
-	if levelPrinter == nil {
-		levelPrinter = func(w io.Writer, a ...interface{}) {
-			fmt.Fprint(w, a...)
-		}
-	}
+	levelPrinter := p.levelPrinter(level)
 	levelPrinter(buf, strings.ToUpper(level))
 	levelPrinter(buf, strings.Repeat(" ", levelMinChars-len(level)))
 	buf.WriteByte(' ')
 	if component != "" {
-		grayPrinter(buf, component)
+		secondaryTextPrinter(buf, component)
 		buf.WriteByte(' ')
 	}
 	if caller != "" {
 		if component != "" {
-			grayPrinter(buf, "(")
+			secondaryTextPrinter(buf, "(")
 		}
-		grayPrinter(buf, caller)
+		secondaryTextPrinter(buf, caller)
 		if component != "" {
-			grayPrinter(buf, ")")
+			secondaryTextPrinter(buf, ")")
 		}
 		buf.WriteByte(' ')
 	}
@@ -199,7 +203,7 @@ func (p *Prettifier) PrettifyJSON(r io.Reader) (*buffer.Buffer, error) {
 			buf.WriteByte(' ')
 		}
 		buf.WriteString(key)
-		grayPrinter(buf, "=")
+		secondaryTextPrinter(buf, "=")
 		value, _ := o.Get(key)
 		switch x := value.(type) {
 		case string:
@@ -228,4 +232,21 @@ func (p *Prettifier) PrettifyJSON(r io.Reader) (*buffer.Buffer, error) {
 		buf.WriteByte('\n')
 	}
 	return buf, nil
+}
+
+func (p *Prettifier) secondaryTextPrinter() printerFunc {
+	if p.disableColor {
+		return fmtPrinter
+	}
+	return grayPrinter
+}
+
+func (p *Prettifier) levelPrinter(level string) printerFunc {
+	if !p.disableColor {
+		coloredPrinter := levelPrinters[level]
+		if coloredPrinter != nil {
+			return coloredPrinter
+		}
+	}
+	return fmtPrinter
 }
