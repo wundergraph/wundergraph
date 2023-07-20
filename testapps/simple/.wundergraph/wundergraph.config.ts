@@ -25,7 +25,7 @@ const route = dynamicRouter({
 const route2 = dynamicRouter({
 	match: {
 		operationType: 'query',
-		datasources: ['countries_1'],
+		datasources: ['countries'],
 	},
 	handler: ({ request }) => {
 		return fetch(request);
