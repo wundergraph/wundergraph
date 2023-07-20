@@ -3,7 +3,7 @@
  * All rights reserved.
  *
  * This file is licensed under the WunderGraph Community License.
- * @see https://github.com/wundergraph/wundergraph/blob/main/LICENSE.COMMUNITY
+ * @see https://github.com/wundergraph/wundergraph/blob/main/LICENSE.COMMUNITY.md
  */
 
 export {
