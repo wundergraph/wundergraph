@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -23,6 +24,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/cli"
 	"github.com/wundergraph/wundergraph/pkg/codegeneration"
 	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/licensing"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/operations"
@@ -52,6 +54,8 @@ var upCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
+
+		go configureEmbeddedNatsBlocking(ctx)
 
 		// Enable TUI only if stdout is a terminal
 		if !isatty.IsTerminal(os.Stdout.Fd()) {
@@ -107,6 +111,12 @@ var upCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		var licensingOutput io.Writer = os.Stderr
+		if enableTUI {
+			licensingOutput = io.Discard
+		}
+		go licensing.NewManager(licensingPublicKey).LicenseCheck(wunderGraphDir, cancel, licensingOutput)
 
 		if clearCache {
 			if cacheDir, _ := helpers.LocalWunderGraphCacheDir(wunderGraphDir); cacheDir != "" {

@@ -1,0 +1,10 @@
+query ($key: String!, $revision: Int!) {
+	kv_getRevision(key: $key, revision: $revision) {
+		key
+		revision
+		created
+		value {
+			token
+		}
+	}
+}

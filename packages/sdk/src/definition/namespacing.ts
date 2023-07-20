@@ -316,7 +316,7 @@ export const applyNameSpaceToFieldConfigurations = (
 			...field,
 			typeName: isRoot ? field.typeName : namespace + '_' + field.typeName,
 			fieldName: isRoot && !skipRename ? namespace + '_' + field.fieldName : field.fieldName,
-			path: [field.fieldName],
+			path: field.disableDefaultFieldMapping ? [] : [field.fieldName],
 		};
 	});
 

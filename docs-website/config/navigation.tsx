@@ -14,9 +14,9 @@ import {
 	LockClosedIcon,
 	ServerIcon,
 	ShareIcon,
-	WrenchIcon,
-	SunIcon,
 	SparklesIcon,
+	SunIcon,
+	WrenchIcon,
 } from '@heroicons/react/24/solid';
 
 const navigation = [
@@ -548,6 +548,10 @@ const navigation = [
 			{
 				title: 'FaunaDB',
 				href: '/docs/databases/faunadb',
+			},
+			{
+				title: 'Key Value',
+				href: '/docs/databases/kv',
 			},
 		],
 	},

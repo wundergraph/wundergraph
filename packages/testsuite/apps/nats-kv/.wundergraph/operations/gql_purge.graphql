@@ -1,0 +1,3 @@
+mutation ($key: String!) {
+	kv_purge(key: $key)
+}
