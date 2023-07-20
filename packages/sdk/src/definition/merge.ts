@@ -30,29 +30,14 @@ export interface mergeApiInput<T extends {} = {}> {
 }
 
 export const mergeApis = <T extends {} = {}>(input: mergeApiInput<T>): Api<T> => {
-	// Count the number of DS with have to assign with the same name
-	// and always use numbers for the ones with multiple assignments
-	const toAssign = new Map<string, number>();
-	input.apis.forEach((api) => {
-		api.DataSources.forEach((ds) => {
-			if (ds.Id === undefined && api.Namespace) {
-				toAssign.set(api.Namespace, (toAssign.get(api.Namespace) ?? 0) + 1);
-			}
-		});
-	});
-
 	// Now assign the IDs
 	const assignedIds = new Map<string, number>();
 	const assignId = <TAPI, TDataSource>(api: Api<TAPI>, ds: DataSource<TDataSource>) => {
 		if (ds.Id === undefined && api.Namespace) {
-			if (toAssign.get(api.Namespace) == 1) {
-				ds.Id = api.Namespace;
-			} else {
-				const prev = assignedIds.get(api.Namespace);
-				const next = (prev ?? 0) + 1;
-				ds.Id = `${api.Namespace}_${next}`;
-				assignedIds.set(api.Namespace, next);
-			}
+			const prev = assignedIds.get(api.Namespace);
+			const next = (prev ?? 0) + 1;
+			ds.Id = next === 1 ? api.Namespace : `${api.Namespace}_${next}`;
+			assignedIds.set(api.Namespace, next);
 		}
 		return ds;
 	};
