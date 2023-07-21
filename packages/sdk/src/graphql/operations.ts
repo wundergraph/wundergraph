@@ -1550,7 +1550,7 @@ export const loadOperations = async (schemaFileName: string): Promise<LoadOperat
 	// stdout is not displayed intentionally
 	// we are only interested in the final result
 	const result = await wunderctl({
-		cmd: ['loadoperations', operationsPath, fragmentsPath, schemaFilePath, '--pretty'],
+		cmd: ['loadoperations', operationsPath, fragmentsPath, schemaFilePath],
 	});
 	if (result?.failed) {
 		throw new Error(`Could not load operations: ${result?.stderr}`);

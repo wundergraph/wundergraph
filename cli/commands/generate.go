@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/codegeneration"
 	"github.com/wundergraph/wundergraph/pkg/files"
@@ -62,7 +63,7 @@ var generateCmd = &cobra.Command{
 			AbsWorkingDir: wunderGraphDir,
 			Logger:        log,
 			ScriptEnv:     scriptEnv,
-			Streaming:     true,
+			Output:        helpers.ScriptRunnerOutputConfig(rootFlags),
 		})
 		defer func() {
 			log.Debug("Stopping config-runner")

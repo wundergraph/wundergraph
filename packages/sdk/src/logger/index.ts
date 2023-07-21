@@ -1,7 +1,6 @@
 import { ConfigurationVariable, LogLevel, logLevelFromJSON } from '@wundergraph/protobuf';
 import { resolveConfigurationVariable } from '../configure/variables';
 import { DestinationStream, pino } from 'pino';
-import pretty from 'pino-pretty';
 import { pinoOptions } from '../server/logger';
 
 export enum PinoLogLevel {
@@ -42,7 +41,6 @@ const resolvePinoLogLevel = (level: string): PinoLogLevel => {
 };
 
 const initLogger = (destination: DestinationStream): pino.Logger => {
-	const enablePretty = process.env.WG_CLI_LOG_PRETTY === 'true';
 	const logLevel =
 		process.env.WG_DEBUG_MODE === 'true'
 			? PinoLogLevel.Debug
@@ -54,23 +52,6 @@ const initLogger = (destination: DestinationStream): pino.Logger => {
 		...pinoOptions(),
 		level: logLevel,
 	};
-
-	if (enablePretty) {
-		const stream = pretty({
-			colorize: true,
-			colorizeObjects: false,
-			translateTime: 'HH:MM:ss TT', // https://www.npmjs.com/package/dateformat
-			customPrettifiers: {
-				time: (timestamp: any) => `${timestamp}`,
-			},
-			ignore: 'pid,hostname',
-			destination: destination,
-			messageFormat: '{msg}',
-			singleLine: true,
-		});
-
-		return pino(options, stream);
-	}
 
 	return pino(options);
 };
