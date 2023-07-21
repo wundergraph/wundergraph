@@ -43,7 +43,7 @@ const resolvePinoLogLevel = (level: string): PinoLogLevel => {
 };
 
 const initLogger = (destination: DestinationStream): pino.Logger => {
-	const logLevel = resolvePinoLogLevel(process.env.WG_LOG ?? '');
+	const logLevel = resolvePinoLogLevel(process.env.WG_LOG ?? 'info');
 	let options: pino.LoggerOptions = {
 		...pinoOptions(),
 		level: logLevel,
