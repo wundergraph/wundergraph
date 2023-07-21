@@ -87,7 +87,7 @@ func NewWunderGraphNode(ctx context.Context) (*node.Node, string, error) {
 	}
 
 	nodeLogger := logging.
-		New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevel)
+		New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevelSetter)
 	return node.New(ctx, BuildInfo, wunderGraphDir, nodeLogger), wunderGraphDir, nil
 }
 
@@ -96,6 +96,7 @@ type options struct {
 	idleHandler            func()
 	enableRequestLogging   bool
 	natsDefaultServerURL   string
+	serverConfigLoadHandler func(*node.WunderNodeConfig)
 }
 
 type Option func(options *options)
@@ -118,9 +119,15 @@ func WithRequestLogging(debugMode bool) Option {
 	}
 }
 
+<<<<<<< HEAD
 func WithNATSDefaultServerURL(serverURL string) Option {
 	return func(options *options) {
 		options.natsDefaultServerURL = serverURL
+=======
+func WithServerConfigLoadHandler(handler func(*node.WunderNodeConfig)) Option {
+	return func(options *options) {
+		options.serverConfigLoadHandler = handler
+>>>>>>> 5f0ca21b (fix: allow setting logging levels from command line)
 	}
 }
 
@@ -163,7 +170,13 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 		node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
 		node.WithIntrospection(enableIntrospection),
 		node.WithTraceBatchTimeout(otelBatchTimeout),
+<<<<<<< HEAD
 		node.WithNATSDefaultServerURL(options.natsDefaultServerURL),
+=======
+		node.WithServerConfigLoadHandler(func(config *node.WunderNodeConfig) {
+			updateLoggingLevel(config.Api.Options.Logging.Level)
+		}),
+>>>>>>> 5f0ca21b (fix: allow setting logging levels from command line)
 	}
 
 	if shutdownAfterIdle > 0 {
