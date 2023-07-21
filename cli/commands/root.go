@@ -40,6 +40,8 @@ const (
 	// we need  need to wait a bit for it
 	telemetryReloadWait     = 100 * time.Millisecond
 	maxTelemetryLoadRetries = 20
+
+	prettyLoggingFlagName = "pretty-logging"
 )
 
 var (
@@ -139,6 +141,44 @@ func sendTelemetry(cmd *cobra.Command) error {
 	return TelemetryClient.Send(metrics)
 }
 
+func workaroundBugWithDuplicatedFlags(cmd *cobra.Command) {
+	// Cobra doesn't properly support multiple flags on different
+	// subcommands because it keeps a global registry using the
+	// flag name, which makes the only flag available to last to
+	// be registered and also takes the default value from that one.
+	//  To make it work, we lookup the flag from the
+	// chosen command, install it (so it overrides any other flags
+	// with the same name) and we restore its default value as long
+	// as it has not changed.
+	flagsToPatchUp := []string{
+		prettyLoggingFlagName,
+	}
+	for _, name := range flagsToPatchUp {
+		flag := cmd.Flags().Lookup(name)
+		if flag != nil {
+			if !flag.Changed {
+				flag.Value.Set(flag.DefValue)
+			}
+			viper.BindPFlag(name, flag)
+		}
+	}
+}
+
+func updateFlagsFromEnvironment(cmd *cobra.Command) {
+	overriddenFlags := map[string]string{
+		prettyLoggingFlagName: helpers.WgLogPrettyEnvKey,
+	}
+	for flagName, envKey := range overriddenFlags {
+		flag := cmd.Flags().Lookup(flagName)
+		if flag != nil && !flag.Changed {
+			envValue := os.Getenv(envKey)
+			if envValue != "" {
+				flag.Value.Set(envValue)
+			}
+		}
+	}
+}
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "wunderctl",
@@ -147,6 +187,9 @@ var rootCmd = &cobra.Command{
 	// Don't show usage on error
 	SilenceUsage: true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		workaroundBugWithDuplicatedFlags(cmd)
+		updateFlagsFromEnvironment(cmd)
+
 		switch cmd.Name() {
 		// skip any setup to avoid logging anything
 		// because the command output data on stdout
@@ -340,7 +383,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.DebugMode, "debug", false, "Enables the debug mode so that all requests and responses will be logged")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.Telemetry, "telemetry", !isTelemetryDisabled, "Enables telemetry. Telemetry allows us to accurately gauge WunderGraph feature usage, pain points, and customization across all users.")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.TelemetryDebugMode, "telemetry-debug", isTelemetryDebugEnabled, "Enables the debug mode for telemetry. Understand what telemetry is being sent to us.")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", true, "Enables pretty logging")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, prettyLoggingFlagName, false, "Enables pretty logging")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "Directory of your wundergraph.config.ts")
 }
 

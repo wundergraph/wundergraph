@@ -163,6 +163,14 @@ var upCmd = &cobra.Command{
 			helpers.KillExistingHooksProcess(port, log)
 		}
 
+		scriptRunnerOutputConfig := helpers.ScriptRunnerOutputConfig(rootFlags)
+		if enableTUI {
+			scriptRunnerOutputConfig = &scriptrunner.OutputConfig{
+				Stdout: io.Discard,
+				Stderr: io.Discard,
+			}
+		}
+
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
 			Executable:    "node",
@@ -180,7 +188,7 @@ var upCmd = &cobra.Command{
 				WunderGraphDir: wunderGraphDir,
 				EnableCache:    !disableCache,
 			}),
-			Streaming: devTUI == nil,
+			Output: scriptRunnerOutputConfig,
 		})
 
 		// responsible for executing the config in "polling" mode
@@ -197,7 +205,7 @@ var upCmd = &cobra.Command{
 				EnableCache:                   !disableCache,
 				DefaultPollingIntervalSeconds: defaultDataSourcePollingIntervalSeconds,
 			}), "WG_DATA_SOURCE_POLLING_MODE=true"),
-			Streaming: devTUI == nil,
+			Output: scriptRunnerOutputConfig,
 		})
 
 		var hookServerRunner *scriptrunner.ScriptRunner
@@ -303,8 +311,8 @@ var upCmd = &cobra.Command{
 				ServerScriptFile:  serverOutFile,
 				Env:               helpers.CliEnv(rootFlags),
 				Debug:             rootFlags.DebugMode,
-				LogStreaming:      devTUI == nil,
 				LogLevel:          rootFlags.CliLogLevel,
+				Output:            scriptRunnerOutputConfig,
 			}
 
 			hookServerRunner = helpers.NewHooksServerRunner(log, srvCfg)
@@ -565,6 +573,7 @@ func init() {
 	upCmd.PersistentFlags().IntVar(&defaultDataSourcePollingIntervalSeconds, "default-polling-interval", 5, "Default polling interval for data sources")
 	upCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "Disables local caches")
 	upCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "Clears local caches before startup")
+	upCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, prettyLoggingFlagName, true, "Enables pretty logging")
 
 	rootCmd.AddCommand(upCmd)
 }

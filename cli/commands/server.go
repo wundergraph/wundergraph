@@ -74,7 +74,7 @@ func startHooksServer(ctx context.Context) error {
 		Debug:             rootFlags.DebugMode,
 		Env:               helpers.CliEnv(rootFlags),
 		LogLevel:          rootFlags.CliLogLevel,
-		LogStreaming:      true,
+		Output:            helpers.ScriptRunnerOutputConfig(rootFlags),
 	}
 
 	hookServerRunner := helpers.NewHooksServerRunner(log, srvCfg)

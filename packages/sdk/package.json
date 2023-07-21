@@ -193,7 +193,6 @@
     "openai": "^3.3.0",
     "openapi-types": "12.1.0",
     "pino": "^8.11.0",
-    "pino-pretty": "^10.0.0",
     "postman-collection": "^4.1.1",
     "protobufjs": "^6.11.2",
     "raw-body": "^2.5.2",
