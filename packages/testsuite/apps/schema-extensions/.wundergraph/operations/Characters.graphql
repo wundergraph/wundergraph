@@ -21,6 +21,7 @@ query {
 				highestLevel
 				typeSpeciality
 			}
+			attributes
 		}
 		... on pocket_Friend {
 			details {

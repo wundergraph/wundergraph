@@ -112,6 +112,7 @@ func (e *Engine) IntrospectPrismaDatabaseSchema(ctx context.Context, introspecti
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, e.introspectionEnginePath)
+	cmd.Stderr = os.Stderr
 	out, err := cmd.StdoutPipe()
 	if err != nil {
 		return "", err
@@ -157,8 +158,9 @@ Loop:
 	}
 
 	var response IntrospectionResponse
-	err = json.NewDecoder(&buf).Decode(&response)
-	if err != nil {
+	if err := json.Unmarshal(buf.Bytes(), &response); err != nil {
+		// Make sure we print the
+		fmt.Fprintf(os.Stderr, "%s\n", buf.String())
 		return "", err
 	}
 	if response.Error != nil {
@@ -323,8 +325,13 @@ func (e *Engine) ensurePrisma() error {
 		return err
 	}
 
-	e.queryEnginePath = filepath.Join(prismaPath, PrismaBinaryVersion, fmt.Sprintf("prisma-query-engine-%s", e.BinaryPlatformName()))
-	e.introspectionEnginePath = filepath.Join(prismaPath, PrismaBinaryVersion, fmt.Sprintf("prisma-migration-engine-%s", e.BinaryPlatformName()))
+	prismaBinaryPlatform, err := e.BinaryPlatformName()
+	if err != nil {
+		return fmt.Errorf("could not determine prisma platform: %w", err)
+	}
+	e.log.Debug("installing prisma", zap.String("directory", prismaPath), zap.String("platform", prismaBinaryPlatform))
+	e.queryEnginePath = filepath.Join(prismaPath, PrismaBinaryVersion, fmt.Sprintf("prisma-query-engine-%s", prismaBinaryPlatform))
+	e.introspectionEnginePath = filepath.Join(prismaPath, PrismaBinaryVersion, fmt.Sprintf("prisma-migration-engine-%s", prismaBinaryPlatform))
 
 	if runtime.GOOS == "windows" {
 		// Append .exe suffix
@@ -346,7 +353,7 @@ func (e *Engine) ensurePrisma() error {
 		e.log.Info("downloading prisma query engine",
 			zap.String("path", e.queryEnginePath),
 		)
-		if err := e.FetchEngine(prismaPath, "query-engine", e.BinaryPlatformName()); err != nil {
+		if err := e.FetchEngine(prismaPath, "query-engine", prismaBinaryPlatform); err != nil {
 			return err
 		}
 		e.log.Info("downloading prisma query engine complete")
@@ -357,7 +364,7 @@ func (e *Engine) ensurePrisma() error {
 		e.log.Info("downloading prisma introspection engine",
 			zap.String("path", e.introspectionEnginePath),
 		)
-		if err := e.FetchEngine(prismaPath, "migration-engine", e.BinaryPlatformName()); err != nil {
+		if err := e.FetchEngine(prismaPath, "migration-engine", prismaBinaryPlatform); err != nil {
 			return err
 		}
 		e.log.Info("downloading prisma introspection engine complete")

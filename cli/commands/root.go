@@ -1,15 +1,19 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/fatih/color"
 	"github.com/joho/godotenv"
 	"github.com/mattn/go-isatty"
+	natsServer "github.com/nats-io/nats-server/v2/server"
+	natsTest "github.com/nats-io/nats-server/v2/test"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -31,6 +35,13 @@ const (
 	wunderctlBinaryPathEnvKey = "WUNDERCTL_BINARY_PATH"
 
 	defaultNodeGracefulTimeoutSeconds = 10
+
+	// Telemetry requires the configuration to be generated, so
+	// we need  need to wait a bit for it
+	telemetryReloadWait     = 100 * time.Millisecond
+	maxTelemetryLoadRetries = 20
+
+	prettyLoggingFlagName = "pretty-logging"
 )
 
 var (
@@ -56,6 +67,118 @@ var (
 	white  = color.New(color.FgHiWhite)
 )
 
+func sendTelemetry(cmd *cobra.Command) error {
+	// Check if we want to track telemetry for this command
+	if !rootFlags.Telemetry || !telemetry.HasAnnotations(telemetry.AnnotationCommand, cmd.Annotations) {
+		return nil
+	}
+	cmdMetricName := telemetry.CobraFullCommandPathMetricName(cmd)
+
+	metricDurationName := telemetry.DurationMetricSuffix(cmdMetricName)
+	cmdDurationMetric = telemetry.NewDurationMetric(metricDurationName)
+
+	metricUsageName := telemetry.UsageMetricSuffix(cmdMetricName)
+	cmdUsageMetric := telemetry.NewUsageMetric(metricUsageName)
+
+	metrics := []*telemetry.Metric{cmdUsageMetric}
+
+	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+	if err != nil {
+		return err
+	}
+
+	var clientInfo *telemetry.MetricClientInfo
+	retries := 0
+	for {
+		clientInfo, err = telemetry.NewClientInfo(BuildInfo.Version, viper.GetString("anonymousid"), wunderGraphDir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				// Configuration is not yet available, wait a bit to try to report all telemetry
+				if retries < maxTelemetryLoadRetries {
+					retries++
+					time.Sleep(telemetryReloadWait)
+					continue
+				}
+			}
+			return err
+		}
+		break
+	}
+
+	// Check if this command should also other telemetry data
+	if telemetry.HasAnnotations(telemetry.AnnotationDataSources, cmd.Annotations) || telemetry.HasAnnotations(telemetry.AnnotationFeatures, cmd.Annotations) {
+		if telemetry.HasAnnotations(telemetry.AnnotationDataSources, cmd.Annotations) {
+			dataSourcesMetrics, err := telemetry.DataSourceMetrics(wunderGraphDir)
+			if err != nil {
+				if rootFlags.TelemetryDebugMode {
+					log.Error("could not generate data sources telemetry data", zap.Error(err))
+
+				}
+			}
+			metrics = append(metrics, dataSourcesMetrics...)
+		}
+
+		if telemetry.HasAnnotations(telemetry.AnnotationFeatures, cmd.Annotations) {
+			featureMetrics, err := telemetry.FeatureMetrics(wunderGraphDir)
+			if err != nil {
+				if rootFlags.TelemetryDebugMode {
+					log.Error("could not generate features telemetry data", zap.Error(err))
+
+				}
+			}
+			metrics = append(metrics, featureMetrics...)
+		}
+	}
+
+	TelemetryClient = telemetry.NewClient(
+		viper.GetString("API_URL"), clientInfo,
+		telemetry.WithTimeout(3*time.Second),
+		telemetry.WithLogger(log),
+		telemetry.WithDebug(rootFlags.TelemetryDebugMode),
+		telemetry.WithAuthToken(os.Getenv("WG_TELEMETRY_AUTH_TOKEN")),
+	)
+
+	return TelemetryClient.Send(metrics)
+}
+
+func workaroundBugWithDuplicatedFlags(cmd *cobra.Command) {
+	// Cobra doesn't properly support multiple flags on different
+	// subcommands because it keeps a global registry using the
+	// flag name, which makes the only flag available to last to
+	// be registered and also takes the default value from that one.
+	//  To make it work, we lookup the flag from the
+	// chosen command, install it (so it overrides any other flags
+	// with the same name) and we restore its default value as long
+	// as it has not changed.
+	flagsToPatchUp := []string{
+		prettyLoggingFlagName,
+	}
+	for _, name := range flagsToPatchUp {
+		flag := cmd.Flags().Lookup(name)
+		if flag != nil {
+			if !flag.Changed {
+				flag.Value.Set(flag.DefValue)
+			}
+			viper.BindPFlag(name, flag)
+		}
+	}
+}
+
+func updateFlagsFromEnvironment(cmd *cobra.Command) {
+	overriddenFlags := map[string]string{
+		prettyLoggingFlagName: helpers.WgLogPrettyEnvKey,
+	}
+	for flagName, envKey := range overriddenFlags {
+		flag := cmd.Flags().Lookup(flagName)
+		if flag != nil && !flag.Changed {
+			envValue := os.Getenv(envKey)
+			if envValue != "" {
+				flag.Value.Set(envValue)
+			}
+		}
+	}
+}
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "wunderctl",
@@ -64,6 +187,9 @@ var rootCmd = &cobra.Command{
 	// Don't show usage on error
 	SilenceUsage: true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		workaroundBugWithDuplicatedFlags(cmd)
+		updateFlagsFromEnvironment(cmd)
+
 		switch cmd.Name() {
 		// skip any setup to avoid logging anything
 		// because the command output data on stdout
@@ -106,62 +232,19 @@ var rootCmd = &cobra.Command{
 			)
 		}
 
-		// Check if we want to track telemetry for this command
-		if rootFlags.Telemetry && telemetry.HasAnnotations(telemetry.AnnotationCommand, cmd.Annotations) {
-			cmdMetricName := telemetry.CobraFullCommandPathMetricName(cmd)
+		// Send telemetry in a goroutine to not block the command
+		go func() {
+			err := sendTelemetry(cmd)
 
-			metricDurationName := telemetry.DurationMetricSuffix(cmdMetricName)
-			cmdDurationMetric = telemetry.NewDurationMetric(metricDurationName)
-
-			metricUsageName := telemetry.UsageMetricSuffix(cmdMetricName)
-			cmdUsageMetric := telemetry.NewUsageMetric(metricUsageName)
-
-			metrics := []*telemetry.Metric{cmdUsageMetric}
-
-			clientInfo := &telemetry.MetricClientInfo{
-				WunderctlVersion: BuildInfo.Version,
-				IsCI:             os.Getenv("CI") != "" || os.Getenv("ci") != "",
-				AnonymousID:      viper.GetString("anonymousid"),
-			}
-
-			// Check if this command should also send data source related telemetry
-			if telemetry.HasAnnotations(telemetry.AnnotationDataSources, cmd.Annotations) {
-				wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+			// AddMetric the usage of the command immediately
+			if rootFlags.TelemetryDebugMode {
 				if err != nil {
-					return err
+					log.Error("Could not send telemetry data", zap.Error(err))
+				} else {
+					log.Info("Telemetry data sent")
 				}
-				dataSourcesMetrics, err := telemetry.DataSourceMetrics(wunderGraphDir)
-				if err != nil {
-					if rootFlags.TelemetryDebugMode {
-						log.Error("could not generate data sources telemetry data", zap.Error(err))
-
-					}
-				}
-				metrics = append(metrics, dataSourcesMetrics...)
 			}
-
-			TelemetryClient = telemetry.NewClient(
-				viper.GetString("API_URL"), clientInfo,
-				telemetry.WithTimeout(3*time.Second),
-				telemetry.WithLogger(log),
-				telemetry.WithDebug(rootFlags.TelemetryDebugMode),
-				telemetry.WithAuthToken(os.Getenv("WG_TELEMETRY_AUTH_TOKEN")),
-			)
-
-			// Send telemetry in a goroutine to not block the command
-			go func() {
-				err := TelemetryClient.Send(metrics)
-
-				// AddMetric the usage of the command immediately
-				if rootFlags.TelemetryDebugMode {
-					if err != nil {
-						log.Error("Could not send telemetry data", zap.Error(err))
-					} else {
-						log.Info("Telemetry data sent")
-					}
-				}
-			}()
-		}
+		}()
 
 		return nil
 	},
@@ -174,22 +257,28 @@ type BuildTimeConfig struct {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
+	// Instead of recover()'ing, use a boolean that we set to false
+	// at the of the function to keep track of whether we've panic()'ed
+	// or not. This allows us to set an appropriate exit code while
+	// showing the whole panic stack, which might be useful for fixing the
+	// problem.
+	didPanic := true
 	var err error
-
 	defer func() {
 		// In case of a panic or error we want to flush the telemetry data
-		if r := recover(); r != nil || err != nil {
-			FlushTelemetry()
+		FlushTelemetry()
+		if didPanic || err != nil {
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%s\n", err)
+			}
 			os.Exit(1)
-		} else {
-			FlushTelemetry()
-			os.Exit(0)
 		}
 	}()
 
 	BuildInfo = buildInfo
 	GitHubAuthDemo = githubAuthDemo
 	err = rootCmd.Execute()
+	didPanic = false
 }
 
 func FlushTelemetry() {
@@ -294,6 +383,39 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.DebugMode, "debug", false, "Enables the debug mode so that all requests and responses will be logged")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.Telemetry, "telemetry", !isTelemetryDisabled, "Enables telemetry. Telemetry allows us to accurately gauge WunderGraph feature usage, pain points, and customization across all users.")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.TelemetryDebugMode, "telemetry-debug", isTelemetryDebugEnabled, "Enables the debug mode for telemetry. Understand what telemetry is being sent to us.")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", true, "Enables pretty logging")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, prettyLoggingFlagName, false, "Enables pretty logging")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "Directory of your wundergraph.config.ts")
+}
+
+func configureEmbeddedNatsBlocking(ctx context.Context) {
+
+	disable := os.Getenv("WG_DISABLE_EMBEDDED_NATS")
+	if disable == "true" {
+		return
+	}
+
+	log.Debug("Embedded NATS server enabled")
+
+	// only for testing, debugging and development purposes
+	// in production, the user should run a dedicated NATS server
+	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+	if err != nil {
+		return
+	}
+	storageDir := filepath.Join(wunderGraphDir, "generated", "nats-server", "storage")
+	if err := os.MkdirAll(storageDir, 0755); err != nil {
+		return
+	}
+	srv := natsTest.RunServer(&natsServer.Options{
+		JetStream: true,
+		StoreDir:  storageDir,
+	})
+	if srv == nil {
+		log.Debug("Embedded NATS server could not be started")
+		return
+	}
+	log.Debug("Embedded NATS server started")
+	<-ctx.Done()
+	srv.Shutdown()
+	log.Debug("Embedded NATS server stopped")
 }

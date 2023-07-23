@@ -10,6 +10,7 @@ import {
 	FieldConfiguration,
 	GraphQLDataSourceHooksConfiguration,
 	MTLSConfiguration,
+	NatsKvOperation,
 	SigningMethod,
 	SingleTypeField,
 	StatusCodeTypeMapping,
@@ -34,6 +35,7 @@ import {
 	introspectSQLServer,
 } from './database-introspection';
 import { introspectSoap } from './soap-introspection';
+import { introspectNatsKV } from './nats-kv-introspection';
 
 export type { OpenAPIIntrospection } from './openapi-introspection';
 
@@ -61,6 +63,13 @@ export interface ApiIntrospectionOptions {
 	 */
 	httpProxyUrl?: string;
 	apiID?: string;
+}
+
+export interface ApiFeatures {
+	schemaExtension?: boolean;
+	customJSONScalars?: boolean;
+	customIntScalars?: boolean;
+	customFloatScalars?: boolean;
 }
 
 export interface RenameType {
@@ -92,7 +101,8 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[]
+		customJsonScalars?: Set<string>,
+		features?: ApiFeatures
 	) {
 		this.Schema = schema;
 		this.Namespace = namespace;
@@ -100,8 +110,9 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		this.Fields = fields;
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
-		this.CustomJsonScalars = customJsonScalars;
+		this.CustomJsonScalars = customJsonScalars ?? new Set<string>();
 		this.Namespace = namespace;
+		this.Features = features;
 	}
 
 	DefaultFlushInterval: number = 500;
@@ -110,8 +121,9 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	Fields: FieldConfiguration[];
 	Types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
-	CustomJsonScalars?: string[];
+	CustomJsonScalars: Set<string>;
 	Namespace: string;
+	Features?: ApiFeatures;
 
 	get schemaSha256() {
 		const hash = createHash('sha256');
@@ -233,6 +245,18 @@ export class MongoDBApi extends Api<DatabaseApiCustom> {}
 
 export class PrismaApi extends Api<DatabaseApiCustom> {}
 
+export class NatsKvApi extends Api<NatsKvApiCustom> {}
+
+export interface NatsKvApiCustom {
+	serverURL: string;
+	bucketName: string;
+	operation: NatsKvOperation;
+	history: number;
+	token: string;
+	bucketPrefix: ConfigurationVariable;
+	schema: any;
+}
+
 export interface DataSource<Custom = unknown> {
 	Id?: string;
 	Kind: DataSourceKind;
@@ -250,7 +274,8 @@ interface GraphQLIntrospectionOptions {
 	customFloatScalars?: string[];
 	customIntScalars?: string[];
 	/*
-		customJSONScalars is deprecated; the types are now detected automatically.
+		The customJSONScalars array no longer needs to contain new replacement JSON scalars.
+		However, original JSON scalars will default to type string if not included in this array.
 	 */
 	customJSONScalars?: string[];
 	// switching internal to true will mark the origin as an internal GraphQL API
@@ -472,6 +497,7 @@ export const introspect = {
 	openApi: introspectOpenApi,
 	openApiV2: introspectOpenApiV2,
 	soap: introspectSoap,
+	natsKV: introspectNatsKV,
 };
 
 export const buildUpstreamAuthentication = (upstream: HTTPUpstream): UpstreamAuthentication | undefined => {

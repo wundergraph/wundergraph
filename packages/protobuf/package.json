@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/protobuf",
-  "version": "0.116.1",
+  "version": "0.117.0",
   "license": "Apache-2.0",
   "main": "./dist/wundernode_config.js",
   "types": "./dist/wundernode_config.d.ts",
@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "cpy-cli": "^4.1.0",
-    "typescript": "^4.8.2"
+    "typescript": "^5.1.6"
   },
   "sideEffects": false
 }

@@ -43,6 +43,14 @@ export default defineWorkspace([
 		},
 	},
 	{
+		root: 'apps/nats-kv',
+		test: {
+			globalSetup: 'apps/nats-kv/test-setup.ts',
+			testTimeout: 15000,
+			hookTimeout: 20000,
+		},
+	},
+	{
 		root: 'apps/openapi',
 		test: {
 			globalSetup: 'apps/openapi/test-setup.ts',

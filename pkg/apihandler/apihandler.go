@@ -852,6 +852,11 @@ type SubscriptionResolver interface {
 	ResolveGraphQLSubscription(ctx *resolve.Context, subscription *resolve.GraphQLSubscription, writer resolve.FlushWriter) (err error)
 }
 
+type GraphQLResolver interface {
+	QueryResolver
+	SubscriptionResolver
+}
+
 type liveQueryConfig struct {
 	enabled                bool
 	pollingIntervalSeconds int64
@@ -2086,11 +2091,12 @@ func handleOperationErr(log *zap.Logger, err error, w http.ResponseWriter, error
 	var ne net.Error
 	if errors.As(err, &ne) && ne.Timeout() {
 		// request timeout exceeded
-		log.Error("request timeout exceeded",
+		log.Warn("request timeout exceeded",
 			zap.String("operationName", operation.Name),
 			zap.String("operationType", operation.OperationType.String()),
 		)
 		w.WriteHeader(http.StatusGatewayTimeout)
+		_, _ = io.WriteString(w, http.StatusText(http.StatusGatewayTimeout))
 		return true
 	}
 	var validationError *inputvariables.ValidationError

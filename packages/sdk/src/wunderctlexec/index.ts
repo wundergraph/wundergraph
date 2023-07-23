@@ -34,10 +34,6 @@ const wunderCtlArgs = (args: string[]): string[] => {
 		args.push('--cli-log-level', process.env.WG_CLI_LOG_LEVEL);
 	}
 
-	if (process.env.WG_CLI_LOG_PRETTY) {
-		args.push(`--pretty-logging=${process.env.WG_CLI_LOG_PRETTY}`);
-	}
-
 	return args;
 };
 

@@ -14,14 +14,14 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.11.11",
-    "@wundergraph/sdk": "^0.166.0",
-    "@wundergraph/swr": "^0.15.11",
+    "@wundergraph/nextjs": "^0.12.2",
+    "@wundergraph/sdk": "^0.169.0",
+    "@wundergraph/swr": "^0.16.2",
     "graphql": "^16.3.0",
     "next": "^13.1.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "swr": "^2.1.5"
+    "swr": "^2.2.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.15",

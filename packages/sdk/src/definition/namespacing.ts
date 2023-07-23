@@ -1,5 +1,4 @@
 import {
-	buildSchema,
 	DirectiveDefinitionNode,
 	DirectiveNode,
 	DocumentNode,
@@ -19,16 +18,13 @@ import {
 } from 'graphql';
 import { NamedTypeNode } from 'graphql/language/ast';
 import {
-	DataSourceCustomDatabase,
-	DataSourceKind,
 	DirectiveConfiguration,
 	FieldConfiguration,
+	SingleTypeField,
 	TypeConfiguration,
 	TypeField,
-	SingleTypeField,
 } from '@wundergraph/protobuf';
 import { isRootType } from '../graphql/configuration';
-import { Api, DataSource } from './index';
 
 export const wellKnownTypeNames: string[] = [
 	'Query',
@@ -67,6 +63,20 @@ const uniqueWellKnownTypes = (schema: DocumentNode): string[] => {
 const wellKnownDirectives: string[] = ['include', 'skip', 'deprecated', 'specifiedBy'];
 const omnigraphOpenApiDirectives: string[] = ['oneOf'];
 const knownDirectives: string[] = [...wellKnownDirectives, ...omnigraphOpenApiDirectives];
+
+export const applyNameSpaceToCustomJsonScalars = (namespace?: string, customJsonScalars?: Set<string>): Set<string> => {
+	if (!customJsonScalars) {
+		return new Set<string>();
+	}
+	if (!namespace || customJsonScalars.size < 1) {
+		return customJsonScalars;
+	}
+	const namespacedScalars = new Set<string>();
+	for (const scalar of customJsonScalars) {
+		namespacedScalars.add(`${namespace}_${scalar}`);
+	}
+	return namespacedScalars;
+};
 
 export const applyNameSpaceToGraphQLSchema = (
 	schema: string,
@@ -306,7 +316,7 @@ export const applyNameSpaceToFieldConfigurations = (
 			...field,
 			typeName: isRoot ? field.typeName : namespace + '_' + field.typeName,
 			fieldName: isRoot && !skipRename ? namespace + '_' + field.fieldName : field.fieldName,
-			path: [field.fieldName],
+			path: field.disableDefaultFieldMapping ? [] : [field.fieldName],
 		};
 	});
 

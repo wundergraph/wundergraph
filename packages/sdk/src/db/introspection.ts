@@ -68,7 +68,12 @@ const introspectPrismaDatabase = async (
 		};
 	}
 	const output = fs.readFileSync(introspectionFilePath, 'utf8');
-	const out = JSON.parse(output) as PrismaDatabaseIntrospectionResult;
+	let out: PrismaDatabaseIntrospectionResult;
+	try {
+		out = JSON.parse(output) as PrismaDatabaseIntrospectionResult;
+	} catch (e: any) {
+		throw new Error(`could not parse introspection output ${output}: ${e}`);
+	}
 	out.success = true;
 	out.interpolateVariableDefinitionAsJSON = [];
 	out.jsonTypeFields = [];

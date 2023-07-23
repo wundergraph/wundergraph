@@ -4,16 +4,15 @@ import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
 const federatedApi = introspect.federation({
-	apiNamespace: 'federated',
 	upstreams: [
 		{
 			url: 'http://localhost:4001/graphql',
 		},
 		{
-			url: 'http://localhost:4002/graphql',
+			url: 'http://localhost:4003/graphql',
 		},
 		{
-			url: 'http://localhost:4003/graphql',
+			url: 'http://localhost:4002/graphql',
 		},
 		{
 			url: 'http://localhost:4004/graphql',

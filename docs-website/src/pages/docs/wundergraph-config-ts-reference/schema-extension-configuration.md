@@ -20,6 +20,12 @@ store the same value in a JSON/JSONB column.
 
 ## Enabling Schema Extensions
 
+{% callout type="note" %}
+If you are _replacing_ a JSON scalar, you do not need to include it in the `customJSONScalars` array.
+However, if it is not being replaced, the scalar type will be inferred as a TypeScript `string` unless it is added to
+the `customJSONScalars` array.
+{% /callout %}
+
 There are two mandatory steps to enabling Schema Extensions.
 First, you must provide the `schemaExtension` itself in your `wundergraph.config.ts` file.
 Add the `schemaExtension` property to the introspection configuration for a data source.

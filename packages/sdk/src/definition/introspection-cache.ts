@@ -2,10 +2,10 @@ import { setTimeout } from 'node:timers/promises';
 
 import {
 	Api,
+	ApiIntrospectionOptions,
 	ApiType,
 	DataSource,
 	IntrospectionConfiguration,
-	ApiIntrospectionOptions,
 	WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS,
 	WG_DATA_SOURCE_POLLING_MODE,
 	WG_ENABLE_INTROSPECTION_CACHE,
@@ -94,7 +94,7 @@ function toCacheEntry<T extends ApiType>(api: Api<T>): IntrospectionCacheFile<T>
 		fields: api.Fields,
 		types: api.Types,
 		interpolateVariableDefinitionAsJSON: api.interpolateVariableDefinitionAsJSON,
-		customJsonScalars: api.CustomJsonScalars,
+		customJsonScalars: Array.from(api.CustomJsonScalars || []),
 	};
 }
 
@@ -106,7 +106,7 @@ function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<A>): Ap
 		cache.fields,
 		cache.types,
 		cache.interpolateVariableDefinitionAsJSON,
-		cache.customJsonScalars
+		new Set<string>(cache.customJsonScalars)
 	);
 }
 

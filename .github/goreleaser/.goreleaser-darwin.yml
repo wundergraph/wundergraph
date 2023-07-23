@@ -29,7 +29,7 @@ builds:
     #      - SDKROOT=/Applications/Xcode_12.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk
     #      - MACOSX_DEPLOYMENT_TARGET=11.1
     ldflags:
-      - -w -s -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=ci -X main.githubAuthDemoClientID={{.Env.GH_AUTH_DEMO_CLIENT_ID}} -X main.githubAuthDemoClientSecret={{.Env.GH_AUTH_DEMO_CLIENT_SECRET}}
+      - -w -s -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=ci -X main.githubAuthDemoClientID={{.Env.GH_AUTH_DEMO_CLIENT_ID}} -X main.githubAuthDemoClientSecret={{.Env.GH_AUTH_DEMO_CLIENT_SECRET}} -X github.com/wundergraph/wundergraph/cli/commands.licensingPublicKey={{.Env.LICENSING_PUBLIC_KEY}}
     goos:
       - darwin
     goarch:
@@ -37,12 +37,13 @@ builds:
 #    hooks:
 #      post: install_name_tool -rpath "/Users/runner/go/pkg/mod/github.com/jensneuse/goprisma@v0.0.11/lib/darwin-aarch64" "@executable_path/lib/darwin-aarch64" "./dist/darwin_arm64_darwin_arm64/wunderctl" && gon gon_arm64.json
 archives:
-  - replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
+  - name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
 snapshot:
   name_template: '{{ .Tag }}-next'
 changelog:

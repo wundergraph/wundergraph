@@ -22,6 +22,13 @@ const (
 	WgCloudEnvironmentID = "WG_CLOUD_ENVIRONMENT_ID"
 	WgCloudProjectID     = "WG_CLOUD_PROJECT_ID"
 	WgCloudDeploymentID  = "WG_CLOUD_DEPLOYMENT_ID"
+
+	logLevelKey      = "level"
+	logMessageKey    = "msg"
+	logComponentKey  = "component"
+	logCallerKey     = "caller"
+	logTimeKey       = "time"
+	logStacktraceKey = "stacktrace"
 )
 
 type RequestIDKey struct{}
@@ -45,14 +52,6 @@ func zapJsonEncoder() zapcore.Encoder {
 		enc.AppendInt64(millis)
 	}
 	return zapcore.NewJSONEncoder(ec)
-}
-
-func zapConsoleEncoder() zapcore.Encoder {
-	ec := zapBaseEncoderConfig()
-	ec.ConsoleSeparator = " "
-	ec.EncodeTime = zapcore.TimeEncoderOfLayout("15:04:05 PM")
-	ec.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	return zapcore.NewConsoleEncoder(ec)
 }
 
 func attachBaseFields(logger *zap.Logger) *zap.Logger {
@@ -89,7 +88,7 @@ func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool, le
 	var zapOpts []zap.Option
 
 	if prettyLogging {
-		encoder = zapConsoleEncoder()
+		encoder = newPrettyEncoder()
 	} else {
 		encoder = zapJsonEncoder()
 	}

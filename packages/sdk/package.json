@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.166.1",
+  "version": "0.169.0",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -15,10 +15,6 @@
       "types": "./dist/testing/index.d.ts",
       "default": "./dist/testing/index.js"
     },
-    "./internal": {
-      "types": "./dist/internal/index.d.ts",
-      "default": "./dist/internal/index.js"
-    },
     "./server": {
       "types": "./dist/server/index.d.ts",
       "default": "./dist/server/index.js"
@@ -27,9 +23,21 @@
       "types": "./dist/operations/index.d.ts",
       "default": "./dist/operations/index.js"
     },
+    "./openai": {
+      "types": "./dist/openai/index.d.ts",
+      "default": "./dist/openai/index.js"
+    },
+    "./internal": {
+      "types": "./dist/internal/index.d.ts",
+      "default": "./dist/internal/index.js"
+    },
     "./internal/logger": {
       "types": "./dist/logger/index.d.ts",
       "default": "./dist/logger/index.js"
+    },
+    "./internal/codegen": {
+      "types": "./dist/codegen/index.d.ts",
+      "default": "./dist/codegen/index.js"
     },
     "./orm": {
       "types": "./dist/orm/index.d.ts",
@@ -48,17 +56,23 @@
       "testing": [
         "./dist/testing"
       ],
-      "internal": [
-        "./dist/internal"
-      ],
       "server": [
         "./dist/server"
       ],
       "operations": [
         "./dist/operations"
       ],
+      "openai": [
+        "./dist/openai"
+      ],
+      "internal": [
+        "./dist/internal"
+      ],
       "internal/logger": [
         "./dist/logger"
+      ],
+      "internal/codegen": [
+        "./dist/codegen"
       ],
       "orm": [
         "./dist/orm"
@@ -128,7 +142,7 @@
     "ts-jest": "^29.0.1",
     "tsd": "^0.24.1",
     "type-fest": "^3.5.2",
-    "typescript": "^4.8.2"
+    "typescript": "^5.1.6"
   },
   "dependencies": {
     "@fastify/formbody": "^7.3.0",
@@ -151,9 +165,9 @@
     "@prisma/generator-helper": "^3.9.2",
     "@whatwg-node/fetch": "^0.9.4",
     "@wundergraph/orm": "workspace:*",
-    "@wundergraph/protobuf": "workspace:^0.116.1",
+    "@wundergraph/protobuf": "workspace:^0.117.0",
     "@wundergraph/straightforward": "^4.2.5",
-    "@wundergraph/wunderctl": "workspace:^0.160.0",
+    "@wundergraph/wunderctl": "workspace:^0.165.0",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",
@@ -163,6 +177,7 @@
     "fast-uri": "^2.2.0",
     "fastify": "^4.10.2",
     "fastify-plugin": "^4.4.0",
+    "get-graphql-from-jsonschema": "^8.1.0",
     "get-port": "^5.1.1",
     "graphql": "^16.6.0",
     "graphql-helix": "^1.13.0",
@@ -175,9 +190,9 @@
     "lodash": "^4.17.21",
     "long": "^5.2.0",
     "object-hash": "^2.2.0",
+    "openai": "^3.3.0",
     "openapi-types": "12.1.0",
     "pino": "^8.11.0",
-    "pino-pretty": "^10.0.0",
     "postman-collection": "^4.1.1",
     "protobufjs": "^6.11.2",
     "raw-body": "^2.5.2",

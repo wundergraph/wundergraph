@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/react-query",
-  "version": "0.8.46",
+  "version": "0.8.50",
   "license": "Apache-2.0",
   "description": "WunderGraph React Query Integration",
   "main": "./dist/index.js",
@@ -56,7 +56,7 @@
     "react-dom": "^18.1.0",
     "tsd": "^0.24.1",
     "tsup": "^6.5.0",
-    "typescript": "^4.8.2"
+    "typescript": "^5.1.6"
   },
   "homepage": "https://wundergraph.com",
   "author": {
