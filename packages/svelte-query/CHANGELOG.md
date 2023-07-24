@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/svelte-query@0.3.0...@wundergraph/svelte-query@0.3.1) (2023-07-24)
+
+### Bug Fixes
+
+* peer dependency warnings ([#1143](https://github.com/wundergraph/wundergraph/issues/1143)) ([1f9bec2](https://github.com/wundergraph/wundergraph/commit/1f9bec236179322697c20124e53615c8976d96e5)) (@Pagebakers)
+
 ## [0.3.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/svelte-query@0.2.45...@wundergraph/svelte-query@0.3.0) (2023-07-24)
 
 ### Features
