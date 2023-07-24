@@ -442,7 +442,11 @@ export const createServer = async ({
 		});
 
 		if (serverConfig?.hooks && Object.keys(serverConfig.hooks).length > 0) {
-			await fastify.register(require('./plugins/hooks'), { ...serverConfig.hooks, config });
+			await fastify.register(require('./plugins/hooks'), {
+				integrations: serverConfig.integrations || [],
+				...serverConfig.hooks,
+				config,
+			});
 			fastify.log.debug('Hooks plugin registered');
 		}
 

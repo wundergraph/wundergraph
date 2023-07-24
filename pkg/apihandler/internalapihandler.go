@@ -337,7 +337,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reqID := r.Header.Get(logging.RequestIDHeader)
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
-	r = operation.SetOperationMetaData(r, h.operation)
+	r = operation.RequestWithMetadata(r, operation.NewMetadata(h.operation))
 
 	// Set trace attributes based on the current operation
 	trace.SetOperationAttributes(r.Context())
@@ -424,7 +424,7 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 	reqID := r.Header.Get(logging.RequestIDHeader)
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
-	r = operation.SetOperationMetaData(r, h.operation)
+	r = operation.RequestWithMetadata(r, operation.NewMetadata(h.operation))
 
 	// Set trace attributes based on the current operation
 	trace.SetOperationAttributes(r.Context())

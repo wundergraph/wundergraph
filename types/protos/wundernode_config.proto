@@ -139,6 +139,21 @@ message GraphQLDataSourceHooksConfiguration {
 	bool onWSTransportConnectionInit = 1;
 }
 
+enum HookType {
+	HTTP_TRANSPORT = 0;
+}
+
+message HookMatcher {
+	optional OperationType operationType = 1;
+	repeated string datasources = 2;
+}
+
+message Hook {
+	string id = 1;
+	HookType type = 2;
+	HookMatcher matcher = 3;
+}
+
 message OperationHooksConfiguration {
 	bool preResolve = 1;
 	bool postResolve = 2;
@@ -238,9 +253,10 @@ message OperationCacheConfig {
 }
 
 enum OperationType {
-	QUERY = 0;
-	MUTATION = 1;
-	SUBSCRIPTION = 2;
+	INVALID = 0;
+	QUERY = 1;
+	MUTATION = 2;
+	SUBSCRIPTION = 3;
 }
 
 message EngineConfiguration {
@@ -488,6 +504,8 @@ message WunderGraphConfiguration {
 	bool dangerouslyEnableGraphQLEndpoint = 4;
 	string configHash = 5;
 	EnabledFeatures enabledFeatures = 6;
+	// New-style hooks
+	repeated Hook hooks = 7;
 }
 
 // Used for reporting enabled features from the TS side

@@ -22,6 +22,7 @@ import (
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/cli"
+	"github.com/wundergraph/wundergraph/pkg/codegeneration"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/licensing"
 	"github.com/wundergraph/wundergraph/pkg/logging"
@@ -54,7 +55,7 @@ var upCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		go configureEmbeddedNatsBlocking(ctx)
+		natsEmbeddedServerURL := startEmbeddedNats(ctx, log)
 
 		// Enable TUI only if stdout is a terminal
 		if !isatty.IsTerminal(os.Stdout.Fd()) {
@@ -125,8 +126,7 @@ var upCmd = &cobra.Command{
 			}
 		}
 
-		// only validate if the file exists
-		_, err = files.CodeFilePath(wunderGraphDir, configEntryPointFilename)
+		configEntryPoint, err := codegeneration.ApplicationEntryPoint(wunderGraphDir)
 		if err != nil {
 			return err
 		}
@@ -436,7 +436,7 @@ var upCmd = &cobra.Command{
 
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:          "config-bundler",
-			EntryPoints:   []string{configEntryPointFilename},
+			EntryPoints:   []string{configEntryPoint},
 			AbsWorkingDir: wunderGraphDir,
 			OutFile:       configOutFile,
 			Logger:        log,
@@ -507,6 +507,7 @@ var upCmd = &cobra.Command{
 				node.WithRequestLogging(rootFlags.DebugMode),
 				node.WithTraceBatchTimeout(1000 * time.Millisecond),
 				node.WithDevMode(),
+				node.WithNATSDefaultServerURL(natsEmbeddedServerURL),
 			}
 
 			if devTUI != nil {

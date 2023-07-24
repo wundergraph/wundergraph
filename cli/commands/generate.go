@@ -11,6 +11,7 @@ import (
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
+	"github.com/wundergraph/wundergraph/pkg/codegeneration"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/operations"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
@@ -33,8 +34,8 @@ var generateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		// only validate if the file exists
-		_, err = files.CodeFilePath(wunderGraphDir, configEntryPointFilename)
+
+		configEntryPoint, err := codegeneration.ApplicationEntryPoint(wunderGraphDir)
 		if err != nil {
 			return err
 		}
@@ -226,7 +227,7 @@ var generateCmd = &cobra.Command{
 			Name:          "config-bundler",
 			Production:    true,
 			AbsWorkingDir: wunderGraphDir,
-			EntryPoints:   []string{configEntryPointFilename},
+			EntryPoints:   []string{configEntryPoint},
 			OutFile:       configOutFile,
 			Logger:        log,
 			IgnorePaths: []string{

@@ -1,23 +1,51 @@
-import { configureWunderGraphApplication, introspect } from '@wundergraph/sdk';
-import server from './wundergraph.server';
-import operations from './wundergraph.operations';
+import type { WunderGraphConfig } from '@wundergraph/sdk';
+import { graphql } from '@wundergraph/sdk/datasources';
+import { weather } from './weather-datasource';
 
-const weather = introspect.graphql({
-	apiNamespace: 'weather',
-	url: 'https://weather-api.wundergraph.com/',
-});
+import { dynamicTransport } from '@wundergraph/sdk/advanced-hooks';
 
-// configureWunderGraph emits the configuration
-configureWunderGraphApplication({
-	apis: [weather],
-	server,
-	operations,
-	options: {
-		openTelemetry: {
-			enabled: true,
-		},
-		prometheus: {
-			enabled: true,
-		},
+const route = dynamicTransport({
+	match: {
+		operationType: 'query',
+		datasources: ['weather'],
+	},
+	handler: async ({ request }) => {
+		const response = await fetch(request);
+
+		const { data } = await response.json();
+
+		data.weather_getCityByName.name = 'Override';
+
+		console.log('WEATHER', data);
+
+		return new Response(JSON.stringify({ data }));
 	},
 });
+
+const route2 = dynamicTransport({
+	match: {
+		operationType: 'query',
+		datasources: ['countries'],
+	},
+	handler: ({ request }) => {
+		return fetch(request);
+	},
+});
+
+export default {
+	datasources: [
+		weather(),
+		graphql({
+			namespace: 'countries',
+			url: 'https://countries.trevorblades.com/',
+		}),
+		graphql({
+			namespace: 'countries',
+			url: 'https://countries.trevorblades.com/',
+		}),
+	],
+	integrations: [route, route2],
+	security: {
+		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production',
+	},
+} satisfies WunderGraphConfig;

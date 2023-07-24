@@ -95,6 +95,7 @@ type options struct {
 	hooksServerHealthCheck bool
 	idleHandler            func()
 	enableRequestLogging   bool
+	natsDefaultServerURL   string
 }
 
 type Option func(options *options)
@@ -114,6 +115,12 @@ func WithIdleHandler(idleHandler func()) Option {
 func WithRequestLogging(debugMode bool) Option {
 	return func(options *options) {
 		options.enableRequestLogging = debugMode
+	}
+}
+
+func WithNATSDefaultServerURL(serverURL string) Option {
+	return func(options *options) {
+		options.natsDefaultServerURL = serverURL
 	}
 }
 
@@ -156,6 +163,7 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 		node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
 		node.WithIntrospection(enableIntrospection),
 		node.WithTraceBatchTimeout(otelBatchTimeout),
+		node.WithNATSDefaultServerURL(options.natsDefaultServerURL),
 	}
 
 	if shutdownAfterIdle > 0 {

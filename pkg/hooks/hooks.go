@@ -144,7 +144,8 @@ const (
 	// HttpTransportOnRequest to the origin
 	HttpTransportOnRequest MiddlewareHook = "onOriginRequest"
 	// HttpTransportOnResponse from the origin
-	HttpTransportOnResponse MiddlewareHook = "onOriginResponse"
+	HttpTransportOnResponse  MiddlewareHook = "onOriginResponse"
+	HttpTransportOnTransport MiddlewareHook = "onOriginTransport"
 
 	WsTransportOnConnectionInit MiddlewareHook = "onConnectionInit"
 )
@@ -208,16 +209,16 @@ func buildClient(requestTimeout time.Duration, rt http.RoundTripper) *retryableh
 	return httpClient
 }
 
-func (c *Client) DoGlobalRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte, buf *bytes.Buffer) (*MiddlewareHookResponse, error) {
-	return c.doMiddlewareRequest(ctx, "global/httpTransport", hook, jsonData, buf)
+func (c *Client) DoGlobalRequest(ctx context.Context, hook MiddlewareHook, hookID string, jsonData []byte, buf *bytes.Buffer) (*MiddlewareHookResponse, error) {
+	return c.doMiddlewareRequest(ctx, "global/httpTransport", hook, hookID, jsonData, buf)
 }
 
 func (c *Client) DoWsTransportRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte, buf *bytes.Buffer) (*MiddlewareHookResponse, error) {
-	return c.doMiddlewareRequest(ctx, "global/wsTransport", hook, jsonData, buf)
+	return c.doMiddlewareRequest(ctx, "global/wsTransport", hook, "", jsonData, buf)
 }
 
 func (c *Client) DoOperationRequest(ctx context.Context, operationName string, hook MiddlewareHook, jsonData []byte, buf *bytes.Buffer) (*MiddlewareHookResponse, error) {
-	return c.doMiddlewareRequest(ctx, "operation/"+operationName, hook, jsonData, buf)
+	return c.doMiddlewareRequest(ctx, "operation/"+operationName, hook, "", jsonData, buf)
 }
 
 func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, jsonData []byte, buf *bytes.Buffer) (*MiddlewareHookResponse, error) {
@@ -385,12 +386,12 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 }
 
 func (c *Client) DoAuthenticationRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte, buf *bytes.Buffer) (*MiddlewareHookResponse, error) {
-	return c.doMiddlewareRequest(ctx, "authentication", hook, jsonData, buf)
+	return c.doMiddlewareRequest(ctx, "authentication", hook, "", jsonData, buf)
 }
 
 func (c *Client) DoUploadRequest(ctx context.Context, providerName string, profileName string, hook UploadHook, jsonData []byte, buf *bytes.Buffer) (*UploadHookResponse, error) {
 	var hookResponse UploadHookResponse
-	if err := c.doRequest(ctx, &hookResponse, path.Join("upload", providerName, profileName), MiddlewareHook(hook), jsonData, buf); err != nil {
+	if err := c.doRequest(ctx, &hookResponse, path.Join("upload", providerName, profileName), MiddlewareHook(hook), "", jsonData, buf); err != nil {
 		return nil, err
 	}
 	return &hookResponse, nil
@@ -414,9 +415,13 @@ func (c *Client) setInternalHookData(ctx context.Context, jsonData []byte, buf *
 	return jsonData
 }
 
-func (c *Client) doRequest(ctx context.Context, hookResponse HookResponse, action string, hook MiddlewareHook, jsonData []byte, buf *bytes.Buffer) error {
+func (c *Client) doRequest(ctx context.Context, hookResponse HookResponse, action string, hook MiddlewareHook, hookID string, jsonData []byte, buf *bytes.Buffer) error {
 	jsonData = c.setInternalHookData(ctx, jsonData, buf)
-	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/"+action+"/"+string(hook), bytes.NewReader(jsonData))
+	hookURL := c.serverUrl + "/" + action + "/" + string(hook)
+	if hookID != "" {
+		hookURL += "/" + hookID
+	}
+	r, err := http.NewRequestWithContext(ctx, "POST", hookURL, bytes.NewReader(jsonData))
 	if err != nil {
 		return err
 	}
@@ -456,9 +461,9 @@ func (c *Client) doRequest(ctx context.Context, hookResponse HookResponse, actio
 	return nil
 }
 
-func (c *Client) doMiddlewareRequest(ctx context.Context, action string, hook MiddlewareHook, jsonData []byte, buf *bytes.Buffer) (*MiddlewareHookResponse, error) {
+func (c *Client) doMiddlewareRequest(ctx context.Context, action string, hook MiddlewareHook, hookID string, jsonData []byte, buf *bytes.Buffer) (*MiddlewareHookResponse, error) {
 	var hookResponse MiddlewareHookResponse
-	if err := c.doRequest(ctx, &hookResponse, action, hook, jsonData, buf); err != nil {
+	if err := c.doRequest(ctx, &hookResponse, action, hook, hookID, jsonData, buf); err != nil {
 		return nil, err
 	}
 	return &hookResponse, nil

@@ -3,6 +3,8 @@ package nats
 import (
 	"bytes"
 	"context"
+	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"sync"
@@ -103,10 +105,18 @@ type token_Value {
 )
 
 func TestNatsDataSource(t *testing.T) {
+	listener, err := net.Listen("tcp", ":0")
+	assert.NoError(t, err)
+	randomPort := listener.Addr().(*net.TCPAddr).Port
+	listener.Close()
+
 	server := natsTest.RunServer(&natsServer.Options{
+		Port:      randomPort,
 		JetStream: true,
 	})
 	defer server.Shutdown()
+
+	serverURL := fmt.Sprintf("nats://127.0.0.1:%d", randomPort)
 
 	keyVariableRenderer := resolve.NewJSONVariableRendererWithValidation(`{"type":["string"]}`)
 	integerVariableRenderer := resolve.NewJSONVariableRendererWithValidation(`{"type":["integer"]}`)
@@ -184,7 +194,7 @@ func TestNatsDataSource(t *testing.T) {
 					Custom: ConfigJson(Configuration{
 						Operation: wgpb.NatsKvOperation_NATSKV_PUT,
 						Bucket:    "token",
-						ServerURL: nats.DefaultURL,
+						ServerURL: serverURL,
 					}),
 					Factory: &Factory{},
 				},
@@ -271,7 +281,7 @@ func TestNatsDataSource(t *testing.T) {
 					Custom: ConfigJson(Configuration{
 						Operation: wgpb.NatsKvOperation_NATSKV_CREATE,
 						Bucket:    "token",
-						ServerURL: nats.DefaultURL,
+						ServerURL: serverURL,
 					}),
 					Factory: &Factory{},
 				},
@@ -362,7 +372,7 @@ func TestNatsDataSource(t *testing.T) {
 					Custom: ConfigJson(Configuration{
 						Operation: wgpb.NatsKvOperation_NATSKV_UPDATE,
 						Bucket:    "token",
-						ServerURL: nats.DefaultURL,
+						ServerURL: serverURL,
 					}),
 					Factory: &Factory{},
 				},
@@ -428,7 +438,7 @@ func TestNatsDataSource(t *testing.T) {
 					Custom: ConfigJson(Configuration{
 						Operation: wgpb.NatsKvOperation_NATSKV_DELETE,
 						Bucket:    "token",
-						ServerURL: nats.DefaultURL,
+						ServerURL: serverURL,
 					}),
 					Factory: &Factory{},
 				},
@@ -494,7 +504,7 @@ func TestNatsDataSource(t *testing.T) {
 					Custom: ConfigJson(Configuration{
 						Operation: wgpb.NatsKvOperation_NATSKV_PURGE,
 						Bucket:    "token",
-						ServerURL: nats.DefaultURL,
+						ServerURL: serverURL,
 					}),
 					Factory: &Factory{},
 				},
@@ -577,7 +587,7 @@ func TestNatsDataSource(t *testing.T) {
 					Custom: ConfigJson(Configuration{
 						Operation: wgpb.NatsKvOperation_NATSKV_GET,
 						Bucket:    "token",
-						ServerURL: nats.DefaultURL,
+						ServerURL: serverURL,
 					}),
 					Factory: &Factory{},
 				},
@@ -664,7 +674,7 @@ func TestNatsDataSource(t *testing.T) {
 					Custom: ConfigJson(Configuration{
 						Operation: wgpb.NatsKvOperation_NATSKV_GETREVISION,
 						Bucket:    "token",
-						ServerURL: nats.DefaultURL,
+						ServerURL: serverURL,
 					}),
 					Factory: &Factory{},
 				},
@@ -727,7 +737,7 @@ func TestNatsDataSource(t *testing.T) {
 					Custom: ConfigJson(Configuration{
 						Operation: wgpb.NatsKvOperation_NATSKV_KEYS,
 						Bucket:    "token",
-						ServerURL: nats.DefaultURL,
+						ServerURL: serverURL,
 					}),
 					Factory: &Factory{},
 				},
@@ -813,7 +823,7 @@ func TestNatsDataSource(t *testing.T) {
 					Custom: ConfigJson(Configuration{
 						Operation: wgpb.NatsKvOperation_NATSKV_HISTORY,
 						Bucket:    "token",
-						ServerURL: nats.DefaultURL,
+						ServerURL: serverURL,
 					}),
 					Factory: &Factory{},
 				},
@@ -891,7 +901,7 @@ func TestNatsDataSource(t *testing.T) {
 					Custom: ConfigJson(Configuration{
 						Operation: wgpb.NatsKvOperation_NATSKV_WATCH,
 						Bucket:    "token",
-						ServerURL: nats.DefaultURL,
+						ServerURL: serverURL,
 					}),
 					Factory: &Factory{},
 				},
@@ -963,7 +973,7 @@ func TestNatsDataSource(t *testing.T) {
 					Custom: ConfigJson(Configuration{
 						Operation: wgpb.NatsKvOperation_NATSKV_WATCHALL,
 						Bucket:    "token",
-						ServerURL: nats.DefaultURL,
+						ServerURL: serverURL,
 					}),
 					Factory: &Factory{},
 				},
