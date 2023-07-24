@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.170.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.169.0...@wundergraph/sdk@0.170.0) (2023-07-24)
+
+### Features
+
+* advanced hooks - dynamicTransport ([#1124](https://github.com/wundergraph/wundergraph/issues/1124)) ([6cbdeba](https://github.com/wundergraph/wundergraph/commit/6cbdebac0a775b638beeae8457d07dce829379bc)) (@Pagebakers)
+* initial impl of nats kv ([#1057](https://github.com/wundergraph/wundergraph/issues/1057)) ([961f1f0](https://github.com/wundergraph/wundergraph/commit/961f1f0d14b95fc69a9a99ef637d6cd544750c08)) (@jensneuse)
+* unify pretty logs ([#1139](https://github.com/wundergraph/wundergraph/issues/1139)) ([c765d1f](https://github.com/wundergraph/wundergraph/commit/c765d1fca829953383c5be55e1a5348ad62d7c0a)) (@fiam)
+* upgrade to typescript 5 ([#1135](https://github.com/wundergraph/wundergraph/issues/1135)) ([74cee5d](https://github.com/wundergraph/wundergraph/commit/74cee5db3ae8865d2bf1f1d7ab5c67fccbeeb798)) (@Pagebakers)
+
+### Bug Fixes
+
+* add cloudflare worker support for client ([#1137](https://github.com/wundergraph/wundergraph/issues/1137)) ([af6a18a](https://github.com/wundergraph/wundergraph/commit/af6a18a0e28f59fc69d6fc131431d6882ff57415)) (@Pagebakers)
+* move codegen template helpers out of internal ([#1136](https://github.com/wundergraph/wundergraph/issues/1136)) ([3fd393f](https://github.com/wundergraph/wundergraph/commit/3fd393f777ea92ba69b48a1a8502aca5b2e6ed48)) (@Pagebakers)
+
 ## [0.169.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.168.0...@wundergraph/sdk@0.169.0) (2023-07-14)
 
 ### Features
