@@ -29,7 +29,7 @@
     "@types/metro": "^0.76.0",
     "@types/metro-cache": "^0.76.0",
     "@types/metro-config": "^0.76.2",
-    "tsup": "^6.5.0",
+    "tsup": "^6.7.0",
     "typescript": "^5.1.6"
   },
   "homepage": "https://wundergraph.com",

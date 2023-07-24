@@ -59,7 +59,7 @@
     "react-relay": "^15.0.0",
     "relay-runtime": "^15.0.0",
     "tsd": "^0.24.1",
-    "tsup": "^6.5.0",
+    "tsup": "^6.7.0",
     "typescript": "^5.1.6"
   }
 }
