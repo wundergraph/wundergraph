@@ -254,7 +254,7 @@ importers:
   packages/golang-client:
     dependencies:
       '@wundergraph/protobuf':
-        specifier: workspace:^0.117.0
+        specifier: workspace:^0.118.0
         version: link:../protobuf
       execa:
         specifier: 5.1.1
@@ -285,7 +285,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.169.0
+        specifier: workspace:^0.170.0
         version: link:../sdk
       typescript:
         specifier: ^5.1.6
@@ -325,7 +325,7 @@ importers:
   packages/nextjs:
     dependencies:
       '@wundergraph/protobuf':
-        specifier: workspace:^0.117.0
+        specifier: workspace:^0.118.0
         version: link:../protobuf
       '@wundergraph/swr':
         specifier: workspace:*
@@ -659,13 +659,13 @@ importers:
         specifier: workspace:*
         version: link:../orm
       '@wundergraph/protobuf':
-        specifier: workspace:^0.117.0
+        specifier: workspace:^0.118.0
         version: link:../protobuf
       '@wundergraph/straightforward':
         specifier: ^4.2.5
         version: 4.2.5
       '@wundergraph/wunderctl':
-        specifier: workspace:^0.165.0
+        specifier: workspace:^0.166.0
         version: link:../wunderctl
       axios:
         specifier: ^0.26.1
@@ -798,7 +798,7 @@ importers:
         specifier: ^7.0.6
         version: 7.0.11
       '@types/lodash':
-        specifier: ^4.14.178
+        specifier: ^4.14.187
         version: 4.14.187
       '@types/node':
         specifier: ^18.14.4
@@ -825,8 +825,8 @@ importers:
         specifier: ^13.2.9
         version: 13.2.9
       ts-jest:
-        specifier: ^29.0.1
-        version: 29.0.3(@babel/core@7.22.9)(jest@29.2.2)(typescript@5.1.6)
+        specifier: ^29.1.1
+        version: 29.1.1(@babel/core@7.22.9)(jest@29.2.2)(typescript@5.1.6)
       tsd:
         specifier: ^0.24.1
         version: 0.24.1
@@ -1786,7 +1786,7 @@ packages:
       debug: 4.3.4
       gensync: 1.0.0-beta.2
       json5: 2.2.3
-      semver: 6.3.0
+      semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -1889,7 +1889,7 @@ packages:
       '@babel/helper-validator-option': 7.21.0
       browserslist: 4.21.5
       lru-cache: 5.1.1
-      semver: 6.3.0
+      semver: 6.3.1
     dev: false
 
   /@babel/helper-compilation-targets@7.22.5(@babel/core@7.22.5):
@@ -4591,7 +4591,7 @@ packages:
       babel-plugin-polyfill-corejs2: 0.3.3(@babel/core@7.20.12)
       babel-plugin-polyfill-corejs3: 0.6.0(@babel/core@7.20.12)
       babel-plugin-polyfill-regenerator: 0.4.1(@babel/core@7.20.12)
-      semver: 6.3.0
+      semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -4608,7 +4608,7 @@ packages:
       babel-plugin-polyfill-corejs2: 0.3.3(@babel/core@7.22.9)
       babel-plugin-polyfill-corejs3: 0.6.0(@babel/core@7.22.9)
       babel-plugin-polyfill-regenerator: 0.4.1(@babel/core@7.22.9)
-      semver: 6.3.0
+      semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -5858,7 +5858,7 @@ packages:
       qrcode-terminal: 0.11.0
       requireg: 0.2.2
       resolve-from: 5.0.0
-      semver: 6.3.0
+      semver: 6.3.1
       send: 0.18.0
       slugify: 1.6.6
       structured-headers: 0.4.1
@@ -5921,7 +5921,7 @@ packages:
       getenv: 1.0.0
       glob: 7.1.6
       resolve-from: 5.0.0
-      semver: 7.3.8
+      semver: 7.5.4
       slash: 3.0.0
       xcode: 3.0.1
       xml2js: 0.4.23
@@ -7749,7 +7749,7 @@ packages:
       path: 0.12.7
       pify: 5.0.0
       resolve-from: 5.0.0
-      semver: 7.3.8
+      semver: 7.5.4
       slash: 3.0.0
       strong-log-transformer: 2.1.0
       temp-dir: 1.0.0
@@ -7827,7 +7827,7 @@ packages:
       path: 0.12.7
       pify: 5.0.0
       read-package-json: 6.0.0
-      semver: 7.3.8
+      semver: 7.5.4
       ssri: 10.0.0
       tar: 6.1.13
     transitivePeerDependencies:
@@ -7851,7 +7851,7 @@ packages:
       p-pipe: 3.1.0
       p-reduce: 2.1.0
       path: 0.12.7
-      semver: 7.3.8
+      semver: 7.5.4
       slash: 3.0.0
       write-json-file: 4.3.0
     transitivePeerDependencies:
@@ -9464,7 +9464,7 @@ packages:
       fs-extra: 8.1.0
       graceful-fs: 4.2.10
       prompts: 2.4.2
-      semver: 6.3.0
+      semver: 6.3.1
     transitivePeerDependencies:
       - '@babel/core'
       - bufferutil
@@ -9494,7 +9494,7 @@ packages:
       fs-extra: 8.1.0
       graceful-fs: 4.2.10
       prompts: 2.4.2
-      semver: 6.3.0
+      semver: 6.3.1
     transitivePeerDependencies:
       - '@babel/core'
       - bufferutil
@@ -10540,6 +10540,7 @@ packages:
 
   /@types/lodash@4.14.187:
     resolution: {integrity: sha512-MrO/xLXCaUgZy3y96C/iOsaIqZSeupyTImKClHunL5GrmaiII2VwvWmLBu2hwa0Kp0sV19CsyjtrTc/Fx8rg/A==}
+    dev: true
 
   /@types/lodash@4.14.195:
     resolution: {integrity: sha512-Hwx9EUgdwf2GLarOjQp5ZH8ZmblzcbTBC2wtQWNKARBSxM9ezRIAUpeDTgoQRAFB0+8CNWXVA9+MaSOzOF3nPg==}
@@ -10918,7 +10919,7 @@ packages:
       debug: 4.3.4
       globby: 11.1.0
       is-glob: 4.0.3
-      semver: 7.3.8
+      semver: 7.5.4
       tsutils: 3.21.0(typescript@5.1.6)
       typescript: 5.1.6
     transitivePeerDependencies:
@@ -12205,7 +12206,7 @@ packages:
       '@babel/compat-data': 7.20.14
       '@babel/core': 7.20.12
       '@babel/helper-define-polyfill-provider': 0.3.3(@babel/core@7.20.12)
-      semver: 6.3.0
+      semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
 
@@ -13937,7 +13938,7 @@ packages:
       postcss-modules-scope: 3.0.0(postcss@8.4.24)
       postcss-modules-values: 4.0.0(postcss@8.4.24)
       postcss-value-parser: 4.2.0
-      semver: 7.3.8
+      semver: 7.5.4
       webpack: 5.79.0
     dev: false
 
@@ -19552,7 +19553,7 @@ packages:
       jest-util: 29.5.0
       natural-compare: 1.4.0
       pretty-format: 29.5.0
-      semver: 7.3.8
+      semver: 7.5.4
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -20221,7 +20222,7 @@ packages:
     dependencies:
       '@bcherny/json-schema-ref-parser': 9.0.9
       '@types/json-schema': 7.0.11
-      '@types/lodash': 4.14.187
+      '@types/lodash': 4.14.195
       '@types/prettier': 2.7.2
       cli-color: 2.0.3
       get-stdin: 8.0.0
@@ -27334,40 +27335,6 @@ packages:
   /ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
 
-  /ts-jest@29.0.3(@babel/core@7.22.9)(jest@29.2.2)(typescript@5.1.6):
-    resolution: {integrity: sha512-Ibygvmuyq1qp/z3yTh9QTwVVAbFdDy/+4BtIQR2sp6baF2SJU/8CKK/hhnGIDY2L90Az2jIqTwZPnN2p+BweiQ==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-    hasBin: true
-    peerDependencies:
-      '@babel/core': '>=7.0.0-beta.0 <8'
-      '@jest/types': ^29.0.0
-      babel-jest: ^29.0.0
-      esbuild: '*'
-      jest: ^29.0.0
-      typescript: '>=4.3'
-    peerDependenciesMeta:
-      '@babel/core':
-        optional: true
-      '@jest/types':
-        optional: true
-      babel-jest:
-        optional: true
-      esbuild:
-        optional: true
-    dependencies:
-      '@babel/core': 7.22.9
-      bs-logger: 0.2.6
-      fast-json-stable-stringify: 2.1.0
-      jest: 29.2.2(@types/node@18.14.4)(ts-node@10.9.1)
-      jest-util: 29.3.1
-      json5: 2.2.3
-      lodash.memoize: 4.1.2
-      make-error: 1.3.6
-      semver: 7.3.8
-      typescript: 5.1.6
-      yargs-parser: 21.1.1
-    dev: true
-
   /ts-jest@29.0.3(@babel/core@7.22.9)(jest@29.3.1)(typescript@5.1.6):
     resolution: {integrity: sha512-Ibygvmuyq1qp/z3yTh9QTwVVAbFdDy/+4BtIQR2sp6baF2SJU/8CKK/hhnGIDY2L90Az2jIqTwZPnN2p+BweiQ==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -27468,6 +27435,40 @@ packages:
       lodash.memoize: 4.1.2
       make-error: 1.3.6
       semver: 7.3.8
+      typescript: 5.1.6
+      yargs-parser: 21.1.1
+    dev: true
+
+  /ts-jest@29.1.1(@babel/core@7.22.9)(jest@29.2.2)(typescript@5.1.6):
+    resolution: {integrity: sha512-D6xjnnbP17cC85nliwGiL+tpoKN0StpgE0TeOjXQTU6MVCfsB4v7aW05CgQ/1OywGb0x/oy9hHFnN+sczTiRaA==}
+    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
+    hasBin: true
+    peerDependencies:
+      '@babel/core': '>=7.0.0-beta.0 <8'
+      '@jest/types': ^29.0.0
+      babel-jest: ^29.0.0
+      esbuild: '*'
+      jest: ^29.0.0
+      typescript: '>=4.3 <6'
+    peerDependenciesMeta:
+      '@babel/core':
+        optional: true
+      '@jest/types':
+        optional: true
+      babel-jest:
+        optional: true
+      esbuild:
+        optional: true
+    dependencies:
+      '@babel/core': 7.22.9
+      bs-logger: 0.2.6
+      fast-json-stable-stringify: 2.1.0
+      jest: 29.2.2(@types/node@18.14.4)(ts-node@10.9.1)
+      jest-util: 29.5.0
+      json5: 2.2.3
+      lodash.memoize: 4.1.2
+      make-error: 1.3.6
+      semver: 7.5.4
       typescript: 5.1.6
       yargs-parser: 21.1.1
     dev: true
@@ -28125,7 +28126,7 @@ packages:
       is-yarn-global: 0.4.0
       latest-version: 7.0.0
       pupa: 3.1.0
-      semver: 7.3.8
+      semver: 7.5.4
       semver-diff: 4.0.0
       xdg-basedir: 5.1.0
     dev: true
@@ -29247,7 +29248,7 @@ packages:
     resolution: {directory: packages/sdk, type: directory}
     id: file:packages/sdk
     name: '@wundergraph/sdk'
-    version: 0.169.0
+    version: 0.170.0
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.4.0

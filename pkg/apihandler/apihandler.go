@@ -913,7 +913,7 @@ type QueryHandler struct {
 
 func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
-	r = operation.SetOperationMetaData(r, h.operation)
+	r = operation.RequestWithMetadata(r, operation.NewMetadata(h.operation))
 
 	// Set trace attributes based on the current operation
 	trace.SetOperationAttributes(r.Context())
@@ -1180,7 +1180,7 @@ func (h *MutationHandler) parseFormVariables(r *http.Request) []byte {
 
 func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
-	r = operation.SetOperationMetaData(r, h.operation)
+	r = operation.RequestWithMetadata(r, operation.NewMetadata(h.operation))
 
 	// Set trace attributes based on the current operation
 	trace.SetOperationAttributes(r.Context())
@@ -1290,7 +1290,7 @@ type SubscriptionHandler struct {
 
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
-	r = operation.SetOperationMetaData(r, h.operation)
+	r = operation.RequestWithMetadata(r, operation.NewMetadata(h.operation))
 
 	// Set trace attributes based on the current operation
 	trace.SetOperationAttributes(r.Context())
@@ -1789,8 +1789,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reqID := r.Header.Get(logging.RequestIDHeader)
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
-
-	r = operation.SetOperationMetaData(r, h.operation)
+	r = operation.RequestWithMetadata(r, operation.NewMetadata(h.operation))
 
 	// Set trace attributes based on the current operation
 	trace.SetOperationAttributes(r.Context())

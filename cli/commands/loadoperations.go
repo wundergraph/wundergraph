@@ -37,7 +37,7 @@ var loadoperationsCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		return os.WriteFile(outFile, []byte(out), os.ModePerm)
+		return os.WriteFile(outFile, []byte(out), 0644)
 	},
 	Args: cobra.ExactArgs(3),
 }

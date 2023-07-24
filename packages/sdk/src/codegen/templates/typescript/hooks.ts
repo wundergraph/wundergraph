@@ -22,7 +22,9 @@ export class WunderGraphHooksPlugin implements Template {
 			operationNamesUnion: application.Operations.map((o) => `"${o.Name}"`).join(' | ') || 'never',
 			dataSourcesUnion:
 				application.EngineConfiguration.DataSources.filter((ds) => ds.Id !== undefined && ds.Id !== '')
-					.map((ds) => `"${ds.Id}"`)
+					.map((ds) => {
+						return `"${ds.Id}"`;
+					})
 					.filter((ds, i, arr) => arr.indexOf(ds) === i)
 					.join(' | ') || 'never',
 			queries: _queries,

@@ -99,6 +99,7 @@ type options struct {
 	onServerConfigLoad      func(config *WunderNodeConfig)
 	onServerError           func(err error)
 	traceBatchTimeout       time.Duration
+	natsDefaultServerURL    string
 }
 
 type Option func(options *options)
@@ -207,6 +208,13 @@ func WithIdleTimeout(idleTimeout time.Duration, idleHandler func()) Option {
 	return func(options *options) {
 		options.idleTimeout = idleTimeout
 		options.idleHandler = idleHandler
+	}
+}
+
+// WithNATSDefaultServerURL sets the URL for the default NATS server
+func WithNATSDefaultServerURL(serverURL string) Option {
+	return func(options *options) {
+		options.natsDefaultServerURL = serverURL
 	}
 }
 
@@ -554,7 +562,11 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		zap.Bool("enableRequestLogging", n.options.enableRequestLogging),
 	)
 
-	loader := engineconfigloader.New(n.WundergraphDir, engineconfigloader.NewDefaultFactoryResolver(
+	loaderOptions := engineconfigloader.EngineConfigLoaderOptions{
+		WunderGraphDir:       n.WundergraphDir,
+		NATSDefaultServerURL: n.options.natsDefaultServerURL,
+	}
+	loader := engineconfigloader.New(loaderOptions, engineconfigloader.NewDefaultFactoryResolver(
 		transportFactory,
 		defaultTransport,
 		n.log,

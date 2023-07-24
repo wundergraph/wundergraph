@@ -66,6 +66,8 @@ import {
 	ValueType,
 	WebhookConfiguration,
 	WunderGraphConfiguration,
+	Hook,
+	HookType,
 } from '@wundergraph/protobuf';
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
@@ -80,7 +82,7 @@ import { getWebhooks } from '../webhooks';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
 import logger, { FatalLogger, Logger } from '../logger';
-import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
+import { hookID, resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { GenerateConfig, OperationsGenerationConfig } from './codegeneration';
@@ -88,8 +90,12 @@ import { generateOperations } from '../codegen/generateoperations';
 import { configurationHash } from '../codegen/templates/typescript/helpers';
 import templates from '../codegen/templates';
 import { WunderGraphConfigurationFilename } from '../server/server';
+import { InternalIntergration, WunderGraphAppConfig } from '../integrations/types';
+import { DynamicTransportConfig } from '../advanced-hooks';
 
 export const WG_GENERATE_CONFIG_JSON = process.env['WG_GENERATE_CONFIG_JSON'] === 'true';
+
+export * from './define-config';
 
 const utf8 = 'utf8';
 const generated = 'generated';
@@ -192,7 +198,7 @@ export interface WunderGraphConfigApplicationConfig<
 		 */
 		publicClaims?: TPublicClaim[];
 	};
-	links?: LinkConfiguration;
+
 	security?: SecurityConfig;
 
 	/**
@@ -205,6 +211,9 @@ export interface WunderGraphConfigApplicationConfig<
 
 	/** @deprecated: Not used anymore */
 	dotGraphQLConfig?: any;
+
+	/** @deprecated */
+	links?: LinkConfiguration;
 }
 
 export interface TokenAuthProvider {
@@ -305,7 +314,7 @@ export interface S3UploadProfile {
 
 export type S3UploadProfiles = Record<string, S3UploadProfile>;
 
-interface S3UploadConfiguration {
+export interface S3UploadConfiguration {
 	name: string;
 	endpoint: InputVariable;
 	accessKeyID: InputVariable;
@@ -364,6 +373,7 @@ export interface ResolvedWunderGraphConfig {
 	experimental: {
 		orm: boolean;
 	};
+	integrations: InternalIntergration[];
 }
 
 export interface CodeGenerationConfig {
@@ -546,6 +556,7 @@ const resolveConfig = async (
 		experimental: {
 			orm: config.experimental?.orm ?? false,
 		},
+		integrations: (config as WunderGraphAppConfig).integrations || [],
 	};
 
 	const appConfig = config.links ? addLinks(resolvedConfig, config.links) : resolvedConfig;
@@ -1232,6 +1243,34 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 	const fields: FieldConfiguration[] = config.application.EngineConfiguration.Fields;
 	const types: TypeConfiguration[] = config.application.EngineConfiguration.Types;
 
+	const hooks: Hook[] = [];
+	const operationTypes = {
+		query: OperationType.QUERY,
+		mutation: OperationType.MUTATION,
+		subscription: OperationType.SUBSCRIPTION,
+	};
+	const integrations = config.integrations || [];
+	for (const integration of integrations) {
+		const httpTransport = integration.hooks['http:transport'];
+		if (httpTransport) {
+			const config = httpTransport as unknown as DynamicTransportConfig;
+			if (config.match) {
+				const matches = Array.isArray(config.match) ? config.match : [config.match];
+				for (const match of matches) {
+					const id = hookID(match);
+					hooks.push({
+						id,
+						type: HookType.HTTP_TRANSPORT,
+						matcher: {
+							operationType: match.operationType ? operationTypes[match.operationType] : undefined,
+							datasources: (match as { datasources?: string[] }).datasources ?? [],
+						},
+					});
+				}
+			}
+		}
+	}
+
 	const out: WunderGraphConfiguration = {
 		apiId: config.deployment.api.id,
 		environmentIds: [config.deployment.environment.id],
@@ -1316,6 +1355,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
 		configHash: configurationHash(config),
 		enabledFeatures: configEnabledFeatures(config, apiCount),
+		hooks,
 	};
 	return out;
 };

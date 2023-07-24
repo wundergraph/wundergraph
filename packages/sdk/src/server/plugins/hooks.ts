@@ -5,6 +5,7 @@ import {
 	HooksConfigurationOperationType,
 	OperationHookFunction,
 	OperationHooksConfiguration,
+	RequestMethod,
 	UploadHooks,
 	WunderGraphFile,
 	WunderGraphRequest,
@@ -17,6 +18,9 @@ import { FastifyRequest } from 'fastify';
 import { trace } from '@opentelemetry/api';
 import { Attributes } from '../trace/attributes';
 import { attachErrorToSpan } from '../trace/util';
+import { InternalIntergration, WunderGraphIntegration } from '../../integrations/types';
+import { hookID } from '../util';
+import { DynamicTransportConfig } from '../../advanced-hooks';
 
 const maximumRecursionLimit = 16;
 
@@ -32,6 +36,7 @@ export interface GraphQLError {
 
 export interface FastifyHooksOptions extends HooksConfiguration {
 	config: WunderGraphConfiguration;
+	integrations: InternalIntergration[];
 }
 
 export interface HooksRouteConfig {
@@ -45,6 +50,14 @@ export interface GlobalHooksRouteConfig {
 	category: string;
 	hookName: string;
 }
+
+const requestFromWunderGraphRequest = (req: WunderGraphRequest): Request => {
+	return new Request(req.requestURI, {
+		method: req.method,
+		headers: req.headers,
+		body: JSON.stringify(req.body),
+	});
+};
 
 const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fastify, config) => {
 	const headersToObject = (headers: ClientRequestHeaders) => {
@@ -271,6 +284,80 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			}
 		}
 	);
+
+	const integrations = config.integrations || [];
+	for (const integration of integrations) {
+		const httpTransport = integration.hooks['http:transport'];
+		if (httpTransport) {
+			const onOriginTransportHookName = 'onOriginTransport';
+			const config = httpTransport as unknown as DynamicTransportConfig;
+			const matches = Array.isArray(config.match) ? config.match : [config.match];
+			for (const match of matches) {
+				const id = hookID(match);
+				fastify.post<
+					{
+						Body: {
+							request: WunderGraphRequest;
+							operationName: string;
+							operationType: 'query' | 'mutation' | 'subscription';
+						};
+					},
+					GlobalHooksRouteConfig
+				>(
+					`/global/httpTransport/onOriginTransport/${id}`,
+					{ config: { kind: 'global-hook', category: 'httpTransport', hookName: onOriginTransportHookName } },
+					async (request, reply) => {
+						reply.type('application/json');
+						let result: Response | null | undefined;
+						try {
+							result = await config.handler({
+								...requestContext(request),
+								request: requestFromWunderGraphRequest(request.body.request),
+							});
+						} catch (err) {
+							// Mark the request as errored and attach information about the error
+							if (request.telemetry) {
+								attachErrorToSpan(request.telemetry.parentSpan, err);
+							}
+
+							request.log.error(err);
+							reply.code(500);
+							return { hook: onOriginTransportHookName, error: err };
+						}
+
+						let response: WunderGraphResponse | undefined;
+
+						if (result != null) {
+							// XXX: This requires the body to be JSON-representable.
+							// Consider changing the hooks protocol to allow any type of payload
+							// in the future.
+							const body = await result.json();
+							response = {
+								method: request.method as RequestMethod,
+								requestURI: result.url,
+								headers: headersToObject(result.headers) as any, // TODO
+								body,
+								status: result.statusText,
+								statusCode: result.status,
+							};
+						}
+
+						reply.code(200);
+
+						return {
+							op: request.body.operationName,
+							hook: onOriginTransportHookName,
+							response: {
+								skip: result === undefined,
+								cancel: result === null,
+								response,
+							},
+						};
+					}
+				);
+			}
+		}
+	}
 
 	// wsTransport
 	if (config.global?.wsTransport?.onConnectionInit) {

@@ -30,6 +30,7 @@ import (
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
 	"github.com/wundergraph/wundergraph/pkg/graphiql"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 )
 
@@ -175,17 +176,33 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	requestOperationType := ast.OperationTypeUnknown
+
 	if len(requestOperationName) == 0 {
 		shared.Normalizer.NormalizeOperation(shared.Doc, h.definition, shared.Report)
+		if len(shared.Doc.OperationDefinitions) > 0 {
+			requestOperationType = shared.Doc.OperationDefinitions[0].OperationType
+		}
 	} else {
 		shared.Normalizer.NormalizeNamedOperation(shared.Doc, h.definition, requestOperationName, shared.Report)
+		for ii := range shared.Doc.OperationDefinitions {
+			operationName := shared.Doc.OperationDefinitionNameBytes(ii)
+			if bytes.Equal(operationName, requestOperationName) {
+				requestOperationType = shared.Doc.OperationDefinitions[ii].OperationType
+			}
+		}
 	}
+
 	if shared.Report.HasErrors() {
 		h.logInternalErrors(shared.Report, requestLogger)
 		w.WriteHeader(http.StatusBadRequest)
 		h.writeRequestErrors(shared.Report, w, requestLogger)
 		return
 	}
+
+	shared.Ctx = shared.Ctx.WithContext(operation.WithMetadata(shared.Ctx.Context(), &operation.Metadata{
+		OperationType: operation.TypeFromASTOperationType(requestOperationType),
+	}))
 
 	// create a hash of the query to use as a key for the prepared plan cache
 	// in this hash, we include the printed operation

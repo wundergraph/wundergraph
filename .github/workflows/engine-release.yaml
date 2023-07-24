@@ -71,6 +71,7 @@ jobs:
           GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
           GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
+          LICENSING_PUBLIC_KEY: ${{ secrets.LICENSING_PUBLIC_KEY }}
 
   goreleaser-linux:
     name: Release Linux build
@@ -114,6 +115,7 @@ jobs:
           GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
           GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
+          LICENSING_PUBLIC_KEY: ${{ secrets.LICENSING_PUBLIC_KEY }}
 
   goreleaser-win:
     name: Release Windows build
@@ -164,6 +166,7 @@ jobs:
           GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
           GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
+          LICENSING_PUBLIC_KEY: ${{ secrets.LICENSING_PUBLIC_KEY }}
 
   release-wunderctl:
     # https://docs.npmjs.com/generating-provenance-statements#publishing-packages-with-provenance-via-github-actions
