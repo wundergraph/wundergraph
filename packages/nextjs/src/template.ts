@@ -94,5 +94,5 @@ const isLiveQuery = (operation: GraphQLOperation) => {
 
 const mapOperation = (operation: GraphQLOperation) => ({
 	name: operation.Name,
-	requiresAuthentication: operation.AuthenticationConfig.required,
+	requiresAuthentication: operation.AuthenticationConfig?.required ?? false,
 });
