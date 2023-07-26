@@ -2620,9 +2620,6 @@ exports[`parseGraphQLOperations 1`] = `
 {
   "operations": [
     {
-      "AuthenticationConfig": {
-        "required": false,
-      },
       "AuthorizationConfig": {
         "claims": [],
         "roleConfig": {
@@ -2717,9 +2714,6 @@ exports[`parseGraphQLOperations 1`] = `
       },
     },
     {
-      "AuthenticationConfig": {
-        "required": false,
-      },
       "AuthorizationConfig": {
         "claims": [],
         "roleConfig": {
@@ -2904,9 +2898,6 @@ exports[`parseGraphQLOperations 1`] = `
       },
     },
     {
-      "AuthenticationConfig": {
-        "required": false,
-      },
       "AuthorizationConfig": {
         "claims": [],
         "roleConfig": {
@@ -2983,9 +2974,6 @@ exports[`parseGraphQLOperations 1`] = `
       },
     },
     {
-      "AuthenticationConfig": {
-        "required": false,
-      },
       "AuthorizationConfig": {
         "claims": [],
         "roleConfig": {
