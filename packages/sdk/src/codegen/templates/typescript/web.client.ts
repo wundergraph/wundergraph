@@ -62,7 +62,7 @@ export const operations = (application: ResolvedApplication, operationType: Oper
 				path: op.Name,
 				hasInput: hasInput(op),
 				hasInternalInput: hasInternalInput(op),
-				requiresAuthentication: op.AuthenticationConfig.required,
+				requiresAuthentication: op.AuthenticationConfig?.required ?? false,
 			};
 		});
 
@@ -75,6 +75,6 @@ export const liveQueries = (application: ResolvedApplication, includeInternal: b
 				path: op.Name,
 				hasInput: hasInput(op),
 				hasInternalInput: hasInternalInput(op),
-				requiresAuthentication: op.AuthenticationConfig.required,
+				requiresAuthentication: op.AuthenticationConfig?.required ?? false,
 			};
 		});

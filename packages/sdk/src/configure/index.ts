@@ -951,7 +951,7 @@ export const configureWunderGraphApplication = <
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
-									required: op.AuthenticationConfig.required || mutationConfig.authentication.required,
+									required: op.AuthenticationConfig?.required ?? mutationConfig.authentication.required,
 								},
 							});
 						case OperationType.QUERY:
@@ -964,7 +964,7 @@ export const configureWunderGraphApplication = <
 								CacheConfig: queryConfig.caching,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
-									required: op.AuthenticationConfig.required || queryConfig.authentication.required,
+									required: op.AuthenticationConfig?.required ?? queryConfig.authentication.required,
 								},
 								LiveQuery: queryConfig.liveQuery,
 							});
@@ -977,7 +977,7 @@ export const configureWunderGraphApplication = <
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
-									required: op.AuthenticationConfig.required || subscriptionConfig.authentication.required,
+									required: op.AuthenticationConfig?.required ?? subscriptionConfig.authentication.required,
 								},
 							});
 						default:
@@ -1217,7 +1217,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 		engine: op.ExecutionEngine,
 		cacheConfig: op.CacheConfig,
 		authenticationConfig: {
-			authRequired: op.AuthenticationConfig.required,
+			authRequired: op.AuthenticationConfig?.required ?? false,
 		},
 		authorizationConfig: op.AuthorizationConfig,
 		liveQueryConfig: op.LiveQuery,
@@ -1594,9 +1594,12 @@ const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFi
 		// need some generated files to be ready
 		ResponseSchema: { type: 'object', properties: { data: {} } },
 		TypeScriptOperationImport: `function_${file.operation_name}`,
-		AuthenticationConfig: {
-			required: implementation.requireAuthentication || false,
-		},
+		AuthenticationConfig:
+			implementation.requireAuthentication !== undefined
+				? {
+						required: implementation.requireAuthentication,
+				  }
+				: undefined,
 		LiveQuery: {
 			enable: true,
 			pollingIntervalSeconds: 5,
