@@ -131,8 +131,13 @@ export class InternalError extends OperationError<'InternalError'> {
  * because there's no authenticated user.
  **/
 export class NoUserError extends OperationError<'NoUserError'> {
-	constructor(opts?: { statusCode?: number }) {
-		super({ message: 'User is not authenticated', code: 'NoUserError', statusCode: opts?.statusCode ?? 500 });
+	constructor(opts?: { code?: string; statusCode?: number; message?: string }) {
+		super({
+			code: opts?.code,
+			message: opts?.message || 'User is not authenticated',
+			code: 'NoUserError',
+			statusCode: opts?.statusCode ?? 500,
+		});
 	}
 }
 
