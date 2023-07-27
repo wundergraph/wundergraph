@@ -1197,7 +1197,7 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		defer cancel()
 		next := make(chan []byte)
 		go func() {
-			err = streamDs.Start(ctx, []byte(`{"args":{"keys":"keys"},"variables":{"keys":["foo"]}}`), next)
+			err := streamDs.Start(ctx, []byte(`{"args":{"keys":"keys"},"variables":{"keys":["foo"]}}`), next)
 			assert.NoError(t, err)
 		}()
 
@@ -1281,7 +1281,7 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		defer cancel()
 		next := make(chan []byte)
 		go func() {
-			err = streamDs.Start(ctx, []byte(``), next)
+			err := streamDs.Start(ctx, []byte(``), next)
 			assert.NoError(t, err)
 		}()
 
