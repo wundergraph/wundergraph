@@ -521,3 +521,13 @@ describe('test session expiration', () => {
 		expect(user.expires).toBeGreaterThanOrEqual(now + 50 * 1000);
 	});
 });
+
+describe('Test requireAuthentication override in TS operations', () => {
+	it('should override the a default of true with false', async () => {
+		// FromTS uses requireAuthentication: false
+		const client = wg.client();
+		const result = await client.query({ operationName: 'echo/FromTS', input: { input: 'hello' } });
+		expect(result.error).toBeUndefined();
+		expect(result?.data).toBe('hello');
+	});
+});

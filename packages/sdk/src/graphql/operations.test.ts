@@ -170,9 +170,6 @@ const expectedTransformOperations: ParsedOperations = {
 				},
 				additionalProperties: false,
 			},
-			AuthenticationConfig: {
-				required: false,
-			},
 			AuthorizationConfig: {
 				claims: [],
 				roleConfig: {
@@ -264,9 +261,6 @@ const expectedTransformOperations: ParsedOperations = {
 					},
 				},
 				additionalProperties: false,
-			},
-			AuthenticationConfig: {
-				required: false,
 			},
 			AuthorizationConfig: {
 				claims: [],
@@ -385,9 +379,6 @@ const expectedTransformOperations: ParsedOperations = {
 					},
 				},
 				additionalProperties: false,
-			},
-			AuthenticationConfig: {
-				required: false,
 			},
 			AuthorizationConfig: {
 				claims: [],
@@ -560,9 +551,6 @@ const fromClaimParsed: ParsedOperations = {
 				},
 				additionalProperties: false,
 			},
-			AuthenticationConfig: {
-				required: true,
-			},
 			AuthorizationConfig: {
 				claims: [
 					{
@@ -594,6 +582,9 @@ const fromClaimParsed: ParsedOperations = {
 				injectVariables: [],
 			},
 			Internal: false,
+			AuthenticationConfig: {
+				required: true,
+			},
 		},
 	],
 };
@@ -795,9 +786,6 @@ const jsonSchemaDirectiveParsed: ParsedOperations = {
 					},
 				},
 				additionalProperties: false,
-			},
-			AuthenticationConfig: {
-				required: false,
 			},
 			AuthorizationConfig: {
 				claims: [],
