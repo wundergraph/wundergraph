@@ -7,13 +7,11 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/buger/jsonparser"
 	"github.com/nats-io/nats.go"
-
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
@@ -197,6 +195,10 @@ func (p *Planner) ConfigureSubscription() plan.SubscriptionConfiguration {
 			config:    p.config,
 			kvMutex:   &sync.Mutex{},
 		},
+		ProcessResponseConfig: resolve.ProcessResponseConfig{
+			ExtractGraphqlResponse:    false,
+			ExtractFederationEntities: false,
+		},
 	}
 }
 
@@ -259,16 +261,16 @@ func (s *KeyValueSource) Start(ctx context.Context, input []byte, next chan<- []
 	return fmt.Errorf("unknown operation %s", s.Operation.String())
 }
 
-func (s *KeyValueSource) processUpdates(ctx context.Context, watcher nats.KeyWatcher, next chan<- []byte) error {
+func (s *KeyValueSource) processUpdates(ctx context.Context, watcher nats.KeyWatcher, next chan<- []byte) {
 	updates := watcher.Updates()
 	done := ctx.Done()
 	for {
 		select {
 		case <-done:
-			return nil
+			return
 		case update, ok := <-updates:
 			if !ok {
-				return nil
+				return
 			}
 			if update == nil {
 				// initial sync complete
@@ -285,7 +287,7 @@ func (s *KeyValueSource) processUpdates(ctx context.Context, watcher nats.KeyWat
 			}
 			entryBytes, err := json.Marshal(entry)
 			if err != nil {
-				return err
+				return
 			}
 			next <- entryBytes
 		}
@@ -304,11 +306,13 @@ func (s *KeyValueSource) watch(ctx context.Context, input []byte, next chan<- []
 	if err != nil {
 		return err
 	}
-	watcher, err := s.kv.Watch(strings.Join(keys, ","), nats.Context(ctx))
-	if err != nil {
-		return err
+	for _, key := range keys {
+		watcher, err := s.kv.Watch(key, nats.Context(ctx))
+		if err != nil {
+			return err
+		}
+		go s.processUpdates(ctx, watcher, next)
 	}
-	err = s.processUpdates(ctx, watcher, next)
 	return err
 }
 
@@ -317,7 +321,7 @@ func (s *KeyValueSource) watchAll(ctx context.Context, next chan<- []byte) error
 	if err != nil {
 		return err
 	}
-	err = s.processUpdates(ctx, watcher, next)
+	go s.processUpdates(ctx, watcher, next)
 	return err
 }
 
