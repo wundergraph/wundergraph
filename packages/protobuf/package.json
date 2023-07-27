@@ -29,8 +29,8 @@
   },
   "dependencies": {
     "long": "^5.2.0",
-    "protobufjs": "^6.11.2",
-    "ts-proto": "^1.112.1"
+    "protobufjs": "^7.2.4",
+    "ts-proto": "^1.156.1"
   },
   "devDependencies": {
     "cpy-cli": "^4.1.0",

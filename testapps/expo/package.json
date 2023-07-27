@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@babel/runtime": "^7.21.0",
-    "@expo/webpack-config": "^18.0.1",
+    "@babel/runtime": "^7.22.6",
+    "@expo/webpack-config": "^18.1.2",
     "@rnx-kit/metro-config": "^1.3.5",
     "@rnx-kit/metro-resolver-symlinks": "^0.1.27",
     "@wundergraph/metro-config": "workspace:*",
     "@wundergraph/sdk": "workspace:*",
     "@wundergraph/swr": "workspace:*",
-    "expo": "^48.0.11",
+    "expo": "^48.0.17",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.71.7",
@@ -18,7 +18,7 @@
     "swr": "^2.2.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.12",
+    "@babel/core": "^7.22.9",
     "@types/react": "~18.0.27",
     "@types/react-native": "~0.71.5",
     "npm-run-all": "^4.1.5",
