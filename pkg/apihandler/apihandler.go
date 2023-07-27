@@ -23,7 +23,6 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"github.com/wI2L/jsondiff"
-	"github.com/wundergraph/wundergraph/pkg/querystring"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
@@ -51,6 +50,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
+	"github.com/wundergraph/wundergraph/pkg/querystring"
 	"github.com/wundergraph/wundergraph/pkg/s3uploadclient"
 	"github.com/wundergraph/wundergraph/pkg/trace"
 	"github.com/wundergraph/wundergraph/pkg/webhookhandler"

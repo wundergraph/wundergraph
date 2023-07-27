@@ -17,7 +17,7 @@ var (
 )
 
 func init() {
-	bracketSplitter = regexp.MustCompile("\\[|\\]")
+	bracketSplitter = regexp.MustCompile(`[|]`)
 }
 
 func ToJSON(query string) ([]byte, error) {
