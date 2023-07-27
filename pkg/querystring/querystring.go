@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+
+	"golang.org/x/exp/slices"
 )
 
 var (
@@ -17,10 +19,10 @@ var (
 )
 
 func init() {
-	bracketSplitter = regexp.MustCompile(`[|]`)
+	bracketSplitter = regexp.MustCompile(`\[|\]`)
 }
 
-func ToJSON(query string) ([]byte, error) {
+func ToJSON(query string, allowList []string) ([]byte, error) {
 
 	if query == "" {
 		return []byte("{}"), nil
@@ -41,19 +43,28 @@ func ToJSON(query string) ([]byte, error) {
 	)
 	params := strings.Split(query, "&")
 	for _, part := range params {
-		tempMap, err := queryToMap(part)
+		if strings.HasPrefix(part, "wg_") {
+			continue
+		}
+		tempMap, err := queryToMap(part, allowList)
 		if err != nil {
 			return nil, err
+		}
+		if tempMap == nil {
+			continue
 		}
 		builder = merge(builder, tempMap)
 	}
 	return json.Marshal(builder)
 }
 
-func queryToMap(param string) (map[string]interface{}, error) {
+func queryToMap(param string, allowList []string) (map[string]interface{}, error) {
 	rawKey, rawValue, err := splitKeyAndValue(param)
 	if err != nil {
 		return nil, err
+	}
+	if allowList != nil && !slices.Contains(allowList, rawKey) {
+		return nil, nil
 	}
 	rawValue, err = url.QueryUnescape(rawValue)
 	if err != nil {
@@ -93,7 +104,7 @@ func queryToMap(param string) (map[string]interface{}, error) {
 	//   a and b[c]
 	// and then we set {"a": queryToMap("b[c]", value)}
 	ret := make(map[string]interface{}, 0)
-	ret[key], err = queryToMap(buildNewKey(rawKey) + "=" + rawValue)
+	ret[key], err = queryToMap(buildNewKey(rawKey)+"="+rawValue, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -905,7 +905,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer pool.PutCtx(resolveCtx)
 
 	var err error
-	resolveCtx.Variables, err = querystring.ToJSON(r.URL.RawQuery)
+	resolveCtx.Variables, err = querystring.ToJSON(r.URL.RawQuery, h.queryParamsAllowList)
 	if err != nil {
 		requestLogger.Error("Could not parse query string", zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
@@ -1291,7 +1291,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	defer pool.PutCtx(ctx)
 
 	var err error
-	ctx.Variables, err = querystring.ToJSON(r.URL.RawQuery)
+	ctx.Variables, err = querystring.ToJSON(r.URL.RawQuery, h.queryParamsAllowList)
 	if err != nil {
 		requestLogger.Error("Could not parse query string", zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
@@ -1815,7 +1815,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ct := r.Header.Get("Content-Type")
 	if r.Method == http.MethodGet {
 		var err error
-		ctx.Variables, err = querystring.ToJSON(r.URL.RawQuery)
+		ctx.Variables, err = querystring.ToJSON(r.URL.RawQuery, h.queryParamsAllowList)
 		if err != nil {
 			requestLogger.Error("Could not parse query string", zap.Error(err))
 			w.WriteHeader(http.StatusBadRequest)
