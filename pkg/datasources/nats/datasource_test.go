@@ -1196,10 +1196,8 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 		next := make(chan []byte)
-		go func() {
-			err := streamDs.Start(ctx, []byte(`{"args":{"keys":"keys"},"variables":{"keys":["foo"]}}`), next)
-			assert.NoError(t, err)
-		}()
+		err = streamDs.Start(ctx, []byte(`{"args":{"keys":"keys"},"variables":{"keys":["foo"]}}`), next)
+		assert.NoError(t, err)
 
 		wg := sync.WaitGroup{}
 		wg.Add(1)
@@ -1239,9 +1237,9 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		wg.Wait()
 
 		assert.Equal(t, 3, len(streamOut))
-		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":2,"created":1}`, streamOut[0])
-		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":3}},"revision":3,"created":1}`, streamOut[1])
-		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":4}},"revision":4,"created":1}`, streamOut[2])
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":1}},"revision":1,"created":1}`, streamOut[0])
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":2}},"revision":2,"created":1}`, streamOut[1])
+		assert.Equal(t, `{"key":"foo","value":{"token":"bar","org":{"id":1},"user":{"id":3}},"revision":3,"created":1}`, streamOut[2])
 	})
 
 	t.Run("token_watchAll", func(t *testing.T) {
@@ -1280,10 +1278,8 @@ func TestNatsKeyValueDataSourceLoad(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 		next := make(chan []byte)
-		go func() {
-			err := streamDs.Start(ctx, []byte(``), next)
-			assert.NoError(t, err)
-		}()
+		err = streamDs.Start(ctx, []byte(``), next)
+		assert.NoError(t, err)
 
 		wg := sync.WaitGroup{}
 		wg.Add(1)
