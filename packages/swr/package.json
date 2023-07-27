@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/swr",
-  "version": "0.16.2",
+  "version": "0.17.1",
   "license": "Apache-2.0",
   "description": "WunderGraph SWR Integration",
   "main": "./dist/index.js",
@@ -55,7 +55,7 @@
     "react-dom": "^18.1.0",
     "swr": "^2.2.0",
     "tsd": "^0.24.1",
-    "tsup": "^6.5.0",
+    "tsup": "^6.7.0",
     "typescript": "^5.1.6"
   },
   "homepage": "https://wundergraph.com",

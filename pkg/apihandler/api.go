@@ -10,6 +10,7 @@ import (
 
 	"go.uber.org/zap/zapcore"
 
+	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -142,6 +143,7 @@ type Api struct {
 	Webhooks              []*wgpb.WebhookConfiguration
 	Options               *Options
 	CookieBasedSecrets    *CookieBasedSecrets
+	Hooks                 []*hooks.Hook
 }
 
 func (api *Api) HasCookieAuthEnabled() bool {

@@ -24,6 +24,12 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/relay"
 )
 
+var (
+	ignoredFiles = map[string]struct{}{
+		".DS_Store": {},
+	}
+)
+
 type Loader struct {
 	operationsRootPath string
 	fragmentsRootPath  string
@@ -120,12 +126,15 @@ func (l *Loader) readOperations() error {
 		switch strings.ToLower(filepath.Ext(filePath)) {
 		case ".ts":
 			l.readTypescriptOperation(filePath)
-		case ".graphql":
+		case ".graphql", ".gql":
 			l.readGraphQLOperation(filePath)
 		case ".json":
 			r := relay.NewRelay(filepath.Join(l.operationsRootPath, filePath))
 			return r.ExpandOperationsJson()
 		default:
+			if _, found := ignoredFiles[filepath.Base(filePath)]; found {
+				break
+			}
 			l.out.Info = append(l.out.Info, fmt.Sprintf("skipping non .graphql nor .ts file: %s", filePath))
 		}
 

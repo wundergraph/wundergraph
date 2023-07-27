@@ -33,8 +33,9 @@ import (
 )
 
 type EngineConfigLoader struct {
-	wundergraphDir string
-	resolvers      []FactoryResolver
+	wunderGraphDir       string
+	natsDefaultServerURL string
+	resolvers            []FactoryResolver
 }
 
 type FactoryResolver interface {
@@ -43,8 +44,13 @@ type FactoryResolver interface {
 
 // Defined again here to avoid circular reference to apihandler.ApiTransportFactory
 
+type ApiTransportFactoryRoundTripperOptions struct {
+	DataSourceID        string
+	EnableStreamingMode bool
+}
+
 type ApiTransportFactory interface {
-	RoundTripper(transport *http.Transport, enableStreamingMode bool) http.RoundTripper
+	RoundTripper(transport *http.Transport, opts ApiTransportFactoryRoundTripperOptions) http.RoundTripper
 	DefaultTransportTimeout() time.Duration
 	DefaultHTTPProxyURL() *url.URL
 }
@@ -65,11 +71,15 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 	log *zap.Logger, hooksClient *hooks.Client) *DefaultFactoryResolver {
 
 	defaultHttpClient := &http.Client{
-		Timeout:   transportFactory.DefaultTransportTimeout(),
-		Transport: transportFactory.RoundTripper(baseTransport, false),
+		Timeout: transportFactory.DefaultTransportTimeout(),
+		Transport: transportFactory.RoundTripper(baseTransport, ApiTransportFactoryRoundTripperOptions{
+			EnableStreamingMode: false,
+		}),
 	}
 	streamingClient := &http.Client{
-		Transport: transportFactory.RoundTripper(baseTransport, true),
+		Transport: transportFactory.RoundTripper(baseTransport, ApiTransportFactoryRoundTripperOptions{
+			EnableStreamingMode: true,
+		}),
 	}
 
 	return &DefaultFactoryResolver{
@@ -96,9 +106,15 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 
 // requiresDedicatedHTTPClient returns true iff the given FetchConfiguration requires a dedicated HTTP client
 func (d *DefaultFactoryResolver) requiresDedicatedHTTPClient(ds *wgpb.DataSourceConfiguration, cfg *wgpb.FetchConfiguration) bool {
-	// when a custom timeout is specified, we can't use the shared http.Client
-	if ds != nil && ds.RequestTimeoutSeconds > 0 {
-		return true
+	if ds != nil {
+		// if the data source has an ID we need a custom transport to store it
+		if ds.GetId() != "" {
+			return true
+		}
+		// when a custom timeout is specified, we can't use the shared http.Client
+		if ds.RequestTimeoutSeconds > 0 {
+			return true
+		}
 	}
 	if cfg != nil {
 		// when mTLS is enabled, we need to create a new client
@@ -205,8 +221,11 @@ func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration,
 	}
 
 	return &http.Client{
-		Timeout:   timeout,
-		Transport: d.transportFactory.RoundTripper(transport, false),
+		Timeout: timeout,
+		Transport: d.transportFactory.RoundTripper(transport, ApiTransportFactoryRoundTripperOptions{
+			DataSourceID:        ds.GetId(),
+			EnableStreamingMode: false,
+		}),
 	}, nil
 }
 
@@ -304,10 +323,16 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 	}
 }
 
-func New(wundergraphDir string, resolvers ...FactoryResolver) *EngineConfigLoader {
+type EngineConfigLoaderOptions struct {
+	WunderGraphDir       string
+	NATSDefaultServerURL string
+}
+
+func New(opts EngineConfigLoaderOptions, resolvers ...FactoryResolver) *EngineConfigLoader {
 	return &EngineConfigLoader{
-		wundergraphDir: wundergraphDir,
-		resolvers:      resolvers,
+		wunderGraphDir:       opts.WunderGraphDir,
+		natsDefaultServerURL: opts.NATSDefaultServerURL,
+		resolvers:            resolvers,
 	}
 }
 
@@ -496,10 +521,18 @@ func (l *EngineConfigLoader) Load(engineConfig *wgpb.EngineConfiguration, wgServ
 				bucketName = strings.Join([]string{prefix, bucketName}, ".")
 			}
 
+			natsServerURL := in.CustomNatsKv.GetServerURL()
+			if natsServerURL == "" {
+				if l.natsDefaultServerURL == "" {
+					return nil, errors.New("could not determine default NATS server URL")
+				}
+				natsServerURL = l.natsDefaultServerURL
+			}
+
 			config := nats.Configuration{
 				Operation: in.CustomNatsKv.GetOperation(),
 				Bucket:    bucketName,
-				ServerURL: in.CustomNatsKv.GetServerURL(),
+				ServerURL: natsServerURL,
 				History:   in.CustomNatsKv.GetHistory(),
 				Token:     in.CustomNatsKv.GetToken(),
 			}
@@ -527,7 +560,7 @@ func (l *EngineConfigLoader) Load(engineConfig *wgpb.EngineConfiguration, wgServ
 				PrismaSchema:        l.addDataSourceToPrismaSchema(prismaSchema, databaseURL, in.Kind),
 				GraphqlSchema:       graphqlSchema,
 				CloseTimeoutSeconds: in.CustomDatabase.CloseTimeoutSeconds,
-				WunderGraphDir:      l.wundergraphDir,
+				WunderGraphDir:      l.wunderGraphDir,
 			}
 			for _, field := range in.CustomDatabase.JsonTypeFields {
 				config.JsonTypeFields = append(config.JsonTypeFields, database.SingleTypeField{

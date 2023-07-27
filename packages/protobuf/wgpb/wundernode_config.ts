@@ -179,6 +179,29 @@ export function injectVariableKindToJSON(object: InjectVariableKind): string {
   }
 }
 
+export enum HookType {
+  HTTP_TRANSPORT = 0,
+}
+
+export function hookTypeFromJSON(object: any): HookType {
+  switch (object) {
+    case 0:
+    case "HTTP_TRANSPORT":
+      return HookType.HTTP_TRANSPORT;
+    default:
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum HookType");
+  }
+}
+
+export function hookTypeToJSON(object: HookType): string {
+  switch (object) {
+    case HookType.HTTP_TRANSPORT:
+      return "HTTP_TRANSPORT";
+    default:
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum HookType");
+  }
+}
+
 export enum ClaimType {
   /** ISSUER - iss */
   ISSUER = 0,
@@ -390,20 +413,24 @@ export function valueTypeToJSON(object: ValueType): string {
 }
 
 export enum OperationType {
-  QUERY = 0,
-  MUTATION = 1,
-  SUBSCRIPTION = 2,
+  INVALID = 0,
+  QUERY = 1,
+  MUTATION = 2,
+  SUBSCRIPTION = 3,
 }
 
 export function operationTypeFromJSON(object: any): OperationType {
   switch (object) {
     case 0:
+    case "INVALID":
+      return OperationType.INVALID;
+    case 1:
     case "QUERY":
       return OperationType.QUERY;
-    case 1:
+    case 2:
     case "MUTATION":
       return OperationType.MUTATION;
-    case 2:
+    case 3:
     case "SUBSCRIPTION":
       return OperationType.SUBSCRIPTION;
     default:
@@ -413,6 +440,8 @@ export function operationTypeFromJSON(object: any): OperationType {
 
 export function operationTypeToJSON(object: OperationType): string {
   switch (object) {
+    case OperationType.INVALID:
+      return "INVALID";
     case OperationType.QUERY:
       return "QUERY";
     case OperationType.MUTATION:
@@ -915,6 +944,17 @@ export interface GraphQLDataSourceHooksConfiguration {
   onWSTransportConnectionInit: boolean;
 }
 
+export interface HookMatcher {
+  operationType?: OperationType | undefined;
+  datasources: string[];
+}
+
+export interface Hook {
+  id: string;
+  type: HookType;
+  matcher: HookMatcher | undefined;
+}
+
 export interface OperationHooksConfiguration {
   preResolve: boolean;
   postResolve: boolean;
@@ -1185,7 +1225,11 @@ export interface WunderGraphConfiguration {
   environmentIds: string[];
   dangerouslyEnableGraphQLEndpoint: boolean;
   configHash: string;
-  enabledFeatures: EnabledFeatures | undefined;
+  enabledFeatures:
+    | EnabledFeatures
+    | undefined;
+  /** New-style hooks */
+  hooks: Hook[];
 }
 
 /**
@@ -2731,6 +2775,140 @@ export const GraphQLDataSourceHooksConfiguration = {
   ): GraphQLDataSourceHooksConfiguration {
     const message = createBaseGraphQLDataSourceHooksConfiguration();
     message.onWSTransportConnectionInit = object.onWSTransportConnectionInit ?? false;
+    return message;
+  },
+};
+
+function createBaseHookMatcher(): HookMatcher {
+  return { operationType: undefined, datasources: [] };
+}
+
+export const HookMatcher = {
+  encode(message: HookMatcher, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.operationType !== undefined) {
+      writer.uint32(8).int32(message.operationType);
+    }
+    for (const v of message.datasources) {
+      writer.uint32(18).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): HookMatcher {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseHookMatcher();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.operationType = reader.int32() as any;
+          break;
+        case 2:
+          message.datasources.push(reader.string());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): HookMatcher {
+    return {
+      operationType: isSet(object.operationType) ? operationTypeFromJSON(object.operationType) : undefined,
+      datasources: Array.isArray(object?.datasources) ? object.datasources.map((e: any) => String(e)) : [],
+    };
+  },
+
+  toJSON(message: HookMatcher): unknown {
+    const obj: any = {};
+    message.operationType !== undefined &&
+      (obj.operationType = message.operationType !== undefined
+        ? operationTypeToJSON(message.operationType)
+        : undefined);
+    if (message.datasources) {
+      obj.datasources = message.datasources.map((e) => e);
+    } else {
+      obj.datasources = [];
+    }
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<HookMatcher>, I>>(object: I): HookMatcher {
+    const message = createBaseHookMatcher();
+    message.operationType = object.operationType ?? undefined;
+    message.datasources = object.datasources?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBaseHook(): Hook {
+  return { id: "", type: 0, matcher: undefined };
+}
+
+export const Hook = {
+  encode(message: Hook, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.type !== 0) {
+      writer.uint32(16).int32(message.type);
+    }
+    if (message.matcher !== undefined) {
+      HookMatcher.encode(message.matcher, writer.uint32(26).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): Hook {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseHook();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.id = reader.string();
+          break;
+        case 2:
+          message.type = reader.int32() as any;
+          break;
+        case 3:
+          message.matcher = HookMatcher.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Hook {
+    return {
+      id: isSet(object.id) ? String(object.id) : "",
+      type: isSet(object.type) ? hookTypeFromJSON(object.type) : 0,
+      matcher: isSet(object.matcher) ? HookMatcher.fromJSON(object.matcher) : undefined,
+    };
+  },
+
+  toJSON(message: Hook): unknown {
+    const obj: any = {};
+    message.id !== undefined && (obj.id = message.id);
+    message.type !== undefined && (obj.type = hookTypeToJSON(message.type));
+    message.matcher !== undefined && (obj.matcher = message.matcher ? HookMatcher.toJSON(message.matcher) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<Hook>, I>>(object: I): Hook {
+    const message = createBaseHook();
+    message.id = object.id ?? "";
+    message.type = object.type ?? 0;
+    message.matcher = (object.matcher !== undefined && object.matcher !== null)
+      ? HookMatcher.fromPartial(object.matcher)
+      : undefined;
     return message;
   },
 };
@@ -5772,6 +5950,7 @@ function createBaseWunderGraphConfiguration(): WunderGraphConfiguration {
     dangerouslyEnableGraphQLEndpoint: false,
     configHash: "",
     enabledFeatures: undefined,
+    hooks: [],
   };
 }
 
@@ -5794,6 +5973,9 @@ export const WunderGraphConfiguration = {
     }
     if (message.enabledFeatures !== undefined) {
       EnabledFeatures.encode(message.enabledFeatures, writer.uint32(50).fork()).ldelim();
+    }
+    for (const v of message.hooks) {
+      Hook.encode(v!, writer.uint32(58).fork()).ldelim();
     }
     return writer;
   },
@@ -5823,6 +6005,9 @@ export const WunderGraphConfiguration = {
         case 6:
           message.enabledFeatures = EnabledFeatures.decode(reader, reader.uint32());
           break;
+        case 7:
+          message.hooks.push(Hook.decode(reader, reader.uint32()));
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -5841,6 +6026,7 @@ export const WunderGraphConfiguration = {
         : false,
       configHash: isSet(object.configHash) ? String(object.configHash) : "",
       enabledFeatures: isSet(object.enabledFeatures) ? EnabledFeatures.fromJSON(object.enabledFeatures) : undefined,
+      hooks: Array.isArray(object?.hooks) ? object.hooks.map((e: any) => Hook.fromJSON(e)) : [],
     };
   },
 
@@ -5858,6 +6044,11 @@ export const WunderGraphConfiguration = {
     message.configHash !== undefined && (obj.configHash = message.configHash);
     message.enabledFeatures !== undefined &&
       (obj.enabledFeatures = message.enabledFeatures ? EnabledFeatures.toJSON(message.enabledFeatures) : undefined);
+    if (message.hooks) {
+      obj.hooks = message.hooks.map((e) => e ? Hook.toJSON(e) : undefined);
+    } else {
+      obj.hooks = [];
+    }
     return obj;
   },
 
@@ -5873,6 +6064,7 @@ export const WunderGraphConfiguration = {
     message.enabledFeatures = (object.enabledFeatures !== undefined && object.enabledFeatures !== null)
       ? EnabledFeatures.fromPartial(object.enabledFeatures)
       : undefined;
+    message.hooks = object.hooks?.map((e) => Hook.fromPartial(e)) || [];
     return message;
   },
 };

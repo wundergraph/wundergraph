@@ -37,12 +37,12 @@ var loadoperationsCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		return os.WriteFile(outFile, []byte(out), os.ModePerm)
+		return os.WriteFile(outFile, []byte(out), 0644)
 	},
 	Args: cobra.ExactArgs(3),
 }
 
 func init() {
 	rootCmd.AddCommand(loadoperationsCmd)
-	rootCmd.PersistentFlags().BoolVar(&prettyOutput, "pretty", false, "Pretty print the output")
+	loadoperationsCmd.PersistentFlags().BoolVar(&prettyOutput, "pretty-print", false, "Pretty print the output")
 }

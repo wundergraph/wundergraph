@@ -900,6 +900,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 				experimental: {
 					orm: false,
 				},
+				integrations: [],
 			},
 			templates,
 		},

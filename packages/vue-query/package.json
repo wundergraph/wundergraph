@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/vue-query",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "license": "Apache-2.0",
   "description": "WunderGraph Vue Query Integration",
   "main": "./dist/index.js",
@@ -51,9 +51,9 @@
     "nock": "^13.2.9",
     "node-fetch": "2.6.7",
     "tsd": "^0.24.1",
-    "tsup": "^6.5.0",
+    "tsup": "^6.7.0",
     "typescript": "^5.1.6",
-    "vue": "^3.2.47"
+    "vue": "^3.3.4"
   },
   "homepage": "https://wundergraph.com",
   "author": {

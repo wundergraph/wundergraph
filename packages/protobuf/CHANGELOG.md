@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.118.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.117.0...@wundergraph/protobuf@0.118.0) (2023-07-24)
+
+### Features
+
+* advanced hooks - dynamicTransport ([#1124](https://github.com/wundergraph/wundergraph/issues/1124)) ([6cbdeba](https://github.com/wundergraph/wundergraph/commit/6cbdebac0a775b638beeae8457d07dce829379bc)) (@Pagebakers)
+* initial impl of nats kv ([#1057](https://github.com/wundergraph/wundergraph/issues/1057)) ([961f1f0](https://github.com/wundergraph/wundergraph/commit/961f1f0d14b95fc69a9a99ef637d6cd544750c08)) (@jensneuse)
+* upgrade to typescript 5 ([#1135](https://github.com/wundergraph/wundergraph/issues/1135)) ([74cee5d](https://github.com/wundergraph/wundergraph/commit/74cee5db3ae8865d2bf1f1d7ab5c67fccbeeb798)) (@Pagebakers)
+
 ## [0.117.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.116.1...@wundergraph/protobuf@0.117.0) (2023-07-13)
 
 ### Features

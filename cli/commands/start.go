@@ -36,7 +36,7 @@ var startCmd = &cobra.Command{
 		defer stop()
 
 		g, ctx := errgroup.WithContext(sigCtx)
-		go configureEmbeddedNatsBlocking(ctx)
+		natsEmbeddedServerURL := startEmbeddedNats(ctx, log)
 
 		n, wunderGraphDir, err := NewWunderGraphNode(ctx)
 		if err != nil {
@@ -64,6 +64,7 @@ var startCmd = &cobra.Command{
 				WithIdleHandler(stop),
 				WithHooksServerHealthCheck(),
 				WithRequestLogging(rootFlags.DebugMode),
+				WithNATSDefaultServerURL(natsEmbeddedServerURL),
 			)
 		})
 

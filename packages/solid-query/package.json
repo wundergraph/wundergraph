@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/solid-query",
-  "version": "0.4.50",
+  "version": "0.5.1",
   "license": "Apache-2.0",
   "description": "WunderGraph Solid Query Integration",
   "main": "./dist/index.js",
@@ -58,7 +58,7 @@
     "solid-js": "^1.6.11",
     "ts-jest": "^29.0.5",
     "tsd": "^0.24.1",
-    "tsup": "^6.5.0",
+    "tsup": "^6.7.0",
     "typescript": "^5.1.6"
   },
   "homepage": "https://wundergraph.com",

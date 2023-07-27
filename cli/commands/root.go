@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
+	"net"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -29,7 +30,6 @@ import (
 
 const (
 	serializedConfigFilename = "wundergraph.wgconfig"
-	configEntryPointFilename = "wundergraph.config.ts"
 	serverEntryPointFilename = "wundergraph.server.ts"
 
 	wunderctlBinaryPathEnvKey = "WUNDERCTL_BINARY_PATH"
@@ -40,6 +40,9 @@ const (
 	// we need  need to wait a bit for it
 	telemetryReloadWait     = 100 * time.Millisecond
 	maxTelemetryLoadRetries = 20
+
+	natsDisableEmbeddedServerKey = "WG_DISABLE_EMBEDDED_NATS"
+	prettyLoggingFlagName        = "pretty-logging"
 )
 
 var (
@@ -139,6 +142,44 @@ func sendTelemetry(cmd *cobra.Command) error {
 	return TelemetryClient.Send(metrics)
 }
 
+func workaroundBugWithDuplicatedFlags(cmd *cobra.Command) {
+	// Cobra doesn't properly support multiple flags on different
+	// subcommands because it keeps a global registry using the
+	// flag name, which makes the only flag available to last to
+	// be registered and also takes the default value from that one.
+	//  To make it work, we lookup the flag from the
+	// chosen command, install it (so it overrides any other flags
+	// with the same name) and we restore its default value as long
+	// as it has not changed.
+	flagsToPatchUp := []string{
+		prettyLoggingFlagName,
+	}
+	for _, name := range flagsToPatchUp {
+		flag := cmd.Flags().Lookup(name)
+		if flag != nil {
+			if !flag.Changed {
+				flag.Value.Set(flag.DefValue)
+			}
+			viper.BindPFlag(name, flag)
+		}
+	}
+}
+
+func updateFlagsFromEnvironment(cmd *cobra.Command) {
+	overriddenFlags := map[string]string{
+		prettyLoggingFlagName: helpers.WgLogPrettyEnvKey,
+	}
+	for flagName, envKey := range overriddenFlags {
+		flag := cmd.Flags().Lookup(flagName)
+		if flag != nil && !flag.Changed {
+			envValue := os.Getenv(envKey)
+			if envValue != "" {
+				flag.Value.Set(envValue)
+			}
+		}
+	}
+}
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "wunderctl",
@@ -147,6 +188,9 @@ var rootCmd = &cobra.Command{
 	// Don't show usage on error
 	SilenceUsage: true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		workaroundBugWithDuplicatedFlags(cmd)
+		updateFlagsFromEnvironment(cmd)
+
 		switch cmd.Name() {
 		// skip any setup to avoid logging anything
 		// because the command output data on stdout
@@ -340,15 +384,15 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.DebugMode, "debug", false, "Enables the debug mode so that all requests and responses will be logged")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.Telemetry, "telemetry", !isTelemetryDisabled, "Enables telemetry. Telemetry allows us to accurately gauge WunderGraph feature usage, pain points, and customization across all users.")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.TelemetryDebugMode, "telemetry-debug", isTelemetryDebugEnabled, "Enables the debug mode for telemetry. Understand what telemetry is being sent to us.")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", true, "Enables pretty logging")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, prettyLoggingFlagName, false, "Enables pretty logging")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "Directory of your wundergraph.config.ts")
 }
 
-func configureEmbeddedNatsBlocking(ctx context.Context) {
-
-	disable := os.Getenv("WG_DISABLE_EMBEDDED_NATS")
-	if disable == "true" {
-		return
+// startEmbeddedNats starts the embedded NATS server and returns its URL.
+// if the server can't be started, it logs any errors and returns an empty string
+func startEmbeddedNats(ctx context.Context, log *zap.Logger) string {
+	if os.Getenv(natsDisableEmbeddedServerKey) == "true" {
+		return ""
 	}
 
 	log.Debug("Embedded NATS server enabled")
@@ -357,22 +401,38 @@ func configureEmbeddedNatsBlocking(ctx context.Context) {
 	// in production, the user should run a dedicated NATS server
 	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 	if err != nil {
-		return
+		log.Warn("could not find WunderGraph directory for NATS", zap.Error(err))
+		return ""
 	}
 	storageDir := filepath.Join(wunderGraphDir, "generated", "nats-server", "storage")
 	if err := os.MkdirAll(storageDir, 0755); err != nil {
-		return
+		log.Warn("could not initialize NATS storage dir", zap.Error(err))
+		return ""
 	}
+	// Select a random TCP port to avoid conflicts with other software
+	// starting a NATS server in the default port (e.g. Docker Desktop)
+	listener, err := net.Listen("tcp", ":0")
+	if err != nil {
+		log.Error("could not select random port for NATS", zap.Error(err))
+		return ""
+	}
+	randomPort := listener.Addr().(*net.TCPAddr).Port
+	listener.Close()
 	srv := natsTest.RunServer(&natsServer.Options{
+		Port:      randomPort,
 		JetStream: true,
 		StoreDir:  storageDir,
 	})
 	if srv == nil {
-		log.Debug("Embedded NATS server could not be started")
-		return
+		log.Warn("Embedded NATS server could not be started")
+		return ""
 	}
-	log.Debug("Embedded NATS server started")
-	<-ctx.Done()
-	srv.Shutdown()
-	log.Debug("Embedded NATS server stopped")
+	serverURL := fmt.Sprintf("nats://localhost:%d", randomPort)
+	log.Debug("embedded NATS server started", zap.String("url", serverURL))
+	go func() {
+		<-ctx.Done()
+		srv.Shutdown()
+		log.Debug("Embedded NATS server stopped")
+	}()
+	return serverURL
 }

@@ -106,7 +106,17 @@ func (b *Bundler) buildErr() error {
 	var err error
 
 	for _, message := range b.buildResult.Errors {
-		err = multierror.Append(err, fmt.Errorf("%s (%d:%d):\n%s\n%s", message.Location.File, message.Location.Line, message.Location.Column, message.Location.LineText, message.Text))
+		file := "????"
+		line := 0
+		column := 0
+		lineText := ""
+		if message.Location != nil {
+			file = message.Location.File
+			line = message.Location.Line
+			column = message.Location.Column
+			lineText = message.Location.LineText
+		}
+		err = multierror.Append(err, fmt.Errorf("%s (%d:%d):\n%s\n%s", file, line, column, lineText, message.Text))
 	}
 
 	return err
@@ -268,7 +278,12 @@ func (b *Bundler) initialBuild() api.BuildResult {
 		Setup: func(build api.PluginBuild) {
 			build.OnResolve(api.OnResolveOptions{Filter: `.*`},
 				func(args api.OnResolveArgs) (api.OnResolveResult, error) {
-					file := filepath.Join(args.ResolveDir, args.Path)
+					var file string
+					if filepath.IsAbs(args.Path) {
+						file = args.Path
+					} else {
+						file = filepath.Join(args.ResolveDir, args.Path)
+					}
 
 					if args.Kind == api.ResolveJSImportStatement || (!b.skipWatchOnEntryPoint && args.Kind == api.ResolveEntryPoint) {
 						isExternal := NonNodeModuleReg.MatchString(args.Path)

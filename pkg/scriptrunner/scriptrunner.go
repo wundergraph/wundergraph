@@ -1,14 +1,76 @@
 package scriptrunner
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os"
+	"time"
 
 	gocmd "github.com/go-cmd/cmd"
 	"github.com/smallnest/ringbuffer"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
 )
+
+type pipeWriter struct {
+	w    io.Writer
+	pipe func(line string) string
+	buf  bytes.Buffer
+}
+
+func (w *pipeWriter) Write(data []byte) (int, error) {
+	for _, b := range data {
+		w.buf.WriteByte(b)
+		if b == '\n' {
+			line := w.pipe(w.buf.String())
+			w.buf.Reset()
+			if _, err := io.WriteString(w.w, line); err != nil {
+				return 0, err
+			}
+		}
+	}
+	return len(data), nil
+}
+
+// OutputConfig configures the script output. Stdout and Stderr default
+// to os.Stdout/os.Stderr, even if OutputConfig is nil. Pipe is an optional
+// function that transforms each output line before printing it.
+type OutputConfig struct {
+	Stdout io.Writer
+	Stderr io.Writer
+	Pipe   func(line string) string
+}
+
+func (c *OutputConfig) pipe(w io.Writer) io.Writer {
+	if c != nil && c.Pipe != nil {
+		return &pipeWriter{
+			w:    w,
+			pipe: c.Pipe,
+		}
+	}
+	return w
+}
+
+func (c *OutputConfig) stdout() io.Writer {
+	var stdout io.Writer
+	if c == nil || c.Stdout == nil {
+		stdout = os.Stdout
+	} else {
+		stdout = c.Stdout
+	}
+	return c.pipe(stdout)
+}
+
+func (c *OutputConfig) stderr() io.Writer {
+	var stderr io.Writer
+	if c == nil || c.Stdout == nil {
+		stderr = os.Stderr
+	} else {
+		stderr = c.Stderr
+	}
+	return c.pipe(stderr)
+}
 
 type Config struct {
 	Name       string
@@ -20,13 +82,11 @@ type Config struct {
 	FirstRunEnv   []string
 	AbsWorkingDir string
 	Logger        *zap.Logger
-	// Streaming determines if the script output is streamed to stdout/stderr.
-	Streaming bool
+	Output        *OutputConfig
 }
 
 type ScriptRunner struct {
 	name          string
-	fatalOnStop   bool
 	executable    string
 	scriptArgs    []string
 	scriptEnv     []string
@@ -36,15 +96,15 @@ type ScriptRunner struct {
 	cmdDoneChan   chan struct{}
 	log           *zap.Logger
 	cmd           *gocmd.Cmd
+	stdout        io.Writer
+	stderr        io.Writer
 	stdErrBuf     *ringbuffer.RingBuffer
-	streaming     bool
 }
 
 func NewScriptRunner(config *Config) *ScriptRunner {
-
 	return &ScriptRunner{
 		name:          config.Name,
-		log:           config.Logger,
+		log:           config.Logger.With(zap.String("runnerName", config.Name)),
 		firstRunEnv:   config.FirstRunEnv,
 		absWorkingDir: config.AbsWorkingDir,
 		executable:    config.Executable,
@@ -52,7 +112,8 @@ func NewScriptRunner(config *Config) *ScriptRunner {
 		scriptEnv:     config.ScriptEnv,
 		firstRun:      true,
 		stdErrBuf:     ringbuffer.New(1024 * 1024), // 1MB
-		streaming:     config.Streaming,
+		stdout:        config.Output.stdout(),
+		stderr:        config.Output.stderr(),
 	}
 }
 
@@ -105,10 +166,7 @@ func (b *ScriptRunner) Successful() bool {
 func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 	err := b.Stop()
 	if err != nil {
-		b.log.Debug("Stopping runner failed",
-			zap.String("runnerName", b.name),
-			zap.Error(err),
-		)
+		b.log.Debug("Stopping runner failed", zap.Error(err))
 	}
 
 	cmdOptions := CmdOptions{
@@ -116,8 +174,9 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 		cmdDir:     b.absWorkingDir,
 		scriptArgs: b.scriptArgs,
 		scriptEnv:  b.scriptEnv,
+		stdout:     b.stdout,
+		stderr:     b.stderr,
 		stdErrBuf:  b.stdErrBuf,
-		streaming:  b.streaming,
 	}
 
 	if b.firstRun {
@@ -135,17 +194,13 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 		case <-ctx.Done():
 			err := b.cmd.Stop()
 			if err != nil {
-				b.log.Error("Stopping runner failed",
-					zap.String("runnerName", b.name),
-					zap.Error(err),
-				)
+				b.log.Error("Stopping runner failed", zap.Error(err))
 			}
 			status := b.cmd.Status()
 			b.log.Debug("Script runner context cancelled",
-				zap.String("runnerName", b.name),
 				zap.Int("exit", status.Exit),
-				zap.Int64("startTs", status.StartTs),
-				zap.Int64("stopTs", status.StopTs),
+				zap.Time("started", time.Unix(0, status.StartTs)),
+				zap.Time("stopped", time.Unix(0, status.StopTs)),
 				zap.Bool("complete", status.Complete),
 			)
 		case <-b.cmd.Done():
@@ -155,30 +210,27 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 			// when we re-start the process after a watched file has changed
 			if status.Exit == -1 {
 				b.log.Debug("Script runner exited with -1 exit code",
-					zap.String("runnerName", b.name),
 					zap.Int("exit", status.Exit),
 					zap.Error(status.Error),
-					zap.Int64("startTs", status.StartTs),
-					zap.Int64("stopTs", status.StopTs),
+					zap.Time("started", time.Unix(0, status.StartTs)),
+					zap.Time("stopped", time.Unix(0, status.StopTs)),
 					zap.Bool("complete", status.Complete),
 				)
 				return
 			}
 			if status.Error != nil || status.Exit > 0 {
 				b.log.Debug("Script runner exited with non-zero exit code",
-					zap.String("runnerName", b.name),
 					zap.Int("exit", status.Exit),
 					zap.Error(status.Error),
-					zap.Int64("startTs", status.StartTs),
-					zap.Int64("stopTs", status.StopTs),
+					zap.Time("started", time.Unix(0, status.StartTs)),
+					zap.Time("stopped", time.Unix(0, status.StopTs)),
 					zap.Bool("complete", status.Complete),
 				)
 			} else {
 				b.log.Debug("Script runner is done",
-					zap.String("runnerName", b.name),
 					zap.Int("exit", status.Exit),
-					zap.Int64("startTs", status.StartTs),
-					zap.Int64("stopTs", status.StopTs),
+					zap.Time("started", time.Unix(0, status.StartTs)),
+					zap.Time("stopped", time.Unix(0, status.StopTs)),
 					zap.Bool("complete", status.Complete),
 				)
 			}
@@ -199,10 +251,13 @@ type CmdOptions struct {
 	cmdDir     string
 	scriptArgs []string
 	scriptEnv  []string
-	stdErrBuf  *ringbuffer.RingBuffer
-	stdoutBuf  *ringbuffer.RingBuffer
-	buffered   bool
-	streaming  bool
+	stdout     io.Writer
+	stderr     io.Writer
+	// When the script errors, we want to keep the last lines of output
+	// for debugging purposes.
+	stdErrBuf *ringbuffer.RingBuffer
+	buffered  bool
+	streaming bool
 }
 
 // newCmd creates a new command to run the bundler script.
@@ -217,6 +272,8 @@ func newCmd(options CmdOptions) (*gocmd.Cmd, chan struct{}) {
 	cmd.Dir = options.cmdDir
 	cmd.Env = append(cmd.Env, options.scriptEnv...)
 
+	stderrPipe := io.MultiWriter(options.stderr, options.stdErrBuf)
+
 	doneChan := make(chan struct{})
 
 	// stream IO
@@ -227,26 +284,17 @@ func newCmd(options CmdOptions) (*gocmd.Cmd, chan struct{}) {
 		for cmd.Stdout != nil || cmd.Stderr != nil {
 			select {
 			case line, open := <-cmd.Stdout:
+				fmt.Fprintln(options.stdout, line)
 				if !open {
 					cmd.Stdout = nil
 					continue
 				}
-				if options.streaming {
-					fmt.Println(line)
-				}
-
 			case line, open := <-cmd.Stderr:
+				fmt.Fprintln(stderrPipe, line)
 				if !open {
 					cmd.Stderr = nil
 					continue
 				}
-				if options.streaming {
-					fmt.Fprintln(os.Stderr, line)
-				}
-
-				// When the script errors, we want to keep the last lines of output
-				// for debugging purposes.
-				options.stdErrBuf.WriteString(line + "\n")
 			}
 		}
 	}()

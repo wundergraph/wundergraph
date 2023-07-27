@@ -15,7 +15,7 @@ type HooksServerRunConfig struct {
 	LogLevel          string
 	Production        bool
 	Debug             bool
-	LogStreaming      bool
+	Output            *scriptrunner.OutputConfig
 }
 
 func NewHooksServerRunner(log *zap.Logger, cfg *HooksServerRunConfig) *scriptrunner.ScriptRunner {
@@ -47,7 +47,7 @@ func NewHooksServerRunner(log *zap.Logger, cfg *HooksServerRunConfig) *scriptrun
 		ScriptArgs:    scriptArgs,
 		Logger:        log,
 		ScriptEnv:     append(cfg.Env, hooksEnv...),
-		Streaming:     cfg.LogStreaming,
+		Output:        cfg.Output,
 	})
 
 	return hookServerRunner
