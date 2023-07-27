@@ -460,6 +460,7 @@ const resolveConfig = async (
 			resolvedNodeOptions.defaultHttpProxyUrl !== undefined
 				? resolveConfigurationVariable(resolvedNodeOptions.defaultHttpProxyUrl)
 				: undefined,
+		logger: Logger,
 	};
 
 	// Generate the promises first, then await them all at once
