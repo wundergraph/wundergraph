@@ -1,0 +1,10 @@
+subscription ($key: [String!]!) {
+	kv_watch(keys: $key) {
+		key
+		revision
+		created
+		value {
+			token
+		}
+	}
+}

@@ -1,0 +1,10 @@
+subscription {
+	kv_watchAll {
+		key
+		revision
+		created
+		value {
+			token
+		}
+	}
+}
