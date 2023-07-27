@@ -82,8 +82,8 @@ export interface GraphQLOperation {
 		enable: boolean;
 		pollingIntervalSeconds: number;
 	};
-	AuthenticationConfig: {
-		required: boolean;
+	AuthenticationConfig?: {
+		required?: boolean;
 	};
 	AuthorizationConfig: {
 		claims: ClaimConfig[];
@@ -241,9 +241,6 @@ export const parseGraphQLOperations = (
 								transformations,
 								customJsonScalars
 							),
-							AuthenticationConfig: {
-								required: false,
-							},
 							AuthorizationConfig: {
 								claims: [],
 								roleConfig: {
@@ -292,7 +289,10 @@ export const parseGraphQLOperations = (
 							internalOperationDirective || isInternalOperationByAPIMountPath(operationFile.api_mount_path);
 
 						if (node.directives?.find((d) => d.name.value === 'requireAuthentication') !== undefined) {
-							operation.AuthenticationConfig.required = true;
+							operation.AuthenticationConfig = {
+								...operation.AuthenticationConfig,
+								required: true,
+							};
 						}
 
 						if (wgRoleEnum && wgRoleEnum.kind === 'EnumTypeDefinition') {
@@ -340,10 +340,16 @@ export const parseGraphQLOperations = (
 								operation.AuthorizationConfig.roleConfig.requireMatchAny.length !==
 							0
 						) {
-							operation.AuthenticationConfig.required = true;
+							operation.AuthenticationConfig = {
+								...operation.AuthenticationConfig,
+								required: true,
+							};
 						}
 						if (operation.AuthorizationConfig.claims.length !== 0) {
-							operation.AuthenticationConfig.required = true;
+							operation.AuthenticationConfig = {
+								...operation.AuthenticationConfig,
+								required: true,
+							};
 						}
 						parsed.operations.push(operation);
 					},
@@ -635,7 +641,10 @@ const handleFromClaimDirective = (
 			claimType: parseWellKnownClaim(claimName),
 		};
 	}
-	operation.AuthenticationConfig.required = true;
+	operation.AuthenticationConfig = {
+		...operation.AuthenticationConfig,
+		required: true,
+	};
 	operation.AuthorizationConfig.claims.push(claim);
 };
 

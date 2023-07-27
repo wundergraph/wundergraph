@@ -1,6 +1,5 @@
-import { parse, buildSchema, visit, GraphQLEnumType, Kind, OperationTypeNode } from 'graphql';
+import { parse, buildSchema, visit, GraphQLEnumType } from 'graphql';
 import type { Code } from 'ts-poet';
-import prettier from 'prettier';
 
 import { printType, stringifyAST } from './utils';
 import { transform } from './types';
@@ -49,5 +48,5 @@ export const codegen = (sdl: string) => {
   ` +
 		result.definitions.map((code) => code.toString()).join('\n');
 
-	return prettier.format(source, { parser: 'typescript' });
+	return source;
 };
