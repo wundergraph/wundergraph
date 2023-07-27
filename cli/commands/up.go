@@ -43,6 +43,7 @@ var (
 	clearCache                              bool
 	enableTUI                               bool
 	logs                                    bool
+	bindHost								string
 )
 
 // upCmd represents the up command
@@ -311,6 +312,7 @@ var upCmd = &cobra.Command{
 				ServerScriptFile:  serverOutFile,
 				Env:               helpers.CliEnv(rootFlags),
 				Debug:             rootFlags.DebugMode,
+				BindHost:		   bindHost,
 				LogLevel:          rootFlags.CliLogLevel,
 				Output:            scriptRunnerOutputConfig,
 			}
@@ -575,6 +577,7 @@ func init() {
 	upCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "Disables local caches")
 	upCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "Clears local caches before startup")
 	upCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, prettyLoggingFlagName, true, "Enables pretty logging")
+	upCmd.PersistentFlags().StringVar(&bindHost, "bind-host", "127.0.0.1:9229", "Default host:port to bind to, will only work in conjunction with --debug")
 
 	rootCmd.AddCommand(upCmd)
 }

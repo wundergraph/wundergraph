@@ -44,6 +44,8 @@ make
 Before you run any testapp, you need to ensure that you use your local wunderctl binary. This is necessary because the examples are using the downloaded wunderctl binary from GithHub.
 
 ```bash
+# Ensure your GOBIN is on your path.  Only needs doing once
+PATH=$PATH:$(go env GOPATH)/bin
 # Install the wunderctl binary in your GOBIN.
 make install
 # Set this environment variable to use your local wunderctl binary for all calls in the SDK.
