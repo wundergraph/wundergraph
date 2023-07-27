@@ -380,7 +380,7 @@ export class Client {
 				const code = decodeURIComponent(errorCode || '');
 				const message = decodeURIComponent(errorMessage || errorCode || '');
 				window.history.replaceState({}, window.document.title, nextUrl);
-				throw new NoUserError({ code, message, statusCode: 401 });
+				throw new ResponseError({ code, message, statusCode: 401 });
 			}
 		}
 	}
