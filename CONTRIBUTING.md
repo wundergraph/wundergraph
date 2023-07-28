@@ -84,6 +84,18 @@ echo "export NVM_DIR="$HOME/.nvm"\n[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.
 
 We merge all pull requests in `squash merge` mode. You're not enforced to use [conventional commit standard](https://www.conventionalcommits.org/en/v1.0.0-beta.2/#why-use-conventional-commits) across all your commits, but it's good practice and avoids mistakes. However, it's important that the ultimate squashed commit message follow the conventionalcommit standard.
 
+Please ensure your formatting is correct before checking in. This can be done by running
+
+```bash
+ make golang-ci-fix
+```
+
+If you do not have golangci-lint installed this will fail. It can be installed via brew
+
+```bash
+brew install golangci-lint
+```
+
 ## Releases
 
 See the [Release Guide](docs/releasing.md) for more information.

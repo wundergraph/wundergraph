@@ -14,7 +14,7 @@ type HooksServerRunConfig struct {
 	Env               []string
 	LogLevel          string
 	Production        bool
-	BindHost		  string
+	DebugBindAddress  string
 	Debug             bool
 	Output            *scriptrunner.OutputConfig
 }
@@ -37,7 +37,7 @@ func NewHooksServerRunner(log *zap.Logger, cfg *HooksServerRunConfig) *scriptrun
 	var scriptArgs []string
 
 	if cfg.Debug {
-		scriptArgs = append(scriptArgs, "--inspect=" + cfg.BindHost)
+		scriptArgs = append(scriptArgs, "--inspect="+cfg.DebugBindAddress)
 	}
 	scriptArgs = append(scriptArgs, cfg.ServerScriptFile)
 
