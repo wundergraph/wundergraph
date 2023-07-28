@@ -39,7 +39,7 @@ func ToJSON(query string, allowList []string) ([]byte, error) {
 	}
 
 	var (
-		builder interface{} = make(map[string]interface{})
+		builder interface{} = make(map[string]any)
 	)
 	params := strings.Split(query, "&")
 	for _, part := range params {
@@ -63,9 +63,6 @@ func queryToMap(param string, allowList []string) (map[string]interface{}, error
 	if err != nil {
 		return nil, err
 	}
-	if allowList != nil && !slices.Contains(allowList, rawKey) {
-		return nil, nil
-	}
 	rawValue, err = url.QueryUnescape(rawValue)
 	if err != nil {
 		return nil, err
@@ -77,6 +74,10 @@ func queryToMap(param string, allowList []string) (map[string]interface{}, error
 
 	pieces := bracketSplitter.Split(rawKey, -1)
 	key := pieces[0]
+
+	if allowList != nil && !slices.Contains(allowList, key) {
+		return nil, nil
+	}
 
 	// If len==1 then rawKey has no [] chars and we can just
 	// decode this as key=value into {key: value}

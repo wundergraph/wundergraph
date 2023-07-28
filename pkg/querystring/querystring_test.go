@@ -17,6 +17,19 @@ func TestToJSONNested(t *testing.T) {
 	}
 }
 
+func TestToJSONNestedWithAllowList(t *testing.T) {
+	query := "bar%5Bone%5D%5Btwo%5D=2&bar[one][red]=112"
+	expected := `{"bar":{"one":{"red":112,"two":2}}}`
+	actual, err := ToJSON(query, []string{"bar"})
+	if err != nil {
+		t.Error(err)
+	}
+	actualStr := string(actual)
+	if actualStr != expected {
+		t.Errorf("Expected: %s Actual: %s", expected, actualStr)
+	}
+}
+
 func TestToJSONPlain(t *testing.T) {
 	query := "cat=1&dog=2"
 	expected := `{"cat":1,"dog":2}`
@@ -98,6 +111,19 @@ func TestToJSONWithAllowList(t *testing.T) {
 func TestToJSONWithAllowListIgnore(t *testing.T) {
 	query := "cat=1&dog=2"
 	expected := `{"cat":1}`
+	actual, err := ToJSON(query, []string{"cat"})
+	if err != nil {
+		t.Error(err)
+	}
+	actualStr := string(actual)
+	if actualStr != expected {
+		t.Errorf("Expected: %s Actual: %s", expected, actualStr)
+	}
+}
+
+func TestToJSONWithAllowListArray(t *testing.T) {
+	query := "cat[]=1&cat[]=2"
+	expected := `{"cat":[1,2]}`
 	actual, err := ToJSON(query, []string{"cat"})
 	if err != nil {
 		t.Error(err)
