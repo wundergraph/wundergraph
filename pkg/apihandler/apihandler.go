@@ -1641,13 +1641,13 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUriRegexes),
 	))
 
-	authorizeRouter := router.PathPrefix("/authorize").Subrouter()
+	authorizeRouter := router.PathPrefix("/" + authentication.AuthorizePath).Subrouter()
 	authorizeRouter.Use(authentication.ValidateRedirectURIQueryParameter(
 		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUris),
 		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUriRegexes),
 	))
 
-	callbackRouter := router.PathPrefix("/callback").Subrouter()
+	callbackRouter := router.PathPrefix("/" + authentication.CallbackPath).Subrouter()
 
 	switch provider.Kind {
 	case wgpb.AuthProviderKind_AuthProviderGithub:
@@ -1664,8 +1664,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 				StaticVariableContent: r.githubAuthDemoClientSecret,
 			}
 		}
-		github := authentication.NewGithubCookieHandler(r.log)
-		github.Register(authorizeRouter, callbackRouter, authentication.GithubConfig{
+		github := authentication.NewGithubCookieHandler(authentication.GithubConfig{
 			ClientID:           loadvariable.String(provider.GithubConfig.ClientId),
 			ClientSecret:       loadvariable.String(provider.GithubConfig.ClientSecret),
 			ProviderID:         provider.Id,
@@ -1673,7 +1672,8 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
 			AuthTimeout:        authTimeout,
-		}, r.authenticationHooks())
+		}, r.authenticationHooks(), r.log)
+		github.Register(authorizeRouter, callbackRouter)
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "github"),
 			zap.String("providerId", provider.Id),
@@ -1694,8 +1694,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			})
 		}
 
-		openID := authentication.NewOpenIDConnectCookieHandler(r.log)
-		openID.Register(authorizeRouter, callbackRouter, authentication.OpenIDConnectConfig{
+		openID, err := authentication.NewOpenIDConnectCookieHandler(authentication.OpenIDConnectConfig{
 			Issuer:             loadvariable.String(provider.OidcConfig.Issuer),
 			ClientID:           loadvariable.String(provider.OidcConfig.ClientId),
 			ClientSecret:       loadvariable.String(provider.OidcConfig.ClientSecret),
@@ -1705,7 +1704,12 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
 			AuthTimeout:        authTimeout,
-		}, r.authenticationHooks())
+		}, r.authenticationHooks(), r.log)
+		if err != nil {
+			r.log.Error("creating OIDC auth provider", zap.Error(err))
+			break
+		}
+		openID.Register(authorizeRouter, callbackRouter)
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "oidc"),
 			zap.String("providerId", provider.Id),
