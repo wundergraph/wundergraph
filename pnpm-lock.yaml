@@ -254,7 +254,7 @@ importers:
   packages/golang-client:
     dependencies:
       '@wundergraph/protobuf':
-        specifier: workspace:^0.118.0
+        specifier: workspace:^0.118.1
         version: link:../protobuf
       execa:
         specifier: 5.1.1
@@ -285,7 +285,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.170.1
+        specifier: workspace:^0.171.0
         version: link:../sdk
       typescript:
         specifier: ^5.1.6
@@ -325,7 +325,7 @@ importers:
   packages/nextjs:
     dependencies:
       '@wundergraph/protobuf':
-        specifier: workspace:^0.118.0
+        specifier: workspace:^0.118.1
         version: link:../protobuf
       '@wundergraph/swr':
         specifier: workspace:*
@@ -659,7 +659,7 @@ importers:
         specifier: workspace:*
         version: link:../orm
       '@wundergraph/protobuf':
-        specifier: workspace:^0.118.0
+        specifier: workspace:^0.118.1
         version: link:../protobuf
       '@wundergraph/straightforward':
         specifier: ^4.2.5
@@ -6925,7 +6925,7 @@ packages:
       '@graphql-mesh/utils': 0.94.5(@graphql-mesh/cross-helpers@0.4.0)(@graphql-mesh/types@0.94.5)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
       '@json-schema-tools/meta-schema': 1.7.0
-      '@whatwg-node/fetch': 0.9.9
+      '@whatwg-node/fetch': 0.9.4
       ajv: 8.12.0
       ajv-formats: 2.1.1(ajv@8.12.0)
       dset: 3.1.2
@@ -23521,14 +23521,6 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /rollup@3.7.4:
-    resolution: {integrity: sha512-jN9rx3k5pfg9H9al0r0y1EYKSeiRANZRYX32SuNXAnKzh6cVyf4LZVto1KAuDnbHT03E1CpsgqDKaqQ8FZtgxw==}
-    engines: {node: '>=14.18.0', npm: '>=8.0.0'}
-    hasBin: true
-    optionalDependencies:
-      fsevents: 2.3.2
-    dev: true
-
   /run-applescript@5.0.0:
     resolution: {integrity: sha512-XcT5rBksx1QdIhlFOCtgZkB99ZEouFZ1E2Kc2LHqNW13U3/74YGdkQRmThTwxy4QIyookibDKYZOPqX//6BlAg==}
     engines: {node: '>=12'}
@@ -25362,7 +25354,7 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 16.18.14
-      acorn: 8.10.0
+      acorn: 8.8.2
       acorn-walk: 8.2.0
       arg: 4.1.3
       create-require: 1.1.1
@@ -25424,7 +25416,7 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 18.16.16
-      acorn: 8.10.0
+      acorn: 8.8.2
       acorn-walk: 8.2.0
       arg: 4.1.3
       create-require: 1.1.1
@@ -25533,7 +25525,7 @@ packages:
       joycon: 3.1.1
       postcss-load-config: 3.1.4(ts-node@10.9.1)
       resolve-from: 5.0.0
-      rollup: 3.7.4
+      rollup: 3.25.1
       source-map: 0.8.0-beta.0
       sucrase: 3.29.0
       tree-kill: 1.2.2
@@ -25570,7 +25562,7 @@ packages:
       joycon: 3.1.1
       postcss-load-config: 3.1.4(ts-node@10.9.1)
       resolve-from: 5.0.0
-      rollup: 3.7.4
+      rollup: 3.25.1
       source-map: 0.8.0-beta.0
       sucrase: 3.29.0
       tree-kill: 1.2.2
@@ -27011,6 +27003,7 @@ packages:
     resolution: {directory: packages/sdk, type: directory}
     id: file:packages/sdk
     name: '@wundergraph/sdk'
+    version: 0.171.0
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.4.0

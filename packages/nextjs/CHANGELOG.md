@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.13.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.13.1...@wundergraph/nextjs@0.13.2) (2023-07-28)
+
+### Bug Fixes
+
+* allow TS operations to override a requiredAuthentication with false ([#1151](https://github.com/wundergraph/wundergraph/issues/1151)) ([a6017cd](https://github.com/wundergraph/wundergraph/commit/a6017cd39f3c62ed0d658ac44495a0078be28691)) (@fiam)
+
 ## [0.13.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.13.0...@wundergraph/nextjs@0.13.1) (2023-07-24)
 
 **Note:** Version bump only for package @wundergraph/nextjs

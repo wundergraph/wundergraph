@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/orm@0.3.0...@wundergraph/orm@0.3.1) (2023-07-28)
+
+### Bug Fixes
+
+* do not import prettier from the ORM ([#1152](https://github.com/wundergraph/wundergraph/issues/1152)) ([4923c38](https://github.com/wundergraph/wundergraph/commit/4923c38b157d94ddb3d3b5216e43bbf95d56f59b)) (@fiam)
+
 ## [0.3.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/orm@0.2.0...@wundergraph/orm@0.3.0) (2023-07-24)
 
 ### Features
