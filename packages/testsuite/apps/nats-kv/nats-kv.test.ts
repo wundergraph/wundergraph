@@ -259,7 +259,7 @@ describe('The Nats KV', () => {
 		expect(responses[2].data?.kv_watch?.value?.token).toBe('token3');
 	});
 
-	it('should watch a multiple keys', async () => {
+	it('should watch multiple keys', async () => {
 		const client = wg.client();
 		const abortController = new AbortController();
 		const responses: Gql_watchResponse[] = [];
@@ -269,15 +269,6 @@ describe('The Nats KV', () => {
 				key: 'a',
 				value: {
 					token: 'a1',
-				},
-			},
-		});
-		const put2 = await client.mutate({
-			operationName: 'gql_put',
-			input: {
-				key: 'b',
-				value: {
-					token: 'b1',
 				},
 			},
 		});
@@ -293,6 +284,15 @@ describe('The Nats KV', () => {
 				responses.push(res);
 			}
 		);
+		const put2 = await client.mutate({
+			operationName: 'gql_put',
+			input: {
+				key: 'b',
+				value: {
+					token: 'b1',
+				},
+			},
+		});
 		const put3 = await client.mutate({
 			operationName: 'gql_put',
 			input: {
@@ -325,7 +325,7 @@ describe('The Nats KV', () => {
 		expect(responses[3].data?.kv_watch?.value?.token).toBe('b2');
 	});
 
-	it('should watch a all keys', async () => {
+	it('should watch all keys', async () => {
 		const client = wg.client();
 		const abortController = new AbortController();
 		const responses: Gql_watch_allResponse[] = [];
