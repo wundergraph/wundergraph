@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { buildClientSchema, GraphQLSchema, introspectionFromSchema, parse, print, printSchema } from 'graphql';
+import { Logger } from 'pino';
 import { renameTypeFields, renameTypes } from '../graphql/renametypes';
 import {
 	ArgumentSource,
@@ -63,6 +64,7 @@ export interface ApiIntrospectionOptions {
 	 */
 	httpProxyUrl?: string;
 	apiID?: string;
+	logger?: Logger;
 }
 
 export interface ApiFeatures {
