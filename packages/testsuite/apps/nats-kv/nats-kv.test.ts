@@ -1,11 +1,16 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { createTestServer } from './.wundergraph/generated/testing';
+import type { Gql_watchResponse, Gql_watch_allResponse } from './.wundergraph/generated/models';
+import path from 'path';
+import fs from 'fs';
 
 const wg = createTestServer({
 	dir: __dirname,
 });
 
-beforeAll(async () => {
+beforeEach(async () => {
+	const storage = path.join(__dirname, '.wundergraph', 'generated', 'nats-server');
+	fs.rmSync(storage, { recursive: true, force: true });
 	await wg.start();
 	return async () => {
 		await wg.stop();
@@ -126,7 +131,7 @@ describe('The Nats KV', () => {
 			operationName: 'gql_getRevision',
 			input: {
 				key: 'mykey',
-				revision: 5,
+				revision: 1,
 			},
 		});
 		expect(revision.error).toBeUndefined();
@@ -137,7 +142,7 @@ describe('The Nats KV', () => {
 			operationName: 'gql_update',
 			input: {
 				key: 'mykey',
-				revision: 6,
+				revision: 2,
 				value: {
 					token: 'mytoken3',
 				},
@@ -154,7 +159,7 @@ describe('The Nats KV', () => {
 			},
 		});
 		expect(history.error).toBeUndefined();
-		expect(history.data?.kv_history?.length).toBe(7);
+		expect(history.data?.kv_history?.length).toBe(3);
 	});
 
 	it('should get keys and purge', async () => {
@@ -175,7 +180,7 @@ describe('The Nats KV', () => {
 			operationName: 'gql_keys',
 		});
 		expect(keys.error).toBeUndefined();
-		expect(keys.data?.kv_keys?.length).toBe(2);
+		expect(keys.data?.kv_keys?.length).toBe(1);
 
 		const purge = await client.mutate({
 			operationName: 'gql_purge',
@@ -197,5 +202,189 @@ describe('The Nats KV', () => {
 		});
 		expect(revision.error).toBeUndefined();
 		expect(revision.data?.kv_getRevision?.key).toBeUndefined();
+	});
+
+	it('should watch a single key', async () => {
+		const client = wg.client();
+		const abortController = new AbortController();
+		const responses: Gql_watchResponse[] = [];
+		const put = await client.mutate({
+			operationName: 'gql_put',
+			input: {
+				key: 'mykey',
+				value: {
+					token: 'token1',
+				},
+			},
+		});
+		const sub = client.subscribe(
+			{
+				operationName: 'gql_watch',
+				input: {
+					keys: ['mykey'],
+				},
+				abortSignal: abortController.signal,
+			},
+			(res) => {
+				responses.push(res);
+			}
+		);
+		const put2 = await client.mutate({
+			operationName: 'gql_put',
+			input: {
+				key: 'mykey',
+				value: {
+					token: 'token2',
+				},
+			},
+		});
+		const put3 = await client.mutate({
+			operationName: 'gql_put',
+			input: {
+				key: 'mykey',
+				value: {
+					token: 'token3',
+				},
+			},
+		});
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+		abortController.abort();
+		await sub;
+		expect(responses.length).toBe(3);
+		expect(responses[0].data?.kv_watch?.key).toBe('mykey');
+		expect(responses[0].data?.kv_watch?.value?.token).toBe('token1');
+		expect(responses[1].data?.kv_watch?.key).toBe('mykey');
+		expect(responses[1].data?.kv_watch?.value?.token).toBe('token2');
+		expect(responses[2].data?.kv_watch?.key).toBe('mykey');
+		expect(responses[2].data?.kv_watch?.value?.token).toBe('token3');
+	});
+
+	it('should watch multiple keys', async () => {
+		const client = wg.client();
+		const abortController = new AbortController();
+		const responses: Gql_watchResponse[] = [];
+		const put = await client.mutate({
+			operationName: 'gql_put',
+			input: {
+				key: 'a',
+				value: {
+					token: 'a1',
+				},
+			},
+		});
+		const sub = client.subscribe(
+			{
+				operationName: 'gql_watch',
+				input: {
+					keys: ['a', 'b'],
+				},
+				abortSignal: abortController.signal,
+			},
+			(res) => {
+				responses.push(res);
+			}
+		);
+		const put2 = await client.mutate({
+			operationName: 'gql_put',
+			input: {
+				key: 'b',
+				value: {
+					token: 'b1',
+				},
+			},
+		});
+		const put3 = await client.mutate({
+			operationName: 'gql_put',
+			input: {
+				key: 'a',
+				value: {
+					token: 'a2',
+				},
+			},
+		});
+		const put4 = await client.mutate({
+			operationName: 'gql_put',
+			input: {
+				key: 'b',
+				value: {
+					token: 'b2',
+				},
+			},
+		});
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+		abortController.abort();
+		await sub;
+		expect(responses.length).toBe(4);
+		expect(responses[0].data?.kv_watch?.key).toBe('a');
+		expect(responses[0].data?.kv_watch?.value?.token).toBe('a1');
+		expect(responses[1].data?.kv_watch?.key).toBe('b');
+		expect(responses[1].data?.kv_watch?.value?.token).toBe('b1');
+		expect(responses[2].data?.kv_watch?.key).toBe('a');
+		expect(responses[2].data?.kv_watch?.value?.token).toBe('a2');
+		expect(responses[3].data?.kv_watch?.key).toBe('b');
+		expect(responses[3].data?.kv_watch?.value?.token).toBe('b2');
+	});
+
+	it('should watch all keys', async () => {
+		const client = wg.client();
+		const abortController = new AbortController();
+		const responses: Gql_watch_allResponse[] = [];
+		const put = await client.mutate({
+			operationName: 'gql_put',
+			input: {
+				key: 'a',
+				value: {
+					token: 'a1',
+				},
+			},
+		});
+		const put2 = await client.mutate({
+			operationName: 'gql_put',
+			input: {
+				key: 'b',
+				value: {
+					token: 'b1',
+				},
+			},
+		});
+		const sub = client.subscribe(
+			{
+				operationName: 'gql_watch_all',
+				abortSignal: abortController.signal,
+			},
+			(res) => {
+				responses.push(res);
+			}
+		);
+		const put3 = await client.mutate({
+			operationName: 'gql_put',
+			input: {
+				key: 'a',
+				value: {
+					token: 'a2',
+				},
+			},
+		});
+		const put4 = await client.mutate({
+			operationName: 'gql_put',
+			input: {
+				key: 'b',
+				value: {
+					token: 'b2',
+				},
+			},
+		});
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+		abortController.abort();
+		await sub;
+		expect(responses.length).toBe(4);
+		expect(responses[0].data?.kv_watchAll?.key).toBe('a');
+		expect(responses[0].data?.kv_watchAll?.value?.token).toBe('a1');
+		expect(responses[1].data?.kv_watchAll?.key).toBe('b');
+		expect(responses[1].data?.kv_watchAll?.value?.token).toBe('b1');
+		expect(responses[2].data?.kv_watchAll?.key).toBe('a');
+		expect(responses[2].data?.kv_watchAll?.value?.token).toBe('a2');
+		expect(responses[3].data?.kv_watchAll?.key).toBe('b');
+		expect(responses[3].data?.kv_watchAll?.value?.token).toBe('b2');
 	});
 });
