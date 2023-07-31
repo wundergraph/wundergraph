@@ -341,7 +341,7 @@ export class Client {
 
 		const headers: Headers = {};
 
-		if (await this.shouldIncludeCsrfToken()) {
+		if (this.shouldIncludeCsrfToken(this.isAuthenticatedOperation(options.operationName))) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 
@@ -611,7 +611,7 @@ export class Client {
 
 		const headers: Headers = {};
 
-		if (await this.shouldIncludeCsrfToken()) {
+		if (this.shouldIncludeCsrfToken(validation?.requireAuthentication ?? true)) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 
@@ -746,8 +746,11 @@ export class Client {
 		return ok;
 	}
 
-	private async shouldIncludeCsrfToken() {
+	private shouldIncludeCsrfToken(orCondition: boolean) {
 		if (this.csrfEnabled) {
+			if (orCondition) {
+				return true;
+			}
 			// If fetchUser has never been called, assume no authentication is set up
 			return this.userIsAuthenticated ?? false;
 		}
