@@ -12,27 +12,40 @@ import (
 type Feature string
 
 const (
-	OIDC               = Feature("oidc")
-	Auth0              = Feature("auth0")
-	Prometheus         = Feature("prometheus")
-	OpenTelemetry      = Feature("opentelemetry")
-	GraphQLEndpoint    = Feature("graphql-endpoint")
-	SchemaExtension    = Feature("schema-extension")
-	HttpProxy          = Feature("http-proxy")
-	MTLS               = Feature("mtls")
-	CustomJSONScalars  = Feature("custom-json-scalars")
-	CustomIntScalars   = Feature("custom-int-scalars")
-	CustomFloatScalars = Feature("custom-float-scalars")
-	S3Uploads          = Feature("s3-uploads")
-	TokenAuth          = Feature("token-auth")
-	ORM                = Feature("orm")
-	OpenAI             = Feature("openai")
-	AdvancedHooks      = Feature("advanced-hooks")
+	OIDC                = Feature("oidc")
+	Auth0               = Feature("auth0")
+	Prometheus          = Feature("prometheus")
+	OpenTelemetry       = Feature("opentelemetry")
+	GraphQLEndpoint     = Feature("graphql-endpoint")
+	SchemaExtension     = Feature("schema-extension")
+	HttpProxy           = Feature("http-proxy")
+	MTLS                = Feature("mtls")
+	CustomJSONScalars   = Feature("custom-json-scalars")
+	CustomIntScalars    = Feature("custom-int-scalars")
+	CustomFloatScalars  = Feature("custom-float-scalars")
+	S3Uploads           = Feature("s3-uploads")
+	TokenAuth           = Feature("token-auth")
+	ORM                 = Feature("orm")
+	OpenAI              = Feature("openai")
+	AdvancedHooks       = Feature("advanced-hooks")
+	AuthenticationHooks = Feature("authentication-hooks")
+	Federation          = Feature("federation")
+	SQLServer           = Feature("sql-server")
+	ClaimInjection      = Feature("claim-injection")
 )
 
 type featureCheck struct {
 	Feature Feature
 	Check   func(cfg *wgpb.WunderGraphConfiguration) (bool, error)
+}
+
+func isDataSourceKindEnabled(cfg *wgpb.WunderGraphConfiguration, kind wgpb.DataSourceKind) (bool, error) {
+	for _, ds := range cfg.GetApi().GetEngineConfiguration().GetDatasourceConfigurations() {
+		if ds.Kind == kind {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func isFeatureOIDCEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
@@ -131,6 +144,33 @@ func isFeatureAdvancedHooksEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, er
 	return len(cfg.GetHooks()) > 0, nil
 }
 
+func isFeatureAuthenticationHooksEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	hooks := cfg.GetApi().GetAuthenticationConfig().GetHooks()
+	return hooks.GetRevalidateAuthentication() || hooks.GetPostAuthentication() || hooks.GetMutatingPostAuthentication() || hooks.GetPostLogout(), nil
+}
+
+func isFederationEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	for _, ds := range cfg.GetApi().GetEngineConfiguration().GetDatasourceConfigurations() {
+		if ds.GetCustomGraphql().GetFederation() != nil {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func isSQLServerEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	return isDataSourceKindEnabled(cfg, wgpb.DataSourceKind_SQLSERVER)
+}
+
+func isFeatureClaimInjectionEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	for _, op := range cfg.GetApi().GetOperations() {
+		if len(op.GetAuthorizationConfig().GetClaims()) > 0 {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 func featureChecks() []*featureCheck {
 	// Same order as Feature declarations
 	return []*featureCheck{
@@ -150,6 +190,10 @@ func featureChecks() []*featureCheck {
 		{ORM, isFeatureORMEnabled},
 		{OpenAI, isFeatureOpenAIEnabled},
 		{AdvancedHooks, isFeatureAdvancedHooksEnabled},
+		{AuthenticationHooks, isFeatureAuthenticationHooksEnabled},
+		{Federation, isFederationEnabled},
+		{SQLServer, isSQLServerEnabled},
+		{ClaimInjection, isFeatureClaimInjectionEnabled},
 	}
 }
 
@@ -176,6 +220,13 @@ func EnabledFeatures(wunderGraphDir string) ([]Feature, error) {
 var (
 	enterpriseFeatures = map[Feature]struct{}{
 		AdvancedHooks: {},
+		// Auth0:          {},
+		// OIDC:           {},
+		// Federation:     {},
+		// SQLServer:      {},
+		// ClaimInjection: {},
+		// Prometheus:     {},
+		// OpenTelemetry:  {},
 	}
 )
 
