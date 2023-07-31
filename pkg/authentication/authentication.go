@@ -873,11 +873,10 @@ func (u *UserLogoutHandler) logoutFromProvider(w http.ResponseWriter, r *http.Re
 }
 
 type CSRFErrorHandler struct {
-	InsecureCookies bool
 }
 
 func (u *CSRFErrorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	resetUserCookies(w, r, !u.InsecureCookies)
+	w.Header().Set("X-CSRF-Failure", "true")
 	http.Error(w, "forbidden", http.StatusForbidden)
 }
 
@@ -904,10 +903,14 @@ type CSRFConfig struct {
 	Secret          []byte
 }
 
+func isMutatingHTTPMethod(method string) bool {
+	return method == "POST" || method == "DELETE" || method == "PATCH"
+}
+
 func NewCSRFMw(config CSRFConfig) func(handler http.Handler) http.Handler {
 	return func(unprotected http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if user := UserFromContext(r.Context()); user != nil && user.FromCookie {
+			if isMutatingHTTPMethod(r.Method) && r.Header.Get("Cookie") != "" {
 				domain := removeSubdomain(sanitizeDomain(r.Host))
 				csrfMiddleware := csrf.Protect(config.Secret,
 					csrf.Path("/"),
@@ -917,9 +920,7 @@ func NewCSRFMw(config CSRFConfig) func(handler http.Handler) http.Handler {
 					csrf.HttpOnly(true),
 					csrf.Secure(!config.InsecureCookies),
 					csrf.SameSite(csrf.SameSiteStrictMode),
-					csrf.ErrorHandler(&CSRFErrorHandler{
-						InsecureCookies: config.InsecureCookies,
-					}),
+					csrf.ErrorHandler(&CSRFErrorHandler{}),
 				)
 				csrfMiddleware(unprotected).ServeHTTP(w, r)
 				return

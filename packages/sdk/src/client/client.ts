@@ -122,10 +122,17 @@ export class Client {
 	private async fetch(input: RequestInfo, init: RequestInit = {}): Promise<globalThis.Response> {
 		const fetchImpl = this.options.customFetch || globalThis.fetch;
 
+		const requestHeaders: Headers = {};
+
+		if (init.method === 'POST' || init.method === 'PATCH' || init.method === 'DELETE') {
+			requestHeaders['X-CSRF-Token'] = await this.getCSRFToken();
+		}
+
 		init.headers = {
 			...this.baseHeaders,
 			...this.extraHeaders,
 			...init.headers,
+			...requestHeaders,
 		};
 
 		let timeout: NodeJS.Timeout | undefined;
@@ -338,17 +345,10 @@ export class Client {
 		const params = this.searchParams();
 		const url = this.addUrlParams(this.operationUrl(options.operationName), params);
 
-		const headers: Headers = {};
-
-		if (this.isAuthenticatedOperation(options.operationName) && this.csrfEnabled) {
-			headers['X-CSRF-Token'] = await this.getCSRFToken();
-		}
-
 		const resp = await this.fetchJson(url, {
 			method: 'POST',
 			signal: options.abortSignal,
 			body: this.stringifyInput(options.input),
-			headers,
 		});
 
 		return this.fetchResponseToClientResponse(resp);
@@ -607,11 +607,6 @@ export class Client {
 		}
 
 		const headers: Headers = {};
-
-		if (this.csrfEnabled && (validation?.requireAuthentication ?? true)) {
-			headers['X-CSRF-Token'] = await this.getCSRFToken();
-		}
-
 		const params = this.searchParams();
 
 		if ('profile' in config) {
