@@ -75,6 +75,7 @@ export class Client {
 	protected readonly baseHeaders: Headers = {};
 	private extraHeaders: Headers = {};
 	private csrfToken: string | undefined;
+	private userIsAuthenticated: boolean | undefined;
 	protected readonly csrfEnabled: boolean = true;
 
 	public static buildCacheKey(query: OperationRequestOptions): string {
@@ -122,17 +123,10 @@ export class Client {
 	private async fetch(input: RequestInfo, init: RequestInit = {}): Promise<globalThis.Response> {
 		const fetchImpl = this.options.customFetch || globalThis.fetch;
 
-		const requestHeaders: Headers = {};
-
-		if (init.method === 'POST' || init.method === 'PATCH' || init.method === 'DELETE') {
-			requestHeaders['X-CSRF-Token'] = await this.getCSRFToken();
-		}
-
 		init.headers = {
 			...this.baseHeaders,
 			...this.extraHeaders,
 			...init.headers,
-			...requestHeaders,
 		};
 
 		let timeout: NodeJS.Timeout | undefined;
@@ -345,6 +339,12 @@ export class Client {
 		const params = this.searchParams();
 		const url = this.addUrlParams(this.operationUrl(options.operationName), params);
 
+		const headers: Headers = {};
+
+		if (await this.shouldIncludeCsrfToken()) {
+			headers['X-CSRF-Token'] = await this.getCSRFToken();
+		}
+
 		const resp = await this.fetchJson(url, {
 			method: 'POST',
 			signal: options.abortSignal,
@@ -403,14 +403,17 @@ export class Client {
 		});
 
 		if (!response.ok) {
+			this.userIsAuthenticated = false;
 			throw await this.handleClientResponseError(response);
 		}
 
 		if (response.status == 204) {
+			this.userIsAuthenticated = false;
 			// No user is signed in. Keep this in sync with pkg/authentication/authentication.go
 			throw new NoUserError({ statusCode: response.status });
 		}
 
+		this.userIsAuthenticated = true;
 		return response.json();
 	}
 
@@ -607,6 +610,11 @@ export class Client {
 		}
 
 		const headers: Headers = {};
+
+		if (await this.shouldIncludeCsrfToken()) {
+			headers['X-CSRF-Token'] = await this.getCSRFToken();
+		}
+
 		const params = this.searchParams();
 
 		if ('profile' in config) {
@@ -736,5 +744,20 @@ export class Client {
 		}
 
 		return ok;
+	}
+
+	private async shouldIncludeCsrfToken() {
+		if (this.csrfEnabled) {
+			if (this.userIsAuthenticated === undefined) {
+				// Call fetchUser to find out if the user is actually
+				// authenticated. Since this is cached, it won't be called
+				// more than once per Client instance
+				try {
+					await this.fetchUser();
+				} catch {}
+			}
+			return this.userIsAuthenticated;
+		}
+		return false;
 	}
 }

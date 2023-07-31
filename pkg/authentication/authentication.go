@@ -903,14 +903,10 @@ type CSRFConfig struct {
 	Secret          []byte
 }
 
-func isMutatingHTTPMethod(method string) bool {
-	return method == "POST" || method == "DELETE" || method == "PATCH"
-}
-
 func NewCSRFMw(config CSRFConfig) func(handler http.Handler) http.Handler {
 	return func(unprotected http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if isMutatingHTTPMethod(r.Method) && r.Header.Get("Cookie") != "" {
+			if user := UserFromContext(r.Context()); user != nil && user.FromCookie {
 				domain := removeSubdomain(sanitizeDomain(r.Host))
 				csrfMiddleware := csrf.Protect(config.Secret,
 					csrf.Path("/"),
