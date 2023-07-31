@@ -52,7 +52,6 @@ const soapToGraphQLApi = async (wsdl: string, introspection: SoapIntrospection, 
 			internal: true,
 			loadSchemaFromString: () => schema,
 			headers: introspection.headers,
-			customIntScalars: ['BigInt'],
 		},
 		{}
 	);
