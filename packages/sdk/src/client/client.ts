@@ -349,6 +349,7 @@ export class Client {
 			method: 'POST',
 			signal: options.abortSignal,
 			body: this.stringifyInput(options.input),
+			headers,
 		});
 
 		return this.fetchResponseToClientResponse(resp);
