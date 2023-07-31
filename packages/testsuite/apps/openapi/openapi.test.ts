@@ -111,7 +111,7 @@ describe('Test subscriptions', () => {
 		// Create 100 notes, to ensure the payload is bigger than
 		// the patch
 		const n = 100;
-		const ids: number[] = [];
+		const ids: string[] = [];
 		for (let ii = 0; ii < n; ii++) {
 			const result = await client.mutate({
 				operationName: 'NewNote',

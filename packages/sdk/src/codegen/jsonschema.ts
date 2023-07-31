@@ -1,6 +1,8 @@
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 
 export type VisitorCallBack = (name: string, isRequired: boolean, isArray: boolean) => void;
+export type VisitorAnyCallBack = (name: string, typename: string, isRequired: boolean, isArray: boolean) => void;
+
 export type CustomTypeVisitorCallBack = (
 	propertyName: string,
 	typeName: string,
@@ -34,7 +36,7 @@ export interface SchemaVisitor {
 	object?: VisitorCallBacks;
 	string?: StringVisitorCallBack;
 	array?: VisitorCallBacks;
-	any?: VisitorCallBack;
+	any?: VisitorAnyCallBack;
 	customType?: CustomTypeVisitorCallBack;
 	oneOf?: OneOfVisitorCallBacks;
 }
@@ -82,7 +84,7 @@ const visitSchema = (
 	}
 	let schemaType: string | undefined;
 	if (schema.type !== undefined && Array.isArray(schema.type)) {
-		schemaType = schema.type.find((type) => type !== 'null') || '';
+		schemaType = schema.type.filter((type) => type !== 'null').join('|') || '';
 	} else {
 		schemaType = schema.type || '';
 	}
@@ -111,6 +113,6 @@ const visitSchema = (
 			visitor.number && visitor.number(propertyName, isRequired, isArray);
 			break;
 		default:
-			visitor.any && visitor.any(propertyName, isRequired, isArray);
+			visitor.any && visitor.any(propertyName, schemaType, isRequired, isArray);
 	}
 };
