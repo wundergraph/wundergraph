@@ -748,15 +748,8 @@ export class Client {
 
 	private async shouldIncludeCsrfToken() {
 		if (this.csrfEnabled) {
-			if (this.userIsAuthenticated === undefined) {
-				// Call fetchUser to find out if the user is actually
-				// authenticated. Since this is cached, it won't be called
-				// more than once per Client instance
-				try {
-					await this.fetchUser();
-				} catch {}
-			}
-			return this.userIsAuthenticated;
+			// If fetchUser has never been called, assume no authentication is set up
+			return this.userIsAuthenticated ?? false;
 		}
 		return false;
 	}
