@@ -233,7 +233,6 @@ export const openApiSpecificationToGraphQLApi = async (
 			internal: true,
 			loadSchemaFromString: () => schema,
 			headers: introspection.headers,
-			customIntScalars: ['BigInt'],
 		},
 		{}
 	);

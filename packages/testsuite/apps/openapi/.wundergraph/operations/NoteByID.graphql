@@ -1,4 +1,4 @@
-query ($id: Int!) {
+query ($id: BigInt!) {
 	notes_noteByID(noteID: $id) {
 		id
 		text
