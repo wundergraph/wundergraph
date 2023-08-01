@@ -75,16 +75,27 @@ describe('Test correct responses', () => {
 		expect(mutateResult.error).toBeUndefined();
 		const id = mutateResult.data?.notes_newNote?.id ?? 0;
 
-		const queryResult = await wg.client().query({
+		const byNumberResult = await wg.client().query({
 			operationName: 'NoteByID',
 			input: {
 				id: id,
 			},
 		});
 
-		expect(queryResult.error).toBeUndefined();
-		expect(queryResult.data?.notes_noteByID?.id ?? 0).toBe(id);
-		expect(queryResult.data?.notes_noteByID?.text ?? '').toBe(text);
+		expect(byNumberResult.error).toBeUndefined();
+		expect(byNumberResult.data?.notes_noteByID?.id ?? 0).toBe(id);
+		expect(byNumberResult.data?.notes_noteByID?.text ?? '').toBe(text);
+
+		const byString = await wg.client().query({
+			operationName: 'NoteByID',
+			input: {
+				id: id.toString(),
+			},
+		});
+
+		expect(byString.error).toBeUndefined();
+		expect(byString.data?.notes_noteByID?.id ?? 0).toBe(id);
+		expect(byString.data?.notes_noteByID?.text ?? '').toBe(text);
 	});
 });
 
@@ -111,7 +122,7 @@ describe('Test subscriptions', () => {
 		// Create 100 notes, to ensure the payload is bigger than
 		// the patch
 		const n = 100;
-		const ids: string[] = [];
+		const ids: (string | number)[] = [];
 		for (let ii = 0; ii < n; ii++) {
 			const result = await client.mutate({
 				operationName: 'NewNote',

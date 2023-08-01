@@ -1435,6 +1435,10 @@ const resolveFieldSchema = (
 					};
 				case 'JSON':
 					return {};
+				case 'BigInt':
+					return {
+						type: ['string', 'number'],
+					};
 				default:
 					if (customJsonScalars.has(fieldType.name.value)) {
 						return {};
