@@ -55,6 +55,9 @@ paths:
                     format: int64
                   text:
                     type: string
+                  jsonData:
+                    type: object
+                    additionalProperties: true
         '400':
           description: The specified note ID is invalid (not a number).
         '404':
