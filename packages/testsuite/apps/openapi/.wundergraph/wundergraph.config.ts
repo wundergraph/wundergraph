@@ -10,6 +10,20 @@ const notes = introspect.openApiV2({
 		filePath: './api.yaml',
 	},
 	baseURL: new EnvironmentVariable('OPENAPI_URL', 'http://localhost:8090/'),
+	schemaExtension: `
+		type JSONData  {
+			id: Int!
+			name: String!
+			date: Int!
+		}
+	`,
+	replaceCustomScalarTypeFields: [
+		{
+			entityName: 'noteByID_200_response',
+			fieldName: 'jsonData',
+			responseTypeReplacement: '[JSONData]',
+		},
+	],
 });
 
 const unions = introspect.openApiV2({

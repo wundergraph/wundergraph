@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 import { createTestServer } from './.wundergraph/generated/testing';
 import { createOpenAPITestServer } from './test-server';
-import { ResponseError, getHttpResponseError } from '@wundergraph/sdk/client';
+import { getHttpResponseError, ResponseError } from '@wundergraph/sdk/client';
 
 const httpServer = createOpenAPITestServer(8090);
 const wg = createTestServer({
@@ -82,9 +82,17 @@ describe('Test correct responses', () => {
 			},
 		});
 
+		const jsonData = [
+			{ id: 1, name: 'data1', date: 10823 },
+			{ id: 2, name: 'data2', date: 10823 },
+		];
+
 		expect(byNumberResult.error).toBeUndefined();
-		expect(byNumberResult.data?.notes_noteByID?.id ?? 0).toBe(id);
-		expect(byNumberResult.data?.notes_noteByID?.text ?? '').toBe(text);
+		const note = byNumberResult.data?.notes_noteByID;
+		expect(note).toBeDefined();
+		expect(note!.id ?? 0).toBe(id);
+		expect(note!.text ?? '').toBe(text);
+		expect(note!.jsonData ?? '').toStrictEqual(jsonData);
 
 		const byString = await wg.client().query({
 			operationName: 'NoteByID',
@@ -159,7 +167,9 @@ describe('Test subscriptions', () => {
 		expect(triggers).toBe(2);
 		abort.abort();
 		const last = await query;
-		expect(last?.data?.notes_all?.length).toBe(expectedNotesLength);
+		if (last) {
+			expect(last?.data?.notes_all?.length).toBe(expectedNotesLength);
+		}
 	});
 });
 

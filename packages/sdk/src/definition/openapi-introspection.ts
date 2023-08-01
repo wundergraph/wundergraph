@@ -112,6 +112,9 @@ export interface OpenAPIIntrospectionV2
 	extends Omit<HTTPUpstream, 'authentication' | 'mTLS' | 'requestTimeoutSeconds'> {
 	source: OpenAPIIntrospectionV2Source;
 	baseURL?: InputVariable;
+	customJSONScalars?: string[];
+	customIntScalars?: string[];
+	customFloatScalars?: string[];
 	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
@@ -233,6 +236,11 @@ export const openApiSpecificationToGraphQLApi = async (
 			internal: true,
 			loadSchemaFromString: () => schema,
 			headers: introspection.headers,
+			customJSONScalars: introspection.customJSONScalars,
+			customIntScalars: introspection.customIntScalars,
+			customFloatScalars: introspection.customFloatScalars,
+			schemaExtension: introspection.schemaExtension,
+			replaceCustomScalarTypeFields: introspection.replaceCustomScalarTypeFields,
 		},
 		{}
 	);
