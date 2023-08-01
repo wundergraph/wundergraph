@@ -92,8 +92,6 @@ describe('Test correct responses', () => {
 		expect(note).toBeDefined();
 		expect(note!.id ?? 0).toBe(id);
 		expect(note!.text ?? '').toBe(text);
-		console.log(note);
-		console.log('%^&^%&^^%&^%&^%&^%');
 		expect(note!.jsonData ?? '').toStrictEqual(jsonData);
 
 		const byString = await wg.client().query({

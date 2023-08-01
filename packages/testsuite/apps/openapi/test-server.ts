@@ -7,7 +7,6 @@ export const createOpenAPITestServer = (port: number) => {
 	});
 
 	server.post<{ Body: string }>('/notes/new', async (request, reply) => {
-		console.log(request.body);
 		let text: string;
 		try {
 			text = JSON.parse(request.body);
