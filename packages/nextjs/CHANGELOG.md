@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.13.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.13.1...@wundergraph/nextjs@0.13.2) (2023-07-28)
+
+### Bug Fixes
+
+* allow TS operations to override a requiredAuthentication with false ([#1151](https://github.com/wundergraph/wundergraph/issues/1151)) ([a6017cd](https://github.com/wundergraph/wundergraph/commit/a6017cd39f3c62ed0d658ac44495a0078be28691)) (@fiam)
+
+## [0.13.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.13.0...@wundergraph/nextjs@0.13.1) (2023-07-24)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.13.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.12.2...@wundergraph/nextjs@0.13.0) (2023-07-24)
+
+### Features
+
+* upgrade to typescript 5 ([#1135](https://github.com/wundergraph/wundergraph/issues/1135)) ([74cee5d](https://github.com/wundergraph/wundergraph/commit/74cee5db3ae8865d2bf1f1d7ab5c67fccbeeb798)) (@Pagebakers)
+
+### Bug Fixes
+
+* move codegen template helpers out of internal ([#1136](https://github.com/wundergraph/wundergraph/issues/1136)) ([3fd393f](https://github.com/wundergraph/wundergraph/commit/3fd393f777ea92ba69b48a1a8502aca5b2e6ed48)) (@Pagebakers)
+
 ## [0.12.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.12.1...@wundergraph/nextjs@0.12.2) (2023-07-14)
 
 **Note:** Version bump only for package @wundergraph/nextjs

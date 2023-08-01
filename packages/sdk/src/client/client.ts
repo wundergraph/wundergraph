@@ -136,10 +136,13 @@ export class Client {
 			init.signal = controller.signal;
 		}
 
+		// Only add credentials / mode if we are in a browser context,
+		// otherwise it will throw on runtimes like Cloudflare Workers.
+		const extraInit: RequestInit = typeof window !== 'undefined' ? { credentials: 'include', mode: 'cors' } : {};
+
 		try {
 			const resp = await fetchImpl(input, {
-				credentials: 'include',
-				mode: 'cors',
+				...extraInit,
 				...init,
 			});
 			return resp;
@@ -351,12 +354,45 @@ export class Client {
 		return this.fetchResponseToClientResponse(resp);
 	}
 
+	/**
+	 * Handles authentication errors from a failed attempt in a browser context
+	 * by examining window.location.href
+	 */
+	private handleAuthenticationError() {
+		if (typeof window !== 'undefined') {
+			const href = window.location.href;
+			const sep = href.indexOf('?');
+			const query = href.substring(sep);
+			const searchParams = new URLSearchParams(query);
+			const errorCode = searchParams.get('_wg.auth.error.code');
+			const errorMessage = searchParams.get('_wg.auth.error.message');
+			if (errorCode || errorMessage) {
+				searchParams.delete('_wg.auth.error.code');
+				searchParams.delete('_wg.auth.error.message');
+				const newQuery = searchParams.toString();
+				const nonQuery = href.substring(0, sep);
+				let nextUrl: string;
+				if (newQuery) {
+					nextUrl = `${nonQuery}?${newQuery}`;
+				} else {
+					nextUrl = nonQuery;
+				}
+				const code = decodeURIComponent(errorCode || '');
+				const message = decodeURIComponent(errorMessage || errorCode || '');
+				window.history.replaceState({}, window.document.title, nextUrl);
+				throw new ResponseError({ code, message, statusCode: 401 });
+			}
+		}
+	}
+
 	/***
 	 * fetchUser makes a GET request to the server to fetch the current user.
 	 * The method throws an error if the request fails to reach the server or
 	 * the server returns a non-200 status code.
 	 */
 	public async fetchUser<U extends User>(options?: FetchUserRequestOptions): Promise<U> {
+		this.handleAuthenticationError();
+
 		const params = this.searchParams();
 		if (options?.revalidate) {
 			params.set('revalidate', '');
@@ -541,13 +577,16 @@ export class Client {
 			if (!result.value) continue;
 			message += decoder.decode(result.value);
 			if (message.endsWith('\n\n')) {
-				const jsonResp = JSON.parse(message.substring(0, message.length - 2));
-				if (lastResponse !== null && Array.isArray(jsonResp)) {
-					lastResponse = applyPatch(lastResponse, jsonResp).newDocument as GraphQLResponse;
-				} else {
-					lastResponse = jsonResp as GraphQLResponse;
+				const parts = message.substring(0, message.length - '\n\n'.length).split('\n\n');
+				for (const part of parts) {
+					const jsonResp = JSON.parse(part);
+					if (lastResponse !== null && Array.isArray(jsonResp)) {
+						lastResponse = applyPatch(lastResponse, jsonResp).newDocument as GraphQLResponse;
+					} else {
+						lastResponse = jsonResp as GraphQLResponse;
+					}
+					yield this.convertGraphQLResponse(lastResponse, response.status);
 				}
-				yield this.convertGraphQLResponse(lastResponse, response.status);
 				message = '';
 			}
 		}

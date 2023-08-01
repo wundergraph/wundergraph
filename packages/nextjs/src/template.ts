@@ -13,7 +13,7 @@ import {
 	TypeScriptResponseModels,
 	TypeScriptEnumModels,
 } from '@wundergraph/sdk';
-import { modelImports } from '@wundergraph/sdk/internal';
+import { modelImports } from '@wundergraph/sdk/internal/codegen';
 import hash from 'object-hash';
 import { OperationType } from '@wundergraph/protobuf';
 import {} from '@wundergraph/sdk/dist/configure';
@@ -94,5 +94,5 @@ const isLiveQuery = (operation: GraphQLOperation) => {
 
 const mapOperation = (operation: GraphQLOperation) => ({
 	name: operation.Name,
-	requiresAuthentication: operation.AuthenticationConfig.required,
+	requiresAuthentication: operation.AuthenticationConfig?.required ?? false,
 });

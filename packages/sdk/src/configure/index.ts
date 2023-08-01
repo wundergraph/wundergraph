@@ -25,6 +25,7 @@ import {
 	DataSource,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
+	NatsKvApiCustom,
 	RESTApiCustom,
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
@@ -65,6 +66,8 @@ import {
 	ValueType,
 	WebhookConfiguration,
 	WunderGraphConfiguration,
+	Hook,
+	HookType,
 } from '@wundergraph/protobuf';
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
@@ -79,7 +82,7 @@ import { getWebhooks } from '../webhooks';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
 import logger, { FatalLogger, Logger } from '../logger';
-import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
+import { hookID, resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { GenerateConfig, OperationsGenerationConfig } from './codegeneration';
@@ -87,8 +90,12 @@ import { generateOperations } from '../codegen/generateoperations';
 import { configurationHash } from '../codegen/templates/typescript/helpers';
 import templates from '../codegen/templates';
 import { WunderGraphConfigurationFilename } from '../server/server';
+import { InternalIntergration, WunderGraphAppConfig } from '../integrations/types';
+import { DynamicTransportConfig } from '../advanced-hooks';
 
 export const WG_GENERATE_CONFIG_JSON = process.env['WG_GENERATE_CONFIG_JSON'] === 'true';
+
+export * from './define-config';
 
 const utf8 = 'utf8';
 const generated = 'generated';
@@ -191,7 +198,7 @@ export interface WunderGraphConfigApplicationConfig<
 		 */
 		publicClaims?: TPublicClaim[];
 	};
-	links?: LinkConfiguration;
+
 	security?: SecurityConfig;
 
 	/**
@@ -204,6 +211,9 @@ export interface WunderGraphConfigApplicationConfig<
 
 	/** @deprecated: Not used anymore */
 	dotGraphQLConfig?: any;
+
+	/** @deprecated */
+	links?: LinkConfiguration;
 }
 
 export interface TokenAuthProvider {
@@ -304,7 +314,7 @@ export interface S3UploadProfile {
 
 export type S3UploadProfiles = Record<string, S3UploadProfile>;
 
-interface S3UploadConfiguration {
+export interface S3UploadConfiguration {
 	name: string;
 	endpoint: InputVariable;
 	accessKeyID: InputVariable;
@@ -363,6 +373,7 @@ export interface ResolvedWunderGraphConfig {
 	experimental: {
 		orm: boolean;
 	};
+	integrations: InternalIntergration[];
 }
 
 export interface CodeGenerationConfig {
@@ -449,6 +460,7 @@ const resolveConfig = async (
 			resolvedNodeOptions.defaultHttpProxyUrl !== undefined
 				? resolveConfigurationVariable(resolvedNodeOptions.defaultHttpProxyUrl)
 				: undefined,
+		logger: Logger,
 	};
 
 	// Generate the promises first, then await them all at once
@@ -545,6 +557,7 @@ const resolveConfig = async (
 		experimental: {
 			orm: config.experimental?.orm ?? false,
 		},
+		integrations: (config as WunderGraphAppConfig).integrations || [],
 	};
 
 	const appConfig = config.links ? addLinks(resolvedConfig, config.links) : resolvedConfig;
@@ -819,6 +832,44 @@ export const configureWunderGraphApplication = <
 			writeWunderGraphFileSync('schema', schemaContent, 'graphql');
 
 			/**
+			 * NATS
+			 */
+
+			const natsKVApis = apis.filter((a) => a.DataSources.filter((d) => d.Kind === DataSourceKind.NATSKV).length > 1);
+
+			const buckets: {
+				name: string;
+				schema: any;
+			}[] = [];
+
+			natsKVApis.forEach((kvAPI) => {
+				kvAPI.DataSources.filter((d) => d.Kind === DataSourceKind.NATSKV).forEach((ds) => {
+					const custom = ds.Custom as NatsKvApiCustom;
+					const exists = buckets.find((b) => b.name === custom.bucketName);
+					if (!exists) {
+						buckets.push({
+							name: custom.bucketName,
+							schema: custom.schema,
+						});
+					}
+				});
+			});
+
+			const natsConfig = {
+				kv: {
+					buckets,
+				},
+			};
+
+			const natsDir = 'generated/nats';
+			if (!fs.existsSync(natsDir)) {
+				fs.mkdirSync(natsDir, { recursive: true });
+			}
+			fs.writeFileSync(path.join(natsDir, 'config.json'), JSON.stringify(natsConfig, null, 2), {
+				encoding: utf8,
+			});
+
+			/**
 			 * Webhooks
 			 */
 
@@ -901,7 +952,7 @@ export const configureWunderGraphApplication = <
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
-									required: op.AuthenticationConfig.required || mutationConfig.authentication.required,
+									required: op.AuthenticationConfig?.required ?? mutationConfig.authentication.required,
 								},
 							});
 						case OperationType.QUERY:
@@ -914,7 +965,7 @@ export const configureWunderGraphApplication = <
 								CacheConfig: queryConfig.caching,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
-									required: op.AuthenticationConfig.required || queryConfig.authentication.required,
+									required: op.AuthenticationConfig?.required ?? queryConfig.authentication.required,
 								},
 								LiveQuery: queryConfig.liveQuery,
 							});
@@ -927,7 +978,7 @@ export const configureWunderGraphApplication = <
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
-									required: op.AuthenticationConfig.required || subscriptionConfig.authentication.required,
+									required: op.AuthenticationConfig?.required ?? subscriptionConfig.authentication.required,
 								},
 							});
 						default:
@@ -1167,7 +1218,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 		engine: op.ExecutionEngine,
 		cacheConfig: op.CacheConfig,
 		authenticationConfig: {
-			authRequired: op.AuthenticationConfig.required,
+			authRequired: op.AuthenticationConfig?.required ?? false,
 		},
 		authorizationConfig: op.AuthorizationConfig,
 		liveQueryConfig: op.LiveQuery,
@@ -1192,6 +1243,34 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 	);
 	const fields: FieldConfiguration[] = config.application.EngineConfiguration.Fields;
 	const types: TypeConfiguration[] = config.application.EngineConfiguration.Types;
+
+	const hooks: Hook[] = [];
+	const operationTypes = {
+		query: OperationType.QUERY,
+		mutation: OperationType.MUTATION,
+		subscription: OperationType.SUBSCRIPTION,
+	};
+	const integrations = config.integrations || [];
+	for (const integration of integrations) {
+		const httpTransport = integration.hooks['http:transport'];
+		if (httpTransport) {
+			const config = httpTransport as unknown as DynamicTransportConfig;
+			if (config.match) {
+				const matches = Array.isArray(config.match) ? config.match : [config.match];
+				for (const match of matches) {
+					const id = hookID(match);
+					hooks.push({
+						id,
+						type: HookType.HTTP_TRANSPORT,
+						matcher: {
+							operationType: match.operationType ? operationTypes[match.operationType] : undefined,
+							datasources: (match as { datasources?: string[] }).datasources ?? [],
+						},
+					});
+				}
+			}
+		}
+	}
 
 	const out: WunderGraphConfiguration = {
 		apiId: config.deployment.api.id,
@@ -1277,6 +1356,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
 		configHash: configurationHash(config),
 		enabledFeatures: configEnabledFeatures(config, apiCount),
+		hooks,
 	};
 	return out;
 };
@@ -1307,6 +1387,7 @@ const mapDataSource = (stringStorage: Record<string, string>, source: DataSource
 		customStatic: undefined,
 		overrideFieldPathFromAlias: source.Kind === DataSourceKind.GRAPHQL,
 		customDatabase: undefined,
+		customNatsKv: undefined,
 		directives: source.Directives,
 		requestTimeoutSeconds: source.RequestTimeoutSeconds,
 	};
@@ -1363,6 +1444,18 @@ const mapDataSource = (stringStorage: Record<string, string>, source: DataSource
 				jsonTypeFields: database.jsonTypeFields,
 				jsonInputVariables: database.jsonInputVariables,
 			};
+			break;
+		case DataSourceKind.NATSKV:
+			const natskv = source.Custom as NatsKvApiCustom;
+			out.customNatsKv = {
+				serverURL: natskv.serverURL,
+				bucketName: natskv.bucketName,
+				operation: natskv.operation,
+				history: natskv.history,
+				token: natskv.token,
+				bucketPrefix: natskv.bucketPrefix,
+			};
+			break;
 	}
 
 	return out;
@@ -1502,9 +1595,12 @@ const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFi
 		// need some generated files to be ready
 		ResponseSchema: { type: 'object', properties: { data: {} } },
 		TypeScriptOperationImport: `function_${file.operation_name}`,
-		AuthenticationConfig: {
-			required: implementation.requireAuthentication || false,
-		},
+		AuthenticationConfig:
+			implementation.requireAuthentication !== undefined
+				? {
+						required: implementation.requireAuthentication,
+				  }
+				: undefined,
 		LiveQuery: {
 			enable: true,
 			pollingIntervalSeconds: 5,

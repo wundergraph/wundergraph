@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/svelte-query",
-  "version": "0.2.45",
+  "version": "0.3.2",
   "license": "Apache-2.0",
   "description": "WunderGraph Svelte Query Integration",
   "module": "./dist/index.js",
@@ -35,7 +35,7 @@
     "svelte": "^3.54.0"
   },
   "devDependencies": {
-    "@sveltejs/package": "^2.0.2",
+    "@sveltejs/package": "^2.2.0",
     "@swc/core": "^1.3.14",
     "@swc/jest": "^0.2.23",
     "@tanstack/svelte-query": "^4.29.1",
@@ -44,14 +44,14 @@
     "@types/jest": "^28.1.1",
     "@types/node-fetch": "2.6.2",
     "@wundergraph/sdk": "workspace:*",
-    "jest": "^29.0.3",
-    "jest-environment-jsdom": "^29.3.0",
+    "jest": "^29.6.1",
+    "jest-environment-jsdom": "^29.6.1",
     "nock": "^13.2.9",
     "node-fetch": "2.6.7",
     "svelte": "^3.54.0",
     "svelte-jester": "^2.3.2",
     "tsd": "^0.24.1",
-    "typescript": "^4.8.2"
+    "typescript": "^5.1.6"
   },
   "homepage": "https://wundergraph.com",
   "author": {

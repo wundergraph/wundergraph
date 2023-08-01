@@ -9,6 +9,7 @@ import { OperationsClient } from './operations-client';
 import { GraphQLError } from '../client';
 import { TelemetryOptions } from './trace/trace';
 import { RequestLogger } from './logger';
+import { InternalIntergration } from '../integrations/types';
 
 declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
@@ -316,6 +317,7 @@ export interface WunderGraphHooksAndServerConfig<
 	hooks?: GeneratedHooksConfig;
 	graphqlServers?: GraphQLServerConfig[];
 	options?: ServerOptions;
+	integrations?: InternalIntergration[];
 }
 
 export interface OnConnectionInitHookRequestBody extends FastifyRequestBody {
@@ -389,6 +391,14 @@ export type WsTransportHookRequest<
 > = {
 	dataSourceId: DataSources;
 	request: WunderGraphRequest;
+} & Context;
+
+export type HttpTransportRequest<Operations = string, Context extends BaseRequestContext = BaseRequestContext> = {
+	request: Request;
+	operation: {
+		name: Operations;
+		type: 'mutation' | 'query' | 'subscription';
+	};
 } & Context;
 
 // Any is used here because the exact type of the hooks is not known at compile time
@@ -499,6 +509,9 @@ export interface GlobalHooksConfig<
 			enableForOperations?: Operations[];
 			// enableForAllOperations will disregard the enableForOperations property and enable the hook for all operations
 			enableForAllOperations?: boolean;
+		};
+		onOriginTransport?: {
+			hook: (hook: HttpTransportRequest<Operations, Context>) => Promise<Response | null | undefined>;
 		};
 	};
 	wsTransport?: {

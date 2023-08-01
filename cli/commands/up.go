@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -21,7 +22,9 @@ import (
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/cli"
+	"github.com/wundergraph/wundergraph/pkg/codegeneration"
 	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/licensing"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/operations"
@@ -51,6 +54,8 @@ var upCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
+
+		natsEmbeddedServerURL := startEmbeddedNats(ctx, log)
 
 		// Enable TUI only if stdout is a terminal
 		if !isatty.IsTerminal(os.Stdout.Fd()) {
@@ -107,6 +112,12 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
+		var licensingOutput io.Writer = os.Stderr
+		if enableTUI {
+			licensingOutput = io.Discard
+		}
+		go licensing.NewManager(licensingPublicKey).LicenseCheck(wunderGraphDir, cancel, licensingOutput)
+
 		if clearCache {
 			if cacheDir, _ := helpers.LocalWunderGraphCacheDir(wunderGraphDir); cacheDir != "" {
 				if err := os.RemoveAll(cacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -115,8 +126,7 @@ var upCmd = &cobra.Command{
 			}
 		}
 
-		// only validate if the file exists
-		_, err = files.CodeFilePath(wunderGraphDir, configEntryPointFilename)
+		configEntryPoint, err := codegeneration.ApplicationEntryPoint(wunderGraphDir)
 		if err != nil {
 			return err
 		}
@@ -153,6 +163,14 @@ var upCmd = &cobra.Command{
 			helpers.KillExistingHooksProcess(port, log)
 		}
 
+		scriptRunnerOutputConfig := helpers.ScriptRunnerOutputConfig(rootFlags)
+		if enableTUI {
+			scriptRunnerOutputConfig = &scriptrunner.OutputConfig{
+				Stdout: io.Discard,
+				Stderr: io.Discard,
+			}
+		}
+
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
 			Executable:    "node",
@@ -170,7 +188,7 @@ var upCmd = &cobra.Command{
 				WunderGraphDir: wunderGraphDir,
 				EnableCache:    !disableCache,
 			}),
-			Streaming: devTUI == nil,
+			Output: scriptRunnerOutputConfig,
 		})
 
 		// responsible for executing the config in "polling" mode
@@ -187,7 +205,7 @@ var upCmd = &cobra.Command{
 				EnableCache:                   !disableCache,
 				DefaultPollingIntervalSeconds: defaultDataSourcePollingIntervalSeconds,
 			}), "WG_DATA_SOURCE_POLLING_MODE=true"),
-			Streaming: devTUI == nil,
+			Output: scriptRunnerOutputConfig,
 		})
 
 		var hookServerRunner *scriptrunner.ScriptRunner
@@ -293,8 +311,8 @@ var upCmd = &cobra.Command{
 				ServerScriptFile:  serverOutFile,
 				Env:               helpers.CliEnv(rootFlags),
 				Debug:             rootFlags.DebugMode,
-				LogStreaming:      devTUI == nil,
 				LogLevel:          rootFlags.CliLogLevel,
+				Output:            scriptRunnerOutputConfig,
 			}
 
 			hookServerRunner = helpers.NewHooksServerRunner(log, srvCfg)
@@ -418,7 +436,7 @@ var upCmd = &cobra.Command{
 
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:          "config-bundler",
-			EntryPoints:   []string{configEntryPointFilename},
+			EntryPoints:   []string{configEntryPoint},
 			AbsWorkingDir: wunderGraphDir,
 			OutFile:       configOutFile,
 			Logger:        log,
@@ -489,6 +507,7 @@ var upCmd = &cobra.Command{
 				node.WithRequestLogging(rootFlags.DebugMode),
 				node.WithTraceBatchTimeout(1000 * time.Millisecond),
 				node.WithDevMode(),
+				node.WithNATSDefaultServerURL(natsEmbeddedServerURL),
 			}
 
 			if devTUI != nil {
@@ -555,6 +574,7 @@ func init() {
 	upCmd.PersistentFlags().IntVar(&defaultDataSourcePollingIntervalSeconds, "default-polling-interval", 5, "Default polling interval for data sources")
 	upCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "Disables local caches")
 	upCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "Clears local caches before startup")
+	upCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, prettyLoggingFlagName, true, "Enables pretty logging")
 
 	rootCmd.AddCommand(upCmd)
 }

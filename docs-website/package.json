@@ -52,11 +52,11 @@
     "@types/js-yaml": "^4.0.0",
     "@types/node": "^18.0.3",
     "@types/react": "^18.0.15",
-    "eslint": "8.19.0",
-    "eslint-config-next": "12.2.6",
+    "eslint": "^8.45.0",
+    "eslint-config-next": "^13.4.12",
     "prettier": "^2.7.1",
     "prettier-plugin-tailwindcss": "^0.1.11",
     "tsconfig-paths": "3.14.2",
-    "typescript": "^4.8.4"
+    "typescript": "^5.1.6"
   }
 }

@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/wundergraph/wundergraph/pkg/licensing"
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
 )
 
@@ -29,16 +30,21 @@ var startCmd = &cobra.Command{
 	Long:        `Start runs WunderGraph Node and Server as a single process in production mode`,
 	Annotations: telemetry.Annotations(telemetry.AnnotationCommand),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		cancelCtx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		sigCtx, stop := signal.NotifyContext(cancelCtx, os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
 		g, ctx := errgroup.WithContext(sigCtx)
+		natsEmbeddedServerURL := startEmbeddedNats(ctx, log)
 
-		n, err := NewWunderGraphNode(ctx)
+		n, wunderGraphDir, err := NewWunderGraphNode(ctx)
 		if err != nil {
 			log.Error("Could not create node: %w", zap.Error(err))
 			return err
 		}
+
+		go licensing.NewManager(licensingPublicKey).LicenseCheck(wunderGraphDir, cancel, os.Stderr)
 
 		if !excludeServer {
 			g.Go(func() error {
@@ -58,6 +64,7 @@ var startCmd = &cobra.Command{
 				WithIdleHandler(stop),
 				WithHooksServerHealthCheck(),
 				WithRequestLogging(rootFlags.DebugMode),
+				WithNATSDefaultServerURL(natsEmbeddedServerURL),
 			)
 		})
 

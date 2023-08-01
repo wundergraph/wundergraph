@@ -50,6 +50,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
+	"github.com/wundergraph/wundergraph/pkg/querystring"
 	"github.com/wundergraph/wundergraph/pkg/s3uploadclient"
 	"github.com/wundergraph/wundergraph/pkg/trace"
 	"github.com/wundergraph/wundergraph/pkg/webhookhandler"
@@ -852,39 +853,14 @@ type SubscriptionResolver interface {
 	ResolveGraphQLSubscription(ctx *resolve.Context, subscription *resolve.GraphQLSubscription, writer resolve.FlushWriter) (err error)
 }
 
+type GraphQLResolver interface {
+	QueryResolver
+	SubscriptionResolver
+}
+
 type liveQueryConfig struct {
 	enabled                bool
 	pollingIntervalSeconds int64
-}
-
-func parseQueryVariables(r *http.Request, allowList []string) []byte {
-	rawVariables := r.URL.Query().Get(WgVariables)
-	if rawVariables == "" {
-		rawVariables = "{}"
-		for name, val := range r.URL.Query() {
-			if len(val) > 0 && !strings.HasPrefix(name, WgPrefix) {
-				if !stringSliceContainsValue(allowList, name) {
-					continue
-				}
-				// check if the user work with JSON values
-				if gjson.Valid(val[0]) {
-					rawVariables, _ = sjson.SetRaw(rawVariables, name, val[0])
-				} else {
-					rawVariables, _ = sjson.Set(rawVariables, name, val[0])
-				}
-			}
-		}
-	}
-	return unsafebytes.StringToBytes(rawVariables)
-}
-
-func stringSliceContainsValue(list []string, value string) bool {
-	for i := range list {
-		if list[i] == value {
-			return true
-		}
-	}
-	return false
 }
 
 type QueryHandler struct {
@@ -908,7 +884,7 @@ type QueryHandler struct {
 
 func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
-	r = operation.SetOperationMetaData(r, h.operation)
+	r = operation.RequestWithMetadata(r, operation.NewMetadata(h.operation))
 
 	// Set trace attributes based on the current operation
 	trace.SetOperationAttributes(r.Context())
@@ -928,7 +904,13 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	})
 	defer pool.PutCtx(resolveCtx)
 
-	resolveCtx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
+	var err error
+	resolveCtx.Variables, err = querystring.ToJSON(r.URL.RawQuery, h.queryParamsAllowList)
+	if err != nil {
+		requestLogger.Error("Could not parse query string", zap.Error(err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	resolveCtx.Variables = h.stringInterpolator.Interpolate(resolveCtx.Variables)
 
 	if !validateInputVariables(resolveCtx.Context(), requestLogger, resolveCtx.Variables, h.variablesValidator, w) {
@@ -937,7 +919,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	compactBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(compactBuf)
-	err := json.Compact(compactBuf, resolveCtx.Variables)
+	err = json.Compact(compactBuf, resolveCtx.Variables)
 	if err != nil {
 		requestLogger.Error("Could not compact variables in query handler", zap.Bool("isLive", isLive), zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
@@ -1175,7 +1157,7 @@ func (h *MutationHandler) parseFormVariables(r *http.Request) []byte {
 
 func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
-	r = operation.SetOperationMetaData(r, h.operation)
+	r = operation.RequestWithMetadata(r, operation.NewMetadata(h.operation))
 
 	// Set trace attributes based on the current operation
 	trace.SetOperationAttributes(r.Context())
@@ -1285,7 +1267,7 @@ type SubscriptionHandler struct {
 
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
-	r = operation.SetOperationMetaData(r, h.operation)
+	r = operation.RequestWithMetadata(r, operation.NewMetadata(h.operation))
 
 	// Set trace attributes based on the current operation
 	trace.SetOperationAttributes(r.Context())
@@ -1308,7 +1290,13 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	})
 	defer pool.PutCtx(ctx)
 
-	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
+	var err error
+	ctx.Variables, err = querystring.ToJSON(r.URL.RawQuery, h.queryParamsAllowList)
+	if err != nil {
+		requestLogger.Error("Could not parse query string", zap.Error(err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 
 	if !validateInputVariables(ctx.Context(), requestLogger, ctx.Variables, h.variablesValidator, w) {
@@ -1317,7 +1305,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	compactBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(compactBuf)
-	err := json.Compact(compactBuf, ctx.Variables)
+	err = json.Compact(compactBuf, ctx.Variables)
 	if err != nil {
 		requestLogger.Error("Could not compact variables", zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
@@ -1636,13 +1624,13 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUriRegexes),
 	))
 
-	authorizeRouter := router.PathPrefix("/authorize").Subrouter()
+	authorizeRouter := router.PathPrefix("/" + authentication.AuthorizePath).Subrouter()
 	authorizeRouter.Use(authentication.ValidateRedirectURIQueryParameter(
 		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUris),
 		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUriRegexes),
 	))
 
-	callbackRouter := router.PathPrefix("/callback").Subrouter()
+	callbackRouter := router.PathPrefix("/" + authentication.CallbackPath).Subrouter()
 
 	switch provider.Kind {
 	case wgpb.AuthProviderKind_AuthProviderGithub:
@@ -1659,8 +1647,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 				StaticVariableContent: r.githubAuthDemoClientSecret,
 			}
 		}
-		github := authentication.NewGithubCookieHandler(r.log)
-		github.Register(authorizeRouter, callbackRouter, authentication.GithubConfig{
+		github := authentication.NewGithubCookieHandler(authentication.GithubConfig{
 			ClientID:           loadvariable.String(provider.GithubConfig.ClientId),
 			ClientSecret:       loadvariable.String(provider.GithubConfig.ClientSecret),
 			ProviderID:         provider.Id,
@@ -1668,7 +1655,8 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
 			AuthTimeout:        authTimeout,
-		}, r.authenticationHooks())
+		}, r.authenticationHooks(), r.log)
+		github.Register(authorizeRouter, callbackRouter)
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "github"),
 			zap.String("providerId", provider.Id),
@@ -1689,8 +1677,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			})
 		}
 
-		openID := authentication.NewOpenIDConnectCookieHandler(r.log)
-		openID.Register(authorizeRouter, callbackRouter, authentication.OpenIDConnectConfig{
+		openID, err := authentication.NewOpenIDConnectCookieHandler(authentication.OpenIDConnectConfig{
 			Issuer:             loadvariable.String(provider.OidcConfig.Issuer),
 			ClientID:           loadvariable.String(provider.OidcConfig.ClientId),
 			ClientSecret:       loadvariable.String(provider.OidcConfig.ClientSecret),
@@ -1700,7 +1687,12 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
 			AuthTimeout:        authTimeout,
-		}, r.authenticationHooks())
+		}, r.authenticationHooks(), r.log)
+		if err != nil {
+			r.log.Error("creating OIDC auth provider", zap.Error(err))
+			break
+		}
+		openID.Register(authorizeRouter, callbackRouter)
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "oidc"),
 			zap.String("providerId", provider.Id),
@@ -1784,8 +1776,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reqID := r.Header.Get(logging.RequestIDHeader)
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
-
-	r = operation.SetOperationMetaData(r, h.operation)
+	r = operation.RequestWithMetadata(r, operation.NewMetadata(h.operation))
 
 	// Set trace attributes based on the current operation
 	trace.SetOperationAttributes(r.Context())
@@ -1827,7 +1818,13 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	ct := r.Header.Get("Content-Type")
 	if r.Method == http.MethodGet {
-		ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
+		var err error
+		ctx.Variables, err = querystring.ToJSON(r.URL.RawQuery, h.queryParamsAllowList)
+		if err != nil {
+			requestLogger.Error("Could not parse query string", zap.Error(err))
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 	} else if ct == "application/x-www-form-urlencoded" {
 		ctx.Variables = h.parseFormVariables(r)
 	} else {
@@ -2086,11 +2083,12 @@ func handleOperationErr(log *zap.Logger, err error, w http.ResponseWriter, error
 	var ne net.Error
 	if errors.As(err, &ne) && ne.Timeout() {
 		// request timeout exceeded
-		log.Error("request timeout exceeded",
+		log.Warn("request timeout exceeded",
 			zap.String("operationName", operation.Name),
 			zap.String("operationType", operation.OperationType.String()),
 		)
 		w.WriteHeader(http.StatusGatewayTimeout)
+		_, _ = io.WriteString(w, http.StatusText(http.StatusGatewayTimeout))
 		return true
 	}
 	var validationError *inputvariables.ValidationError

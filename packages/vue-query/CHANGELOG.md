@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/vue-query@0.2.1...@wundergraph/vue-query@0.2.2) (2023-07-28)
+
+**Note:** Version bump only for package @wundergraph/vue-query
+
+## [0.2.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/vue-query@0.2.0...@wundergraph/vue-query@0.2.1) (2023-07-24)
+
+### Bug Fixes
+
+* peer dependency warnings ([#1143](https://github.com/wundergraph/wundergraph/issues/1143)) ([1f9bec2](https://github.com/wundergraph/wundergraph/commit/1f9bec236179322697c20124e53615c8976d96e5)) (@Pagebakers)
+
+## [0.2.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/vue-query@0.1.0...@wundergraph/vue-query@0.2.0) (2023-07-24)
+
+### Features
+
+* upgrade to typescript 5 ([#1135](https://github.com/wundergraph/wundergraph/issues/1135)) ([74cee5d](https://github.com/wundergraph/wundergraph/commit/74cee5db3ae8865d2bf1f1d7ab5c67fccbeeb798)) (@Pagebakers)
+
 ## 0.1.0 (2023-07-14)
 
 ### Features

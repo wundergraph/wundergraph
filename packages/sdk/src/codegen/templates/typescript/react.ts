@@ -109,7 +109,7 @@ interface Operation {
 const operation = (op: GraphQLOperation) => ({
 	name: op.Name,
 	hasInput: hasInput(op),
-	requiresAuthentication: op.AuthenticationConfig.required,
+	requiresAuthentication: op.AuthenticationConfig?.required ?? false,
 });
 
 const queries = (application: ResolvedApplication): Operation[] =>
