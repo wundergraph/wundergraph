@@ -222,4 +222,32 @@ describe('Test error responses', () => {
 
 		await wg.stop();
 	});
+
+	test('that root field response types can be replaced and selected on successfully', async () => {
+		const numberToShow = 2;
+		const result = await wg.client().query({
+			operationName: 'Reminders',
+			input: {
+				numberToShow,
+			},
+		});
+
+		expect(result.error).toBeUndefined();
+		const responseJson = result.data.notes_reminders;
+		expect(responseJson).toHaveLength(numberToShow);
+		expect(responseJson).toStrictEqual([
+			{
+				id: 1,
+				date: 20823,
+				time: 9000,
+				what: 'Haircut appointment',
+			},
+			{
+				id: 2,
+				date: 251223,
+				time: 1300,
+				what: 'Christmas Day Dinner',
+			},
+		]);
+	});
 });
