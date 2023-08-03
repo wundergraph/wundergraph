@@ -30,8 +30,8 @@
   },
   "dependencies": {
     "@tanstack/vue-query": "^4.27.0",
-    "@wundergraph/sdk": "^0.170.1",
-    "@wundergraph/vue-query": "^0.2.1",
+    "@wundergraph/sdk": "^0.171.0",
+    "@wundergraph/vue-query": "^0.2.2",
     "unimport": "^3.0.6",
     "vitest": "^0.29.8",
     "vue": "^3.2.47",
