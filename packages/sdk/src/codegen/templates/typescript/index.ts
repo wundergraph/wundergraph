@@ -450,11 +450,12 @@ const JSONSchemaToTypescriptInterface = (
 				writeType(name, isRequired, 'boolean');
 			}
 		},
-		any: (name, isRequired, isArray) => {
+		any: (name, typename, isRequired, isArray) => {
+			typename = typename || 'JSONValue';
 			if (isArray) {
-				out += 'JSONValue';
+				out += typename;
 			} else {
-				writeType(name, isRequired, 'JSONValue');
+				writeType(name, isRequired, typename);
 			}
 		},
 		customType: (name, typeName, isRequired, isArray) => {

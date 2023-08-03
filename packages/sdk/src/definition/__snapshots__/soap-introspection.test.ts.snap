@@ -46,6 +46,9 @@ exports[`introspectSoap introspection kind:file should introspect wsdl greeting.
   mutation: Mutation
 }
 
+"The \`BigInt\` scalar type represents non-fractional signed whole numeric values."
+scalar BigInt
+
 type Mutation {
   NumberConversion_NumberConversion_NumberConversionSoap_NumberToDollars(NumberToDollars: NumberConversion_NumberToDollars_Input): NumberConversion_NumberToDollarsResponse
   NumberConversion_NumberConversion_NumberConversionSoap_NumberToWords(NumberToWords: NumberConversion_NumberToWords_Input): NumberConversion_NumberToWordsResponse
@@ -64,7 +67,7 @@ type NumberConversion_NumberToWordsResponse {
 }
 
 input NumberConversion_NumberToWords_Input {
-  ubiNum: Int
+  ubiNum: BigInt
 }
 
 type Query {
