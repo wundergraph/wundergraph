@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.173.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.172.0...@wundergraph/sdk@0.173.0) (2023-08-02)
+
+### Features
+
+* implement schema extension and replaceCustomScalarTypeFields fo… ([#1169](https://github.com/wundergraph/wundergraph/issues/1169)) ([7e17b9a](https://github.com/wundergraph/wundergraph/commit/7e17b9a96a50266a9a860e2f46e992e26665df2b)) (@Aenimus)
+
+## [0.172.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.171.0...@wundergraph/sdk@0.172.0) (2023-08-01)
+
+### Features
+
+* improve support for BigInt ([#1165](https://github.com/wundergraph/wundergraph/issues/1165)) ([32fbcde](https://github.com/wundergraph/wundergraph/commit/32fbcde4b042e5da8dbfc672259d193904f9cf51)) (@fiam)
+
+### Bug Fixes
+
+* nats subscriptions ([#1155](https://github.com/wundergraph/wundergraph/issues/1155)) ([3c66c77](https://github.com/wundergraph/wundergraph/commit/3c66c77276b344288f7b35943b8d004fd67055a8)) (@jensneuse)
+
 ## [0.171.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.170.1...@wundergraph/sdk@0.171.0) (2023-07-28)
 
 ### Features

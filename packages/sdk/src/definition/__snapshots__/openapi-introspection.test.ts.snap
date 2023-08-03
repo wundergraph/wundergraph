@@ -11586,7 +11586,7 @@ type AccessToken {
   "Access Token used for API calls"
   access_token: String!
   "Number of seconds before the token expires"
-  expires_in: Int!
+  expires_in: BigInt!
   "Refresh token which can be used to obtain a new access token"
   refresh_token: String
   "Type of Token"
@@ -11881,23 +11881,23 @@ type Artifact {
   "Value to store."
   value: String!
   "Size (in bytes) of the stored value."
-  value_size: Int!
+  value_size: BigInt!
   "Version number of the stored value. The version must be provided for any updates to an existing artifact."
-  version: Int!
+  version: BigInt!
 }
 
 type ArtifactNamespace {
   "The number of artifacts stored in the namespace."
-  count: Int!
+  count: BigInt!
   "Artifact storage namespace."
   namespace: String!
 }
 
 type ArtifactUsage {
   "The configured maximum size in bytes of the entire artifact store."
-  max_size: Int!
+  max_size: BigInt!
   "The currently used storage size in bytes of the entire artifact store."
-  usage: Int!
+  usage: BigInt!
 }
 
 type BackupConfiguration {
@@ -11934,8 +11934,11 @@ input BackupConfiguration_Input {
   url: UriReference
 }
 
+"The \`BigInt\` scalar type represents non-fractional signed whole numeric values."
+scalar BigInt
+
 type BigInt_container {
-  BigInt: Int
+  BigInt: BigInt
 }
 
 type Board {
@@ -11993,7 +11996,7 @@ type BoardItem {
   "The actual description for display"
   description: String
   "Number of times content has been favorited, if present"
-  favorite_count: Int
+  favorite_count: BigInt
   "Unique Id"
   id: String!
   "The actual image_url for display"
@@ -12005,7 +12008,7 @@ type BoardItem {
   "LookML Dashboard to base this item on"
   lookml_dashboard_id: String
   "An arbitrary integer representing the sort order within the section"
-  order: Int
+  order: BigInt
   "The actual title for display"
   title: String
   "Relative url for the associated content"
@@ -12019,7 +12022,7 @@ type BoardItem {
   "Whether the custom url should be used instead of the content url, if the item is associated with content"
   use_custom_url: Boolean!
   "Number of times content has been viewed, if present"
-  view_count: Int
+  view_count: BigInt
 }
 
 input BoardItem_Input {
@@ -12050,7 +12053,7 @@ input BoardItem_Input {
   "The actual description for display"
   description: String
   "Number of times content has been favorited, if present"
-  favorite_count: Int
+  favorite_count: BigInt
   "Unique Id"
   id: String
   "The actual image_url for display"
@@ -12062,7 +12065,7 @@ input BoardItem_Input {
   "LookML Dashboard to base this item on"
   lookml_dashboard_id: String
   "An arbitrary integer representing the sort order within the section"
-  order: Int
+  order: BigInt
   "The actual title for display"
   title: String
   "Relative url for the associated content"
@@ -12076,7 +12079,7 @@ input BoardItem_Input {
   "Whether the custom url should be used instead of the content url, if the item is associated with content"
   use_custom_url: Boolean!
   "Number of times content has been viewed, if present"
-  view_count: Int
+  view_count: BigInt
 }
 
 type BoardSection {
@@ -12186,14 +12189,14 @@ type ColorStop {
   "CSS color string"
   color: String!
   "Offset in continuous palette (0 to 100)"
-  offset: Int!
+  offset: BigInt!
 }
 
 input ColorStop_Input {
   "CSS color string"
   color: String!
   "Offset in continuous palette (0 to 100)"
-  offset: Int!
+  offset: BigInt!
 }
 
 type ColumnSearch {
@@ -12372,7 +12375,7 @@ type ContentSearch {
   "Type of content"
   type: String
   "Number of times the content has been viewed"
-  view_count: Int
+  view_count: BigInt
 }
 
 type ContentValidation {
@@ -12381,17 +12384,17 @@ type ContentValidation {
   "A list of content errors"
   content_with_errors: [ContentValidatorError]
   "The number of alerts validated"
-  total_alerts_validated: Int
+  total_alerts_validated: BigInt
   "The number of dashboard elements validated"
-  total_dashboard_elements_validated: Int
+  total_dashboard_elements_validated: BigInt
   "The number of dashboard filters validated"
-  total_dashboard_filters_validated: Int
+  total_dashboard_filters_validated: BigInt
   "The number of explores used across all content validated"
-  total_explores_validated: Int
+  total_explores_validated: BigInt
   "The number of looks validated"
-  total_looks_validated: Int
+  total_looks_validated: BigInt
   "The number of scheduled plans validated"
-  total_scheduled_plans_validated: Int
+  total_scheduled_plans_validated: BigInt
 }
 
 type ContentValidationAlert {
@@ -12559,7 +12562,7 @@ type ContentView {
   "Id of the viewed Dashboard"
   dashboard_id: String
   "Number of times piece of content was favorited"
-  favorite_count: Int
+  favorite_count: BigInt
   "Id of group content was viewed by"
   group_id: String
   "Unique Id"
@@ -12575,7 +12578,7 @@ type ContentView {
   "Id of user content was viewed by"
   user_id: String
   "Number of times piece of content was viewed"
-  view_count: Int
+  view_count: BigInt
 }
 
 type ContinuousPalette {
@@ -12604,7 +12607,7 @@ type CostEstimate {
   "Does the result come from the cache?"
   cache_hit: Boolean!
   "Cost of SQL statement"
-  cost: Int!
+  cost: BigInt!
   "Cost measurement size"
   cost_unit: String!
   "Human-friendly message"
@@ -12659,7 +12662,7 @@ input CreateDashboardFilter_Input {
   "Whether the filter requires a value to run the dashboard"
   required: Boolean!
   "Display order of this filter relative to other filters"
-  row: Int
+  row: BigInt
   "Title of filter"
   title: String
   "Type of filter: one of date, number, string, or field"
@@ -13143,7 +13146,7 @@ type DBConnection {
   "Creation date for this connection"
   created_at: String
   "This field is only applicable to connections over an SSH Tunnel. The value of this field would be the local port associated with the SSH tunnel if configured manually. Otherwise either enter NULL or exclude this field."
-  custom_local_port: Int
+  custom_local_port: BigInt
   "Database name"
   database: String
   "Time zone of database"
@@ -13172,7 +13175,7 @@ type DBConnection {
   "Maximum size of query in GBs (BigQuery only, can be a user_attribute name)"
   max_billing_gigabytes: String
   "Maximum number of concurrent connection to use"
-  max_connections: Int
+  max_connections: BigInt
   "Name of the connection. Also used as the unique identifier"
   name: String!
   "An External OAuth Application to use for authenticating to the database"
@@ -13182,12 +13185,12 @@ type DBConnection {
   "PDT builds on this connection can be kicked off and cancelled via API."
   pdt_api_control_enabled: Boolean
   "Maximum number of threads to use to build PDTs in parallel"
-  pdt_concurrency: Int
+  pdt_concurrency: BigInt
   pdt_context_override: DBConnectionOverride
   "True if PDTs are enabled on this connection"
   pdts_enabled: Boolean!
   "Connection Pool Timeout, in seconds"
-  pool_timeout: Int
+  pool_timeout: BigInt
   "Port number on server. If the connection is over an SSH tunnel, then the local port associated with the SSH tunnel."
   port: String
   "Timezone to use in queries"
@@ -13317,7 +13320,7 @@ input DBConnection_Input {
   "Creation date for this connection"
   created_at: String
   "This field is only applicable to connections over an SSH Tunnel. The value of this field would be the local port associated with the SSH tunnel if configured manually. Otherwise either enter NULL or exclude this field."
-  custom_local_port: Int
+  custom_local_port: BigInt
   "Database name"
   database: String
   "Time zone of database"
@@ -13346,7 +13349,7 @@ input DBConnection_Input {
   "Maximum size of query in GBs (BigQuery only, can be a user_attribute name)"
   max_billing_gigabytes: String
   "Maximum number of concurrent connection to use"
-  max_connections: Int
+  max_connections: BigInt
   "Name of the connection. Also used as the unique identifier"
   name: String!
   "An External OAuth Application to use for authenticating to the database"
@@ -13356,12 +13359,12 @@ input DBConnection_Input {
   "PDT builds on this connection can be kicked off and cancelled via API."
   pdt_api_control_enabled: Boolean
   "Maximum number of threads to use to build PDTs in parallel"
-  pdt_concurrency: Int
+  pdt_concurrency: BigInt
   pdt_context_override: DBConnectionOverride_Input
   "True if PDTs are enabled on this connection"
   pdts_enabled: Boolean
   "Connection Pool Timeout, in seconds"
-  pool_timeout: Int
+  pool_timeout: BigInt
   "Port number on server. If the connection is over an SSH tunnel, then the local port associated with the SSH tunnel."
   port: String
   "Timezone to use in queries"
@@ -13433,7 +13436,7 @@ type Dashboard {
   "Allow visualizations to be viewed in full screen mode"
   enable_viz_full_screen: Boolean!
   "Number of times favorited"
-  favorite_count: Int
+  favorite_count: BigInt
   "Sets the default state of the filters bar to collapsed or open"
   filters_bar_collapsed: Boolean!
   "Sets the default state of the filters location to top(true) or right(false)"
@@ -13467,7 +13470,7 @@ type Dashboard {
   "Refresh Interval, as a time duration phrase like \\"2 hours 30 minutes\\". A number with no time units will be interpreted as whole seconds."
   refresh_interval: String
   "Refresh Interval in milliseconds"
-  refresh_interval_to_i: Int
+  refresh_interval_to_i: BigInt
   "Show filters bar.  **Security Note:** This property only affects the *cosmetic* appearance of the dashboard, not a user's ability to access data. Hiding the filters bar does **NOT** prevent users from changing filters by other means. For information on how to set up secure data access control policies, see [Control User Access to Data](https://cloud.google.com/looker/docs/r/api/control-access)"
   show_filters_bar: Boolean
   "Show title"
@@ -13493,7 +13496,7 @@ type Dashboard {
   "Name of User that created the dashboard."
   user_name: String
   "Number of times viewed in the Looker web UI"
-  view_count: Int
+  view_count: BigInt
 }
 
 type DashboardAggregateTableLookml {
@@ -13509,13 +13512,13 @@ type DashboardAppearance {
   "Background color for the dashboard"
   page_background_color: String
   "Page margin (side) width"
-  page_side_margins: Int
+  page_side_margins: BigInt
   "Background color for tiles"
   tile_background_color: String
   "Tile shadow on/off"
   tile_shadow: Boolean
   "Space between tiles"
-  tile_space_between: Int
+  tile_space_between: BigInt
   "Title alignment on dashboard tiles"
   tile_title_alignment: String
 }
@@ -13526,13 +13529,13 @@ input DashboardAppearance_Input {
   "Background color for the dashboard"
   page_background_color: String
   "Page margin (side) width"
-  page_side_margins: Int
+  page_side_margins: BigInt
   "Background color for tiles"
   tile_background_color: String
   "Tile shadow on/off"
   tile_shadow: Boolean
   "Space between tiles"
-  tile_space_between: Int
+  tile_space_between: BigInt
   "Title alignment on dashboard tiles"
   tile_title_alignment: String
 }
@@ -13561,7 +13564,7 @@ type DashboardBase {
   "Refresh Interval, as a time duration phrase like \\"2 hours 30 minutes\\". A number with no time units will be interpreted as whole seconds."
   refresh_interval: String
   "Refresh Interval in milliseconds"
-  refresh_interval_to_i: Int
+  refresh_interval_to_i: BigInt
   "Content Metadata Slug"
   slug: String
   "Dashboard Title"
@@ -13594,7 +13597,7 @@ input DashboardBase_Input {
   "Refresh Interval, as a time duration phrase like \\"2 hours 30 minutes\\". A number with no time units will be interpreted as whole seconds."
   refresh_interval: String
   "Refresh Interval in milliseconds"
-  refresh_interval_to_i: Int
+  refresh_interval_to_i: BigInt
   "Content Metadata Slug"
   slug: String
   "Dashboard Title"
@@ -13605,7 +13608,7 @@ input DashboardBase_Input {
 
 type DashboardElement {
   "Count of Alerts associated to a dashboard element"
-  alert_count: Int
+  alert_count: BigInt
   "Text tile body text"
   body_text: String
   "Text tile body text as Html"
@@ -13641,7 +13644,7 @@ type DashboardElement {
   "Refresh Interval"
   refresh_interval: String
   "Refresh Interval as integer"
-  refresh_interval_to_i: Int
+  refresh_interval_to_i: BigInt
   result_maker: ResultMakerWithIdVisConfigAndDynamicFields
   "ID of the ResultMakerLookup entry."
   result_maker_id: String
@@ -13665,7 +13668,7 @@ type DashboardElement {
 
 input DashboardElement_Input {
   "Count of Alerts associated to a dashboard element"
-  alert_count: Int
+  alert_count: BigInt
   "Text tile body text"
   body_text: String
   "Text tile body text as Html"
@@ -13701,7 +13704,7 @@ input DashboardElement_Input {
   "Refresh Interval"
   refresh_interval: String
   "Refresh Interval as integer"
-  refresh_interval_to_i: Int
+  refresh_interval_to_i: BigInt
   result_maker: ResultMakerWithIdVisConfigAndDynamicFields_Input
   "ID of the ResultMakerLookup entry."
   result_maker_id: String
@@ -13749,7 +13752,7 @@ type DashboardFilter {
   "Whether the filter requires a value to run the dashboard"
   required: Boolean!
   "Display order of this filter relative to other filters"
-  row: Int
+  row: BigInt
   "Title of filter"
   title: String
   "Type of filter: one of date, number, string, or field"
@@ -13784,7 +13787,7 @@ input DashboardFilter_Input {
   "Whether the filter requires a value to run the dashboard"
   required: Boolean!
   "Display order of this filter relative to other filters"
-  row: Int
+  row: BigInt
   "Title of filter"
   title: String
   "Type of filter: one of date, number, string, or field"
@@ -13799,7 +13802,7 @@ type DashboardLayout {
   "Operations the current user is able to perform on this object"
   can: JSON!
   "Column Width"
-  column_width: Int
+  column_width: BigInt
   "Id of Dashboard"
   dashboard_id: String
   "Components"
@@ -13813,14 +13816,14 @@ type DashboardLayout {
   "Type"
   type: String
   "Width"
-  width: Int
+  width: BigInt
 }
 
 type DashboardLayoutComponent {
   "Operations the current user is able to perform on this object"
   can: JSON!
   "Column"
-  column: Int
+  column: BigInt
   "Id Of Dashboard Element"
   dashboard_element_id: String
   "Id of Dashboard Layout"
@@ -13832,22 +13835,22 @@ type DashboardLayoutComponent {
   "Whether or not the dashboard element title is displayed."
   element_title_hidden: Boolean!
   "Height"
-  height: Int
+  height: BigInt
   "Unique Id"
   id: String!
   "Row"
-  row: Int
+  row: BigInt
   "Visualization type, extracted from a query's vis_config"
   vis_type: String
   "Width"
-  width: Int
+  width: BigInt
 }
 
 input DashboardLayoutComponent_Input {
   "Operations the current user is able to perform on this object"
   can: JSON
   "Column"
-  column: Int
+  column: BigInt
   "Id Of Dashboard Element"
   dashboard_element_id: String
   "Id of Dashboard Layout"
@@ -13859,15 +13862,15 @@ input DashboardLayoutComponent_Input {
   "Whether or not the dashboard element title is displayed."
   element_title_hidden: Boolean
   "Height"
-  height: Int
+  height: BigInt
   "Unique Id"
   id: String
   "Row"
-  row: Int
+  row: BigInt
   "Visualization type, extracted from a query's vis_config"
   vis_type: String
   "Width"
-  width: Int
+  width: BigInt
 }
 
 input DashboardLayout_Input {
@@ -13876,7 +13879,7 @@ input DashboardLayout_Input {
   "Operations the current user is able to perform on this object"
   can: JSON
   "Column Width"
-  column_width: Int
+  column_width: BigInt
   "Id of Dashboard"
   dashboard_id: String
   "Components"
@@ -13890,7 +13893,7 @@ input DashboardLayout_Input {
   "Type"
   type: String
   "Width"
-  width: Int
+  width: BigInt
 }
 
 type DashboardLookml {
@@ -13946,7 +13949,7 @@ input Dashboard_Input {
   "Allow visualizations to be viewed in full screen mode"
   enable_viz_full_screen: Boolean!
   "Number of times favorited"
-  favorite_count: Int
+  favorite_count: BigInt
   "Sets the default state of the filters bar to collapsed or open"
   filters_bar_collapsed: Boolean!
   "Sets the default state of the filters location to top(true) or right(false)"
@@ -13980,7 +13983,7 @@ input Dashboard_Input {
   "Refresh Interval, as a time duration phrase like \\"2 hours 30 minutes\\". A number with no time units will be interpreted as whole seconds."
   refresh_interval: String
   "Refresh Interval in milliseconds"
-  refresh_interval_to_i: Int
+  refresh_interval_to_i: BigInt
   "Show filters bar.  **Security Note:** This property only affects the *cosmetic* appearance of the dashboard, not a user's ability to access data. Hiding the filters bar does **NOT** prevent users from changing filters by other means. For information on how to set up secure data access control policies, see [Control User Access to Data](https://cloud.google.com/looker/docs/r/api/control-access)"
   show_filters_bar: Boolean
   "Show title"
@@ -14006,7 +14009,7 @@ input Dashboard_Input {
   "Name of User that created the dashboard."
   user_name: String
   "Number of times viewed in the Looker web UI"
-  view_count: Int
+  view_count: BigInt
 }
 
 type DataActionForm {
@@ -14066,14 +14069,14 @@ type DataActionUserState {
   "User state data"
   data: String
   "Time in seconds until the state needs to be refreshed"
-  refresh_time: Int
+  refresh_time: BigInt
 }
 
 type Datagroup {
   "Operations the current user is able to perform on this object"
   can: JSON!
   "UNIX timestamp at which this entry was created."
-  created_at: Int
+  created_at: BigInt
   "Unique ID of the datagroup"
   id: String!
   "Name of the model containing the datagroup. Unique when combined with name."
@@ -14081,22 +14084,22 @@ type Datagroup {
   "Name of the datagroup. Unique when combined with model_name."
   name: String
   "UNIX timestamp before which cache entries are considered stale. Cannot be in the future."
-  stale_before: Int
+  stale_before: BigInt
   "UNIX timestamp at which this entry trigger was last checked."
-  trigger_check_at: Int
+  trigger_check_at: BigInt
   "The message returned with the error of the last trigger check."
   trigger_error: String
   "The value of the trigger when last checked."
   trigger_value: String
   "UNIX timestamp at which this entry became triggered. Cannot be in the future."
-  triggered_at: Int
+  triggered_at: BigInt
 }
 
 input Datagroup_Input {
   "Operations the current user is able to perform on this object"
   can: JSON
   "UNIX timestamp at which this entry was created."
-  created_at: Int
+  created_at: BigInt
   "Unique ID of the datagroup"
   id: String
   "Name of the model containing the datagroup. Unique when combined with name."
@@ -14104,15 +14107,15 @@ input Datagroup_Input {
   "Name of the datagroup. Unique when combined with model_name."
   name: String
   "UNIX timestamp before which cache entries are considered stale. Cannot be in the future."
-  stale_before: Int
+  stale_before: BigInt
   "UNIX timestamp at which this entry trigger was last checked."
-  trigger_check_at: Int
+  trigger_check_at: BigInt
   "The message returned with the error of the last trigger check."
   trigger_error: String
   "The value of the trigger when last checked."
   trigger_value: String
   "UNIX timestamp at which this entry became triggered. Cannot be in the future."
-  triggered_at: Int
+  triggered_at: BigInt
 }
 
 "A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the \`date-time\` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar."
@@ -14305,19 +14308,19 @@ type EmbedCookielessSessionAcquireResponse {
   "Token to used to call Looker APIs."
   api_token: String
   "Api token time to live in seconds."
-  api_token_ttl: Int
+  api_token_ttl: BigInt
   "One time token used to create or to attach to an embedded session in the Looker application server."
   authentication_token: String
   "Authentication token time to live in seconds."
-  authentication_token_ttl: Int
+  authentication_token_ttl: BigInt
   "Token used to load and navigate between Looker pages."
   navigation_token: String
   "Navigation token time to live in seconds."
-  navigation_token_ttl: Int
+  navigation_token_ttl: BigInt
   "Token referencing the actual embed session. It is used to generate new api, navigation and authentication tokens. api and navigation tokens are short lived and must be refreshed regularly. A new authentication token must be acquired for each IFRAME that is created. The session_reference_token should be kept secure, ideally in the embed hosts application server."
   session_reference_token: String
   "Session reference token time to live in seconds. Note that this is the same as actual session."
-  session_reference_token_ttl: Int
+  session_reference_token_ttl: BigInt
 }
 
 input EmbedCookielessSessionAcquire_Input {
@@ -14340,7 +14343,7 @@ input EmbedCookielessSessionAcquire_Input {
   "List of Looker permission names to grant to the embed user. Requested permissions will be filtered to permissions allowed for embed sessions."
   permissions: [String]
   "Number of seconds the SSO embed session will be valid after the embed session is started. Defaults to 300 seconds. Maximum session length accepted is 2592000 seconds (30 days)."
-  session_length: Int
+  session_length: BigInt
   "Token referencing the embed session and is used to generate new authentication, navigation and api tokens."
   session_reference_token: String
   "A dictionary of name-value pairs associating a Looker user attribute name with a value."
@@ -14353,15 +14356,15 @@ type EmbedCookielessSessionGenerateTokensResponse {
   "Token to used to call Looker APIs."
   api_token: String
   "Api token time to live in seconds."
-  api_token_ttl: Int
+  api_token_ttl: BigInt
   "Token used to load and navigate between Looker pages."
   navigation_token: String
   "Navigation token time to live in seconds."
-  navigation_token_ttl: Int
+  navigation_token_ttl: BigInt
   "Token referencing the embed session and is used to generate new authentication, navigation and api tokens."
   session_reference_token: String!
   "Session reference token time to live in seconds. Note that this is the same as actual session."
-  session_reference_token_ttl: Int
+  session_reference_token_ttl: BigInt
 }
 
 input EmbedCookielessSessionGenerateTokens_Input {
@@ -14377,7 +14380,7 @@ input EmbedParams_Input {
   "When true, the embed session will purge any residual Looker login state (such as in browser cookies) before creating a new login state with the given embed user info. Defaults to true."
   force_logout_login: Boolean!
   "Number of seconds the SSO embed session will be valid after the embed session is started. Defaults to 300 seconds. Maximum session length accepted is 2592000 seconds (30 days)."
-  session_length: Int
+  session_length: BigInt
   "The complete URL of the Looker UI page to display in the embed context. For example, to display the dashboard with id 34, \`target_url\` would look like: \`https://mycompany.looker.com:9999/dashboards/34\`. \`target_uri\` MUST contain a scheme (HTTPS), domain name, and URL path. Port must be included if it is required to reach the Looker server from browser clients. If the Looker instance is behind a load balancer or other proxy, \`target_uri\` must be the public-facing domain name and port required to reach the Looker instance, not the actual internal network machine name of the Looker instance."
   target_url: UriReference!
 }
@@ -14434,7 +14437,7 @@ input EmbedSsoParams_Input {
   "Id of the embed secret to use to sign this SSO url. If specified, the value must be an id of a valid (active) secret defined in the Looker instance. If not specified, the URL will be signed with the newest active embed secret defined in the Looker instance."
   secret_id: String
   "Number of seconds the SSO embed session will be valid after the embed session is started. Defaults to 300 seconds. Maximum session length accepted is 2592000 seconds (30 days)."
-  session_length: Int
+  session_length: BigInt
   "The complete URL of the Looker UI page to display in the embed context. For example, to display the dashboard with id 34, \`target_url\` would look like: \`https://mycompany.looker.com:9999/dashboards/34\`. \`target_uri\` MUST contain a scheme (HTTPS), domain name, and URL path. Port must be included if it is required to reach the Looker server from browser clients. If the Looker instance is behind a load balancer or other proxy, \`target_uri\` must be the public-facing domain name and port required to reach the Looker instance, not the actual internal network machine name of the Looker instance."
   target_url: UriReference!
   "A dictionary of name-value pairs associating a Looker user attribute name with a value."
@@ -14493,7 +14496,7 @@ type Folder {
   "Operations the current user is able to perform on this object"
   can: JSON!
   "Children Count"
-  child_count: Int
+  child_count: BigInt
   "Id of content metadata"
   content_metadata_id: String
   "Time the space was created"
@@ -14532,7 +14535,7 @@ type FolderBase {
   "Operations the current user is able to perform on this object"
   can: JSON!
   "Children Count"
-  child_count: Int
+  child_count: BigInt
   "Id of content metadata"
   content_metadata_id: String
   "Time the folder was created"
@@ -14567,7 +14570,7 @@ input FolderBase_Input {
   "Operations the current user is able to perform on this object"
   can: JSON
   "Children Count"
-  child_count: Int
+  child_count: BigInt
   "Id of content metadata"
   content_metadata_id: String
   "Time the folder was created"
@@ -14600,13 +14603,13 @@ input FolderBase_Input {
 
 type GitBranch {
   "Number of commits the local branch is ahead of the remote"
-  ahead_count: Int
+  ahead_count: BigInt
   "Number of commits the local branch is behind the remote"
-  behind_count: Int
+  behind_count: BigInt
   "Operations the current user is able to perform on this object"
   can: JSON!
   "UNIX timestamp at which this branch was last committed."
-  commit_at: Int
+  commit_at: BigInt
   "Name of error"
   error: String
   "Whether or not a local ref exists for the branch"
@@ -14637,13 +14640,13 @@ type GitBranch {
 
 input GitBranch_Input {
   "Number of commits the local branch is ahead of the remote"
-  ahead_count: Int
+  ahead_count: BigInt
   "Number of commits the local branch is behind the remote"
-  behind_count: Int
+  behind_count: BigInt
   "Operations the current user is able to perform on this object"
   can: JSON
   "UNIX timestamp at which this branch was last committed."
-  commit_at: Int
+  commit_at: BigInt
   "Name of error"
   error: String
   "Whether or not a local ref exists for the branch"
@@ -14721,7 +14724,7 @@ type Group {
   "Name of group"
   name: String
   "Number of users included in this group"
-  user_count: Int
+  user_count: BigInt
 }
 
 type GroupHierarchy {
@@ -14746,7 +14749,7 @@ type GroupHierarchy {
   "Role IDs assigned to group"
   role_ids: [String]
   "Number of users included in this group"
-  user_count: Int
+  user_count: BigInt
 }
 
 input GroupIdForGroupInclusion_Input {
@@ -14779,7 +14782,7 @@ type GroupSearch {
   "Roles assigned to group"
   roles: [Role]
   "Number of users included in this group"
-  user_count: Int
+  user_count: BigInt
 }
 
 input Group_Input {
@@ -14800,7 +14803,7 @@ input Group_Input {
   "Name of group"
   name: String
   "Number of users included in this group"
-  user_count: Int
+  user_count: BigInt
 }
 
 enum HTTPMethod {
@@ -14841,7 +14844,7 @@ type HomepageItem {
   "The actual description for display"
   description: String
   "Number of times content has been favorited, if present"
-  favorite_count: Int
+  favorite_count: BigInt
   "Associated Homepage Section"
   homepage_section_id: String
   "Unique Id"
@@ -14855,7 +14858,7 @@ type HomepageItem {
   "LookML Dashboard to base this item on"
   lookml_dashboard_id: String
   "An arbitrary integer representing the sort order within the section"
-  order: Int
+  order: BigInt
   "Number of seconds it took to fetch the section this item is in"
   section_fetch_time: Float
   "The actual title for display"
@@ -14871,7 +14874,7 @@ type HomepageItem {
   "Whether the custom url should be used instead of the content url, if the item is associated with content"
   use_custom_url: Boolean!
   "Number of times content has been viewed, if present"
-  view_count: Int
+  view_count: BigInt
 }
 
 type HomepageSection {
@@ -15578,7 +15581,7 @@ type Look {
   "Excel File Url"
   excel_file_url: String
   "Number of times favorited"
-  favorite_count: Int
+  favorite_count: BigInt
   folder: FolderBase
   "Folder Id"
   folder_id: String
@@ -15614,7 +15617,7 @@ type Look {
   "User Id"
   user_id: String
   "Number of times viewed in the Looker web UI"
-  view_count: Int
+  view_count: BigInt
 }
 
 type LookBasic {
@@ -15681,7 +15684,7 @@ type LookWithDashboards {
   "Excel File Url"
   excel_file_url: String
   "Number of times favorited"
-  favorite_count: Int
+  favorite_count: BigInt
   folder: FolderBase
   "Folder Id"
   folder_id: String
@@ -15717,7 +15720,7 @@ type LookWithDashboards {
   "User Id"
   user_id: String
   "Number of times viewed in the Looker web UI"
-  view_count: Int
+  view_count: BigInt
 }
 
 type LookWithQuery {
@@ -15742,7 +15745,7 @@ type LookWithQuery {
   "Excel File Url"
   excel_file_url: String
   "Number of times favorited"
-  favorite_count: Int
+  favorite_count: BigInt
   folder: FolderBase
   "Folder Id"
   folder_id: String
@@ -15781,7 +15784,7 @@ type LookWithQuery {
   "User Id"
   user_id: String
   "Number of times viewed in the Looker web UI"
-  view_count: Int
+  view_count: BigInt
 }
 
 input LookWithQuery_Input {
@@ -15806,7 +15809,7 @@ input LookWithQuery_Input {
   "Excel File Url"
   excel_file_url: String
   "Number of times favorited"
-  favorite_count: Int
+  favorite_count: BigInt
   folder: FolderBase_Input
   "Folder Id"
   folder_id: String
@@ -15845,7 +15848,7 @@ input LookWithQuery_Input {
   "User Id"
   user_id: String
   "Number of times viewed in the Looker web UI"
-  view_count: Int
+  view_count: BigInt
 }
 
 type LookmlModel {
@@ -16013,7 +16016,7 @@ type LookmlModelExploreField {
   "Array of filter conditions defined for the measure in LookML."
   filters: [LookmlModelExploreFieldMeasureFilters]
   "An offset (in months) from the calendar start month to the fiscal start month defined in the LookML model this field belongs to."
-  fiscal_month_offset: Int!
+  fiscal_month_offset: BigInt!
   "Whether this field has a set of allowed_values specified in LookML."
   has_allowed_values: Boolean!
   "Whether this field should be hidden from the user interface."
@@ -16077,7 +16080,7 @@ type LookmlModelExploreField {
   tags: [String]!
   time_interval: LookmlModelExploreFieldTimeInterval
   "The number of times this field has been used in queries"
-  times_used: Int!
+  times_used: BigInt!
   "The LookML type of the field."
   type: String!
   "An array of user attribute types that are allowed to be used in filters on this field. Valid values are: \\"advanced_filter_string\\", \\"advanced_filter_number\\", \\"advanced_filter_datetime\\", \\"string\\", \\"number\\", \\"datetime\\", \\"relative_url\\", \\"yesno\\", \\"zipcode\\"."
@@ -16105,9 +16108,9 @@ type LookmlModelExploreFieldMapLayer {
   feature_key: String
   format: query_lookml_model_explore_oneOf_0_fields_dimensions_items_map_layer_format!
   "The minimum zoom level that the map layer may be displayed at, for visualizations that support zooming."
-  max_zoom_level: Int
+  max_zoom_level: BigInt
   "The maximum zoom level that the map layer may be displayed at, for visualizations that support zooming."
-  min_zoom_level: Int
+  min_zoom_level: BigInt
   "Name of the map layer, as defined in LookML."
   name: String!
   "The preferred geographic projection of the map layer when displayed in a visualization that supports multiple geographic projections."
@@ -16136,7 +16139,7 @@ type LookmlModelExploreFieldSqlCase {
 
 type LookmlModelExploreFieldTimeInterval {
   "The number of intervals this field represents a grouping of."
-  count: Int!
+  count: BigInt!
   name: query_lookml_model_explore_oneOf_0_fields_dimensions_items_time_interval_name!
 }
 
@@ -16245,7 +16248,7 @@ type LookmlTest {
   "Name of the LookML file containing this test."
   file: String!
   "Line number of this test in LookML."
-  line: Int
+  line: BigInt
   "Name of model containing this test."
   model_name: String!
   "Name of this test."
@@ -16256,9 +16259,9 @@ type LookmlTest {
 
 type LookmlTestResult {
   "Number of assertions in this test"
-  assertions_count: Int!
+  assertions_count: BigInt!
   "Number of assertions passed in this test"
-  assertions_failed: Int!
+  assertions_failed: BigInt!
   "Operations the current user is able to perform on this object"
   can: JSON!
   "A list of any errors encountered by the test."
@@ -16579,11 +16582,11 @@ type Mutation {
     "Requested fields."
     fields: String
     "Output height in pixels"
-    height: Int!
+    height: BigInt!
     "Output type: png or jpg"
     result_format: String!
     "Output width in pixels"
-    width: Int!
+    width: BigInt!
   ): create_dashboard_element_render_task_response
   "### Create a dashboard filter on the dashboard with a specific id."
   create_dashboard_filter(
@@ -16606,7 +16609,7 @@ type Mutation {
     "Requested fields."
     fields: String
     "Output height in pixels"
-    height: Int!
+    height: BigInt!
     input: CreateDashboardRenderTask_Input
     "Whether or not to expand table vis to full length"
     long_tables: Boolean
@@ -16617,7 +16620,7 @@ type Mutation {
     "Output type: pdf, png, or jpg"
     result_format: String!
     "Output width in pixels"
-    width: Int!
+    width: BigInt!
   ): create_dashboard_render_task_response
   "### Trigger the generation of digest email records and send them to Looker's internal system. This does not send\\nany actual emails, it generates records containing content which may be of interest for users who have become inactive.\\nEmails will be sent at a later time from Looker's internal system if the Digest Emails feature is enabled in settings."
   create_digest_email_send: create_digest_email_send_response
@@ -16665,13 +16668,13 @@ type Mutation {
     "Requested fields."
     fields: String
     "Output height in pixels"
-    height: Int!
+    height: BigInt!
     "Id of look to render"
     look_id: String!
     "Output type: png, or jpg"
     result_format: String!
     "Output width in pixels"
-    width: Int!
+    width: BigInt!
   ): create_look_render_task_response
   "### Create a lookml model using the specified configuration.\\n"
   create_lookml_model(input: LookmlModel_Input): create_lookml_model_response
@@ -16702,13 +16705,13 @@ type Mutation {
     "Requested fields."
     fields: String
     "Output height in pixels"
-    height: Int!
+    height: BigInt!
     "Id of the query to render"
     query_id: String!
     "Output type: png or jpg"
     result_format: String!
     "Output width in pixels"
-    width: Int!
+    width: BigInt!
   ): create_query_render_task_response
   "### Create an async query task\\n\\nCreates a query task (job) to run a previously created query asynchronously. Returns a Query Task ID.\\n\\nUse [query_task(query_task_id)](#!/Query/query_task) to check the execution status of the query task.\\nAfter the query task status reaches \\"Complete\\", use [query_task_results(query_task_id)](#!/Query/query_task_results) to fetch the results of the query.\\n"
   create_query_task(
@@ -16727,12 +16730,12 @@ type Mutation {
     "Generate drill links (only applicable to 'json_detail' format."
     generate_drill_links: Boolean
     "DEPRECATED. Render height for image formats. Note that this parameter is always ignored by this method."
-    image_height: Int
+    image_height: BigInt
     "DEPRECATED. Render width for image formats. Note that this parameter is always ignored by this method."
-    image_width: Int
+    image_width: BigInt
     input: CreateQueryTask_Input
     "Row limit (may override the limit in the saved query)."
-    limit: Int
+    limit: BigInt
     "Prefix to use for drill links (url encoded)."
     path_prefix: String
     "Rebuild PDTS used in query."
@@ -17243,12 +17246,12 @@ type Mutation {
     "Generate drill links (only applicable to 'json_detail' format."
     generate_drill_links: Boolean
     "Render height for image formats."
-    image_height: Int
+    image_height: BigInt
     "Render width for image formats."
-    image_width: Int
+    image_width: BigInt
     input: Query__Input
     "Row limit (may override the limit in the saved query)."
-    limit: Int
+    limit: BigInt
     "Prefix to use for drill links (url encoded)."
     path_prefix: String
     "Rebuild PDTS used in query."
@@ -17979,7 +17982,7 @@ type PasswordConfig {
   "Operations the current user is able to perform on this object"
   can: JSON!
   "Minimum number of characters required for a new password.  Must be between 7 and 100"
-  min_length: Int
+  min_length: BigInt
   "Require at least one numeric character"
   require_numeric: Boolean!
   "Require at least one special character"
@@ -17992,7 +17995,7 @@ input PasswordConfig_Input {
   "Operations the current user is able to perform on this object"
   can: JSON
   "Minimum number of characters required for a new password.  Must be between 7 and 100"
-  min_length: Int
+  min_length: BigInt
   "Require at least one numeric character"
   require_numeric: Boolean!
   "Require at least one special character"
@@ -18116,7 +18119,7 @@ type Project {
   "(Write-Only) Optional secret token with which to authenticate requests to the webhook deploy endpoint. If not set, endpoint is unauthenticated."
   deploy_secret: String
   "Port that HTTP(S) application server is running on (for PRs, file browsing, etc.)"
-  git_application_server_http_port: Int
+  git_application_server_http_port: BigInt
   "Scheme that is running on application server (for PRs, file browsing, etc.)"
   git_application_server_http_scheme: String
   "(Write-Only) Git password for HTTPS authentication. (For production only, if using user attributes.)"
@@ -18166,7 +18169,7 @@ type ProjectError {
   "Error classification: syntax, deprecation, model_configuration, etc"
   kind: String
   "Line number in the file of this error"
-  line_number: Int
+  line_number: BigInt
   "Error message which may contain information such as dashboard or model names that may be considered sensitive in some use cases. Avoid storing or sending this message outside of Looker"
   message: String
   "The model associated with this error"
@@ -18250,7 +18253,7 @@ input Project_Input {
   "(Write-Only) Optional secret token with which to authenticate requests to the webhook deploy endpoint. If not set, endpoint is unauthenticated."
   deploy_secret: String
   "Port that HTTP(S) application server is running on (for PRs, file browsing, etc.)"
-  git_application_server_http_port: Int
+  git_application_server_http_port: BigInt
   "Scheme that is running on application server (for PRs, file browsing, etc.)"
   git_application_server_http_scheme: String
   "(Write-Only) Git password for HTTPS authentication. (For production only, if using user attributes.)"
@@ -18299,9 +18302,9 @@ type Query {
   "# Alert Notifications.\\n  The endpoint returns all the alert notifications received by the user on email in the past 7 days. It also returns whether the notifications have been read by the user.\\n\\n"
   alert_notifications(
     "(Optional) Number of results to return (used with \`offset\`)."
-    limit: Int
+    limit: BigInt
     "(Optional) Number of results to skip before returning any (used with \`limit\`)."
-    offset: Int
+    offset: BigInt
   ): [alert_notifications_response]
   "### Get information about all board items.\\n"
   all_board_items(
@@ -18398,13 +18401,13 @@ type Query {
     "Id of group"
     group_id: String!
     "Number of results to return. (used with offset and takes priority over page and per_page)"
-    limit: Int
+    limit: BigInt
     "Number of results to skip before returning any. (used with limit and takes priority over page and per_page)"
-    offset: Int
+    offset: BigInt
     "DEPRECATED. Use limit and offset instead. Return only page N of paginated results"
-    page: Int
+    page: BigInt
     "DEPRECATED. Use limit and offset instead. Return N rows of data per page"
-    per_page: Int
+    per_page: BigInt
     "Fields to sort by."
     sorts: String
   ): [all_group_users_response]
@@ -18419,13 +18422,13 @@ type Query {
     "Optional of ids to get specific groups."
     ids: [String]
     "Number of results to return. (used with offset and takes priority over page and per_page)"
-    limit: Int
+    limit: BigInt
     "Number of results to skip before returning any. (used with limit and takes priority over page and per_page)"
-    offset: Int
+    offset: BigInt
     "DEPRECATED. Use limit and offset instead. Return only page N of paginated results"
-    page: Int
+    page: BigInt
     "DEPRECATED. Use limit and offset instead. Return N rows of data per page"
-    per_page: Int
+    per_page: BigInt
     "Fields to sort by."
     sorts: String
   ): [all_groups_response]
@@ -18450,9 +18453,9 @@ type Query {
     "Requested fields."
     fields: String
     "Number of results to return. (can be used with offset)"
-    limit: Int
+    limit: BigInt
     "Number of results to skip before returning any. (Defaults to 0 if not set when limit is used)"
-    offset: Int
+    offset: BigInt
   ): [all_lookml_models_response]
   "### Get All LookML Tests\\n\\nReturns a list of tests which can be run to validate a project's LookML code and/or the underlying data,\\noptionally filtered by the file id.\\nCall [Run LookML Test](#!/Project/run_lookml_test) to execute tests.\\n"
   all_lookml_tests(
@@ -18582,13 +18585,13 @@ type Query {
     "Optional list of ids to get specific users."
     ids: [String]
     "Number of results to return. (used with offset and takes priority over page and per_page)"
-    limit: Int
+    limit: BigInt
     "Number of results to skip before returning any. (used with limit and takes priority over page and per_page)"
-    offset: Int
+    offset: BigInt
     "DEPRECATED. Use limit and offset instead. Return only page N of paginated results"
-    page: Int
+    page: BigInt
     "DEPRECATED. Use limit and offset instead. Return N rows of data per page"
-    per_page: Int
+    per_page: BigInt
     "Fields to sort by."
     sorts: String
   ): [all_users_response]
@@ -18608,20 +18611,20 @@ type Query {
     "Comma-delimited list of keys. Wildcards not allowed."
     key: String!
     "Number of results to return. (used with offset)"
-    limit: Int
+    limit: BigInt
     "Artifact storage namespace"
     namespace: String!
     "Number of results to skip before returning any. (used with limit)"
-    offset: Int
+    offset: BigInt
   ): [artifact_response]
   "Get all artifact namespaces and the count of artifacts in each namespace\\n\\n**Note**: The artifact storage API can only be used by Looker-built extensions.\\n\\n"
   artifact_namespaces(
     "Comma-delimited names of fields to return in responses. Omit for all fields"
     fields: String
     "Number of results to return. (used with offset)"
-    limit: Int
+    limit: BigInt
     "Number of results to skip before returning any. (used with limit)"
-    offset: Int
+    offset: BigInt
   ): [artifact_namespaces_response]
   "Get the maximum configured size of the entire artifact store, and the currently used storage in bytes.\\n\\n**Note**: The artifact storage API can only be used by Looker-built extensions.\\n\\n"
   artifact_usage(
@@ -18700,7 +18703,7 @@ type Query {
     "Name of schema to use."
     schema_name: String
     "limits the tables per schema returned"
-    table_limit: Int
+    table_limit: BigInt
     "only fetch columns for a given (comma-separated) list of tables"
     table_names: String
   ): [connection_columns_response]
@@ -18751,7 +18754,7 @@ type Query {
     "Optional. Return tables with names that contain this value"
     table_filter: String
     "Optional. Return tables up to the table_limit"
-    table_limit: Int
+    table_limit: BigInt
   ): [connection_tables_response]
   "### Get favorite content by its id"
   content_favorite(
@@ -18772,7 +18775,7 @@ type Query {
     "A value of png produces a thumbnail in PNG format instead of SVG (default)"
     format: String
     "The height of the image if format is supplied"
-    height: Int
+    height: BigInt
     "Whether or not to refresh the rendered image with the latest content"
     reload: String
     "ID of the dashboard or look to render"
@@ -18782,7 +18785,7 @@ type Query {
     "Either dashboard or look"
     type: String!
     "The width of the image if format is supplied"
-    width: Int
+    width: BigInt
   ): content_thumbnail_response
   "### Validate All Content\\n\\nPerforms validation of all looks and dashboards\\nReturns a list of errors found as well as metadata about the content validation run.\\n"
   content_validation(
@@ -18906,13 +18909,13 @@ type Query {
     "Id of folder"
     folder_id: String!
     "Number of results to return. (used with offset and takes priority over page and per_page)"
-    limit: Int
+    limit: BigInt
     "Number of results to skip before returning any. (used with limit and takes priority over page and per_page)"
-    offset: Int
+    offset: BigInt
     "DEPRECATED. Use limit and offset instead. Return only page N of paginated results"
-    page: Int
+    page: BigInt
     "DEPRECATED. Use limit and offset instead. Return N rows of data per page"
-    per_page: Int
+    per_page: BigInt
     "Fields to sort by."
     sorts: String
   ): [folder_children_response]
@@ -19239,11 +19242,11 @@ type Query {
     "Generate drill links (only applicable to 'json_detail' format."
     generate_drill_links: Boolean
     "Render height for image formats."
-    image_height: Int
+    image_height: BigInt
     "Render width for image formats."
-    image_width: Int
+    image_width: BigInt
     "Row limit (may override the limit in the saved query)."
-    limit: Int
+    limit: BigInt
     "Id of look"
     look_id: String!
     "Prefix to use for drill links (url encoded)."
@@ -19281,11 +19284,11 @@ type Query {
     "Generate drill links (only applicable to 'json_detail' format."
     generate_drill_links: Boolean
     "Render height for image formats."
-    image_height: Int
+    image_height: BigInt
     "Render width for image formats."
-    image_width: Int
+    image_width: BigInt
     "Row limit (may override the limit in the saved query)."
-    limit: Int
+    limit: BigInt
     "Prefix to use for drill links (url encoded)."
     path_prefix: String
     "Id of query"
@@ -19381,9 +19384,9 @@ type Query {
     "(Optional) Filter on the start range of the last time the alerts were run. Example: 2021-01-01T01:01:01-08:00."
     last_run_start: String
     "(Optional) Number of results to return (used with \`offset\`)."
-    limit: Int
+    limit: BigInt
     "(Optional) Number of results to skip before returning any (used with \`limit\`)."
-    offset: Int
+    offset: BigInt
   ): [search_alerts_response]
   "### Search all key/value pairs in a namespace for matching criteria.\\n\\nReturns an array of artifacts matching the specified search criteria.\\n\\nKey search patterns use case-insensitive matching and can contain \`%\` and \`_\` as SQL LIKE pattern match wildcard expressions.\\n\\nThe parameters \`min_size\` and \`max_size\` can be used individually or together.\\n\\n- \`min_size\` finds artifacts with sizes greater than or equal to its value\\n- \`max_size\` finds artifacts with sizes less than or equal to its value\\n- using both parameters restricts the minimum and maximum size range for artifacts\\n\\n**NOTE**: Artifacts are always returned in alphanumeric order by key.\\n\\nGet a **single artifact** by namespace and key with [\`artifact\`](#!/Artifact/artifact)\\n\\n**Note**: The artifact storage API can only be used by Looker-built extensions.\\n\\n"
   search_artifacts(
@@ -19392,15 +19395,15 @@ type Query {
     "Key pattern to match"
     key: String
     "Number of results to return. (used with offset)"
-    limit: Int
+    limit: BigInt
     "Maximum storage size of the artifact"
-    max_size: Int
+    max_size: BigInt
     "Minimum storage size of the artifact"
-    min_size: Int
+    min_size: BigInt
     "Artifact storage namespace"
     namespace: String!
     "Number of results to skip before returning any. (used with limit)"
-    offset: Int
+    offset: BigInt
     "Ids of users who created or updated the artifact (comma-delimited list)"
     user_ids: String
   ): [search_artifacts_response]
@@ -19421,13 +19424,13 @@ type Query {
     "The last name of the user who created this board."
     last_name: String
     "The maximum number of items to return. (used with offset and takes priority over page and per_page)"
-    limit: Int
+    limit: BigInt
     "The number of items to skip before returning any. (used with limit and takes priority over page and per_page)"
-    offset: Int
+    offset: BigInt
     "The page to return. DEPRECATED. Use offset instead."
-    page: Int
+    page: BigInt
     "The number of items in the returned page. DEPRECATED. Use limit instead."
-    per_page: Int
+    per_page: BigInt
     "Filter results based on permission, either show (default) or update"
     permission: String
     "The fields to sort the results by"
@@ -19440,13 +19443,13 @@ type Query {
     "Requested fields."
     fields: String
     "Number of results to return. (used with offset and takes priority over page and per_page)"
-    limit: Int
+    limit: BigInt
     "Number of results to skip before returning any. (used with limit and takes priority over page and per_page)"
-    offset: Int
+    offset: BigInt
     "Requested page."
-    page: Int
+    page: BigInt
     "Results per page."
-    per_page: Int
+    per_page: BigInt
     "Search terms"
     terms: String!
     "Content types requested (dashboard, look, lookml_dashboard)."
@@ -19467,11 +19470,11 @@ type Query {
     "Match content favorite id(s)"
     id: String
     "Number of results to return. (used with offset)"
-    limit: Int
+    limit: BigInt
     "Match look id(s).To create a list of multiple ids, use commas as separators"
     look_id: String
     "Number of results to skip before returning any. (used with limit)"
-    offset: Int
+    offset: BigInt
     "Fields to sort by."
     sorts: String
     "Match user id(s).To create a list of multiple ids, use commas as separators"
@@ -19492,11 +19495,11 @@ type Query {
     "Match Group Id"
     group_id: String
     "Number of results to return. Use with \`offset\` to manage pagination of results"
-    limit: Int
+    limit: BigInt
     "Match look_id"
     look_id: String
     "Number of results to skip before returning data"
-    offset: Int
+    offset: BigInt
     "Fields to sort by"
     sorts: String
     "Match start of week date (format is \\"YYYY-MM-DD\\")"
@@ -19519,9 +19522,9 @@ type Query {
     "Match credentials_email id."
     id: String
     "Number of results to return (used with \`offset\`)."
-    limit: Int
+    limit: BigInt
     "Number of results to skip before returning any (used with \`limit\`)."
-    offset: Int
+    offset: BigInt
     "Fields to sort by."
     sorts: String
   ): [search_credentials_email_response]
@@ -19565,13 +19568,13 @@ type Query {
     "Select dashboards based on when they were last viewed"
     last_viewed_at: String
     "Number of results to return. (used with offset and takes priority over page and per_page)"
-    limit: Int
+    limit: BigInt
     "Number of results to skip before returning any. (used with limit and takes priority over page and per_page)"
-    offset: Int
+    offset: BigInt
     "DEPRECATED. Use limit and offset instead. Return only page N of paginated results"
-    page: Int
+    page: BigInt
     "DEPRECATED. Use limit and offset instead. Return N rows of data per page"
-    per_page: Int
+    per_page: BigInt
     "Match dashboard slug."
     slug: String
     "One or more fields to sort by. Sortable fields: [:title, :user_id, :id, :created_at, :space_id, :folder_id, :description, :view_count, :favorite_count, :slug, :content_favorite_id, :content_metadata_id, :deleted, :deleted_at, :last_viewed_at, :last_accessed_at]"
@@ -19596,17 +19599,17 @@ type Query {
     "Match is shared root"
     is_shared_root: Boolean
     "Number of results to return. (used with offset and takes priority over page and per_page)"
-    limit: Int
+    limit: BigInt
     "Match Space title."
     name: String
     "Number of results to skip before returning any. (used with limit and takes priority over page and per_page)"
-    offset: Int
+    offset: BigInt
     "DEPRECATED. Use limit and offset instead. Return only page N of paginated results"
-    page: Int
+    page: BigInt
     "Filter on a children of a particular folder."
     parent_id: String
     "DEPRECATED. Use limit and offset instead. Return N rows of data per page"
-    per_page: Int
+    per_page: BigInt
     "Fields to sort by."
     sorts: String
   ): [search_folders_response]
@@ -19625,11 +19628,11 @@ type Query {
     "Match group id."
     id: String
     "Number of results to return (used with \`offset\`)."
-    limit: Int
+    limit: BigInt
     "Match group name."
     name: String
     "Number of results to skip before returning any (used with \`limit\`)."
-    offset: Int
+    offset: BigInt
     "Fields to sort by."
     sorts: String
   ): [search_groups_response]
@@ -19648,11 +19651,11 @@ type Query {
     "Match group id."
     id: String
     "Number of results to return (used with \`offset\`)."
-    limit: Int
+    limit: BigInt
     "Match group name."
     name: String
     "Number of results to skip before returning any (used with \`limit\`)."
-    offset: Int
+    offset: BigInt
     "Fields to sort by."
     sorts: String
   ): [search_groups_with_hierarchy_response]
@@ -19671,11 +19674,11 @@ type Query {
     "Match group id."
     id: String
     "Number of results to return (used with \`offset\`)."
-    limit: Int
+    limit: BigInt
     "Match group name."
     name: String
     "Number of results to skip before returning any (used with \`limit\`)."
-    offset: Int
+    offset: BigInt
     "Fields to sort by."
     sorts: String
   ): [search_groups_with_roles_response]
@@ -19700,13 +19703,13 @@ type Query {
     "Select looks based on when they were last viewed"
     last_viewed_at: String
     "Number of results to return. (used with offset and takes priority over page and per_page)"
-    limit: Int
+    limit: BigInt
     "Number of results to skip before returning any. (used with limit and takes priority over page and per_page)"
-    offset: Int
+    offset: BigInt
     "DEPRECATED. Use limit and offset instead. Return only page N of paginated results"
-    page: Int
+    page: BigInt
     "DEPRECATED. Use limit and offset instead. Return N rows of data per page"
-    per_page: Int
+    per_page: BigInt
     "Select looks that reference a particular query by query_id"
     query_id: String
     "One or more fields to sort results by. Sortable fields: [:title, :user_id, :id, :created_at, :space_id, :folder_id, :description, :updated_at, :last_updater_id, :view_count, :favorite_count, :content_favorite_id, :deleted, :deleted_at, :last_viewed_at, :last_accessed_at, :query_id]"
@@ -19731,11 +19734,11 @@ type Query {
     "Match model set id."
     id: String
     "Number of results to return (used with \`offset\`)."
-    limit: Int
+    limit: BigInt
     "Match model set name."
     name: String
     "Number of results to skip before returning any (used with \`limit\`)."
-    offset: Int
+    offset: BigInt
     "Fields to sort by."
     sorts: String
   ): [search_model_sets_response]
@@ -19752,11 +19755,11 @@ type Query {
     "Match permission set id."
     id: String
     "Number of results to return (used with \`offset\`)."
-    limit: Int
+    limit: BigInt
     "Match permission set name."
     name: String
     "Number of results to skip before returning any (used with \`limit\`)."
-    offset: Int
+    offset: BigInt
     "Fields to sort by."
     sorts: String
   ): [search_permission_sets_response]
@@ -19771,11 +19774,11 @@ type Query {
     "Match role id."
     id: String
     "Number of results to return (used with \`offset\`)."
-    limit: Int
+    limit: BigInt
     "Match role name."
     name: String
     "Number of results to skip before returning any (used with \`limit\`)."
-    offset: Int
+    offset: BigInt
     "Fields to sort by."
     sorts: String
   ): [search_roles_response]
@@ -19790,11 +19793,11 @@ type Query {
     "Match role id."
     id: String
     "Number of results to return (used with \`offset\`)."
-    limit: Int
+    limit: BigInt
     "Match role name."
     name: String
     "Number of results to skip before returning any (used with \`limit\`)."
-    offset: Int
+    offset: BigInt
     "Fields to sort by."
     sorts: String
   ): [search_roles_with_user_count_response]
@@ -19811,11 +19814,11 @@ type Query {
     "Match theme id."
     id: String
     "Number of results to return (used with \`offset\`)."
-    limit: Int
+    limit: BigInt
     "Match theme name."
     name: String
     "Number of results to skip before returning any (used with \`limit\`)."
-    offset: Int
+    offset: BigInt
     "Fields to sort by."
     sorts: String
   ): [search_themes_response]
@@ -19832,13 +19835,13 @@ type Query {
     "Match name"
     full_name: String
     "Number of results to return. (used with offset and takes priority over page and per_page)"
-    limit: Int
+    limit: BigInt
     "Number of results to skip before returning any. (used with limit and takes priority over page and per_page)"
-    offset: Int
+    offset: BigInt
     "DEPRECATED. Use limit and offset instead. Return only page N of paginated results"
-    page: Int
+    page: BigInt
     "DEPRECATED. Use limit and offset instead. Return N rows of data per page"
-    per_page: Int
+    per_page: BigInt
     "Match remote LDAP ID"
     remote_id: String
     "Fields to sort by."
@@ -19867,13 +19870,13 @@ type Query {
     "Match Last name."
     last_name: String
     "Number of results to return. (used with offset and takes priority over page and per_page)"
-    limit: Int
+    limit: BigInt
     "Number of results to skip before returning any. (used with limit and takes priority over page and per_page)"
-    offset: Int
+    offset: BigInt
     "DEPRECATED. Use limit and offset instead. Return only page N of paginated results"
-    page: Int
+    page: BigInt
     "DEPRECATED. Use limit and offset instead. Return N rows of data per page"
-    per_page: Int
+    per_page: BigInt
     "Fields to sort by."
     sorts: String
     "Search for user accounts associated with Looker employees"
@@ -19894,15 +19897,15 @@ type Query {
     "Match Last name"
     last_name: String
     "Number of results to return. (used with offset and takes priority over page and per_page)"
-    limit: Int
+    limit: BigInt
     "Number of results to skip before returning any. (used with limit and takes priority over page and per_page)"
-    offset: Int
+    offset: BigInt
     "DEPRECATED. Use limit and offset instead. Return only page N of paginated results"
-    page: Int
+    page: BigInt
     "Pattern to match"
     pattern: String!
     "DEPRECATED. Use limit and offset instead. Return N rows of data per page"
-    per_page: Int
+    per_page: BigInt
     "Fields to sort by"
     sorts: String
     "Match Verified Looker employee"
@@ -20295,7 +20298,7 @@ type RenderTask {
   "Date/Time render task was completed"
   finalized_at: String
   "Output height in pixels. Flowed layouts may ignore this value."
-  height: Int
+  height: BigInt
   "Id of this render task"
   id: String!
   "Id of look to render"
@@ -20319,7 +20322,7 @@ type RenderTask {
   "The user account permissions in which the render task will execute"
   user_id: String
   "Output width in pixels"
-  width: Int
+  width: BigInt
 }
 
 type RepositoryCredential {
@@ -20475,7 +20478,7 @@ type RoleSearch {
   "Link to get this item"
   url: UriReference
   "Count of users with this role"
-  user_count: Int
+  user_count: BigInt
   "Link to get list of users with this role"
   users_url: UriReference
 }
@@ -20548,7 +20551,7 @@ type SamlConfig {
   "SAML auth'd users will inherit roles from non-reflected Looker groups."
   allow_roles_from_normal_groups: Boolean!
   "Count of seconds of clock drift to allow when validating timestamps of assertions."
-  allowed_clock_drift: Int
+  allowed_clock_drift: BigInt
   "Allow alternate email-based login via '/login/email' for admins and for specified users with the 'login_special_email' permission. This option is useful as a fallback during ldap setup, if ldap config problems occur later, or if you need to support some users who are not in your ldap directory. Looker email/password logins are always disabled for regular users when ldap is enabled."
   alternate_email_login_allowed: Boolean!
   "Users will not be allowed to login at all unless a role for them is found in Saml if set to true"
@@ -20617,7 +20620,7 @@ input SamlConfig_Input {
   "SAML auth'd users will inherit roles from non-reflected Looker groups."
   allow_roles_from_normal_groups: Boolean!
   "Count of seconds of clock drift to allow when validating timestamps of assertions."
-  allowed_clock_drift: Int
+  allowed_clock_drift: BigInt
   "Allow alternate email-based login via '/login/email' for admins and for specified users with the 'login_special_email' permission. This option is useful as a fallback during ldap setup, if ldap config problems occur later, or if you need to support some users who are not in your ldap directory. Looker email/password logins are always disabled for regular users when ldap is enabled."
   alternate_email_login_allowed: Boolean!
   "Users will not be allowed to login at all unless a role for them is found in Saml if set to true"
@@ -20825,7 +20828,7 @@ type ScheduledPlan {
   "Whether links back to Looker should be included in this ScheduledPlan"
   include_links: Boolean!
   "The pixel width at which we render the inline table visualizations"
-  inline_table_width: Int
+  inline_table_width: BigInt
   "When the ScheduledPlan was last run"
   last_run_at: DateTime
   "Whether or not to expand table vis to full length"
@@ -20953,7 +20956,7 @@ input ScheduledPlan_Input {
   "Whether links back to Looker should be included in this ScheduledPlan"
   include_links: Boolean!
   "The pixel width at which we render the inline table visualizations"
-  inline_table_width: Int
+  inline_table_width: BigInt
   "When the ScheduledPlan was last run"
   last_run_at: DateTime
   "Whether or not to expand table vis to full length"
@@ -21008,7 +21011,7 @@ type Schema {
 
 type SchemaColumn {
   "Column data size"
-  column_size: Int
+  column_size: BigInt
   "Data type"
   data_type: String!
   "SQL dialect data type"
@@ -21044,7 +21047,7 @@ type SchemaTable {
   "Schema item name"
   name: String
   "Number of data rows"
-  rows: Int
+  rows: BigInt
   "Name of schema"
   schema_name: String
   "SQL Runner snippets for connection"
@@ -21082,7 +21085,7 @@ type Session {
   "Time when this session was last extended by the user"
   extended_at: String
   "Number of times this session was extended"
-  extended_count: Int
+  extended_count: BigInt
   "Unique Id"
   id: String!
   "IP address of user when this session was initiated"
@@ -21103,7 +21106,7 @@ type SessionConfig {
   "Operations the current user is able to perform on this object"
   can: JSON!
   "Number of minutes for user sessions.  Must be between 5 and 43200"
-  session_minutes: Int
+  session_minutes: BigInt
   "Track location of session when user logs in."
   track_session_location: Boolean!
   "Allow users to have an unbounded number of concurrent sessions (otherwise, users will be limited to only one session at a time)."
@@ -21118,7 +21121,7 @@ input SessionConfig_Input {
   "Operations the current user is able to perform on this object"
   can: JSON
   "Number of minutes for user sessions.  Must be between 5 and 43200"
-  session_minutes: Int
+  session_minutes: BigInt
   "Track location of session when user logs in."
   track_session_location: Boolean!
   "Allow users to have an unbounded number of concurrent sessions (otherwise, users will be limited to only one session at a time)."
@@ -21145,7 +21148,7 @@ input Session_Input {
   "Time when this session was last extended by the user"
   extended_at: String
   "Number of times this session was extended"
-  extended_count: Int
+  extended_count: BigInt
   "Unique Id"
   id: String
   "IP address of user when this session was initiated"
@@ -21239,7 +21242,7 @@ input SmtpSettings_Input {
   "Password"
   password: String!
   "SMTP Server's port"
-  port: Int!
+  port: BigInt!
   ssl_version: mutationInput_set_smtp_settings_input_ssl_version
   "User name"
   user_name: String!
@@ -21249,7 +21252,7 @@ type SmtpStatus {
   "Overall SMTP status of cluster"
   is_valid: Boolean!
   "Total number of nodes in cluster"
-  node_count: Int
+  node_count: BigInt
   "array of each node's status containing is_valid, message, hostname"
   node_status: [SmtpNodeStatus]
 }
@@ -21274,7 +21277,7 @@ input Snippet_Input {
 
 type SqlQuery {
   "Maximum number of rows this query will display on the SQL Runner page"
-  browser_limit: Int!
+  browser_limit: BigInt!
   "Operations the current user is able to perform on this object"
   can: JSON!
   connection: DBConnectionBase
@@ -21292,7 +21295,7 @@ type SqlQuery {
   "ID of the ResultMakerLookup entry."
   result_maker_id: String
   "Number of times this query has been run"
-  run_count: Int!
+  run_count: BigInt!
   "The identifier of the SQL query"
   slug: String!
   "SQL query text"
@@ -21333,7 +21336,7 @@ type SshServer {
   "The name to identify this SSH Server"
   ssh_server_name: String!
   "The port to connect to on the SSH Server"
-  ssh_server_port: Int!
+  ssh_server_port: BigInt!
   "The username used to connect to the SSH Server"
   ssh_server_user: String!
   "The current connection status to this SSH Server"
@@ -21354,7 +21357,7 @@ input SshServer_Input {
   "The name to identify this SSH Server"
   ssh_server_name: String!
   "The port to connect to on the SSH Server"
-  ssh_server_port: Int!
+  ssh_server_port: BigInt!
   "The username used to connect to the SSH Server"
   ssh_server_user: String!
   "The current connection status to this SSH Server"
@@ -21365,11 +21368,11 @@ type SshTunnel {
   "Hostname or IP Address of the Database Server"
   database_host: String!
   "Port that the Database Server is listening on"
-  database_port: Int!
+  database_port: BigInt!
   "Time of last connect attempt"
   last_attempt: String!
   "Localhost Port used by the Looker instance to connect to the remote DB"
-  local_host_port: Int!
+  local_host_port: BigInt!
   "SSH Server Hostname or IP Address"
   ssh_server_host: String!
   "SSH Server ID"
@@ -21377,7 +21380,7 @@ type SshTunnel {
   "SSH Server name"
   ssh_server_name: String!
   "SSH Server port"
-  ssh_server_port: Int!
+  ssh_server_port: BigInt!
   "Username used to connect to the SSH Server"
   ssh_server_user: String!
   "Current connection status for this Tunnel"
@@ -21390,11 +21393,11 @@ input SshTunnel_Input {
   "Hostname or IP Address of the Database Server"
   database_host: String!
   "Port that the Database Server is listening on"
-  database_port: Int!
+  database_port: BigInt!
   "Time of last connect attempt"
   last_attempt: String
   "Localhost Port used by the Looker instance to connect to the remote DB"
-  local_host_port: Int!
+  local_host_port: BigInt!
   "SSH Server Hostname or IP Address"
   ssh_server_host: String
   "SSH Server ID"
@@ -21402,7 +21405,7 @@ input SshTunnel_Input {
   "SSH Server name"
   ssh_server_name: String
   "SSH Server port"
-  ssh_server_port: Int
+  ssh_server_port: BigInt
   "Username used to connect to the SSH Server"
   ssh_server_user: String
   "Current connection status for this Tunnel"
@@ -21437,7 +21440,7 @@ type SupportAccessAllowlistEntry {
 
 input SupportAccessEnable_Input {
   "Duration Support Access will remain enabled"
-  duration_in_seconds: Int
+  duration_in_seconds: BigInt
 }
 
 type SupportAccessStatus {
@@ -21602,7 +21605,7 @@ input UpdateArtifact_Input {
   "Value to store."
   value: String!
   "Version number of the stored value. The version must be provided for any updates to an existing artifact."
-  version: Int
+  version: BigInt
 }
 
 input UpdateFolder_Input {
@@ -21720,7 +21723,7 @@ type UserAttributeGroupValue {
   "Unique Id of this group-attribute relation"
   id: String!
   "Precedence for resolving value for user"
-  rank: Int
+  rank: BigInt
   "Id of user attribute"
   user_attribute_id: String
   "Value of user attribute for group"
@@ -21737,7 +21740,7 @@ input UserAttributeGroupValue_Input {
   "Unique Id of this group-attribute relation"
   id: String
   "Precedence for resolving value for user"
-  rank: Int
+  rank: BigInt
   "Id of user attribute"
   user_attribute_id: String
   "Value of user attribute for group"
@@ -21756,7 +21759,7 @@ type UserAttributeWithValue {
   "Name of user attribute"
   name: String
   "Precedence for setting value on user (lowest wins)"
-  rank: Int
+  rank: BigInt
   "How user got this value for this attribute"
   source: String
   "Id of User Attribute"
@@ -21781,7 +21784,7 @@ input UserAttributeWithValue_Input {
   "Name of user attribute"
   name: String
   "Precedence for setting value on user (lowest wins)"
-  rank: Int
+  rank: BigInt
   "How user got this value for this attribute"
   source: String
   "Id of User Attribute"
@@ -21836,7 +21839,7 @@ type UserLoginLockout {
   "Email address associated with the user's account"
   email: String
   "Number of failures that triggered the lockout"
-  fail_count: Int
+  fail_count: BigInt
   "User's name"
   full_name: String
   "IP address of most recent failed attempt"
@@ -22105,7 +22108,7 @@ input WriteScheduledPlan_Input {
   "Whether links back to Looker should be included in this ScheduledPlan"
   include_links: Boolean!
   "The pixel width at which we render the inline table visualizations"
-  inline_table_width: Int
+  inline_table_width: BigInt
   "Whether or not to expand table vis to full length"
   long_tables: Boolean!
   "Id of a look"
