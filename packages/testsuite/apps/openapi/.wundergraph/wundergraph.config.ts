@@ -11,6 +11,13 @@ const notes = introspect.openApiV2({
 	},
 	baseURL: new EnvironmentVariable('OPENAPI_URL', 'http://localhost:8090/'),
 	schemaExtension: `
+		type Reminder {
+			id: Int
+			date: Int
+			time: Int
+			what: String
+		}
+
 		type JSONData  {
 			id: Int!
 			name: String!
@@ -22,6 +29,11 @@ const notes = introspect.openApiV2({
 			entityName: 'noteByID_200_response',
 			fieldName: 'jsonData',
 			responseTypeReplacement: '[JSONData]',
+		},
+		{
+			entityName: 'Query',
+			fieldName: 'reminders',
+			responseTypeReplacement: '[Reminder]',
 		},
 	],
 });
