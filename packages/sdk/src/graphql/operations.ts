@@ -1033,6 +1033,10 @@ const typeSchema = (
 					};
 				case 'JSON':
 					return {};
+				case 'BigInt':
+					return {
+						type: nonNull ? ['string', 'number'] : ['string', 'number', 'null'],
+					};
 				default:
 					if (customJsonScalars.has(type.name.value)) {
 						return {};
@@ -1431,6 +1435,10 @@ const resolveFieldSchema = (
 					};
 				case 'JSON':
 					return {};
+				case 'BigInt':
+					return {
+						type: ['string', 'number'],
+					};
 				default:
 					if (customJsonScalars.has(fieldType.name.value)) {
 						return {};

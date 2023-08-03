@@ -221,9 +221,9 @@ type Subscription {
     Watch for any updates to keys that match the keys argument which could include wildcards.
 	  Watch will send a nil entry when it has received all initial values.
 	"""
-	watch(keys: [String!]!): [KeyValueEntry!]!
+	watch(keys: [String!]!): KeyValueEntry!
 	"WatchAll will invoke the callback for all updates."
-	watchAll: [KeyValueEntry!]!
+	watchAll: KeyValueEntry!
 }
 
 type KeyValueEntry {

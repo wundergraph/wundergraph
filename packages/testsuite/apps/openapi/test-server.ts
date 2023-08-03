@@ -46,7 +46,19 @@ export const createOpenAPITestServer = (port: number) => {
 			reply.code(404).send(`noteID ${id} not found`);
 			return;
 		}
-		reply.code(200).header('content-type', 'application/json; charset=utf-8').send({ id, text });
+		const jsonData = [
+			{
+				id: 1,
+				name: 'data1',
+				date: 10823,
+			},
+			{
+				id: 2,
+				name: 'data2',
+				date: 10823,
+			},
+		];
+		reply.code(200).header('content-type', 'application/json; charset=utf-8').send({ id, text, jsonData });
 	});
 
 	server.delete<{ Params: { noteID: string } }>('/notes/note/:noteID', async (request, reply) => {

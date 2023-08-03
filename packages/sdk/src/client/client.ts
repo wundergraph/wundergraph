@@ -577,13 +577,16 @@ export class Client {
 			if (!result.value) continue;
 			message += decoder.decode(result.value);
 			if (message.endsWith('\n\n')) {
-				const jsonResp = JSON.parse(message.substring(0, message.length - 2));
-				if (lastResponse !== null && Array.isArray(jsonResp)) {
-					lastResponse = applyPatch(lastResponse, jsonResp).newDocument as GraphQLResponse;
-				} else {
-					lastResponse = jsonResp as GraphQLResponse;
+				const parts = message.substring(0, message.length - '\n\n'.length).split('\n\n');
+				for (const part of parts) {
+					const jsonResp = JSON.parse(part);
+					if (lastResponse !== null && Array.isArray(jsonResp)) {
+						lastResponse = applyPatch(lastResponse, jsonResp).newDocument as GraphQLResponse;
+					} else {
+						lastResponse = jsonResp as GraphQLResponse;
+					}
+					yield this.convertGraphQLResponse(lastResponse, response.status);
 				}
-				yield this.convertGraphQLResponse(lastResponse, response.status);
 				message = '';
 			}
 		}
