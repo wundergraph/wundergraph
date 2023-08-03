@@ -91,7 +91,7 @@ export const replaceCustomScalars = (
 					return false;
 				}
 				// If we're already inside an input value field on the parent input object, this must be an argument
-				// Support for renaming arguments it's possible but not yet implemented, so skip the field
+				// Support for renaming arguments is possible but not yet implemented, so skip the field
 				if (isInputValue) {
 					isArgument = true;
 					return false;
