@@ -1599,7 +1599,7 @@ func (r *Builder) configureOpenIDConnectProviders() (*authentication.OpenIDConne
 		}
 		issuer := loadvariable.String(provider.OidcConfig.Issuer)
 		clientID := loadvariable.String(provider.OidcConfig.ClientId)
-		clientSecret := loadvariable.String(provider.OidcConfig.ClientId)
+		clientSecret := loadvariable.String(provider.OidcConfig.ClientSecret)
 
 		oidc, err := authentication.NewOpenIDConnectProvider(issuer, clientID, clientSecret, &authentication.OpenIDConnectProviderOptions{
 			Flavor:     flavor,
