@@ -33,7 +33,7 @@
     "vite-plugin-solid": "^2.5.0"
   },
   "dependencies": {
-    "@tanstack/solid-query": "^4.24.6",
+    "@tanstack/solid-query": "^4.29.1",
     "@wundergraph/sdk": "^0.171.0",
     "@wundergraph/solid-query": "^0.5.2",
     "solid-js": "^1.6.10"
