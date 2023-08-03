@@ -1,24 +1,23 @@
 {
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
     "target": "ESNext",
-    "allowJs": true,
-    "noEmit": true,
-    "checkJs": true,
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "jsxImportSource": "solid-js",
-    "jsx": "preserve",
-    "types": ["./env"],
-    "strict": true,
+    "useDefineForClassFields": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "paths": {
-      "vite": ["./node_modules/vite"],
-      "@wundergraph/solid-query": ["../../packages/solid-query/src"]
-    },
-    "baseUrl": "./"
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "types": ["./env"]
   },
-  "include": ["./**/*.ts", "./**/*.tsx", "./**/*.js", "./**/*.jsx"],
-  "exclude": ["node_modules", "**/node_modules/*"]
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
