@@ -18,11 +18,15 @@ export const replaceCustomScalars = (
 	}
 	const replacementsByParentName = getCustomScalarReplacementsByParent(replacements);
 	const replacementsByInterfaceName = new Map<string, Map<string, string>>();
-	let currentParentInterfaces: string[] = [];
-	let currentValidParentTypeName = '';
-	let customScalarReplacementName = '';
 	const replacementScalars = new Set<SingleTypeField>();
 	const replacementScalarTypeNames = new Set<string>();
+	let currentParentInterfaces: string[] = [];
+	let currentValidParentTypeName = '';
+	let customScalarReplacementTypeNameForField = '';
+	let customScalarReplacementTypeNameForInputValue = '';
+	let isParentInputObjectType = false;
+	let isInputValue = false;
+	let isArgument = false;
 
 	const ast = parse(schemaSDL);
 	const astWithReplacements = visit(ast, {
@@ -42,13 +46,13 @@ export const replaceCustomScalars = (
 			},
 			leave: (_) => {
 				currentValidParentTypeName = '';
-				customScalarReplacementName = '';
+				customScalarReplacementTypeNameForField = '';
 				currentParentInterfaces = [];
 			},
 		},
 		FieldDefinition: {
 			enter: (node) => {
-				customScalarReplacementName = handleScalarReplacementForChild(
+				customScalarReplacementTypeNameForField = handleScalarReplacementForChild(
 					node,
 					replacementsByParentName,
 					currentValidParentTypeName,
@@ -59,11 +63,12 @@ export const replaceCustomScalars = (
 				);
 			},
 			leave: (_) => {
-				customScalarReplacementName = '';
+				customScalarReplacementTypeNameForField = '';
 			},
 		},
 		InputObjectTypeDefinition: {
 			enter: (node) => {
+				isParentInputObjectType = true;
 				const nodeName = node.name.value;
 				if (replacementsByParentName.get(nodeName)) {
 					currentValidParentTypeName = nodeName;
@@ -74,12 +79,26 @@ export const replaceCustomScalars = (
 			},
 			leave: (_) => {
 				currentValidParentTypeName = '';
-				customScalarReplacementName = '';
+				customScalarReplacementTypeNameForInputValue = '';
+				isParentInputObjectType = false;
 			},
 		},
 		InputValueDefinition: {
 			enter: (node) => {
-				customScalarReplacementName = handleScalarReplacementForChild(
+				// If the parent is not an input object, this input value definition must be an argument
+				// Support for renaming arguments is possible but not yet implemented, so skip the field
+				if (!isParentInputObjectType) {
+					return false;
+				}
+				// If we're already inside an input value field on the parent input object, this must be an argument
+				// Support for renaming arguments it's possible but not yet implemented, so skip the field
+				if (isInputValue) {
+					isArgument = true;
+					return false;
+				} else {
+					isInputValue = true;
+				}
+				customScalarReplacementTypeNameForInputValue = handleScalarReplacementForChild(
 					node,
 					replacementsByParentName,
 					currentValidParentTypeName,
@@ -88,12 +107,26 @@ export const replaceCustomScalars = (
 				);
 			},
 			leave: (_) => {
-				customScalarReplacementName = '';
+				customScalarReplacementTypeNameForInputValue = '';
+				// If isArgument is true, the visitor has just left an argument
+				if (isArgument) {
+					isArgument = false;
+					return;
+				}
+				// If isArgument is false, the visitor just left an input value field
+				isInputValue = false;
 			},
 		},
 		NamedType: (node) => {
-			if (customScalarReplacementName) {
-				return { ...node, name: { ...node.name, value: customScalarReplacementName } };
+			// Argument replacement is not currently possible
+			if (isArgument) {
+				return false;
+			}
+			if (customScalarReplacementTypeNameForInputValue) {
+				return { ...node, name: { ...node.name, value: customScalarReplacementTypeNameForInputValue } };
+			}
+			if (customScalarReplacementTypeNameForField) {
+				return { ...node, name: { ...node.name, value: customScalarReplacementTypeNameForField } };
 			}
 		},
 	});
@@ -119,13 +152,13 @@ export const replaceCustomScalars = (
 			},
 			leave: (_) => {
 				currentValidParentTypeName = '';
-				customScalarReplacementName = '';
+				customScalarReplacementTypeNameForField = '';
 			},
 		},
 		FieldDefinition: {
 			enter: (node) => {
 				// Interfaces will have the same fields as objects, so need to attempt to add to replacementScalarTypeNames
-				customScalarReplacementName = handleScalarReplacementForChild(
+				customScalarReplacementTypeNameForField = handleScalarReplacementForChild(
 					node,
 					replacementsByInterfaceName,
 					currentValidParentTypeName,
@@ -133,12 +166,12 @@ export const replaceCustomScalars = (
 				);
 			},
 			leave: (_) => {
-				customScalarReplacementName = '';
+				customScalarReplacementTypeNameForField = '';
 			},
 		},
 		NamedType: (node) => {
-			if (customScalarReplacementName) {
-				return { ...node, name: { ...node.name, value: customScalarReplacementName } };
+			if (customScalarReplacementTypeNameForField) {
+				return { ...node, name: { ...node.name, value: customScalarReplacementTypeNameForField } };
 			}
 		},
 	});
@@ -206,8 +239,10 @@ export const handleScalarReplacementForChild = (
 		}
 	}
 	replacementScalars.add({ typeName: currentValidParentTypeName, fieldName: fieldName });
+	// Remove the brackets and exclamation marks to get the root type
+	const replacementScalarRootTypeName = replacementScalarName.replaceAll(/[\[!\]]/g, '');
 	if (replacementScalarTypeNames) {
-		replacementScalarTypeNames.add(replacementScalarName);
+		replacementScalarTypeNames.add(replacementScalarRootTypeName);
 	}
 	return replacementScalarName;
 };

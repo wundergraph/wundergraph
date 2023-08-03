@@ -9,6 +9,30 @@ servers:
     description: Example Server
 
 paths:
+  /notes/reminders/{numberToShow}:
+    get:
+      summary: Returns JSON array of reminders
+      operationId: reminders
+      parameters:
+        - name: numberToShow
+          in: path
+          required: true
+          description: The number of reminders to show
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+      responses:
+        '200':
+          description: JSON data for a note
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: The specified note ID is invalid (not a number).
+        default:
+          description: Unexpected error
   /notes/all:
     get:
       summary: Returns a note by ID
@@ -25,7 +49,7 @@ paths:
                   properties:
                     id:
                       type: integer
-                      format: int64
+                      format: int32
                     text:
                       type: string
 

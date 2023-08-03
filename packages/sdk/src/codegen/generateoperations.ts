@@ -84,7 +84,9 @@ const operationsHeader =
 	'# This file is auto generated.\n# Remove/modify this header if you want to customize the operation.\n';
 
 const buildFieldPath = (config: GenerateConfig, field: FieldConfig) => {
-	const fileName = field.name.substring(field.apiNamespace.length + 1) + '.graphql';
+	// If the namespace is empty, there is no underscore to remove
+	const substringIndex = field.apiNamespace.length ? field.apiNamespace.length + 1 : 0;
+	const fileName = field.name.substring(substringIndex) + '.graphql';
 	return path.join(
 		config.wgDirAbs,
 		'operations',
