@@ -23,4 +23,4 @@ which you can override or change.
 ## How RBAC works
 
 If you want to learn more on how RBAC works,
-please follow the [Configure Authorization Guide](/docs/guides/configure-authorization).
+please follow the [Authorization / RBAC reference](/docs/wundergraph-config-ts-reference/configure-authorization).
