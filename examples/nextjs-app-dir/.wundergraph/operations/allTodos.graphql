@@ -1,0 +1,7 @@
+query allTodos {
+	todos_todos {
+		id
+		isCompleted
+		text
+	}
+}
