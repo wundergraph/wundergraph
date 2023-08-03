@@ -74,7 +74,7 @@ func NewOpenIDConnectCookieHandler(config OpenIDConnectConfig, hooks Hooks, log 
 	handler.auth2 = NewOAuth2AuthenticationHandler(OAuth2AuthenticationConfig{
 		ProviderID:         config.ProviderID,
 		ClientID:           config.ClientID,
-		ClientSecret:       config.ClientID,
+		ClientSecret:       config.ClientSecret,
 		Endpoint:           provider.Endpoint(),
 		Scopes:             []string{oidc.ScopeOpenID, "profile", "email"},
 		AuthTimeout:        config.AuthTimeout,
