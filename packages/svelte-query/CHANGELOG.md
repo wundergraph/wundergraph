@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/svelte-query@0.3.4...@wundergraph/svelte-query@0.3.5) (2023-08-03)
+
+### Bug Fixes
+
+* allow svelte 3 | 4 peer-dependency in @wundergraph/svelte-query … ([#1160](https://github.com/wundergraph/wundergraph/issues/1160)) ([892d21f](https://github.com/wundergraph/wundergraph/commit/892d21fe709d9e0394add7f1e6f78b86634613df)) (@leoalves)
+
 ## [0.3.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/svelte-query@0.3.3...@wundergraph/svelte-query@0.3.4) (2023-08-02)
 
 **Note:** Version bump only for package @wundergraph/svelte-query

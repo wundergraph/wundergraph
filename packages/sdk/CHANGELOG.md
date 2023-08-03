@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.174.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.173.0...@wundergraph/sdk@0.174.0) (2023-08-03)
+
+### Features
+
+* add support for renaming root field response types ([#1173](https://github.com/wundergraph/wundergraph/issues/1173)) ([f7734ce](https://github.com/wundergraph/wundergraph/commit/f7734ce9cc2637bf0264792192ff5bf75dc2a978)) (@Aenimus)
+
 ## [0.173.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.172.0...@wundergraph/sdk@0.173.0) (2023-08-02)
 
 ### Features
