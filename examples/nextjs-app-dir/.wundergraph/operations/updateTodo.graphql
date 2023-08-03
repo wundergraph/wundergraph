@@ -1,0 +1,7 @@
+mutation updateTodo($id: Int!, $text: String!, $isCompleted: Boolean!) {
+	todos_updateTodo(todo: { id: $id, text: $text, isCompleted: $isCompleted }) {
+		id
+		text
+		isCompleted
+	}
+}

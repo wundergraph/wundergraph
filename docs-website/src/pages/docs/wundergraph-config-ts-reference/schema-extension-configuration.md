@@ -376,6 +376,8 @@ but need to specify the `phone` and `type` fields.
 
 ### REST API with arbitrary JSON type
 
+This example explains how to use the Custom Schema Extension to add a custom type to an existing REST API.
+
 ```openapi
 {
   "openapi": "3.0.0",
@@ -527,7 +529,7 @@ with a custom type:
 
 ```typescript
 // wundergraph.config.ts
-const users = introspect.openApi({
+const users = introspect.openApiV2({
   apiNamespace: 'users',
   source: {
     kind: 'file',

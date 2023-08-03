@@ -17,8 +17,8 @@
     "@remix-run/react": "^1.11.1",
     "@remix-run/vercel": "^1.11.1",
     "@vercel/node": "^2.6.2",
-    "@wundergraph/sdk": "^0.170.1",
-    "@wundergraph/swr": "^0.17.1",
+    "@wundergraph/sdk": "^0.173.0",
+    "@wundergraph/swr": "^0.17.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

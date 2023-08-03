@@ -1,0 +1,36 @@
+{
+  "name": "wundergraph-nextjs-app-dir",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "wunderctl generate && concurrently \"wunderctl up --debug\" \"next dev\"",
+    "wundergraph": "wunderctl up --debug",
+    "build": "wunderctl generate && next build",
+    "lint": "next lint",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@graphql-yoga/node": "^2.13.13",
+    "@types/node": "20.2.4",
+    "@types/react": "18.2.7",
+    "@types/react-dom": "18.2.4",
+    "@wundergraph/sdk": "^0.171.0",
+    "autoprefixer": "10.4.14",
+    "graphql": "^16.6.0",
+    "next": "13.4.4",
+    "postcss": "8.4.23",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "tailwindcss": "3.3.2",
+    "typescript": "5.0.4"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.6.2",
+    "@types/jest": "^29.5.3",
+    "concurrently": "^8.0.1",
+    "cross-fetch": "^3.1.6",
+    "jest": "^29.6.2",
+    "ts-jest": "^29.1.1"
+  }
+}
