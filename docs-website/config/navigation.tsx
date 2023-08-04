@@ -1022,6 +1022,10 @@ const navigation = [
 						href: '/docs/cloud/redeployment',
 					},
 					{
+						title: 'Exclude Files from Deployments',
+						href: '/docs/cloud/wundergraph-ignore',
+					},
+					{
 						title: 'Private NPM dependencies',
 						href: '/docs/cloud/private-npm-dependencies',
 					},
