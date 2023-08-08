@@ -1,22 +1,22 @@
-import type { GraphQLIntrospection } from '../../definition';
+import type { OpenAPIIntrospectionV2 } from '../../definition/openapi-introspection';
 import { defineDatasource } from '../define-datasource';
 
-export interface GraphQLDatasourceOptions extends Omit<GraphQLIntrospection, 'apiNamespace'> {
+export interface OpenAPIDatasourceOptions extends Omit<OpenAPIIntrospectionV2, 'apiNamespace'> {
 	namespace?: string;
 }
 
 /**
- * Add a GraphQL API to your VirtualGraph.
+ * Add an OpenAPI API to your VirtualGraph.
  */
-export const graphql = defineDatasource<GraphQLDatasourceOptions>((config) => {
+export const openapi = defineDatasource<OpenAPIDatasourceOptions>((config) => {
 	const { namespace, ...introspectionConfig } = config;
 	return {
-		name: 'graphql-datasource',
+		name: 'openapi-datasource',
 		hooks: {
 			'config:setup': async (options) => {
 				const { introspect } = await import('../../definition');
 				options.addApi(
-					introspect.graphql({
+					introspect.openApiV2({
 						apiNamespace: namespace,
 						...introspectionConfig,
 					})
