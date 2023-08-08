@@ -15,3 +15,7 @@ export type {
 	CustomOperationsConfiguration,
 	WunderGraphConfigOperations,
 } from './types';
+
+export * from './auth/demo';
+export * from './auth/github';
+export * from './auth/google';
