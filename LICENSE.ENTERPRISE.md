@@ -1,6 +1,6 @@
-## WunderGraph License Agreement
+## WunderGraph Enterprise License Agreement
 
-Please read this WunderGraph License Agreement (the **“Agreement”** or **“WLA”**) carefully before using WunderGraph (as defined below), which is offered by WunderGraph, Inc. (**“WG”**).
+Please read this WunderGraph Enterprise License Agreement (the **“Agreement”** or **“WELA”**) carefully before using WunderGraph (as defined below), which is offered by WunderGraph, Inc. (**“WG”**).
 
 By downloading, accessing, or using WunderGraph in any manner, You agree that You have read and agree to be legally bound by the terms of this Agreement. If You are accessing WunderGraph on behalf of a Legal Entity, You represent and warrant that You have the authority to agree to these terms on its behalf and the right to legally bind that Legal Entity to this Agreement. Use of WunderGraph is expressly conditioned upon Your acceptance of all the terms of this Agreement, to the exclusion of all other terms.
 
