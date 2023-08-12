@@ -33,13 +33,12 @@ describe('Mock Api join', () => {
 		 * We join from the country to the weather API with the capital.
 		 */
 		const scopeCountry = ts.mockServer.mock<Record<string, any>>({
-			match: ({ url, method }) => {
-				return url.path === '/' && method === 'POST';
-			},
-			handler: async ({ json }) => {
+			match: async ({ json }) => {
 				const body = await json();
 				expect(body.variables.countryCode).toEqual('DE');
-
+				return true;
+			},
+			handler: async ({}) => {
 				return {
 					body: { data: { country: [{ code: 'DE', name: 'Germany', capital: 'Berlin' }] } },
 				};
@@ -47,13 +46,12 @@ describe('Mock Api join', () => {
 		});
 
 		const scopeWeather = ts.mockServer.mock<Record<string, any>>({
-			match: async ({ url, method }) => {
-				return url.path === '/' && method === 'POST';
-			},
-			handler: async ({ json }) => {
+			match: async ({ json }) => {
 				const body = await json();
 				expect(body.variables.capital).toEqual('Berlin');
-
+				return true;
+			},
+			handler: async ({ json }) => {
 				return {
 					body: {
 						data: {
