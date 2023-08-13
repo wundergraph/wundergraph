@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.174.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.174.1...@wundergraph/sdk@0.174.2) (2023-08-13)
+
+### Bug Fixes
+
+* **mock-library:** ensure to read req body only once ([#1188](https://github.com/wundergraph/wundergraph/issues/1188)) ([76c8b36](https://github.com/wundergraph/wundergraph/commit/76c8b364d19f69956faf33cbc11ed01fd0628cbd)) (@StarpTech)
+
 ## [0.174.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.174.0...@wundergraph/sdk@0.174.1) (2023-08-03)
 
 **Note:** Version bump only for package @wundergraph/sdk

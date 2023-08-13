@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/vue-query",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "license": "Apache-2.0",
   "description": "WunderGraph Vue Query Integration",
   "main": "./dist/index.js",
