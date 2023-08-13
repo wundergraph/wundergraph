@@ -95,7 +95,7 @@ export interface InternalMockRequest {
 	/**
 	 * The parsed request body.
 	 */
-	_body?: any;
+	_body?: Buffer;
 }
 
 export interface MockRequest extends Omit<InternalMockRequest, '_body'> {}
@@ -173,19 +173,13 @@ export class WunderGraphMockServer {
 				mockReq._body = await getBody(req);
 				return mockReq._body;
 			};
-			const json = async <Body = any>(): Promise<Body> => {
-				if (mockReq._body) {
-					return JSON.parse(mockReq._body.toString());
-				}
-				mockReq._body = await getBody(req);
-				return JSON.parse(mockReq._body.toString());
-			};
 			const text = async (): Promise<string> => {
-				if (mockReq._body) {
-					return mockReq._body.toString();
-				}
-				mockReq._body = await getBody(req);
-				return mockReq._body.toString();
+				const body = await raw();
+				return body.toString();
+			};
+			const json = async <Body = any>(): Promise<Body> => {
+				const body = await text();
+				return JSON.parse(body);
 			};
 
 			this.requests.set(req, {
