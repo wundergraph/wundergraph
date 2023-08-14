@@ -5,25 +5,24 @@ export default configureWunderGraphServer(() => ({
 	hooks: {
 		authentication: {
 			/**
-			 * mutatingPostResolve is a hook that is called after the user has been authenticate.
+			 * mutatingPostResolve is a hook that is called after the user has been authenticated.
 			 */
-			mutatingPostAuthentication: async ({ user, internalClient, log }) => {
+			mutatingPostAuthentication: async ({ user}) => {
+				const allowedRolesClaim = 'x-wundergraph-allowed-roles';
+				
 				const roles: Role[] = [];
 
-				const client = internalClient.withHeaders({
-					Authorization: `token ${user.rawAccessToken}`,
-				});
+				if (user.rawAccessToken) {
+					// Check if the custom claim exists in the JWT
+					if (allowedRolesClaim in user.rawAccessToken) {
+						const rolesClaim = user.rawAccessToken[allowedRolesClaim];
 
-				const { data } = await client.queries.HasWunderGraphStarred();
-
-				// Only allow the user to access the server if they have starred the repo
-				if (
-					// Error are communicated via GraphQL unions
-					data?.github_checkRepoIsStarred?.statusCode !== 204
-				) {
-					log.error(`Could not authorize user ${user.name}`, data?.github_checkRepoIsStarred?.message);
-				} else {
-					roles.push('stargazer');
+						// Ensure the roles claim is an array
+						if (Array.isArray(rolesClaim)) {
+							// Add the roles from the claim to the user's roles
+							roles.push(...rolesClaim);
+						}
+					}
 				}
 
 				return {
