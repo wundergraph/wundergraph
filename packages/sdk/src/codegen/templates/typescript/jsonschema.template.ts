@@ -3,8 +3,8 @@ export const template = `
 // @ts-ignore: no-types available		
 import type {JSONSchema7} from "json-schema";
 
-interface JSONSchema extends JSONSchema7 {
-		'x-graphql-enum-name'?: string;
+type JSONSchema = JSONSchema7 & {
+	'x-graphql-enum-name'?: string;
 }
 
 export interface Queries {
