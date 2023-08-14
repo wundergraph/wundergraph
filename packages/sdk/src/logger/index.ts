@@ -58,7 +58,7 @@ const initLogger = (destination: DestinationStream): pino.Logger => {
 
 const logger = initLogger(process.stdout);
 
-let cloudBindings: Record<string, any> = {};
+const cloudBindings: Record<string, any> = {};
 if (process.env.WG_CLOUD_ENVIRONMENT_ID) {
 	cloudBindings.environmentID = process.env.WG_CLOUD_ENVIRONMENT_ID;
 }
