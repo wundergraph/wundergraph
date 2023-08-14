@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.174.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.174.2...@wundergraph/sdk@0.174.3) (2023-08-14)
+
+### Bug Fixes
+
+* server logger missing cloud env bindings ([#1191](https://github.com/wundergraph/wundergraph/issues/1191)) ([885ffe3](https://github.com/wundergraph/wundergraph/commit/885ffe38ae799ace0f190aa9178d192722f7df5c)) (@thisisnithin)
+* type error in generated jsonschema.ts file ([#1190](https://github.com/wundergraph/wundergraph/issues/1190)) ([979f215](https://github.com/wundergraph/wundergraph/commit/979f215b1484ae479e0beecbd83e771633625b20)) (@thisisnithin)
+
 ## [0.174.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.174.1...@wundergraph/sdk@0.174.2) (2023-08-13)
 
 ### Bug Fixes
