@@ -58,9 +58,20 @@ const initLogger = (destination: DestinationStream): pino.Logger => {
 
 const logger = initLogger(process.stdout);
 
+const cloudBindings: Record<string, any> = {};
+if (process.env.WG_CLOUD_ENVIRONMENT_ID) {
+	cloudBindings.environmentID = process.env.WG_CLOUD_ENVIRONMENT_ID;
+}
+if (process.env.WG_CLOUD_PROJECT_ID) {
+	cloudBindings.projectID = process.env.WG_CLOUD_PROJECT_ID;
+}
+if (process.env.WG_CLOUD_DEPLOYMENT_ID) {
+	cloudBindings.deploymentID = process.env.WG_CLOUD_DEPLOYMENT_ID;
+}
+
 export const Logger = logger.child({ component: '@wundergraph/sdk' });
 export const ServerLogger = logger.child(
-	{ component: '@wundergraph/server' },
+	{ component: '@wundergraph/server', ...cloudBindings },
 	{ level: process.env.WG_DEBUG_MODE === 'true' ? PinoLogLevel.Debug : PinoLogLevel.Info }
 );
 
