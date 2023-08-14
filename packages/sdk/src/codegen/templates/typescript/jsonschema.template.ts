@@ -3,17 +3,15 @@ export const template = `
 // @ts-ignore: no-types available		
 import type {JSONSchema7} from "json-schema";
 
-declare module 'json-schema' {
-		export interface JSONSchema7 {
+interface JSONSchema extends JSONSchema7 {
 		'x-graphql-enum-name'?: string;
-	}
 }
 
 export interface Queries {
     {{#each queries}}
     "{{name}}": {
-        input: JSONSchema7;
-        response: JSONSchema7;
+        input: JSONSchema;
+        response: JSONSchema;
 				operationType: string;
 				description: string;
     },
@@ -23,8 +21,8 @@ export interface Queries {
 export interface Mutations {
     {{#each mutations}}
     "{{name}}": {
-        input: JSONSchema7;
-        response: JSONSchema7;
+        input: JSONSchema;
+        response: JSONSchema;
 				operationType: string;
 				description: string;
     },
@@ -34,8 +32,8 @@ export interface Mutations {
 export interface Subscriptions {
     {{#each subscriptions}}
     "{{name}}": {
-        input: JSONSchema7;
-        response: JSONSchema7;
+        input: JSONSchema;
+        response: JSONSchema;
 				operationType: string;
 				description: string;
     },
