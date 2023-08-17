@@ -665,7 +665,7 @@ importers:
         specifier: ^4.2.5
         version: 4.2.5
       '@wundergraph/wunderctl':
-        specifier: workspace:^0.169.2
+        specifier: workspace:^0.169.3
         version: link:../wunderctl
       axios:
         specifier: ^0.26.1
@@ -18278,7 +18278,7 @@ packages:
       minimist: 1.2.8
       mkdirp: 1.0.4
       mz: 2.7.0
-      prettier: 2.8.8
+      prettier: 2.8.7
     dev: false
 
   /json-schema-traverse@0.4.1:
@@ -27004,7 +27004,6 @@ packages:
     resolution: {directory: packages/sdk, type: directory}
     id: file:packages/sdk
     name: '@wundergraph/sdk'
-    version: 0.174.3
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.4.0
@@ -27057,6 +27056,7 @@ packages:
       openapi-types: 12.1.0
       pino: 8.14.1
       postman-collection: 4.1.7
+      prettier: 2.8.7
       protobufjs: 7.2.4
       raw-body: 2.5.2
       swagger2openapi: 7.0.8
