@@ -1,0 +1,8 @@
+query Reminders($numberToShow: Int!) {
+	notes_reminders(numberToShow: $numberToShow) {
+		id
+		date
+		time
+		what
+	}
+}

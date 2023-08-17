@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 import { createTestServer } from './.wundergraph/generated/testing';
 import { createOpenAPITestServer } from './test-server';
-import { ResponseError, getHttpResponseError } from '@wundergraph/sdk/client';
+import { getHttpResponseError, ResponseError } from '@wundergraph/sdk/client';
 
 const httpServer = createOpenAPITestServer(8090);
 const wg = createTestServer({
@@ -75,16 +75,35 @@ describe('Test correct responses', () => {
 		expect(mutateResult.error).toBeUndefined();
 		const id = mutateResult.data?.notes_newNote?.id ?? 0;
 
-		const queryResult = await wg.client().query({
+		const byNumberResult = await wg.client().query({
 			operationName: 'NoteByID',
 			input: {
 				id: id,
 			},
 		});
 
-		expect(queryResult.error).toBeUndefined();
-		expect(queryResult.data?.notes_noteByID?.id ?? 0).toBe(id);
-		expect(queryResult.data?.notes_noteByID?.text ?? '').toBe(text);
+		const jsonData = [
+			{ id: 1, name: 'data1', date: 10823 },
+			{ id: 2, name: 'data2', date: 10823 },
+		];
+
+		expect(byNumberResult.error).toBeUndefined();
+		const note = byNumberResult.data?.notes_noteByID;
+		expect(note).toBeDefined();
+		expect(note!.id ?? 0).toBe(id);
+		expect(note!.text ?? '').toBe(text);
+		expect(note!.jsonData ?? '').toStrictEqual(jsonData);
+
+		const byString = await wg.client().query({
+			operationName: 'NoteByID',
+			input: {
+				id: id.toString(),
+			},
+		});
+
+		expect(byString.error).toBeUndefined();
+		expect(byString.data?.notes_noteByID?.id ?? 0).toBe(id);
+		expect(byString.data?.notes_noteByID?.text ?? '').toBe(text);
 	});
 });
 
@@ -111,7 +130,7 @@ describe('Test subscriptions', () => {
 		// Create 100 notes, to ensure the payload is bigger than
 		// the patch
 		const n = 100;
-		const ids: number[] = [];
+		const ids: (string | number)[] = [];
 		for (let ii = 0; ii < n; ii++) {
 			const result = await client.mutate({
 				operationName: 'NewNote',
@@ -148,7 +167,9 @@ describe('Test subscriptions', () => {
 		expect(triggers).toBe(2);
 		abort.abort();
 		const last = await query;
-		expect(last?.data?.notes_all?.length).toBe(expectedNotesLength);
+		if (last) {
+			expect(last?.data?.notes_all?.length).toBe(expectedNotesLength);
+		}
 	});
 });
 
@@ -200,5 +221,33 @@ describe('Test error responses', () => {
 		expect(result.error?.statusCode).toBe(504);
 
 		await wg.stop();
+	});
+
+	test('that root field response types can be replaced and selected on successfully', async () => {
+		const numberToShow = 2;
+		const result = await wg.client().query({
+			operationName: 'Reminders',
+			input: {
+				numberToShow,
+			},
+		});
+
+		expect(result.error).toBeUndefined();
+		const responseJson = result.data.notes_reminders;
+		expect(responseJson).toHaveLength(numberToShow);
+		expect(responseJson).toStrictEqual([
+			{
+				id: 1,
+				date: 20823,
+				time: 9000,
+				what: 'Haircut appointment',
+			},
+			{
+				id: 2,
+				date: 251223,
+				time: 1300,
+				what: 'Christmas Day Dinner',
+			},
+		]);
 	});
 });

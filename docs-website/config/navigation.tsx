@@ -172,6 +172,10 @@ const navigation = [
 						href: '/docs/examples/nextjs',
 					},
 					{
+						title: 'Next.js with App Directory',
+						href: '/docs/examples/nextjs-app-dir',
+					},
+					{
 						title: 'Next.js TypeScript Operations',
 						href: '/docs/examples/nextjs-typescript-operations',
 					},
@@ -1016,6 +1020,10 @@ const navigation = [
 					{
 						title: 'Redeployment',
 						href: '/docs/cloud/redeployment',
+					},
+					{
+						title: 'Exclude Files from Deployments',
+						href: '/docs/cloud/wundergraph-ignore',
 					},
 					{
 						title: 'Private NPM dependencies',

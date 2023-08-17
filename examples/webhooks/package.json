@@ -15,7 +15,7 @@
   "dependencies": {
     "@jest/globals": "^29.3.1",
     "@types/node-fetch": "^2.6.2",
-    "@wundergraph/sdk": "^0.170.1",
+    "@wundergraph/sdk": "^0.174.1",
     "jest": "^29.6.1",
     "ts-jest": "^29.0.3"
   },

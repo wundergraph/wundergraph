@@ -18,7 +18,6 @@
 
 [<img height="auto" src="./assets/logo2.png">](https://wundergraph.com/)
 
-[![Post on our Discourse forum](https://img.shields.io/discourse/topics?color=fbf5af&label=Discourse&logo=Discourse&server=https%3A%2F%2Fcommunity.wundergraph.com%2F)](https://community.wundergraph.com/)
 [![Join our Discord Server](https://img.shields.io/badge/Discord-chat%20with%20us-%235865F2?style=flat&logo=discord&logoColor=%23fff)](https://discord.com/invite/Jjmc8TC)
 [![Tweet at us on Twitter](https://img.shields.io/badge/Twitter-tweet%20at%20us-1da1f2?style=flat&logo=twitter&logoColor=%23fff)](https://twitter.com/wundergraphcom)
 
@@ -217,6 +216,7 @@ The best way to try them out is by cloning the mono-repo.
 - [Learn WUnderGraph](examples/learn-wundergraph)
 - [Migrate from Apollo](examples/migrate-from-apollo)
 - [Next.js](examples/nextjs)
+- [Next.js app directory](examples/nextjs-app-dir)
 - [Next.js file upload](examples/nextjs-file-upload)
 - [Next.js PostgresSQL Prisma](examples/nextjs-postgres-prisma)
 - [Next.js PostgresQL user filters](examples/nextjs-postgres-user-filters)
@@ -244,7 +244,7 @@ The best way to try them out is by cloning the mono-repo.
 
 - [Use Turborepo to speed up builds in monorepos.](https://github.com/wundergraph/cloud-starter-turbo)
 - [Manage multiple WunderGraph Cloud Projects in a single repository](https://github.com/wundergraph/cloud-multi-projects-demo)
-- [Built-in OpenTelemetry instrumentation](examples/openapi-mocking)
+- [Built-in OpenTelemetry instrumentation](examples/open-telemetry)
 
 ## The WunderGraph Stack
 

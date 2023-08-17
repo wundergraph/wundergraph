@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"path"
 	"strings"
 	"time"
 
@@ -25,20 +24,68 @@ const (
 	OpenIDConnectFlavorAuth0
 )
 
-const (
-	oidcRedirectURICookieName             = "redirect_uri"
-	oidcRedirectOnCompletionURICookieName = "completion_redirect_uri"
-)
-
-type OpenIDConnectCookieHandler struct {
-	log    *zap.Logger
-	claims ClaimsInfo
+func createOIDCProvider(ctx context.Context, config OpenIDConnectConfig) (*oidc.Provider, error) {
+	provider, err := oidc.NewProvider(ctx, config.Issuer)
+	if err != nil {
+		originalErr := err
+		if strings.HasSuffix(config.Issuer, "/") {
+			config.Issuer = strings.TrimSuffix(config.Issuer, "/")
+		} else {
+			config.Issuer += "/"
+		}
+		provider, err = oidc.NewProvider(ctx, config.Issuer)
+		if err != nil {
+			return nil, originalErr
+		}
+	}
+	return provider, nil
 }
 
-func NewOpenIDConnectCookieHandler(log *zap.Logger) *OpenIDConnectCookieHandler {
-	return &OpenIDConnectCookieHandler{
-		log: log,
+func validateOIDCIssuer(issuer string) error {
+	_, err := url.ParseRequestURI(issuer)
+	return err
+}
+
+type OpenIDConnectCookieHandler struct {
+	claims   ClaimsInfo
+	provider *oidc.Provider
+	auth2    *OAuth2AuthenticationHandler
+}
+
+func NewOpenIDConnectCookieHandler(config OpenIDConnectConfig, hooks Hooks, log *zap.Logger) (*OpenIDConnectCookieHandler, error) {
+
+	if err := validateOIDCIssuer(config.Issuer); err != nil {
+		return nil, err
 	}
+
+	ctx := context.Background()
+	provider, err := createOIDCProvider(ctx, config)
+	if err != nil {
+		return nil, fmt.Errorf("creating OIDC provider: %w", err)
+	}
+
+	handler := &OpenIDConnectCookieHandler{
+		provider: provider,
+	}
+	if err := provider.Claims(&handler.claims); err != nil {
+		return nil, fmt.Errorf("retrieving OIDC provider claims: %w", err)
+	}
+
+	handler.auth2 = NewOAuth2AuthenticationHandler(OAuth2AuthenticationConfig{
+		ProviderID:         config.ProviderID,
+		ClientID:           config.ClientID,
+		ClientSecret:       config.ClientSecret,
+		Endpoint:           provider.Endpoint(),
+		Scopes:             []string{oidc.ScopeOpenID, "profile", "email"},
+		AuthTimeout:        config.AuthTimeout,
+		ForceRedirectHttps: config.ForceRedirectHttps,
+		Hooks:              hooks,
+		Cookie:             config.Cookie,
+		InsecureCookies:    config.InsecureCookies,
+		Log:                log,
+	}, handler)
+
+	return handler, nil
 }
 
 type QueryParameter struct {
@@ -132,225 +179,34 @@ func (c *Claims) Custom() map[string]interface{} {
 	return custom
 }
 
-func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *mux.Router, config OpenIDConnectConfig, hooks Hooks) {
-
-	ctx := context.Background()
-
-	if !h.isValidIssuer(config.Issuer) {
-		h.log.Error("oidc.Register failed, invalid issuer, must be valid URL",
-			zap.String("providerID", config.ProviderID),
-			zap.String("issuer", config.Issuer),
-		)
-		return
-	}
-
-	provider := h.createProvider(ctx, config)
-	if provider == nil {
-		return
-	}
-
-	err := provider.Claims(&h.claims)
-	if err != nil {
-		h.log.Error("oidc.provider.ClaimsInfo", zap.Error(err))
-		return
-	}
-
-	authorizeRouter.Path(fmt.Sprintf("/%s", config.ProviderID)).Methods(http.MethodGet).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h.authorize(ctx, w, r, provider, &config)
-	})
-
-	callbackRouter.Path(fmt.Sprintf("/%s", config.ProviderID)).Methods(http.MethodGet).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h.authorizationCallback(ctx, w, r, provider, &config, hooks)
-	})
+func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *mux.Router) {
+	authorizeRouter.Path(fmt.Sprintf("/%s", h.auth2.config.ProviderID)).Methods(http.MethodGet).HandlerFunc(h.auth2.Authorize)
+	callbackRouter.Path(fmt.Sprintf("/%s", h.auth2.config.ProviderID)).Methods(http.MethodGet).HandlerFunc(h.auth2.Callback)
 }
 
-func (h *OpenIDConnectCookieHandler) authorize(_ context.Context, w http.ResponseWriter, r *http.Request, provider *oidc.Provider, config *OpenIDConnectConfig) {
+func (h *OpenIDConnectCookieHandler) User(ctx context.Context, log *zap.Logger, token *oauth2.Token) (*User, error) {
+	var idToken string
 
-	redirectOnCompletionURI := r.URL.Query().Get("redirect_uri")
-
-	uriWithoutQuery := strings.Replace(r.RequestURI, "?"+r.URL.RawQuery, "", 1)
-	redirectPath := strings.Replace(uriWithoutQuery, "authorize", "callback", 1)
-	scheme := "https"
-	if !config.ForceRedirectHttps && r.TLS == nil {
-		scheme = "http"
-	}
-	redirectURI := fmt.Sprintf("%s://%s%s", scheme, r.Host, redirectPath)
-
-	oauth2Config := oauth2.Config{
-		ClientID:     config.ClientID,
-		ClientSecret: config.ClientSecret,
-		Endpoint:     provider.Endpoint(),
-		RedirectURL:  redirectURI,
-		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
-	}
-
-	state, err := generateState()
-	if err != nil {
-		h.log.Error("OIDCCookieHandler could not generate state",
-			zap.Error(err),
-		)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	cookiePath := fmt.Sprintf("/auth/cookie/callback/%s", config.ProviderID)
-	cookieDomain := sanitizeDomain(r.Host)
-
-	stateCookie := &http.Cookie{
-		Name:     "state",
-		Value:    state,
-		MaxAge:   int(config.AuthTimeout.Seconds()),
-		Secure:   r.TLS != nil,
-		HttpOnly: true,
-		Path:     cookiePath,
-		Domain:   cookieDomain,
-		SameSite: http.SameSiteLaxMode,
-	}
-	http.SetCookie(w, stateCookie)
-
-	redirectURICookie := &http.Cookie{
-		Name:     oidcRedirectURICookieName,
-		Value:    redirectURI,
-		MaxAge:   int(config.AuthTimeout.Seconds()),
-		Secure:   r.TLS != nil,
-		HttpOnly: true,
-		Path:     cookiePath,
-		Domain:   cookieDomain,
-		SameSite: http.SameSiteLaxMode,
-	}
-	http.SetCookie(w, redirectURICookie)
-
-	if redirectOnCompletionURI != "" {
-		redirectOnSucessURICookie := &http.Cookie{
-			Name:     oidcRedirectOnCompletionURICookieName,
-			Value:    redirectOnCompletionURI,
-			MaxAge:   int(config.AuthTimeout.Seconds()),
-			Secure:   r.TLS != nil,
-			HttpOnly: true,
-			Path:     cookiePath,
-			Domain:   cookieDomain,
-			SameSite: http.SameSiteLaxMode,
-		}
-		http.SetCookie(w, redirectOnSucessURICookie)
-	}
-
-	opts := make([]oauth2.AuthCodeOption, len(config.QueryParameters))
-	for i, p := range config.QueryParameters {
-		opts[i] = oauth2.SetAuthURLParam(p.Name, p.Value)
-	}
-
-	redirect := oauth2Config.AuthCodeURL(state, opts...)
-
-	http.Redirect(w, r, redirect, http.StatusFound)
-}
-
-func (h *OpenIDConnectCookieHandler) authorizationCallback(ctx context.Context, w http.ResponseWriter, r *http.Request, provider *oidc.Provider, config *OpenIDConnectConfig, hooks Hooks) {
-	state, err := r.Cookie("state")
-	if err != nil {
-		h.log.Warn("OIDCCookieHandler state missing",
-			zap.Error(err),
-		)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	if r.URL.Query().Get("state") != state.Value {
-		h.log.Warn("OIDCCookieHandler state mismatch",
-			zap.Error(err),
-		)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	redirectURI, err := r.Cookie(oidcRedirectURICookieName)
-	if err != nil {
-		h.log.Warn("OIDCCookieHandler redirect uri missing",
-			zap.Error(err),
-		)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	// This is optional
-	var redirectOnCompletionURI string
-	if redirectOnCompletionCookie, err := r.Cookie(oidcRedirectOnCompletionURICookieName); err == nil {
-		redirectOnCompletionURI = redirectOnCompletionCookie.Value
-	}
-
-	oauth2Config := &oauth2.Config{
-		ClientID:     config.ClientID,
-		ClientSecret: config.ClientSecret,
-		Endpoint:     provider.Endpoint(),
-		RedirectURL:  redirectURI.Value,
-		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
-	}
-	if err := h.exchangeToken(ctx, w, r, oauth2Config, provider, config, hooks); err != nil {
-		// Error is already logged by exchangeToken
-		if redirectOnCompletionURI != "" {
-			if redirURL, _ := url.Parse(redirectOnCompletionURI); redirURL != nil {
-				qs := redirURL.Query()
-				qs.Add("error", url.QueryEscape(err.Error()))
-				redirURL.RawQuery = qs.Encode()
-				redirectOnCompletionURI = redirURL.String()
-			}
-			http.Redirect(w, r, redirectOnCompletionURI, http.StatusFound)
-		} else {
-			w.WriteHeader(http.StatusBadRequest)
-		}
-		return
-	}
-
-	if redirectOnCompletionURI != "" {
-		http.Redirect(w, r, redirectOnCompletionURI, http.StatusFound)
-		return
-	}
-
-	scheme := "https"
-	if !config.ForceRedirectHttps && r.TLS == nil {
-		scheme = "http"
-	}
-
-	redirect := fmt.Sprintf("%s://%s", scheme, path.Join(r.Host, "/auth/cookie/user"))
-
-	http.Redirect(w, r, redirect, http.StatusFound)
-}
-
-func (h *OpenIDConnectCookieHandler) exchangeToken(ctx context.Context, w http.ResponseWriter, r *http.Request, oauth2Config *oauth2.Config, provider *oidc.Provider, config *OpenIDConnectConfig, hooks Hooks) error {
-	oauth2Token, err := oauth2Config.Exchange(r.Context(), r.URL.Query().Get("code"))
-	if err != nil {
-		h.log.Error("OIDCCookieHandler.exchange.token",
-			zap.Error(err),
-		)
-		return err
-	}
-
-	var (
-		idToken string
-	)
-
-	accessToken := oauth2Token.AccessToken
-	maybeIdToken := oauth2Token.Extra("id_token")
-	if maybeIdToken != nil {
+	accessToken := token.AccessToken
+	if maybeIdToken := token.Extra("id_token"); maybeIdToken != nil {
 		idToken = maybeIdToken.(string)
 	}
 
-	userInfo, err := provider.UserInfo(ctx, oauth2.StaticTokenSource(oauth2Token))
+	userInfo, err := h.provider.UserInfo(ctx, oauth2.StaticTokenSource(token))
 	if err != nil {
-		h.log.Error("oidc.provider.UserInfo", zap.Error(err))
-		return err
+		log.Error("oidc.provider.UserInfo", zap.Error(err))
+		return nil, err
 	}
 
 	var claims Claims
-	err = userInfo.Claims(&claims)
-	if err != nil {
-		h.log.Error("oidc.userInfo.Claims", zap.Error(err))
-		return err
+	if err := userInfo.Claims(&claims); err != nil {
+		log.Error("oidc.userInfo.Claims", zap.Error(err))
+		return nil, err
 	}
 
-	err = userInfo.Claims(&claims.Raw)
-	if err != nil {
-		h.log.Error("oidc.userInfo.Claims.Raw", zap.Error(err))
-		return err
+	if err := userInfo.Claims(&claims.Raw); err != nil {
+		log.Error("oidc.userInfo.Claims.Raw", zap.Error(err))
+		return nil, err
 	}
 
 	accessTokenJSON := tryParseJWT(accessToken)
@@ -358,45 +214,13 @@ func (h *OpenIDConnectCookieHandler) exchangeToken(ctx context.Context, w http.R
 
 	user := claims.ToUser()
 	user.ProviderName = "oidc"
-	user.ProviderID = config.ProviderID
-	user.ExpiresAt = oauth2Token.Expiry
+	user.ExpiresAt = token.Expiry
 	user.AccessToken = accessTokenJSON
 	user.RawAccessToken = accessToken
 	user.RawIDToken = idToken
 	user.IdToken = idTokenJSON
 
-	if err := postAuthentication(ctx, w, r, hooks, user, config.Cookie, config.InsecureCookies); err != nil {
-		h.log.Error("OpenIDConnectCookieHandler postAuthentication failed",
-			zap.Error(err),
-		)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	return nil
-}
-
-func (h *OpenIDConnectCookieHandler) isValidIssuer(issuer string) bool {
-	_, urlErr := url.ParseRequestURI(issuer)
-	return urlErr == nil
-}
-
-func (h *OpenIDConnectCookieHandler) createProvider(ctx context.Context, config OpenIDConnectConfig) *oidc.Provider {
-	provider, err := oidc.NewProvider(ctx, config.Issuer)
-	if err != nil {
-		originalErr := err
-		if strings.HasSuffix(config.Issuer, "/") {
-			config.Issuer = strings.TrimSuffix(config.Issuer, "/")
-		} else {
-			config.Issuer += "/"
-		}
-		provider, err = oidc.NewProvider(ctx, config.Issuer)
-		if err != nil {
-			h.log.Error("oidc.createProvider failed, issuer name mismatch, auth provider not configured",
-				zap.Error(originalErr),
-				zap.Error(err),
-			)
-		}
-	}
-	return provider
+	return user, nil
 }
 
 type openIDConnectConfiguration struct {

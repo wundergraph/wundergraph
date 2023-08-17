@@ -6,6 +6,37 @@ export const createOpenAPITestServer = (port: number) => {
 		logger: true,
 	});
 
+	server.get<{ Params: { numberToShow: number } }>('/notes/reminders/:numberToShow', async (request, reply) => {
+		const remindersToShow = request.params.numberToShow;
+		const reminders = [
+			{
+				id: 1,
+				date: 20823,
+				time: 9000,
+				what: 'Haircut appointment',
+			},
+			{
+				id: 2,
+				date: 251223,
+				time: 1300,
+				what: 'Christmas Day Dinner',
+			},
+			{
+				id: 3,
+				date: 311299,
+				time: 2359,
+				what: 'Retirement starts',
+			},
+		];
+		const maxNumber = reminders.length;
+		if (remindersToShow < 1 || remindersToShow > maxNumber) {
+			reply.code(400).send(`Please enter a number between 1 and ${maxNumber}`);
+			return;
+		}
+		const slicedReminders = reminders.slice(0, remindersToShow);
+		reply.code(200).header('content-type', 'application/json; charset=utf-8').send([slicedReminders]);
+	});
+
 	server.post<{ Body: string }>('/notes/new', async (request, reply) => {
 		let text: string;
 		try {
@@ -46,7 +77,19 @@ export const createOpenAPITestServer = (port: number) => {
 			reply.code(404).send(`noteID ${id} not found`);
 			return;
 		}
-		reply.code(200).header('content-type', 'application/json; charset=utf-8').send({ id, text });
+		const jsonData = [
+			{
+				id: 1,
+				name: 'data1',
+				date: 10823,
+			},
+			{
+				id: 2,
+				name: 'data2',
+				date: 10823,
+			},
+		];
+		reply.code(200).header('content-type', 'application/json; charset=utf-8').send({ id, text, jsonData });
 	});
 
 	server.delete<{ Params: { noteID: string } }>('/notes/note/:noteID', async (request, reply) => {

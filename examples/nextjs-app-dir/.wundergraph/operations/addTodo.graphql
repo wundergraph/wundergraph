@@ -1,0 +1,7 @@
+mutation addTodo($text: String!) {
+	todos_addTodo(todo: { text: $text }) {
+		id
+		text
+		isCompleted
+	}
+}

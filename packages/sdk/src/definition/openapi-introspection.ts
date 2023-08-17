@@ -1,6 +1,10 @@
 import path from 'path';
+import { format } from 'util';
 import process from 'node:process';
 import fs from 'fs/promises';
+
+import type { Logger as GraphQLMeshLogger } from '@graphql-mesh/types';
+import { Logger as PinoLogger } from 'pino';
 
 import {
 	ApiIntrospectionOptions,
@@ -108,10 +112,53 @@ export interface OpenAPIIntrospectionV2
 	extends Omit<HTTPUpstream, 'authentication' | 'mTLS' | 'requestTimeoutSeconds'> {
 	source: OpenAPIIntrospectionV2Source;
 	baseURL?: InputVariable;
+	customJSONScalars?: string[];
+	customIntScalars?: string[];
+	customFloatScalars?: string[];
 	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
+}
+
+/**
+ * Implements a GraphQLMeshLogger compatible logger wrapping a Pino logger
+ */
+class OpenAPILogger implements GraphQLMeshLogger {
+	constructor(private logger: PinoLogger) {}
+
+	log(...args: any[]) {
+		this.logger.info(format(...args));
+	}
+
+	debug(...args: any[]) {
+		// When "healing" a schema, the OAS parser generates a child logger
+		// with a name starts with "heal" and then issues debug messages to
+		// it. Since these messages are a bit critical we want to raise their
+		// level to warning.
+		const name = this.logger.bindings()['name'];
+		if (name && name.startsWith('heal')) {
+			this.warn(...args);
+			return;
+		}
+		this.logger.debug(format(...args));
+	}
+
+	info(...args: any[]) {
+		this.logger.info(format(...args));
+	}
+
+	warn(...args: any[]) {
+		this.logger.warn(format(...args));
+	}
+
+	error(...args: any[]) {
+		this.logger.error(format(...args));
+	}
+
+	child(name: string) {
+		return new OpenAPILogger(this.logger.child({ name }));
+	}
 }
 
 export const introspectOpenApiV2 = async (introspection: OpenAPIIntrospectionV2) => {
@@ -122,7 +169,10 @@ export const introspectOpenApiV2 = async (introspection: OpenAPIIntrospectionV2)
 		introspection,
 		configuration,
 		async (introspection: OpenAPIIntrospectionV2, options: ApiIntrospectionOptions): Promise<GraphQLApi> => {
-			return await openApiSpecificationToGraphQLApi(specSource, introspection, options.apiID!);
+			const logger = options.logger
+				? new OpenAPILogger(options.logger.child({ component: '@wundergraph/openapi' }))
+				: undefined;
+			return await openApiSpecificationToGraphQLApi(specSource, introspection, options.apiID!, logger);
 		}
 	);
 };
@@ -135,12 +185,14 @@ interface OpenApiOptions {
 	endpoint?: string;
 	name: string;
 	operationHeaders: Record<string, string>;
+	logger?: GraphQLMeshLogger;
 }
 
 export const openApiSpecificationToGraphQLApi = async (
 	source: OasSource, // could be json, file path or url
 	introspection: OpenAPIIntrospectionV2,
-	apiID: string
+	apiID: string,
+	logger?: GraphQLMeshLogger
 ): Promise<GraphQLApi> => {
 	const headersBuilder = new HeadersBuilder();
 	if (introspection.headers !== undefined) {
@@ -161,6 +213,7 @@ export const openApiSpecificationToGraphQLApi = async (
 		cwd: process.cwd(),
 		name: introspection.apiNamespace || 'api',
 		operationHeaders,
+		logger,
 	};
 
 	// get json schema options describing each path in the spec
@@ -183,7 +236,11 @@ export const openApiSpecificationToGraphQLApi = async (
 			internal: true,
 			loadSchemaFromString: () => schema,
 			headers: introspection.headers,
-			customIntScalars: ['BigInt'],
+			customJSONScalars: introspection.customJSONScalars,
+			customIntScalars: introspection.customIntScalars,
+			customFloatScalars: introspection.customFloatScalars,
+			schemaExtension: introspection.schemaExtension,
+			replaceCustomScalarTypeFields: introspection.replaceCustomScalarTypeFields,
 		},
 		{}
 	);

@@ -394,7 +394,7 @@ describe('Mock server', () => {
 	});
 
 	test('Should be possible to consume the payload twice', async () => {
-		const scope = server.mock({
+		const scope1 = server.mock({
 			match: async ({ url, method, json }) => {
 				const body = await json();
 
@@ -417,7 +417,30 @@ describe('Mock server', () => {
 			},
 		});
 
-		const resp = await fetch(`${server.url()}/test?a=b`, {
+		const scope2 = server.mock({
+			match: async ({ url, method, json }) => {
+				const body = await json();
+
+				expect(body).toEqual({ a: 'b' });
+
+				return url.path === '/test?a=b' && method === 'POST';
+			},
+			handler: async ({ json }) => {
+				const body = await json();
+
+				expect(body).toEqual({ a: 'b' });
+
+				return {
+					status: 200,
+					headers: {
+						'X-Foo': 'Bar',
+					},
+					body,
+				};
+			},
+		});
+
+		let resp = await fetch(`${server.url()}/test?a=b`, {
 			method: 'POST',
 			headers: {
 				Accept: 'application.json',
@@ -425,9 +448,21 @@ describe('Mock server', () => {
 			},
 			body: JSON.stringify({ a: 'b' }),
 		});
-		const data = await resp.json();
+		let data = await resp.json();
 
-		scope.done();
+		scope1.done();
+
+		resp = await fetch(`${server.url()}/test?a=b`, {
+			method: 'POST',
+			headers: {
+				Accept: 'application.json',
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ a: 'b' }),
+		});
+		data = await resp.json();
+
+		scope2.done();
 
 		expect(resp.status).toBe(200);
 		expect(resp.headers.get('x-foo')).toEqual('Bar');
