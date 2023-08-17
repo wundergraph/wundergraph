@@ -216,6 +216,7 @@
     "openapi-types": "12.1.0",
     "pino": "^8.11.0",
     "postman-collection": "^4.1.7",
+    "prettier": "2.8.7",
     "protobufjs": "^7.2.4",
     "raw-body": "^2.5.2",
     "swagger2openapi": "^7.0.8",
