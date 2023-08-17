@@ -1,6 +1,6 @@
 import { Straightforward, Request, RequestContext, ConnectContext, Next } from '@wundergraph/straightforward';
 import debug from 'debug';
-import { freeport, getBody, getJSONBody, getTextBody } from './util';
+import { freeport, getBody } from './util';
 import { IncomingHttpHeaders } from 'http';
 import { PublicScope, Scope } from './scope';
 
@@ -95,7 +95,7 @@ export interface InternalMockRequest {
 	/**
 	 * The parsed request body.
 	 */
-	_body?: any;
+	_body?: Buffer;
 }
 
 export interface MockRequest extends Omit<InternalMockRequest, '_body'> {}
@@ -104,11 +104,13 @@ export class WunderGraphMockServer {
 	private proxy: Straightforward;
 	private port: number;
 	private mocks: Mock[];
+	private requests: WeakMap<Request, MockRequest>;
 
 	constructor() {
 		this.proxy = new Straightforward();
 		this.port = 0;
 		this.mocks = [];
+		this.requests = new WeakMap<Request, MockRequest>();
 	}
 
 	/**
@@ -152,6 +154,50 @@ export class WunderGraphMockServer {
 			return;
 		}
 
+		let userMockReq: MockRequest | undefined = undefined;
+
+		if (this.requests.has(req)) {
+			userMockReq = this.requests.get(req);
+		} else {
+			const mockReq: Omit<InternalMockRequest, 'json' | 'text' | 'raw'> = {
+				headers: req.headers,
+				url: req.locals.urlParts,
+				method: req.method as HTTPMethod,
+			};
+
+			// We read the body only once, so we can use it multiple times
+			const raw = async (): Promise<Buffer> => {
+				if (mockReq._body) {
+					return mockReq._body;
+				}
+				mockReq._body = await getBody(req);
+				return mockReq._body;
+			};
+			const text = async (): Promise<string> => {
+				const body = await raw();
+				return body.toString();
+			};
+			const json = async <Body = any>(): Promise<Body> => {
+				const body = await text();
+				return JSON.parse(body);
+			};
+
+			this.requests.set(req, {
+				...mockReq,
+				json,
+				text,
+				raw,
+			});
+
+			// Cache the request object for the next mock
+			userMockReq = this.requests.get(req);
+		}
+
+		// This should never happen
+		if (!userMockReq) {
+			throw new Error('Could not find the mock request');
+		}
+
 		for (let mock of this.mocks) {
 			scope = mock.scope;
 
@@ -160,34 +206,6 @@ export class WunderGraphMockServer {
 			}
 
 			try {
-				const mockReq: Omit<InternalMockRequest, 'json' | 'text' | 'raw'> = {
-					headers: req.headers,
-					url: req.locals.urlParts,
-					method: req.method as HTTPMethod,
-				};
-
-				const json = async <Body = any>(): Promise<Body> => {
-					if (mockReq._body) {
-						return mockReq._body;
-					}
-					mockReq._body = await getJSONBody(req);
-					return mockReq._body;
-				};
-				const text = async (): Promise<string> => {
-					if (mockReq._body) {
-						return mockReq._body;
-					}
-					mockReq._body = await getTextBody(req);
-					return mockReq._body;
-				};
-
-				const userMockReq: MockRequest = {
-					...mockReq,
-					json,
-					text,
-					raw: () => getBody(req),
-				};
-
 				// Skip if the request does not match, try the next mock
 				if (!(await mock.match(userMockReq))) {
 					log('request did not match mock: %s %s', req.method, req.url);
