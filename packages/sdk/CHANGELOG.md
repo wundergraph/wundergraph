@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.174.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.174.3...@wundergraph/sdk@0.174.4) (2023-08-17)
+
+### Bug Fixes
+
+* add prettier as a direct SDK dependency ([#1205](https://github.com/wundergraph/wundergraph/issues/1205)) ([ffd30eb](https://github.com/wundergraph/wundergraph/commit/ffd30ebe7adbe971d57f8279e33a0d4f09028484)) (@fiam)
+* jsonschema template ([#1194](https://github.com/wundergraph/wundergraph/issues/1194)) ([3dfab90](https://github.com/wundergraph/wundergraph/commit/3dfab90067866d5df2890473af7e0a3afac94464)) (@thisisnithin)
+
 ## [0.174.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.174.2...@wundergraph/sdk@0.174.3) (2023-08-14)
 
 ### Bug Fixes
