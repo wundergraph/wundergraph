@@ -9,6 +9,11 @@ Using this hook, you're able to completely rewrite the request, headers, etc.
 
 This hook is useful, e.g. when you'd like to sign requests or when you have to get a one time short-lived access token.
 
+{% callout title="Setting headers in this hook" %}
+In case of openAPI you need to mention the headers that you will dynamically set in this hook within the introspection config.
+It can be either in staticHeaders or clientRequestHeaders
+{% /callout %}
+
 The `onOriginRequest` hook is called with the following parameters:
 
 - `user`: The user object when the user is authenticated
