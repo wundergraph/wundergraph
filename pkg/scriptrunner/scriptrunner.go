@@ -256,8 +256,6 @@ type CmdOptions struct {
 	// When the script errors, we want to keep the last lines of output
 	// for debugging purposes.
 	stdErrBuf *ringbuffer.RingBuffer
-	buffered  bool
-	streaming bool
 }
 
 // newCmd creates a new command to run the bundler script.
@@ -265,8 +263,9 @@ type CmdOptions struct {
 // this is necessary to make sure the IO was flushed after the script is stopped.
 func newCmd(options CmdOptions) (*gocmd.Cmd, chan struct{}) {
 	cmdOptions := gocmd.Options{
-		Buffered:  false,
-		Streaming: true,
+		Buffered:       false,
+		Streaming:      true,
+		LineBufferSize: 8 * 1024 * 1024,
 	}
 	cmd := gocmd.NewCmdOptions(cmdOptions, options.executable, options.scriptArgs...)
 	cmd.Dir = options.cmdDir
