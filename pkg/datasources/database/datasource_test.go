@@ -49,6 +49,8 @@ const (
 	`
 
 	operationWithRemoveNullVariablesDirective = `
+	directive @removeNullVariables on QUERY | MUTATION
+
 	query FindFirstUser($id: Int) @removeNullVariables {
 		findFirstUser(id: $id) {
 			id
