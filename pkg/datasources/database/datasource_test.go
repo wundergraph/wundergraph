@@ -12,6 +12,8 @@ import (
 
 const (
 	schema = `
+		directive @removeNullVariables on QUERY | MUTATION
+
 		type Query {
 			queryRaw(query: String! parameters: [String]): String
 			queryRawJSON(query: String! parameters: [String]): JSON
@@ -49,8 +51,6 @@ const (
 	`
 
 	operationWithRemoveNullVariablesDirective = `
-	directive @removeNullVariables on QUERY | MUTATION
-
 	query FindFirstUser($id: Int) @removeNullVariables {
 		findFirstUser(id: $id) {
 			id
