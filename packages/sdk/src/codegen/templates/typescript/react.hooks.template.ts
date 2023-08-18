@@ -2,7 +2,7 @@
 export const template = `
 import {useCallback, useContext, useEffect, useMemo, useState} from "react";
 import {WunderGraphContext} from "./provider";
-import { RequestOptions, MutateRequestOptions, SubscriptionRequestOptions, Response} from "@wundergraph/sdk"
+import { RequestOptions, MutateRequestOptions, SubscriptionRequestOptions, Response} from "@wundergraph/sdk/server"
 {{#if hasImports}}import { {{imports}} } from "./models";{{/if}}
 
 export const useWunderGraph = () => {
