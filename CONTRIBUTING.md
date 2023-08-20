@@ -44,6 +44,8 @@ make
 Before you run any testapp, you need to ensure that you use your local wunderctl binary. This is necessary because the examples are using the downloaded wunderctl binary from GithHub.
 
 ```bash
+# Ensure your GOBIN is on your path.  Only needs doing once
+PATH=$PATH:$(go env GOPATH)/bin
 # Install the wunderctl binary in your GOBIN.
 make install
 # Set this environment variable to use your local wunderctl binary for all calls in the SDK.
@@ -81,6 +83,18 @@ echo "export NVM_DIR="$HOME/.nvm"\n[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.
 ### Pull Requests
 
 We merge all pull requests in `squash merge` mode. You're not enforced to use [conventional commit standard](https://www.conventionalcommits.org/en/v1.0.0-beta.2/#why-use-conventional-commits) across all your commits, but it's good practice and avoids mistakes. However, it's important that the ultimate squashed commit message follow the conventionalcommit standard.
+
+Please ensure your formatting is correct before checking in. This can be done by running
+
+```bash
+ make golang-ci-fix
+```
+
+If you do not have golangci-lint installed this will fail. It can be installed via brew
+
+```bash
+brew install golangci-lint
+```
 
 ## Releases
 
