@@ -5,32 +5,36 @@ import _m0 from "protobufjs/minimal";
 export const protobufPackage = "wgpb";
 
 export enum LogLevel {
-  DEBUG = 0,
-  INFO = 1,
-  ERROR = 2,
-  WARNING = 3,
-  PANIC = 4,
-  FATAL = 5,
+  TRACE = 0,
+  DEBUG = 1,
+  INFO = 2,
+  ERROR = 3,
+  WARNING = 4,
+  PANIC = 5,
+  FATAL = 6,
 }
 
 export function logLevelFromJSON(object: any): LogLevel {
   switch (object) {
     case 0:
+    case "TRACE":
+      return LogLevel.TRACE;
+    case 1:
     case "DEBUG":
       return LogLevel.DEBUG;
-    case 1:
+    case 2:
     case "INFO":
       return LogLevel.INFO;
-    case 2:
+    case 3:
     case "ERROR":
       return LogLevel.ERROR;
-    case 3:
+    case 4:
     case "WARNING":
       return LogLevel.WARNING;
-    case 4:
+    case 5:
     case "PANIC":
       return LogLevel.PANIC;
-    case 5:
+    case 6:
     case "FATAL":
       return LogLevel.FATAL;
     default:
@@ -40,6 +44,8 @@ export function logLevelFromJSON(object: any): LogLevel {
 
 export function logLevelToJSON(object: LogLevel): string {
   switch (object) {
+    case LogLevel.TRACE:
+      return "TRACE";
     case LogLevel.DEBUG:
       return "DEBUG";
     case LogLevel.INFO:
