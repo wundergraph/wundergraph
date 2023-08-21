@@ -18,7 +18,9 @@
   "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
   "exclude": [
     // temporarily exclude wundergraph generated files - due to an issue with references in wundergraph.factory.ts file
-    "./.wundergraph/**"
+    "./.wundergraph/**",
+    "node_modules",
+    "**/node_modules/*"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

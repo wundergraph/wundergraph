@@ -3,6 +3,52 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.174.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.174.3...@wundergraph/sdk@0.174.4) (2023-08-17)
+
+### Bug Fixes
+
+* add prettier as a direct SDK dependency ([#1205](https://github.com/wundergraph/wundergraph/issues/1205)) ([ffd30eb](https://github.com/wundergraph/wundergraph/commit/ffd30ebe7adbe971d57f8279e33a0d4f09028484)) (@fiam)
+* jsonschema template ([#1194](https://github.com/wundergraph/wundergraph/issues/1194)) ([3dfab90](https://github.com/wundergraph/wundergraph/commit/3dfab90067866d5df2890473af7e0a3afac94464)) (@thisisnithin)
+
+## [0.174.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.174.2...@wundergraph/sdk@0.174.3) (2023-08-14)
+
+### Bug Fixes
+
+* server logger missing cloud env bindings ([#1191](https://github.com/wundergraph/wundergraph/issues/1191)) ([885ffe3](https://github.com/wundergraph/wundergraph/commit/885ffe38ae799ace0f190aa9178d192722f7df5c)) (@thisisnithin)
+* type error in generated jsonschema.ts file ([#1190](https://github.com/wundergraph/wundergraph/issues/1190)) ([979f215](https://github.com/wundergraph/wundergraph/commit/979f215b1484ae479e0beecbd83e771633625b20)) (@thisisnithin)
+
+## [0.174.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.174.1...@wundergraph/sdk@0.174.2) (2023-08-13)
+
+### Bug Fixes
+
+* **mock-library:** ensure to read req body only once ([#1188](https://github.com/wundergraph/wundergraph/issues/1188)) ([76c8b36](https://github.com/wundergraph/wundergraph/commit/76c8b364d19f69956faf33cbc11ed01fd0628cbd)) (@StarpTech)
+
+## [0.174.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.174.0...@wundergraph/sdk@0.174.1) (2023-08-03)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.174.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.173.0...@wundergraph/sdk@0.174.0) (2023-08-03)
+
+### Features
+
+* add support for renaming root field response types ([#1173](https://github.com/wundergraph/wundergraph/issues/1173)) ([f7734ce](https://github.com/wundergraph/wundergraph/commit/f7734ce9cc2637bf0264792192ff5bf75dc2a978)) (@Aenimus)
+
+## [0.173.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.172.0...@wundergraph/sdk@0.173.0) (2023-08-02)
+
+### Features
+
+* implement schema extension and replaceCustomScalarTypeFields fo… ([#1169](https://github.com/wundergraph/wundergraph/issues/1169)) ([7e17b9a](https://github.com/wundergraph/wundergraph/commit/7e17b9a96a50266a9a860e2f46e992e26665df2b)) (@Aenimus)
+
+## [0.172.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.171.0...@wundergraph/sdk@0.172.0) (2023-08-01)
+
+### Features
+
+* improve support for BigInt ([#1165](https://github.com/wundergraph/wundergraph/issues/1165)) ([32fbcde](https://github.com/wundergraph/wundergraph/commit/32fbcde4b042e5da8dbfc672259d193904f9cf51)) (@fiam)
+
+### Bug Fixes
+
+* nats subscriptions ([#1155](https://github.com/wundergraph/wundergraph/issues/1155)) ([3c66c77](https://github.com/wundergraph/wundergraph/commit/3c66c77276b344288f7b35943b8d004fd67055a8)) (@jensneuse)
+
 ## [0.171.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.170.1...@wundergraph/sdk@0.171.0) (2023-07-28)
 
 ### Features

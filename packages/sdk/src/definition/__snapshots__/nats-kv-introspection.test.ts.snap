@@ -36,9 +36,9 @@ type Subscription {
    Watch for any updates to keys that match the keys argument which could include wildcards.
   Watch will send a nil entry when it has received all initial values.
   """
-  token_watch(keys: [String!]!): [token_KeyValueEntry!]!
+  token_watch(keys: [String!]!): token_KeyValueEntry!
   "WatchAll will invoke the callback for all updates."
-  token_watchAll: [token_KeyValueEntry!]!
+  token_watchAll: token_KeyValueEntry!
 }
 
 type token_KeyValueEntry {
@@ -964,9 +964,9 @@ type Subscription {
    Watch for any updates to keys that match the keys argument which could include wildcards.
   Watch will send a nil entry when it has received all initial values.
   """
-  token_watch(keys: [String!]!): [token_KeyValueEntry!]!
+  token_watch(keys: [String!]!): token_KeyValueEntry!
   "WatchAll will invoke the callback for all updates."
-  token_watchAll: [token_KeyValueEntry!]!
+  token_watchAll: token_KeyValueEntry!
 }
 
 type token_KeyValueEntry {

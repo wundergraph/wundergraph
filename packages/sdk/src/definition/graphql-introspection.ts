@@ -122,8 +122,10 @@ export const introspectGraphql = async (
 	upstreamSchema = lexicographicSortSchema(upstreamSchema);
 	const federationEnabled = introspection.isFederation || false;
 
-	const printedUpstreamSchemaWithDirectives = printSchemaWithDirectives(upstreamSchema);
-	const cleanUpstreamSchema = cleanupSchema(upstreamSchema);
+	// The upstream schema should NEVER be modified
+	const printedUnmodifiedUpstreamSchemaWithDirectives = printSchemaWithDirectives(upstreamSchema);
+	const schemaWithMergedExtension = mergeSchemaExtension(upstreamSchema, introspection.schemaExtension);
+	const cleanUpstreamSchema = cleanupSchema(schemaWithMergedExtension);
 
 	const {
 		schemaSDL: schemaSDLWithCustomScalars,
@@ -216,7 +218,7 @@ export const introspectGraphql = async (
 						Enabled: federationEnabled,
 						ServiceSDL: serviceSDL || '',
 					},
-					UpstreamSchema: printedUpstreamSchemaWithDirectives,
+					UpstreamSchema: printedUnmodifiedUpstreamSchemaWithDirectives,
 					HooksConfiguration: {
 						onWSTransportConnectionInit: false,
 					},
@@ -257,12 +259,9 @@ const introspectGraphQLSchema = async (
 		try {
 			if (introspection.isFederation) {
 				const parsedSchema = parse(loadFile(introspection.loadSchemaFromString));
-				return mergeSchemaExtension(buildSubgraphSchema(parsedSchema), introspection.schemaExtension);
+				return buildSubgraphSchema(parsedSchema);
 			}
-			return mergeSchemaExtension(
-				buildSchema(loadFile(introspection.loadSchemaFromString)),
-				introspection.schemaExtension
-			);
+			return buildSchema(loadFile(introspection.loadSchemaFromString));
 		} catch (e: any) {
 			throw new Error(
 				`Loading schema from string failed for apiNamespace '${introspection.apiNamespace}'. Make sure the schema is valid and try again: ${e}`
@@ -270,8 +269,7 @@ const introspectGraphQLSchema = async (
 		}
 	}
 	try {
-		const schema = await introspectGraphQLAPI(introspection, options, headers);
-		return mergeSchemaExtension(schema, introspection.schemaExtension);
+		return await introspectGraphQLAPI(introspection, options, headers);
 	} catch (e: any) {
 		throw new Error(`Introspecting GraphQL API failed for apiNamespace '${introspection.apiNamespace}': ${e}`);
 	}

@@ -50,6 +50,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
+	"github.com/wundergraph/wundergraph/pkg/querystring"
 	"github.com/wundergraph/wundergraph/pkg/s3uploadclient"
 	"github.com/wundergraph/wundergraph/pkg/trace"
 	"github.com/wundergraph/wundergraph/pkg/webhookhandler"
@@ -862,36 +863,6 @@ type liveQueryConfig struct {
 	pollingIntervalSeconds int64
 }
 
-func parseQueryVariables(r *http.Request, allowList []string) []byte {
-	rawVariables := r.URL.Query().Get(WgVariables)
-	if rawVariables == "" {
-		rawVariables = "{}"
-		for name, val := range r.URL.Query() {
-			if len(val) > 0 && !strings.HasPrefix(name, WgPrefix) {
-				if !stringSliceContainsValue(allowList, name) {
-					continue
-				}
-				// check if the user work with JSON values
-				if gjson.Valid(val[0]) {
-					rawVariables, _ = sjson.SetRaw(rawVariables, name, val[0])
-				} else {
-					rawVariables, _ = sjson.Set(rawVariables, name, val[0])
-				}
-			}
-		}
-	}
-	return unsafebytes.StringToBytes(rawVariables)
-}
-
-func stringSliceContainsValue(list []string, value string) bool {
-	for i := range list {
-		if list[i] == value {
-			return true
-		}
-	}
-	return false
-}
-
 type QueryHandler struct {
 	resolver               QueryResolver
 	log                    *zap.Logger
@@ -933,7 +904,13 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	})
 	defer pool.PutCtx(resolveCtx)
 
-	resolveCtx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
+	var err error
+	resolveCtx.Variables, err = querystring.ToJSON(r.URL.RawQuery, h.queryParamsAllowList)
+	if err != nil {
+		requestLogger.Error("Could not parse query string", zap.Error(err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	resolveCtx.Variables = h.stringInterpolator.Interpolate(resolveCtx.Variables)
 
 	if !validateInputVariables(resolveCtx.Context(), requestLogger, resolveCtx.Variables, h.variablesValidator, w) {
@@ -942,7 +919,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	compactBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(compactBuf)
-	err := json.Compact(compactBuf, resolveCtx.Variables)
+	err = json.Compact(compactBuf, resolveCtx.Variables)
 	if err != nil {
 		requestLogger.Error("Could not compact variables in query handler", zap.Bool("isLive", isLive), zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
@@ -1313,7 +1290,13 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	})
 	defer pool.PutCtx(ctx)
 
-	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
+	var err error
+	ctx.Variables, err = querystring.ToJSON(r.URL.RawQuery, h.queryParamsAllowList)
+	if err != nil {
+		requestLogger.Error("Could not parse query string", zap.Error(err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 
 	if !validateInputVariables(ctx.Context(), requestLogger, ctx.Variables, h.variablesValidator, w) {
@@ -1322,7 +1305,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	compactBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(compactBuf)
-	err := json.Compact(compactBuf, ctx.Variables)
+	err = json.Compact(compactBuf, ctx.Variables)
 	if err != nil {
 		requestLogger.Error("Could not compact variables", zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
@@ -1616,7 +1599,7 @@ func (r *Builder) configureOpenIDConnectProviders() (*authentication.OpenIDConne
 		}
 		issuer := loadvariable.String(provider.OidcConfig.Issuer)
 		clientID := loadvariable.String(provider.OidcConfig.ClientId)
-		clientSecret := loadvariable.String(provider.OidcConfig.ClientId)
+		clientSecret := loadvariable.String(provider.OidcConfig.ClientSecret)
 
 		oidc, err := authentication.NewOpenIDConnectProvider(issuer, clientID, clientSecret, &authentication.OpenIDConnectProviderOptions{
 			Flavor:     flavor,
@@ -1835,7 +1818,13 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	ct := r.Header.Get("Content-Type")
 	if r.Method == http.MethodGet {
-		ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
+		var err error
+		ctx.Variables, err = querystring.ToJSON(r.URL.RawQuery, h.queryParamsAllowList)
+		if err != nil {
+			requestLogger.Error("Could not parse query string", zap.Error(err))
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 	} else if ct == "application/x-www-form-urlencoded" {
 		ctx.Variables = h.parseFormVariables(r)
 	} else {
