@@ -57,7 +57,7 @@ require (
 	github.com/tidwall/sjson v1.1.5
 	github.com/valyala/fasthttp v1.44.0
 	github.com/wI2L/jsondiff v0.4.0
-	github.com/wundergraph/graphql-go-tools v1.66.1
+	github.com/wundergraph/graphql-go-tools v1.66.3
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.42.0
 	go.opentelemetry.io/otel v1.16.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.16.0
