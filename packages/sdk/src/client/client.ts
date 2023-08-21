@@ -756,10 +756,18 @@ export class Client {
 			if (orCondition) {
 				return true;
 			}
-			// If fetchUser has never been called, assume we do need the CSRF token.
-			// This shouldn't be a problem because the CSRF token generator is always
-			// available
-			return this.userIsAuthenticated ?? true;
+			if (typeof this.userIsAuthenticated !== 'undefined') {
+				return this.userIsAuthenticated;
+			}
+			// If fetchUser has never been called and we're in a browser
+			// assume we do need the CSRF token. This shouldn't be a problem
+			// because the CSRF token generator is always available
+			if (typeof window !== 'undefined') {
+				// Browser
+				return true;
+			}
+			// Backend
+			return false;
 		}
 		return false;
 	}
