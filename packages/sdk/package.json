@@ -145,7 +145,6 @@
     "test:update-snapshots": "jest -u"
   },
   "devDependencies": {
-    "@types/big-json": "^3.2.0",
     "@types/chai": "^4.2.22",
     "@types/cors": "^2.8.10",
     "@types/debug": "^4.1.7",
@@ -193,7 +192,6 @@
     "@wundergraph/wunderctl": "workspace:^0.169.3",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
-    "big-json": "^3.2.0",
     "close-with-grace": "^1.1.0",
     "debug": "^4.3.4",
     "execa": "5.1.1",
@@ -211,6 +209,7 @@
     "js-yaml": "^4.1.0",
     "json-schema": "^0.4.0",
     "json-schema-to-typescript": "^11.0.3",
+    "json-stream-stringify": "^3.1.0",
     "lodash": "^4.17.21",
     "long": "^5.2.0",
     "object-hash": "^2.2.0",

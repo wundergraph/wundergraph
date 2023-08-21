@@ -1,4 +1,4 @@
-import bigJson from 'big-json';
+import { JsonStreamStringify } from 'json-stream-stringify';
 
 /**
  * Encodes the given data as JSON, handling large payloads
@@ -7,11 +7,7 @@ import bigJson from 'big-json';
  * @returns String with JSON-encoded data
  */
 export const toJson = async (data: any): Promise<string> => {
-	// bigJSON only supports arrays and objects as top level elements
-	if (typeof data !== 'object') {
-		return JSON.stringify(data);
-	}
-	const stream = bigJson.createStringifyStream({ body: data });
+	const stream = new JsonStreamStringify(data, undefined, undefined, false);
 	const chunks: Buffer[] = [];
 	return new Promise((resolve, reject) => {
 		stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
