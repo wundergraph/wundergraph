@@ -6,6 +6,7 @@ import (
 )
 
 const (
+	WgLogEnvKey       = "WG_LOG"
 	WgLogPrettyEnvKey = "WG_LOG_PRETTY"
 )
 
@@ -14,7 +15,7 @@ const (
 func CliEnv(flags RootFlags) []string {
 	return append(
 		os.Environ(),
-		fmt.Sprintf("%s=%s", "WG_CLI_LOG_LEVEL", flags.CliLogLevel),
+		fmt.Sprintf("%s=%s", WgLogEnvKey, flags.Log),
 		fmt.Sprintf("%s=%t", WgLogPrettyEnvKey, flags.PrettyLogs),
 		fmt.Sprintf("%s=%t", "WG_DEBUG_MODE", flags.DebugMode))
 }

@@ -30,7 +30,7 @@ import (
 func TestNode(t *testing.T) {
 	g := goldie.New(t, goldie.WithFixtureDir("fixtures"))
 
-	logger := logging.New(true, false, zapcore.DebugLevel)
+	logger := logging.New(true, false, zap.NewAtomicLevelAt(zapcore.DebugLevel))
 
 	userService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "67b77eab-d1a5-4cd8-b908-8443f24502b6", r.Header.Get("X-Request-Id"))
@@ -259,7 +259,7 @@ func TestWebHooks(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	logger := logging.New(true, false, zapcore.DebugLevel)
+	logger := logging.New(true, false, zap.NewAtomicLevelAt(zapcore.DebugLevel))
 	node := New(ctx, BuildInfo{}, "", logger)
 
 	nodeConfig := &WunderNodeConfig{
@@ -345,7 +345,7 @@ func TestWebHooks(t *testing.T) {
 }
 
 func BenchmarkNode(t *testing.B) {
-	logger := logging.New(true, false, zapcore.DebugLevel)
+	logger := logging.New(true, false, zap.NewAtomicLevelAt(zapcore.DebugLevel))
 
 	userService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(`{"data":{"me":{"id":"1234","username":"Me"}}}`))
