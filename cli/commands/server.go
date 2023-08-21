@@ -73,7 +73,7 @@ func startHooksServer(ctx context.Context) error {
 		Production:        true,
 		Debug:             rootFlags.DebugMode,
 		Env:               helpers.CliEnv(rootFlags),
-		LogLevel:          rootFlags.CliLogLevel,
+		Log:               rootFlags.Log,
 		Output:            helpers.ScriptRunnerOutputConfig(rootFlags),
 	}
 
