@@ -313,7 +313,7 @@ var upCmd = &cobra.Command{
 				Env:               helpers.CliEnv(rootFlags),
 				Debug:             rootFlags.DebugMode,
 				DebugBindAddress:  debugBindAddress,
-				LogLevel:          rootFlags.CliLogLevel,
+				Log:               rootFlags.Log,
 				Output:            scriptRunnerOutputConfig,
 			}
 
@@ -493,7 +493,7 @@ var upCmd = &cobra.Command{
 		if enableTUI {
 			nodeLogger = zap.NewNop()
 		} else {
-			nodeLogger = logging.New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevel)
+			nodeLogger = logging.New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevelSetter)
 		}
 
 		n := node.New(ctx, BuildInfo, wunderGraphDir, nodeLogger)
@@ -512,9 +512,9 @@ var upCmd = &cobra.Command{
 				node.WithNATSDefaultServerURL(natsEmbeddedServerURL),
 			}
 
-			if devTUI != nil {
-				options = append(options, node.WithServerConfigLoadHandler(func(config *node.WunderNodeConfig) {
-
+			options = append(options, node.WithServerConfigLoadHandler(func(config *node.WunderNodeConfig) {
+				updateLoggingLevel(config.Api.Options.Logging.Level)
+				if devTUI != nil {
 					// The file is guaranteed to exist, because the server is only started after the config was built
 					if data, err := os.ReadFile(filepath.Join(wunderGraphDir, "generated", "wundergraph.build_info.json")); err == nil {
 						var buildInfo wgpb.BuildInfo
@@ -532,11 +532,11 @@ var upCmd = &cobra.Command{
 							})
 						}
 					}
-				}))
-				options = append(options, node.WithServerErrorHandler(func(err error) {
-					reportErrToTUI(multierror.Append(errors.New("could not start server"), err))
-				}))
-			}
+				}
+			}))
+			options = append(options, node.WithServerErrorHandler(func(err error) {
+				reportErrToTUI(multierror.Append(errors.New("could not start server"), err))
+			}))
 
 			err := n.StartBlocking(options...)
 			if err != nil {

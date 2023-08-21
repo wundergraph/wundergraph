@@ -35,25 +35,21 @@ const resolvePinoLogLevel = (level: string): PinoLogLevel => {
 			return PinoLogLevel.Info;
 		case LogLevel.DEBUG:
 			return PinoLogLevel.Debug;
+		case LogLevel.TRACE:
+			return PinoLogLevel.Trace;
 		default:
 			throw new Error(`Unknown log level: ${wgLogLevel}`);
 	}
 };
 
 const initLogger = (destination: DestinationStream): pino.Logger => {
-	const logLevel =
-		process.env.WG_DEBUG_MODE === 'true'
-			? PinoLogLevel.Debug
-			: process.env.WG_CLI_LOG_LEVEL
-			? resolvePinoLogLevel(process.env.WG_CLI_LOG_LEVEL)
-			: PinoLogLevel.Info;
-
+	const logLevel = resolvePinoLogLevel(process.env.WG_LOG ?? 'info');
 	let options: pino.LoggerOptions = {
 		...pinoOptions(),
 		level: logLevel,
 	};
 
-	return pino(options);
+	return pino(options, destination);
 };
 
 const logger = initLogger(process.stdout);

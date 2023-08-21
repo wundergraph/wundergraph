@@ -12,7 +12,7 @@ type HooksServerRunConfig struct {
 	WunderGraphDirAbs string
 	ServerScriptFile  string
 	Env               []string
-	LogLevel          string
+	Log               string
 	Production        bool
 	DebugBindAddress  string
 	Debug             bool
@@ -29,9 +29,9 @@ func NewHooksServerRunner(log *zap.Logger, cfg *HooksServerRunConfig) *scriptrun
 		hooksEnv = append(hooksEnv, "NODE_ENV=production")
 	}
 
-	// Align the log level
-	if cfg.LogLevel != "" {
-		hooksEnv = append(hooksEnv, fmt.Sprintf("WG_LOG_LEVEL=%s", cfg.LogLevel))
+	// Align the log configuration
+	if cfg.Log != "" {
+		hooksEnv = append(hooksEnv, fmt.Sprintf("WG_LOG=%s", cfg.Log))
 	}
 
 	var scriptArgs []string
