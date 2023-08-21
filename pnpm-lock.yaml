@@ -254,7 +254,7 @@ importers:
   packages/golang-client:
     dependencies:
       '@wundergraph/protobuf':
-        specifier: workspace:^0.118.1
+        specifier: workspace:^0.118.2
         version: link:../protobuf
       execa:
         specifier: 5.1.1
@@ -285,7 +285,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.174.4
+        specifier: workspace:^0.174.5
         version: link:../sdk
       typescript:
         specifier: ^5.1.6
@@ -325,7 +325,7 @@ importers:
   packages/nextjs:
     dependencies:
       '@wundergraph/protobuf':
-        specifier: workspace:^0.118.1
+        specifier: workspace:^0.118.2
         version: link:../protobuf
       '@wundergraph/swr':
         specifier: workspace:*
@@ -659,7 +659,7 @@ importers:
         specifier: workspace:*
         version: link:../orm
       '@wundergraph/protobuf':
-        specifier: workspace:^0.118.1
+        specifier: workspace:^0.118.2
         version: link:../protobuf
       '@wundergraph/straightforward':
         specifier: ^4.2.5
@@ -6926,7 +6926,7 @@ packages:
       '@graphql-mesh/utils': 0.94.5(@graphql-mesh/cross-helpers@0.4.0)(@graphql-mesh/types@0.94.5)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
       '@json-schema-tools/meta-schema': 1.7.0
-      '@whatwg-node/fetch': 0.9.9
+      '@whatwg-node/fetch': 0.9.4
       ajv: 8.12.0
       ajv-formats: 2.1.1(ajv@8.12.0)
       dset: 3.1.2
@@ -27004,6 +27004,7 @@ packages:
     resolution: {directory: packages/sdk, type: directory}
     id: file:packages/sdk
     name: '@wundergraph/sdk'
+    version: 0.174.5
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.4.0
