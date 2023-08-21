@@ -414,8 +414,9 @@ export class Client {
 			throw new NoUserError({ statusCode: response.status });
 		}
 
+		const user = response.json();
 		this.userIsAuthenticated = true;
-		return response.json();
+		return user;
 	}
 
 	/**
@@ -755,8 +756,10 @@ export class Client {
 			if (orCondition) {
 				return true;
 			}
-			// If fetchUser has never been called, assume no authentication is set up
-			return this.userIsAuthenticated ?? false;
+			// If fetchUser has never been called, assume we do need the CSRF token.
+			// This shouldn't be a problem because the CSRF token generator is always
+			// available
+			return this.userIsAuthenticated ?? true;
 		}
 		return false;
 	}
