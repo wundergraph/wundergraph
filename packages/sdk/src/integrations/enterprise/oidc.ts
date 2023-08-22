@@ -12,7 +12,7 @@ import { defineIntegration } from '../define-integration';
 export interface OIDCIntegrationOptions extends OpenIDConnectAuthProviderConfig {}
 
 /**
- * Add a Open ID Connect authentication provider.
+ * Open ID Connect authentication provider.
  *
  * @license "WunderGraph Community License"
  */

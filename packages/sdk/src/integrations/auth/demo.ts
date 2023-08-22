@@ -1,9 +1,9 @@
 import { defineIntegration } from '../define-integration';
 
 /**
- * Add a demo authentication provider. *Don't use this for production.*
+ * Demo authentication provider. *Don't use this for production.*
  */
-export const demoAuthProvider = defineIntegration(() => {
+export const demoAuth = defineIntegration(() => {
 	return {
 		name: 'demo-auth-provider',
 		hooks: {

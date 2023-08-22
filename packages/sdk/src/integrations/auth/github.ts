@@ -4,9 +4,9 @@ import { defineIntegration } from '../define-integration';
 export interface GithubAuthIntegrationOptions extends GithubAuthProviderConfig {}
 
 /**
- * Add a Github authentication provider.
+ * Github authentication provider.
  */
-export const githubAuthProvider = defineIntegration<GithubAuthIntegrationOptions>((options) => {
+export const githubAuth = defineIntegration<GithubAuthIntegrationOptions>((options) => {
 	return {
 		name: 'github-auth-provider',
 		hooks: {
