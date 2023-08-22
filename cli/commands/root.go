@@ -351,6 +351,7 @@ type configScriptEnvOptions struct {
 	EnableCache                   bool
 	DefaultPollingIntervalSeconds int
 	FirstRun                      bool
+	EnableTUI                     bool
 }
 
 // configScriptEnv returns the environment variables that scripts running the SDK configuration
@@ -366,6 +367,7 @@ func configScriptEnv(opts configScriptEnvOptions) []string {
 		// WG_INTROSPECTION_CACHE_SKIP=true causes the cache to try to load the remote data on the first run
 		env = append(env, "WG_INTROSPECTION_CACHE_SKIP=true")
 	}
+	env = append(env, "WG_ENABLE_TUI="+strconv.FormatBool(opts.EnableTUI))
 	return env
 }
 

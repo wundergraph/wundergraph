@@ -182,12 +182,14 @@ var upCmd = &cobra.Command{
 				RootFlags:      rootFlags,
 				WunderGraphDir: wunderGraphDir,
 				EnableCache:    !disableCache,
+				EnableTUI:      enableTUI,
 				FirstRun:       true,
 			}),
 			ScriptEnv: configScriptEnv(configScriptEnvOptions{
 				RootFlags:      rootFlags,
 				WunderGraphDir: wunderGraphDir,
 				EnableCache:    !disableCache,
+				EnableTUI:      enableTUI,
 			}),
 			Output: scriptRunnerOutputConfig,
 		})
@@ -205,6 +207,7 @@ var upCmd = &cobra.Command{
 				WunderGraphDir:                wunderGraphDir,
 				EnableCache:                   !disableCache,
 				DefaultPollingIntervalSeconds: defaultDataSourcePollingIntervalSeconds,
+				EnableTUI:                     enableTUI,
 			}), "WG_DATA_SOURCE_POLLING_MODE=true"),
 			Output: scriptRunnerOutputConfig,
 		})
