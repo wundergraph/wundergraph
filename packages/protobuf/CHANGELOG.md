@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.118.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.118.1...@wundergraph/protobuf@0.118.2) (2023-08-21)
+
+### Bug Fixes
+
+* allow setting logging levels from command line ([#1141](https://github.com/wundergraph/wundergraph/issues/1141)) ([01100b7](https://github.com/wundergraph/wundergraph/commit/01100b7a508eaa9c8ceb6cac5998c9f0365e5fde)) (@fiam)
+
 ## [0.118.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.118.0...@wundergraph/protobuf@0.118.1) (2023-07-28)
 
 **Note:** Version bump only for package @wundergraph/protobuf

@@ -24,7 +24,7 @@ export enum WgEnv {
 	OtelBatchTimeoutMs = 'WG_OTEL_BATCH_TIMEOUT_MS',
 }
 
-export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'debug';
+export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'debug' | 'trace';
 
 export const defaultHost = 'localhost';
 export const defaultNodePort = '9991';

@@ -12,6 +12,8 @@ import (
 
 const (
 	schema = `
+		directive @removeNullVariables on QUERY | MUTATION
+
 		type Query {
 			queryRaw(query: String! parameters: [String]): String
 			queryRawJSON(query: String! parameters: [String]): JSON

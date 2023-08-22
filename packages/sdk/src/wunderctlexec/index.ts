@@ -29,11 +29,6 @@ const wunderCtlArgs = (args: string[]): string[] => {
 	if (process.env.WG_DIR_ABS) {
 		args.push('--wundergraph-dir', process.env.WG_DIR_ABS);
 	}
-
-	if (process.env.WG_CLI_LOG_LEVEL) {
-		args.push('--cli-log-level', process.env.WG_CLI_LOG_LEVEL);
-	}
-
 	return args;
 };
 
