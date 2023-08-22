@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.174.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.174.4...@wundergraph/sdk@0.174.5) (2023-08-21)
+
+### Bug Fixes
+
+* allow setting logging levels from command line ([#1141](https://github.com/wundergraph/wundergraph/issues/1141)) ([01100b7](https://github.com/wundergraph/wundergraph/commit/01100b7a508eaa9c8ceb6cac5998c9f0365e5fde)) (@fiam)
+
 ## [0.174.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.174.3...@wundergraph/sdk@0.174.4) (2023-08-17)
 
 ### Bug Fixes
