@@ -19,3 +19,7 @@ export type {
 export * from './auth/demo';
 export * from './auth/github';
 export * from './auth/google';
+
+export * from './upload-providers/s3';
+export * from './upload-providers/minio';
+export * from './upload-providers/do';

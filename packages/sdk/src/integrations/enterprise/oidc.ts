@@ -16,7 +16,7 @@ export interface OIDCIntegrationOptions extends OpenIDConnectAuthProviderConfig 
  *
  * @license "WunderGraph Community License"
  */
-export const oidcProvider = defineIntegration<OIDCIntegrationOptions>((options) => {
+export const oidc = defineIntegration<OIDCIntegrationOptions>((options) => {
 	return {
 		name: 'oidc-auth-provider',
 		hooks: {

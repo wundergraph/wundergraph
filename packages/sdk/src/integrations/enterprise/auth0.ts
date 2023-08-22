@@ -16,7 +16,7 @@ export interface Auth0IntegrationOptions extends OpenIDConnectAuthProviderConfig
  *
  * @license "WunderGraph Community License"
  */
-export const auth0Provider = defineIntegration<Auth0IntegrationOptions>((options) => {
+export const auth0 = defineIntegration<Auth0IntegrationOptions>((options) => {
 	return {
 		name: 'auth0-provider',
 		hooks: {

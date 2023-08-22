@@ -315,13 +315,38 @@ export interface S3UploadProfile {
 export type S3UploadProfiles = Record<string, S3UploadProfile>;
 
 export interface S3UploadConfiguration {
+	/**
+	 * The name of the S3 upload provider, used in the client to select the provider
+	 */
 	name: string;
+	/**
+	 * The S3 endpoint url
+	 */
 	endpoint: InputVariable;
+	/**
+	 * The access key id
+	 */
 	accessKeyID: InputVariable;
+	/**
+	 * The secret access key
+	 */
 	secretAccessKey: InputVariable;
+	/**
+	 * The bucket name
+	 */
 	bucketName: InputVariable;
+	/**
+	 * The bucket location, eg "eu-central-1"
+	 */
 	bucketLocation: InputVariable;
-	useSSL: boolean;
+	/**
+	 * Whether to use SSL, always enable this for production
+	 * @default true
+	 * */
+	useSSL?: boolean;
+	/**
+	 * Upload profiles to restrict uploads to certain file types, sizes, etc.
+	 */
 	uploadProfiles?: S3UploadProfiles;
 }
 
@@ -1319,7 +1344,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 					bucketName: mapInputVariable(provider.bucketName),
 					endpoint: mapInputVariable(provider.endpoint),
 					secretAccessKey: mapInputVariable(provider.secretAccessKey),
-					useSSL: provider.useSSL,
+					useSSL: provider.useSSL ?? true,
 					uploadProfiles: uploadProfiles,
 				};
 			}),
