@@ -23,3 +23,4 @@ export * from './auth/google';
 export * from './upload-providers/s3';
 export * from './upload-providers/minio';
 export * from './upload-providers/do';
+export * from './upload-providers/r2';
