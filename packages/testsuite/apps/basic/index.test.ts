@@ -143,7 +143,6 @@ describe('Operations', () => {
 			lang: 'af',
 			units: 'imperial',
 		};
-
 		assertType<weather_LanguageValues | undefined>(weatherInput.lang);
 	});
 

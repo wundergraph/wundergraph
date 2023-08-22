@@ -161,7 +161,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			if (this.options.debug || process.env.WG_TEST_DEBUG) {
 				cmd.push('--debug', '--pretty-logging');
 			} else {
-				cmd.push('--cli-log-level', 'error');
+				cmd.push('--log-level', 'error');
 			}
 
 			if (this.options.dir) {

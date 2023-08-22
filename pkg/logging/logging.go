@@ -33,7 +33,7 @@ const (
 
 type RequestIDKey struct{}
 
-func New(prettyLogging bool, debug bool, level zapcore.Level) *zap.Logger {
+func New(prettyLogging bool, debug bool, level zap.AtomicLevel) *zap.Logger {
 	return newZapLogger(zapcore.AddSync(os.Stdout), prettyLogging, debug, level)
 }
 
@@ -83,7 +83,7 @@ func attachBaseFields(logger *zap.Logger) *zap.Logger {
 	return logger
 }
 
-func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool, level zapcore.Level) *zap.Logger {
+func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool, level zap.AtomicLevel) *zap.Logger {
 	var encoder zapcore.Encoder
 	var zapOpts []zap.Option
 
@@ -115,6 +115,10 @@ func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool, le
 
 func FindLogLevel(logLevel string) (zapcore.Level, error) {
 	switch strings.ToUpper(logLevel) {
+	case "TRACE":
+		// Zap doesn't support TRACE, but we do want it for
+		// the TS side of the SDK which does support it
+		return zap.DebugLevel, nil
 	case "DEBUG":
 		return zap.DebugLevel, nil
 	case "INFO":
