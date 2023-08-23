@@ -3,6 +3,7 @@ package features
 
 import (
 	"os"
+	"strings"
 
 	"github.com/wundergraph/wundergraph/pkg/config"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
@@ -31,6 +32,7 @@ const (
 	AuthenticationHooks = Feature("authentication-hooks")
 	Federation          = Feature("federation")
 	SQLServer           = Feature("sql-server")
+	SOAP                = Feature("soap")
 	ClaimInjection      = Feature("claim-injection")
 )
 
@@ -162,6 +164,16 @@ func isSQLServerEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
 	return isDataSourceKindEnabled(cfg, wgpb.DataSourceKind_SQLSERVER)
 }
 
+func isSOAPEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
+	for _, ds := range cfg.GetApi().GetEngineConfiguration().GetDatasourceConfigurations() {
+		if ds.Kind == wgpb.DataSourceKind_GRAPHQL {
+			url := loadvariable.String(ds.GetCustomGraphql().GetFetch().GetUrl())
+			return strings.Contains(url, "/soap/"), nil
+		}
+	}
+	return false, nil
+}
+
 func isFeatureClaimInjectionEnabled(cfg *wgpb.WunderGraphConfiguration) (bool, error) {
 	for _, op := range cfg.GetApi().GetOperations() {
 		if len(op.GetAuthorizationConfig().GetClaims()) > 0 {
@@ -193,6 +205,7 @@ func featureChecks() []*featureCheck {
 		{AuthenticationHooks, isFeatureAuthenticationHooksEnabled},
 		{Federation, isFederationEnabled},
 		{SQLServer, isSQLServerEnabled},
+		{SOAP, isSOAPEnabled},
 		{ClaimInjection, isFeatureClaimInjectionEnabled},
 	}
 }
@@ -220,18 +233,30 @@ func EnabledFeatures(wunderGraphDir string) ([]Feature, error) {
 var (
 	enterpriseFeatures = map[Feature]struct{}{
 		AdvancedHooks: {},
-		// Auth0:          {},
-		// OIDC:           {},
-		// Federation:     {},
-		// SQLServer:      {},
-		// ClaimInjection: {},
-		// Prometheus:     {},
-		// OpenTelemetry:  {},
+		SQLServer:     {},
+		SOAP:          {},
+		Prometheus:    {},
+		OpenTelemetry: {},
+	}
+
+	// enterprise features available for all WG cloud users
+	enterpriseFeaturesEnabledInCloud = map[Feature]struct{}{
+		OpenTelemetry: {},
 	}
 )
+
+func runningInCloud() bool {
+	return os.Getenv("WG_CLOUD") != ""
+}
 
 // IsEnterprise returns true iff feat is only available with an enterprise license
 func IsEnterprise(feat Feature) bool {
 	_, found := enterpriseFeatures[feat]
+	if found && runningInCloud() {
+		if _, enabledInCloud := enterpriseFeaturesEnabledInCloud[feat]; enabledInCloud {
+			return false
+		}
+
+	}
 	return found
 }

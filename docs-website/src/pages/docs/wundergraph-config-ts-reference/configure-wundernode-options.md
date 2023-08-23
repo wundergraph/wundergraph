@@ -72,7 +72,7 @@ Each option when unset will get a value from the `Default Environment Variables`
 | `nodeUrl`                            | `http://localhost:9991` | `WG_NODE_URL`                    |
 | `publicNodeUrl`                      | `http://localhost:9991` | `WG_PUBLIC_NODE_URL`             |
 | `logger.level`                       | `info`                  | `WG_LOG_LEVEL`                   |
-| `prometheus.enabled`                 | `true`                  | `WG_PROMETHEUS_ENABLED`          |
+| `prometheus.enabled`                 | `false`                 | `WG_PROMETHEUS_ENABLED`          |
 | `prometheus.port`                    | `8881`                  | `WG_PROMETHEUS_PORT`             |
 | `openTelemetry.enabled`              | `false`                 | `WG_OTEL_ENABLED`                |
 | `openTelemetry.sampler`              | `1.0`                   | `WG_OTEL_SAMPLER`                |
