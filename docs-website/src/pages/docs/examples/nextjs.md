@@ -67,7 +67,7 @@ export default withWunderGraph(Home);
 
 Your operations will be compiled into RPC endpoints.
 The template will generate the NextJS client,
-so all you have to do is to import he `useQuery` hook and call your newly created API.
+so all you have to do is to import the `useQuery` hook and call your newly created API.
 
 Wrapping the Page in `withWunderGraph` will make sure that Server Side Rendering (SSR) works,
 that's it.

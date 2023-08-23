@@ -1579,7 +1579,9 @@ export const loadOperations = async (schemaFileName: string): Promise<LoadOperat
 	out.info?.forEach((msg) => Logger.info(msg));
 	out.errors?.forEach((msg) => Logger.error(msg));
 
-	if (out.errors?.length) {
+	const isTuiEnabled = process.env['WG_ENABLE_TUI'] === 'true';
+
+	if (isTuiEnabled && out.errors?.length) {
 		if (out.invalid?.length) {
 			throw new Error(`Could not load operation '${out.invalid[0]}': ${out.errors[0]}`);
 		} else {

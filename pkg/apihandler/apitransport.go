@@ -305,9 +305,10 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 	}
 
 	req.Header = request.Header.Clone()
+	req.Header.Del(WgInternalApiCallHeader)
 	setRequestHost(req)
 
-	return t.httpTransport.RoundTrip(req)
+	return t.RoundTrip(req)
 }
 
 func (t *ApiTransport) sendRequestHook(r *http.Request, metaData *operation.Metadata, buf *bytes.Buffer, hook hooks.MiddlewareHook, hookID string, result interface{}) error {

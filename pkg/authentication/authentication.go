@@ -873,11 +873,10 @@ func (u *UserLogoutHandler) logoutFromProvider(w http.ResponseWriter, r *http.Re
 }
 
 type CSRFErrorHandler struct {
-	InsecureCookies bool
 }
 
 func (u *CSRFErrorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	resetUserCookies(w, r, !u.InsecureCookies)
+	w.Header().Set("X-CSRF-Failure", "true")
 	http.Error(w, "forbidden", http.StatusForbidden)
 }
 
@@ -917,9 +916,7 @@ func NewCSRFMw(config CSRFConfig) func(handler http.Handler) http.Handler {
 					csrf.HttpOnly(true),
 					csrf.Secure(!config.InsecureCookies),
 					csrf.SameSite(csrf.SameSiteStrictMode),
-					csrf.ErrorHandler(&CSRFErrorHandler{
-						InsecureCookies: config.InsecureCookies,
-					}),
+					csrf.ErrorHandler(&CSRFErrorHandler{}),
 				)
 				csrfMiddleware(unprotected).ServeHTTP(w, r)
 				return

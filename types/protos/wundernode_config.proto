@@ -4,12 +4,13 @@ package wgpb;
 option go_package = "github.com/wundergraph/wundergraph/pkg/wgpb";
 
 enum LogLevel {
-	DEBUG = 0;
-	INFO = 1;
-	ERROR = 2;
-	WARNING = 3;
-	PANIC = 4;
-	FATAL = 5;
+	TRACE = 0;
+	DEBUG = 1;
+	INFO = 2;
+	ERROR = 3;
+	WARNING = 4;
+	PANIC = 5;
+	FATAL = 6;
 }
 
 message ApiAuthenticationConfig {

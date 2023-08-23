@@ -3,6 +3,8 @@ title: '@transform Directive'
 description: Transform the response of a field
 ---
 
+#### Note: The `@transform` directive works within the `operations` directory and does not produce the desired result inside the GraphQL playground.
+
 One of the issues when using the `_join` field is that the response will have more nesting than necessary.
 This is because the `_join ` field adds a new, nested, Query type into the response.
 With the additional root field that is required to add a nested Query, that's two levels of nesting.

@@ -43,6 +43,7 @@ var (
 	clearCache                              bool
 	enableTUI                               bool
 	logs                                    bool
+	debugBindAddress                        string
 )
 
 // upCmd represents the up command
@@ -181,12 +182,14 @@ var upCmd = &cobra.Command{
 				RootFlags:      rootFlags,
 				WunderGraphDir: wunderGraphDir,
 				EnableCache:    !disableCache,
+				EnableTUI:      enableTUI,
 				FirstRun:       true,
 			}),
 			ScriptEnv: configScriptEnv(configScriptEnvOptions{
 				RootFlags:      rootFlags,
 				WunderGraphDir: wunderGraphDir,
 				EnableCache:    !disableCache,
+				EnableTUI:      enableTUI,
 			}),
 			Output: scriptRunnerOutputConfig,
 		})
@@ -204,6 +207,7 @@ var upCmd = &cobra.Command{
 				WunderGraphDir:                wunderGraphDir,
 				EnableCache:                   !disableCache,
 				DefaultPollingIntervalSeconds: defaultDataSourcePollingIntervalSeconds,
+				EnableTUI:                     enableTUI,
 			}), "WG_DATA_SOURCE_POLLING_MODE=true"),
 			Output: scriptRunnerOutputConfig,
 		})
@@ -311,7 +315,8 @@ var upCmd = &cobra.Command{
 				ServerScriptFile:  serverOutFile,
 				Env:               helpers.CliEnv(rootFlags),
 				Debug:             rootFlags.DebugMode,
-				LogLevel:          rootFlags.CliLogLevel,
+				DebugBindAddress:  debugBindAddress,
+				Log:               rootFlags.Log,
 				Output:            scriptRunnerOutputConfig,
 			}
 
@@ -491,7 +496,7 @@ var upCmd = &cobra.Command{
 		if enableTUI {
 			nodeLogger = zap.NewNop()
 		} else {
-			nodeLogger = logging.New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevel)
+			nodeLogger = logging.New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevelSetter)
 		}
 
 		n := node.New(ctx, BuildInfo, wunderGraphDir, nodeLogger)
@@ -510,9 +515,9 @@ var upCmd = &cobra.Command{
 				node.WithNATSDefaultServerURL(natsEmbeddedServerURL),
 			}
 
-			if devTUI != nil {
-				options = append(options, node.WithServerConfigLoadHandler(func(config *node.WunderNodeConfig) {
-
+			options = append(options, node.WithServerConfigLoadHandler(func(config *node.WunderNodeConfig) {
+				updateLoggingLevel(config.Api.Options.Logging.Level)
+				if devTUI != nil {
 					// The file is guaranteed to exist, because the server is only started after the config was built
 					if data, err := os.ReadFile(filepath.Join(wunderGraphDir, "generated", "wundergraph.build_info.json")); err == nil {
 						var buildInfo wgpb.BuildInfo
@@ -530,11 +535,11 @@ var upCmd = &cobra.Command{
 							})
 						}
 					}
-				}))
-				options = append(options, node.WithServerErrorHandler(func(err error) {
-					reportErrToTUI(multierror.Append(errors.New("could not start server"), err))
-				}))
-			}
+				}
+			}))
+			options = append(options, node.WithServerErrorHandler(func(err error) {
+				reportErrToTUI(multierror.Append(errors.New("could not start server"), err))
+			}))
 
 			err := n.StartBlocking(options...)
 			if err != nil {
@@ -575,6 +580,7 @@ func init() {
 	upCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "Disables local caches")
 	upCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "Clears local caches before startup")
 	upCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, prettyLoggingFlagName, true, "Enables pretty logging")
+	upCmd.PersistentFlags().StringVar(&debugBindAddress, "debug-bind-address", "127.0.0.1:9229", "Default host:port to bind to, will only work in conjunction with --debug")
 
 	rootCmd.AddCommand(upCmd)
 }

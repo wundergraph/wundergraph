@@ -90,7 +90,11 @@ type GraphQLPlaygroundHandler struct {
 }
 
 func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
-	tpl := strings.Replace(h.html, "{{apiURL}}", h.nodeUrl, -1)
+	// The playground has to be served from the same hostname as the GraphQL endpoint
+	// so we can replace apiURL in the template with an empty string to use a relative
+	// URL access the GraphQL endpoint, removing the need for configuring the public
+	// URL to access the playground
+	tpl := strings.Replace(h.html, "{{apiURL}}", "", -1)
 	resp := []byte(tpl)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
