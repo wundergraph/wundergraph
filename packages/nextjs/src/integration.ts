@@ -1,5 +1,4 @@
 import { defineIntegration } from '@wundergraph/sdk/integrations';
-import { NextJsTemplate } from './template';
 
 export interface NextJsIntegrationOptions {
 	/**
@@ -17,9 +16,10 @@ export const nextjs = defineIntegration<NextJsIntegrationOptions>((options) => {
 		name: 'nextjs',
 		hooks: {
 			async 'config:setup'(config) {
+				const { NextJsTemplate } = await import('./template');
 				config.addCodeGeneration({
 					templates: [new NextJsTemplate()],
-					path: options?.path ?? '../src/generated',
+					path: options?.path ?? './generated',
 				});
 			},
 		},
