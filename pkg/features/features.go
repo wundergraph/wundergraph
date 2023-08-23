@@ -233,7 +233,6 @@ func EnabledFeatures(wunderGraphDir string) ([]Feature, error) {
 var (
 	enterpriseFeatures = map[Feature]struct{}{
 		AdvancedHooks: {},
-		SQLServer:     {},
 		SOAP:          {},
 		Prometheus:    {},
 		OpenTelemetry: {},
