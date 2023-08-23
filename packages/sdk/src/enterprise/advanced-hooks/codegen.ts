@@ -9,14 +9,13 @@
 import Handlebars from 'handlebars';
 
 import { handlebarTemplate } from './codegen.template';
-import { CodeGenerationConfig } from '../configure';
-import templates from '../codegen/templates';
-import { formatTypeScript } from '../codegen/templates/typescript';
-import { Template, TemplateOutputFile } from '../codegen';
+import { CodeGenerationConfig } from '../../configure';
+import templates from '../../codegen/templates';
+import { formatTypeScript } from '../../codegen/templates/typescript';
+import { Template, TemplateOutputFile } from '../../codegen';
 
 export class AdvancedHooksTemplate implements Template {
 	async generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
-		const config = generationConfig.config;
 		const tmpl = Handlebars.compile(handlebarTemplate);
 
 		const content = tmpl({});

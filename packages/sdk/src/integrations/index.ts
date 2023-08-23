@@ -3,8 +3,6 @@ export type {
 	AuthProviderConfig,
 	AuthProviderTypes,
 	ConfigSetupOptions,
-	CookieAuthProvider,
-	TokenAuthProvider,
 	WunderGraphAppConfig,
 	WunderGraphConfig,
 	WunderGraphConfigWithAppConfig,
@@ -16,10 +14,7 @@ export type {
 	WunderGraphConfigOperations,
 } from './types';
 
-export * from './auth/demo';
-export * from './auth/github';
-export * from './auth/google';
-
+// Upload providers
 export * from './upload-providers/s3';
 export * from './upload-providers/minio';
 export * from './upload-providers/do';

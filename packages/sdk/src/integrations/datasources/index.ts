@@ -7,5 +7,7 @@ export { type PlanetScaleDatasourceOptions, planetscale } from './planetscale';
 export { type PostgreSQLDatasourceOptions, postgresql } from './postgresql';
 export { type PrismaDatasourceOptions, prisma } from './prisma';
 export { type SQLiteDatasourceOptions, sqlite } from './sqlite';
+export { type SQLServerDatasourceOptions, sqlserver } from './sqlserver';
+export { type FederationDatasourceOptions, federation } from './federation';
 
 export { defineDatasource } from '../define-datasource';

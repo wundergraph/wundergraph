@@ -9,3 +9,5 @@ export { createWunderGraphNext } from './create-wundergraph';
 export { useWunderGraphContext } from './context';
 
 export { useAuthMiddleware, type AuthMiddleware } from './auth-middleware';
+
+export * from './integration';

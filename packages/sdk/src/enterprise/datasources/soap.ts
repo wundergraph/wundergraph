@@ -7,7 +7,7 @@
  */
 
 import type { SoapIntrospection } from '../../definition/soap-introspection';
-import { defineDatasource } from '../define-datasource';
+import { defineDatasource } from '../../integrations/define-datasource';
 
 export interface SoapDatasourceOptions extends Omit<SoapIntrospection, 'apiNamespace'> {
 	namespace?: string;
