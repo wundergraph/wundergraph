@@ -56,8 +56,8 @@
       "default": "./dist/integrations/auth/index.js"
     },
     "./advanced-hooks": {
-      "types": "./dist/advanced-hooks/index.d.ts",
-      "default": "./dist/advanced-hooks/index.js"
+      "types": "./dist/enterprise/advanced-hooks/index.d.ts",
+      "default": "./dist/enterprise/advanced-hooks/index.js"
     },
     "./enterprise": {
       "types": "./dist/enterprise/index.d.ts",
