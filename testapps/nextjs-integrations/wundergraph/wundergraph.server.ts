@@ -1,4 +1,5 @@
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
+import config from './wundergraph.config';
 
 export class MyContext {
 	cleanup() {
@@ -13,6 +14,7 @@ export class MyContext {
 }
 
 export default configureWunderGraphServer(() => ({
+	integrations: config.integrations,
 	context: {
 		request: {
 			create: async () => new MyContext(),
