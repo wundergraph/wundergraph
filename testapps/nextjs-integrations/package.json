@@ -26,10 +26,7 @@
     "start": "next start --port 3003"
   },
   "dependencies": {
-    "@graphql-yoga/node": "^2.13.13",
-    "@tanstack/react-query": "^4.20.4",
     "@wundergraph/nextjs": "workspace:*",
-    "@wundergraph/react-query": "workspace:*",
     "@wundergraph/sdk": "workspace:*",
     "@wundergraph/swr": "workspace:*",
     "next": "^13.1.1",

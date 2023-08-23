@@ -1395,18 +1395,9 @@ importers:
 
   testapps/nextjs-integrations:
     dependencies:
-      '@graphql-yoga/node':
-        specifier: ^2.13.13
-        version: 2.13.13(graphql@16.6.0)
-      '@tanstack/react-query':
-        specifier: ^4.20.4
-        version: 4.29.5(react-dom@18.2.0)(react@18.2.0)
       '@wundergraph/nextjs':
         specifier: workspace:*
         version: link:../../packages/nextjs
-      '@wundergraph/react-query':
-        specifier: workspace:*
-        version: link:../../packages/react-query
       '@wundergraph/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
@@ -8453,6 +8444,7 @@ packages:
 
   /@tanstack/query-core@4.29.5:
     resolution: {integrity: sha512-xXIiyQ/4r9KfaJ3k6kejqcaqFXXBTzN2aOJ5H1J6aTJE9hl/nbgAdfF6oiIu0CD5xowejJEJ6bBg8TO7BN4NuQ==}
+    dev: true
 
   /@tanstack/react-query@4.20.4(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-SJRxx13k/csb9lXAJfycgVA1N/yU/h3bvRNWP0+aHMfMjmbyX82FdoAcckDBbOdEyAupvb0byelNHNeypCFSyA==}
@@ -8488,6 +8480,7 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       use-sync-external-store: 1.2.0(react@18.2.0)
+    dev: true
 
   /@tanstack/solid-query@4.29.1(solid-js@1.6.11):
     resolution: {integrity: sha512-XvRfk7Epi0gh5p+sgaMrrFu2yLY0nIq1wYbcBExehiNgyIfOw032xyZLNk5LJTAy5bLwMqL7hYR92j+ThtZ8mA==}
