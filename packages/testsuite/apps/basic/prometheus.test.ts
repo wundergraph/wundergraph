@@ -3,6 +3,9 @@ import { createTestServer } from './.wundergraph/generated/testing';
 
 const wg = createTestServer({
 	dir: __dirname,
+	env: {
+		WG_PROMETHEUS_ENABLED: 'true',
+	},
 });
 
 beforeAll(async () => {

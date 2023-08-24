@@ -9,6 +9,7 @@ overrides:
   zod: ^3.21.4
   json-machete: 0.94.5
   '@graphql-mesh/store': 0.94.5
+  react: 18.2.0
 
 importers:
 
@@ -118,7 +119,7 @@ importers:
         version: 6.0.0(next@13.4.1)(react-dom@18.2.0)(react@18.2.0)
       next-sitemap:
         specifier: ^3.1.11
-        version: 3.1.30(@next/env@13.4.10)(next@13.4.1)
+        version: 3.1.30(@next/env@13.4.19)(next@13.4.1)
       next-themes:
         specifier: ^0.2.1
         version: 0.2.1(next@13.4.1)(react-dom@18.2.0)(react@18.2.0)
@@ -254,7 +255,7 @@ importers:
   packages/golang-client:
     dependencies:
       '@wundergraph/protobuf':
-        specifier: workspace:^0.118.1
+        specifier: workspace:^0.118.2
         version: link:../protobuf
       execa:
         specifier: 5.1.1
@@ -285,7 +286,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.174.1
+        specifier: workspace:^0.174.5
         version: link:../sdk
       typescript:
         specifier: ^5.1.6
@@ -325,7 +326,7 @@ importers:
   packages/nextjs:
     dependencies:
       '@wundergraph/protobuf':
-        specifier: workspace:^0.118.1
+        specifier: workspace:^0.118.2
         version: link:../protobuf
       '@wundergraph/swr':
         specifier: workspace:*
@@ -386,7 +387,7 @@ importers:
         specifier: 2.6.7
         version: 2.6.7
       react:
-        specifier: ^18.1.0
+        specifier: 18.2.0
         version: 18.2.0
       react-dom:
         specifier: ^18.1.0
@@ -520,7 +521,7 @@ importers:
         specifier: 2.6.7
         version: 2.6.7
       react:
-        specifier: ^18.1.0
+        specifier: 18.2.0
         version: 18.2.0
       react-dom:
         specifier: ^18.1.0
@@ -659,13 +660,13 @@ importers:
         specifier: workspace:*
         version: link:../orm
       '@wundergraph/protobuf':
-        specifier: workspace:^0.118.1
+        specifier: workspace:^0.118.2
         version: link:../protobuf
       '@wundergraph/straightforward':
         specifier: ^4.2.5
         version: 4.2.5
       '@wundergraph/wunderctl':
-        specifier: workspace:^0.169.1
+        specifier: workspace:^0.170.0
         version: link:../wunderctl
       axios:
         specifier: ^0.26.1
@@ -724,6 +725,9 @@ importers:
       json-schema-to-typescript:
         specifier: ^11.0.3
         version: 11.0.3
+      json-stream-stringify:
+        specifier: ^3.1.0
+        version: 3.1.0
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -745,6 +749,9 @@ importers:
       postman-collection:
         specifier: ^4.1.7
         version: 4.1.7
+      prettier:
+        specifier: 2.8.7
+        version: 2.8.7
       protobufjs:
         specifier: ^7.2.4
         version: 7.2.4
@@ -1009,7 +1016,7 @@ importers:
         specifier: 2.6.7
         version: 2.6.7
       react:
-        specifier: ^18.1.0
+        specifier: 18.2.0
         version: 18.2.0
       react-dom:
         specifier: ^18.1.0
@@ -1291,7 +1298,7 @@ importers:
         specifier: ^4.22.3
         version: 4.22.3(next@13.1.1)(react-dom@18.2.0)(react@18.2.0)
       react:
-        specifier: ^18.0.0
+        specifier: 18.2.0
         version: 18.2.0
       react-dom:
         specifier: ^18.0.0
@@ -1349,7 +1356,7 @@ importers:
         specifier: ^13.1.1
         version: 13.1.1(react-dom@18.2.0)(react@18.2.0)
       react:
-        specifier: ^18.2.0
+        specifier: 18.2.0
         version: 18.2.0
       react-dom:
         specifier: ^18.2.0
@@ -1370,6 +1377,58 @@ importers:
       '@types/react':
         specifier: ^18.0.7
         version: 18.0.24
+      concurrently:
+        specifier: ^6.0.0
+        version: 6.5.1
+      graphql:
+        specifier: ^16.3.0
+        version: 16.6.0
+      open-cli:
+        specifier: ^7.0.1
+        version: 7.1.0
+      typescript:
+        specifier: ^5.1.6
+        version: 5.1.6
+      wait-on:
+        specifier: ^6.0.0
+        version: 6.0.1
+
+  testapps/nextjs-integrations:
+    dependencies:
+      '@wundergraph/nextjs':
+        specifier: workspace:*
+        version: link:../../packages/nextjs
+      '@wundergraph/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
+      '@wundergraph/swr':
+        specifier: workspace:*
+        version: link:../../packages/swr
+      next:
+        specifier: ^13.1.1
+        version: 13.4.1(react-dom@18.2.0)(react@18.2.0)
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
+      stripe:
+        specifier: ^11.12.0
+        version: 11.12.0
+      swr:
+        specifier: ^2.2.0
+        version: 2.2.0(react@18.2.0)
+      zod:
+        specifier: ^3.21.4
+        version: 3.21.4
+    devDependencies:
+      '@types/node':
+        specifier: ^18.16.0
+        version: 18.16.0
+      '@types/react':
+        specifier: ^18.0.7
+        version: 18.0.35
       concurrently:
         specifier: ^6.0.0
         version: 6.5.1
@@ -1413,7 +1472,7 @@ importers:
         specifier: ^13.1.1
         version: 13.1.1(react-dom@18.2.0)(react@18.2.0)
       react:
-        specifier: ^18.2.0
+        specifier: 18.2.0
         version: 18.2.0
       react-dom:
         specifier: ^18.2.0
@@ -1510,7 +1569,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/swr
       react:
-        specifier: ^18.1.0
+        specifier: 18.2.0
         version: 18.2.0
       react-dom:
         specifier: ^18.1.0
@@ -2168,12 +2227,10 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.22.9
-      '@babel/helper-environment-visitor': 7.18.9
+      '@babel/helper-environment-visitor': 7.22.5
       '@babel/helper-plugin-utils': 7.22.5
-      '@babel/helper-remap-async-to-generator': 7.18.9(@babel/core@7.22.9)
+      '@babel/helper-remap-async-to-generator': 7.22.9(@babel/core@7.22.9)
       '@babel/plugin-syntax-async-generators': 7.8.4(@babel/core@7.22.9)
-    transitivePeerDependencies:
-      - supports-color
     dev: false
 
   /@babel/plugin-proposal-class-properties@7.18.6(@babel/core@7.22.9):
@@ -4979,7 +5036,7 @@ packages:
       '@graphql-yoga/subscription': 2.2.3
       '@whatwg-node/fetch': 0.3.2
       graphql: 16.6.0
-      tslib: 2.5.0
+      tslib: 2.6.0
     transitivePeerDependencies:
       - encoding
 
@@ -6211,8 +6268,8 @@ packages:
     resolution: {integrity: sha512-eD6WCBMFjLFooLM19SIhSkWBHtaFrZFfg2Cxnyl3vS3DAdFRfnx5TY2RxlkuKXdIRCC0ySbtK9JXXt8qLCqzZg==}
     dev: false
 
-  /@next/env@13.4.10:
-    resolution: {integrity: sha512-3G1yD/XKTSLdihyDSa8JEsaWOELY+OWe08o0LUYzfuHp1zHDA8SObQlzKt+v+wrkkPcnPweoLH1ImZeUa0A1NQ==}
+  /@next/env@13.4.19:
+    resolution: {integrity: sha512-FsAT5x0jF2kkhNkKkukhsyYOrRqtSxrEhfliniIq0bwWbuXLgyt3Gv0Ml+b91XwjwArmuP7NxCiGd++GGKdNMQ==}
     dev: false
 
   /@next/eslint-plugin-next@13.4.12:
@@ -6925,7 +6982,7 @@ packages:
       '@graphql-mesh/utils': 0.94.5(@graphql-mesh/cross-helpers@0.4.0)(@graphql-mesh/types@0.94.5)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
       '@json-schema-tools/meta-schema': 1.7.0
-      '@whatwg-node/fetch': 0.9.4
+      '@whatwg-node/fetch': 0.9.9
       ajv: 8.12.0
       ajv-formats: 2.1.1(ajv@8.12.0)
       dset: 3.1.2
@@ -7846,7 +7903,7 @@ packages:
       execa: 1.0.0
       find-up: 4.1.0
       fs-extra: 8.1.0
-      graceful-fs: 4.2.10
+      graceful-fs: 4.2.11
       prompts: 2.4.2
       semver: 6.3.1
     transitivePeerDependencies:
@@ -11195,10 +11252,6 @@ packages:
 
   /caniuse-lite@1.0.30001430:
     resolution: {integrity: sha512-IB1BXTZKPDVPM7cnV4iaKaHxckvdr/3xtctB3f7Hmenx3qYBhGtTZ//7EllK66aKXW98Lx0+7Yr0kxBtIt3tzg==}
-
-  /caniuse-lite@1.0.30001452:
-    resolution: {integrity: sha512-Lkp0vFjMkBB3GTpLR8zk4NwW5EdRdnitwYJHDOOKIU85x4ckYCPQ+9WlVvSVClHxVReefkUMtWZH2l9KGlD51w==}
-    dev: false
 
   /caniuse-lite@1.0.30001503:
     resolution: {integrity: sha512-Sf9NiF+wZxPfzv8Z3iS0rXM1Do+iOy2Lxvib38glFX+08TCYYYGR5fRJXk4d77C4AYwhUjgYgMsMudbh2TqCKw==}
@@ -16896,6 +16949,7 @@ packages:
       '@types/node': 18.16.16
       jest-mock: 29.6.1
       jest-util: 29.6.1
+    dev: true
 
   /jest-environment-node@29.6.1:
     resolution: {integrity: sha512-ZNIfAiE+foBog24W+2caIldl4Irh8Lx1PUhg/GZ0odM1d/h2qORAsejiFc7zb+SEmYPn1yDZzEDSU5PmDkmVLQ==}
@@ -16907,7 +16961,6 @@ packages:
       '@types/node': 18.16.16
       jest-mock: 29.6.1
       jest-util: 29.6.1
-    dev: true
 
   /jest-get-type@26.3.0:
     resolution: {integrity: sha512-TpfaviN1R2pQWkIihlfEanwOXK0zcxrKEE4MlU6Tn7keoXdN6/3gK/xl0yEh8DOunn5pOVGKf8hB4R9gVh04ig==}
@@ -18256,7 +18309,7 @@ packages:
       minimist: 1.2.7
       mkdirp: 1.0.4
       mz: 2.7.0
-      prettier: 2.7.1
+      prettier: 2.8.8
     dev: false
 
   /json-schema-to-typescript@11.0.5:
@@ -18277,7 +18330,7 @@ packages:
       minimist: 1.2.8
       mkdirp: 1.0.4
       mz: 2.7.0
-      prettier: 2.8.8
+      prettier: 2.8.7
     dev: false
 
   /json-schema-traverse@0.4.1:
@@ -18293,6 +18346,11 @@ packages:
   /json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
     dev: true
+
+  /json-stream-stringify@3.1.0:
+    resolution: {integrity: sha512-ilynhoPlWa29XqgWJTD8V3bOF8k4Ybm3U9Oc7o/CG8qvFMGUzPlh9P4mOj9Ss3VtisA6N2OYevCWa14VRpJtQQ==}
+    engines: {node: '>=7.10.1'}
+    dev: false
 
   /json-stringify-nice@1.1.4:
     resolution: {integrity: sha512-5Z5RFW63yxReJ7vANgW6eZFGWaQvnPE3WNmZoOJrSkGju2etKA2L5rrOa1sm877TVTFt57A80BH1bArcmlLfPw==}
@@ -19351,13 +19409,13 @@ packages:
       '@babel/core': 7.22.9
       '@babel/plugin-proposal-async-generator-functions': 7.20.7(@babel/core@7.22.9)
       '@babel/plugin-proposal-class-properties': 7.18.6(@babel/core@7.22.9)
-      '@babel/plugin-proposal-export-default-from': 7.18.10(@babel/core@7.22.9)
+      '@babel/plugin-proposal-export-default-from': 7.22.5(@babel/core@7.22.9)
       '@babel/plugin-proposal-nullish-coalescing-operator': 7.18.6(@babel/core@7.22.9)
       '@babel/plugin-proposal-object-rest-spread': 7.20.7(@babel/core@7.22.9)
       '@babel/plugin-proposal-optional-catch-binding': 7.18.6(@babel/core@7.22.9)
-      '@babel/plugin-proposal-optional-chaining': 7.20.7(@babel/core@7.22.9)
+      '@babel/plugin-proposal-optional-chaining': 7.21.0(@babel/core@7.22.9)
       '@babel/plugin-syntax-dynamic-import': 7.8.3(@babel/core@7.22.9)
-      '@babel/plugin-syntax-export-default-from': 7.18.6(@babel/core@7.22.9)
+      '@babel/plugin-syntax-export-default-from': 7.22.5(@babel/core@7.22.9)
       '@babel/plugin-syntax-flow': 7.22.5(@babel/core@7.22.9)
       '@babel/plugin-syntax-nullish-coalescing-operator': 7.8.3(@babel/core@7.22.9)
       '@babel/plugin-syntax-optional-chaining': 7.8.3(@babel/core@7.22.9)
@@ -19375,9 +19433,9 @@ packages:
       '@babel/plugin-transform-parameters': 7.22.5(@babel/core@7.22.9)
       '@babel/plugin-transform-react-display-name': 7.22.5(@babel/core@7.22.9)
       '@babel/plugin-transform-react-jsx': 7.22.5(@babel/core@7.22.9)
-      '@babel/plugin-transform-react-jsx-self': 7.18.6(@babel/core@7.22.9)
-      '@babel/plugin-transform-react-jsx-source': 7.19.6(@babel/core@7.22.9)
-      '@babel/plugin-transform-runtime': 7.21.4(@babel/core@7.22.9)
+      '@babel/plugin-transform-react-jsx-self': 7.22.5(@babel/core@7.22.9)
+      '@babel/plugin-transform-react-jsx-source': 7.22.5(@babel/core@7.22.9)
+      '@babel/plugin-transform-runtime': 7.22.9(@babel/core@7.22.9)
       '@babel/plugin-transform-shorthand-properties': 7.22.5(@babel/core@7.22.9)
       '@babel/plugin-transform-spread': 7.22.5(@babel/core@7.22.9)
       '@babel/plugin-transform-sticky-regex': 7.22.5(@babel/core@7.22.9)
@@ -20246,7 +20304,7 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /next-sitemap@3.1.30(@next/env@13.4.10)(next@13.4.1):
+  /next-sitemap@3.1.30(@next/env@13.4.19)(next@13.4.1):
     resolution: {integrity: sha512-mZqq9xWrTp/tgUM7+Oz/qxT6x2vnJhwQ3AGke2GjypRbUo44QaTb+4Cp1uX9GwXBaiuuuXDoWyS5VxJP3pJljw==}
     engines: {node: '>=14.18'}
     hasBin: true
@@ -20255,7 +20313,7 @@ packages:
       next: '*'
     dependencies:
       '@corex/deepmerge': 4.0.29
-      '@next/env': 13.4.10
+      '@next/env': 13.4.19
       minimist: 1.2.7
       next: 13.4.1(react-dom@18.2.0)(react@18.2.0)
     dev: false
@@ -20388,7 +20446,7 @@ packages:
       '@next/env': 13.4.1
       '@swc/helpers': 0.5.1
       busboy: 1.6.0
-      caniuse-lite: 1.0.30001452
+      caniuse-lite: 1.0.30001516
       postcss: 8.4.14
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -22343,12 +22401,12 @@ packages:
     resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
     engines: {node: '>=10.13.0'}
     hasBin: true
+    dev: true
 
   /prettier@2.8.7:
     resolution: {integrity: sha512-yPngTo3aXUUmyuTjeTUT75txrf+aMh9FiD7q9ZE/i6r0bPb22g4FsE6Y338PQX1bmfy08i9QQCB7/rcUAVntfw==}
     engines: {node: '>=10.13.0'}
     hasBin: true
-    dev: true
 
   /prettier@2.8.8:
     resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
@@ -22823,7 +22881,7 @@ packages:
       deprecated-react-native-prop-types: 3.0.1
       event-target-shim: 5.0.1
       invariant: 2.2.4
-      jest-environment-node: 29.5.0
+      jest-environment-node: 29.6.1
       jsc-android: 250231.0.0
       memoize-one: 5.2.1
       metro-react-native-babel-transformer: 0.73.9(@babel/core@7.22.9)
@@ -26309,8 +26367,8 @@ packages:
       axios: 0.25.0
       joi: 17.7.0
       lodash: 4.17.21
-      minimist: 1.2.7
-      rxjs: 7.5.7
+      minimist: 1.2.8
+      rxjs: 7.8.1
     transitivePeerDependencies:
       - debug
     dev: true
@@ -26343,7 +26401,7 @@ packages:
     engines: {node: '>=10.13.0'}
     dependencies:
       glob-to-regexp: 0.4.1
-      graceful-fs: 4.2.10
+      graceful-fs: 4.2.11
     dev: false
 
   /wbuf@1.7.3:
@@ -27003,7 +27061,7 @@ packages:
     resolution: {directory: packages/sdk, type: directory}
     id: file:packages/sdk
     name: '@wundergraph/sdk'
-    version: 0.174.1
+    version: 0.174.5
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.4.0
@@ -27049,6 +27107,7 @@ packages:
       js-yaml: 4.1.0
       json-schema: 0.4.0
       json-schema-to-typescript: 11.0.5
+      json-stream-stringify: 3.1.0
       lodash: 4.17.21
       long: 5.2.3
       object-hash: 2.2.0
@@ -27056,6 +27115,7 @@ packages:
       openapi-types: 12.1.0
       pino: 8.14.1
       postman-collection: 4.1.7
+      prettier: 2.8.7
       protobufjs: 7.2.4
       raw-body: 2.5.2
       swagger2openapi: 7.0.8

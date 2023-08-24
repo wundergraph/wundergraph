@@ -1,4 +1,12 @@
-import { AsyncApiIntrospector, CodeGen, S3UploadConfiguration, WunderGraphConfigApplicationConfig } from '../configure';
+import {
+	AsyncApiIntrospector,
+	AuthenticationConfig,
+	CodeGen,
+	S3UploadConfiguration,
+	TokenAuthProvider,
+	WunderGraphConfigApplicationConfig,
+} from '../configure';
+import { AuthenticationProvider } from '../configure/authentication';
 import {
 	BaseOperationConfiguration,
 	MutationConfiguration,
@@ -22,7 +30,7 @@ export interface WunderGraphConfigWithAppConfig extends WunderGraphConfig {
 }
 
 export interface WunderGraphAppConfig
-	extends Omit<WunderGraphConfig, 'operations' | 'options'>,
+	extends Omit<WunderGraphConfig, 'operations' | 'options' | 'authentication'>,
 		WunderGraphConfigApplicationConfig<any, any> {}
 
 export interface WunderGraphDatasourceHooks {
@@ -53,13 +61,20 @@ export interface InternalIntergration {
 	hooks: WunderGraphIntegrationHooks & WunderGraphEnterpriseIntegrationHooks;
 }
 
+export interface InternalMatcher {
+	operationType: 'query' | 'mutation' | 'subscription';
+}
+
+export interface InternalHookConfig {
+	match: InternalMatcher | InternalMatcher[];
+	handler: (context: any) => Promise<Response>;
+}
+
 export type AuthProviderTypes = 'tokenBased' | 'cookieBased';
 export type AuthProviderConfig = {
-	cookieBased: CookieAuthProvider;
+	cookieBased: AuthenticationProvider;
 	tokenBased: TokenAuthProvider;
 };
-export type CookieAuthProvider = any;
-export type TokenAuthProvider = any;
 
 export type WunderGraphNodeOptions = Pick<NodeOptions, 'defaultHttpProxyUrl' | 'defaultRequestTimeoutSeconds'>;
 
@@ -87,6 +102,12 @@ export interface WunderGraphConfig
 	extends Pick<WunderGraphConfigApplicationConfig<any, any>, 'cors' | 'experimental' | 'security' | 'authorization'> {
 	datasources: WunderGraphDatasource[];
 	integrations?: WunderGraphIntegration[];
+	authentication?: WunderGraphAuthenticationConfig;
 	options?: WunderGraphNodeOptions;
 	operations?: WunderGraphConfigOperations;
+}
+
+export interface WunderGraphAuthenticationConfig {
+	providers: WunderGraphIntegration[];
+	redirectUris?: string[];
 }

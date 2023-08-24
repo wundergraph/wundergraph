@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.169.1",
+  "version": "0.170.0",
   "name": "wundergraph",
   "license": "Apache-2.0",
   "author": {
@@ -88,7 +88,8 @@
       "@tanstack/query-core": "^4.29.1",
       "zod": "^3.21.4",
       "json-machete": "0.94.5",
-      "@graphql-mesh/store": "0.94.5"
+      "@graphql-mesh/store": "0.94.5",
+      "react": "18.2.0"
     }
   }
 }

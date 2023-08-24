@@ -244,7 +244,7 @@ The best way to try them out is by cloning the mono-repo.
 
 - [Use Turborepo to speed up builds in monorepos.](https://github.com/wundergraph/cloud-starter-turbo)
 - [Manage multiple WunderGraph Cloud Projects in a single repository](https://github.com/wundergraph/cloud-multi-projects-demo)
-- [Built-in OpenTelemetry instrumentation](examples/openapi-mocking)
+- [Built-in OpenTelemetry instrumentation](examples/open-telemetry)
 
 ## The WunderGraph Stack
 

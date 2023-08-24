@@ -75,6 +75,7 @@ export class Client {
 	protected readonly baseHeaders: Headers = {};
 	private extraHeaders: Headers = {};
 	private csrfToken: string | undefined;
+	private userIsAuthenticated: boolean | undefined;
 	protected readonly csrfEnabled: boolean = true;
 
 	public static buildCacheKey(query: OperationRequestOptions): string {
@@ -340,7 +341,7 @@ export class Client {
 
 		const headers: Headers = {};
 
-		if (this.isAuthenticatedOperation(options.operationName) && this.csrfEnabled) {
+		if (this.shouldIncludeCsrfToken(this.isAuthenticatedOperation(options.operationName))) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 
@@ -403,15 +404,19 @@ export class Client {
 		});
 
 		if (!response.ok) {
+			this.userIsAuthenticated = false;
 			throw await this.handleClientResponseError(response);
 		}
 
 		if (response.status == 204) {
+			this.userIsAuthenticated = false;
 			// No user is signed in. Keep this in sync with pkg/authentication/authentication.go
 			throw new NoUserError({ statusCode: response.status });
 		}
 
-		return response.json();
+		const user = response.json();
+		this.userIsAuthenticated = true;
+		return user;
 	}
 
 	/**
@@ -611,7 +616,7 @@ export class Client {
 
 		const headers: Headers = {};
 
-		if (this.csrfEnabled && (validation?.requireAuthentication ?? true)) {
+		if (this.shouldIncludeCsrfToken(validation?.requireAuthentication ?? true)) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 
@@ -744,5 +749,26 @@ export class Client {
 		}
 
 		return ok;
+	}
+
+	private shouldIncludeCsrfToken(orCondition: boolean) {
+		if (this.csrfEnabled) {
+			if (orCondition) {
+				return true;
+			}
+			if (typeof this.userIsAuthenticated !== 'undefined') {
+				return this.userIsAuthenticated;
+			}
+			// If fetchUser has never been called and we're in a browser
+			// assume we do need the CSRF token. This shouldn't be a problem
+			// because the CSRF token generator is always available
+			if (typeof window !== 'undefined') {
+				// Browser
+				return true;
+			}
+			// Backend
+			return false;
+		}
+		return false;
 	}
 }
