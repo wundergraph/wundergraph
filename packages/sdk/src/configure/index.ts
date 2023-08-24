@@ -90,8 +90,7 @@ import { generateOperations } from '../codegen/generateoperations';
 import { configurationHash } from '../codegen/templates/typescript/helpers';
 import templates from '../codegen/templates';
 import { WunderGraphConfigurationFilename } from '../server/server';
-import { InternalIntergration, WunderGraphAppConfig } from '../integrations/types';
-import { DynamicTransportConfig } from '../advanced-hooks';
+import { InternalHookConfig, InternalIntergration, WunderGraphAppConfig } from '../integrations/types';
 
 export const WG_GENERATE_CONFIG_JSON = process.env['WG_GENERATE_CONFIG_JSON'] === 'true';
 
@@ -148,31 +147,7 @@ export interface WunderGraphConfigApplicationConfig<
 	authentication?: {
 		cookieBased?: {
 			providers: AuthenticationProvider[];
-			// authorizedRedirectUris is a whitelist of allowed URIs to redirect to after a successful login
-			// the values are used as exact string matches
-			// URIs always match, independent of a trailing slash or not
-			// e.g. if an authorized URI is "http://localhost:3000", the URI "http://localhost:3000/" would also match
-			// or if the authorized URI is "http://localhost:3000/auth", the URI "http://localhost:3000/auth/" would also match
-			// if you need more flexibility, use authorizedRedirectUriRegexes instead
-			authorizedRedirectUris?: InputVariable[];
-			// authorizedRedirectUriRegexes is a whitelist of allowed URIs to redirect to after a successful login using regexes
-			// make sure to set boundaries properly, e.g:
-			// "^http://localhost:3000$"
-			// without boundaries, all URIs would match, e.g:
-			// "http://localhost:3000" would match if the URI was "http://localhost:3000/anything" because of the missing boundary
-			authorizedRedirectUriRegexes?: InputVariable[];
-			// secureCookieHashKey is used to encrypt user cookies, should be 11 bytes
-			secureCookieHashKey?: InputVariable;
-			// secureCookieBlockKey is used to encrypt user cookies, should be 32 bytes
-			secureCookieBlockKey?: InputVariable;
-			// csrfTokenSecret is the secret to enable the csrf middleware, should be 32 bytes
-			csrfTokenSecret?: InputVariable;
-			/**
-			 * Optional timeout used for storing temporary data during authentication
-			 * @default 600 (10 minutes)
-			 */
-			timeoutSeconds?: InputVariable<number>;
-		};
+		} & AuthenticationConfig;
 		tokenBased?: {
 			providers: TokenAuthProvider[];
 		};
@@ -214,6 +189,43 @@ export interface WunderGraphConfigApplicationConfig<
 
 	/** @deprecated */
 	links?: LinkConfiguration;
+}
+
+export interface AuthenticationConfig {
+	/**
+	 * authorizedRedirectUris is a whitelist of allowed URIs to redirect to after a successful login
+	 * the values are used as exact string matches
+	 * URIs always match, independent of a trailing slash or not
+	 * e.g. if an authorized URI is "http://localhost:3000", the URI "http://localhost:3000/" would also match
+	 * or if the authorized URI is "http://localhost:3000/auth", the URI "http://localhost:3000/auth/" would also match
+	 * if you need more flexibility, use authorizedRedirectUriRegexes instead
+	 */
+	authorizedRedirectUris?: InputVariable[];
+	/**
+	 * 	authorizedRedirectUriRegexes is a whitelist of allowed URIs to redirect to after a successful login using regexes
+	 * make sure to set boundaries properly, e.g:
+	 * "^http://localhost:3000$"
+	 * without boundaries, all URIs would match, e.g:
+	 * "http://localhost:3000" would match if the URI was "http://localhost:3000/anything" because of the missing boundary
+	 */
+	authorizedRedirectUriRegexes?: InputVariable[];
+	/**
+	 * secureCookieHashKey is used to encrypt user cookies, should be 11 bytes
+	 */
+	secureCookieHashKey?: InputVariable;
+	/**
+	 * secureCookieBlockKey is used to encrypt user cookies, should be 32 bytes
+	 */
+	secureCookieBlockKey?: InputVariable;
+	/**
+	 * csrfTokenSecret is the secret to enable the csrf middleware, should be 32 bytes
+	 */
+	csrfTokenSecret?: InputVariable;
+	/**
+	 * Optional timeout used for storing temporary data during authentication
+	 * @default 600 (10 minutes)
+	 */
+	timeoutSeconds?: InputVariable<number>;
 }
 
 export interface TokenAuthProvider {
@@ -315,13 +327,38 @@ export interface S3UploadProfile {
 export type S3UploadProfiles = Record<string, S3UploadProfile>;
 
 export interface S3UploadConfiguration {
+	/**
+	 * The name of the S3 upload provider, used in the client to select the provider
+	 */
 	name: string;
+	/**
+	 * The S3 endpoint url
+	 */
 	endpoint: InputVariable;
+	/**
+	 * The access key id
+	 */
 	accessKeyID: InputVariable;
+	/**
+	 * The secret access key
+	 */
 	secretAccessKey: InputVariable;
+	/**
+	 * The bucket name
+	 */
 	bucketName: InputVariable;
+	/**
+	 * The bucket location, eg "eu-central-1"
+	 */
 	bucketLocation: InputVariable;
-	useSSL: boolean;
+	/**
+	 * Whether to use SSL, always enable this for production
+	 * @default true
+	 * */
+	useSSL?: boolean;
+	/**
+	 * Upload profiles to restrict uploads to certain file types, sizes, etc.
+	 */
 	uploadProfiles?: S3UploadProfiles;
 }
 
@@ -1254,7 +1291,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 	for (const integration of integrations) {
 		const httpTransport = integration.hooks['http:transport'];
 		if (httpTransport) {
-			const config = httpTransport as unknown as DynamicTransportConfig;
+			const config = httpTransport as unknown as InternalHookConfig;
 			if (config.match) {
 				const matches = Array.isArray(config.match) ? config.match : [config.match];
 				for (const match of matches) {
@@ -1263,7 +1300,9 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 						id,
 						type: HookType.HTTP_TRANSPORT,
 						matcher: {
-							operationType: match.operationType ? operationTypes[match.operationType] : undefined,
+							operationType: match.operationType
+								? operationTypes[match.operationType as keyof typeof operationTypes]
+								: undefined,
 							datasources: (match as { datasources?: string[] }).datasources ?? [],
 						},
 					});
@@ -1319,7 +1358,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 					bucketName: mapInputVariable(provider.bucketName),
 					endpoint: mapInputVariable(provider.endpoint),
 					secretAccessKey: mapInputVariable(provider.secretAccessKey),
-					useSSL: provider.useSSL,
+					useSSL: provider.useSSL ?? true,
 					uploadProfiles: uploadProfiles,
 				};
 			}),

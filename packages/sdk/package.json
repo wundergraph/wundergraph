@@ -51,9 +51,17 @@
       "types": "./dist/integrations/datasources/index.d.ts",
       "default": "./dist/integrations/datasources/index.js"
     },
+    "./authentication": {
+      "types": "./dist/integrations/auth/index.d.ts",
+      "default": "./dist/integrations/auth/index.js"
+    },
     "./advanced-hooks": {
-      "types": "./dist/advanced-hooks/index.d.ts",
-      "default": "./dist/advanced-hooks/index.js"
+      "types": "./dist/enterprise/advanced-hooks/index.d.ts",
+      "default": "./dist/enterprise/advanced-hooks/index.js"
+    },
+    "./enterprise": {
+      "types": "./dist/enterprise/index.d.ts",
+      "default": "./dist/enterprise/index.js"
     },
     "./dist/*": {
       "types": "./dist/*.d.ts",
@@ -89,14 +97,20 @@
       "orm": [
         "./dist/orm"
       ],
-      "datasources": [
-        "./dist/integrations/datasources"
-      ],
       "integrations": [
         "./dist/integrations"
       ],
+      "datasources": [
+        "./dist/integrations/datasources"
+      ],
+      "authentication": [
+        "./dist/integrations/auth"
+      ],
+      "enterprise": [
+        "./dist/enterprise"
+      ],
       "advanced-hooks": [
-        "./dist/advanced-hooks"
+        "./dist/enterprise/advanced-hooks"
       ]
     }
   },

@@ -7,7 +7,7 @@
  */
 
 export {
-	type DynamicTransportConfig,
+	type DynamicTransportOptions,
 	type DynamicTransportContext,
 	type RouteMatcher,
 	dynamicTransport,
