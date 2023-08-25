@@ -1,0 +1,11 @@
+{
+  "nextjs": {
+    "title": "Next.js Pages Router",
+    "href": "https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs",
+    "newWindow": true
+  },
+  "nextjs-app-dir": {
+    "title": "Next.js App Router",
+    "href": "https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-app-dir"
+  }
+}

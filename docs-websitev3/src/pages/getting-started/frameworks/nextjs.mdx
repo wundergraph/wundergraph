@@ -1,0 +1,171 @@
+---
+title: Next.js
+pageTitle: WunderGraph and Next.js Quickstart
+description: Getting started with WunderGraph and Next.js
+---
+
+This quickstart guide will show you how to use WunderGraph with Next.js.
+
+## Install WunderGraph
+
+### Manual installation
+
+You can add WunderGraph to an existing project by running the following command:
+
+```shell npm2yarn
+npm install @wundergraph/sdk @wundergraph/nextjs swr
+```
+
+### Using the WunderGraph CLI
+
+You can also use the WunderGraph CLI to create a new project with Next.js and WunderGraph.
+
+```shell
+# Init wundergraph in an existing project
+npx create-wundergraph-app --init
+
+# Create a new WunderGraph + Next.js project
+npx create-wundergraph-app my-project --example nextjs
+```
+
+## Configure WunderGraph
+
+WunderGraph lives in the `wundergraph` directory by default. This is where you can configure your WunderGraph application and write your operations.
+
+Create a new file `wundergraph/wundergraph.config.ts` and add the following content:
+
+```ts
+import type { WunderGraphConfig } from '@wundergraph/sdk';
+import { graphql } from '@wundergraph/sdk/datasources';
+import { nextjs } from '@wundergraph/nextjs/integration';
+
+export default {
+	datasources: [
+		graphql({
+			namespace: 'spacex',
+			url: 'https://spacex-api.fly.dev/graphql/',
+		}),
+	],
+	integrations: [nextjs()],
+} as WunderGraphConfig;
+```
+
+This will configure WunderGraph to use the SpaceX GraphQL API as a datasource and the Next.js integration.
+The Next.js integration will generate the React hooks for you that can be used to query and mutate your API.
+
+Now let's take a look at the operations.
+
+## Operations
+
+Operations are written in the `wundergraph/operations` directory. They can be written in Graphql or TypeScript.
+Let's create a new Dragons operation.
+
+Create a new file `wundergraph/operations/Dragons.graphql` and add the following content:
+
+```graphql
+query Dragons {
+	spacex_dragons {
+		name
+		active
+	}
+}
+```
+
+This simply fetches the name and active status of all the SpaceX dragons, we can run this operation in Next.js by using the generated React hooks.
+Note that we prefix the operation with the name of the datasource, in this case `spacex`. To remove the prefix, you can alias the query name.
+
+```graphql
+query Dragons {
+	dragons: spacex_dragons {
+		name
+		active
+	}
+}
+```
+
+## Calling the operation in Next.js
+
+Open `pages/index.tsx`, and let's fetch the dragons.
+
+```tsx
+import { useQuery } from '../wundergraph/generated/nextjs';
+
+const Home: NextPage = () => {
+	const dragons = useQuery({
+		operationName: 'Dragons',
+	});
+
+	return (
+		<div>
+			<h1>Dragons</h1>
+			{dragons.data?.dragons.map((dragon) => (
+				<div key={dragon.name}>
+					<h2>{dragon.name}</h2>
+					<p>{dragon.active ? 'Active' : 'Inactive'}</p>
+				</div>
+			))}
+		</div>
+	);
+};
+```
+
+The operation name is the name of the file in the operations directory, without the extension. The `useQuery` hook will return the result of the operation.
+
+The Next.js client uses SWR under the hood, check out the [SWR documentration for more information](https://swr.vercel.app/).
+
+## Server side rendering
+
+import { Callout } from 'nextra/components';
+
+<Callout>**withWunderGraph** only works with the `pages` directory.</Callout>
+
+Next.js supports server side rendering, which means that the page is rendered on the server and then sent to the browser. This is great for SEO and performance. WunderGraph supports server side rendering as well.
+
+Let's take a look at the `pages/index.tsx` file again. You will see that we are using the `useQuery` hook to fetch the data. This hook will fetch the data on the client side, which means that the page will be rendered on the client side.
+
+To render the page on the server side, all we need to wrap our Page or App with `withWunderGraph`. This will make sure that the page is rendered on the server side, WunderGraph does all the hard work for you.
+
+```tsx
+export default withWunderGraph(Home);
+```
+
+## App directory
+
+The WunderGraph TypeScript client can be used to query and mutate your API in server components.
+
+Let's fetch the dragons in a server component.
+
+Create a new file in `app/page.tsx` and add the following content:
+
+```tsx
+import { client } from '../wundergraph/generated/client';
+
+export default async function Home() {
+  const dragons = await client.query({
+    operationName: 'Dragons',
+  });
+
+  return (
+    <div>
+      <h1>Dragons</h1>
+      {dragons.data?.dragons.map((dragon) => (
+        <div key={dragon.name}>
+          <h2>{dragon.name}</h2>
+          <p>{dragon.active ? 'Active' : 'Inactive'}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+## What's next?
+
+Wunderbar! You've added your first Graphql API to Next.js. Next up you might want to add a database, authentication and support uploads to turn Next.js into a full stack powerhouse 😎.
+
+- [Learn WunderGraph](/docs/learn)
+- [Datasources](/docs/datasources)
+- [Authentication](/docs/authentication)
+- [File Storage](/docs/file-storage)
+
+If you've got questions, please [join our Discord community](https://wundergraph.com/discord) or [contact us](https://wundergraph.com/contact/sales).
+```

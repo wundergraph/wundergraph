@@ -18,7 +18,7 @@ so we're able to not just discuss headless API use cases,
 but also how to use WunderGraph with a frontend framework.
 
 Once initialized, we can start exploring the project structure.
-There's a `.wundergraph` folder in the root that contains all the configuration files for WunderGraph alongside the `pages` directory,
+There's a `wundergraph` folder in the root that contains all the configuration files for WunderGraph alongside the `pages` directory,
 which is where we can find the Next.js pages.
 
 We'll dive into the configuration deeper in the following articles,
@@ -29,14 +29,17 @@ the main configuration file of WunderGraph.
 
 ```typescript
 // wundergraph.config.ts
-import { introspect, configureWunderGraphApplication } from '@wundergraph/sdk';
-const spaceX = introspect.graphql({
-  apiNamespace: 'spacex',
+import type { WunderGraphConfig } from '@wundergraph/sdk';
+import { graphql } from '@wundergraph/sdk/datasources';
+
+const spaceX = graphql({
+  namespace: 'spacex',
   url: 'https://spacex-api.fly.dev/graphql/',
 });
-configureWunderGraphApplication({
-  apis: [spaceX],
-});
+
+export default {
+  datasources: [spaceX],
+} satisfies WunderGraphConfig;
 ```
 
 This adds the SpaceX API to our project as an API dependency.

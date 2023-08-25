@@ -14,9 +14,9 @@ Let's start by defining two GraphQL Operations first,
 so we can fetch a city and weather data.
 
 ```graphql
-# .wundergraph/operations/weather/Country.graphql
-query ($code: String!) @internalOperation {
-  countries_countries(filter: { code: { eq: $code } }) {
+# wundergraph/operations/internal/Country.graphql
+query ($code: String!) {
+  countries: countries_countries(filter: { code: { eq: $code } }) {
     code
     name
     capital
@@ -27,9 +27,9 @@ query ($code: String!) @internalOperation {
 And the second one for fetching the weather data:
 
 ```graphql
-# .wundergraph/operations/weather/Weather.graphql
-query ($city: String!) @internalOperation {
-  weather_getCityByName(name: $city) {
+# wundergraph/operations/internal/Weather.graphql
+query ($city: String!) {
+  getCityByName: weather_getCityByName(name: $city) {
     name
     id
     weather {
@@ -48,14 +48,14 @@ query ($city: String!) @internalOperation {
 }
 ```
 
-Note that both Operations use the `@internalOperation` directive.
+Note that both Operations are placed in the `internal` directory.
 That's because we don't want to expose them to the public API,
 but only use them internally.
 
 Last step, we need to define a TypeScript Operation to glue it all together:
 
 ```typescript
-// .wundergraph/operations/weather/CountryWeather.ts
+// wundergraph/operations/weather/CountryWeather.ts
 import { createOperation, z } from '../../generated/wundergraph.factory';
 
 export default createOperation.query({
@@ -64,18 +64,18 @@ export default createOperation.query({
   }),
   handler: async ({ operations, input }) => {
     const country = await operations.query({
-      operationName: 'weather/Country',
+      operationName: 'internal/Country',
       input: {
         code: input.countryCode,
       },
     });
-    if (!country.data?.countries_countries[0].capital) {
+    if (!country.data?.countries[0].capital) {
       throw new Error('No capital found');
     }
     const weather = await operations.query({
-      operationName: 'weather/Weather',
+      operationName: 'internal/Weather',
       input: {
-        city: country.data?.countries_countries[0].capital,
+        city: country.data?.countries[0].capital,
       },
     });
     const out: {
@@ -86,11 +86,11 @@ export default createOperation.query({
         description: string;
       };
     } = {
-      country: country.data?.countries_countries[0].name || '',
-      capital: country.data?.countries_countries[0].capital || '',
+      country: country.data?.countries[0].name || '',
+      capital: country.data?.countries[0].capital || '',
       weather: {
-        title: weather.data?.weather_getCityByName?.weather?.summary?.title || '',
-        description: weather.data?.weather_getCityByName?.weather?.summary?.description || '',
+        title: weather.data?.getCityByName?.weather?.summary?.title || '',
+        description: weather.data?.getCityByName?.weather?.summary?.description || '',
       },
     };
     return out;

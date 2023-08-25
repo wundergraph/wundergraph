@@ -13,22 +13,27 @@ Let's add a few more "API dependencies" to our application and discuss the desig
 
 ```typescript
 // wundergraph.config.ts
-import { introspect, configureWunderGraphApplication } from '@wundergraph/sdk';
-const spaceX = introspect.graphql({
-  apiNamespace: 'spacex',
+import type { WunderGraphConfig } from '@wundergraph/sdk';
+import { graphql } from '@wundergraph/sdk/datasources';
+
+const spaceX = graphql({
+  namespace: 'spacex',
   url: 'https://spacex-api.fly.dev/graphql/',
 });
-const weather = introspect.graphql({
-  apiNamespace: 'weather',
+
+const weather = graphql({
+  namespace: 'weather',
   url: 'https://weather-api.wundergraph.com/',
 });
-const countries = introspect.graphql({
-  apiNamespace: 'countries',
+
+const countries = graphql({
+  namespace: 'countries',
   url: 'https://countries.trevorblades.com/',
 });
-configureWunderGraphApplication({
-  apis: [spaceX, weather, countries],
-});
+
+export default {
+  datasources: [spaceX, weather, countries],
+} satisfies WunderGraphConfig;
 ```
 
 This will add the SpaceX, Weather and Countries API to our project as API dependencies.
@@ -39,10 +44,10 @@ We write a module that does one thing, and then we use it in another module.
 If we wanted to use it in another codebase, we could also publish it as a package and install it from a package manager.
 
 In WunderGraph, we've taken this idea and applied it to APIs.
-So when you use the `introspect` function, you're basically importing an API as a dependency.
-If you then pass it to the `configureWunderGraphApplication` function, you're basically saying that you want to use this API in your application.
+So when you use a `datasource` function, you're basically importing an API as a dependency.
+If you then pass it to the `config`, you're basically saying that you want to use this API in your application.
 
-There's one more important thing to note here, the `apiNamespace` property.
+There's one more important thing to note here, the `namespace` property.
 Imagine you have a lot of exported functions, classes, etc. in a single module,
 wouldn't that be hard to use? Yes, of course it would.
 And that's why almost all languages have some kind of namespacing mechanism,
