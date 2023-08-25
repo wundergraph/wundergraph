@@ -507,9 +507,9 @@ export const createServer = async ({
 
 			for (const server of openApiServers) {
 				await fastify.register(omnigraphPlugin, server);
-				fastify.log.debug('OpenAPI plugin registered');
-				fastify.log.info(`OpenAPI GraphQL server '${server.serverName}' listening at ${server.mountPath}`);
+				fastify.log.debug(`OpenAPI GraphQL server '${server.serverName}' listening at ${server.mountPath}`);
 			}
+			fastify.log.debug('OpenAPI plugin registered');
 		}
 
 		// mount omnigraph soap proxies
@@ -518,9 +518,9 @@ export const createServer = async ({
 
 			for (const server of soapServers) {
 				await fastify.register(soapPlugin, server);
-				fastify.log.debug('SOAP plugin registered');
-				fastify.log.info(`SOAP GraphQL server '${server.serverName}' listening at ${server.mountPath}`);
+				fastify.log.debug(`SOAP GraphQL server '${server.serverName}' listening at ${server.mountPath}`);
 			}
+			fastify.log.debug('SOAP plugin registered');
 		}
 
 		const hasGraphqlServers = serverConfig.graphqlServers && serverConfig.graphqlServers.length > 0;
