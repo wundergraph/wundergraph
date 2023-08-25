@@ -85,6 +85,8 @@ query Dragons {
 
 ## Calling the operation in Next.js
 
+### Pages directory
+
 Open `pages/index.tsx`, and let's fetch the dragons.
 
 ```tsx
@@ -113,7 +115,7 @@ The operation name is the name of the file in the operations directory, without 
 
 The Next.js client uses SWR under the hood, check out the [SWR documentration for more information](https://swr.vercel.app/).
 
-## Server side rendering
+#### Server side rendering
 
 import { Callout } from 'nextra/components';
 
@@ -129,7 +131,7 @@ To render the page on the server side, all we need to wrap our Page or App with 
 export default withWunderGraph(Home);
 ```
 
-## App directory
+### App directory
 
 The WunderGraph TypeScript client can be used to query and mutate your API in server components.
 
@@ -141,22 +143,23 @@ Create a new file in `app/page.tsx` and add the following content:
 import { client } from '../wundergraph/generated/client';
 
 export default async function Home() {
-  const dragons = await client.query({
-    operationName: 'Dragons',
-  });
+	const dragons = await client.query({
+		operationName: 'Dragons',
+	});
 
-  return (
-    <div>
-      <h1>Dragons</h1>
-      {dragons.data?.dragons.map((dragon) => (
-        <div key={dragon.name}>
-          <h2>{dragon.name}</h2>
-          <p>{dragon.active ? 'Active' : 'Inactive'}</p>
-        </div>
-      ))}
-    </div>
-  );
+	return (
+		<div>
+			<h1>Dragons</h1>
+			{dragons.data?.dragons.map((dragon) => (
+				<div key={dragon.name}>
+					<h2>{dragon.name}</h2>
+					<p>{dragon.active ? 'Active' : 'Inactive'}</p>
+				</div>
+			))}
+		</div>
+	);
 }
+```
 
 ## What's next?
 
@@ -168,4 +171,3 @@ Wunderbar! You've added your first Graphql API to Next.js. Next up you might wan
 - [File Storage](/docs/file-storage)
 
 If you've got questions, please [join our Discord community](https://wundergraph.com/discord) or [contact us](https://wundergraph.com/contact/sales).
-```
