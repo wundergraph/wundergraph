@@ -1,0 +1,8 @@
+{
+  "prisma": "Prisma",
+  "graphql": "GraphQL",
+  "federation": "GraphQL Federation",
+  "rest": "REST / OAS",
+  "natskv": "Nats KV",
+  "soap": "SOAP"
+}
