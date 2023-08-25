@@ -18,9 +18,8 @@ import { FastifyRequest } from 'fastify';
 import { trace } from '@opentelemetry/api';
 import { Attributes } from '../trace/attributes';
 import { attachErrorToSpan } from '../trace/util';
-import { InternalIntergration, WunderGraphIntegration } from '../../integrations/types';
+import { InternalIntergration, InternalHookConfig } from '../../integrations/types';
 import { hookID } from '../util';
-import { DynamicTransportConfig } from '../../advanced-hooks';
 
 const maximumRecursionLimit = 16;
 
@@ -290,7 +289,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		const httpTransport = integration.hooks['http:transport'];
 		if (httpTransport) {
 			const onOriginTransportHookName = 'onOriginTransport';
-			const config = httpTransport as unknown as DynamicTransportConfig;
+			const config = httpTransport as unknown as InternalHookConfig;
 			const matches = Array.isArray(config.match) ? config.match : [config.match];
 			for (const match of matches) {
 				const id = hookID(match);

@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/nextjs",
-  "version": "0.13.10",
+  "version": "0.14.0",
   "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -9,6 +9,11 @@
       "import": "./dist/index.mjs",
       "types": "./dist/index.d.ts",
       "require": "./dist/index.js"
+    },
+    "./integration": {
+      "import": "./dist/integration.mjs",
+      "types": "./dist/integration.d.ts",
+      "require": "./dist/integration.js"
     },
     "./template": {
       "import": "./dist/template.mjs",
@@ -21,8 +26,18 @@
       "require": "./dist/template.js"
     }
   },
+  "typesVersions": {
+    "*": {
+      "integration": [
+        "./dist/integration"
+      ],
+      "template": [
+        "./dist/template"
+      ]
+    }
+  },
   "scripts": {
-    "build": "tsup src/index.ts src/template.ts --dts --format esm,cjs",
+    "build": "tsup src/index.ts src/template.ts src/integration.ts --dts --format esm,cjs",
     "test": "jest"
   },
   "files": [

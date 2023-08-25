@@ -1,10 +1,10 @@
 import type { WunderGraphConfig } from '@wundergraph/sdk';
 import { graphql } from '@wundergraph/sdk/datasources';
-import { weather } from './weather-datasource';
-
 import { dynamicTransport } from '@wundergraph/sdk/advanced-hooks';
 
-const route = dynamicTransport({
+import { weather } from './weather-datasource';
+
+const router = dynamicTransport({
 	match: {
 		operationType: 'query',
 		datasources: ['weather'],
@@ -22,29 +22,18 @@ const route = dynamicTransport({
 	},
 });
 
-const route2 = dynamicTransport({
-	match: {
-		operationType: 'query',
-		datasources: ['countries'],
-	},
-	handler: ({ request }) => {
-		return fetch(request);
-	},
-});
-
 export default {
+	experimental: {
+		orm: true,
+	},
 	datasources: [
 		weather(),
 		graphql({
 			namespace: 'countries',
 			url: 'https://countries.trevorblades.com/',
 		}),
-		graphql({
-			namespace: 'countries',
-			url: 'https://countries.trevorblades.com/',
-		}),
 	],
-	integrations: [route, route2],
+	integrations: [router],
 	security: {
 		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production',
 	},

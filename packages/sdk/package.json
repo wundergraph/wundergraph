@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.174.5",
+  "version": "0.175.0",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -51,9 +51,17 @@
       "types": "./dist/integrations/datasources/index.d.ts",
       "default": "./dist/integrations/datasources/index.js"
     },
+    "./authentication": {
+      "types": "./dist/integrations/auth/index.d.ts",
+      "default": "./dist/integrations/auth/index.js"
+    },
     "./advanced-hooks": {
-      "types": "./dist/advanced-hooks/index.d.ts",
-      "default": "./dist/advanced-hooks/index.js"
+      "types": "./dist/enterprise/advanced-hooks/index.d.ts",
+      "default": "./dist/enterprise/advanced-hooks/index.js"
+    },
+    "./enterprise": {
+      "types": "./dist/enterprise/index.d.ts",
+      "default": "./dist/enterprise/index.js"
     },
     "./dist/*": {
       "types": "./dist/*.d.ts",
@@ -89,14 +97,20 @@
       "orm": [
         "./dist/orm"
       ],
-      "datasources": [
-        "./dist/integrations/datasources"
-      ],
       "integrations": [
         "./dist/integrations"
       ],
+      "datasources": [
+        "./dist/integrations/datasources"
+      ],
+      "authentication": [
+        "./dist/integrations/auth"
+      ],
+      "enterprise": [
+        "./dist/enterprise"
+      ],
       "advanced-hooks": [
-        "./dist/advanced-hooks"
+        "./dist/enterprise/advanced-hooks"
       ]
     }
   },
@@ -169,15 +183,15 @@
     "@fastify/formbody": "^7.3.0",
     "@fastify/multipart": "^7.7.3",
     "@graphql-mesh/cross-helpers": "^0.4.0",
-    "@graphql-mesh/store": "0.94.5",
-    "@graphql-mesh/types": "0.94.5",
-    "@graphql-mesh/utils": "0.94.5",
+    "@graphql-mesh/store": "0.94.6",
+    "@graphql-mesh/types": "0.94.6",
+    "@graphql-mesh/utils": "0.94.6",
     "@graphql-tools/merge": "^9.0.0",
     "@graphql-tools/schema": "^8.5.1",
     "@graphql-tools/utils": "^9.2.1",
     "@omnigraph/json-schema": "0.94.2",
-    "@omnigraph/openapi": "0.94.5",
-    "@omnigraph/soap": "0.94.5",
+    "@omnigraph/openapi": "0.94.6",
+    "@omnigraph/soap": "0.94.6",
     "@opentelemetry/api": "^1.4.1",
     "@opentelemetry/core": "^1.13.0",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.39.1",
@@ -190,7 +204,7 @@
     "@wundergraph/orm": "workspace:*",
     "@wundergraph/protobuf": "workspace:^0.118.2",
     "@wundergraph/straightforward": "^4.2.5",
-    "@wundergraph/wunderctl": "workspace:^0.170.0",
+    "@wundergraph/wunderctl": "workspace:^0.171.0",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",

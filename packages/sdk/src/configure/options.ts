@@ -30,7 +30,7 @@ export const defaultHost = 'localhost';
 export const defaultNodePort = '9991';
 export const defaultNodeInternalPort = '9993';
 export const defaultServerPort = '9992';
-export const defaultPrometheusEnabled = true;
+export const defaultPrometheusEnabled = false;
 export const defaultPrometheusPort = 8881;
 
 const DefaultNodeOptions = {
@@ -133,7 +133,9 @@ export interface NodeOptions {
 	 */
 	defaultHttpProxyUrl?: InputVariable;
 
-	/** Options for exposing metrics via Prometheus  */
+	/**
+	 * Options for exposing metrics via Prometheus
+	 **/
 	prometheus?: {
 		/** Whether to enable Prometheus metrics collection and exposure */
 		enabled?: InputVariable<boolean>;

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.14.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.13.10...@wundergraph/nextjs@0.14.0) (2023-08-24)
+
+### Features
+
+* implement all core integrations ([#1215](https://github.com/wundergraph/wundergraph/issues/1215)) ([9d191df](https://github.com/wundergraph/wundergraph/commit/9d191df094bd218cdf59dc9bdda7f48d5fafd9eb)) (@Pagebakers)
+
 ## [0.13.10](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.13.9...@wundergraph/nextjs@0.13.10) (2023-08-21)
 
 **Note:** Version bump only for package @wundergraph/nextjs
