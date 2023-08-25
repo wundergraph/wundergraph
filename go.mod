@@ -12,6 +12,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.7.1
 	github.com/coreos/go-oidc/v3 v3.0.0
 	github.com/dgraph-io/ristretto v0.0.3
+	github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203
 	github.com/evanw/esbuild v0.16.10
 	github.com/fatih/color v1.13.0
 	github.com/fsnotify/fsnotify v1.5.4
@@ -88,7 +89,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.2.0 // indirect
-	github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/gin-gonic/gin v1.9.1 // indirect
