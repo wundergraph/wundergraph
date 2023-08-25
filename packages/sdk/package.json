@@ -182,9 +182,9 @@
   "dependencies": {
     "@fastify/formbody": "^7.3.0",
     "@graphql-mesh/cross-helpers": "^0.4.0",
-    "@graphql-mesh/store": "0.94.5",
-    "@graphql-mesh/types": "0.94.5",
-    "@graphql-mesh/utils": "0.94.5",
+    "@graphql-mesh/store": "0.94.6",
+    "@graphql-mesh/types": "0.94.6",
+    "@graphql-mesh/utils": "0.94.6",
     "@graphql-tools/merge": "^9.0.0",
     "@graphql-tools/schema": "^8.5.1",
     "@graphql-tools/utils": "^9.2.1",
