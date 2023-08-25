@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.175.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.174.5...@wundergraph/sdk@0.175.0) (2023-08-24)
+
+### Features
+
+* continue generation on graphql validation failures during development ([#1216](https://github.com/wundergraph/wundergraph/issues/1216)) ([19f370b](https://github.com/wundergraph/wundergraph/commit/19f370be019a3075d1d97adc372609d1a4dd57c1)) (@fiam)
+* implement all core integrations ([#1215](https://github.com/wundergraph/wundergraph/issues/1215)) ([9d191df](https://github.com/wundergraph/wundergraph/commit/9d191df094bd218cdf59dc9bdda7f48d5fafd9eb)) (@Pagebakers)
+
+### Bug Fixes
+
+* allow operations that don't require authentication to work with authenticated users ([#1163](https://github.com/wundergraph/wundergraph/issues/1163)) ([19cbec0](https://github.com/wundergraph/wundergraph/commit/19cbec0fe1a095ec64eaf7bf5d88bacbdc471333)) (@fiam)
+* use json-stream-stringify to encode potentially big JSON payloads ([#1209](https://github.com/wundergraph/wundergraph/issues/1209)) ([a037114](https://github.com/wundergraph/wundergraph/commit/a037114079cfb7a073291d77f0b5557db41e0197)) (@fiam)
+
 ## [0.174.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.174.4...@wundergraph/sdk@0.174.5) (2023-08-21)
 
 ### Bug Fixes

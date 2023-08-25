@@ -116,5 +116,5 @@ const transport = dynamicTransport({
 
 ## License
 
-Advanced hooks are licensed under the WunderGraph Community License.
-https://github.com/wundergraph/wundergraph/blob/main/LICENSE.COMMUNITY
+Advanced hooks are licensed under the WunderGraph Enterprise License.
+https://github.com/wundergraph/wundergraph/blob/main/LICENSE.ENTERPRISE
