@@ -167,6 +167,7 @@
   },
   "dependencies": {
     "@fastify/formbody": "^7.3.0",
+    "@fastify/multipart": "^7.7.3",
     "@graphql-mesh/cross-helpers": "^0.4.0",
     "@graphql-mesh/store": "0.94.5",
     "@graphql-mesh/types": "0.94.5",
