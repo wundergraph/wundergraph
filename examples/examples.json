@@ -1,0 +1,162 @@
+{
+  "examples": [
+    {
+      "id": "hello-world",
+      "name": "Hello World"
+    },
+    {
+      "id": "cross-api-joins",
+      "name": "Cross API Joins"
+    },
+    {
+      "name": "Next.js"
+    },
+    {
+      "id": "nextjs-app-dir",
+      "name": "Next.js with App Directory"
+    },
+    {
+      "id": "nextjs-typescript-operations",
+      "name": "Next.js TypeScript Operations"
+    },
+    {
+      "id": "nextjs-react-query",
+      "name": "Next.js + React Query"
+    },
+    {
+      "id": "nextjs-relay",
+      "name": "Next.js + Relay"
+    },
+    {
+      "id": "nextjs-clerk",
+      "name": "Next.js + Clerk"
+    },
+    {
+      "id": "remix",
+      "name": "Remix"
+    },
+    {
+      "id": "sveltekit",
+      "name": "SvelteKit + SSR with TanStack Query",
+      "author": "DaniAkash"
+    },
+    {
+      "id": "sveltekit-todos",
+      "name": "SvelteKit Todos",
+      "author": "leoalves"
+    },
+    {
+      "id": "astro",
+      "name": "Astro"
+    },
+    {
+      "id": "astro-relay",
+      "name": "Astro + Relay"
+    },
+    {
+      "name": "Vite + SWR",
+      "id": "vite-swr"
+    },
+    {
+      "name": "Vite + Solid.js",
+      "id": "vite-solidjs"
+    },
+    {
+      "name": "Vite + React Relay",
+      "id": "vite-react-relay"
+    },
+    {
+      "name": "Vite + Svelte",
+      "id": "vite-svelte"
+    },
+    {
+      "name": "Hooks",
+      "id": "hooks"
+    },
+    {
+      "name": "Caching",
+      "id": "caching"
+    },
+    {
+      "name": "Expo + SWR",
+      "id": "expo-swr"
+    },
+    {
+      "name": "Expo + Relay",
+      "id": "expo-relay"
+    },
+    {
+      "name": "FaunaDB Next.js",
+      "id": "fauna-db-nextjs"
+    },
+    {
+      "name": "Inject Bearer Token",
+      "id": "inject-bearer-token"
+    },
+    {
+      "name": "PostgreSQL",
+      "id": "postgresql"
+    },
+    {
+      "name": "Next.js & PostgreSQL & Prisma",
+      "id": "nextjs-postgresql-prisma"
+    },
+    {
+      "name": "Apollo Federation",
+      "id": "apollo-federation"
+    },
+    {
+      "name": "Auth0 OpenID Connect Authentication",
+      "id": "auth0-openid-connect-authentication"
+    },
+    {
+      "name": "GraphQL Fragments",
+      "id": "fragments"
+    },
+    {
+      "name": "Keycloak OpenID Connect Authentication",
+      "id": "keycloak-openid-connect-authentication"
+    },
+    {
+      "name": "GraphQL Apollo subscriptions",
+      "id": "graphql-apollo-subscriptions"
+    },
+    {
+      "name": "GraphQL Yoga subscriptions",
+      "id": "graphql-yoga-subscriptions"
+    },
+    {
+      "name": "GraphQL SSE subscriptions",
+      "id": "graphql-sse-subscriptions"
+    },
+    {
+      "name": "GraphQL WS subscriptions",
+      "id": "graphql-ws-subscriptions"
+    },
+    {
+      "name": "GraphQL Hasura WS subscriptions",
+      "id": "graphql-hasura-subscriptions"
+    },
+    {
+      "name": "GraphQL subscriptions hooks",
+      "id": "graphql-subscriptions-hooks"
+    },
+    {
+      "name": "WunderGraph schema extension",
+      "id": "schema-extension"
+    },
+    {
+      "name": "Next.js Todos",
+      "id": "nextjs-todos"
+    },
+    {
+      "name": "Nuxt + Vue Query",
+      "id": "nuxt",
+      "author": "Hebilicious"
+    },
+    {
+      "name": "TypeScript ORM",
+      "id": "orm"
+    }
+  ]
+}

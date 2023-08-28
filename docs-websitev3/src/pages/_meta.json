@@ -1,23 +1,14 @@
 {
-  "index": "Home",
-  "getting-started": "Getting started",
-  "learn": "Learn",
-  "-- components": {
-    "type": "separator"
+  "docs": {
+    "type": "page",
+    "title": "Documentation"
   },
-  "datasources": "Datasources",
-  "authentication": "Authentication",
-  "file-storage": "File storage",
-  "-- more": {
-    "type": "separator"
+  "learn": {
+    "type": "page",
+    "title": "Learn WunderGraph"
   },
-  "integrations": "Integrations",
-  "testing": "Testing",
-  "advanced": "Advanced Usage",
-  "troubleshooting": "Troubleshooting",
-  "Upgrade Guides": "Upgrade Guides",
-  "-- References": {
-    "type": "separator",
-    "title": "References"
+  "reference": {
+    "type": "page",
+    "title": "Reference"
   }
 }

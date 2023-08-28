@@ -1,0 +1,8 @@
+{
+  "index": "Overview",
+  "-- ide": {
+    "type": "separator",
+    "title": "IDE"
+  },
+  "enable-autocompletion-in-your-ide": "Enable autocompletion in your IDE"
+}

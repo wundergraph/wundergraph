@@ -1,0 +1,20 @@
+{
+  "index": "Home",
+  "getting-started": "Getting started",
+  "examples": "Examples",
+  "guides": "Guides",
+  "-- components": {
+    "type": "separator"
+  },
+  "datasources": "Datasources",
+  "authentication": "Authentication",
+  "file-storage": "File storage",
+  "-- more": {
+    "type": "separator"
+  },
+  "integrations": "Integrations",
+  "testing": "Testing",
+  "advanced": "Advanced Usage",
+  "troubleshooting": "Troubleshooting",
+  "Upgrade Guides": "Upgrade Guides"
+}

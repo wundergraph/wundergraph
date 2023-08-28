@@ -1,0 +1,151 @@
+---
+title: Quickstart
+pageTitle: WunderGraph - Getting started quickly with WunderGraph
+description: Initialize your WunderGraph development environment and get started using WunderGraph
+---
+
+This quick start guide will help you to start a new WunderGraph project from scratch, or add WunderGraph to an existing project.
+
+## Install WunderGraph
+
+### Manual installation
+
+```shell npm2yarn
+npm install @wundergraph/sdk
+```
+
+### Using `create-wundergraph-app`
+
+```shell
+# Init a new project
+npx create-wundergraph-app my-project --example simple
+
+# Move to the project directory
+cd my-project
+
+# Install dependencies
+npm i
+```
+
+You can also easily integrate WunderGraph into your existing projects.
+
+```shell
+# In your application directory
+npx create-wundergraph-app --init
+```
+
+## Configure WunderGraph
+
+Your WunderGraph project is configured in the `wundergraph` directory. This is where you can configure your WunderGraph application and write your operations.
+
+Create a `wundergraph.config.ts` file in the `wundergraph` directory and add the following content:
+
+```ts
+import type { WunderGraphConfig } from '@wundergraph/sdk';
+import { graphql } from '@wundergraph/sdk/datasources';
+
+const countries = graphql({
+	namespace: 'countries',
+	url: 'https://countries.trevorblades.com/',
+});
+
+export default {
+	datasources: [countries],
+} satisfies WunderGraphConfig;
+```
+
+Let's dissect what is going on here.
+
+First, we import the `WunderGraphConfig` type from the `@wundergraph/sdk` package. This type is used to validate the configuration.
+
+Next, we import the `graphql` datasource from `@wundergraph/sdk/datasources`. This function is used to create a new GraphQL datasource.
+
+Then we create a new datasource called `countries` and add it to our datasources array. Now the countries GraphQL API will be added to the `Virtual Graph` and it can be used in our operations.
+
+## Write your first operation
+
+Operations are written in the `wundergraph/operations` directory. They can be written in Graphql or TypeScript.
+
+Create your first operation in `wundergraph/operations/Countries.graphql`
+
+```graphql
+query Countries($filter: countries_CountryFilterInput) {
+	countries_countries(filter: $filter) {
+		code
+		name
+		capital
+	}
+}
+```
+
+## Start the WunderGraph server
+
+Now that we've configured our WunderGraph application and written our first operation, we can start the WunderGraph server.
+
+```shell
+npm run wunderctl up
+```
+
+WunderGraph will now do some code generation and start the server.
+Head over to [http://localhost:9991](http://localhost:9991) and you should see the WunderGraph status page.
+
+Now lets run our query, open the following URL in your browser:
+[http://localhost:9991/operations/Countries](http://localhost:9991/operations/Countries)
+
+You'll see a JSON response with a list of countries.
+Pretty cool, right? Let's take a look at how this works.
+
+## Modify your operations
+
+import { Callout } from 'nextra/components';
+
+<Callout>
+	To add autocomplete support to your GraphQL operations configure `.graphqlrc.yml`. [How to
+	guide](/docs/guides/enable-autocompletion-in-your-ide).
+</Callout>
+
+The input type and query are prefixed with `countries_` because we're using the `countries` API namespace in the datasource config. This is to avoid naming conflicts when you add multiple APIs to your WunderGraph application.
+
+We'll make a few improvements to the API. First, let's remove the `countries_` prefix from the result, so we can access the result without the `countries_` prefix.
+
+```graphql
+query Countries($filter: countries_CountryFilterInput) {
+	countries: countries_countries(filter: $filter) {
+		code
+		name
+		capital
+	}
+}
+```
+
+If you run the operation again, you'll see that the result is the same, but the countries can now be accessed without the `countries_` prefix.
+
+Now we can add some extra data to the result. Let's add the `continent` and `currency` fields to the result.
+
+```graphql
+query Countries($filter: countries_CountryFilterInput) {
+	countries: countries_countries(filter: $filter) {
+		code
+		name
+		capital
+		continent {
+			name
+		}
+		currency
+	}
+}
+```
+
+If you run the operation again, you'll see that the result now contains the `continent` and `currency` fields.
+
+Awesome! You now have a basic understanding how WunderGraph works. The next step is to consume the API from your frontend, continue with one of our frontend quickstarts:
+
+- [Next.js Quickstart](/docs/getting-started/nextjs-quickstart)
+- [Vite Quickstart](/docs/getting-started/vite-quickstart)
+- [Remix Quickstart](/docs/getting-started/remix-quickstart)
+
+## More Examples
+
+Have a look at [other examples](/docs/examples) we provide, to get a better understanding of WunderGraph.
+
+If you've got questions, please [join our Discord community](https://wundergraph.com/discord) or [contact us](https://wundergraph.com/contact/sales).

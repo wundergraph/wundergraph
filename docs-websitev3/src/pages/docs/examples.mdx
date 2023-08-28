@@ -1,0 +1,78 @@
+import { useData } from 'nextra/data';
+import examples from '../../../../examples/examples.json'
+
+export const getStaticProps = ({ params }) => {
+	return {
+			props: {
+				// We add an `ssg` field to the page props,
+				// which will be provided to the Nextra `useData` hook.
+				ssg: {
+					examples: examples.examples
+				},
+			},
+		}
+};
+
+export const Deploy = (props) => {
+	const { template, repository } = props;
+	const baseUrl = 'https://cloud.wundergraph.com/new';
+
+    let params;
+    if (template) {
+    	params = new URLSearchParams({ templateName: template });
+    } else if (repository) {
+    	params = new URLSearchParams({ repository });
+    }
+
+    let url = params ? `${baseUrl}/clone?${params.toString()}` : baseUrl;
+
+    return (
+    	<a href={url}>
+    		<img src="https://wundergraph.com/button" alt="Deploy to WunderGraph" />
+    	</a>
+    );
+
+};
+
+export const Examples = () => {
+	// Get the data from SSG, and render it as a component.
+	const { examples } = useData();
+	return (
+		<table>
+			<thead>
+				<tr>
+					<th>Example</th>
+					<th>Author</th>
+					<th>Deploy</th>
+				</tr>
+			</thead>
+			<tbody>
+				{examples.map((example, i) => (
+					<tr key={i}>
+						<td>
+							<a href={`https://github.com/wundergraph/wundergraph/tree/main/examples/${example.id}`}>{example.name}</a>
+						</td>
+						<td>{example.author && <a href={`https://github.com/${example.author}`}>{example.author}</a>}</td>
+						<td>
+							<Deploy template={example.id} />
+						</td>
+					</tr>
+				))}
+			</tbody>
+		</table>
+	);
+};
+
+# Examples
+
+An overview of all official example projects.
+
+import { Callout } from 'nextra/components';
+
+<Callout emoji="❤️">
+	Missing a framework or example? [Let us
+	know](https://github.com/wundergraph/wundergraph/issues/new?title=Feedback%20for%20%E2%80%9CExamples%E2%80%9D&labels=feedback)
+	or [open a PR](https://github.com/wundergraph/wundergraph/tree/main/examples).
+</Callout>
+
+<Examples />
