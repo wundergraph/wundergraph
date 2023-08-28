@@ -71,7 +71,7 @@ export default {
 Next, we've defined a WunderGraph Operation, turning a GraphQL Query into a JSON RPC API.
 
 ```graphql
-# .wundergraph/operations/users/first.graphql
+# wundergraph/operations/users/first.graphql
 query {
   user: users_post_findFirstUser {
     id
@@ -119,7 +119,7 @@ you can add one of the below data sources to your `wundergraph.config.ts` file.
 
 When you now run `wunderctl up`, WunderGraph will introspect the database,
 generate the GraphQL Schema and start the WunderGraph server.
-You can view the generated GraphQL Schema either by looking at the `.wundergraph/generated/wundergraph.schema.graphql` file or by visiting `http://localhost:9991/graphql`.
+You can view the generated GraphQL Schema either by looking at the `wundergraph/generated/wundergraph.schema.graphql` file or by visiting `http://localhost:9991/graphql`.
 If the GraphQL Endpoint is not available, make sure that you've [configured it properly](/docs/wundergraph-config-ts-reference/configure-advanced-security#enable-graph-ql-endpoint).
 
 ### PostgreSQL
