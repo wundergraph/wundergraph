@@ -22,6 +22,7 @@ export enum WgEnv {
 	OtelSampler = 'WG_OTEL_SAMPLER',
 	OtelAuthToken = 'WG_OTEL_AUTH_TOKEN',
 	OtelBatchTimeoutMs = 'WG_OTEL_BATCH_TIMEOUT_MS',
+	SubscriptionServerPingIntervalMs = 'WG_SUBSCRIPTION_PING_INTERVAL_MS',
 }
 
 export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'debug' | 'trace';
@@ -55,6 +56,9 @@ const DefaultNodeOptions = {
 	},
 	defaultRequestTimeoutSeconds: 0,
 	defaultHttpProxyUrl: new EnvironmentVariable(WgEnv.HttpProxyUrl, ''),
+	subscriptions: {
+		serverPingIntervalMs: new EnvironmentVariable(WgEnv.SubscriptionServerPingIntervalMs, 0),
+	},
 	prometheus: {
 		enabled: new EnvironmentVariable(WgEnv.PrometheusEnabled, defaultPrometheusEnabled),
 		port: new EnvironmentVariable(WgEnv.PrometheusPort, defaultPrometheusPort),
@@ -134,6 +138,19 @@ export interface NodeOptions {
 	defaultHttpProxyUrl?: InputVariable;
 
 	/**
+	 * Options for configuring how subscriptions are served
+	 */
+	subscriptions?: {
+		/** Ping interval in milliseconds. If a subscription is idle for this duration
+		 * the server will send a ping consisting of an empty payload. Set to zero or
+		 * less than zero to disable it.
+		 *
+		 * @defaultValue Use the WG_SUBSCRIPTION_SERVER_PING_INTERVAL_MS environment variable
+		 */
+		serverPingIntervalMs: InputVariable<number>;
+	};
+
+	/**
 	 * Options for exposing metrics via Prometheus
 	 **/
 	prometheus?: {
@@ -159,6 +176,9 @@ export interface ResolvedNodeOptions {
 	};
 	defaultRequestTimeoutSeconds: number;
 	defaultHttpProxyUrl: ConfigurationVariable;
+	subscriptions: {
+		serverPingIntervalMs: ConfigurationVariable;
+	};
 	prometheus: {
 		enabled: ConfigurationVariable;
 		port: ConfigurationVariable;
@@ -207,6 +227,10 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 				defaultRequestTimeoutSeconds:
 					options?.defaultRequestTimeoutSeconds || DefaultNodeOptions.defaultRequestTimeoutSeconds,
 				defaultHttpProxyUrl: options?.defaultHttpProxyUrl || DefaultNodeOptions.defaultHttpProxyUrl,
+				subscriptions: {
+					serverPingIntervalMs:
+						options?.subscriptions?.serverPingIntervalMs || DefaultNodeOptions.subscriptions.serverPingIntervalMs,
+				},
 				prometheus: {
 					enabled: options?.prometheus?.enabled || DefaultNodeOptions.prometheus.enabled,
 					port: options?.prometheus?.port || DefaultNodeOptions.prometheus.port,
@@ -235,6 +259,9 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 		},
 		defaultRequestTimeoutSeconds: nodeOptions.defaultRequestTimeoutSeconds,
 		defaultHttpProxyUrl: mapInputVariable(nodeOptions.defaultHttpProxyUrl),
+		subscriptions: {
+			serverPingIntervalMs: mapInputVariable(nodeOptions.subscriptions?.serverPingIntervalMs),
+		},
 		prometheus: {
 			enabled: mapInputVariable(nodeOptions.prometheus.enabled),
 			port: mapInputVariable(nodeOptions.prometheus.port),

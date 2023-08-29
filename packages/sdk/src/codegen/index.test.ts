@@ -104,6 +104,15 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						environmentVariableDefaultValue: '',
 						placeholderVariableName: '',
 					},
+					subscriptions: {
+						serverPingIntervalMs: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '0',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
 					prometheus: {
 						enabled: {
 							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,

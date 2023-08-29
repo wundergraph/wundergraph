@@ -71,7 +71,7 @@ func newPipeline(resolver *FakeResolver, operation *wgpb.Operation) *hooks.Synch
 		Resolver: resolver,
 		Plan:     preparedPlan,
 	}
-	return hooks.NewSynchonousOperationPipeline(config)
+	return hooks.NewSynchronousOperationPipeline(config)
 }
 
 func TestQueryHandler_VariablesIgnore(t *testing.T) {

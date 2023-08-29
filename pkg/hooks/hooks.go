@@ -17,7 +17,6 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/hashicorp/go-retryablehttp"
-	"github.com/wI2L/jsondiff"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	otrace "go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
@@ -262,7 +261,7 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 	return &hookRes, nil
 }
 
-func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationName string, jsonData []byte, subscribeOnce, useSSE, useJsonPatch bool, out io.Writer, buf *bytes.Buffer) error {
+func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationName string, jsonData []byte, subscribeOnce bool, out io.Writer, buf *bytes.Buffer) error {
 	jsonData = c.setInternalHookData(ctx, jsonData, buf)
 	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/functions/"+operationName, bytes.NewReader(jsonData))
 	if err != nil {
@@ -300,16 +299,7 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 		return fmt.Errorf("client connection is not flushable")
 	}
 
-	if useSSE {
-		defer func() {
-			_, _ = out.Write([]byte("data: done\n\n"))
-			flusher.Flush()
-		}()
-	}
-
 	reader := bufio.NewReader(resp.Body)
-	lastLine := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(lastLine)
 
 	var (
 		line []byte
@@ -319,60 +309,17 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 		line, err = reader.ReadBytes('\n')
 		if err == nil {
 			_, err = reader.ReadByte()
+			if err == io.EOF {
+				err = nil
+			}
 		}
 		if err != nil {
 			if err == io.EOF {
 				return nil
 			}
-			if ctx.Err() != nil {
-				return nil
-			}
 			return err
 		}
-		if useSSE {
-			_, err = out.Write([]byte("data: "))
-			if err != nil {
-				if ctx.Err() != nil {
-					return nil
-				}
-				return fmt.Errorf("error writing to client: %w", err)
-			}
-		}
-		if useJsonPatch && lastLine.Len() != 0 {
-			patchOperation, err := jsondiff.CompareJSON(lastLine.Bytes(), line[:len(line)-1]) // remove newline
-			if err != nil {
-				return fmt.Errorf("error creating json patch: %w", err)
-			}
-			patch, err := json.Marshal(patchOperation)
-			if err != nil {
-				return fmt.Errorf("error marshalling json patch: %w", err)
-			}
-			if len(patch) < len(line) {
-				_, err = out.Write(patch)
-				if err != nil {
-					return err
-				}
-				_, err = out.Write([]byte("\n")) // add newline again
-				if err != nil {
-					return err
-				}
-			} else {
-				_, err = out.Write(line)
-				if err != nil {
-					return err
-				}
-			}
-		} else {
-			_, err = out.Write(line)
-		}
-		if err != nil {
-			if ctx.Err() != nil {
-				return nil
-			}
-			return fmt.Errorf("error writing to client: %w", err)
-		}
-		// we only need to write one newline, the second one is already in the line above
-		_, err = out.Write([]byte("\n"))
+		_, err = out.Write(line)
 		if err != nil {
 			if ctx.Err() != nil {
 				return nil
@@ -380,8 +327,6 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 			return fmt.Errorf("error writing to client: %w", err)
 		}
 		flusher.Flush()
-		lastLine.Reset()
-		_, _ = lastLine.Write(line)
 	}
 }
 

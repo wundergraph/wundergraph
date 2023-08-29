@@ -62,6 +62,11 @@ configureWunderGraphApplication({
 	authorization: {
 		roles: ['admin', 'user'],
 	},
+	options: {
+		subscriptions: {
+			serverPingIntervalMs: 100,
+		},
+	},
 	cors: {
 		...cors.allowAll,
 		allowedOrigins:

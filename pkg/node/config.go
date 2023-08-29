@@ -83,6 +83,16 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 		}
 	}
 
+	var subscriptionsServerPingInterval time.Duration
+
+	interval, err := loadvariable.Int64(graphConfig.GetApi().GetNodeOptions().GetSubscriptions().GetServerPingIntervalMs())
+	if err != nil {
+		return nil, err
+	}
+	if interval > 0 {
+		subscriptionsServerPingInterval = time.Millisecond * time.Duration(interval)
+	}
+
 	prometheusConfig := graphConfig.GetApi().GetNodeOptions().GetPrometheus()
 
 	prometheusEnabled, err := loadvariable.Bool(prometheusConfig.GetEnabled())
@@ -141,6 +151,9 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 				},
 				DefaultTimeout:      defaultRequestTimeout,
 				DefaultHTTPProxyURL: defaultHTTPProxyURL,
+				Subscriptions: apihandler.SubscriptionOptions{
+					ServerPingInterval: subscriptionsServerPingInterval,
+				},
 				Prometheus: apihandler.PrometheusOptions{
 					Enabled: prometheusEnabled,
 					Port:    prometheusPort,
