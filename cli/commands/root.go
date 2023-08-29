@@ -25,6 +25,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
+	"github.com/wundergraph/wundergraph/pkg/restart"
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
 )
 
@@ -196,6 +197,7 @@ var rootCmd = &cobra.Command{
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		workaroundBugWithDuplicatedFlags(cmd)
 		updateFlagsFromEnvironment(cmd)
+		restart.Await()
 
 		switch cmd.Name() {
 		// skip any setup to avoid logging anything

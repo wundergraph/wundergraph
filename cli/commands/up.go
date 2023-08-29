@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -23,11 +25,13 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/cli"
 	"github.com/wundergraph/wundergraph/pkg/codegeneration"
+	"github.com/wundergraph/wundergraph/pkg/cui"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/licensing"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/operations"
+	"github.com/wundergraph/wundergraph/pkg/restart"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
 	"github.com/wundergraph/wundergraph/pkg/watcher"
@@ -40,11 +44,103 @@ const UpCmdName = "up"
 var (
 	defaultDataSourcePollingIntervalSeconds int
 	disableCache                            bool
-	clearCache                              bool
+	clearCacheOnStart                       bool
 	enableTUI                               bool
 	logs                                    bool
 	debugBindAddress                        string
+	restartFunc                             func()
 )
+
+type cuiHandler struct {
+	ctx               context.Context
+	cancel            func()
+	wunderGraphDir    string
+	runtimeReloadChan chan<- struct{}
+	configBundler     *bundler.Bundler
+	log               *zap.Logger
+}
+
+func (h *cuiHandler) SetConfigBundler(b *bundler.Bundler) {
+	h.configBundler = b
+}
+
+func (h *cuiHandler) Quit() {
+	h.cancel()
+}
+
+func (h *cuiHandler) ClearCache() {
+	if err := clearCache(h.wunderGraphDir); err != nil {
+		h.log.Error("clearing cache", zap.Error(err))
+	} else {
+		h.log.Info("cache cleared")
+	}
+}
+
+func (h *cuiHandler) RebuildAndRestartApp() {
+	// This might not be available because it's initialized later
+	if h.configBundler != nil {
+		clearScreen()
+		h.configBundler.Bundle()
+	}
+}
+
+func (h *cuiHandler) Restart(debugMode bool) {
+	restartFunc = func() {
+		err := restart.Restart(&restart.Options{
+			Args: func(args []string) []string {
+				newArgs := make([]string, 0, len(args))
+				for _, arg := range args {
+					if strings.HasPrefix(arg, "--debug=") || arg == "--debug" {
+						continue
+					}
+					newArgs = append(newArgs, arg)
+				}
+				if debugMode {
+					newArgs = append(newArgs, "--debug")
+				}
+				return newArgs
+			},
+		})
+		if err != nil {
+			log.Error("could not restart", zap.Error(err))
+		}
+	}
+	h.Quit()
+}
+
+// clearScreen clears the screen so the new log messages appear at the top
+func clearScreen() {
+	const (
+		Esc             = "\u001B["
+		CursorToTopLeft = Esc + "1;1H"
+		EraseDown       = Esc + "J"
+	)
+	fmt.Print(CursorToTopLeft)
+	fmt.Print(EraseDown)
+}
+
+func triggerNodeReload(ctx context.Context, serverNotifyConfigCh chan<- struct{}) {
+	// Make sure we don't get stuck here if the node has already
+	// exited when we reach this point (and no one is reading from
+	// configFileChangeChan)
+	select {
+	case serverNotifyConfigCh <- struct{}{}:
+	case <-ctx.Done():
+	}
+}
+
+func clearCache(wunderGraphDir string) error {
+	cacheDir, err := helpers.LocalWunderGraphCacheDir(wunderGraphDir)
+	if err != nil {
+		return err
+	}
+	if cacheDir != "" {
+		if err := os.RemoveAll(cacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return err
+		}
+	}
+	return nil
+}
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
@@ -55,6 +151,14 @@ var upCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
+
+		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+		if err != nil {
+			return err
+		}
+
+		// Used for triggering reloads of the runtime
+		configFileChangeChan := make(chan struct{})
 
 		natsEmbeddedServerURL := startEmbeddedNats(ctx, log)
 
@@ -67,11 +171,34 @@ var upCmd = &cobra.Command{
 		// Bubbletea UI is not compatible with regular stdout logging
 		if enableTUI {
 			if rootFlags.DebugMode {
-				log.Warn("Debug mode is enabled. This will disable the UI.")
+				log.Warn("Debug mode is enabled. This will disable the TUI.")
 				enableTUI = false
 			} else if logs {
-				log.Warn("Logs are enabled. This will disable the UI.")
+				log.Warn("Logs are enabled. This will disable the TUI.")
 				enableTUI = false
+			}
+		}
+
+		var consoleUI *cui.UI
+		var consoleHandler *cuiHandler
+
+		if !enableTUI {
+			consoleHandler = &cuiHandler{
+				ctx:               ctx,
+				cancel:            cancel,
+				runtimeReloadChan: configFileChangeChan,
+				wunderGraphDir:    wunderGraphDir,
+				log:               log,
+			}
+
+			consoleUI = cui.New(consoleHandler, cui.Options{
+				Debug: rootFlags.DebugMode,
+			})
+
+			if err := consoleUI.Open(); err != nil {
+				log.Warn("could not enable console UI", zap.Error(err))
+			} else {
+				go consoleUI.Run()
 			}
 		}
 
@@ -108,22 +235,15 @@ var upCmd = &cobra.Command{
 			}
 		}
 
-		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
-		if err != nil {
-			return err
-		}
-
 		var licensingOutput io.Writer = os.Stderr
 		if enableTUI {
 			licensingOutput = io.Discard
 		}
 		go licensing.NewManager(licensingPublicKey).LicenseCheck(wunderGraphDir, cancel, licensingOutput)
 
-		if clearCache {
-			if cacheDir, _ := helpers.LocalWunderGraphCacheDir(wunderGraphDir); cacheDir != "" {
-				if err := os.RemoveAll(cacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
-					return err
-				}
+		if clearCacheOnStart {
+			if err := clearCache(wunderGraphDir); err != nil {
+				return err
 			}
 		}
 
@@ -249,15 +369,6 @@ var upCmd = &cobra.Command{
 			return nil
 		}
 
-		onWatch := func(paths []string) {
-			if devTUI != nil {
-				task := cli.TaskStarted{
-					Label: "Building",
-				}
-				devTUI.Send(task)
-			}
-		}
-
 		if codeServerFilePath != "" {
 			ormEntryPointFilename := filepath.Join(wunderGraphDir, "generated", "orm", "index.ts")
 			ormBundler := bundler.NewBundler(bundler.Config{
@@ -329,6 +440,8 @@ var upCmd = &cobra.Command{
 							Label: "Build completed",
 							Err:   err,
 						})
+					} else if consoleUI != nil {
+						consoleUI.PrintShortHelp()
 					}
 				}()
 
@@ -449,9 +562,20 @@ var upCmd = &cobra.Command{
 			IgnorePaths: []string{
 				"node_modules",
 			},
-			OnWatch:       onWatch,
+			OnWatch: func(paths []string) {
+				if devTUI != nil {
+					task := cli.TaskStarted{
+						Label: "Building",
+					}
+					devTUI.Send(task)
+				} else {
+					clearScreen()
+				}
+			},
 			OnAfterBundle: onAfterBuild,
 		})
+
+		consoleHandler.SetConfigBundler(configBundler)
 
 		if devTUI != nil {
 			devTUI.Send(cli.TaskStarted{
@@ -471,7 +595,6 @@ var upCmd = &cobra.Command{
 		// only start watching in the builder once the initial config was built and written to the filesystem
 		go configBundler.Watch(ctx)
 
-		configFileChangeChan := make(chan struct{})
 		configWatcher := watcher.NewWatcher("config", &watcher.Config{
 			WatchPaths: []*watcher.WatchPath{
 				{Path: configFilePath},
@@ -480,7 +603,7 @@ var upCmd = &cobra.Command{
 
 		go func() {
 			err := configWatcher.Watch(ctx, func(paths []string) error {
-				configFileChangeChan <- struct{}{}
+				triggerNodeReload(ctx, configFileChangeChan)
 				return nil
 			})
 			if err != nil {
@@ -550,14 +673,8 @@ var upCmd = &cobra.Command{
 		}()
 
 		// trigger server reload after initial config build
-		// because no fs event is fired as build is already done
-		// Make sure we don't get stuck here if the node has already
-		// exited when we reach this point (and no one is reading from
-		// configFileChangeChan)
-		select {
-		case configFileChangeChan <- struct{}{}:
-		case <-ctx.Done():
-		}
+		// because no fs event is fired as build if already done
+		triggerNodeReload(ctx, configFileChangeChan)
 
 		// wait for context to be canceled (signal, context cancellation or via cancel())
 		<-ctx.Done()
@@ -569,6 +686,16 @@ var upCmd = &cobra.Command{
 
 		log.Info("server shutdown complete")
 
+		if restartFunc != nil {
+			if consoleUI != nil {
+				// Make sure we release the keyboard handle before
+				// the new process starts
+				consoleUI.Close()
+			}
+			restartFunc()
+			os.Exit(0)
+		}
+
 		return nil
 	},
 }
@@ -578,7 +705,7 @@ func init() {
 	upCmd.PersistentFlags().BoolVar(&logs, "logs", false, "Enable log mode. Useful for debugging")
 	upCmd.PersistentFlags().IntVar(&defaultDataSourcePollingIntervalSeconds, "default-polling-interval", 5, "Default polling interval for data sources")
 	upCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "Disables local caches")
-	upCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "Clears local caches before startup")
+	upCmd.PersistentFlags().BoolVar(&clearCacheOnStart, "clear-cache", false, "Clears local caches before startup")
 	upCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, prettyLoggingFlagName, true, "Enables pretty logging")
 	upCmd.PersistentFlags().StringVar(&debugBindAddress, "debug-bind-address", "127.0.0.1:9229", "Default host:port to bind to, will only work in conjunction with --debug")
 
