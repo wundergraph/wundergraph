@@ -1,0 +1,24 @@
+{
+  "index": "Overview",
+  ".. providers": {
+    "type": "separator",
+    "title": "Providers"
+  },
+  "openid-connect": "OpenID Connect",
+  "auth0": "Auth0",
+  "google": "Google",
+  "github": "Github",
+  "keycloak": "Keycloak",
+  "jwks": "JWKS",
+  ".. authorization": {
+    "type": "separator",
+    "title": "Authorization"
+  },
+  "roles": "Role-based Access",
+  ".. integrations": {
+    "type": "separator",
+    "title": "Integrations"
+  },
+  "auth-js": "Auth.js",
+  "clerk": "Clerk"
+}

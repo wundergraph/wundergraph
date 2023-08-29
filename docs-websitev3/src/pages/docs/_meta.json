@@ -7,7 +7,7 @@
     "type": "separator"
   },
   "datasources": "Datasources",
-  "authentication": "Authentication",
+  "auth": "Authentication",
   "file-storage": "File storage",
   "-- more": {
     "type": "separator"

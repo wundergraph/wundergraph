@@ -1,0 +1,51 @@
+---
+title: OpenID Connect
+pageTitle: WunderGraph - Authentication - OIDC Providers - OpenID Connect
+description: Add OpenID Connect authentication to your WunderGraph application.
+---
+
+# OpenID Connect
+
+The `openIDConnect` auth provider is a generic provider that can be used with any OpenID Connect compliant identity provider.
+
+## Configuration
+
+Open your project's `wundergraph.config.ts` and scroll down to the `authentication` object.
+Add the `openIDConnect` provider to the `providers` array.
+
+```typescript
+import { openIDConnect } from '@wundergraph/sdk/auth';
+
+export default {
+  // ...
+  authentication: {
+    providers: [
+      openIDConnect({
+        id: 'oidc', // you have to choose this ID
+        issuer: new EnvironmentVariable('OIDC_ISSUER'),
+        clientId: new EnvironmentVariable('OIDC_CLIENT_ID'),
+        clientSecret: new EnvironmentVariable('OIDC_CLIENT_SECRET'),
+      }),
+    ];
+  }
+}
+```
+
+The `openIDConnect` function takes the following arguments:
+
+- `id`: an unique id that identifies the provider, used to reference the provider in the clients
+- `issuer`: the issuer provided by your identity provider
+- `clientId`: the client ID provided by your identity provider
+- `clientSecret`: the client secret provided by your identity provider
+
+import { Callout } from 'nextra/components';
+
+<Callout>
+	On production you have to [configure cookie keys and crsf token
+	secret](/docs/wundergraph-config-ts-reference/configure-cookie-based-authentication#important-notes-for-production-use)
+	to make sure your application is secure.
+</Callout>
+
+## Learn more
+
+@TODO

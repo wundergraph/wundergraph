@@ -1,0 +1,86 @@
+---
+title: GraphQL DataSource
+description: The GraphQL DataSource allows you to connect any compatible GraphQL Server.
+---
+
+# GraphQL Datasource
+
+The GraphQL DataSource allows you to connect any compatible GraphQL Server.
+WunderGraph supports Queries, Mutations as well as Subscriptions.
+
+## Add a GraphQL DataSource
+
+To add a GraphQL data source, edit `wundergraph/wundergraph.config.ts` and introspect the GraphQL server like the config below.
+
+```typescript
+import type { WunderGraphConfig } from '@wundergraph/sdk';
+import { graphql } from '@wundergraph/sdk/datasources';
+
+const countries = graphql({
+	namespace: 'countries',
+	url: 'https://countries.trevorblades.com/',
+});
+
+export default {
+	datasources: [countries],
+} satisfies WunderGraphConfig;
+```
+
+The GraphQL data source is now added to your virtual graph and you can now write operations against it.
+
+```graphql
+# Get all countrie names
+query {
+	countries_countries {
+		name
+	}
+}
+```
+
+import { Callout } from 'nextra/components';
+
+<Callout>
+	We recommend always using a namespace, as this will make sure to prevent any naming conflicts in the schema and
+	generated types.
+</Callout>
+
+## Authenticated GraphQL APIs
+
+If you need to authenticate against your GraphQL API, you can use the `introspection` option to add custom headers to your requests.
+
+```typescript
+const github = graphql({
+	namespace: 'github',
+	url: 'https://api.github.com/graphql',
+	introspection: {
+		headers(builder) {
+			return builder.addStaticHeader('Authorization', `Bearer ${process.env.GITHUB_TOKEN}`);
+		},
+	},
+});
+```
+
+To forward the Authorization header from the client to the upstream or set static headers, you can use the `headers` option.
+
+```typescript
+const github = graphql({
+	namespace: 'github',
+	url: 'https://api.github.com/graphql',
+	headers(builder) {
+		return (
+			builder
+				// We forward `X-Github-Token` to the `Authorization` header.
+				.addClientRequestHeader('Authorization', 'X-Github-Token')
+				// Add a static header
+				.addStaticHeader('X-Github-Next-Global-ID', '1')
+		);
+	},
+});
+```
+
+The `X-Github-Token` header will be forwarded from the client to the upstream, while the `X-Github-Next-Global-ID` header will be added to every request.
+
+## Learn more
+
+- [How to write GraphQL and TypeScript operations](/docs/guides/writing-operations)
+- [GraphQL datasource reference](/reference/datasources/graphql)
