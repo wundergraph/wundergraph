@@ -9,7 +9,6 @@ overrides:
   zod: ^3.21.4
   json-machete: 0.94.5
   '@graphql-mesh/store': 0.94.5
-  react: 18.2.0
 
 importers:
 
@@ -197,7 +196,7 @@ importers:
         specifier: ^2.12.0
         version: 2.12.0(next@13.4.19)(nextra@2.12.0)(react-dom@18.2.0)(react@18.2.0)
       react:
-        specifier: 18.2.0
+        specifier: ^18.2.0
         version: 18.2.0
       react-dom:
         specifier: ^18.2.0
@@ -418,7 +417,7 @@ importers:
         specifier: 2.6.7
         version: 2.6.7
       react:
-        specifier: 18.2.0
+        specifier: ^18.1.0
         version: 18.2.0
       react-dom:
         specifier: ^18.1.0
@@ -552,7 +551,7 @@ importers:
         specifier: 2.6.7
         version: 2.6.7
       react:
-        specifier: 18.2.0
+        specifier: ^18.1.0
         version: 18.2.0
       react-dom:
         specifier: ^18.1.0
@@ -1047,7 +1046,7 @@ importers:
         specifier: 2.6.7
         version: 2.6.7
       react:
-        specifier: 18.2.0
+        specifier: ^18.1.0
         version: 18.2.0
       react-dom:
         specifier: ^18.1.0
@@ -1329,7 +1328,7 @@ importers:
         specifier: ^4.22.3
         version: 4.22.3(next@13.1.1)(react-dom@18.2.0)(react@18.2.0)
       react:
-        specifier: 18.2.0
+        specifier: ^18.0.0
         version: 18.2.0
       react-dom:
         specifier: ^18.0.0
@@ -1387,7 +1386,7 @@ importers:
         specifier: ^13.1.1
         version: 13.1.1(react-dom@18.2.0)(react@18.2.0)
       react:
-        specifier: 18.2.0
+        specifier: ^18.2.0
         version: 18.2.0
       react-dom:
         specifier: ^18.2.0
@@ -1439,7 +1438,7 @@ importers:
         specifier: ^13.1.1
         version: 13.4.1(react-dom@18.2.0)(react@18.2.0)
       react:
-        specifier: 18.2.0
+        specifier: ^18.2.0
         version: 18.2.0
       react-dom:
         specifier: ^18.2.0
@@ -1503,7 +1502,7 @@ importers:
         specifier: ^13.1.1
         version: 13.1.1(react-dom@18.2.0)(react@18.2.0)
       react:
-        specifier: 18.2.0
+        specifier: ^18.2.0
         version: 18.2.0
       react-dom:
         specifier: ^18.2.0
@@ -1600,7 +1599,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/swr
       react:
-        specifier: 18.2.0
+        specifier: ^18.1.0
         version: 18.2.0
       react-dom:
         specifier: ^18.1.0
