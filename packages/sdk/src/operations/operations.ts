@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import * as fs from 'fs';
-import type { BaseRequestContext, InternalClient, OperationsClient, WunderGraphUser } from '../server';
+import type { BaseRequestContext, OperationsClient, WunderGraphUser } from '../server';
 import { OperationError } from '../client';
 import { LiveQueryConfiguration, QueryCacheConfiguration } from '../configure/operations';
 export type { LiveQueryConfiguration, QueryCacheConfiguration } from '../configure/operations';
@@ -14,7 +14,6 @@ export type SubscriptionHandler<
 	Input,
 	InferredResponse,
 	ZodResponse,
-	IC extends InternalClient,
 	UserRole extends string,
 	CustomClaims extends {},
 	InternalOperationsClient extends OperationsClient,
@@ -25,7 +24,6 @@ export type SubscriptionHandler<
 	? (
 			ctx: HandlerContext<
 				Input,
-				IC,
 				UserRole,
 				CustomClaims,
 				InternalOperationsClient,
@@ -37,7 +35,6 @@ export type SubscriptionHandler<
 	: (
 			ctx: HandlerContext<
 				Input,
-				IC,
 				UserRole,
 				CustomClaims,
 				InternalOperationsClient,
@@ -51,14 +48,13 @@ export type OperationTypes = 'query' | 'mutation' | 'subscription';
 
 interface _HandlerContext<
 	Input,
-	IC extends InternalClient,
 	Role extends string,
 	CustomClaims extends {},
 	InternalOperationsClient extends OperationsClient,
 	TypedORM,
 	OpenApiAgentFactory,
 	CustomContext
-> extends BaseRequestContext<WunderGraphUser<Role, CustomClaims>, IC, OperationsClient, CustomContext> {
+> extends BaseRequestContext<WunderGraphUser<Role, CustomClaims>, OperationsClient, CustomContext> {
 	input: Input extends {} ? Input : never;
 	operations: Omit<InternalOperationsClient, 'cancelSubscriptions'>;
 	graph: TypedORM;
@@ -67,7 +63,6 @@ interface _HandlerContext<
 
 export type HandlerContext<
 	Input,
-	IC extends InternalClient,
 	Role extends string,
 	CustomClaims extends {},
 	InternalOperationsClient extends OperationsClient,
@@ -77,7 +72,6 @@ export type HandlerContext<
 > = Input extends z.ZodObject<any>
 	? _HandlerContext<
 			z.infer<Input>,
-			IC,
 			Role,
 			CustomClaims,
 			InternalOperationsClient,
@@ -88,7 +82,6 @@ export type HandlerContext<
 	: Omit<
 			_HandlerContext<
 				never,
-				IC,
 				Role,
 				CustomClaims,
 				InternalOperationsClient,
@@ -112,7 +105,6 @@ export interface BaseOperationConfiguration<UserRole extends string> {
 
 const createQuery =
 	<
-		IC extends InternalClient,
 		UserRole extends string,
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient,
@@ -140,7 +132,6 @@ const createQuery =
 			? (
 					ctx: HandlerContext<
 						Input,
-						IC,
 						UserRole,
 						CustomClaims,
 						InternalOperationsClient,
@@ -152,7 +143,6 @@ const createQuery =
 			: (
 					ctx: HandlerContext<
 						Input,
-						IC,
 						UserRole,
 						CustomClaims,
 						InternalOperationsClient,
@@ -168,7 +158,6 @@ const createQuery =
 		InferredResponse,
 		ZodResponse,
 		'query',
-		IC,
 		UserRole,
 		CustomClaims,
 		InternalOperationsClient,
@@ -201,7 +190,6 @@ const createQuery =
 
 const createMutation =
 	<
-		IC extends InternalClient,
 		UserRole extends string,
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient,
@@ -227,7 +215,6 @@ const createMutation =
 			? (
 					ctx: HandlerContext<
 						Input,
-						IC,
 						UserRole,
 						CustomClaims,
 						InternalOperationsClient,
@@ -239,7 +226,6 @@ const createMutation =
 			: (
 					ctx: HandlerContext<
 						Input,
-						IC,
 						UserRole,
 						CustomClaims,
 						InternalOperationsClient,
@@ -253,7 +239,6 @@ const createMutation =
 		InferredResponse,
 		ZodResponse,
 		'mutation',
-		IC,
 		UserRole,
 		CustomClaims,
 		InternalOperationsClient,
@@ -282,7 +267,6 @@ const createMutation =
 
 const createSubscription =
 	<
-		IC extends InternalClient,
 		UserRole extends string,
 		CustomClaims extends {},
 		InternalOperationsClient extends OperationsClient,
@@ -308,7 +292,6 @@ const createSubscription =
 			Input,
 			InferredResponse,
 			ZodResponse,
-			IC,
 			UserRole,
 			CustomClaims,
 			InternalOperationsClient,
@@ -321,7 +304,6 @@ const createSubscription =
 		InferredResponse,
 		ZodResponse,
 		'subscription',
-		IC,
 		UserRole,
 		CustomClaims,
 		InternalOperationsClient,
@@ -349,7 +331,6 @@ const createSubscription =
 	};
 
 export const createOperationFactory = <
-	IC extends InternalClient,
 	UserRole extends string,
 	CustomClaims extends {},
 	InternalOperationsClient extends OperationsClient,
@@ -357,17 +338,8 @@ export const createOperationFactory = <
 	OpenApiAgentFactory,
 	CustomContext
 >() => ({
-	query: createQuery<
-		IC,
-		UserRole,
-		CustomClaims,
-		InternalOperationsClient,
-		TypedORM,
-		OpenApiAgentFactory,
-		CustomContext
-	>(),
+	query: createQuery<UserRole, CustomClaims, InternalOperationsClient, TypedORM, OpenApiAgentFactory, CustomContext>(),
 	mutation: createMutation<
-		IC,
 		UserRole,
 		CustomClaims,
 		InternalOperationsClient,
@@ -376,7 +348,6 @@ export const createOperationFactory = <
 		CustomContext
 	>(),
 	subscription: createSubscription<
-		IC,
 		UserRole,
 		CustomClaims,
 		InternalOperationsClient,
@@ -391,7 +362,6 @@ export type NodeJSOperation<
 	Response,
 	ZodResponse,
 	OperationType extends OperationTypes,
-	IC extends InternalClient,
 	UserRole extends string,
 	CustomClaims extends {},
 	InternalOperationsClient extends OperationsClient,
@@ -407,7 +377,6 @@ export type NodeJSOperation<
 		? (
 				ctx: HandlerContext<
 					Input,
-					IC,
 					UserRole,
 					CustomClaims,
 					InternalOperationsClient,
@@ -419,7 +388,6 @@ export type NodeJSOperation<
 		: (
 				ctx: HandlerContext<
 					Input,
-					IC,
 					UserRole,
 					CustomClaims,
 					InternalOperationsClient,
@@ -432,7 +400,6 @@ export type NodeJSOperation<
 		? (
 				ctx: HandlerContext<
 					Input,
-					IC,
 					UserRole,
 					CustomClaims,
 					InternalOperationsClient,
@@ -444,7 +411,6 @@ export type NodeJSOperation<
 		: (
 				ctx: HandlerContext<
 					Input,
-					IC,
 					UserRole,
 					CustomClaims,
 					InternalOperationsClient,
@@ -457,7 +423,6 @@ export type NodeJSOperation<
 		Input,
 		Response,
 		ZodResponse,
-		IC,
 		UserRole,
 		CustomClaims,
 		InternalOperationsClient,
@@ -478,14 +443,13 @@ export type NodeJSOperation<
 	};
 };
 
-export type ExtractInput<B> = B extends NodeJSOperation<infer T, any, any, any, any, any, any, any, any, any, any>
+export type ExtractInput<B> = B extends NodeJSOperation<infer T, any, any, any, any, any, any, any, any, any>
 	? T
 	: never;
 export type ExtractResponse<B> = B extends NodeJSOperation<
 	any,
 	infer Response,
 	infer ZodResponse,
-	any,
 	any,
 	any,
 	any,
@@ -501,7 +465,7 @@ export type ExtractResponse<B> = B extends NodeJSOperation<
 
 export const loadNodeJsOperationDefaultModule = async (
 	operationPath: string
-): Promise<NodeJSOperation<any, any, any, any, any, any, any, any, any, any, any>> => {
+): Promise<NodeJSOperation<any, any, any, any, any, any, any, any, any, any>> => {
 	// remove .js or / from the end of operationPath if present
 	if (operationPath.endsWith('.cjs')) {
 		operationPath = operationPath.slice(0, -4);

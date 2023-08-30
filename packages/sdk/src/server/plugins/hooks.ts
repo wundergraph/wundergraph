@@ -422,7 +422,6 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			extraHeaders['Wg-Cycle-Counter'] = body.cycleCounter;
 		}
 		if (Object.keys(extraHeaders).length) {
-			req.ctx.internalClient = req.ctx.internalClient.withHeaders(extraHeaders);
 			req.ctx.operations = req.ctx.operations.withHeaders(extraHeaders);
 		}
 		return req.ctx;

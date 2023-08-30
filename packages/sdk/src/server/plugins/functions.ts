@@ -2,7 +2,6 @@ import { FastifyPluginAsync } from 'fastify';
 import path from 'path';
 import type { ORM } from '@wundergraph/orm';
 
-import { InternalClientFactory } from '../internal-client';
 import type { TypeScriptOperationFile } from '../../graphql/operations';
 import type { NodeJSOperation } from '../../operations';
 import { HandlerContext } from '../../operations';
@@ -23,7 +22,6 @@ import { Configuration, OpenAIApi } from 'openai';
 interface FastifyFunctionsOptions {
 	operationsRequestContext: OperationsAsyncContext;
 	operations: TypeScriptOperationFile[];
-	internalClientFactory: InternalClientFactory;
 	orm: ORM<any>;
 	nodeURL: string;
 	globalContext: any;
@@ -37,7 +35,7 @@ interface FunctionRouteConfig {
 }
 
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {
-	const { operations, internalClientFactory, orm, nodeURL, operationsRequestContext } = config;
+	const { operations, orm, nodeURL, operationsRequestContext } = config;
 
 	const jsonSchemaFile = path.join(process.env.WG_DIR_ABS!, 'generated', 'bundle', 'jsonschema.cjs');
 	const jsonSchemas = (await import(jsonSchemaFile)).default;
@@ -50,7 +48,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 			}
 			const filePath = path.join(process.env.WG_DIR_ABS!, operationPath + '.cjs');
 			const routeUrl = `/functions/${operation.api_mount_path}`;
-			let maybeImplementation: NodeJSOperation<any, any, any, any, any, any, any, any, any, any, any> | undefined;
+			let maybeImplementation: NodeJSOperation<any, any, any, any, any, any, any, any, any, any> | undefined;
 			try {
 				maybeImplementation = (await import(filePath)).default;
 			} catch (e) {
@@ -98,10 +96,9 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							schemas: jsonSchemas,
 							log,
 						});
-						const ctx: HandlerContext<any, any, any, any, any, any, any, any> = {
+						const ctx: HandlerContext<any, any, any, any, any, any, any> = {
 							log,
 							user: (req.body as any)?.__wg.user!,
-							internalClient: internalClientFactory(headers, clientRequest),
 							clientRequest,
 							input: (req.body as any)?.input,
 							operations: operationClient,

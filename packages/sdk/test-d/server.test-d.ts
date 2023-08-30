@@ -13,7 +13,6 @@ import {
 	SubscriptionHook,
 	SubscriptionHookWithoutInput,
 	WunderGraphUser,
-	InternalClient,
 	OperationsClient,
 	configureWunderGraphServer,
 	WunderGraphHooksAndServerConfig,
@@ -30,8 +29,7 @@ export interface User extends WunderGraphUser<Role, CustomClaims> {}
 
 export type DataSources = 'counter';
 
-export interface HookContext<TCustomContext>
-	extends BaseRequestContext<User, InternalClient, OperationsClient, TCustomContext> {}
+export interface HookContext<TCustomContext> extends BaseRequestContext<User, OperationsClient, TCustomContext> {}
 
 export type HooksConfig<TCustomContext> = HooksConfiguration<
 	QueryHooks<TCustomContext>,
@@ -65,7 +63,7 @@ export interface UploadHooks<TCustomContext> {
 	withProfiles?: {
 		avatar?: {
 			preUpload?: (hook: PreUploadHookRequest<User, TCustomContext>) => PreUploadHookResponse;
-			postUpload?: (hook: PostUploadHookRequest<User, InternalClient, TCustomContext>) => PostUploadHookResponse;
+			postUpload?: (hook: PostUploadHookRequest<User, TCustomContext>) => PostUploadHookResponse;
 		};
 	};
 	withoutProfiles?: {};
@@ -85,7 +83,6 @@ class MyRequestContext {
 
 const configuration = configureWunderGraphServer<
 	HooksConfig<MyRequestContext>,
-	InternalClient,
 	WebhooksConfig,
 	MyRequestContext,
 	MyGlobalContext

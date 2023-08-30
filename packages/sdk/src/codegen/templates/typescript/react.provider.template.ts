@@ -40,6 +40,9 @@ export interface Props {
     customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 }
 
+/**
+ * @deprecated Use @wundergraph/swr instead
+ */
 export const WunderGraphProvider: FunctionComponent<Props> = ({ endpoint, extraHeaders, customFetch, children }) => {
     const [initialized, setInitialized] = useState(false);
     const [initializing, setInitializing] = useState(false);

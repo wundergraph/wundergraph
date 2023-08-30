@@ -1,6 +1,5 @@
 import { expectType } from 'tsd';
 import {
-	InternalClient,
 	InternalOperationsDefinition,
 	OperationsClient,
 	Webhook,
@@ -54,7 +53,7 @@ expectType<Webhook>(
 );
 
 // restricted event and response with operations
-expectType<Webhook<InternalClient, WebhookHttpEvent<{ city: string }>, WebhookHttpResponse<{ temp: string }>>>(
+expectType<Webhook<WebhookHttpEvent<{ city: string }>, WebhookHttpResponse<{ temp: string }>>>(
 	createWebhook<WebhookHttpEvent<{ city: string }>, WebhookHttpResponse<{ temp: string }>>({
 		handler: async (event, ctx) => {
 			const result = await ctx.operations.query({
