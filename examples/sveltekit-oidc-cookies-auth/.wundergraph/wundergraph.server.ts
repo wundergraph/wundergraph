@@ -3,14 +3,15 @@ import { configureWunderGraphServer } from '@wundergraph/sdk/server';
 export default configureWunderGraphServer(() => ({
 	hooks: {
 		authentication: {
-			async mutatingPostAuthentication({internalClient, user}){						
+			async mutatingPostAuthentication({operations, user}){						
 				if(!user.email) {
 					return {
 						status: 'deny',
 						message: 'Email is required'
 					}
 				}
-				const {data, errors} = await internalClient.mutations.UserAdd({
+				const {data, errors} = await operations.mutate({
+					operationName: 'UserAdd',
 					input: {
 						email: user.email as string,
 						firstName: user.firstName ? user.firstName : '',

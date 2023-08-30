@@ -5,12 +5,11 @@ export default configureWunderGraphServer(() => ({
 	hooks: {
 		queries: {
 			UserNodes: {
-				mutatingPreResolve: async ({ input, internalClient }) => {
-					const user = await internalClient.queries.UserByEmail({
-						input: {
-							email: 'jens@wundergraph.com',
-						},
+				mutatingPreResolve: async ({ input, operations }) => {
+					const user = await operations.query({
+						operationName: 'UserByEmail',
 					});
+
 					return {
 						where: {
 							...input.where,

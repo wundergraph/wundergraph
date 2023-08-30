@@ -223,9 +223,9 @@ export default configureWunderGraphServer(() => ({
             //
             // Or don't return anything to use the default filename derived from the file contents.
 					},
-					postUpload: async ({ user, file, meta, internalClient, error }) => {
+					postUpload: async ({ user, file, meta, error }) => {
 						console.log(
-							`postUpload user: ${user}, file: ${file}, meta: ${meta}, internalClient: ${internalClient}, error: ${error}`
+							`postUpload user: ${user}, file: ${file}, meta: ${meta}, error: ${error}`
 						);
 					},
 				},

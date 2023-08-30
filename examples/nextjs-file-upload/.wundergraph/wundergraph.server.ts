@@ -19,10 +19,8 @@ export default configureWunderGraphServer(() => ({
 						// the file contents.
 						return { fileKey: `coverPicture/${file.name}` };
 					},
-					postUpload: async ({ user, file, meta, internalClient, error }) => {
-						console.log(
-							`postUpload user: ${user}, file: ${file}, meta: ${meta}, internalClient: ${internalClient}, error: ${error}`
-						);
+					postUpload: async ({ user, file, meta, error }) => {
+						console.log(`postUpload user: ${user}, file: ${file}, meta: ${meta}, error: ${error}`);
 					},
 				},
 			},

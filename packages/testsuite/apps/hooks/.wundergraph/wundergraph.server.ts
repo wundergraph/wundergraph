@@ -7,11 +7,7 @@ export default configureWunderGraphServer(() => ({
 		queries: {
 			Infinite: {
 				preResolve: async (hook) => {
-					const result = await hook.internalClient.queries.Infinite({
-						input: hook.input,
-					});
-
-					const result2 = await hook.operations.query({
+					const result = await hook.operations.query({
 						operationName: 'Infinite',
 						input: hook.input,
 					});

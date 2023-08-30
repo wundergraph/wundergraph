@@ -395,7 +395,7 @@ export const createServer = async ({
 	 */
 	await fastify.register(async (fastify) => {
 		/**
-		 * Calls on every request. We use it to do pre-init stuff e.g. create the request context and internalClient
+		 * Calls on every request. We use it to do pre-init stuff e.g. create the request context and operations client
 		 * Registering this handler will only affect child plugins
 		 */
 		fastify.addHook<{ Body: FastifyRequestBody }>('preHandler', async (req, reply) => {
