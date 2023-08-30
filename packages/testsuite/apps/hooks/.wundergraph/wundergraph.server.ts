@@ -11,6 +11,10 @@ export default configureWunderGraphServer(() => ({
 						operationName: 'Infinite',
 						input: hook.input,
 					});
+
+					if (result.error) {
+						throw result.error;
+					}
 				},
 			},
 			PreResolveFailure: {
