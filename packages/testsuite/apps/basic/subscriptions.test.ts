@@ -72,13 +72,13 @@ describe('Subscriptions', () => {
 
 		await wg.start();
 
-		await wg.stop();
-
 		const items: { hello: string }[] = [];
 		// XXX: The delay should be higher than the server ping time in WG_SUBSCRIPTION_SERVER_PING_INTERVAL
 		await wg.client().subscribe({ operationName: 'subscriptions/counter', input: { count: 2, delay: 300 } }, (item) => {
 			items.push(item.data!);
 		});
 		expect(items).toStrictEqual([{ hello: '0' }, { hello: '1' }]);
+
+		await wg.stop();
 	});
 });
