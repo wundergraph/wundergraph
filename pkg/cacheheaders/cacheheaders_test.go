@@ -42,6 +42,7 @@ func TestCacheControl(t *testing.T) {
 			headers := New(tc.cacheControl, "")
 			headers.Set(nil, &rc, nil)
 			result := rc.Result()
+			defer result.Body.Close()
 			assert.Equal(t, tc.header, result.Header.Get("Cache-Control"))
 		})
 	}
