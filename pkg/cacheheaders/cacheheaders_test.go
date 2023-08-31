@@ -57,11 +57,13 @@ func TestETag(t *testing.T) {
 	var rc1 httptest.ResponseRecorder
 	headers.Set(r, &rc1, nil)
 	result1 := rc1.Result()
+	defer result1.Body.Close()
 	assert.Len(t, result1.Header["ETag"], 0)
 
 	var rc2 httptest.ResponseRecorder
 	headers.Set(r, &rc2, []byte("something"))
 	result2 := rc2.Result()
+	defer result2.Body.Close()
 	assert.Len(t, result2.Header["ETag"], 1)
 
 	// Our ETag headers should be weak etags
@@ -77,6 +79,7 @@ func TestNotModified(t *testing.T) {
 	var rc1 httptest.ResponseRecorder
 	headers.Set(r, &rc1, []byte("something"))
 	response := rc1.Result()
+	defer response.Body.Close()
 	etag := response.Header["ETag"][0]
 	assert.NotEqual(t, "", etag)
 
@@ -87,5 +90,7 @@ func TestNotModified(t *testing.T) {
 
 	r.Header.Add("If-None-Match", etag)
 	assert.True(t, headers.NotModified(r, &rc2))
-	assert.Equal(t, rc2.Result().StatusCode, http.StatusNotModified)
+	response2 := rc2.Result()
+	defer response2.Body.Close()
+	assert.Equal(t, response2.StatusCode, http.StatusNotModified)
 }
