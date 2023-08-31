@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -265,7 +266,7 @@ func TestQueryHandler_LiveQuery(t *testing.T) {
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.Equal(t, context.DeadlineExceeded, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"counter\":0}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"counter\":1}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"counter\":2}}}\n\n", string(data))
 	assert.True(t, validateCalled.Load())
@@ -343,7 +344,7 @@ func TestQueryHandler_LiveQueryJsonPatch(t *testing.T) {
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.Equal(t, context.DeadlineExceeded, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}\n\n[{\"value\":1,\"op\":\"replace\",\"path\":\"/data/me/counter\"}]\n\n[{\"value\":2,\"op\":\"replace\",\"path\":\"/data/me/counter\"}]\n\n", string(data))
 	assert.True(t, validateCalled.Load())
@@ -427,7 +428,7 @@ func TestQueryHandler_SubscriptionJsonPatch(t *testing.T) {
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.NoError(t, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}\n\n[{\"value\":1,\"op\":\"replace\",\"path\":\"/data/me/counter\"}]\n\n[{\"value\":2,\"op\":\"replace\",\"path\":\"/data/me/counter\"}]\n\n", string(data))
 }
@@ -510,7 +511,7 @@ func TestQueryHandler_Subscription(t *testing.T) {
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.NoError(t, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":1}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":2}}}\n\n", string(data))
 }
@@ -577,7 +578,7 @@ func TestFunctionsHandler_Default(t *testing.T) {
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.NoError(t, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}", string(data))
 	assert.Equal(t, 1, hookServerRequestCount)
@@ -646,7 +647,7 @@ func TestFunctionsHandler_Live(t *testing.T) {
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.Equal(t, context.DeadlineExceeded, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":1}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":2}}}\n\n", string(data))
 	assert.Equal(t, 3, hookServerRequestCount)
@@ -716,229 +717,140 @@ func TestFunctionsHandler_Live_JSONPatch(t *testing.T) {
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.Equal(t, context.DeadlineExceeded, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}\n\n[{\"value\":1,\"op\":\"replace\",\"path\":\"/data/me/counter\"}]\n\n[{\"value\":2,\"op\":\"replace\",\"path\":\"/data/me/counter\"}]\n\n", string(data))
 	assert.Equal(t, 3, hookServerRequestCount)
 }
 
 func TestFunctionsHandler_Subscription(t *testing.T) {
-
-	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
-	assert.NoError(t, err)
-
-	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
-
-	validateNothing, err := inputvariables.NewValidator(inputSchema, true)
-	assert.NoError(t, err)
-
-	hookServerRequestCount := 0
-
-	fakeHookServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		for i := 0; i < 3; i++ {
-			_, _ = w.Write([]byte(`{"response":{"data":{"me":{"name":"Jens","bio":"Founder & CEO of WunderGraph","counter":` + strconv.Itoa(hookServerRequestCount) + `}}}}`))
-			_, _ = w.Write([]byte("\n\n"))
-			w.(http.Flusher).Flush()
-			hookServerRequestCount++
-		}
-	}))
-
-	defer fakeHookServer.Close()
-
-	operation := &wgpb.Operation{
-		Name:          "test",
-		OperationType: wgpb.OperationType_SUBSCRIPTION,
-	}
-	hooksClient := hooks.NewClient(&hooks.ClientOptions{
-		ServerURL: fakeHookServer.URL,
-		Logger:    zap.NewNop(),
-	})
-	handler := &FunctionsHandler{
-		log:                  zap.NewNop(),
-		operation:            operation,
-		rbacEnforcer:         &authentication.RBACEnforcer{},
-		stringInterpolator:   interpolateNothing,
-		variablesValidator:   validateNothing,
-		queryParamsAllowList: []string{"id"},
-		liveQuery: liveQueryConfig{
-			enabled:                true,
-			pollingIntervalSeconds: 1,
+	testCases := []struct {
+		Name   string
+		URL    string
+		Expect string
+	}{
+		{
+			Name:   "plain",
+			URL:    "/jens?id=123",
+			Expect: "{\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}}\n\n{\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":1}}}}\n\n{\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":2}}}}\n\n",
 		},
-		hooksClient: hooksClient,
-	}
-
-	srv := httptest.NewServer(handler)
-	defer srv.Close()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	u, err := url.Parse(srv.URL)
-	assert.NoError(t, err)
-	query := u.Query()
-	query.Set("id", "123")
-	u.RawQuery = query.Encode()
-
-	outURL := u.String()
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, outURL, nil)
-	assert.NoError(t, err)
-
-	res, err := srv.Client().Do(req)
-	assert.NoError(t, err)
-
-	data, err := ioutil.ReadAll(res.Body)
-	assert.NoError(t, err)
-	assert.Equal(t, "{\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}}\n\n{\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":1}}}}\n\n{\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":2}}}}\n\n", string(data))
-	assert.Equal(t, 3, hookServerRequestCount)
-}
-
-func TestFunctionsHandler_Subscription_JSONPatch(t *testing.T) {
-
-	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
-	assert.NoError(t, err)
-
-	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
-
-	validateNothing, err := inputvariables.NewValidator(inputSchema, true)
-	assert.NoError(t, err)
-
-	hookServerRequestCount := 0
-
-	fakeHookServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		for i := 0; i < 3; i++ {
-			_, _ = w.Write([]byte(`{"response":{"data":{"me":{"name":"Jens","bio":"Founder & CEO of WunderGraph","counter":` + strconv.Itoa(hookServerRequestCount) + `}}}}`))
-			_, _ = w.Write([]byte("\n\n"))
-			w.(http.Flusher).Flush()
-			hookServerRequestCount++
-		}
-	}))
-
-	defer fakeHookServer.Close()
-
-	operation := &wgpb.Operation{
-		Name:          "test",
-		OperationType: wgpb.OperationType_SUBSCRIPTION,
-	}
-	hooksClient := hooks.NewClient(&hooks.ClientOptions{
-		ServerURL: fakeHookServer.URL,
-		Logger:    zap.NewNop(),
-	})
-	handler := &FunctionsHandler{
-		log:                  zap.NewNop(),
-		operation:            operation,
-		rbacEnforcer:         &authentication.RBACEnforcer{},
-		stringInterpolator:   interpolateNothing,
-		variablesValidator:   validateNothing,
-		queryParamsAllowList: []string{"id"},
-		liveQuery: liveQueryConfig{
-			enabled:                true,
-			pollingIntervalSeconds: 1,
+		{
+			Name:   "json-patch",
+			URL:    "/jens?id=123&wg_json_patch",
+			Expect: "{\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}}\n\n[{\"value\":1,\"op\":\"replace\",\"path\":\"/response/data/me/counter\"}]\n\n[{\"value\":2,\"op\":\"replace\",\"path\":\"/response/data/me/counter\"}]\n\n",
 		},
-		hooksClient: hooksClient,
-	}
-
-	srv := httptest.NewServer(handler)
-	defer srv.Close()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	u, err := url.Parse(srv.URL)
-	assert.NoError(t, err)
-	query := u.Query()
-	query.Set("id", "123")
-	query.Set("wg_json_patch", "")
-	u.RawQuery = query.Encode()
-
-	outURL := u.String()
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, outURL, nil)
-	assert.NoError(t, err)
-
-	res, err := srv.Client().Do(req)
-	assert.NoError(t, err)
-
-	data, err := ioutil.ReadAll(res.Body)
-	assert.NoError(t, err)
-	assert.Equal(t, "{\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}}\n\n[{\"value\":1,\"op\":\"replace\",\"path\":\"/response/data/me/counter\"}]\n\n[{\"value\":2,\"op\":\"replace\",\"path\":\"/response/data/me/counter\"}]\n\n", string(data))
-	assert.Equal(t, 3, hookServerRequestCount)
-}
-
-func TestFunctionsHandler_Subscription_JSONPatch_SSE(t *testing.T) {
-
-	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
-	assert.NoError(t, err)
-
-	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
-
-	validateNothing, err := inputvariables.NewValidator(inputSchema, true)
-	assert.NoError(t, err)
-
-	hookServerRequestCount := 0
-
-	fakeHookServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		for i := 0; i < 3; i++ {
-			_, _ = w.Write([]byte(`{"response":{"data":{"me":{"name":"Jens","bio":"Founder & CEO of WunderGraph","counter":` + strconv.Itoa(hookServerRequestCount) + `}}}}`))
-			_, _ = w.Write([]byte("\n\n"))
-			w.(http.Flusher).Flush()
-			hookServerRequestCount++
-		}
-	}))
-
-	defer fakeHookServer.Close()
-
-	operation := &wgpb.Operation{
-		Name:          "test",
-		OperationType: wgpb.OperationType_SUBSCRIPTION,
-	}
-	hooksClient := hooks.NewClient(&hooks.ClientOptions{
-		ServerURL: fakeHookServer.URL,
-		Logger:    zap.NewNop(),
-	})
-	handler := &FunctionsHandler{
-		log:                  zap.NewNop(),
-		operation:            operation,
-		rbacEnforcer:         &authentication.RBACEnforcer{},
-		stringInterpolator:   interpolateNothing,
-		variablesValidator:   validateNothing,
-		queryParamsAllowList: []string{"id"},
-		liveQuery: liveQueryConfig{
-			enabled:                true,
-			pollingIntervalSeconds: 1,
+		{
+			Name:   "json-patch-sse",
+			URL:    "/jens?id=123&wg_json_patch&wg_sse",
+			Expect: "data: {\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}}\n\ndata: [{\"value\":1,\"op\":\"replace\",\"path\":\"/response/data/me/counter\"}]\n\ndata: [{\"value\":2,\"op\":\"replace\",\"path\":\"/response/data/me/counter\"}]\n\nevent: done\n\n",
 		},
-		hooksClient: hooksClient,
+		{
+			Name:   "ping",
+			URL:    "/ping?id=456",
+			Expect: "{\"response\":{\"data\":{\"n\":0}}}\n\n{\"response\":{\"data\":{\"n\":1}}}\n\n\n{\"response\":{\"data\":{\"n\":2}}}\n\n",
+		},
 	}
+	const pingInterval = 50 * time.Millisecond
 
-	srv := httptest.NewServer(handler)
-	defer srv.Close()
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.Name, func(t *testing.T) {
+			interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
+			assert.NoError(t, err)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
+			inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
 
-	u, err := url.Parse(srv.URL)
-	assert.NoError(t, err)
-	query := u.Query()
-	query.Set("id", "123")
-	query.Set("wg_json_patch", "")
-	query.Set("wg_sse", "")
-	u.RawQuery = query.Encode()
+			validateNothing, err := inputvariables.NewValidator(inputSchema, true)
+			assert.NoError(t, err)
 
-	outURL := u.String()
+			hookServerRequestCount := 0
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, outURL, nil)
-	assert.NoError(t, err)
+			isPing := strings.HasPrefix(tc.URL, "/ping")
 
-	res, err := srv.Client().Do(req)
-	assert.NoError(t, err)
+			fakeHookServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				// var data map[string]interface{}
+				// dec := json.NewDecoder(r.Body)
+				// err := dec.Decode(&data)
+				// assert.NoError(t, err)
+				// wg := data["__wg"].(map[string]interface{})
+				// clientRequest := wg["clientRequest"].(map[string]interface{})
+				// requestURI := clientRequest["requestURI"].(string)
+				switch {
+				default:
+					for i := 0; i < 3; i++ {
+						_, _ = w.Write([]byte(`{"response":{"data":{"me":{"name":"Jens","bio":"Founder & CEO of WunderGraph","counter":` + strconv.Itoa(hookServerRequestCount) + `}}}}`))
+						_, _ = w.Write([]byte("\n\n"))
+						w.(http.Flusher).Flush()
+						hookServerRequestCount++
+					}
+				case isPing:
+					for i := 0; i < 3; i++ {
+						_, _ = w.Write([]byte(fmt.Sprintf(`{"response":{"data":{"n":%d}}}`, i)))
+						_, _ = w.Write([]byte("\n\n"))
+						w.(http.Flusher).Flush()
+						hookServerRequestCount++
+						switch i {
+						case 0:
+							// Sleep half the ping interval, should not include ping
+							time.Sleep(pingInterval / 2)
+						case 1:
+							// Sleep for the ping interval + 50ms, should include a single ping
+							time.Sleep(pingInterval/2 + 50*time.Millisecond)
+						}
+					}
+				}
+			}))
 
-	data, err := ioutil.ReadAll(res.Body)
-	assert.NoError(t, err)
-	assert.Equal(t, "data: {\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}}\n\ndata: [{\"value\":1,\"op\":\"replace\",\"path\":\"/response/data/me/counter\"}]\n\ndata: [{\"value\":2,\"op\":\"replace\",\"path\":\"/response/data/me/counter\"}]\n\ndata: done\n\n", string(data))
-	assert.Equal(t, 3, hookServerRequestCount)
+			defer fakeHookServer.Close()
+
+			operation := &wgpb.Operation{
+				Name:          "test",
+				OperationType: wgpb.OperationType_SUBSCRIPTION,
+			}
+			hooksClient := hooks.NewClient(&hooks.ClientOptions{
+				ServerURL: fakeHookServer.URL,
+				Logger:    zap.NewNop(),
+			})
+			handler := &FunctionsHandler{
+				log:                  zap.NewNop(),
+				operation:            operation,
+				rbacEnforcer:         &authentication.RBACEnforcer{},
+				stringInterpolator:   interpolateNothing,
+				variablesValidator:   validateNothing,
+				queryParamsAllowList: []string{"id"},
+				liveQuery: liveQueryConfig{
+					enabled:                true,
+					pollingIntervalSeconds: 1,
+				},
+				hooksClient:  hooksClient,
+				pingInterval: pingInterval,
+			}
+
+			srv := httptest.NewServer(handler)
+			defer srv.Close()
+
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			defer cancel()
+
+			u, err := url.Parse(srv.URL)
+			assert.NoError(t, err)
+
+			outURL, err := u.Parse(tc.URL)
+			assert.NoError(t, err)
+
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, outURL.String(), nil)
+			assert.NoError(t, err)
+
+			res, err := srv.Client().Do(req)
+			assert.NoError(t, err)
+
+			data, err := io.ReadAll(res.Body)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.Expect, string(data))
+			assert.Equal(t, 3, hookServerRequestCount)
+
+		})
+	}
 }
 
 func TestQueryHandler_Caching(t *testing.T) {

@@ -577,10 +577,6 @@ message NodeLogging {
 	ConfigurationVariable level = 1;
 }
 
-message NodeSubscriptionsOptions {
-	ConfigurationVariable serverPingIntervalMs = 1;
-}
-
 message PrometheusOptions {
 	ConfigurationVariable enabled = 1;
 	ConfigurationVariable port = 2;
@@ -596,8 +592,7 @@ message NodeOptions {
 	ConfigurationVariable nodeInternalUrl = 7;
 	ConfigurationVariable defaultHttpProxyUrl = 8;
 	TelemetryOptions openTelemetry = 9;
-	NodeSubscriptionsOptions subscriptions = 10;
-	PrometheusOptions prometheus = 11;
+	PrometheusOptions prometheus = 10;
 }
 
 message TelemetryOptions {

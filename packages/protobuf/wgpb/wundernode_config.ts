@@ -1317,10 +1317,6 @@ export interface NodeLogging {
   level: ConfigurationVariable | undefined;
 }
 
-export interface NodeSubscriptionsOptions {
-  serverPingIntervalMs: ConfigurationVariable | undefined;
-}
-
 export interface PrometheusOptions {
   enabled: ConfigurationVariable | undefined;
   port: ConfigurationVariable | undefined;
@@ -1336,7 +1332,6 @@ export interface NodeOptions {
   nodeInternalUrl: ConfigurationVariable | undefined;
   defaultHttpProxyUrl: ConfigurationVariable | undefined;
   openTelemetry: TelemetryOptions | undefined;
-  subscriptions: NodeSubscriptionsOptions | undefined;
   prometheus: PrometheusOptions | undefined;
 }
 
@@ -8529,70 +8524,6 @@ export const NodeLogging = {
   },
 };
 
-function createBaseNodeSubscriptionsOptions(): NodeSubscriptionsOptions {
-  return { serverPingIntervalMs: undefined };
-}
-
-export const NodeSubscriptionsOptions = {
-  encode(message: NodeSubscriptionsOptions, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.serverPingIntervalMs !== undefined) {
-      ConfigurationVariable.encode(message.serverPingIntervalMs, writer.uint32(10).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): NodeSubscriptionsOptions {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseNodeSubscriptionsOptions();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.serverPingIntervalMs = ConfigurationVariable.decode(reader, reader.uint32());
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): NodeSubscriptionsOptions {
-    return {
-      serverPingIntervalMs: isSet(object.serverPingIntervalMs)
-        ? ConfigurationVariable.fromJSON(object.serverPingIntervalMs)
-        : undefined,
-    };
-  },
-
-  toJSON(message: NodeSubscriptionsOptions): unknown {
-    const obj: any = {};
-    if (message.serverPingIntervalMs !== undefined) {
-      obj.serverPingIntervalMs = ConfigurationVariable.toJSON(message.serverPingIntervalMs);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<NodeSubscriptionsOptions>, I>>(base?: I): NodeSubscriptionsOptions {
-    return NodeSubscriptionsOptions.fromPartial(base ?? {});
-  },
-
-  fromPartial<I extends Exact<DeepPartial<NodeSubscriptionsOptions>, I>>(object: I): NodeSubscriptionsOptions {
-    const message = createBaseNodeSubscriptionsOptions();
-    message.serverPingIntervalMs = (object.serverPingIntervalMs !== undefined && object.serverPingIntervalMs !== null)
-      ? ConfigurationVariable.fromPartial(object.serverPingIntervalMs)
-      : undefined;
-    return message;
-  },
-};
-
 function createBasePrometheusOptions(): PrometheusOptions {
   return { enabled: undefined, port: undefined };
 }
@@ -8683,7 +8614,6 @@ function createBaseNodeOptions(): NodeOptions {
     nodeInternalUrl: undefined,
     defaultHttpProxyUrl: undefined,
     openTelemetry: undefined,
-    subscriptions: undefined,
     prometheus: undefined,
   };
 }
@@ -8717,11 +8647,8 @@ export const NodeOptions = {
     if (message.openTelemetry !== undefined) {
       TelemetryOptions.encode(message.openTelemetry, writer.uint32(74).fork()).ldelim();
     }
-    if (message.subscriptions !== undefined) {
-      NodeSubscriptionsOptions.encode(message.subscriptions, writer.uint32(82).fork()).ldelim();
-    }
     if (message.prometheus !== undefined) {
-      PrometheusOptions.encode(message.prometheus, writer.uint32(90).fork()).ldelim();
+      PrometheusOptions.encode(message.prometheus, writer.uint32(82).fork()).ldelim();
     }
     return writer;
   },
@@ -8801,13 +8728,6 @@ export const NodeOptions = {
             break;
           }
 
-          message.subscriptions = NodeSubscriptionsOptions.decode(reader, reader.uint32());
-          continue;
-        case 11:
-          if (tag !== 90) {
-            break;
-          }
-
           message.prometheus = PrometheusOptions.decode(reader, reader.uint32());
           continue;
       }
@@ -8838,7 +8758,6 @@ export const NodeOptions = {
         ? ConfigurationVariable.fromJSON(object.defaultHttpProxyUrl)
         : undefined,
       openTelemetry: isSet(object.openTelemetry) ? TelemetryOptions.fromJSON(object.openTelemetry) : undefined,
-      subscriptions: isSet(object.subscriptions) ? NodeSubscriptionsOptions.fromJSON(object.subscriptions) : undefined,
       prometheus: isSet(object.prometheus) ? PrometheusOptions.fromJSON(object.prometheus) : undefined,
     };
   },
@@ -8871,9 +8790,6 @@ export const NodeOptions = {
     }
     if (message.openTelemetry !== undefined) {
       obj.openTelemetry = TelemetryOptions.toJSON(message.openTelemetry);
-    }
-    if (message.subscriptions !== undefined) {
-      obj.subscriptions = NodeSubscriptionsOptions.toJSON(message.subscriptions);
     }
     if (message.prometheus !== undefined) {
       obj.prometheus = PrometheusOptions.toJSON(message.prometheus);
@@ -8911,9 +8827,6 @@ export const NodeOptions = {
       : undefined;
     message.openTelemetry = (object.openTelemetry !== undefined && object.openTelemetry !== null)
       ? TelemetryOptions.fromPartial(object.openTelemetry)
-      : undefined;
-    message.subscriptions = (object.subscriptions !== undefined && object.subscriptions !== null)
-      ? NodeSubscriptionsOptions.fromPartial(object.subscriptions)
       : undefined;
     message.prometheus = (object.prometheus !== undefined && object.prometheus !== null)
       ? PrometheusOptions.fromPartial(object.prometheus)

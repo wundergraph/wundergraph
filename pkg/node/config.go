@@ -3,6 +3,7 @@ package node
 import (
 	"fmt"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -13,6 +14,10 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/operation"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
+)
+
+const (
+	subscriptionServerPingIntervalEnvKey = "WG_SUBSCRIPTION_SERVER_PING_INTERVAL"
 )
 
 type Server struct {
@@ -85,12 +90,14 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 
 	var subscriptionsServerPingInterval time.Duration
 
-	interval, err := loadvariable.Int64(graphConfig.GetApi().GetNodeOptions().GetSubscriptions().GetServerPingIntervalMs())
-	if err != nil {
-		return nil, err
-	}
-	if interval > 0 {
-		subscriptionsServerPingInterval = time.Millisecond * time.Duration(interval)
+	if intervalStr := os.Getenv(subscriptionServerPingIntervalEnvKey); intervalStr != "" && intervalStr != "off" {
+		subscriptionsServerPingInterval, err = time.ParseDuration(intervalStr)
+		if err != nil {
+			return nil, fmt.Errorf("invalid %s = %q: %w", subscriptionServerPingIntervalEnvKey, intervalStr, err)
+		}
+		if subscriptionsServerPingInterval < 0 {
+			return nil, fmt.Errorf("invalid %s = %v, it must be non-negative", subscriptionServerPingIntervalEnvKey, subscriptionsServerPingInterval)
+		}
 	}
 
 	prometheusConfig := graphConfig.GetApi().GetNodeOptions().GetPrometheus()

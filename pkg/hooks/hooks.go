@@ -308,9 +308,14 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 	for {
 		line, err = reader.ReadBytes('\n')
 		if err == nil {
-			_, err = reader.ReadByte()
+			// Read the next line separator
+			var b byte
+			b, err := reader.ReadByte()
 			if err == io.EOF {
 				err = nil
+			}
+			if b != '\n' {
+				return fmt.Errorf("invalid chunk separator %s", string(b))
 			}
 		}
 		if err != nil {
@@ -319,7 +324,8 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 			}
 			return err
 		}
-		_, err = out.Write(line)
+		// Skip the \n terminator
+		_, err = out.Write(line[:len(line)-1])
 		if err != nil {
 			if ctx.Err() != nil {
 				return nil

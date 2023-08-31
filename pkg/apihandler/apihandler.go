@@ -13,6 +13,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -1087,7 +1088,6 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 			if wgParams.JSONPatch.IsEnabled() && lastData.Len() != 0 {
 				last := lastData.Bytes()
 				current := currentData.Bytes()
-				fmt.Println("COMPARE", last, current)
 				patch, err := jsondiff.CompareJSON(last, current)
 				if err != nil {
 					requestLogger.Error("could not create json patch", zap.Error(err))
@@ -1399,10 +1399,41 @@ func (o *operationKindVisitor) EnterOperationDefinition(ref int) {
 	o.walker.Stop()
 }
 
+type httpFlushWriterOutput struct {
+	// The mutex guards both the writer and flusher
+	mu      sync.Mutex
+	writer  http.ResponseWriter
+	flusher http.Flusher
+}
+
+func (o *httpFlushWriterOutput) WriteFlushing(data []byte) (int, error) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	var n int
+	var err error
+	if data != nil {
+		n, err = o.writer.Write(data)
+	}
+	o.flusher.Flush()
+	return n, err
+}
+
+type httpFlushWriterPing struct {
+	interval time.Duration
+	ticker   *time.Ticker
+	notify   chan struct{}
+}
+
+func (p *httpFlushWriterPing) Close() {
+	if p != nil {
+		close(p.notify)
+		p.ticker.Stop()
+	}
+}
+
 type httpFlushWriter struct {
 	ctx                    context.Context
-	writer                 http.ResponseWriter
-	flusher                http.Flusher
+	output                 httpFlushWriterOutput
 	postResolveTransformer *postresolvetransform.Transformer
 	subscribeOnce          bool
 	sse                    bool
@@ -1411,12 +1442,7 @@ type httpFlushWriter struct {
 	close                  func()
 	buf                    bytes.Buffer
 	lastMessage            bytes.Buffer
-	ping                   struct {
-		interval time.Duration
-		ticker   *time.Ticker
-		notify   chan struct{}
-	}
-
+	ping                   *httpFlushWriterPing
 	// Used for hooks
 	resolveContext *resolve.Context
 	request        *http.Request
@@ -1426,9 +1452,11 @@ type httpFlushWriter struct {
 
 func newHTTPFlushWriter(ctx context.Context, w http.ResponseWriter, flusher http.Flusher, params WgRequestParams) *httpFlushWriter {
 	return &httpFlushWriter{
-		ctx:         ctx,
-		writer:      w,
-		flusher:     flusher,
+		ctx: ctx,
+		output: httpFlushWriterOutput{
+			writer:  w,
+			flusher: flusher,
+		},
 		sse:         params.SSE,
 		jsonPatch:   params.JSONPatch,
 		deduplicate: params.Deduplicate,
@@ -1441,15 +1469,16 @@ func (f *httpFlushWriter) StartPinging(interval time.Duration) {
 	if interval <= 0 {
 		return
 	}
-	f.ping.interval = interval
-	f.ping.ticker = time.NewTicker(f.ping.interval)
-	f.ping.notify = make(chan struct{}, 1)
+	f.ping = &httpFlushWriterPing{
+		interval: interval,
+		ticker:   time.NewTicker(interval),
+		notify:   make(chan struct{}, 1),
+	}
 	go func() {
 		for {
 			select {
 			case <-f.ping.ticker.C:
-				f.writer.Write([]byte{'\n'})
-				f.flusher.Flush()
+				f.output.WriteFlushing([]byte{'\n'})
 			case <-f.ctx.Done():
 				return
 			case <-f.ping.notify:
@@ -1461,7 +1490,12 @@ func (f *httpFlushWriter) StartPinging(interval time.Duration) {
 }
 
 func (f *httpFlushWriter) resetPingTimer() {
-	f.ping.notify <- struct{}{}
+	if f.ping != nil {
+		select {
+		case f.ping.notify <- struct{}{}:
+		default:
+		}
+	}
 }
 
 // Deduplicate enables or disables deduplication (off by default). When deduplication
@@ -1472,11 +1506,13 @@ func (f *httpFlushWriter) Deduplicate(dedup bool) {
 }
 
 func (f *httpFlushWriter) Header() http.Header {
-	return f.writer.Header()
+	return f.output.writer.Header()
 }
 
 func (f *httpFlushWriter) WriteHeader(statusCode int) {
-	f.writer.WriteHeader(statusCode)
+	f.output.mu.Lock()
+	defer f.output.mu.Unlock()
+	f.output.writer.WriteHeader(statusCode)
 }
 
 func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
@@ -1491,24 +1527,22 @@ func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
 }
 
 func (f *httpFlushWriter) Close() {
+	f.ping.Close()
 	if f.sse {
-		_, _ = f.writer.Write([]byte("event: done\n\n"))
-		f.flusher.Flush()
-	}
-	if f.ping.ticker != nil {
-		f.ping.ticker.Stop()
-		f.ping.ticker = nil
+		f.output.WriteFlushing([]byte("event: done\n\n"))
 	}
 }
 
 func (f *httpFlushWriter) writeChunk(data []byte) error {
+	f.output.mu.Lock()
+	defer f.output.mu.Unlock()
 	if f.sse {
-		if _, err := f.writer.Write([]byte("data: ")); err != nil {
+		if _, err := f.output.writer.Write([]byte("data: ")); err != nil {
 			return err
 		}
 	}
 
-	if _, err := f.writer.Write(data); err != nil {
+	if _, err := f.output.writer.Write(data); err != nil {
 		return err
 	}
 	f.resetPingTimer()
@@ -1592,16 +1626,15 @@ func (f *httpFlushWriter) Flush() {
 	_, _ = f.lastMessage.Write(resp)
 
 	if f.subscribeOnce {
-		f.flusher.Flush()
+		f.output.WriteFlushing(nil)
 		f.close()
 		return
 	}
-	if _, err := f.writer.Write([]byte("\n\n")); err != nil {
+	if _, err := f.output.WriteFlushing([]byte("\n\n")); err != nil {
 		if f.logger != nil {
 			f.logger.Error("writing separator", zap.Error(err))
 		}
 	}
-	f.flusher.Flush()
 }
 
 // MergeJsonRightIntoLeft merges the right JSON into the left JSON while overriding the left side
