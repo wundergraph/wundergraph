@@ -1903,11 +1903,15 @@ func (h *FunctionsHandler) handleLiveQuery(resolveCtx *resolve.Context, w http.R
 	defer fw.Close()
 
 	ctx := resolveCtx.Context()
+
+	timer := time.NewTimer(0)
+	defer timer.Stop()
 	for {
 		select {
 		case <-ctx.Done():
 			return
-		default:
+		case <-timer.C:
+			timer.Reset(time.Duration(time.Duration(h.liveQuery.pollingIntervalSeconds) * time.Second))
 			out, err = h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input, buf)
 			if err != nil {
 				if ctx.Err() != nil {
@@ -1927,7 +1931,6 @@ func (h *FunctionsHandler) handleLiveQuery(resolveCtx *resolve.Context, w http.R
 			fw.Flush()
 			lastResponse.Reset()
 			lastResponse.Write(out.Response)
-			time.Sleep(time.Duration(h.liveQuery.pollingIntervalSeconds) * time.Second)
 		}
 	}
 }
