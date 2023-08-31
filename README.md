@@ -271,7 +271,7 @@ You can learn more about the architecture of WunderGraph and why we’ve built i
 ## How does WunderGraph work
 
 This section provides a high-level overview of how WunderGraph works and its most consumer centric components. For a
-more thorough introduction, visit the [architecture](./docs/architecture) documentation.
+more thorough introduction, visit the [architecture](docs/architecture.md) documentation.
 
 After initializing your WunderGraph application, you have a NPM package and
 a `.wundergraph` folder. This folder contains the following files:
