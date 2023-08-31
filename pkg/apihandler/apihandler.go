@@ -2050,8 +2050,6 @@ func getFlushWriter(ctx *resolve.Context, variables []byte, r *http.Request, w h
 		setSubscriptionHeaders(w)
 	}
 
-	flusher.Flush()
-
 	flushWriter := &httpFlushWriter{
 		writer:       w,
 		flusher:      flusher,
