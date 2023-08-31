@@ -310,7 +310,7 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 		if err == nil {
 			// Read the next line separator
 			var b byte
-			b, err := reader.ReadByte()
+			b, err = reader.ReadByte()
 			if err == io.EOF {
 				err = nil
 			}
