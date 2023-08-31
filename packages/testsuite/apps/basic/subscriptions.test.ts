@@ -63,8 +63,19 @@ describe('Subscriptions', () => {
 	});
 
 	it('should ignore pings from the server', async () => {
+		const wg = createTestServer({
+			dir: __dirname,
+			env: {
+				WG_SUBSCRIPTION_SERVER_PING_INTERVAL: '100ms',
+			},
+		});
+
+		await wg.start();
+
+		await wg.stop();
+
 		const items: { hello: string }[] = [];
-		// XXX: The delay should be higher than the server ping time configured in wundergraph.config.ts
+		// XXX: The delay should be higher than the server ping time in WG_SUBSCRIPTION_SERVER_PING_INTERVAL
 		await wg.client().subscribe({ operationName: 'subscriptions/counter', input: { count: 2, delay: 300 } }, (item) => {
 			items.push(item.data!);
 		});
