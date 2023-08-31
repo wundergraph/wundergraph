@@ -20,7 +20,7 @@ describe('Live queries', () => {
 		// Now start a live query, which shouldn't send more the one call per second
 		const abortController = new AbortController();
 		fetch(wg.url('/operations/functions/trigger-livequery-bug?wg_live'), { signal: abortController.signal });
-		// Sleep for 2 seconds
+		// Sleep for 1.1 seconds
 		await new Promise((resolve) => setTimeout(resolve, 1100));
 		abortController.abort();
 		// Now check the call counter
