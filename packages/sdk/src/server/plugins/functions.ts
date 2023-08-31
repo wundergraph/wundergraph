@@ -103,7 +103,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							user: (req.body as any)?.__wg.user!,
 							internalClient: internalClientFactory(headers, clientRequest),
 							clientRequest,
-							input: (req.body as any)?.input,
+							input: (req.body as any)?.input || {},
 							operations: operationClient,
 							context: requestContext,
 							graph: orm.withClientRequest(clientRequest),
