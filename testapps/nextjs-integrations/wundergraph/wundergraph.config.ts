@@ -1,7 +1,7 @@
 import { cors, type WunderGraphConfig } from '@wundergraph/sdk';
 
 import { graphql } from '@wundergraph/sdk/datasources';
-import { demoAuth } from '@wundergraph/sdk/authentication';
+import { demoAuth } from '@wundergraph/sdk/auth';
 
 import { nextjs } from '@wundergraph/nextjs/integration';
 import { minio } from '@wundergraph/sdk/integrations';
