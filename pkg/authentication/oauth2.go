@@ -198,7 +198,7 @@ func (h *OAuth2AuthenticationHandler) Callback(w http.ResponseWriter, r *http.Re
 	}
 
 	if redirectURI == "" {
-		redirectURI = fmt.Sprintf("%s%s", scheme, "/auth/cookie/user")
+		redirectURI = fmt.Sprintf("%s%s%s", scheme, r.Host, "/auth/cookie/user")
 	}
 
 	//http.Redirect(w, r, redirect, http.StatusFound)
