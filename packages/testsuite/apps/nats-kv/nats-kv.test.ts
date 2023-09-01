@@ -208,15 +208,6 @@ describe('The Nats KV', () => {
 		const client = wg.client();
 		const abortController = new AbortController();
 		const responses: Gql_watchResponse[] = [];
-		const put = await client.mutate({
-			operationName: 'gql_put',
-			input: {
-				key: 'mykey',
-				value: {
-					token: 'token1',
-				},
-			},
-		});
 		const sub = client.subscribe(
 			{
 				operationName: 'gql_watch',
@@ -229,6 +220,15 @@ describe('The Nats KV', () => {
 				responses.push(res);
 			}
 		);
+		const put = await client.mutate({
+			operationName: 'gql_put',
+			input: {
+				key: 'mykey',
+				value: {
+					token: 'token1',
+				},
+			},
+		});
 		const put2 = await client.mutate({
 			operationName: 'gql_put',
 			input: {
@@ -247,7 +247,7 @@ describe('The Nats KV', () => {
 				},
 			},
 		});
-		await new Promise((resolve) => setTimeout(resolve, 500));
+		await new Promise((resolve) => setTimeout(resolve, 1000));
 		abortController.abort();
 		await sub;
 		expect(responses.length).toBe(3);
