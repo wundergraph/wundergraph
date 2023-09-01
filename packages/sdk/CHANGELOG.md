@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.176.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.175.0...@wundergraph/sdk@0.176.0) (2023-09-01)
+
+### Features
+
+* multipart plugin in webhooks ([#1227](https://github.com/wundergraph/wundergraph/issues/1227)) ([079b081](https://github.com/wundergraph/wundergraph/commit/079b081e0f45fb8db9eeaecd9412994e391d5e4d)) (@rwest202)
+
+### Bug Fixes
+
+* make sure a function's input is always non null ([#1242](https://github.com/wundergraph/wundergraph/issues/1242)) ([c133335](https://github.com/wundergraph/wundergraph/commit/c1333354fad03971715447f44f3428a7592a9969)) (@fiam)
+
 ## [0.175.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.174.5...@wundergraph/sdk@0.175.0) (2023-08-24)
 
 ### Features
