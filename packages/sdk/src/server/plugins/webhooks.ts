@@ -29,6 +29,8 @@ interface FastifyWebHooksOptions {
 
 const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async (fastify, config) => {
 	await fastify.register(require('@fastify/formbody'));
+	await fastify.register(require('@fastify/multipart'), { attachFieldsToBody: true });
+
 	for (const hook of config.webhooks) {
 		try {
 			const webhookFilePath = path.join(process.env.WG_DIR_ABS!, 'generated', 'bundle', hook.filePath);
