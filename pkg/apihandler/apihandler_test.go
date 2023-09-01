@@ -650,7 +650,7 @@ func TestFunctionsHandler_Live(t *testing.T) {
 	data, err := ioutil.ReadAll(res.Body)
 	assert.Equal(t, context.DeadlineExceeded, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":1}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":2}}}\n\n", string(data))
-	assert.Equal(t, 3, hookServerRequestCount)
+	assert.Equal(t, 3, int(hookServerRequestCount.Load()))
 }
 
 func TestFunctionsHandler_Live_JSONPatch(t *testing.T) {
