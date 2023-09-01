@@ -204,7 +204,7 @@
     "@wundergraph/orm": "workspace:*",
     "@wundergraph/protobuf": "workspace:^0.118.2",
     "@wundergraph/straightforward": "^4.2.5",
-    "@wundergraph/wunderctl": "workspace:^0.171.0",
+    "@wundergraph/wunderctl": "workspace:^0.172.0",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",
