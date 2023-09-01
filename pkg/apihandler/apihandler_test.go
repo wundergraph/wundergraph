@@ -593,12 +593,13 @@ func TestFunctionsHandler_Live(t *testing.T) {
 	validateNothing, err := inputvariables.NewValidator(inputSchema, true)
 	assert.NoError(t, err)
 
-	hookServerRequestCount := 0
+	var hookServerRequestCount atomic.Int64
 
 	fakeHookServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":{"data":{"me":{"name":"Jens","bio":"Founder & CEO of WunderGraph","counter":` + strconv.Itoa(hookServerRequestCount) + `}}}}`))
-		hookServerRequestCount++
+		count := int(hookServerRequestCount.Load())
+		_, _ = w.Write([]byte(`{"response":{"data":{"me":{"name":"Jens","bio":"Founder & CEO of WunderGraph","counter":` + strconv.Itoa(count) + `}}}}`))
+		hookServerRequestCount.Add(1)
 	}))
 
 	defer fakeHookServer.Close()
