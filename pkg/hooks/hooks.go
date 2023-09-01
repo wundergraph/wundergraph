@@ -284,16 +284,11 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 	if err != nil {
 		return fmt.Errorf("error calling function %s: %w", operationName, err)
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("server function call did not return 200: %s", resp.Status)
+		return fmt.Errorf("server function call did not return an ok response: %s", resp.Status)
 	}
-
-	if resp.Body == nil {
-		return fmt.Errorf("server function call did not return a body")
-	}
-
-	defer resp.Body.Close()
 
 	flusher, ok := out.(http.Flusher)
 	if !ok {
