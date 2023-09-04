@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -286,7 +286,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.175.0
+        specifier: workspace:^0.176.0
         version: link:../sdk
       typescript:
         specifier: ^5.1.6
@@ -669,7 +669,7 @@ importers:
         specifier: ^4.2.5
         version: 4.2.5
       '@wundergraph/wunderctl':
-        specifier: workspace:^0.171.0
+        specifier: workspace:^0.172.0
         version: link:../wunderctl
       axios:
         specifier: ^0.26.1
@@ -7062,7 +7062,7 @@ packages:
       '@graphql-mesh/utils': 0.94.6(@graphql-mesh/cross-helpers@0.4.0)(@graphql-mesh/types@0.94.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
       '@json-schema-tools/meta-schema': 1.7.0
-      '@whatwg-node/fetch': 0.9.9
+      '@whatwg-node/fetch': 0.9.4
       ajv: 8.12.0
       ajv-formats: 2.1.1(ajv@8.12.0)
       dset: 3.1.2
@@ -25515,7 +25515,7 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 16.18.14
-      acorn: 8.10.0
+      acorn: 8.8.2
       acorn-walk: 8.2.0
       arg: 4.1.3
       create-require: 1.1.1
@@ -25577,7 +25577,7 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 18.16.16
-      acorn: 8.10.0
+      acorn: 8.8.2
       acorn-walk: 8.2.0
       arg: 4.1.3
       create-require: 1.1.1
@@ -27169,10 +27169,11 @@ packages:
     resolution: {directory: packages/sdk, type: directory}
     id: file:packages/sdk
     name: '@wundergraph/sdk'
-    version: 0.175.0
+    version: 0.176.0
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.4.0
+      '@fastify/multipart': 7.7.3
       '@graphql-mesh/cross-helpers': 0.4.0(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(react-native@0.71.7)
       '@graphql-mesh/store': 0.94.5(@graphql-mesh/cross-helpers@0.4.0)(@graphql-mesh/types@0.94.6)(@graphql-mesh/utils@0.94.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
       '@graphql-mesh/types': 0.94.6(@graphql-mesh/store@0.94.5)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
