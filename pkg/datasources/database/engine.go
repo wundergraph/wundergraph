@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -191,10 +190,11 @@ func (e *Engine) IntrospectGraphQLSchema(ctx context.Context) (schema string, er
 			if err != nil {
 				continue
 			}
+			defer res.Body.Close()
 			if res.StatusCode != http.StatusOK {
 				continue
 			}
-			data, err := ioutil.ReadAll(res.Body)
+			data, err := io.ReadAll(res.Body)
 			if err != nil {
 				return "", err
 			}
@@ -222,10 +222,11 @@ func (e *Engine) IntrospectDMMF(ctx context.Context) (dmmf string, err error) {
 			if err != nil {
 				continue
 			}
+			defer res.Body.Close()
 			if res.StatusCode != http.StatusOK {
 				continue
 			}
-			data, err := ioutil.ReadAll(res.Body)
+			data, err := io.ReadAll(res.Body)
 			if err != nil {
 				return "", err
 			}
@@ -417,11 +418,12 @@ func (e *Engine) WaitUntilReady(ctx context.Context) error {
 		case <-done:
 			return fmt.Errorf("WaitUntilReady: context cancelled")
 		default:
-			_, err := http.Get(e.url)
+			resp, err := http.Get(e.url)
 			if err != nil {
 				time.Sleep(time.Millisecond * 10)
 				continue
 			}
+			defer resp.Body.Close()
 			return nil
 		}
 	}

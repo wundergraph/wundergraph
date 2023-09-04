@@ -452,6 +452,7 @@ func BenchmarkNode(t *testing.B) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		defer out.Body.Close()
 
 		if out.StatusCode != http.StatusOK {
 			t.Fatal("status code")
