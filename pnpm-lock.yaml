@@ -167,10 +167,10 @@ importers:
         specifier: ^18.0.15
         version: 18.0.24
       eslint:
-        specifier: ^8.45.0
+        specifier: 8.45.0
         version: 8.45.0
       eslint-config-next:
-        specifier: ^13.4.12
+        specifier: 13.4.12
         version: 13.4.12(eslint@8.45.0)(typescript@5.1.6)
       prettier:
         specifier: ^2.7.1
@@ -182,7 +182,7 @@ importers:
         specifier: 3.14.2
         version: 3.14.2
       typescript:
-        specifier: ^5.1.6
+        specifier: 5.1.6
         version: 5.1.6
 
   packages/create-wundergraph-app:
@@ -25515,7 +25515,7 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 16.18.14
-      acorn: 8.8.2
+      acorn: 8.10.0
       acorn-walk: 8.2.0
       arg: 4.1.3
       create-require: 1.1.1
@@ -25577,7 +25577,7 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 18.16.16
-      acorn: 8.8.2
+      acorn: 8.10.0
       acorn-walk: 8.2.0
       arg: 4.1.3
       create-require: 1.1.1
