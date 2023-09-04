@@ -61,8 +61,10 @@ func (u *UI) Open() error {
 
 // Close closes the keyboard handle
 func (u *UI) Close() {
-	u.enabled = false
-	_ = keyboard.Close()
+	if u.enabled {
+		u.enabled = false
+		_ = keyboard.Close()
+	}
 }
 
 func (u *UI) quit() {

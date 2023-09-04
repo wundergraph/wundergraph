@@ -45,6 +45,7 @@ func TestTransport(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		defer res.Body.Close()
 
 		body, err := io.ReadAll(res.Body)
 		if err != nil {
@@ -95,6 +96,7 @@ func TestTransport(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		defer res.Body.Close()
 
 		body, err := io.ReadAll(res.Body)
 		if err != nil {
