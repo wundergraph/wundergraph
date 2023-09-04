@@ -58,6 +58,7 @@ func TestEngineAvailability(t *testing.T) {
 
 	for _, engineName := range engines {
 		for _, platform := range platforms {
+			platform := platform
 			url := engine.GetEngineURL(engineName, platform)
 			t.Run(engineName+"_"+platform, func(t *testing.T) {
 				t.Parallel()
@@ -66,6 +67,7 @@ func TestEngineAvailability(t *testing.T) {
 				if err != nil || resp.StatusCode != 200 {
 					t.Fatalf("Engine %s unavailable for platform %s", engineName, platform)
 				}
+				resp.Body.Close()
 			})
 		}
 	}
