@@ -846,6 +846,7 @@ func TestFunctionsHandler_Subscription(t *testing.T) {
 
 			res, err := srv.Client().Do(req)
 			assert.NoError(t, err)
+			defer res.Body.Close()
 
 			data, err := io.ReadAll(res.Body)
 			assert.NoError(t, err)
