@@ -78,6 +78,16 @@ func (u *UserLoader) parseClaims(r io.Reader) (*Claims, error) {
 	if err := json.Unmarshal(data, &claims); err != nil {
 		return nil, err
 	}
+
+	switch v := claims.EmailVerifiedRaw.(type) {
+	case bool:
+		claims.EmailVerified = v
+	case string:
+		claims.EmailVerified = (v == "true")
+	default:
+		return nil, fmt.Errorf("email_verified field is neither a bool nor a string")
+	}
+
 	if err := json.Unmarshal(data, &claims.Raw); err != nil {
 		return nil, err
 	}
