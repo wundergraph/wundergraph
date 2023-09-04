@@ -102,7 +102,7 @@ By default, when no options are passed to `wundergraph.config.ts` or `wundergrap
 | `WG_SERVER_PORT`                       | The port of the `WunderGraph Server`.                                | `9992`                  |
 | `WG_PROMETHEUS_ENABLED`                | Whether to enable Prometheus metrics. \*Enterprise license required. | `false`                 |
 | `WG_PROMETHEUS_PORT`                   | Port used to serve Prometheus metrics.                               | `8881`                  |
-| `WG_SUBSCRIPTION_SERVER_PING_INTERVAL` | Ping interval when serving subscriptions, as a duration (e.g. `30s`) | `off`                   |
+| `WG_SUBSCRIPTION_SERVER_PING_INTERVAL` | Ping interval when serving subscriptions, as a duration (e.g. `30s`) | `30s`                   |
 
 ### Available log levels
 
