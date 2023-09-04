@@ -199,6 +199,7 @@ var upCmd = &cobra.Command{
 				log.Warn("could not enable console UI", zap.Error(err))
 			} else {
 				go consoleUI.Run()
+				defer consoleUI.Close()
 			}
 		}
 

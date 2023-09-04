@@ -240,9 +240,7 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 		return nil, fmt.Errorf("error calling function %s: %w", operationName, err)
 	}
 
-	if resp == nil {
-		return nil, fmt.Errorf("error calling function %s: no response", operationName)
-	}
+	defer resp.Body.Close()
 
 	dec := json.NewDecoder(resp.Body)
 
@@ -421,11 +419,11 @@ func (c *Client) DoHealthCheckRequest(ctx context.Context) (status bool) {
 		return false
 	}
 	resp, err := c.httpClient.Do(req)
-	if err != nil || resp.StatusCode != 200 {
-		return
+	if err != nil {
+		return false
 	}
-
-	return true
+	defer resp.Body.Close()
+	return resp.StatusCode != 200
 }
 
 func encodeData(r *http.Request, w *bytes.Buffer, variables []byte, response []byte) ([]byte, error) {

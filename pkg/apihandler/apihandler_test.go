@@ -265,6 +265,7 @@ func TestQueryHandler_LiveQuery(t *testing.T) {
 
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
+	defer res.Body.Close()
 
 	data, err := io.ReadAll(res.Body)
 	assert.Equal(t, context.DeadlineExceeded, err)
@@ -343,6 +344,7 @@ func TestQueryHandler_LiveQueryJsonPatch(t *testing.T) {
 
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
+	defer res.Body.Close()
 
 	data, err := io.ReadAll(res.Body)
 	assert.Equal(t, context.DeadlineExceeded, err)
@@ -426,6 +428,7 @@ func TestQueryHandler_SubscriptionJsonPatch(t *testing.T) {
 	assert.NoError(t, err)
 
 	res, err := srv.Client().Do(req)
+	defer res.Body.Close()
 	assert.NoError(t, err)
 
 	data, err := io.ReadAll(res.Body)
@@ -510,6 +513,7 @@ func TestQueryHandler_Subscription(t *testing.T) {
 
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
+	defer res.Body.Close()
 
 	data, err := io.ReadAll(res.Body)
 	assert.NoError(t, err)
@@ -577,6 +581,7 @@ func TestFunctionsHandler_Default(t *testing.T) {
 
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
+	defer res.Body.Close()
 
 	data, err := io.ReadAll(res.Body)
 	assert.NoError(t, err)
@@ -594,12 +599,13 @@ func TestFunctionsHandler_Live(t *testing.T) {
 	validateNothing, err := inputvariables.NewValidator(inputSchema, true)
 	assert.NoError(t, err)
 
-	hookServerRequestCount := 0
+	var hookServerRequestCount atomic.Int64
 
 	fakeHookServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":{"data":{"me":{"name":"Jens","bio":"Founder & CEO of WunderGraph","counter":` + strconv.Itoa(hookServerRequestCount) + `}}}}`))
-		hookServerRequestCount++
+		count := int(hookServerRequestCount.Load())
+		_, _ = w.Write([]byte(`{"response":{"data":{"me":{"name":"Jens","bio":"Founder & CEO of WunderGraph","counter":` + strconv.Itoa(count) + `}}}}`))
+		hookServerRequestCount.Add(1)
 	}))
 
 	defer fakeHookServer.Close()
@@ -646,11 +652,12 @@ func TestFunctionsHandler_Live(t *testing.T) {
 
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
+	defer res.Body.Close()
 
 	data, err := io.ReadAll(res.Body)
 	assert.Equal(t, context.DeadlineExceeded, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":1}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":2}}}\n\n", string(data))
-	assert.Equal(t, 3, hookServerRequestCount)
+	assert.Equal(t, 3, int(hookServerRequestCount.Load()))
 }
 
 func TestFunctionsHandler_Live_JSONPatch(t *testing.T) {
@@ -716,6 +723,7 @@ func TestFunctionsHandler_Live_JSONPatch(t *testing.T) {
 
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
+	defer res.Body.Close()
 
 	data, err := io.ReadAll(res.Body)
 	assert.Equal(t, context.DeadlineExceeded, err)
@@ -770,13 +778,6 @@ func TestFunctionsHandler_Subscription(t *testing.T) {
 			isPing := strings.HasPrefix(tc.URL, "/ping")
 
 			fakeHookServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				// var data map[string]interface{}
-				// dec := json.NewDecoder(r.Body)
-				// err := dec.Decode(&data)
-				// assert.NoError(t, err)
-				// wg := data["__wg"].(map[string]interface{})
-				// clientRequest := wg["clientRequest"].(map[string]interface{})
-				// requestURI := clientRequest["requestURI"].(string)
 				switch {
 				default:
 					for i := 0; i < 3; i++ {
