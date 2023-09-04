@@ -501,6 +501,9 @@ export class Client {
 					eventSource.close();
 					return;
 				}
+				if (ev.data == '') {
+					return;
+				}
 				const jsonResp = JSON.parse(ev.data);
 				// we parse the json response, which might be a json patch (array) or a full response (object)
 				if (lastResponse !== null && Array.isArray(jsonResp)) {
