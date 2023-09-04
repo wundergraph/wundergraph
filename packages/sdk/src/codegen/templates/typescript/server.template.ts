@@ -6,6 +6,7 @@ import type { InternalOperationsClient } from "./wundergraph.internal.operations
 import type { CustomClaims } from "./claims";
 import type {
 	BaseRequestContext,
+	CustomContext,
 	GraphQLServerConfig,
 	WunderGraphUser,
 	WunderGraphServerConfig,
@@ -30,14 +31,17 @@ export interface GraphQLExecutionContext<TCustomContext = any> {
     wundergraph: BaseRequestContext<User, InternalOperationsClient, TCustomContext>;
 }
 
+type RequestContext = CustomContext extends { request: infer R } ? R : any;
+type GlobalContext = CustomContext extends { global: infer G } ? G : any;
+
 declare module "@wundergraph/sdk/server" {
-	export function configureWunderGraphServer<TRequestContext = any, TGlobalContext = any>(
+	export function configureWunderGraphServer(
 		configWrapper: () => WunderGraphServerConfig<
-			HooksConfig<TRequestContext>,
+			HooksConfig<RequestContext>,
 			WebhooksConfig,
-			TRequestContext,
-			TGlobalContext
+			RequestContext,
+			GlobalContext
 		>
-	): WunderGraphHooksAndServerConfig<any, any, TRequestContext, TGlobalContext>;
+	): WunderGraphHooksAndServerConfig<any, any, RequestContext, GlobalContext>;
 }
 `;

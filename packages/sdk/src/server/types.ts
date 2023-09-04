@@ -53,6 +53,23 @@ export interface OperationHookFunction {
 	(...args: any[]): Promise<any>;
 }
 
+/**
+ * The custom context can be used to add custom properties to the request context.
+ * ```ts
+ * declare module "@wundergraph/sdk/server" {
+ * 	interface CustomContext {
+ * 		global: {
+ * 			foo: string;
+ * 		}
+ * 		request: {
+ * 			bar: string;
+ * 		}
+ * 	}
+ * }
+ * ```
+ */
+export interface CustomContext {}
+
 export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
 	mockResolve?: AsyncFn;
 	preResolve?: AsyncFn;

@@ -29,6 +29,12 @@ export class MyContext {
   }
 }
 
+declare module '@wundergraph/sdk/server' {
+  export interface CustomContext {
+    request: MyContext;
+  }
+}
+
 export default configureWunderGraphServer(() => ({
   hooks: {
     queries: {
@@ -142,6 +148,12 @@ class MyRequestContext {
     constructor(private ctx: MyGlobalContext)
 }
 
+declare module '@wundergraph/sdk/server' {
+	export interface CustomContext {
+    global: MyGlobalContext;
+		request: MyContext;
+	}
+}
 
 export default configureWunderGraphServer(() => ({
   hooks: {
