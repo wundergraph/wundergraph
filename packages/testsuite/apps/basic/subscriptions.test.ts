@@ -1,9 +1,7 @@
-import path from 'path';
-
-import execa from 'execa';
 import { beforeAll, expect, describe, it } from 'vitest';
 
 import { createTestServer } from './.wundergraph/generated/testing';
+import { createClient } from './.wundergraph/generated/client';
 
 const wg = createTestServer({
 	dir: __dirname,
@@ -72,12 +70,24 @@ describe('Subscriptions', () => {
 
 		await wg.start();
 
-		const items: { hello: string }[] = [];
+		const expected = [{ hello: '0' }, { hello: '1' }];
 		// XXX: The delay should be higher than the server ping time in WG_SUBSCRIPTION_SERVER_PING_INTERVAL
-		await wg.client().subscribe({ operationName: 'subscriptions/counter', input: { count: 2, delay: 300 } }, (item) => {
+		const input = { count: 2, delay: 300 };
+
+		let items: { hello: string }[] = [];
+		await wg.client().subscribe({ operationName: 'subscriptions/counter', input }, (item) => {
 			items.push(item.data!);
 		});
-		expect(items).toStrictEqual([{ hello: '0' }, { hello: '1' }]);
+		expect(items).toStrictEqual(expected);
+
+		// Test with SSE
+		items = [];
+		const sseClient = createClient({ baseURL: wg.url(), forceSSE: true });
+
+		await sseClient.subscribe({ operationName: 'subscriptions/counter', input }, (item) => {
+			items.push(item.data!);
+		});
+		expect(items).toStrictEqual(expected);
 
 		await wg.stop();
 	});

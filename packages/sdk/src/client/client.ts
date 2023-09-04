@@ -514,7 +514,7 @@ export class Client {
 					// it's not a patch, so we just set the lastResponse to the current response
 					lastResponse = jsonResp as GraphQLResponse;
 				}
-				const clientResponse = this.convertGraphQLResponse(lastResponse);
+				const clientResponse = this.convertGraphQLResponse(deepClone(lastResponse));
 				cb(clientResponse);
 			});
 			if (subscription?.abortSignal) {
