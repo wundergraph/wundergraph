@@ -154,7 +154,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest && npm run test:types",
-    "test:types": "tsd --typings ./tsconfig.json",
+    "test:types": "tsd",
     "test:int": "TEST_INTEGRATION=true jest",
     "test:update-snapshots": "jest -u"
   },
