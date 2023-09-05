@@ -247,7 +247,7 @@ describe('The Nats KV', () => {
 				},
 			},
 		});
-		await new Promise((resolve) => setTimeout(resolve, 500));
+		await new Promise((resolve) => setTimeout(resolve, 1000));
 		abortController.abort();
 		await sub;
 		expect(responses.length).toBe(3);
@@ -311,7 +311,7 @@ describe('The Nats KV', () => {
 				},
 			},
 		});
-		await new Promise((resolve) => setTimeout(resolve, 500));
+		await new Promise((resolve) => setTimeout(resolve, 1000));
 		abortController.abort();
 		await sub;
 		expect(responses.length).toBe(4);

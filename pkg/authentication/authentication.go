@@ -84,6 +84,8 @@ func (u *UserLoader) parseClaims(r io.Reader) (*Claims, error) {
 		claims.EmailVerified = v
 	case string:
 		claims.EmailVerified = (v == "true")
+	case nil:
+		// Not provided, default to false
 	default:
 		return nil, fmt.Errorf("email_verified field is neither a bool nor a string")
 	}
@@ -407,6 +409,8 @@ func (u *User) loadUser(loader *UserLoader, r *http.Request) error {
 			}
 			if err := loader.userFromToken(token, config, u, revalidate); err == nil {
 				return nil
+			} else {
+				loader.log.Warn("could not load user from token", zap.String("issuer", config.issuer), zap.Error(err))
 			}
 		}
 	}
