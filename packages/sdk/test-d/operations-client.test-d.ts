@@ -57,7 +57,11 @@ type InternalOperations = InternalOperationsDefinition<Queries, Mutations, Subsc
 
 const client = new OperationsClient<InternalOperations>({
 	baseURL: 'https://api.com',
-	clientRequest: null,
+	clientRequest: {
+		headers: new Headers(),
+		method: 'GET',
+		requestURI: 'https://api.com',
+	},
 });
 
 // Queries
