@@ -25,12 +25,6 @@ export interface Operations {
 	[key: string]: Operation<object, unknown>;
 }
 
-export interface Options {
-	baseURL: string;
-	extraHeaders?: { [key: string]: string };
-	clientRequest: any;
-}
-
 export interface OperationsClientConfig extends Omit<ClientConfig, 'csrfEnabled'> {
 	/**
 	 * raw JSON encoded client request
