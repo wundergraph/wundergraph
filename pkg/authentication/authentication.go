@@ -78,6 +78,18 @@ func (u *UserLoader) parseClaims(r io.Reader) (*Claims, error) {
 	if err := json.Unmarshal(data, &claims); err != nil {
 		return nil, err
 	}
+
+	switch v := claims.EmailVerifiedRaw.(type) {
+	case bool:
+		claims.EmailVerified = v
+	case string:
+		claims.EmailVerified = (v == "true")
+	case nil:
+		// Not provided, default to false
+	default:
+		return nil, fmt.Errorf("email_verified field is neither a bool nor a string")
+	}
+
 	if err := json.Unmarshal(data, &claims.Raw); err != nil {
 		return nil, err
 	}
@@ -397,6 +409,8 @@ func (u *User) loadUser(loader *UserLoader, r *http.Request) error {
 			}
 			if err := loader.userFromToken(token, config, u, revalidate); err == nil {
 				return nil
+			} else {
+				loader.log.Warn("could not load user from token", zap.String("issuer", config.issuer), zap.Error(err))
 			}
 		}
 	}
