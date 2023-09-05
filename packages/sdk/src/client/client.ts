@@ -24,6 +24,7 @@ import {
 	ClientOperationErrorCodes,
 	NoUserError,
 } from './errors';
+import { deepClone } from '../utils/helper';
 
 // We follow https://docs.wundergraph.com/docs/architecture/wundergraph-rpc-protocol-explained
 
@@ -500,6 +501,9 @@ export class Client {
 					eventSource.close();
 					return;
 				}
+				if (ev.data == '') {
+					return;
+				}
 				const jsonResp = JSON.parse(ev.data);
 				// we parse the json response, which might be a json patch (array) or a full response (object)
 				if (lastResponse !== null && Array.isArray(jsonResp)) {
@@ -513,7 +517,7 @@ export class Client {
 					// it's not a patch, so we just set the lastResponse to the current response
 					lastResponse = jsonResp as GraphQLResponse;
 				}
-				const clientResponse = this.convertGraphQLResponse(lastResponse);
+				const clientResponse = this.convertGraphQLResponse(deepClone(lastResponse));
 				cb(clientResponse);
 			});
 			if (subscription?.abortSignal) {
@@ -584,13 +588,21 @@ export class Client {
 			if (message.endsWith('\n\n')) {
 				const parts = message.substring(0, message.length - '\n\n'.length).split('\n\n');
 				for (const part of parts) {
+					if (part == '') {
+						// Empty payload to keep the connection alive
+						continue;
+					}
 					const jsonResp = JSON.parse(part);
 					if (lastResponse !== null && Array.isArray(jsonResp)) {
 						lastResponse = applyPatch(lastResponse, jsonResp).newDocument as GraphQLResponse;
 					} else {
 						lastResponse = jsonResp as GraphQLResponse;
 					}
-					yield this.convertGraphQLResponse(lastResponse, response.status);
+					// XXX: This needs to be cloned before we send it to the client,
+					// otherwise we will overwrite the value the client receives
+					//  in the next iteration
+					const result = deepClone(lastResponse);
+					yield this.convertGraphQLResponse(result, response.status);
 				}
 				message = '';
 			}

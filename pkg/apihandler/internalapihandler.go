@@ -232,7 +232,7 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 			Resolver:       i.resolver,
 			Plan:           p,
 		}
-		hooksPipeline := hooks.NewSynchonousOperationPipeline(hooksPipelineConfig)
+		hooksPipeline := hooks.NewSynchronousOperationPipeline(hooksPipelineConfig)
 
 		handler = &InternalApiHandler{
 			preparedPlan:       p,

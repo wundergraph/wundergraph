@@ -304,7 +304,7 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			flushWriter *httpFlushWriter
 			ok          bool
 		)
-		shared.Ctx, flushWriter, ok = getFlushWriter(shared.Ctx, shared.Ctx.Variables, r, w)
+		shared.Ctx, flushWriter, ok = getFlushWriter(shared.Ctx, r, w)
 		if !ok {
 			requestLogger.Error("connection not flushable")
 			http.Error(w, "Connection not flushable", http.StatusBadRequest)
