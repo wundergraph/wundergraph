@@ -12,6 +12,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -62,25 +63,48 @@ const (
 	WgPrefix             = "wg_"
 	WgVariables          = WgPrefix + "variables"
 	WgLiveParam          = WgPrefix + "live"
-	WgJsonPatchParam     = WgPrefix + "json_patch"
-	WgSseParam           = WgPrefix + "sse"
+	WgJSONPatchParam     = WgPrefix + "json_patch"
+	WgSSEParam           = WgPrefix + "sse"
 	WgSubscribeOnceParam = WgPrefix + "subscribe_once"
+	WgDeduplicateParam   = WgPrefix + "deduplicate"
 
 	defaultAuthTimeoutSeconds = 600 // 10 minutes
 )
 
+type JSONPatchConfiguration int
+
+const (
+	JSONPatchConfigurationDisabled = JSONPatchConfiguration(0)
+	JSONPatchConfigurationEnabled  = JSONPatchConfiguration(1)
+	JSONPatchConfigurationForced   = JSONPatchConfiguration(2)
+)
+
+func (c JSONPatchConfiguration) IsEnabled() bool {
+	return c > JSONPatchConfigurationDisabled
+}
+
 type WgRequestParams struct {
-	UseJsonPatch bool
-	UseSse       bool
-	SubsribeOnce bool
+	JSONPatch     JSONPatchConfiguration
+	SSE           bool
+	SubscribeOnce bool
+	Deduplicate   bool
 }
 
 func NewWgRequestParams(r *http.Request) WgRequestParams {
 	q := r.URL.Query()
+	var JSONPatch JSONPatchConfiguration
+	if q.Has(WgJSONPatchParam) {
+		if q.Get(WgJSONPatchParam) == "force" {
+			JSONPatch = JSONPatchConfigurationForced
+		} else {
+			JSONPatch = JSONPatchConfigurationForced
+		}
+	}
 	return WgRequestParams{
-		UseJsonPatch: q.Has(WgJsonPatchParam),
-		UseSse:       q.Has(WgSseParam),
-		SubsribeOnce: q.Has(WgSubscribeOnceParam),
+		JSONPatch:     JSONPatch,
+		SSE:           q.Has(WgSSEParam),
+		SubscribeOnce: q.Has(WgSubscribeOnceParam),
+		Deduplicate:   q.Has(WgDeduplicateParam),
 	}
 }
 
@@ -480,7 +504,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			Resolver:       r.resolver,
 			Plan:           synchronousPlan,
 		}
-		hooksPipeline := hooks.NewSynchonousOperationPipeline(hooksPipelineConfig)
+		hooksPipeline := hooks.NewSynchronousOperationPipeline(hooksPipelineConfig)
 		handler := &QueryHandler{
 			resolver:               r.resolver,
 			log:                    r.log,
@@ -529,7 +553,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			Resolver:       r.resolver,
 			Plan:           synchronousPlan,
 		}
-		hooksPipeline := hooks.NewSynchonousOperationPipeline(hooksPipelineConfig)
+		hooksPipeline := hooks.NewSynchronousOperationPipeline(hooksPipelineConfig)
 		handler := &MutationHandler{
 			resolver:               r.resolver,
 			log:                    r.log,
@@ -584,6 +608,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			renameTypeNames:        r.renameTypeNames,
 			queryParamsAllowList:   queryParamsAllowList,
 			hooksPipeline:          hooksPipeline,
+			pingInterval:           r.api.Options.Subscriptions.ServerPingInterval,
 			errorHandler:           newErrorHandler(operation, r.devMode),
 		}
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
@@ -1013,7 +1038,7 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 	currentData := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(currentData)
 
-	if wgParams.UseSse {
+	if wgParams.SSE {
 		defer func() {
 			_, _ = fmt.Fprintf(w, "event: close\n\n")
 			flusher.Flush()
@@ -1054,24 +1079,24 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 		if !bytes.Equal(response, lastData.Bytes()) {
 			currentData.Reset()
 			_, _ = currentData.Write(response)
-			if wgParams.UseSse {
+			if wgParams.SSE {
 				_, _ = w.Write([]byte("data: "))
 			}
-			if wgParams.SubsribeOnce {
+			if wgParams.SubscribeOnce {
 				flusher.Flush()
 				return
 			}
-			if wgParams.UseJsonPatch && lastData.Len() != 0 {
+			if wgParams.JSONPatch.IsEnabled() && lastData.Len() != 0 {
 				last := lastData.Bytes()
 				current := currentData.Bytes()
 				patch, err := jsondiff.CompareJSON(last, current)
 				if err != nil {
-					requestLogger.Error("HandleLiveQueryEvent could not create json patch", zap.Error(err))
+					requestLogger.Error("could not create json patch", zap.Error(err))
 					continue
 				}
 				patchBytes, err := json.Marshal(patch)
 				if err != nil {
-					requestLogger.Error("HandleLiveQueryEvent could not marshal json patch", zap.Error(err))
+					requestLogger.Error("could not marshal json patch", zap.Error(err))
 					continue
 				}
 				// we only send the patch if it's smaller than the full response
@@ -1263,6 +1288,7 @@ type SubscriptionHandler struct {
 	renameTypeNames        []resolve.RenameTypeName
 	queryParamsAllowList   []string
 	hooksPipeline          *hooks.SubscriptionOperationPipeline
+	pingInterval           time.Duration
 	errorHandler           *errorHandler
 }
 
@@ -1332,6 +1358,9 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	flushWriter.StartPinging(h.pingInterval)
+	defer flushWriter.Close()
+
 	if h.cacheHeaders != nil {
 		h.cacheHeaders.Set(r, w, nil)
 	}
@@ -1369,19 +1398,50 @@ func (o *operationKindVisitor) EnterOperationDefinition(ref int) {
 	o.walker.Stop()
 }
 
+type httpFlushWriterOutput struct {
+	// The mutex guards both the writer and flusher
+	mu      sync.Mutex
+	writer  http.ResponseWriter
+	flusher http.Flusher
+}
+
+func (o *httpFlushWriterOutput) WriteFlushing(data []byte) (int, error) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	var n int
+	var err error
+	if data != nil {
+		n, err = o.writer.Write(data)
+	}
+	o.flusher.Flush()
+	return n, err
+}
+
+type httpFlushWriterPing struct {
+	interval time.Duration
+	ticker   *time.Ticker
+	notify   chan struct{}
+}
+
+func (p *httpFlushWriterPing) Close() {
+	if p != nil {
+		close(p.notify)
+		p.ticker.Stop()
+	}
+}
+
 type httpFlushWriter struct {
 	ctx                    context.Context
-	writer                 http.ResponseWriter
-	flusher                http.Flusher
+	output                 httpFlushWriterOutput
 	postResolveTransformer *postresolvetransform.Transformer
 	subscribeOnce          bool
 	sse                    bool
-	useJsonPatch           bool
+	jsonPatch              JSONPatchConfiguration
+	deduplicate            bool
 	close                  func()
-	buf                    *bytes.Buffer
-	lastMessage            *bytes.Buffer
-	variables              []byte
-
+	buf                    bytes.Buffer
+	lastMessage            bytes.Buffer
+	ping                   *httpFlushWriterPing
 	// Used for hooks
 	resolveContext *resolve.Context
 	request        *http.Request
@@ -1389,12 +1449,69 @@ type httpFlushWriter struct {
 	logger         *zap.Logger
 }
 
+func newHTTPFlushWriter(ctx context.Context, w http.ResponseWriter, flusher http.Flusher, params WgRequestParams) *httpFlushWriter {
+	return &httpFlushWriter{
+		ctx: ctx,
+		output: httpFlushWriterOutput{
+			writer:  w,
+			flusher: flusher,
+		},
+		sse:         params.SSE,
+		jsonPatch:   params.JSONPatch,
+		deduplicate: params.Deduplicate,
+	}
+}
+
+// StartPinging starts pinging the client at the given interval. Any write resets
+// the ping timer. If interval is <= 0, this is a no-op.
+func (f *httpFlushWriter) StartPinging(interval time.Duration) {
+	if interval <= 0 {
+		return
+	}
+	f.ping = &httpFlushWriterPing{
+		interval: interval,
+		ticker:   time.NewTicker(interval),
+		notify:   make(chan struct{}, 1),
+	}
+	go func() {
+		for {
+			select {
+			case <-f.ping.ticker.C:
+				f.output.WriteFlushing([]byte{'\n'})
+			case <-f.ctx.Done():
+				return
+			case <-f.ping.notify:
+				f.ping.ticker.Reset(f.ping.interval)
+				continue
+			}
+		}
+	}()
+}
+
+func (f *httpFlushWriter) resetPingTimer() {
+	if f.ping != nil {
+		select {
+		case f.ping.notify <- struct{}{}:
+		default:
+		}
+	}
+}
+
+// Deduplicate enables or disables deduplication (off by default). When deduplication
+// is enabled multiple messages with the same payload cause the second and subsequent
+// ones to be omitted. This is typically used by live queries.
+func (f *httpFlushWriter) Deduplicate(dedup bool) {
+	f.deduplicate = dedup
+}
+
 func (f *httpFlushWriter) Header() http.Header {
-	return f.writer.Header()
+	return f.output.writer.Header()
 }
 
 func (f *httpFlushWriter) WriteHeader(statusCode int) {
-	f.writer.WriteHeader(statusCode)
+	f.output.mu.Lock()
+	defer f.output.mu.Unlock()
+	f.output.writer.WriteHeader(statusCode)
 }
 
 func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
@@ -1409,77 +1526,114 @@ func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
 }
 
 func (f *httpFlushWriter) Close() {
+	f.ping.Close()
 	if f.sse {
-		_, _ = f.writer.Write([]byte("event: done\n\n"))
-		f.flusher.Flush()
+		f.output.WriteFlushing([]byte("event: done\n\n"))
 	}
+}
+
+func (f *httpFlushWriter) writeChunk(data []byte) error {
+	f.output.mu.Lock()
+	defer f.output.mu.Unlock()
+	if f.sse {
+		if _, err := f.output.writer.Write([]byte("data: ")); err != nil {
+			return err
+		}
+	}
+
+	if _, err := f.output.writer.Write(data); err != nil {
+		return err
+	}
+	f.resetPingTimer()
+	return nil
+}
+
+func (f *httpFlushWriter) runPostResolveHook(resp []byte) ([]byte, error) {
+	if f.hooksPipeline != nil {
+		postResolveResponse, err := f.hooksPipeline.PostResolve(f.resolveContext, nil, f.request, resp)
+		if err != nil {
+			if f.logger != nil {
+				f.logger.Error("subscription postResolve hooks", zap.Error(err))
+			}
+			return nil, err
+		}
+		return postResolveResponse.Data, nil
+	}
+	return resp, nil
+}
+
+var errNoJSONPatch = errors.New("not using JSON patch")
+
+func (f *httpFlushWriter) prepareJSONPatch(resp []byte) ([]byte, error) {
+	if f.jsonPatch.IsEnabled() && f.lastMessage.Len() != 0 {
+		last := f.lastMessage.Bytes()
+		patch, err := jsondiff.CompareJSON(last, resp)
+		if err != nil {
+			return nil, fmt.Errorf("creating JSON patch: %w", err)
+		}
+		if len(patch) == 0 {
+			// no changes
+			return nil, errNoJSONPatch
+		}
+		patchData, err := json.Marshal(patch)
+		if err != nil {
+			return nil, fmt.Errorf("serializing JSON patch: %w", err)
+		}
+		if len(patchData) >= len(resp) && f.jsonPatch != JSONPatchConfigurationForced {
+			// patch is bigger than the payload, use the payload instead unless forced
+			return nil, errNoJSONPatch
+		}
+		return patchData, nil
+	}
+	return nil, errNoJSONPatch
 }
 
 func (f *httpFlushWriter) Flush() {
 	resp := f.buf.Bytes()
 	f.buf.Reset()
 
-	if f.hooksPipeline != nil {
-		postResolveResponse, err := f.hooksPipeline.PostResolve(f.resolveContext, nil, f.request, resp)
-		if err != nil {
-			if errors.Is(err, context.Canceled) {
-				return
-			}
-			if f.logger != nil {
-				f.logger.Error("subscription postResolve hooks", zap.Error(err))
-			}
-		} else {
-			resp = postResolveResponse.Data
+	resp, err := f.runPostResolveHook(resp)
+	if err != nil {
+		if errors.Is(err, context.Canceled) {
+			return
 		}
 	}
 
-	if f.useJsonPatch && f.lastMessage.Len() != 0 {
-		last := f.lastMessage.Bytes()
-		patch, err := jsondiff.CompareJSON(last, resp)
-		if err != nil {
-			if f.logger != nil {
-				f.logger.Error("subscription json patch", zap.Error(err))
-			}
-			return
-		}
-		if len(patch) == 0 {
-			// no changes
-			return
-		}
-		patchData, err := json.Marshal(patch)
-		if err != nil {
-			if f.logger != nil {
-				f.logger.Error("subscription json patch", zap.Error(err))
-			}
-			return
-		}
-		if f.sse {
-			_, _ = f.writer.Write([]byte("data: "))
-		}
-		if len(patchData) < len(resp) {
-			_, _ = f.writer.Write(patchData)
-		} else {
-			_, _ = f.writer.Write(resp)
+	patchData, err := f.prepareJSONPatch(resp)
+	if err != nil && err != errNoJSONPatch {
+		if f.logger != nil {
+			f.logger.Error("generating JSON patch", zap.Error(err))
 		}
 	}
 
-	if f.lastMessage.Len() == 0 || !f.useJsonPatch {
-		if f.sse {
-			_, _ = f.writer.Write([]byte("data: "))
+	responseData := patchData
+	if responseData == nil {
+		responseData = resp
+	}
+
+	if f.deduplicate && bytes.Equal(f.lastMessage.Bytes(), resp) {
+		return
+	}
+
+	if err := f.writeChunk(responseData); err != nil {
+		if f.logger != nil {
+			f.logger.Error("writing data", zap.Error(err))
 		}
-		_, _ = f.writer.Write(resp)
 	}
 
 	f.lastMessage.Reset()
 	_, _ = f.lastMessage.Write(resp)
 
 	if f.subscribeOnce {
-		f.flusher.Flush()
+		f.output.WriteFlushing(nil)
 		f.close()
 		return
 	}
-	_, _ = f.writer.Write([]byte("\n\n"))
-	f.flusher.Flush()
+	if _, err := f.output.WriteFlushing([]byte("\n\n")); err != nil {
+		if f.logger != nil {
+			f.logger.Error("writing separator", zap.Error(err))
+		}
+	}
 }
 
 // MergeJsonRightIntoLeft merges the right JSON into the left JSON while overriding the left side
@@ -1739,6 +1893,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 			pollingIntervalSeconds: operation.LiveQueryConfig.PollingIntervalSeconds,
 		},
 		internal:     false,
+		pingInterval: r.api.Options.Subscriptions.ServerPingInterval,
 		errorHandler: newErrorHandler(operation, r.devMode),
 	}
 
@@ -1769,6 +1924,7 @@ type FunctionsHandler struct {
 	stringInterpolator   *interpolate.StringInterpolator
 	liveQuery            liveQueryConfig
 	internal             bool
+	pingInterval         time.Duration
 	errorHandler         *errorHandler
 }
 
@@ -1887,12 +2043,14 @@ func (h *FunctionsHandler) handleLiveQuery(resolveCtx *resolve.Context, w http.R
 		out *hooks.MiddlewareHookResponse
 	)
 
-	resolveCtx, fw, ok = getFlushWriter(resolveCtx, input, r, w)
+	resolveCtx, fw, ok = getFlushWriter(resolveCtx, r, w)
 	if !ok {
 		requestLogger.Error("request doesn't support flushing")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	fw.Deduplicate(true)
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
@@ -1974,8 +2132,16 @@ func (h *FunctionsHandler) handleSubscriptionRequest(resolveCtx *resolve.Context
 	setSubscriptionHeaders(w)
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
+	resolveCtx, flushWriter, ok := getFlushWriter(resolveCtx, r, w)
+	if !ok {
+		requestLogger.Error("could not retrieve flush writer")
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 	ctx := resolveCtx.Context()
-	err := h.hooksClient.DoFunctionSubscriptionRequest(ctx, h.operation.Path, input, wgParams.SubsribeOnce, wgParams.UseSse, wgParams.UseJsonPatch, w, buf)
+	flushWriter.StartPinging(h.pingInterval)
+	defer flushWriter.Close()
+	err := h.hooksClient.DoFunctionSubscriptionRequest(ctx, h.operation.Path, input, wgParams.SubscribeOnce, flushWriter, buf)
 	if err != nil {
 		if ctx.Err() != nil {
 			requestLogger.Debug("request cancelled")
@@ -2027,7 +2193,7 @@ func setSubscriptionHeaders(w http.ResponseWriter) {
 func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter, pipeline *hooks.SubscriptionOperationPipeline, logger *zap.Logger) (*resolve.Context, *httpFlushWriter, bool) {
 	var flushWriter *httpFlushWriter
 	var ok bool
-	ctx, flushWriter, ok = getFlushWriter(ctx, ctx.Variables, r, w)
+	ctx, flushWriter, ok = getFlushWriter(ctx, r, w)
 	if !ok {
 		return nil, nil, false
 	}
@@ -2039,7 +2205,7 @@ func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseW
 	return ctx, flushWriter, true
 }
 
-func getFlushWriter(ctx *resolve.Context, variables []byte, r *http.Request, w http.ResponseWriter) (*resolve.Context, *httpFlushWriter, bool) {
+func getFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter) (*resolve.Context, *httpFlushWriter, bool) {
 	wgParams := NewWgRequestParams(r)
 
 	flusher, ok := w.(http.Flusher)
@@ -2047,22 +2213,13 @@ func getFlushWriter(ctx *resolve.Context, variables []byte, r *http.Request, w h
 		return ctx, nil, false
 	}
 
-	if !wgParams.SubsribeOnce {
+	if !wgParams.SubscribeOnce {
 		setSubscriptionHeaders(w)
 	}
 
-	flushWriter := &httpFlushWriter{
-		writer:       w,
-		flusher:      flusher,
-		sse:          wgParams.UseSse,
-		useJsonPatch: wgParams.UseJsonPatch,
-		buf:          &bytes.Buffer{},
-		lastMessage:  &bytes.Buffer{},
-		ctx:          ctx.Context(),
-		variables:    variables,
-	}
+	flushWriter := newHTTPFlushWriter(ctx.Context(), w, flusher, wgParams)
 
-	if wgParams.SubsribeOnce {
+	if wgParams.SubscribeOnce {
 		flushWriter.subscribeOnce = true
 		var cancellableCtx context.Context
 		cancellableCtx, flushWriter.close = context.WithCancel(ctx.Context())
