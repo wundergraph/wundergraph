@@ -8,6 +8,9 @@ export default configureWunderGraphServer(() => ({
 				mutatingPreResolve: async ({ input, operations }) => {
 					const user = await operations.query({
 						operationName: 'UserByEmail',
+						input: {
+							email: 'jens@wundergraph.com',
+						},
 					});
 
 					return {
