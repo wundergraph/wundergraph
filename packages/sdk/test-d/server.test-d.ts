@@ -30,10 +30,10 @@ export interface User extends WunderGraphUser<Role, CustomClaims> {}
 
 export type DataSources = 'counter';
 
-export interface HookContext<TCustomContext>
+export interface HookContext<TCustomContext = any>
 	extends BaseRequestContext<User, InternalClient, OperationsClient, TCustomContext> {}
 
-export type HooksConfig<TCustomContext> = HooksConfiguration<
+export type HooksConfig<TCustomContext = any> = HooksConfiguration<
 	QueryHooks<TCustomContext>,
 	MutationHooks<TCustomContext>,
 	SubscriptionHooks<TCustomContext>,
@@ -42,17 +42,17 @@ export type HooksConfig<TCustomContext> = HooksConfiguration<
 	HookContext<TCustomContext>
 >;
 
-export type QueryHooks<TCustomContext> = {
+export type QueryHooks<TCustomContext = any> = {
 	Country?: QueryHook<{ id: number }, { data: { name: string } }, HookContext<TCustomContext>>;
 	FakeWeather?: QueryHookWithoutInput<{ data: { temp: number } }, HookContext<TCustomContext>>;
 };
 
-export type MutationHooks<TCustomContext> = {
+export type MutationHooks<TCustomContext = any> = {
 	SetName?: MutationHook<{ id: number }, { data: { name: string } }, HookContext<TCustomContext>>;
 	Delete?: MutationHookWithoutInput<{}, HookContext<TCustomContext>>;
 };
 
-export type SubscriptionHooks<TCustomContext> = {
+export type SubscriptionHooks<TCustomContext = any> = {
 	Countdown?: SubscriptionHook<{ from: number }, { data: { countdown: number } }, HookContext<TCustomContext>>;
 	Price?: SubscriptionHookWithoutInput<{ data: { price: number } }, HookContext<TCustomContext>>;
 };
@@ -201,7 +201,9 @@ const configuration = configureWunderGraphServer<
 	},
 }));
 
-expectType<WunderGraphHooksAndServerConfig<any, any, MyRequestContext, MyGlobalContext>>(configuration);
+expectType<
+	WunderGraphHooksAndServerConfig<HooksConfig<MyRequestContext>, WebhooksConfig, MyRequestContext, MyGlobalContext>
+>(configuration);
 
 expectAssignable<(ctx: MyGlobalContext) => void>(configuration.context?.global?.release!);
 expectAssignable<(ctx: MyRequestContext) => void>(configuration.context?.request?.release!);

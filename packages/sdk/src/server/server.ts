@@ -40,6 +40,7 @@ import { CreateServerOptions, TracerConfig } from './types';
 import { loadTraceConfigFromWgConfig } from './trace/config';
 import { TelemetryPluginOptions } from './plugins/telemetry';
 import { createLogger } from './logger';
+import { ServerError } from './error';
 
 export const WunderGraphConfigurationFilename = 'wundergraph.wgconfig';
 
@@ -90,7 +91,7 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 export function configureWunderGraphServer<
 	GeneratedHooksConfig extends HooksConfiguration = HooksConfiguration,
 	GeneratedInternalClient = InternalClient,
-	GeneratedWebhooksConfig extends HooksConfiguration = WebhooksConfig,
+	GeneratedWebhooksConfig extends WebhooksConfig = WebhooksConfig,
 	TRequestContext = any,
 	TGlobalContext = any
 >(
@@ -328,7 +329,7 @@ export const createServer = async ({
 		if (serverConfig.context?.request?.create) {
 			const result = await serverConfig.context.request.create(globalContext);
 			if (result === undefined) {
-				throw new Error('could not instantiate request context');
+				throw new ServerError('could not instantiate request context');
 			}
 			return result;
 		}
@@ -550,7 +551,7 @@ export const createServer = async ({
 		  })
 		: ({
 				from() {
-					throw new Error(
+					throw new ServerError(
 						`ORM is not enabled for your application. Set "experimental.orm" to "true" in your \`wundergraph.config.ts\` to enable.`
 					);
 				},

@@ -73,8 +73,21 @@ func HeaderCSVToSlice(headers map[string]string) map[string][]string {
 	return result
 }
 
+type HookResponseError struct {
+	Code       string `json:"code"`
+	Message    string `json:"message"`
+	StatusCode int    `json:"statusCode"`
+	Stack      string `json:"stack"`
+}
+
+func (e *HookResponseError) Error() string {
+	return e.Message
+}
+
 type HookResponse interface {
-	ResponseError() string
+	HookName() string
+	OperationName() string
+	ResponseError() error
 }
 
 type OnWsConnectionInitHookPayload struct {
@@ -107,24 +120,53 @@ type OnResponseHookResponse struct {
 }
 
 type MiddlewareHookResponse struct {
-	Error                   string            `json:"error,omitempty"`
-	Op                      string            `json:"op"`
-	Hook                    string            `json:"hook"`
-	Response                json.RawMessage   `json:"response"`
-	Input                   json.RawMessage   `json:"input"`
-	SetClientRequestHeaders map[string]string `json:"setClientRequestHeaders"`
+	Error                   *HookResponseError `json:"error,omitempty"`
+	Op                      string             `json:"op"`
+	Hook                    string             `json:"hook"`
+	Response                json.RawMessage    `json:"response"`
+	Input                   json.RawMessage    `json:"input"`
+	SetClientRequestHeaders map[string]string  `json:"setClientRequestHeaders"`
 	// ClientResponseStatusCode is the status code that should be returned to the client
 	ClientResponseStatusCode int
 }
 
-func (r *MiddlewareHookResponse) ResponseError() string { return r.Error }
-
-type UploadHookResponse struct {
-	Error   string `json:"error"`
-	FileKey string `json:"fileKey"`
+func (r *MiddlewareHookResponse) OperationName() string {
+	return r.Op
 }
 
-func (r *UploadHookResponse) ResponseError() string { return r.Error }
+func (r *MiddlewareHookResponse) HookName() string {
+	return r.Hook
+}
+
+func (r *MiddlewareHookResponse) ResponseError() error {
+	// XXX: Don't simplify this unless you know what you're doing
+	if r.Error != nil {
+		return r.Error
+	}
+	return nil
+}
+
+type UploadHookResponse struct {
+	Hook    string             `json:"hook"`
+	Error   *HookResponseError `json:"error"`
+	FileKey string             `json:"fileKey"`
+}
+
+func (r *UploadHookResponse) OperationName() string {
+	return "upload"
+}
+
+func (r *UploadHookResponse) HookName() string {
+	return r.Hook
+}
+
+func (r *UploadHookResponse) ResponseError() error {
+	// XXX: Don't simplify this unless you know what you're doing
+	if r.Error != nil {
+		return r.Error
+	}
+	return nil
+}
 
 type MiddlewareHook string
 
@@ -250,8 +292,13 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 		return nil, fmt.Errorf("error decoding function response: %w", err)
 	}
 
-	if hookRes.Error != "" {
-		return nil, fmt.Errorf("error calling function %s: %s", operationName, hookRes.Error)
+	if err := hookRes.ResponseError(); err != nil {
+		if err.Error() == "" {
+			// Hook failed but didn't report a message
+			return nil, fmt.Errorf("hook %s failed for operation %s", hookRes.HookName(), hookRes.OperationName())
+		}
+
+		return nil, err
 	}
 
 	hookRes.ClientResponseStatusCode = resp.StatusCode
@@ -389,17 +436,21 @@ func (c *Client) doRequest(ctx context.Context, hookResponse HookResponse, actio
 		return fmt.Errorf("hook %s failed with reading body with error: %w", string(hook), err)
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("hook %s failed with invalid status code: %d (%s)", string(hook), resp.StatusCode, string(data))
-	}
-
-	err = json.Unmarshal(data, hookResponse)
-	if err != nil {
+	// Decode the hook response first, since we might want to propagate the error message
+	if err := json.Unmarshal(data, hookResponse); err != nil {
 		return fmt.Errorf("hook %s response could not be decoded: %w", string(hook), err)
 	}
 
-	if hookResponse.ResponseError() != "" {
-		return fmt.Errorf("hook %s failed with error: %s", string(hook), hookResponse.ResponseError())
+	if err := hookResponse.ResponseError(); err != nil {
+		if err.Error() == "" {
+			// Hook failed but didn't report a message
+			return fmt.Errorf("hook %s failed for operation %s", hookResponse.HookName(), hookResponse.OperationName())
+		}
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("hook %s failed with invalid status code: %d (%s)", string(hook), resp.StatusCode, string(data))
 	}
 
 	return nil

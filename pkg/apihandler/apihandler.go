@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"net/http/httputil"
 	"os"
@@ -522,6 +521,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			renameTypeNames:        r.renameTypeNames,
 			queryParamsAllowList:   queryParamsAllowList,
 			hooksPipeline:          hooksPipeline,
+			errorHandler:           newErrorHandler(operation, r.devMode),
 		}
 
 		if operation.LiveQueryConfig != nil && operation.LiveQueryConfig.Enable {
@@ -569,6 +569,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			postResolveTransformer: postResolveTransformer,
 			renameTypeNames:        r.renameTypeNames,
 			hooksPipeline:          hooksPipeline,
+			errorHandler:           newErrorHandler(operation, r.devMode),
 		}
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
 		route = r.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath)
@@ -608,6 +609,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			queryParamsAllowList:   queryParamsAllowList,
 			hooksPipeline:          hooksPipeline,
 			pingInterval:           r.api.Options.Subscriptions.ServerPingInterval,
+			errorHandler:           newErrorHandler(operation, r.devMode),
 		}
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
 		route = r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
@@ -905,6 +907,7 @@ type QueryHandler struct {
 	renameTypeNames        []resolve.RenameTypeName
 	queryParamsAllowList   []string
 	hooksPipeline          *hooks.SynchronousOperationPipeline
+	errorHandler           *errorHandler
 }
 
 func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -960,10 +963,8 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resolveCtx.Variables, err = postProcessVariables(h.operation, r, resolveCtx.Variables)
-	if err != nil {
-		if done := handleOperationErr(requestLogger, err, w, "postProcessVariables failed", h.operation); done {
-			return
-		}
+	if h.errorHandler.Done(w, err, "postProcessVariables failed", requestLogger) {
+		return
 	}
 
 	flusher, flusherOk := w.(http.Flusher)
@@ -985,7 +986,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp, err := h.hooksPipeline.Run(resolveCtx, w, r, buf)
-	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
+	if h.errorHandler.Done(w, err, "hooks pipeline failed", requestLogger) {
 		return
 	}
 
@@ -1001,7 +1002,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err = w.Write(resp.Data)
-	if done := handleOperationErr(requestLogger, err, w, "writing response failed", h.operation); done {
+	if h.errorHandler.Done(w, err, "writing response failed", requestLogger) {
 		return
 	}
 }
@@ -1160,6 +1161,7 @@ type MutationHandler struct {
 	postResolveTransformer *postresolvetransform.Transformer
 	renameTypeNames        []resolve.RenameTypeName
 	hooksPipeline          *hooks.SynchronousOperationPipeline
+	errorHandler           *errorHandler
 }
 
 func (h *MutationHandler) parseFormVariables(r *http.Request) []byte {
@@ -1243,17 +1245,15 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
-	if err != nil {
-		if done := handleOperationErr(requestLogger, err, w, "postProcessVariables failed", h.operation); done {
-			return
-		}
+	if h.errorHandler.Done(w, err, "postProcessVariables failed", requestLogger) {
+		return
 	}
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
 	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
-	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
+	if h.errorHandler.Done(w, err, "hooks pipeline failed", requestLogger) {
 		return
 	}
 
@@ -1267,7 +1267,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	reader := bytes.NewReader(resp.Data)
 	_, err = reader.WriteTo(w)
-	if done := handleOperationErr(requestLogger, err, w, "writing response failed", h.operation); done {
+	if h.errorHandler.Done(w, err, "writing response failed", requestLogger) {
 		return
 	}
 }
@@ -1289,6 +1289,7 @@ type SubscriptionHandler struct {
 	queryParamsAllowList   []string
 	hooksPipeline          *hooks.SubscriptionOperationPipeline
 	pingInterval           time.Duration
+	errorHandler           *errorHandler
 }
 
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -1347,10 +1348,8 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 
 	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
-	if err != nil {
-		if done := handleOperationErr(requestLogger, err, w, "postProcessVariables failed", h.operation); done {
-			return
-		}
+	if h.errorHandler.Done(w, err, "postProcessVariables failed", requestLogger) {
+		return
 	}
 
 	ctx, flushWriter, ok := getHooksFlushWriter(ctx, r, w, h.hooksPipeline, h.log)
@@ -1895,6 +1894,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 		},
 		internal:     false,
 		pingInterval: r.api.Options.Subscriptions.ServerPingInterval,
+		errorHandler: newErrorHandler(operation, r.devMode),
 	}
 
 	if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
@@ -1925,6 +1925,7 @@ type FunctionsHandler struct {
 	liveQuery            liveQueryConfig
 	internal             bool
 	pingInterval         time.Duration
+	errorHandler         *errorHandler
 }
 
 func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -2019,7 +2020,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	isLive := h.liveQuery.enabled && r.URL.Query().Has(WgLiveParam)
 
 	input, err := hooks.EncodeData(r, buf, ctx.Variables, nil)
-	if done := handleOperationErr(requestLogger, err, w, "encoding hook data failed", h.operation); done {
+	if h.errorHandler.Done(w, err, "encoding hook data failed", requestLogger) {
 		return
 	}
 
@@ -2226,45 +2227,6 @@ func getFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter
 	}
 
 	return ctx, flushWriter, true
-}
-
-func handleOperationErr(log *zap.Logger, err error, w http.ResponseWriter, errorMessage string, operation *wgpb.Operation) (done bool) {
-	if err == nil {
-		return false
-	}
-	if errors.Is(err, context.Canceled) {
-		// client closed connection
-		w.WriteHeader(499)
-		return true
-	}
-	// This detects all timeout errors, including context.DeadlineExceeded
-	var ne net.Error
-	if errors.As(err, &ne) && ne.Timeout() {
-		// request timeout exceeded
-		log.Warn("request timeout exceeded",
-			zap.String("operationName", operation.Name),
-			zap.String("operationType", operation.OperationType.String()),
-		)
-		w.WriteHeader(http.StatusGatewayTimeout)
-		_, _ = io.WriteString(w, http.StatusText(http.StatusGatewayTimeout))
-		return true
-	}
-	var validationError *inputvariables.ValidationError
-	if errors.As(err, &validationError) {
-		w.WriteHeader(http.StatusBadRequest)
-		enc := json.NewEncoder(w)
-		if err := enc.Encode(&validationError); err != nil {
-			log.Error("error encoding validation error", zap.Error(err))
-		}
-		return true
-	}
-	log.Error(errorMessage,
-		zap.String("operationName", operation.Name),
-		zap.String("operationType", operation.OperationType.String()),
-		zap.Error(err),
-	)
-	http.Error(w, fmt.Sprintf("%s: %s", errorMessage, err.Error()), http.StatusInternalServerError)
-	return true
 }
 
 func validateInputVariables(ctx context.Context, log *zap.Logger, variables []byte, validator *inputvariables.Validator, w http.ResponseWriter) bool {
