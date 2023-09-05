@@ -15,7 +15,11 @@ const pipeline = promisify(Stream.pipeline);
 export const downloadTar = async (url: string) => {
 	try {
 		const tempFile = join(tmpdir(), `wundergraph-example.temp-${Date.now()}`);
-		await pipeline(got.stream(url, getGitHubRequestOptions()), createWriteStream(tempFile));
+		const options = {
+			...getGitHubRequestOptions(),
+			followRedirect: true,
+		};
+		await pipeline(got.stream(url, options), createWriteStream(tempFile));
 		return tempFile;
 	} catch (e) {
 		console.error('Error', e);
@@ -40,7 +44,7 @@ export const downloadAndExtractRepo = async ({
 }) => {
 	try {
 		const spinner = ora('Loading..').start();
-		const tempFile = await downloadTar(`https://codeload.github.com/${repoOwnerName}/${repoName}/tar.gz/${ref}`);
+		const tempFile = await downloadTar(`https://github.com/${repoOwnerName}/${repoName}/archive/${ref}.tar.gz`);
 		await tar.x({
 			file: tempFile,
 			cwd: root,
