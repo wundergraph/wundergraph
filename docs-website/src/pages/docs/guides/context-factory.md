@@ -115,7 +115,7 @@ export default configureWunderGraphServer(() => ({
       apiNamespace: 'embedded',
       serverName: 'embedded',
       schema: new GraphQLSchema({
-        query: new GraphQLObjectType<any, GraphQLExecutionContext<MyCustomContext>>({
+        query: new GraphQLObjectType<any, GraphQLExecutionContext>({
           name: 'Query',
           fields: {
             fromCustomContext: {

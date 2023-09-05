@@ -17,22 +17,12 @@ export type Role = {{{ roleDefinitions }}};
 
 export interface User extends WunderGraphUser<Role, CustomClaims> {}
 
-export interface Config<TCustomContext> {
-    hooks: HooksConfig<TCustomContext>;
-    graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
-}
-
-export interface OutputConfig<TCustomContext> {
-    hooks: HooksConfig<TCustomContext>;
-    graphqlServers?: (GraphQLServerConfig & { url: string })[];
-}
-
-export interface GraphQLExecutionContext<TCustomContext = any> {
-    wundergraph: BaseRequestContext<User, InternalOperationsClient, TCustomContext>;
-}
-
 type RequestContext = CustomContext extends { request: infer R } ? R : any;
 type GlobalContext = CustomContext extends { global: infer G } ? G : any;
+
+export interface GraphQLExecutionContext {
+    wundergraph: BaseRequestContext<User, InternalOperationsClient, RequestContext>;
+}
 
 declare module "@wundergraph/sdk/server" {
 	export function configureWunderGraphServer(
