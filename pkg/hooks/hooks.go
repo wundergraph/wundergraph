@@ -82,13 +82,12 @@ type HookResponseError struct {
 }
 
 func (e *HookResponseError) Error() string {
-	if e.Message == "" {
-		return "hook failed"
-	}
 	return e.Message
 }
 
 type HookResponse interface {
+	HookName() string
+	OperationName() string
 	ResponseError() error
 }
 
@@ -132,6 +131,14 @@ type MiddlewareHookResponse struct {
 	ClientResponseStatusCode int
 }
 
+func (r *MiddlewareHookResponse) OperationName() string {
+	return r.Op
+}
+
+func (r *MiddlewareHookResponse) HookName() string {
+	return r.Hook
+}
+
 func (r *MiddlewareHookResponse) ResponseError() error {
 	// XXX: Don't simplify this unless you know what you're doing
 	if r.Error != nil {
@@ -141,8 +148,17 @@ func (r *MiddlewareHookResponse) ResponseError() error {
 }
 
 type UploadHookResponse struct {
+	Hook    string             `json:"hook"`
 	Error   *HookResponseError `json:"error"`
 	FileKey string             `json:"fileKey"`
+}
+
+func (r *UploadHookResponse) OperationName() string {
+	return "upload"
+}
+
+func (r *UploadHookResponse) HookName() string {
+	return r.Hook
 }
 
 func (r *UploadHookResponse) ResponseError() error {
@@ -278,6 +294,11 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 	}
 
 	if err := hookRes.ResponseError(); err != nil {
+		if err.Error() == "" {
+			// Hook failed but didn't report a message
+			return nil, fmt.Errorf("hook %s failed for operation %s", hookRes.HookName(), hookRes.OperationName())
+		}
+
 		return nil, err
 	}
 
@@ -470,6 +491,10 @@ func (c *Client) doRequest(ctx context.Context, hookResponse HookResponse, actio
 	}
 
 	if err := hookResponse.ResponseError(); err != nil {
+		if err.Error() == "" {
+			// Hook failed but didn't report a message
+			return fmt.Errorf("hook %s failed for operation %s", hookResponse.HookName(), hookResponse.OperationName())
+		}
 		return err
 	}
 
