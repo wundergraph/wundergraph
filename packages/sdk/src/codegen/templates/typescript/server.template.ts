@@ -17,9 +17,16 @@ export type Role = {{{ roleDefinitions }}};
 
 export interface User extends WunderGraphUser<Role, CustomClaims> {}
 
+/**
+ * We extract the custom context defined by the user
+ */
 type RequestContext = CustomContext extends { request: infer R } ? R : any;
 type GlobalContext = CustomContext extends { global: infer G } ? G : any;
 
+/**
+ * Can be used for custom GraphQL execution context
+ * @see https://docs.wundergraph.com/docs/wundergraph-server-ts-reference/custom-graphql-servers
+ */
 export interface GraphQLExecutionContext {
     wundergraph: BaseRequestContext<User, InternalOperationsClient, RequestContext>;
 }
