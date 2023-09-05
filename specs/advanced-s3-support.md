@@ -74,7 +74,7 @@ Hooks are called for each file that is uploaded, so we can implement different l
 Validation of the file according to the configuration is done before the hooks are called, in the Go server.
 
 ```ts
-export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
+export default configureWunderGraphServer(() => ({
   uploads: {
     minio: {
       coverPicture: {

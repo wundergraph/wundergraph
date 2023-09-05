@@ -4,7 +4,9 @@ pageTitle: WunderGraph - Internal Client deprecated
 description: The internal client is deprecated and will be superseded by the new operations client.
 ---
 
-The internal client is deprecated and will be superseded by the new operations client. Removal is planned on the 1st of June.
+The internal client is deprecated and will be superseded by the new operations client.
+
+Last supported version: `0.175.0`
 
 The operations client is based on the [TypeScript client](/docs/clients-reference/typescript-client) and gives you the same API. Unlike the internal client, it supports Typescript operations and can be used to call internal and public operations.
 

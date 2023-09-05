@@ -1,6 +1,5 @@
 import { expectType, expectAssignable } from 'tsd';
 import {
-	InternalClient,
 	InternalOperationsDefinition,
 	OperationsClient,
 	Webhook,
@@ -25,7 +24,7 @@ class MyRequestContext {
 
 type InternalOperationsClient = OperationsClient<InternalOperations>;
 
-const createWebhook = createWebhookFactory<InternalOperationsClient, InternalClient, MyRequestContext, any>();
+const createWebhook = createWebhookFactory<InternalOperationsClient, MyRequestContext, any>();
 
 // allow any event and response
 expectAssignable<Webhook>(
@@ -60,7 +59,7 @@ expectAssignable<Webhook>(
 );
 
 // restricted event and response with operations
-expectType<Webhook<InternalClient, WebhookHttpEvent<{ city: string }>, WebhookHttpResponse<{ temp: string }>>>(
+expectType<Webhook<WebhookHttpEvent<{ city: string }>, WebhookHttpResponse<{ temp: string }>>>(
 	createWebhook<WebhookHttpEvent<{ city: string }>, WebhookHttpResponse<{ temp: string }>>({
 		handler: async (event, ctx) => {
 			const result = await ctx.operations.query({

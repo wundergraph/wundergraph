@@ -129,11 +129,8 @@ You can use our generic HMAC verifier to validate other webhooks as well.
 // .wundergraph/wundergraph.server.ts
 
 import { configureWunderGraphServer, EnvironmentVariable, GithubWebhookVerifier } from '@wundergraph/sdk/server';
-import type { HooksConfig } from './generated/wundergraph.hooks';
-import type { WebhooksConfig } from './generated/wundergraph.webhooks';
-import type { InternalClient } from './generated/wundergraph.internal.client';
 
-export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
+export default configureWunderGraphServer(() => ({
   webhooks: {
     github: {
       verifier: CreateWebhookVerifier({

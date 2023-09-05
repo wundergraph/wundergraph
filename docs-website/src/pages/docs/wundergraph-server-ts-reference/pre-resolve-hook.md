@@ -17,7 +17,6 @@ the `preResolve` hook is called with the following parameters:
 - `clientRequest`: The original client request object, including Headers
 - `log`: The logger object
 - `operations`: The operations client, used to call other (internal) operations
-- `internalClient`: The internal client object, _deprecated_
 - `input`: The input object (only for Operation hooks)
 
 With the `operations` client,
@@ -30,7 +29,7 @@ export default configureWunderGraphServer(() => ({
   hooks: {
     queries: {
       Dragons: {
-        preResolve: async ({ input, user, log, operations, internalClient, clientRequest }) => {
+        preResolve: async ({ input, user, log, operations, clientRequest }) => {
           log.info(`Pre-resolve hook called for Dragons with ${input}`);
         },
       },

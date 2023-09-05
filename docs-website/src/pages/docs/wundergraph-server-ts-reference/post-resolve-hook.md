@@ -17,7 +17,6 @@ the `postResolve` hook is called with the following parameters:
 - `clientRequest`: The original client request object, including Headers
 - `log`: The logger object
 - `operations`: The operations client, used to call other (internal) operations
-- `internalClient`: The internal client object, _deprecated_
 - `response`: The response object (only for postResolve hooks)
 - `input`: The input object (only for Operation hooks)
 
@@ -31,7 +30,7 @@ export default configureWunderGraphServer(() => ({
   hooks: {
     queries: {
       Dragons: {
-        postResolve: async ({ input, user, log, internalClient, clientRequest, response }) => {
+        postResolve: async ({ input, user, log, clientRequest, response }) => {
           log.info(`Resolved Dragons with input: ${input.name}`);
         },
       },

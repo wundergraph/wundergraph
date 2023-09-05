@@ -2,7 +2,6 @@
 export const template = `
 import type { HooksConfig } from "./wundergraph.hooks";
 import type { WebhooksConfig } from "./wundergraph.webhooks";
-import type { InternalClient } from "./wundergraph.internal.client"
 import type { InternalOperationsClient } from "./wundergraph.internal.operations.client";
 import type { CustomClaims } from "./claims";
 import type {
@@ -28,7 +27,7 @@ export interface OutputConfig<TCustomContext> {
 }
 
 export interface GraphQLExecutionContext<TCustomContext = any> {
-    wundergraph: BaseRequestContext<User, InternalClient, InternalOperationsClient, TCustomContext>;
+    wundergraph: BaseRequestContext<User, InternalOperationsClient, TCustomContext>;
 }
 
 declare module "@wundergraph/sdk/server" {

@@ -4,8 +4,9 @@ export default createOperation.query({
 	input: z.object({
 		id: z.number(),
 	}),
-	handler: async ({ input, internalClient }) => {
-		const todoResult = await internalClient.queries.Todo({
+	handler: async ({ input, operations }) => {
+		const todoResult = await operations.query({
+			operationName: 'Todo',
 			input: {
 				id: input.id,
 			},

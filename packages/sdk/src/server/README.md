@@ -11,7 +11,7 @@ This directory contains the server implementation of the WunderGraph SDK. It's e
 
 import { configureWunderGraphServer, GithubWebhookVerifier, EnvironmentVariable } from '@wundergraph/sdk/server';
 
-export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
+export default configureWunderGraphServer(() => ({
   webhooks: {
     github: {
       verifier: GithubWebhookVerifier(new EnvironmentVariable('GITHUB_SECRET')),
