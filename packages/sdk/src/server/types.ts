@@ -559,7 +559,7 @@ export interface HooksConfiguration<
 	Mutations extends MutationHooks<Context> = MutationHooks,
 	Subscriptions extends SubscriptionHooks<Context> = SubscriptionHooks,
 	Uploads extends UploadHooks = UploadHooks,
-	DataSources extends string = string,
+	DataSources extends string = any,
 	Context extends BaseRequestContext = BaseRequestContext
 > {
 	global?: GlobalHooksConfig<OperationNames<Queries, Mutations, Subscriptions>, DataSources, Context>;

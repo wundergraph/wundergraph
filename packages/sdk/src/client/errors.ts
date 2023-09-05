@@ -66,9 +66,40 @@ export interface GraphQLError {
 	path?: ReadonlyArray<string | number>;
 }
 
-export type OperationErrorBaseFields = {
+export type OperationErrorFields = {
 	message?: string;
-	code: string;
+	code?: string;
+	statusCode?: number;
+	stack?: string;
+	cause?: OperationErrorFields;
+};
+
+type ErrorWithCause = {
+	cause?: Error;
+};
+
+type MightBeOperationError = {
+	code?: string;
+	statusCode?: number;
+};
+
+const errorToJSON = (err: Error): OperationErrorFields => {
+	const result: OperationErrorFields = {
+		message: err.message,
+		stack: err.stack,
+	};
+	const opError = err as MightBeOperationError;
+	if (opError.code) {
+		result.code = opError.code;
+	}
+	if (opError.statusCode) {
+		result.statusCode = opError.statusCode;
+	}
+	const withCause = err as ErrorWithCause;
+	if (withCause.cause) {
+		result.cause = errorToJSON(withCause.cause);
+	}
+	return result;
 };
 
 /**
@@ -93,12 +124,8 @@ export class OperationError<Code extends string = string> extends Error {
 		this.name = this.constructor.name;
 	}
 
-	public toJSON() {
-		const result: OperationErrorBaseFields = {
-			code: this.code,
-			message: this?.message,
-		};
-		return result;
+	toJSON() {
+		return errorToJSON(this);
 	}
 }
 

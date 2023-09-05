@@ -104,7 +104,7 @@ func newPipeline(config PipelineConfig) pipeline {
 	}
 }
 
-func NewSynchonousOperationPipeline(config SynchronousOperationPipelineConfig) *SynchronousOperationPipeline {
+func NewSynchronousOperationPipeline(config SynchronousOperationPipelineConfig) *SynchronousOperationPipeline {
 
 	return &SynchronousOperationPipeline{
 		pipeline: newPipeline(config.PipelineConfig),

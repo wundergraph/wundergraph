@@ -1,6 +1,7 @@
 import { GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLInt, GraphQLFloat, GraphQLBoolean } from 'graphql';
 
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
+import { ResponseError } from '@wundergraph/sdk/client';
 
 export default configureWunderGraphServer(() => ({
 	hooks: {
@@ -11,6 +12,9 @@ export default configureWunderGraphServer(() => ({
 						operationName: 'Infinite',
 						input: hook.input,
 					});
+					if (result.error) {
+						throw result.error;
+					}
 				},
 			},
 			PreResolveFailure: {

@@ -594,6 +594,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		Metrics:             n.metrics,
 		InsecureCookies:     n.options.insecureCookies,
 		Log:                 n.log,
+		DevMode:             n.options.devMode,
 	}
 	internalBuilder := apihandler.NewInternalBuilder(internalBuilderConfig)
 
