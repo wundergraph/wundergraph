@@ -423,7 +423,7 @@ func (c *Client) DoHealthCheckRequest(ctx context.Context) (status bool) {
 		return false
 	}
 	defer resp.Body.Close()
-	return resp.StatusCode != 200
+	return resp.StatusCode == 200
 }
 
 func encodeData(r *http.Request, w *bytes.Buffer, variables []byte, response []byte) ([]byte, error) {

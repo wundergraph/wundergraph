@@ -5,11 +5,10 @@ import { tmpdir } from 'os';
 import { getRepository } from '../helpers/getRepository';
 import { getRepoTags } from '../helpers/getRepoTags';
 
-jest.setTimeout(20000);
-test('The command should clone the repository using example name and github link and return "success"', async () => {
+jest.setTimeout(180000);
+test('The command should clone the repository using example name and return "success"', async () => {
 	const tempDirectory = tmpdir();
 	const firstRepoName = `tempRepository1-${Date.now()}`;
-	const secondRepoName = `tempRepository2-${Date.now()}`;
 	const firstTestResponse = await getRepository({
 		exampleName: 'caching',
 		projectName: firstRepoName,
@@ -29,7 +28,11 @@ test('The command should clone the repository using example name and github link
 		await fsp.access(path.join(tempDirectory, firstRepoName));
 		fs.rmSync(path.join(tempDirectory, firstRepoName), { recursive: true, force: true });
 	} catch (e) {}
+});
 
+test('The command should clone the repository using example URL and return "success"', async () => {
+	const tempDirectory = tmpdir();
+	const secondRepoName = `tempRepository2-${Date.now()}`;
 	const secondTestResponse = await getRepository({
 		githubLink: 'https://github.com/wundergraph/wundergraph/tree/main/examples/caching',
 		projectName: secondRepoName,
