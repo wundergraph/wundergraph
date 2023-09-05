@@ -21,51 +21,50 @@ import { InternalOperationsClient } from "./wundergraph.internal.operations.clie
 
 export type DATA_SOURCES = {{{dataSourcesUnion}}};
 										
-export interface HookContext<TCustomContext = any> extends BaseRequestContext<User, InternalClient, InternalOperationsClient, TCustomContext> {}
+export interface HookContext extends BaseRequestContext<User, InternalClient, InternalOperationsClient> {}
 
-export type HooksConfig<TCustomContext = any> = HooksConfiguration<
-	QueryHooks<TCustomContext>,
-	MutationHooks<TCustomContext>,
-	SubscriptionHooks<TCustomContext>,
-	UploadHooks<TCustomContext>,
-	DATA_SOURCES,
-	HookContext<TCustomContext>
->;
+declare module '@wundergraph/sdk/server' {
+	export interface HooksMeta {
+		dataSources: {{{dataSourcesUnion}}};
+		operationNames: 'Country' | 'FakeWeather' | 'PastLaunches' | 'ProtectedWeather' | 'Weather';
+	}
 
-export type QueryHooks<TCustomContext = any> = {
-{{#if hasQueries}}
-	{{#each queries}}
-		{{operationName}}?: QueryHook{{#if hasInternalInput}}<{{injectedInputTypename}}, {{else}}WithoutInput<{{/if}}{{responseTypename}}, HookContext<TCustomContext>>,
-	{{/each}}
-{{/if}}
+	export type QueryHooks = {
+		{{#if hasQueries}}
+			{{#each queries}}
+				{{operationName}}?: QueryHook{{#if hasInternalInput}}<{{injectedInputTypename}}, {{else}}WithoutInput<{{/if}}{{responseTypename}}, HookContext>,
+			{{/each}}
+		{{/if}}
+		}
+
+	export type MutationHooks = {
+		{{#if hasMutations}}
+			{{#each mutations}}
+				{{operationName}}?: MutationHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext>,
+			{{/each}}
+		{{/if}}
+		}
+
+	export interface SubscriptionHooks = {
+		{{#if hasSubscriptions}}
+			{{#each subscriptions}}
+				{{operationName}}?: SubscriptionHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext>,
+			{{/each}}
+		{{/if}}
+		}
+
+	export interface UploadHooks {
+		{{#each uploadProviders}}
+			{{name}}?: {
+				{{#each uploadProfiles}}
+					{{@key}}?: {
+						preUpload?: (hook: PreUploadHookRequest<User>) => PreUploadHookResponse;
+						postUpload?: (hook: PostUploadHookRequest<User, InternalClient>) => PostUploadHookResponse;
+					}
+				{{/each}}
+			}
+		{{/each}}
 }
 
-export type MutationHooks<TCustomContext = any> = {
-{{#if hasMutations}}
-	{{#each mutations}}
-		{{operationName}}?: MutationHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext<TCustomContext>>,
-	{{/each}}
-{{/if}}
-}
-
-export type SubscriptionHooks<TCustomContext = any> = {
-{{#if hasSubscriptions}}
-	{{#each subscriptions}}
-		{{operationName}}?: SubscriptionHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext<TCustomContext>>,
-	{{/each}}
-{{/if}}
-}
-
-export interface UploadHooks<TCustomContext = any> {
-    {{#each uploadProviders}}
-        {{name}}?: {
-            {{#each uploadProfiles}}
-                {{@key}}?: {
-                    preUpload?: (hook: PreUploadHookRequest<User, TCustomContext>) => PreUploadHookResponse;
-                    postUpload?: (hook: PostUploadHookRequest<User, InternalClient, TCustomContext>) => PostUploadHookResponse;
-                }
-            {{/each}}
-        }
-    {{/each}}
 }
 `;

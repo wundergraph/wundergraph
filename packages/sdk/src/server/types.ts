@@ -9,7 +9,7 @@ import { OperationsClient } from './operations-client';
 import { GraphQLError } from '../client';
 import { TelemetryOptions } from './trace/trace';
 import { RequestLogger } from './logger';
-import { InternalIntergration } from '../integrations/types';
+import { InternalIntegration } from '../integrations/types';
 
 declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
@@ -18,6 +18,23 @@ declare module 'fastify' {
 export interface FastifyRequestBody {
 	__wg: { user?: WunderGraphUser; clientRequest?: ClientRequest };
 }
+
+/**
+ * The context types can be customized by overridding the CustomContext interface.
+ * ```ts
+ * declare module "@wundergraph/sdk/server" {
+ * 	interface CustomContext {
+ * 		global: {
+ * 			foo: string;
+ * 		}
+ * 		request: {
+ * 			bar: string;
+ * 		}
+ * 	}
+ * }
+ */
+type RequestContext = CustomContext extends { request: infer R } ? R : any;
+type GlobalContext = CustomContext extends { global: infer G } ? G : any;
 
 export interface ServerOptions {
 	serverUrl?: InputVariable;
@@ -54,6 +71,28 @@ export interface OperationHookFunction {
 	(...args: any[]): Promise<any>;
 }
 
+/**
+ * The custom context can be used to add custom properties to the request context.
+ * ```ts
+ * declare module "@wundergraph/sdk/server" {
+ * 	interface CustomContext {
+ * 		global: {
+ * 			foo: string;
+ * 		}
+ * 		request: {
+ * 			bar: string;
+ * 		}
+ * 	}
+ * }
+ * ```
+ */
+export interface CustomContext {}
+
+/**
+ * Generated meta data for the global hooks.
+ */
+export interface HooksMeta {}
+
 export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
 	mockResolve?: AsyncFn;
 	preResolve?: AsyncFn;
@@ -69,16 +108,14 @@ export type AuthenticationHookRequest<Context extends BaseRequestContext = BaseR
 export interface FastifyRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
-	InternalOperationsClient extends OperationsClient = OperationsClient,
-	TRequestContext = any
+	InternalOperationsClient extends OperationsClient = OperationsClient
 > {
-	ctx: AuthenticationHookRequest<BaseRequestContext<User, IC, InternalOperationsClient, TRequestContext>>;
+	ctx: AuthenticationHookRequest<BaseRequestContext<User, IC, InternalOperationsClient>>;
 }
 export interface BaseRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient,
-	InternalOperationsClient extends OperationsClient = OperationsClient,
-	TCustomContext = any
+	InternalOperationsClient extends OperationsClient = OperationsClient
 > {
 	/**
 	 * The user that is currently logged in.
@@ -103,7 +140,7 @@ export interface BaseRequestContext<
 	/**
 	 * Custom context
 	 */
-	context: TCustomContext;
+	context: RequestContext;
 }
 export interface AuthenticationRequestContext<User extends WunderGraphUser = WunderGraphUser> {
 	/**
@@ -127,7 +164,7 @@ export interface WunderGraphFile {
 	readonly type: string;
 }
 
-export interface PreUploadHookRequest<User extends WunderGraphUser = WunderGraphUser, TCustomContext = any> {
+export interface PreUploadHookRequest<User extends WunderGraphUser = WunderGraphUser> {
 	/**
 	 * The user that is currently logged in, if any.
 	 */
@@ -143,14 +180,13 @@ export interface PreUploadHookRequest<User extends WunderGraphUser = WunderGraph
 	/**
 	 * Custom handler context
 	 */
-	context: TCustomContext;
+	context: RequestContext;
 }
 
 export interface PostUploadHookRequest<
 	User extends WunderGraphUser = WunderGraphUser,
-	IC extends InternalClient = InternalClient,
-	TCustomContext = any
-> extends PreUploadHookRequest<User, TCustomContext> {
+	IC extends InternalClient = InternalClient
+> extends PreUploadHookRequest<User> {
 	internalClient: IC;
 	error: Error;
 }
@@ -237,7 +273,7 @@ export interface TracerConfig extends TelemetryOptions {
 
 export interface ServerRunOptions {
 	wundergraphDir: string;
-	serverConfig: WunderGraphHooksAndServerConfig<any, any, any, any>;
+	serverConfig: WunderGraphHooksAndServerConfig;
 	config: WunderGraphConfiguration;
 	gracefulShutdown: boolean;
 	clientFactory: InternalClientFactory;
@@ -252,7 +288,7 @@ export interface CreateServerOptions extends ServerRunOptions {
  * WunderGraphServerContext encapsulates the available functions for
  * creating and release global and per request custom contexts.
  */
-export interface WunderGraphServerContext<TRequestContext = any, TGlobalContext = any> {
+export interface WunderGraphServerContext {
 	global?: {
 		/**
 		 * Create is called once during server startup and the returned
@@ -261,14 +297,14 @@ export interface WunderGraphServerContext<TRequestContext = any, TGlobalContext 
 		 *
 		 * @returns The global context
 		 */
-		create?: () => Promise<TGlobalContext>;
+		create?: () => Promise<GlobalContext>;
 		/**
 		 * Release was called once during server shutdown, givin the global
 		 * context a chance to release its resources.
 		 *
 		 * @param ctx Global context returned by create
 		 */
-		release?: (ctx: TGlobalContext) => Promise<void>;
+		release?: (ctx: GlobalContext) => Promise<void>;
 	};
 	request?: {
 		/**
@@ -278,46 +314,48 @@ export interface WunderGraphServerContext<TRequestContext = any, TGlobalContext 
 		 * @param ctx Global context returned by global.create
 		 * @returns The per-request context
 		 */
-		create?: (ctx: TGlobalContext) => Promise<TRequestContext>;
+		create?: (ctx: GlobalContext) => Promise<RequestContext>;
 		/**
 		 * Release is called once after the request ends, allowing the per-request
 		 * context to release any pending resources.
 		 *
 		 * @param ctx Per-request context returned by create
 		 */
-		release?: (ctx: TRequestContext) => Promise<void>;
+		release?: (ctx: RequestContext) => Promise<void>;
 	};
 }
 
-export interface WunderGraphServerConfig<
-	GeneratedHooksConfig = HooksConfiguration,
-	GeneratedWebhooksConfig = WebhooksConfig,
-	TRequestContext = any,
-	TGlobalContext = any
-> {
-	webhooks?: GeneratedWebhooksConfig;
-	hooks?: GeneratedHooksConfig;
-	// routeUrl is set internally
-	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
+export interface WunderGraphServerConfig {
+	/**
+	 * Webhooks verifier configuration
+	 *
+	 */
+	webhooks?: WebhooksConfig;
+	/**
+	 * Hooks configuration
+	 */
+	hooks?: HooksConfiguration;
+	/**
+	 * Custom GraphQL servers
+	 */
+	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[]; // routeUrl is set internally
+	/**
+	 * Configure server options
+	 */
 	options?: ServerOptions;
 	/**
-	 * Context creation/release
+	 * Context factory
 	 */
-	context?: WunderGraphServerContext<TRequestContext, TGlobalContext>;
+	context?: WunderGraphServerContext;
 }
 
 // internal representation of the fully resolved server config
-export interface WunderGraphHooksAndServerConfig<
-	GeneratedHooksConfig = HooksConfiguration,
-	GeneratedWebhooksConfig = WebhooksConfig,
-	TRequestContext = any,
-	TGlobalContext = any
-> extends WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TRequestContext, TGlobalContext> {
-	webhooks?: GeneratedWebhooksConfig;
-	hooks?: GeneratedHooksConfig;
+export interface WunderGraphHooksAndServerConfig extends WunderGraphServerConfig {
+	webhooks?: WebhooksConfig;
+	hooks?: HooksConfiguration;
 	graphqlServers?: GraphQLServerConfig[];
 	options?: ServerOptions;
-	integrations?: InternalIntergration[];
+	integrations?: InternalIntegration[];
 }
 
 export interface OnConnectionInitHookRequestBody extends FastifyRequestBody {
@@ -546,23 +584,14 @@ type AuthenticationHooks<Context extends BaseRequestContext = BaseRequestContext
 	  }
 	: never;
 
-type OperationNames<Queries, Mutations, Subscriptions> =
-	| Extract<keyof Queries, string>
-	| Extract<keyof Mutations, string>
-	| Extract<keyof Subscriptions, string>;
+type DataSources = HooksMeta extends { dataSources: infer D } ? D : string;
+type Operations = HooksMeta extends { operations: infer O } ? O : string;
 
-export interface HooksConfiguration<
-	Queries extends QueryHooks<Context> = QueryHooks,
-	Mutations extends MutationHooks<Context> = MutationHooks,
-	Subscriptions extends SubscriptionHooks<Context> = SubscriptionHooks,
-	Uploads extends UploadHooks = UploadHooks,
-	DataSources extends string = string,
-	Context extends BaseRequestContext = BaseRequestContext
-> {
-	global?: GlobalHooksConfig<OperationNames<Queries, Mutations, Subscriptions>, DataSources, Context>;
+export interface HooksConfiguration<Context extends BaseRequestContext = BaseRequestContext> {
+	global?: GlobalHooksConfig<Operations, DataSources, Context>;
 	authentication?: AuthenticationHooks<Context>;
-	[HooksConfigurationOperationType.Queries]?: Queries;
-	[HooksConfigurationOperationType.Mutations]?: Mutations;
-	[HooksConfigurationOperationType.Subscriptions]?: Subscriptions;
-	[HooksConfigurationOperationType.Uploads]?: Uploads;
+	[HooksConfigurationOperationType.Queries]?: QueryHooks;
+	[HooksConfigurationOperationType.Mutations]?: MutationHooks;
+	[HooksConfigurationOperationType.Subscriptions]?: SubscriptionHooks;
+	[HooksConfigurationOperationType.Uploads]?: UploadHooks;
 }

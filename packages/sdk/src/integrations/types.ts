@@ -1,19 +1,20 @@
-import {
+import type { User } from '../client';
+import type {
 	AsyncApiIntrospector,
-	AuthenticationConfig,
 	CodeGen,
 	S3UploadConfiguration,
 	TokenAuthProvider,
 	WunderGraphConfigApplicationConfig,
 } from '../configure';
-import { AuthenticationProvider } from '../configure/authentication';
-import {
+import type { AuthenticationProvider } from '../configure/authentication';
+import type {
 	BaseOperationConfiguration,
 	MutationConfiguration,
 	QueryConfiguration,
 	SubscriptionConfiguration,
 } from '../configure/operations';
-import { NodeOptions } from '../configure/options';
+import type { NodeOptions } from '../configure/options';
+import type { ClientRequest, RequestLogger } from '../server';
 
 export interface ConfigSetupOptions {
 	addApi: (api: AsyncApiIntrospector<any>) => void;
@@ -42,9 +43,55 @@ export interface WunderGraphDatasource {
 	hooks: WunderGraphIntegrationHooks;
 }
 
+export interface CustomContext {}
+
+export interface GeneratedOperations {}
+
+export interface HookContext {
+	/**
+	 * The user that is currently logged in.
+	 */
+	user?: User;
+	/**
+	 * The client request.
+	 */
+	clientRequest: ClientRequest;
+	/**
+	 * The request logger.
+	 */
+	log: RequestLogger;
+	/**
+	 * The operations client that is used to communicate with the server.
+	 */
+	// operations: Omit<InternalOperationsClient, 'cancelSubscriptions'>;
+	/**
+	 * Custom context
+	 */
+	context: CustomContext;
+}
+
+/**
+ * HTTP transport hook context
+ */
+export interface HttpHookContext {
+	request: Request;
+	operation: {
+		name: string;
+		type: 'query' | 'mutation' | 'subscription';
+	};
+}
+
+/**
+ * Authentication hook context
+ */
+export interface AuthenticationHookContext {
+	user: User;
+}
+
 export interface WunderGraphIntegrationHooks {
 	'config:setup'?: (options: ConfigSetupOptions) => void;
 	'config:generated'?: (config: WunderGraphConfigWithAppConfig) => void;
+	'authentication:postAuthentication'?: (context: AuthenticationHookContext) => User | Promise<User>;
 }
 
 export interface WunderGraphIntegration {
@@ -56,7 +103,7 @@ export interface WunderGraphEnterpriseIntegrationHooks {
 	'http:transport'?: <Context>(context: Context) => void;
 }
 
-export interface InternalIntergration {
+export interface InternalIntegration {
 	name: string;
 	hooks: WunderGraphIntegrationHooks & WunderGraphEnterpriseIntegrationHooks;
 }

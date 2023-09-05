@@ -18,7 +18,7 @@ import { FastifyRequest } from 'fastify';
 import { trace } from '@opentelemetry/api';
 import { Attributes } from '../trace/attributes';
 import { attachErrorToSpan } from '../trace/util';
-import { InternalIntergration, InternalHookConfig } from '../../integrations/types';
+import { InternalIntegration, InternalHookConfig } from '../../integrations/types';
 import { hookID } from '../util';
 
 const maximumRecursionLimit = 16;
@@ -35,7 +35,7 @@ export interface GraphQLError {
 
 export interface FastifyHooksOptions extends HooksConfiguration {
 	config: WunderGraphConfiguration;
-	integrations: InternalIntergration[];
+	integrations: InternalIntegration[];
 }
 
 export interface HooksRouteConfig {
@@ -67,6 +67,31 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		return headersObj;
 	};
 
+	const registerGlobalHook = (hook: { category: string; name: string }, callback: Function) => {
+		fastify.post<any, GlobalHooksRouteConfig>(
+			`/${hook.category}/${hook.name}`,
+			{ config: { kind: 'global-hook', category: hook.category, hookName: hook.name } },
+			async (request, reply) => {
+				try {
+					const out = await callback(request.ctx);
+					reply.code(200).send({
+						hook: hook.name,
+						response: out,
+						setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
+					});
+				} catch (err) {
+					// Mark the request as errored and attach information about the error
+					if (request.telemetry) {
+						attachErrorToSpan(request.telemetry.parentSpan, err);
+					}
+
+					request.log.error(err);
+					reply.code(500).send({ hook: hook.name, error: err });
+				}
+			}
+		);
+	};
+
 	await fastify.register(async (fastify) => {
 		fastify.addHook('preHandler', (request, reply, done) => {
 			if (request.ctx.user === undefined) {
@@ -78,100 +103,42 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 
 		// authentication
 		if (config.authentication?.postAuthentication) {
-			fastify.post<any, GlobalHooksRouteConfig>(
-				'/authentication/postAuthentication',
-				{ config: { kind: 'global-hook', category: 'authentication', hookName: 'postAuthentication' } },
-				async (request, reply) => {
-					try {
-						await config.authentication?.postAuthentication?.(request.ctx);
-					} catch (err) {
-						// Mark the request as errored and attach information about the error
-						if (request.telemetry) {
-							attachErrorToSpan(request.telemetry.parentSpan, err);
-						}
-
-						request.log.error(err);
-						reply.code(500).send({ hook: 'postAuthentication', error: err });
-					}
-					reply.code(200).send({
-						hook: 'postAuthentication',
-					});
-				}
+			registerGlobalHook(
+				{
+					category: 'authentication',
+					name: 'postAuthentication',
+				},
+				config.authentication?.postAuthentication
 			);
 		}
 
 		if (config.authentication?.mutatingPostAuthentication) {
-			fastify.post<any, GlobalHooksRouteConfig>(
-				'/authentication/mutatingPostAuthentication',
-				{ config: { kind: 'global-hook', category: 'authentication', hookName: 'mutatingPostAuthentication' } },
-				async (request, reply) => {
-					try {
-						const out = await config.authentication?.mutatingPostAuthentication?.(request.ctx);
-						reply.code(200).send({
-							hook: 'mutatingPostAuthentication',
-							response: out,
-							setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
-						});
-					} catch (err) {
-						// Mark the request as errored and attach information about the error
-						if (request.telemetry) {
-							attachErrorToSpan(request.telemetry.parentSpan, err);
-						}
-
-						request.log.error(err);
-						reply.code(500).send({ hook: 'mutatingPostAuthentication', error: err });
-					}
-				}
+			registerGlobalHook(
+				{
+					category: 'authentication',
+					name: 'mutatingPostAuthentication',
+				},
+				config.authentication?.mutatingPostAuthentication
 			);
 		}
 
 		if (config.authentication?.revalidate) {
-			fastify.post<any, GlobalHooksRouteConfig>(
-				'/authentication/revalidateAuthentication',
-				{ config: { kind: 'global-hook', category: 'authentication', hookName: 'postLogout' } },
-				async (request, reply) => {
-					try {
-						const out = await config.authentication?.revalidate?.(request.ctx);
-						reply.code(200).send({
-							hook: 'revalidateAuthentication',
-							response: out,
-							setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
-						});
-					} catch (err) {
-						// Mark the request as errored and attach information about the error
-						if (request.telemetry) {
-							attachErrorToSpan(request.telemetry.parentSpan, err);
-						}
-
-						request.log.error(err);
-						reply.code(500).send({ hook: 'revalidateAuthentication', error: err });
-					}
-				}
+			registerGlobalHook(
+				{
+					category: 'authentication',
+					name: 'revalidate',
+				},
+				config.authentication?.revalidate
 			);
 		}
 
 		if (config.authentication?.postLogout) {
-			fastify.post<any, GlobalHooksRouteConfig>(
-				'/authentication/postLogout',
-				{ config: { kind: 'global-hook', category: 'authentication', hookName: 'postLogout' } },
-				async (request, reply) => {
-					try {
-						const out = await config.authentication?.postLogout?.(request.ctx);
-						reply.code(200).send({
-							hook: 'postLogout',
-							response: out,
-							setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
-						});
-					} catch (err) {
-						// Mark the request as errored and attach information about the error
-						if (request.telemetry) {
-							attachErrorToSpan(request.telemetry.parentSpan, err);
-						}
-
-						request.log.error(err);
-						reply.code(500).send({ hook: 'postLogout', error: err });
-					}
-				}
+			registerGlobalHook(
+				{
+					category: 'authentication',
+					name: 'postLogout',
+				},
+				config.authentication?.postLogout
 			);
 		}
 	});

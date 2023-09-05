@@ -90,7 +90,7 @@ import { generateOperations } from '../codegen/generateoperations';
 import { configurationHash } from '../codegen/templates/typescript/helpers';
 import templates from '../codegen/templates';
 import { WunderGraphConfigurationFilename } from '../server/server';
-import { InternalHookConfig, InternalIntergration, WunderGraphAppConfig } from '../integrations/types';
+import { InternalHookConfig, InternalIntegration, WunderGraphAppConfig } from '../integrations/types';
 
 export const WG_GENERATE_CONFIG_JSON = process.env['WG_GENERATE_CONFIG_JSON'] === 'true';
 
@@ -410,7 +410,7 @@ export interface ResolvedWunderGraphConfig {
 	experimental: {
 		orm: boolean;
 	};
-	integrations: InternalIntergration[];
+	integrations: InternalIntegration[];
 }
 
 export interface CodeGenerationConfig {

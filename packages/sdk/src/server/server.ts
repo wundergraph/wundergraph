@@ -20,6 +20,7 @@ import type { HooksRouteConfig } from './plugins/hooks';
 import type { WebHookRouteConfig } from './plugins/webhooks';
 import type {
 	ClientRequest,
+	CustomContext,
 	FastifyRequestBody,
 	HooksConfiguration,
 	ServerRunOptions,
@@ -87,39 +88,12 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 	}
 }
 
-export function configureWunderGraphServer<
-	GeneratedHooksConfig extends HooksConfiguration = HooksConfiguration,
-	GeneratedInternalClient = InternalClient,
-	GeneratedWebhooksConfig extends HooksConfiguration = WebhooksConfig,
-	TRequestContext = any,
-	TGlobalContext = any
->(
-	configWrapper: () => WunderGraphServerConfig<
-		GeneratedHooksConfig,
-		GeneratedWebhooksConfig,
-		TRequestContext,
-		TGlobalContext
-	>
-) {
-	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig, TRequestContext, TGlobalContext>(
-		configWrapper()
-	);
+export function configureWunderGraphServer(configWrapper: (() => WunderGraphServerConfig) | WunderGraphServerConfig) {
+	return _configureWunderGraphServer(typeof configWrapper === 'function' ? configWrapper() : configWrapper);
 }
 
-const _configureWunderGraphServer = <
-	GeneratedHooksConfig = HooksConfiguration,
-	GeneratedWebhooksConfig = WebhooksConfig,
-	TRequestContext = any,
-	TGlobalContext = any
->(
-	config: WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TRequestContext, TGlobalContext>
-): WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig, TRequestContext, TGlobalContext> => {
-	const serverConfig = config as WunderGraphHooksAndServerConfig<
-		GeneratedHooksConfig,
-		GeneratedWebhooksConfig,
-		TRequestContext,
-		TGlobalContext
-	>;
+const _configureWunderGraphServer = (config: WunderGraphServerConfig): WunderGraphHooksAndServerConfig => {
+	const serverConfig = config as WunderGraphHooksAndServerConfig;
 
 	/**
 	 * Configure the custom GraphQL servers

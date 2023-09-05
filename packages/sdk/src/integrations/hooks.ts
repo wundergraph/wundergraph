@@ -1,16 +1,18 @@
-import { AsyncApiIntrospector, CodeGen, S3UploadConfiguration } from '../configure';
-import {
+import type { AsyncApiIntrospector, CodeGen, S3UploadConfiguration } from '../configure';
+import type {
 	AuthProviderConfig,
 	AuthProviderTypes,
 	WunderGraphConfig,
 	WunderGraphAppConfig,
-	InternalIntergration,
+	InternalIntegration,
+	AuthenticationHookContext,
+	HttpHookContext,
+	WunderGraphIntegrationHooks,
 } from './types';
 import logger from '../logger';
-import { FastifyHooksOptions } from '../server/plugins/hooks';
+import type { FastifyHooksOptions } from '../server/plugins/hooks';
+import type { OperationsConfiguration } from '../configure/operations';
 import merge from 'lodash/merge';
-import { OperationsConfiguration } from '../configure/operations';
-import { NodeOptions } from '../configure/options';
 
 async function withTakingALongTimeMsg<T>({
 	name,
@@ -31,7 +33,7 @@ async function withTakingALongTimeMsg<T>({
 
 const prepareConfig = (config: WunderGraphConfig): WunderGraphAppConfig => {
 	const { operations = {}, authentication, ...rest } = config;
-	const { providers, redirectUris = [] } = authentication || {};
+	const { redirectUris = [] } = authentication || {};
 
 	return {
 		...rest,
@@ -175,22 +177,14 @@ export const runHookConfigGenerated = async ({
 	}
 };
 
-interface HookContext {
-	request: Request;
-	operation: {
-		name: string;
-		type: 'query' | 'mutation' | 'subscription';
-	};
-}
-
 export const runHookHttpOriginTransport = async ({
 	config,
 	context,
 }: {
 	config: FastifyHooksOptions;
-	context: HookContext;
+	context: HttpHookContext;
 }) => {
-	for (const integration of config.integrations as InternalIntergration[]) {
+	for (const integration of config.integrations as InternalIntegration[]) {
 		if (integration.hooks?.['http:transport']) {
 			await withTakingALongTimeMsg({
 				name: integration.name,
@@ -198,4 +192,25 @@ export const runHookHttpOriginTransport = async ({
 			});
 		}
 	}
+};
+
+export const runHookPostAuthentication = async ({
+	config,
+	context,
+}: {
+	config: FastifyHooksOptions;
+	context: AuthenticationHookContext;
+}) => {
+	for (const integration of config.integrations as InternalIntegration[]) {
+		if (integration.hooks?.['authentication:postAuthentication']) {
+			await withTakingALongTimeMsg({
+				name: integration.name,
+				hookResult: integration.hooks['authentication:postAuthentication'](context),
+			});
+		}
+	}
+};
+
+export const hasIntegrationHooks = (integrations: InternalIntegration[], hook: keyof WunderGraphIntegrationHooks) => {
+	return integrations?.some((integration) => typeof integration.hooks?.[hook] === 'function');
 };
