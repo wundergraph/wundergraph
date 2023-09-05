@@ -24,7 +24,7 @@ class MyRequestContext {
 
 type InternalOperationsClient = OperationsClient<InternalOperations>;
 
-const createWebhook = createWebhookFactory<InternalOperationsClient, InternalClient, MyRequestContext, any>();
+const createWebhook = createWebhookFactory<InternalOperationsClient, MyRequestContext, any>();
 
 // allow any event and response
 expectAssignable<Webhook>(
