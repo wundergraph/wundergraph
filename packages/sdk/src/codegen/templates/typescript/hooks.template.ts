@@ -29,29 +29,29 @@ declare module '@wundergraph/sdk/server' {
 		operationNames: 'Country' | 'FakeWeather' | 'PastLaunches' | 'ProtectedWeather' | 'Weather';
 	}
 
+	{{#if hasQueries}}
 	export type QueryHooks = {
-		{{#if hasQueries}}
-			{{#each queries}}
-				{{operationName}}?: QueryHook{{#if hasInternalInput}}<{{injectedInputTypename}}, {{else}}WithoutInput<{{/if}}{{responseTypename}}, HookContext>,
-			{{/each}}
-		{{/if}}
-		}
+		{{#each queries}}
+			{{operationName}}?: QueryHook{{#if hasInternalInput}}<{{injectedInputTypename}}, {{else}}WithoutInput<{{/if}}{{responseTypename}}, HookContext>,
+		{{/each}}
+	}
+	{{/if}}
 
+	{{#if hasMutations}}
 	export type MutationHooks = {
-		{{#if hasMutations}}
-			{{#each mutations}}
-				{{operationName}}?: MutationHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext>,
-			{{/each}}
-		{{/if}}
-		}
+		{{#each mutations}}
+			{{operationName}}?: MutationHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext>,
+		{{/each}}
+	}
+	{{/if}}
 
+	{{#if hasSubscriptions}}
 	export interface SubscriptionHooks = {
-		{{#if hasSubscriptions}}
-			{{#each subscriptions}}
-				{{operationName}}?: SubscriptionHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext>,
-			{{/each}}
-		{{/if}}
-		}
+		{{#each subscriptions}}
+			{{operationName}}?: SubscriptionHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext>,
+		{{/each}}
+	}
+	{{/if}}
 
 	export interface UploadHooks {
 		{{#each uploadProviders}}
@@ -64,7 +64,6 @@ declare module '@wundergraph/sdk/server' {
 				{{/each}}
 			}
 		{{/each}}
-}
-
+	}
 }
 `;
