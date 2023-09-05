@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -264,8 +263,9 @@ func TestQueryHandler_LiveQuery(t *testing.T) {
 
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
+	defer res.Body.Close()
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.Equal(t, context.DeadlineExceeded, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"counter\":0}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"counter\":1}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"counter\":2}}}\n\n", string(data))
 	assert.True(t, validateCalled.Load())
@@ -342,8 +342,9 @@ func TestQueryHandler_LiveQueryJsonPatch(t *testing.T) {
 
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
+	defer res.Body.Close()
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.Equal(t, context.DeadlineExceeded, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}\n\n[{\"value\":1,\"op\":\"replace\",\"path\":\"/data/me/counter\"}]\n\n[{\"value\":2,\"op\":\"replace\",\"path\":\"/data/me/counter\"}]\n\n", string(data))
 	assert.True(t, validateCalled.Load())
@@ -425,9 +426,10 @@ func TestQueryHandler_SubscriptionJsonPatch(t *testing.T) {
 	assert.NoError(t, err)
 
 	res, err := srv.Client().Do(req)
+	defer res.Body.Close()
 	assert.NoError(t, err)
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.NoError(t, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}\n\n[{\"value\":1,\"op\":\"replace\",\"path\":\"/data/me/counter\"}]\n\n[{\"value\":2,\"op\":\"replace\",\"path\":\"/data/me/counter\"}]\n\n", string(data))
 }
@@ -509,8 +511,9 @@ func TestQueryHandler_Subscription(t *testing.T) {
 
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
+	defer res.Body.Close()
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.NoError(t, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":1}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":2}}}\n\n", string(data))
 }
@@ -576,8 +579,9 @@ func TestFunctionsHandler_Default(t *testing.T) {
 
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
+	defer res.Body.Close()
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.NoError(t, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}", string(data))
 	assert.Equal(t, 1, hookServerRequestCount)
@@ -593,12 +597,13 @@ func TestFunctionsHandler_Live(t *testing.T) {
 	validateNothing, err := inputvariables.NewValidator(inputSchema, true)
 	assert.NoError(t, err)
 
-	hookServerRequestCount := 0
+	var hookServerRequestCount atomic.Int64
 
 	fakeHookServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":{"data":{"me":{"name":"Jens","bio":"Founder & CEO of WunderGraph","counter":` + strconv.Itoa(hookServerRequestCount) + `}}}}`))
-		hookServerRequestCount++
+		count := int(hookServerRequestCount.Load())
+		_, _ = w.Write([]byte(`{"response":{"data":{"me":{"name":"Jens","bio":"Founder & CEO of WunderGraph","counter":` + strconv.Itoa(count) + `}}}}`))
+		hookServerRequestCount.Add(1)
 	}))
 
 	defer fakeHookServer.Close()
@@ -645,11 +650,12 @@ func TestFunctionsHandler_Live(t *testing.T) {
 
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
+	defer res.Body.Close()
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.Equal(t, context.DeadlineExceeded, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":1}}}\n\n{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":2}}}\n\n", string(data))
-	assert.Equal(t, 3, hookServerRequestCount)
+	assert.Equal(t, 3, int(hookServerRequestCount.Load()))
 }
 
 func TestFunctionsHandler_Live_JSONPatch(t *testing.T) {
@@ -715,8 +721,9 @@ func TestFunctionsHandler_Live_JSONPatch(t *testing.T) {
 
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
+	defer res.Body.Close()
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.Equal(t, context.DeadlineExceeded, err)
 	assert.Equal(t, "{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}\n\n[{\"value\":1,\"op\":\"replace\",\"path\":\"/data/me/counter\"}]\n\n[{\"value\":2,\"op\":\"replace\",\"path\":\"/data/me/counter\"}]\n\n", string(data))
 	assert.Equal(t, 3, hookServerRequestCount)
@@ -787,8 +794,9 @@ func TestFunctionsHandler_Subscription(t *testing.T) {
 
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
+	defer res.Body.Close()
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.NoError(t, err)
 	assert.Equal(t, "{\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}}\n\n{\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":1}}}}\n\n{\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":2}}}}\n\n", string(data))
 	assert.Equal(t, 3, hookServerRequestCount)
@@ -860,8 +868,9 @@ func TestFunctionsHandler_Subscription_JSONPatch(t *testing.T) {
 
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
+	defer res.Body.Close()
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.NoError(t, err)
 	assert.Equal(t, "{\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}}\n\n[{\"value\":1,\"op\":\"replace\",\"path\":\"/response/data/me/counter\"}]\n\n[{\"value\":2,\"op\":\"replace\",\"path\":\"/response/data/me/counter\"}]\n\n", string(data))
 	assert.Equal(t, 3, hookServerRequestCount)
@@ -934,8 +943,9 @@ func TestFunctionsHandler_Subscription_JSONPatch_SSE(t *testing.T) {
 
 	res, err := srv.Client().Do(req)
 	assert.NoError(t, err)
+	defer res.Body.Close()
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.NoError(t, err)
 	assert.Equal(t, "data: {\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}}\n\ndata: [{\"value\":1,\"op\":\"replace\",\"path\":\"/response/data/me/counter\"}]\n\ndata: [{\"value\":2,\"op\":\"replace\",\"path\":\"/response/data/me/counter\"}]\n\ndata: done\n\n", string(data))
 	assert.Equal(t, 3, hookServerRequestCount)

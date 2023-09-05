@@ -124,7 +124,8 @@ type Claims struct {
 	Picture           string                 `json:"picture"`
 	Website           string                 `json:"website"`
 	Email             string                 `json:"email"`
-	EmailVerified     bool                   `json:"email_verified"`
+	EmailVerified     bool                   `json:"-"`
+	EmailVerifiedRaw  interface{}            `json:"email_verified"`
 	Gender            string                 `json:"gender"`
 	BirthDate         string                 `json:"birthdate"`
 	ZoneInfo          string                 `json:"zoneinfo"`

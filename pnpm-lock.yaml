@@ -167,10 +167,10 @@ importers:
         specifier: ^18.0.15
         version: 18.0.24
       eslint:
-        specifier: ^8.45.0
+        specifier: 8.45.0
         version: 8.45.0
       eslint-config-next:
-        specifier: ^13.4.12
+        specifier: 13.4.12
         version: 13.4.12(eslint@8.45.0)(typescript@5.1.6)
       prettier:
         specifier: ^2.7.1
@@ -182,7 +182,7 @@ importers:
         specifier: 3.14.2
         version: 3.14.2
       typescript:
-        specifier: ^5.1.6
+        specifier: 5.1.6
         version: 5.1.6
 
   packages/create-wundergraph-app:
@@ -286,7 +286,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.175.0
+        specifier: workspace:^0.176.0
         version: link:../sdk
       typescript:
         specifier: ^5.1.6
@@ -669,7 +669,7 @@ importers:
         specifier: ^4.2.5
         version: 4.2.5
       '@wundergraph/wunderctl':
-        specifier: workspace:^0.171.0
+        specifier: workspace:^0.172.0
         version: link:../wunderctl
       axios:
         specifier: ^0.26.1
@@ -27169,10 +27169,11 @@ packages:
     resolution: {directory: packages/sdk, type: directory}
     id: file:packages/sdk
     name: '@wundergraph/sdk'
-    version: 0.175.0
+    version: 0.176.0
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.4.0
+      '@fastify/multipart': 7.7.3
       '@graphql-mesh/cross-helpers': 0.4.0(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(react-native@0.71.7)
       '@graphql-mesh/store': 0.94.5(@graphql-mesh/cross-helpers@0.4.0)(@graphql-mesh/types@0.94.6)(@graphql-mesh/utils@0.94.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
       '@graphql-mesh/types': 0.94.6(@graphql-mesh/store@0.94.5)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
