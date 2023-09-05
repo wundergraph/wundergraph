@@ -20,6 +20,7 @@ import { Attributes } from '../trace/attributes';
 import { attachErrorToSpan } from '../trace/util';
 import { InternalIntergration, InternalHookConfig } from '../../integrations/types';
 import { hookID } from '../util';
+import { ServerError } from '../error';
 
 const maximumRecursionLimit = 16;
 
@@ -417,7 +418,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			if (body.cycleCounter > maximumRecursionLimit) {
 				const errorMessage = `maximum recursion limit reached (${maximumRecursionLimit})`;
 				req.log.error(errorMessage);
-				throw new Error(errorMessage);
+				throw new ServerError(errorMessage);
 			}
 			extraHeaders['Wg-Cycle-Counter'] = body.cycleCounter;
 		}

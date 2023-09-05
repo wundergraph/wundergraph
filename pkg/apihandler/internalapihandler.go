@@ -49,6 +49,7 @@ type InternalBuilder struct {
 	enableIntrospection bool
 	insecureCookies     bool
 	metrics             metrics.Metrics
+	devMode             bool
 }
 
 type InternalBuilderConfig struct {
@@ -59,6 +60,7 @@ type InternalBuilderConfig struct {
 	InsecureCookies     bool
 	Metrics             metrics.Metrics
 	Log                 *zap.Logger
+	DevMode             bool
 }
 
 func NewInternalBuilder(config InternalBuilderConfig) *InternalBuilder {
@@ -70,6 +72,7 @@ func NewInternalBuilder(config InternalBuilderConfig) *InternalBuilder {
 		enableIntrospection: config.EnableIntrospection,
 		insecureCookies:     config.InsecureCookies,
 		metrics:             config.Metrics,
+		devMode:             config.DevMode,
 	}
 }
 
@@ -239,6 +242,7 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 			resolver:           i.resolver,
 			renameTypeNames:    i.renameTypeNames,
 			hooksPipeline:      hooksPipeline,
+			errorHandler:       newErrorHandler(operation, i.devMode),
 		}
 
 		// Don't log for every operation because public ones are
@@ -331,6 +335,7 @@ type InternalApiHandler struct {
 	resolver           *resolve.Resolver
 	renameTypeNames    []resolve.RenameTypeName
 	hooksPipeline      *hooks.SynchronousOperationPipeline
+	errorHandler       *errorHandler
 }
 
 func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -396,7 +401,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer pool.PutBytesBuffer(buf)
 
 	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
-	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
+	if h.errorHandler.Done(w, err, "hooks pipeline failed", requestLogger) {
 		return
 	}
 
