@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -669,7 +669,7 @@ importers:
         specifier: ^4.2.5
         version: 4.2.5
       '@wundergraph/wunderctl':
-        specifier: workspace:^0.172.0
+        specifier: workspace:^0.173.0
         version: link:../wunderctl
       axios:
         specifier: ^0.26.1
@@ -27169,7 +27169,6 @@ packages:
     resolution: {directory: packages/sdk, type: directory}
     id: file:packages/sdk
     name: '@wundergraph/sdk'
-    version: 0.176.0
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.4.0
