@@ -5,7 +5,7 @@ import { tmpdir } from 'os';
 import { getRepository } from '../helpers/getRepository';
 import { getRepoTags } from '../helpers/getRepoTags';
 
-jest.setTimeout(120000);
+jest.setTimeout(180000);
 test('The command should clone the repository using example name and return "success"', async () => {
 	const tempDirectory = tmpdir();
 	const firstRepoName = `tempRepository1-${Date.now()}`;
