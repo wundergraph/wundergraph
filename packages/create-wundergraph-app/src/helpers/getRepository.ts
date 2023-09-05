@@ -14,8 +14,16 @@ import { execSync } from 'node:child_process';
 import ora from 'ora';
 
 const resolveLatestWundergraphRef = async () => {
-	const tags = await getRepoTags('https://github.com/wundergraph/wundergraph', '@wundergraph/sdk');
-	return tags[tags.length - 1];
+	try {
+		const tags = await getRepoTags('https://github.com/wundergraph/wundergraph', '@wundergraph/sdk');
+		return tags[tags.length - 1];
+	} catch (e: any) {
+		// If we run into API limits, download the main branch
+		if (e.code !== 'ERR_NON_2XX_3XX_RESPONSE') {
+			throw e;
+		}
+	}
+	return 'main';
 };
 
 const resolveRepository = async ({ exampleName, githubLink }: { exampleName?: string; githubLink?: string }) => {
@@ -41,7 +49,17 @@ const resolveRepository = async ({ exampleName, githubLink }: { exampleName?: st
 			if (!ref) {
 				ref = await resolveLatestWundergraphRef();
 			}
-			const selectedExampleName = await checkIfValidExample(exampleName, ref);
+			let selectedExampleName: string;
+			try {
+				selectedExampleName = await checkIfValidExample(exampleName, ref);
+			} catch (e: any) {
+				// If we run into API limits, assume the example is valid.
+				// If it's not, it will eventually fail.
+				if (e.code !== 'ERR_NON_2XX_3XX_RESPONSE') {
+					throw e;
+				}
+				selectedExampleName = exampleName;
+			}
 			return {
 				repoOwnerName: 'wundergraph',
 				repoName: 'wundergraph',
