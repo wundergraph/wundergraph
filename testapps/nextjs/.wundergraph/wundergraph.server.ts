@@ -79,17 +79,6 @@ export default configureWunderGraphServer(() => ({
 				customResolve: async (hook) => {},
 			},
 			FakeWeather: {
-				preResolve: async (hook) => {
-					const result = await hook.operations.query({
-						operationName: 'FakeWeather',
-					});
-
-					console.log(result.error);
-
-					if (result.error) {
-						throw result.error;
-					}
-				},
 				mockResolve: async (hook) => {
 					const randomWeatherDescription = ['sunny', 'cloudy', 'rainy', 'stormy', 'snowy', 'windy'];
 					const randomTemperatureCelsius = Math.floor(Math.random() * 40) - 20;
