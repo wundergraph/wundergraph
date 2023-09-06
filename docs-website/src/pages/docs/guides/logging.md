@@ -104,7 +104,7 @@ In GraphQL handlers, the `RequestLogger` can be accessed via the `ctx.wundergrap
 
 ```typescript
 schema: new GraphQLSchema({
-    query: new GraphQLObjectType<any, GraphQLExecutionContext<any>>({
+    query: new GraphQLObjectType<any, GraphQLExecutionContext>({
         name: 'Query',
         fields: {
             myQuery: {

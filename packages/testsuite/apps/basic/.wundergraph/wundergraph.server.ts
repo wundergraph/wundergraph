@@ -27,6 +27,13 @@ class RequestContext {
 	}
 }
 
+declare module '@wundergraph/sdk/server' {
+	export interface CustomContext {
+		global: GlobalContext;
+		request: RequestContext;
+	}
+}
+
 export default configureWunderGraphServer(() => ({
 	hooks: {
 		queries: {
@@ -88,7 +95,7 @@ export default configureWunderGraphServer(() => ({
 			apiNamespace: 'embedded',
 			serverName: 'embedded',
 			schema: new GraphQLSchema({
-				query: new GraphQLObjectType<any, GraphQLExecutionContext<RequestContext>>({
+				query: new GraphQLObjectType<any, GraphQLExecutionContext>({
 					name: 'Query',
 					fields: {
 						clientRequestHeader: {
