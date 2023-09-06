@@ -19,9 +19,7 @@ import type { HooksRouteConfig } from './plugins/hooks';
 import type { WebHookRouteConfig } from './plugins/webhooks';
 import type {
 	ClientRequest,
-	CustomContext,
 	FastifyRequestBody,
-	HooksConfiguration,
 	ServerRunOptions,
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
@@ -41,7 +39,6 @@ import { loadTraceConfigFromWgConfig } from './trace/config';
 import { TelemetryPluginOptions } from './plugins/telemetry';
 import { createLogger } from './logger';
 import { ServerError } from './error';
-import { WunderGraphConfig } from '../integrations';
 
 export const WunderGraphConfigurationFilename = 'wundergraph.wgconfig';
 
@@ -105,7 +102,7 @@ const _configureWunderGraphServer = (config: WunderGraphServerConfig): WunderGra
 	return serverConfig;
 };
 
-export const startWunderGraphServer = (config: WunderGraphConfig, serverConfig: WunderGraphHooksAndServerConfig) => {
+export const startWunderGraphServer = (serverConfig: WunderGraphHooksAndServerConfig) => {
 	/**
 	 * This environment variable is used to determine if the server should start the hooks server.
 	 */
@@ -122,10 +119,7 @@ export const startWunderGraphServer = (config: WunderGraphConfig, serverConfig: 
 		startServer({
 			wundergraphDir: process.env.WG_DIR_ABS!,
 			config: WG_CONFIG,
-			serverConfig: {
-				...serverConfig,
-				integrations: config.integrations,
-			},
+			serverConfig,
 			// only in production because it has no value in development
 			gracefulShutdown: isProduction,
 		}).catch((err) => {

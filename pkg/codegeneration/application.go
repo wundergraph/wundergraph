@@ -5,21 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"text/template"
-)
-
-const (
-	// Legacy entrypoint, used by default
-	configEntryPointFilename = "wundergraph.config.ts"
-	// Entrypoint for applications that use `export default defineConfig` inside generatedDirectory
-	applicationEntryPointFilename = "wundergraph.application.ts"
-
-	serverConfigFilename = "wundergraph.server.ts"
-
-	// generatedDirectory is the relative path to the directory with generated
-	// from $WUNDERGRAPH_DIR
-	generatedDirectory = "generated"
 )
 
 var (
@@ -58,15 +44,6 @@ func generateWunderGraphApplicationTS(wunderGraphDir string) (string, error) {
 		return "", fmt.Errorf("error creating %s: %s", entryPointFilename, err)
 	}
 	return entryPointFilename, nil
-}
-
-func hasApplicationConfig(configEntry string) (bool, error) {
-	b, err := os.ReadFile(configEntry)
-	if err != nil {
-		return false, err
-	}
-	s := string(b)
-	return strings.Contains(s, "export default defineConfig") || strings.Contains(s, "WunderGraphConfig"), nil
 }
 
 func ApplicationEntryPoint(wunderGraphDir string) (string, error) {
