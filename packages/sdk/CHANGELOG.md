@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.177.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.176.0...@wundergraph/sdk@0.177.0) (2023-09-05)
+
+### Features
+
+* add support for server ping during subscription idle times ([#1234](https://github.com/wundergraph/wundergraph/issues/1234)) ([5d36525](https://github.com/wundergraph/wundergraph/commit/5d36525feedfcf2cfc04fc28132392247cb57c0d)) (@fiam)
+* propagate error messages from functions/hooks to API responses ([#1248](https://github.com/wundergraph/wundergraph/issues/1248)) ([e54edc9](https://github.com/wundergraph/wundergraph/commit/e54edc9689149e0f2c3c52cac579670e31315307)) (@fiam)
+* remove internal client ([#1237](https://github.com/wundergraph/wundergraph/issues/1237)) ([650fdeb](https://github.com/wundergraph/wundergraph/commit/650fdebbaf1be9245fdd2891fc180e30333a919c)) (@Pagebakers)
+
+### Bug Fixes
+
+* test-d tests in sdk ([#1249](https://github.com/wundergraph/wundergraph/issues/1249)) ([ebc71c6](https://github.com/wundergraph/wundergraph/commit/ebc71c661cde1ad9d75f843d617c1f0f187e43f2)) (@Pagebakers)
+
 ## [0.176.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.175.0...@wundergraph/sdk@0.176.0) (2023-09-01)
 
 ### Features
