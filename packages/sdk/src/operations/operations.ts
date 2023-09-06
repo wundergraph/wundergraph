@@ -36,8 +36,9 @@ interface _HandlerContext<
 	InternalOperationsClient extends OperationsClient,
 	TypedORM,
 	OpenApiAgentFactory
-> extends BaseRequestContext<WunderGraphUser<Role, CustomClaims>, OperationsClient> {
+> extends Omit<BaseRequestContext, 'user' | 'operations'> {
 	input: Input extends {} ? Input : never;
+	user?: WunderGraphUser<Role, CustomClaims>;
 	operations: Omit<InternalOperationsClient, 'cancelSubscriptions'>;
 	graph: TypedORM;
 	openAI: OpenApiAgentFactory;

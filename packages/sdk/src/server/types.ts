@@ -9,6 +9,7 @@ import { GraphQLError } from '../client';
 import { TelemetryOptions } from './trace/trace';
 import { RequestLogger } from './logger';
 import { InternalIntegration } from '../integrations/types';
+import { IsEmptyObject } from 'type-fest';
 
 declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
@@ -85,12 +86,38 @@ export interface OperationHookFunction {
  * }
  * ```
  */
-export interface CustomContext {}
+export interface CustomContext {
+	/**
+	 * Global context
+	 * @property {object} global
+	 */
+	/**
+	 * Request context
+	 * @property {object} request
+	 */
+}
 
 /**
  * Generated meta data for the global hooks.
  */
-export interface HooksMeta {}
+export interface HooksMeta {
+	/**
+	 * Data sources used in the project.
+	 * @property {string} dataSources
+	 */
+	/**
+	 * Operation names used in the project.
+	 * @property {string} operationNames
+	 */
+	/**
+	 * The `User` type with custom Roles and Claims
+	 * @property {WunderGraphUser} user
+	 */
+	/**
+	 * The generated operations.
+	 * @property {OperationsDefinition} operations
+	 */
+}
 
 export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
 	mockResolve?: AsyncFn;
@@ -102,23 +129,20 @@ export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
 }
 
 export type AuthenticationHookRequest<Context extends BaseRequestContext = BaseRequestContext> = Context &
-	(Context extends BaseRequestContext<infer User> ? AuthenticationRequestContext<User> : never);
+	(HooksMeta extends { user?: infer User } ? AuthenticationRequestContext<User> : never);
 
-export interface FastifyRequestContext<
-	User extends WunderGraphUser = WunderGraphUser,
-	InternalOperationsClient extends OperationsClient = OperationsClient
-> {
-	ctx: AuthenticationHookRequest<BaseRequestContext<User, InternalOperationsClient>>;
+export interface FastifyRequestContext {
+	ctx: BaseRequestContext;
 }
-export interface BaseRequestContext<
-	User extends WunderGraphUser = WunderGraphUser,
-	InternalOperationsClient extends OperationsClient = OperationsClient
-> {
+
+export interface BaseRequestContext {
 	/**
 	 * The user that is currently logged in.
 	 */
-	user?: User;
-
+	user?: HooksMeta extends { user: infer User } ? User : WunderGraphUser;
+	/**
+	 * The original client request.
+	 */
 	clientRequest: ClientRequest;
 	/**
 	 * The request logger.
@@ -127,13 +151,14 @@ export interface BaseRequestContext<
 	/**
 	 * The operations client that is used to communicate with the server.
 	 */
-	operations: Omit<InternalOperationsClient, 'cancelSubscriptions'>;
+	operations: Omit<OperationsClient<HooksMeta extends { operations: infer O } ? O : any>, 'cancelSubscriptions'>;
 	/**
 	 * Custom context
 	 */
 	context: RequestContext;
 }
-export interface AuthenticationRequestContext<User extends WunderGraphUser = WunderGraphUser> {
+
+export interface AuthenticationRequestContext<User> {
 	/**
 	 * The user that is currently logged in.
 	 */
@@ -213,9 +238,7 @@ export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue
 
 export type JSONObject = { [key: string]: JSONValue };
 
-// Changed the default type of Role to any.
-// It should be worked on
-export interface WunderGraphUser<Role extends string = any, CustomClaims extends {} = {}> {
+export interface WunderGraphUser<Role extends string = string, CustomClaims extends {} = {}> {
 	provider?: string;
 	providerId?: string;
 	userId?: string;
@@ -491,15 +514,15 @@ export type SubscriptionHookWithoutInput<
 	Context extends BaseRequestContext = BaseRequestContext
 > = Omit<QueryHook<undefined, Response, Context>, 'mutatingPreResolve'>;
 
-export interface QueryHooks<Context extends BaseRequestContext = BaseRequestContext> {
+export interface InternalQueryHooks<Context extends BaseRequestContext = BaseRequestContext> {
 	[operationName: string]: QueryHook<any, any, Context> | QueryHookWithoutInput<any, any>;
 }
 
-export interface MutationHooks<Context extends BaseRequestContext = BaseRequestContext> {
+export interface InternalMutationHooks<Context extends BaseRequestContext = BaseRequestContext> {
 	[operationName: string]: MutationHook<any, any, Context> | MutationHookWithoutInput<any, any>;
 }
 
-export interface SubscriptionHooks<Context extends BaseRequestContext = BaseRequestContext> {
+export interface InternalSubscriptionHooks<Context extends BaseRequestContext = BaseRequestContext> {
 	[operationName: string]: SubscriptionHook<any, any, Context> | SubscriptionHookWithoutInput<any, any>;
 }
 
@@ -560,25 +583,37 @@ export interface GlobalHooksConfig<
 	};
 }
 
-type AuthenticationHooks<Context extends BaseRequestContext = BaseRequestContext> = Context extends BaseRequestContext<
-	infer User
->
-	? {
-			postAuthentication?: (hook: AuthenticationHookRequest<Context>) => Promise<void>;
-			mutatingPostAuthentication?: (hook: AuthenticationHookRequest<Context>) => Promise<AuthenticationResponse<User>>;
-			revalidate?: (hook: AuthenticationHookRequest<Context>) => Promise<AuthenticationResponse<User>>;
-			postLogout?: (hook: AuthenticationHookRequest<Context>) => Promise<void>;
-	  }
+type AuthenticationHooks<Context extends BaseRequestContext = BaseRequestContext> = Context extends {
+	user?: infer User;
+}
+	? User extends WunderGraphUser
+		? {
+				postAuthentication?: (hook: AuthenticationHookRequest<Context>) => Promise<void>;
+				mutatingPostAuthentication?: (
+					hook: AuthenticationHookRequest<Context>
+				) => Promise<AuthenticationResponse<User>>;
+				revalidate?: (hook: AuthenticationHookRequest<Context>) => Promise<AuthenticationResponse<User>>;
+				postLogout?: (hook: AuthenticationHookRequest<Context>) => Promise<void>;
+		  }
+		: never
 	: never;
 
 type DataSources = HooksMeta extends { dataSources: infer D } ? D : string;
-type Operations = HooksMeta extends { operations: infer O } ? O : string;
+type Operations = HooksMeta extends { operationNames: infer O } ? O : string;
 
 export interface HooksConfiguration<Context extends BaseRequestContext = BaseRequestContext> {
 	global?: GlobalHooksConfig<Operations, DataSources, Context>;
 	authentication?: AuthenticationHooks<Context>;
-	[HooksConfigurationOperationType.Queries]?: QueryHooks;
-	[HooksConfigurationOperationType.Mutations]?: MutationHooks;
-	[HooksConfigurationOperationType.Subscriptions]?: SubscriptionHooks;
+	[HooksConfigurationOperationType.Queries]?: IsEmptyObject<QueryHooks> extends true ? InternalQueryHooks : QueryHooks;
+	[HooksConfigurationOperationType.Mutations]?: IsEmptyObject<MutationHooks> extends true
+		? InternalMutationHooks
+		: MutationHooks;
+	[HooksConfigurationOperationType.Subscriptions]?: IsEmptyObject<SubscriptionHooks> extends true
+		? InternalSubscriptionHooks
+		: SubscriptionHooks;
 	[HooksConfigurationOperationType.Uploads]?: UploadHooks;
 }
+
+export interface QueryHooks {}
+export interface MutationHooks {}
+export interface SubscriptionHooks {}

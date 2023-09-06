@@ -16,30 +16,30 @@ import type {
 	SubscriptionHookWithoutInput,
 } from "@wundergraph/sdk/server";
 import type { User } from "./wundergraph.server"
-import { InternalOperationsClient } from "./wundergraph.internal.operations.client";
+import { InternalOperations } from "./wundergraph.internal.operations.client";
 
 export type DATA_SOURCES = {{{dataSourcesUnion}}};
 										
-export interface HookContext extends BaseRequestContext<User, InternalClient, InternalOperationsClient> {}
-
 declare module '@wundergraph/sdk/server' {
 	export interface HooksMeta {
 		dataSources: {{{dataSourcesUnion}}};
 		operationNames: 'Country' | 'FakeWeather' | 'PastLaunches' | 'ProtectedWeather' | 'Weather';
+		operations: InternalOperations;
+		user: User;
 	}
 
 	{{#if hasQueries}}
-	export type QueryHooks = {
+	export interface QueryHooks {
 		{{#each queries}}
-			{{operationName}}?: QueryHook{{#if hasInternalInput}}<{{injectedInputTypename}}, {{else}}WithoutInput<{{/if}}{{responseTypename}}, HookContext>,
+			{{operationName}}?: QueryHook{{#if hasInternalInput}}<{{injectedInputTypename}}, {{else}}WithoutInput<{{/if}}{{responseTypename}}>
 		{{/each}}
 	}
 	{{/if}}
 
 	{{#if hasMutations}}
-	export type MutationHooks = {
+	export interface MutationHooks {
 		{{#each mutations}}
-			{{operationName}}?: MutationHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext>,
+			{{operationName}}?: MutationHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}>
 		{{/each}}
 	}
 	{{/if}}
@@ -47,7 +47,7 @@ declare module '@wundergraph/sdk/server' {
 	{{#if hasSubscriptions}}
 	export interface SubscriptionHooks = {
 		{{#each subscriptions}}
-			{{operationName}}?: SubscriptionHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}, HookContext>,
+			{{operationName}}?: SubscriptionHook<{{#if hasInternalInput}}{{injectedInputTypename}}{{else}}undefined{{/if}}, {{responseTypename}}>
 		{{/each}}
 	}
 	{{/if}}
@@ -58,7 +58,7 @@ declare module '@wundergraph/sdk/server' {
 				{{#each uploadProfiles}}
 					{{@key}}?: {
 						preUpload?: (hook: PreUploadHookRequest<User>) => PreUploadHookResponse;
-						postUpload?: (hook: PostUploadHookRequest<User, InternalClient>) => PostUploadHookResponse;
+						postUpload?: (hook: PostUploadHookRequest<User>) => PostUploadHookResponse;
 					}
 				{{/each}}
 			}

@@ -1,4 +1,11 @@
+export { defineConfig } from './define-config';
+
+export { default as cors } from '../cors';
+
+export { EnvironmentVariable } from '../configure/variables';
+
 export { defineIntegration } from './define-integration';
+
 export type {
 	AuthProviderConfig,
 	AuthProviderTypes,

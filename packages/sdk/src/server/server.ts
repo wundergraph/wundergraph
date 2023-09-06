@@ -41,6 +41,7 @@ import { loadTraceConfigFromWgConfig } from './trace/config';
 import { TelemetryPluginOptions } from './plugins/telemetry';
 import { createLogger } from './logger';
 import { ServerError } from './error';
+import { WunderGraphConfig } from '../integrations';
 
 export const WunderGraphConfigurationFilename = 'wundergraph.wgconfig';
 
@@ -101,6 +102,10 @@ const _configureWunderGraphServer = (config: WunderGraphServerConfig): WunderGra
 		});
 	}
 
+	return serverConfig;
+};
+
+export const startWunderGraphServer = (config: WunderGraphConfig, serverConfig: WunderGraphHooksAndServerConfig) => {
 	/**
 	 * This environment variable is used to determine if the server should start the hooks server.
 	 */
@@ -117,7 +122,10 @@ const _configureWunderGraphServer = (config: WunderGraphServerConfig): WunderGra
 		startServer({
 			wundergraphDir: process.env.WG_DIR_ABS!,
 			config: WG_CONFIG,
-			serverConfig,
+			serverConfig: {
+				...serverConfig,
+				integrations: config.integrations,
+			},
 			// only in production because it has no value in development
 			gracefulShutdown: isProduction,
 		}).catch((err) => {
@@ -125,8 +133,6 @@ const _configureWunderGraphServer = (config: WunderGraphServerConfig): WunderGra
 			process.exit(1);
 		});
 	}
-
-	return serverConfig;
 };
 
 export const startServer = async (opts: ServerRunOptions) => {

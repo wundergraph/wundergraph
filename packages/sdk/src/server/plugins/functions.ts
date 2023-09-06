@@ -96,7 +96,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							schemas: jsonSchemas,
 							log,
 						});
-						const ctx: HandlerContext<any, any, any, any, any, any, any> = {
+						const ctx: HandlerContext<any, any, any, any, any, any> = {
 							log,
 							user: (req.body as any)?.__wg.user!,
 							clientRequest,

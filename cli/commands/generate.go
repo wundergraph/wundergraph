@@ -41,7 +41,9 @@ var generateCmd = &cobra.Command{
 		}
 
 		// optional, no error check
-		codeServerFilePath, _ := files.CodeFilePath(wunderGraphDir, serverEntryPointFilename)
+		codeServerFilePath, _ := files.CodeFilePath(wunderGraphDir, serverConfigFilename)
+
+		log.Debug("Stopping config-runner", zap.String("%s", codeServerFilePath), )
 
 		ctx := context.Background()
 
@@ -81,6 +83,11 @@ var generateCmd = &cobra.Command{
 		outExtension[".js"] = ".cjs"
 
 		if codeServerFilePath != "" {
+			serverEntryPointFilename, err := codegeneration.ServerEntryPoint(wunderGraphDir)
+			if err != nil {
+				return err
+			}
+
 			serverOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "server.cjs")
 			ormOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "orm.cjs")
 			jsonSchemaOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "jsonschema.cjs")
@@ -207,7 +214,7 @@ var generateCmd = &cobra.Command{
 			}
 
 		} else {
-			log.Debug("wundergraph.server.ts not found, skipping server", zap.String("file", serverEntryPointFilename))
+			log.Debug("wundergraph.server.ts not found, skipping server", zap.String("file", serverConfigFilename))
 			onAfterBuild = func(buildErr error, rebuild bool) error {
 				<-configRunner.Run(ctx)
 

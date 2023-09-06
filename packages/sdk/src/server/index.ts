@@ -72,7 +72,7 @@ export type { FastifyLoggerInstance } from 'fastify';
 
 // Implementations
 
-export { configureWunderGraphServer } from './server';
+export { configureWunderGraphServer, startWunderGraphServer } from './server';
 
 export { GithubWebhookVerifier, CreateWebhookVerifier, WebhookVerifierKind } from '../webhooks/verifiers';
 export { createWebhookFactory } from '../webhooks/factory';

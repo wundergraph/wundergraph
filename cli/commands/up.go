@@ -253,7 +253,7 @@ var upCmd = &cobra.Command{
 		}
 
 		// hook server is optional, so we don't error if it doesn't exist
-		codeServerFilePath, _ := files.CodeFilePath(wunderGraphDir, serverEntryPointFilename)
+		codeServerFilePath, _ := files.CodeFilePath(wunderGraphDir, serverConfigFilename)
 
 		ctx, stop := signal.NotifyContext(ctx, os.Interrupt,
 			syscall.SIGHUP,  // process is detached from terminal
@@ -370,6 +370,11 @@ var upCmd = &cobra.Command{
 		}
 
 		if codeServerFilePath != "" {
+			serverEntryPointFilename, err := codegeneration.ServerEntryPoint(wunderGraphDir)
+			if err != nil {
+				return err
+			}
+
 			ormEntryPointFilename := filepath.Join(wunderGraphDir, "generated", "orm", "index.ts")
 			ormBundler := bundler.NewBundler(bundler.Config{
 				Name:          "orm-bundler",
@@ -500,7 +505,7 @@ var upCmd = &cobra.Command{
 				return nil
 			}
 		} else {
-			log.Debug("wundergraph.server.ts not found, skipping server", zap.String("file", serverEntryPointFilename))
+			log.Debug("wundergraph.server.ts not found, skipping server", zap.String("file", serverConfigFilename))
 
 			onAfterBuild = func(buildErr error, rebuild bool) (err error) {
 				defer func() {
