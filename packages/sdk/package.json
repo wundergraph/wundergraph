@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.175.0",
+  "version": "0.177.0",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -51,7 +51,7 @@
       "types": "./dist/integrations/datasources/index.d.ts",
       "default": "./dist/integrations/datasources/index.js"
     },
-    "./authentication": {
+    "./auth": {
       "types": "./dist/integrations/auth/index.d.ts",
       "default": "./dist/integrations/auth/index.js"
     },
@@ -103,7 +103,7 @@
       "datasources": [
         "./dist/integrations/datasources"
       ],
-      "authentication": [
+      "auth": [
         "./dist/integrations/auth"
       ],
       "enterprise": [
@@ -154,7 +154,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest && npm run test:types",
-    "test:types": "tsd --typings ./tsconfig.json",
+    "test:types": "tsd",
     "test:int": "TEST_INTEGRATION=true jest",
     "test:update-snapshots": "jest -u"
   },
@@ -181,6 +181,7 @@
   },
   "dependencies": {
     "@fastify/formbody": "^7.3.0",
+    "@fastify/multipart": "^7.7.3",
     "@graphql-mesh/cross-helpers": "^0.4.0",
     "@graphql-mesh/store": "0.94.6",
     "@graphql-mesh/types": "0.94.6",
@@ -203,7 +204,7 @@
     "@wundergraph/orm": "workspace:*",
     "@wundergraph/protobuf": "workspace:^0.118.2",
     "@wundergraph/straightforward": "^4.2.5",
-    "@wundergraph/wunderctl": "workspace:^0.171.0",
+    "@wundergraph/wunderctl": "workspace:^0.173.0",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",

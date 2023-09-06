@@ -5,8 +5,10 @@ export default configureWunderGraphServer(() => ({
 		queries: {},
 		mutations: {
 			CreateTodo: {
-				mutatingPreResolve: async ({ input, internalClient }) => {
-					const { data } = await internalClient.queries.GetLastOrder();
+				mutatingPreResolve: async ({ input, operations }) => {
+					const { data } = await operations.query({
+						operationName: 'GetLastOrder',
+					});
 					let order = 1;
 					if (data?.lastItem) {
 						order = data.lastItem.order + 1;
@@ -18,8 +20,9 @@ export default configureWunderGraphServer(() => ({
 				},
 			},
 			UpdateTodoOrder: {
-				preResolve: async ({ input, internalClient }) => {
-					const { data } = await internalClient.queries.Todo({
+				preResolve: async ({ input, operations }) => {
+					const { data } = await operations.query({
+						operationName: 'Todo',
 						input: { id: input.id },
 					});
 
@@ -28,14 +31,16 @@ export default configureWunderGraphServer(() => ({
 					}
 
 					if (data.todo.order > input.order) {
-						await internalClient.mutations.ReorderTodosDragDown({
+						await operations.mutate({
+							operationName: 'ReorderTodosDragDown',
 							input: {
 								newOrder: input.order,
 								oldOrder: data.todo.order,
 							},
 						});
 					} else if (data.todo.order <= input.order) {
-						await internalClient.mutations.ReorderTodosDragUp({
+						await operations.mutate({
+							operationName: 'ReorderTodosDragUp',
 							input: {
 								newOrder: input.order,
 								oldOrder: data.todo.order,

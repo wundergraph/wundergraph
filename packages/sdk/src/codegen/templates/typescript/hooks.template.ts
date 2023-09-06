@@ -15,7 +15,6 @@ import type {
 	SubscriptionHook,
 	SubscriptionHookWithoutInput,
 } from "@wundergraph/sdk/server";
-import type { InternalClient } from "./wundergraph.internal.client"
 import type { User } from "./wundergraph.server"
 import { InternalOperationsClient } from "./wundergraph.internal.operations.client";
 

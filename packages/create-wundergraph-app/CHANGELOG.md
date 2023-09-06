@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.0](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.5.1...create-wundergraph-app@0.6.0) (2023-09-05)
+
+### Features
+
+* use GitHub API instead of tarballs when downloading examples ([#1256](https://github.com/wundergraph/wundergraph/issues/1256)) ([4393566](https://github.com/wundergraph/wundergraph/commit/43935666c3f86dc1229dd4d18b2fc4408b6554fb)) (@fiam)
+
 ## [0.5.1](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.5.0...create-wundergraph-app@0.5.1) (2023-07-28)
 
 **Note:** Version bump only for package create-wundergraph-app

@@ -4,7 +4,7 @@ export default createOperation.query({
 	input: z.object({
 		id: z.number(),
 	}),
-	handler: async ({ input, internalClient }) => {
+	handler: async ({ input }) => {
 		return {
 			name: 'Jens',
 			bio: 'Founder of WunderGraph',

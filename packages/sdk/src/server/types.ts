@@ -1,4 +1,3 @@
-import type { InternalClient, InternalClientFactory } from './internal-client';
 import type { Headers } from '@whatwg-node/fetch';
 import type { GraphQLServerConfig } from './plugins/graphql';
 import type { ConfigurationVariable, WunderGraphConfiguration } from '@wundergraph/protobuf';
@@ -107,14 +106,12 @@ export type AuthenticationHookRequest<Context extends BaseRequestContext = BaseR
 
 export interface FastifyRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
-	IC extends InternalClient = InternalClient,
 	InternalOperationsClient extends OperationsClient = OperationsClient
 > {
-	ctx: AuthenticationHookRequest<BaseRequestContext<User, IC, InternalOperationsClient>>;
+	ctx: AuthenticationHookRequest<BaseRequestContext<User, InternalOperationsClient>>;
 }
 export interface BaseRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
-	IC extends InternalClient = InternalClient,
 	InternalOperationsClient extends OperationsClient = OperationsClient
 > {
 	/**
@@ -127,12 +124,6 @@ export interface BaseRequestContext<
 	 * The request logger.
 	 */
 	log: RequestLogger;
-	/**
-	 * The internal client that is used to communicate with the server.
-	 * @deprecated Use `operations` instead.
-	 * @see https://wundergraph.com/docs/upgrade-guides/internal-client-deprecated
-	 */
-	internalClient: IC;
 	/**
 	 * The operations client that is used to communicate with the server.
 	 */
@@ -183,11 +174,8 @@ export interface PreUploadHookRequest<User extends WunderGraphUser = WunderGraph
 	context: RequestContext;
 }
 
-export interface PostUploadHookRequest<
-	User extends WunderGraphUser = WunderGraphUser,
-	IC extends InternalClient = InternalClient
-> extends PreUploadHookRequest<User> {
-	internalClient: IC;
+export interface PostUploadHookRequest<User extends WunderGraphUser = WunderGraphUser>
+	extends PreUploadHookRequest<User> {
 	error: Error;
 }
 
@@ -276,7 +264,6 @@ export interface ServerRunOptions {
 	serverConfig: WunderGraphHooksAndServerConfig;
 	config: WunderGraphConfiguration;
 	gracefulShutdown: boolean;
-	clientFactory: InternalClientFactory;
 }
 
 export interface CreateServerOptions extends ServerRunOptions {

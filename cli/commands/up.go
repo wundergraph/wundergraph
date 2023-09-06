@@ -47,7 +47,6 @@ var (
 	clearCacheOnStart                       bool
 	enableTUI                               bool
 	logs                                    bool
-	debugBindAddress                        string
 	restartFunc                             func()
 )
 
@@ -199,6 +198,7 @@ var upCmd = &cobra.Command{
 				log.Warn("could not enable console UI", zap.Error(err))
 			} else {
 				go consoleUI.Run()
+				defer consoleUI.Close()
 			}
 		}
 
@@ -707,7 +707,6 @@ func init() {
 	upCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "Disables local caches")
 	upCmd.PersistentFlags().BoolVar(&clearCacheOnStart, "clear-cache", false, "Clears local caches before startup")
 	upCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, prettyLoggingFlagName, true, "Enables pretty logging")
-	upCmd.PersistentFlags().StringVar(&debugBindAddress, "debug-bind-address", "127.0.0.1:9229", "Default host:port to bind to, will only work in conjunction with --debug")
 
 	rootCmd.AddCommand(upCmd)
 }

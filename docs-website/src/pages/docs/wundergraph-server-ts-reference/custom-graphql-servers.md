@@ -31,7 +31,6 @@ Available properties are:
 - `ctx.wundergraph.log`: The logger instance
 - `ctx.wundergraph.clientRequest`: The original client request, including headers
 - `ctx.wundergraph.operations`: The operations client, used to call other (internal) operations
-- `ctx.wundergraph.internalClient`: The internal WunderGraph client, _deprecated_
 
 The internal client is very powerful, as it allows you to call all defined WunderGraph Operations.
 E.g. if you've connected WunderGraph to a database and defined a few "internal" Operations,

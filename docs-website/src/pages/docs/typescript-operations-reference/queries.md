@@ -23,7 +23,7 @@ export default createOperation.query({
     id: z.string(),
   }),
   handler: async ({ input }) => {
-    // here you can do whatever you want, like calling an external API, a database, or other operations via the internalClient
+    // here you can do whatever you want, like calling an external API, a database, or other operations via the operations client
     return {
       id: input.id,
       name: 'Jens',

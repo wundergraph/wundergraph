@@ -26,6 +26,7 @@ on:
       - 'testapps/**/*'
       - 'packages/**/*'
       - '.github/workflows/packages-ci.yaml'
+      - 'pnpm-lock.yaml'
 jobs:
   build_test:
     runs-on: ubuntu-latest
