@@ -1,3 +1,4 @@
+import { ResponseError } from '@wundergraph/sdk/client';
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
 import { GraphQLEnumType, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
 
@@ -22,6 +23,12 @@ export class MyContext {
 	}
 	greet() {
 		console.log(`say hello ${this.hello()}`);
+	}
+}
+
+declare module '@wundergraph/sdk/server' {
+	export interface CustomContext {
+		request: MyContext;
 	}
 }
 
@@ -51,6 +58,8 @@ export default configureWunderGraphServer(() => ({
 			Hello: {
 				preResolve: async (hook) => {
 					console.log('###preResolve', hook);
+
+					throw new ResponseError({ code: 'my-error', statusCode: 500 });
 				},
 				mutatingPreResolve: async (hook) => {
 					console.log('###mutatingPreResolve', hook);
