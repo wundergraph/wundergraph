@@ -219,9 +219,9 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 	// otherwise, the upgrade will fail
 	if isUpgradeRequest || t.enableStreamingMode {
 		if t.enableRequestLogging {
-			fmt.Printf("\n\n--- DebugTransport ---\n\nRequest:\n\n%s\n\nDuration: %d ms\n\n--- DebugTransport\n\n",
+			fmt.Printf("\n\n--- DebugTransport ---\n\nRequest:\n\n%s\n\nDuration: %s\n\n--- DebugTransport\n\n",
 				string(requestDump),
-				duration.Milliseconds(),
+				duration,
 			)
 		}
 		return
@@ -240,7 +240,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 			responseDump = []byte("<no response>")
 		}
 
-		fmt.Printf("\n\n--- DebugTransport ---\n\nRequest:\n\n%s\n\nDuration: %d ms\n\nResponse:\n\n%s\n\n--- DebugTransport\n\n",
+		fmt.Printf("\n\n--- DebugTransport ---\n\nRequest:\n\n%s\n\nDuration: %s\n\nResponse:\n\n%s\n\n--- DebugTransport\n\n",
 			string(requestDump),
 			duration,
 			string(responseDump),
