@@ -38,11 +38,7 @@ const toCamelCase = (s: string) => {
 };
 
 const toSnakeCase = (s: string) => {
-	// TODO: This messes up GraphQL to graph_q_l
-	return s
-		.split(/(?=[A-Z])/)
-		.map((s) => s.toLowerCase())
-		.join('_');
+	return s.replace(/[a-z][A-Z]/g, (s) => `${s[0]}_${s[1]}`).toLowerCase();
 };
 
 const clientRsTemplate = `	
