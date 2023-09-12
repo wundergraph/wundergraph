@@ -21,7 +21,13 @@ const clientPackageName = 'wundergraph-rust-client';
 const clientPackageNamespace = clientPackageName.replace(/-/g, '_');
 
 export interface RustClientTemplateConfig {
+	/**
+	 * Package name of the generated client
+	 */
 	packageName: string;
+	/**
+	 * Package version of the generated client
+	 */
 	packageVersion?: string;
 }
 
