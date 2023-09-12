@@ -204,6 +204,8 @@ class CargoToml implements Template {
 		const content = tmpl({
 			packageName: this.config.packageName,
 			packageVersion: this.config.packageVersion ?? '0.0.1',
+			clientPackageProtocol,
+			clientPackageUrl,
 		});
 		return Promise.resolve([
 			{
