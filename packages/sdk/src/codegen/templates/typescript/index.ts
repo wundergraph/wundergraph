@@ -120,18 +120,36 @@ export class TypeScriptInjectedInputModels implements Template {
 	}
 }
 
+const responseSchema = (op: GraphQLOperation) => {
+	switch (op.ExecutionEngine) {
+		case OperationExecutionEngine.ENGINE_NODEJS:
+			// TypeScript response models are not generated from their response schema,
+			// instead they're derived from their function declaration. Generate a fake
+			// top level object with a data property.
+			return {
+				type: 'object',
+				properties: {
+					data: {},
+				},
+			} as JSONSchema;
+		case OperationExecutionEngine.ENGINE_GRAPHQL:
+			return op.ResponseSchema;
+	}
+	throw new Error(`unhandled operation engine ${op.ExecutionEngine}`);
+};
+
 export class TypeScriptResponseModels implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const content = generationConfig.config.application.Operations.map((op) => {
 			const dataName = '#/definitions/' + operationResponseDataTypename(op);
-			const responseSchema = deepClone(op.ResponseSchema);
-			if (responseSchema.properties) {
-				responseSchema.properties['data'] = {
+			const schema = deepClone(responseSchema(op));
+			if (schema.properties) {
+				schema.properties['data'] = {
 					$ref: dataName,
 				};
 			}
 			return JSONSchemaToTypescriptInterface(
-				responseSchema,
+				schema,
 				operationResponseTypename(op),
 				true,
 				op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined
@@ -151,26 +169,32 @@ export class TypeScriptResponseModels implements Template {
 	}
 }
 
+const responseDataSchema = (op: GraphQLOperation) => {
+	switch (op.ExecutionEngine) {
+		case OperationExecutionEngine.ENGINE_NODEJS:
+			return op.ResponseSchema;
+		case OperationExecutionEngine.ENGINE_GRAPHQL:
+			return op.ResponseSchema?.properties?.['data'] as JSONSchema7;
+	}
+	throw new Error(`unhandled operation engine ${op.ExecutionEngine}`);
+};
+
 export class TypeScriptResponseDataModels implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
-		const content = generationConfig.config.application.Operations.filter(
-			(op) => op.ResponseSchema.properties !== undefined && op.ResponseSchema.properties['data'] !== undefined
-		)
-			.map((op) =>
-				JSONSchemaToTypescriptInterface(
-					op.ResponseSchema.properties!['data'] as JSONSchema7,
-					operationResponseDataTypename(op),
-					false,
-					op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined,
-					op.TypeScriptOperationImport
-						? {
-								importName: op.TypeScriptOperationImport,
-								extract: 'Response',
-						  }
-						: undefined
-				)
+		const content = generationConfig.config.application.Operations.map((op) =>
+			JSONSchemaToTypescriptInterface(
+				responseDataSchema(op),
+				operationResponseDataTypename(op),
+				false,
+				op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined,
+				op.TypeScriptOperationImport
+					? {
+							importName: op.TypeScriptOperationImport,
+							extract: 'Response',
+					  }
+					: undefined
 			)
-			.join('\n\n');
+		).join('\n\n');
 		return Promise.resolve([
 			{
 				path: 'models.ts',
