@@ -9,6 +9,7 @@ import { OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import { CodeGenerationConfig, GraphQLOperation, Template, TemplateOutputFile } from '@wundergraph/sdk';
 import { hasInput } from '@wundergraph/sdk/internal/codegen';
 import {
+	configurationHash,
 	operationInputTypename,
 	operationResponseTypename,
 } from '@wundergraph/sdk/dist/codegen/templates/typescript/helpers';
@@ -92,7 +93,7 @@ impl Client {
 	pub fn new_with_options(options: Options) -> Self {
 		let options = Options{
 			url: options.url,
-			application_hash: Some(options.application_hash.unwrap_or_default()),
+			application_hash: Some(options.application_hash.unwrap_or(String::from("{{apiHash}}"))),
 		};
 		Self {
 			client: Arc::new(${clientPackageNamespace}::Client::new(options)),
@@ -120,11 +121,15 @@ impl Client {
 class ClientRs implements Template {
 	constructor(private config: RustClientTemplateConfig) {}
 
-	async generate(_: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+	async generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const tmpl = Handlebars.compile(clientRsTemplate);
+		const content = tmpl({
+			apiHash: configurationHash(config.config),
+		});
 		return Promise.resolve([
 			{
 				path: path.join('src', 'client.rs'),
-				content: rustfmt(clientRsTemplate),
+				content: rustfmt(content),
 				header: fileHeader(),
 			},
 		]);
@@ -177,8 +182,7 @@ tls = ["${clientPackageName}/tls"]
 [dependencies]
 serde = { version = "1.0.188", features = [ "serde_derive" ] }
 serde_json = "1.0.105"
-#${clientPackageName} = { git = "https://github.com/wundergraph/rust-client.git" }
-${clientPackageName} = { path = "/Users/fiam/Source/WunderGraph/rust-client" }
+${clientPackageName} = { {{clientPackageProtocol}} = "{{clientPackageUrl}}" }
 `;
 
 class CargoToml implements Template {
@@ -186,6 +190,17 @@ class CargoToml implements Template {
 
 	async generate(_: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(cargoTomlTemplate);
+		let clientPackageProtocol: string | undefined;
+		let clientPackageUrl: string | undefined;
+		// Use this to override the Cargo.toml entry to point to a local
+		// copy of the package while working on the rust-client crate
+		if (process.env.RUST_PACKAGE_PATH) {
+			clientPackageProtocol = 'path';
+			clientPackageUrl = process.env.RUST_PACKAGE_PATH;
+		} else {
+			clientPackageProtocol = 'git';
+			clientPackageUrl = 'https://github.com/wundergraph/rust-client.git';
+		}
 		const content = tmpl({
 			packageName: this.config.packageName,
 			packageVersion: this.config.packageVersion ?? '0.0.1',
