@@ -81,7 +81,7 @@ const libRsTemplate = `
 
 type Result<T> = std::result::Result<T, ${clientPackageNamespace}::Error>;
 
-pub use ${clientPackageNamespace}::{Error, Url};
+pub use ${clientPackageNamespace}::{Error, Url, Stream, StreamExt};
 
 mod client;
 pub use client::{Client, Options};
@@ -91,6 +91,8 @@ mod responses;
 pub use responses::*;
 mod queries;
 mod mutations;
+mod subscriptions;
+mod live_queries;
 `;
 
 class LibRs implements Template {
@@ -318,6 +320,7 @@ class rustEncoder {
 				let def = typeAnnotations;
 				def += `pub struct ${structTypeName} {\n`;
 				const typeProperties = typeSchema.properties ?? {};
+				const typeRequiredProperties = typeSchema.required ?? [];
 				for (const propName of Object.keys(typeProperties)) {
 					const propSchema = typeProperties[propName];
 					if (typeof propSchema === 'boolean') {
@@ -325,11 +328,15 @@ class rustEncoder {
 					}
 					// Provide a fallback typeName for anonymous embedded objects
 					const propTypeName = `${typeName}_${propName}`;
-					const propType = this.encodeType(propSchema, propTypeName);
+					let propType = this.encodeType(propSchema, propTypeName);
 					if (!propType) {
 						throw new Error(`property ${propName} with schema ${JSON.stringify(propSchema)} returned an empty type`);
 					}
-					if (optional) {
+					const isRequiredInType = typeRequiredProperties.includes(propName);
+					if (!isRequiredInType) {
+						propType = `Option<${propType}>`;
+					}
+					if (!isRequiredInType || optional) {
 						def += `\t#[serde(skip_serializing_if = "Option::is_none")]\n`;
 					}
 					def += `\t#[serde(rename(serialize = "${propName}", deserialize = "${propName}"))]\n`;
@@ -422,7 +429,7 @@ use crate::Result;
 struct Empty {}
 
 impl Client {
-	{{#each queries}}
+	{{#each operations}}
 	{{#if allowNoSnakeCase}}
 	#[allow(non_snake_case)]
 	{{/if}}
@@ -454,7 +461,7 @@ class Queries implements Template {
 		const config = generationConfig.config;
 		const tmpl = Handlebars.compile(queriesTemplate);
 		const content = tmpl({
-			queries: config.application.Operations.filter((op) => op.OperationType === OperationType.QUERY).map(
+			operations: config.application.Operations.filter((op) => op.OperationType === OperationType.QUERY).map(
 				operationContext
 			),
 		});
@@ -477,7 +484,10 @@ use crate::Result;
 struct Empty {}
 
 impl Client {
-	{{#each mutations}}
+	{{#each operations}}
+	{{#if allowNoSnakeCase}}
+	#[allow(non_snake_case)]
+	{{/if}}
 	pub async fn {{name}}(&self{{#if hasInput}}, input: {{inputTypeName}}{{/if}}) -> Result<{{responseTypeName}}> {
 		{{#if hasInput}}
 			self.client.mutate("{{path}}", input).await
@@ -495,13 +505,103 @@ class Mutations implements Template {
 		const config = generationConfig.config;
 		const tmpl = Handlebars.compile(mutationsTemplate);
 		const content = tmpl({
-			mutations: config.application.Operations.filter((op) => op.OperationType === OperationType.MUTATION).map(
+			operations: config.application.Operations.filter((op) => op.OperationType === OperationType.MUTATION).map(
 				operationContext
 			),
 		});
 		return Promise.resolve([
 			{
 				path: path.join('src', 'mutations.rs'),
+				content,
+				header: fileHeader(),
+			},
+		]);
+	}
+}
+
+const subscriptionsTemplate = `use wundergraph_rust_client::Stream;
+use crate::client::Client;
+use crate::inputs::*;
+use crate::responses::*;
+use crate::Result;
+
+
+#[derive(serde::Serialize)]
+struct Empty {}
+
+impl Client {
+	{{#each operations}}
+	{{#if allowNoSnakeCase}}
+	#[allow(non_snake_case)]
+	{{/if}}
+	pub async fn {{name}}(&self{{#if hasInput}}, input: {{inputTypeName}}{{/if}}) -> Result<impl Stream<Item = Result<{{responseTypeName}}>>> {
+		{{#if hasInput}}
+			self.client.subscribe("{{path}}", input).await
+		{{else}}
+			self.client.subscribe("{{path}}", Empty{}).await
+		{{/if}}
+	}
+	{{/each}}
+}`;
+
+class Subscriptions implements Template {
+	constructor(private config: RustClientTemplateConfig) {}
+
+	async generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const operations = generationConfig.config.application.Operations;
+		const tmpl = Handlebars.compile(subscriptionsTemplate);
+		const content = tmpl({
+			operations: operations.filter((op) => op.OperationType === OperationType.SUBSCRIPTION).map(operationContext),
+		});
+		return Promise.resolve([
+			{
+				path: path.join('src', 'subscriptions.rs'),
+				content,
+				header: fileHeader(),
+			},
+		]);
+	}
+}
+
+const liveQueriesTemplate = `use wundergraph_rust_client::Stream;
+use crate::client::Client;
+use crate::inputs::*;
+use crate::responses::*;
+use crate::Result;
+
+
+#[derive(serde::Serialize)]
+struct Empty {}
+
+impl Client {
+	{{#each operations}}
+	{{#if allowNoSnakeCase}}
+	#[allow(non_snake_case)]
+	{{/if}}
+	pub async fn {{name}}(&self{{#if hasInput}}, input: {{inputTypeName}}{{/if}}) -> Result<impl Stream<Item = Result<{{responseTypeName}}>>> {
+		{{#if hasInput}}
+			self.client.live_query("{{path}}", input).await
+		{{else}}
+			self.client.live_query("{{path}}", Empty{}).await
+		{{/if}}
+	}
+	{{/each}}
+}`;
+
+class LiveQueries implements Template {
+	constructor(private config: RustClientTemplateConfig) {}
+
+	async generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const operations = generationConfig.config.application.Operations;
+		const tmpl = Handlebars.compile(liveQueriesTemplate);
+		const content = tmpl({
+			operations: operations
+				.filter((op) => op.OperationType === OperationType.QUERY && op.LiveQuery?.enable === true)
+				.map(operationContext),
+		});
+		return Promise.resolve([
+			{
+				path: path.join('src', 'live_queries.rs'),
 				content,
 				header: fileHeader(),
 			},
@@ -518,5 +618,7 @@ export const rustClient = (config: RustClientTemplateConfig = defaultTemplateCon
 		new Responses(config),
 		new Queries(config),
 		new Mutations(config),
+		new Subscriptions(config),
+		new LiveQueries(config),
 	];
 };
