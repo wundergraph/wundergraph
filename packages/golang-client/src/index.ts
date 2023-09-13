@@ -303,9 +303,14 @@ const JSONSchemaToGolangStruct = (schema: JSONSchema, structName: string, withEr
 			addJsonTag(name, isArray);
 		},
 		customType: (name, typeName, isRequired, isArray) => {
-			out += `\t${capitalizeFirstChar(name)} ${isArray ? '[]' : ''} ${isRequired ? '' : '*'}${capitalizeFirstChar(
-				typeName
-			)}`;
+			if (typeName.indexOf('{') >= 0) {
+				// Anonymous type not representable by Go
+				// TODO: Do beter with these at some point, use an approach like the Rust generator
+				typeName = `interface{}`;
+			} else {
+				typeName = capitalizeFirstChar(typeName);
+			}
+			out += `\t${capitalizeFirstChar(name)} ${isArray ? '[]' : ''} ${isRequired ? '' : '*'}${typeName}`;
 			addJsonTag(name, isArray);
 		},
 	});
