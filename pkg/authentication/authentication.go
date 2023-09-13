@@ -214,6 +214,7 @@ type User struct {
 	AccessToken    json.RawMessage `json:"accessToken,omitempty"`
 	RawAccessToken string          `json:"rawAccessToken,omitempty"`
 	IdToken        json.RawMessage `json:"idToken,omitempty"`
+	RefreshToken   string          `json:"refreshToken,omitempty"`
 	RawIDToken     string          `json:"rawIdToken,omitempty"`
 }
 
