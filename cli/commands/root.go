@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strconv"
 	"time"
 
@@ -282,8 +283,18 @@ func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
 	var err error
 	defer func() {
 		// In case of a panic or error we want to flush the telemetry data
+		if r := recover(); r != nil {
+			fmt.Fprintf(os.Stderr, "panic %v\n", r)
+		}
 		FlushTelemetry()
-		if didPanic || err != nil {
+		if didPanic {
+			if r := recover(); r != nil {
+				fmt.Fprintf(os.Stderr, "panic: %v\n", r)
+			}
+			fmt.Fprintln(os.Stderr, "stack:\n"+string(debug.Stack()))
+			os.Exit(1)
+		}
+		if err != nil {
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s\n", err)
 			}

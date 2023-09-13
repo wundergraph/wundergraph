@@ -60,7 +60,9 @@ type cuiHandler struct {
 }
 
 func (h *cuiHandler) SetConfigBundler(b *bundler.Bundler) {
-	h.configBundler = b
+	if h != nil {
+		h.configBundler = b
+	}
 }
 
 func (h *cuiHandler) Quit() {
@@ -169,12 +171,8 @@ var upCmd = &cobra.Command{
 
 		// Bubbletea UI is not compatible with regular stdout logging
 		if enableTUI {
-			if rootFlags.DebugMode {
-				log.Warn("Debug mode is enabled. This will disable the TUI.")
-				enableTUI = false
-			} else if logs {
-				log.Warn("Logs are enabled. This will disable the TUI.")
-				enableTUI = false
+			if logs {
+				logs = false
 			}
 		}
 
@@ -701,8 +699,8 @@ var upCmd = &cobra.Command{
 }
 
 func init() {
-	upCmd.PersistentFlags().BoolVar(&enableTUI, "ui", true, "Enable terminal user interface")
-	upCmd.PersistentFlags().BoolVar(&logs, "logs", false, "Enable log mode. Useful for debugging")
+	upCmd.PersistentFlags().BoolVar(&enableTUI, "ui", false, "Enable terminal user interface")
+	upCmd.PersistentFlags().BoolVar(&logs, "logs", true, "Enable log mode. Useful for debugging")
 	upCmd.PersistentFlags().IntVar(&defaultDataSourcePollingIntervalSeconds, "default-polling-interval", 5, "Default polling interval for data sources")
 	upCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "Disables local caches")
 	upCmd.PersistentFlags().BoolVar(&clearCacheOnStart, "clear-cache", false, "Clears local caches before startup")
