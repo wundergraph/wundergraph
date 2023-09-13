@@ -82,6 +82,10 @@ jobs:
       - name: Run testsuite
         run: pnpm test:suite:ci
 
+      - name: Run Rust tests
+        working-directory: packages/testsuite/apps/basic/rust
+        run: ./test.sh
+
       - name: Determine changed files
         id: changed
         uses: ./.github/actions/changed
