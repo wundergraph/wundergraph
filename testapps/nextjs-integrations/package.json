@@ -17,7 +17,7 @@
   "scripts": {
     "clean": "rimraf ./.next",
     "dev": "concurrently \"npm run nextDev\" \"npm run wundergraph\"",
-    "wundergraph": "wunderctl up --logs",
+    "wundergraph": "wunderctl up",
     "generate": "wunderctl generate",
     "browser": "wait-on \"http-get://localhost:3003\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:3003",
     "build": "pnpm generate && next build && pnpm check",
