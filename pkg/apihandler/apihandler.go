@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/http/httputil"
 	"os"
 	"strconv"
 	"strings"
@@ -123,11 +122,10 @@ type Builder struct {
 
 	planConfig plan.Configuration
 
-	insecureCookies      bool
-	forceHttpsRedirects  bool
-	enableRequestLogging bool
-	enableIntrospection  bool
-	devMode              bool
+	insecureCookies     bool
+	forceHttpsRedirects bool
+	enableIntrospection bool
+	devMode             bool
 
 	renameTypeNames []resolve.RenameTypeName
 
@@ -161,7 +159,6 @@ func NewBuilder(pool *pool.Pool,
 		insecureCookies:            config.InsecureCookies,
 		middlewareClient:           hooksClient,
 		forceHttpsRedirects:        config.ForceHttpsRedirects,
-		enableRequestLogging:       config.EnableRequestLogging,
 		enableIntrospection:        config.EnableIntrospection,
 		githubAuthDemoClientID:     config.GitHubAuthDemoClientID,
 		githubAuthDemoClientSecret: config.GitHubAuthDemoClientSecret,
@@ -174,10 +171,6 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	r.api = api
 
 	r.router = r.createSubRouter(router)
-
-	if r.enableRequestLogging {
-		r.router.Use(logRequestMiddleware(os.Stderr))
-	}
 
 	for _, webhook := range api.Webhooks {
 		err = r.registerWebhook(webhook)
@@ -339,32 +332,6 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	}
 
 	return streamClosers, err
-}
-
-func shouldLogRequestBody(request *http.Request) bool {
-	// If the request looks like a file upload, avoid printing the whole
-	// encoded file as a debug message.
-	return !strings.HasPrefix(request.Header.Get("Content-Type"), "multipart/form-data")
-}
-
-// returns a middleware that logs all requests to the given io.Writer
-func logRequestMiddleware(logger io.Writer) mux.MiddlewareFunc {
-	return func(handler http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, request *http.Request) {
-			logBody := shouldLogRequestBody(request)
-			suffix := ""
-			if !logBody {
-				suffix = "<body omitted>"
-			}
-			requestDump, err := httputil.DumpRequest(request, logBody)
-			if err == nil {
-				fmt.Fprintf(logger, "\n\n--- ClientRequest start ---\n\n%s%s\n\n\n\n--- ClientRequest end ---\n\n",
-					string(requestDump), suffix,
-				)
-			}
-			handler.ServeHTTP(w, request)
-		})
-	}
 }
 
 func mergeRequiredFields(fields plan.FieldConfigurations, fieldsRequired plan.FieldConfigurations) plan.FieldConfigurations {
