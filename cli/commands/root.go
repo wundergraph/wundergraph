@@ -7,7 +7,6 @@ import (
 	"net"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"strconv"
 	"time"
 
@@ -274,26 +273,12 @@ type BuildTimeConfig struct {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
-	// Instead of recover()'ing, use a boolean that we set to false
-	// at the of the function to keep track of whether we've panic()'ed
-	// or not. This allows us to set an appropriate exit code while
-	// showing the whole panic stack, which might be useful for fixing the
-	// problem.
-	didPanic := true
 	var err error
 	defer func() {
-		// In case of a panic or error we want to flush the telemetry data
-		if r := recover(); r != nil {
-			fmt.Fprintf(os.Stderr, "panic %v\n", r)
-		}
+		// In case of a panic or error we want to flush the telemetry data.
+		// Don't try to recover() here because it would suppress printing
+		// the stack.
 		FlushTelemetry()
-		if didPanic {
-			if r := recover(); r != nil {
-				fmt.Fprintf(os.Stderr, "panic: %v\n", r)
-			}
-			fmt.Fprintln(os.Stderr, "stack:\n"+string(debug.Stack()))
-			os.Exit(1)
-		}
 		if err != nil {
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s\n", err)
@@ -305,7 +290,6 @@ func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
 	BuildInfo = buildInfo
 	GitHubAuthDemo = githubAuthDemo
 	err = rootCmd.Execute()
-	didPanic = false
 }
 
 func FlushTelemetry() {

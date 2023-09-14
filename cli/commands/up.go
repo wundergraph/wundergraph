@@ -60,9 +60,7 @@ type cuiHandler struct {
 }
 
 func (h *cuiHandler) SetConfigBundler(b *bundler.Bundler) {
-	if h != nil {
-		h.configBundler = b
-	}
+	h.configBundler = b
 }
 
 func (h *cuiHandler) Quit() {
@@ -573,7 +571,9 @@ var upCmd = &cobra.Command{
 			OnAfterBundle: onAfterBuild,
 		})
 
-		consoleHandler.SetConfigBundler(configBundler)
+		if consoleHandler != nil {
+			consoleHandler.SetConfigBundler(configBundler)
+		}
 
 		if devTUI != nil {
 			devTUI.Send(cli.TaskStarted{
