@@ -233,6 +233,7 @@ export interface WunderGraphUser<Role extends string = any, CustomClaims extends
 	rawAccessToken?: string;
 	idToken?: JSONObject;
 	rawIdToken?: string;
+	refreshToken?: string;
 }
 
 export interface TracerConfig extends TelemetryOptions {

@@ -7,9 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
-	"github.com/gorilla/securecookie"
 	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 )
@@ -67,22 +65,18 @@ type OAuth2UserRetriever interface {
 }
 
 type OAuth2AuthenticationConfig struct {
-	ProviderID         string
-	ClientID           string
-	ClientSecret       string
-	Endpoint           oauth2.Endpoint
-	Scopes             []string
-	AuthTimeout        time.Duration
-	ForceRedirectHttps bool
-	QueryParameters    []QueryParameter
-	Hooks              Hooks
-	Cookie             *securecookie.SecureCookie
-	InsecureCookies    bool
-	Log                *zap.Logger
+	Provider        ProviderConfig
+	ClientID        string
+	ClientSecret    string
+	Endpoint        oauth2.Endpoint
+	Scopes          []string
+	QueryParameters []QueryParameter
+	Hooks           Hooks
+	Log             *zap.Logger
 }
 
 func NewOAuth2AuthenticationHandler(config OAuth2AuthenticationConfig, retriever OAuth2UserRetriever) *OAuth2AuthenticationHandler {
-	log := config.Log.With(zap.String("provider", config.ProviderID), zap.String("client", config.ClientID))
+	log := config.Log.With(zap.String("provider", config.Provider.ID), zap.String("client", config.ClientID))
 	config.Log = log
 	return &OAuth2AuthenticationHandler{
 		config:    config,
@@ -100,12 +94,10 @@ func (h *OAuth2AuthenticationHandler) Authorize(w http.ResponseWriter, r *http.R
 
 	uriWithoutQuery := strings.Replace(r.RequestURI, "?"+r.URL.RawQuery, "", 1)
 	redirectPath := strings.Replace(uriWithoutQuery, AuthorizePath, CallbackPath, 1)
-	scheme := "https://"
-	if !h.config.ForceRedirectHttps {
-		scheme = "//"
-	}
 
-	callbackURI := fmt.Sprintf("%s%s%s", scheme, r.Host, redirectPath)
+	scheme := h.config.Provider.RedirectProtocol(r)
+
+	callbackURI := fmt.Sprintf("%s://%s%s", scheme, r.Host, redirectPath)
 	oauth2Config := oauth2.Config{
 		ClientID:     h.config.ClientID,
 		ClientSecret: h.config.ClientSecret,
@@ -123,11 +115,11 @@ func (h *OAuth2AuthenticationHandler) Authorize(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	cookiePath := fmt.Sprintf("/auth/cookie/%s/%s", CallbackPath, h.config.ProviderID)
+	cookiePath := fmt.Sprintf("/auth/cookie/%s/%s", CallbackPath, h.config.Provider.ID)
 	cookieDomain := sanitizeDomain(r.Host)
 
 	cookie := &http.Cookie{
-		MaxAge:   int(h.config.AuthTimeout.Seconds()),
+		MaxAge:   int(h.config.Provider.AuthTimeout.Seconds()),
 		Secure:   r.TLS != nil,
 		HttpOnly: true,
 		Path:     cookiePath,
@@ -155,6 +147,7 @@ func (h *OAuth2AuthenticationHandler) Authorize(w http.ResponseWriter, r *http.R
 	}
 
 	redirectToProvider := oauth2Config.AuthCodeURL(state, opts...)
+	h.config.Log.Debug("redirecting to authentication provider", zap.String("url", redirectToProvider))
 	http.Redirect(w, r, redirectToProvider, http.StatusFound)
 }
 
@@ -192,13 +185,10 @@ func (h *OAuth2AuthenticationHandler) Callback(w http.ResponseWriter, r *http.Re
 		}
 	}
 
-	scheme := "https://"
-	if !h.config.ForceRedirectHttps {
-		scheme = "//"
-	}
+	scheme := h.config.Provider.RedirectProtocol(r)
 
 	if redirectURI == "" {
-		redirectURI = fmt.Sprintf("%s%s%s", scheme, r.Host, "/auth/cookie/user")
+		redirectURI = fmt.Sprintf("%s://%s%s", scheme, r.Host, "/auth/cookie/user")
 	}
 
 	//http.Redirect(w, r, redirect, http.StatusFound)
@@ -276,7 +266,7 @@ func (h *OAuth2AuthenticationHandler) authenticate(w http.ResponseWriter, r *htt
 		}
 	}
 	// Fill in remaining fields
-	user.ProviderID = h.config.ProviderID
+	user.ProviderID = h.config.Provider.ID
 
 	user, err = postAuthenticationHooks(r.Context(), r, h.config.Hooks, user)
 	if err != nil {
@@ -287,7 +277,7 @@ func (h *OAuth2AuthenticationHandler) authenticate(w http.ResponseWriter, r *htt
 		}
 	}
 
-	if err := user.Save(h.config.Cookie, w, r, r.Host, h.config.InsecureCookies); err != nil {
+	if err := user.Save(h.config.Provider.Cookie, w, r, r.Host, h.config.Provider.InsecureCookies); err != nil {
 		return nil, &authError{
 			Code: authErrorCodeSavedFailed,
 			Err:  fmt.Errorf("could not encode user data: %w", err),

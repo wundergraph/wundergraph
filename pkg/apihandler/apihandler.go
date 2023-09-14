@@ -1739,18 +1739,36 @@ func (r *Builder) configureOpenIDConnectProviders() (*authentication.OpenIDConne
 
 func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.AuthProvider, cookie *securecookie.SecureCookie, authTimeout time.Duration) {
 
-	router.Use(authentication.RedirectAlreadyAuthenticatedUsers(
-		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUris),
-		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUriRegexes),
-	))
+	authorizedRedirectUris := loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUris)
+	authorizedRedirectUriRegexes := loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUriRegexes)
 
+	defaultRedirectProtocol := "http"
+	containsHttps := func(uris []string) bool {
+		for _, value := range uris {
+			if strings.HasPrefix(strings.ToLower((value)), "https://") {
+				return true
+			}
+		}
+		return false
+	}
+	if containsHttps(authorizedRedirectUris) || containsHttps(authorizedRedirectUriRegexes) {
+		defaultRedirectProtocol = "https"
+	}
+
+	router.Use(authentication.RedirectAlreadyAuthenticatedUsers(authorizedRedirectUris, authorizedRedirectUriRegexes))
 	authorizeRouter := router.PathPrefix("/" + authentication.AuthorizePath).Subrouter()
-	authorizeRouter.Use(authentication.ValidateRedirectURIQueryParameter(
-		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUris),
-		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUriRegexes),
-	))
+	authorizeRouter.Use(authentication.ValidateRedirectURIQueryParameter(authorizedRedirectUris, authorizedRedirectUriRegexes))
 
 	callbackRouter := router.PathPrefix("/" + authentication.CallbackPath).Subrouter()
+
+	providerConfig := authentication.ProviderConfig{
+		ID:                      provider.Id,
+		InsecureCookies:         r.insecureCookies,
+		ForceRedirectHttps:      r.forceHttpsRedirects,
+		Cookie:                  cookie,
+		AuthTimeout:             authTimeout,
+		DefaultRedirectProtocol: defaultRedirectProtocol,
+	}
 
 	switch provider.Kind {
 	case wgpb.AuthProviderKind_AuthProviderGithub:
@@ -1768,13 +1786,9 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			}
 		}
 		github := authentication.NewGithubCookieHandler(authentication.GithubConfig{
-			ClientID:           loadvariable.String(provider.GithubConfig.ClientId),
-			ClientSecret:       loadvariable.String(provider.GithubConfig.ClientSecret),
-			ProviderID:         provider.Id,
-			InsecureCookies:    r.insecureCookies,
-			ForceRedirectHttps: r.forceHttpsRedirects,
-			Cookie:             cookie,
-			AuthTimeout:        authTimeout,
+			Provider:     providerConfig,
+			ClientID:     loadvariable.String(provider.GithubConfig.ClientId),
+			ClientSecret: loadvariable.String(provider.GithubConfig.ClientSecret),
 		}, r.authenticationHooks(), r.log)
 		github.Register(authorizeRouter, callbackRouter)
 		r.log.Debug("api.configureCookieProvider",
@@ -1798,15 +1812,11 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 		}
 
 		openID, err := authentication.NewOpenIDConnectCookieHandler(authentication.OpenIDConnectConfig{
-			Issuer:             loadvariable.String(provider.OidcConfig.Issuer),
-			ClientID:           loadvariable.String(provider.OidcConfig.ClientId),
-			ClientSecret:       loadvariable.String(provider.OidcConfig.ClientSecret),
-			QueryParameters:    queryParameters,
-			ProviderID:         provider.Id,
-			InsecureCookies:    r.insecureCookies,
-			ForceRedirectHttps: r.forceHttpsRedirects,
-			Cookie:             cookie,
-			AuthTimeout:        authTimeout,
+			Provider:        providerConfig,
+			Issuer:          loadvariable.String(provider.OidcConfig.Issuer),
+			ClientID:        loadvariable.String(provider.OidcConfig.ClientId),
+			ClientSecret:    loadvariable.String(provider.OidcConfig.ClientSecret),
+			QueryParameters: queryParameters,
 		}, r.authenticationHooks(), r.log)
 		if err != nil {
 			r.log.Error("creating OIDC auth provider", zap.Error(err))
