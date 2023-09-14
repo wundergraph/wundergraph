@@ -19,7 +19,6 @@ the `customResolve` hook is called with the following parameters:
 - `clientRequest`: The original client request object, including Headers
 - `log`: The logger object
 - `operations`: The operations client, used to call other (internal) operations
-- `internalClient`: The internal client object, _deprecated_
 - `response`: The response object (only for postResolve hooks)
 - `input`: The input object (only for Operation hooks)
 
@@ -33,7 +32,7 @@ export default configureWunderGraphServer(() => ({
   hooks: {
     queries: {
       Dragons: {
-        customResolve: async ({ user, clientRequest, log, input, operations, internalClient }) => {
+        customResolve: async ({ user, clientRequest, log, input, operations }) => {
           return {
             data: {
               dragons: [

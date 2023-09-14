@@ -20,7 +20,6 @@ the `onConnectionInit` hook is called with the following parameters:
 - `clientRequest`: The original client request object, including Headers
 - `log`: The logger object
 - `operations`: The operations client, used to call other (internal) operations
-- `internalClient`: The internal client object, _deprecated_
 - `datasourceId`: The id of the data-source
 
 ```typescript

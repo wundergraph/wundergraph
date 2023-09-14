@@ -39,6 +39,9 @@ export interface Props {
     extraHeaders?: {[key:string]: string};
 }
 
+/**
+ * @deprecated Use @wundergraph/swr instead
+ */
 export const WunderGraphProvider: FunctionComponent<Props> = ({
     endpoint = 'http://10.0.2.2:9991',
     extraHeaders,

@@ -1,4 +1,3 @@
-import type { InternalClient, InternalClientFactory } from './internal-client';
 import type { Headers } from '@whatwg-node/fetch';
 import type { GraphQLServerConfig } from './plugins/graphql';
 import type { ConfigurationVariable, WunderGraphConfiguration } from '@wundergraph/protobuf';
@@ -54,6 +53,23 @@ export interface OperationHookFunction {
 	(...args: any[]): Promise<any>;
 }
 
+/**
+ * The custom context can be used to add custom properties to the request context.
+ * ```ts
+ * declare module "@wundergraph/sdk/server" {
+ * 	interface CustomContext {
+ * 		global: {
+ * 			foo: string;
+ * 		}
+ * 		request: {
+ * 			bar: string;
+ * 		}
+ * 	}
+ * }
+ * ```
+ */
+export interface CustomContext {}
+
 export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
 	mockResolve?: AsyncFn;
 	preResolve?: AsyncFn;
@@ -68,15 +84,13 @@ export type AuthenticationHookRequest<Context extends BaseRequestContext = BaseR
 
 export interface FastifyRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
-	IC extends InternalClient = InternalClient,
 	InternalOperationsClient extends OperationsClient = OperationsClient,
 	TRequestContext = any
 > {
-	ctx: AuthenticationHookRequest<BaseRequestContext<User, IC, InternalOperationsClient, TRequestContext>>;
+	ctx: AuthenticationHookRequest<BaseRequestContext<User, InternalOperationsClient, TRequestContext>>;
 }
 export interface BaseRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
-	IC extends InternalClient = InternalClient,
 	InternalOperationsClient extends OperationsClient = OperationsClient,
 	TCustomContext = any
 > {
@@ -90,12 +104,6 @@ export interface BaseRequestContext<
 	 * The request logger.
 	 */
 	log: RequestLogger;
-	/**
-	 * The internal client that is used to communicate with the server.
-	 * @deprecated Use `operations` instead.
-	 * @see https://wundergraph.com/docs/upgrade-guides/internal-client-deprecated
-	 */
-	internalClient: IC;
 	/**
 	 * The operations client that is used to communicate with the server.
 	 */
@@ -146,12 +154,8 @@ export interface PreUploadHookRequest<User extends WunderGraphUser = WunderGraph
 	context: TCustomContext;
 }
 
-export interface PostUploadHookRequest<
-	User extends WunderGraphUser = WunderGraphUser,
-	IC extends InternalClient = InternalClient,
-	TCustomContext = any
-> extends PreUploadHookRequest<User, TCustomContext> {
-	internalClient: IC;
+export interface PostUploadHookRequest<User extends WunderGraphUser = WunderGraphUser, TCustomContext = any>
+	extends PreUploadHookRequest<User, TCustomContext> {
 	error: Error;
 }
 
@@ -240,7 +244,6 @@ export interface ServerRunOptions {
 	serverConfig: WunderGraphHooksAndServerConfig<any, any, any, any>;
 	config: WunderGraphConfiguration;
 	gracefulShutdown: boolean;
-	clientFactory: InternalClientFactory;
 }
 
 export interface CreateServerOptions extends ServerRunOptions {
@@ -556,7 +559,7 @@ export interface HooksConfiguration<
 	Mutations extends MutationHooks<Context> = MutationHooks,
 	Subscriptions extends SubscriptionHooks<Context> = SubscriptionHooks,
 	Uploads extends UploadHooks = UploadHooks,
-	DataSources extends string = string,
+	DataSources extends string = any,
 	Context extends BaseRequestContext = BaseRequestContext
 > {
 	global?: GlobalHooksConfig<OperationNames<Queries, Mutations, Subscriptions>, DataSources, Context>;

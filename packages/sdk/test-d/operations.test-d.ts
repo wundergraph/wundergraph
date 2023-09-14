@@ -19,6 +19,8 @@ declare const operation: NodeJSOperation<
 	any,
 	any,
 	any,
+	any,
+	any,
 	any
 >;
 
@@ -54,6 +56,8 @@ declare const zodoperation: NodeJSOperation<
 	},
 	typeof schema,
 	'query',
+	any,
+	any,
 	any,
 	any,
 	any,

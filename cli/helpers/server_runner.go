@@ -38,6 +38,7 @@ func NewHooksServerRunner(log *zap.Logger, cfg *HooksServerRunConfig) *scriptrun
 
 	if cfg.Debug {
 		scriptArgs = append(scriptArgs, "--inspect="+cfg.DebugBindAddress)
+		scriptArgs = append(scriptArgs, "--enable-source-maps")
 	}
 	scriptArgs = append(scriptArgs, cfg.ServerScriptFile)
 

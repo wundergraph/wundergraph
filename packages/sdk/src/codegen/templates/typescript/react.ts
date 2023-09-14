@@ -9,6 +9,9 @@ import { template as reactNativeProviderTemplate } from './react.native.provider
 import { template as hooksTemplate } from './react.hooks.template';
 import { hasInput, isNotInternal, queries as allQueries } from './helpers';
 
+/**
+ * @deprecated Use @wundergraph/swr instead
+ */
 export class TypescriptReactProvider implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(providerTemplate);
@@ -27,6 +30,9 @@ export class TypescriptReactProvider implements Template {
 	}
 }
 
+/**
+ * @deprecated Use @wundergraph/swr instead
+ */
 export class TypescriptReactNativeProvider implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(reactNativeProviderTemplate);
@@ -45,6 +51,9 @@ export class TypescriptReactNativeProvider implements Template {
 	}
 }
 
+/**
+ * @deprecated Use @wundergraph/swr instead
+ */
 export class TypescriptReactHooks implements Template {
 	constructor(reactNative?: boolean) {
 		this.reactNative = reactNative || false;

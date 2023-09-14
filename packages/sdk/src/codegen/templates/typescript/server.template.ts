@@ -2,11 +2,11 @@
 export const template = `
 import type { HooksConfig } from "./wundergraph.hooks";
 import type { WebhooksConfig } from "./wundergraph.webhooks";
-import type { InternalClient } from "./wundergraph.internal.client"
 import type { InternalOperationsClient } from "./wundergraph.internal.operations.client";
 import type { CustomClaims } from "./claims";
 import type {
 	BaseRequestContext,
+	CustomContext,
 	GraphQLServerConfig,
 	WunderGraphUser,
 	WunderGraphServerConfig,
@@ -17,28 +17,28 @@ export type Role = {{{ roleDefinitions }}};
 
 export interface User extends WunderGraphUser<Role, CustomClaims> {}
 
-export interface Config<TCustomContext> {
-    hooks: HooksConfig<TCustomContext>;
-    graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
-}
+/**
+ * We extract the custom context defined by the user
+ */
+type RequestContext = CustomContext extends { request: infer R } ? R : any;
+type GlobalContext = CustomContext extends { global: infer G } ? G : any;
 
-export interface OutputConfig<TCustomContext> {
-    hooks: HooksConfig<TCustomContext>;
-    graphqlServers?: (GraphQLServerConfig & { url: string })[];
-}
-
-export interface GraphQLExecutionContext<TCustomContext = any> {
-    wundergraph: BaseRequestContext<User, InternalClient, InternalOperationsClient, TCustomContext>;
+/**
+ * Can be used for custom GraphQL server execution context
+ * @see https://docs.wundergraph.com/docs/wundergraph-server-ts-reference/custom-graphql-servers
+ */
+export interface GraphQLExecutionContext {
+    wundergraph: BaseRequestContext<User, InternalOperationsClient, RequestContext>;
 }
 
 declare module "@wundergraph/sdk/server" {
-	export function configureWunderGraphServer<TRequestContext = any, TGlobalContext = any>(
+	export function configureWunderGraphServer(
 		configWrapper: () => WunderGraphServerConfig<
-			HooksConfig<TRequestContext>,
+			HooksConfig<RequestContext>,
 			WebhooksConfig,
-			TRequestContext,
-			TGlobalContext
+			RequestContext,
+			GlobalContext
 		>
-	): WunderGraphHooksAndServerConfig<any, any, TRequestContext, TGlobalContext>;
+	): WunderGraphHooksAndServerConfig<any, any, RequestContext, GlobalContext>;
 }
 `;

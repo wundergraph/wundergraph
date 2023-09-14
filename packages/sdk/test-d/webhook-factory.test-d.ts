@@ -1,6 +1,5 @@
-import { expectType } from 'tsd';
+import { expectType, expectAssignable } from 'tsd';
 import {
-	InternalClient,
 	InternalOperationsDefinition,
 	OperationsClient,
 	Webhook,
@@ -17,12 +16,18 @@ type InternalOperations = InternalOperationsDefinition<{
 	};
 }>;
 
+class MyRequestContext {
+	whoami() {
+		return 'request';
+	}
+}
+
 type InternalOperationsClient = OperationsClient<InternalOperations>;
 
-const createWebhook = createWebhookFactory<InternalOperationsClient>();
+const createWebhook = createWebhookFactory<InternalOperationsClient, MyRequestContext, any>();
 
 // allow any event and response
-expectType<Webhook>(
+expectAssignable<Webhook>(
 	createWebhook({
 		handler: async (event, ctx) => {
 			return {
@@ -36,7 +41,7 @@ expectType<Webhook>(
 );
 
 // call operations
-expectType<Webhook>(
+expectAssignable<Webhook>(
 	createWebhook({
 		handler: async (event, ctx) => {
 			const { data, error } = await ctx.operations.query({
@@ -54,7 +59,7 @@ expectType<Webhook>(
 );
 
 // restricted event and response with operations
-expectType<Webhook<InternalClient, WebhookHttpEvent<{ city: string }>, WebhookHttpResponse<{ temp: string }>>>(
+expectType<Webhook<WebhookHttpEvent<{ city: string }>, WebhookHttpResponse<{ temp: string }>>>(
 	createWebhook<WebhookHttpEvent<{ city: string }>, WebhookHttpResponse<{ temp: string }>>({
 		handler: async (event, ctx) => {
 			const result = await ctx.operations.query({

@@ -5,6 +5,9 @@ import {WunderGraphContext} from "./provider";
 import { RequestOptions, MutateRequestOptions, SubscriptionRequestOptions, Response} from "@wundergraph/sdk"
 {{#if hasImports}}import { {{imports}} } from "./models";{{/if}}
 
+/**
+ * @deprecated Use @wundergraph/swr instead
+ */
 export const useWunderGraph = () => {
     const ctx = useContext(WunderGraphContext)
     if (ctx === undefined) {

@@ -1,20 +1,20 @@
 import { GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLInt, GraphQLFloat, GraphQLBoolean } from 'graphql';
 
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
+import { ResponseError } from '@wundergraph/sdk/client';
 
 export default configureWunderGraphServer(() => ({
 	hooks: {
 		queries: {
 			Infinite: {
 				preResolve: async (hook) => {
-					const result = await hook.internalClient.queries.Infinite({
-						input: hook.input,
-					});
-
-					const result2 = await hook.operations.query({
+					const result = await hook.operations.query({
 						operationName: 'Infinite',
 						input: hook.input,
 					});
+					if (result.error) {
+						throw result.error;
+					}
 				},
 			},
 			PreResolveFailure: {

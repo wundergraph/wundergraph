@@ -142,9 +142,9 @@ func runMutatingAuthenticationHook(ctx context.Context, hook MiddlewareHook, cli
 		log.Error("hook failed", zap.Error(err))
 		return nil, err
 	}
-	if out.Error != "" {
-		log.Error("returned an error", zap.String("error", out.Error))
-		return nil, AuthenticationDeniedError(out.Error)
+	if err := out.ResponseError(); err != nil {
+		log.Error("returned an error", zap.Error(err))
+		return nil, AuthenticationDeniedError(err.Error())
 	}
 	var res mutatingPostAuthenticationResponse
 	if err := json.Unmarshal(out.Response, &res); err != nil {

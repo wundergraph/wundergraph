@@ -14,7 +14,6 @@ the `mutatingPreResolve` hook is called with the following parameters:
 - `clientRequest`: The original client request object, including Headers
 - `log`: The logger object
 - `operations`: The operations client, used to call other (internal) operations
-- `internalClient`: The internal client object, _deprecated_
 - `input`: The input object (only for Operation hooks)
 
 With the `operations` client,
@@ -27,7 +26,7 @@ export default configureWunderGraphServer(() => ({
   hooks: {
     queries: {
       Dragons: {
-        mutatingPreResolve: async ({ user, clientRequest, log, input, operations, internalClient }) => {
+        mutatingPreResolve: async ({ user, clientRequest, log, input, operations }) => {
           return input;
         },
       },

@@ -3,7 +3,6 @@ import { Headers } from '@whatwg-node/fetch';
 import process from 'node:process';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import Fastify, { FastifyInstance } from 'fastify';
-import { InternalClient, InternalClientFactory, internalClientFactory } from './internal-client';
 import { ORM } from '@wundergraph/orm';
 import { pino } from 'pino';
 import path from 'path';
@@ -40,12 +39,12 @@ import { CreateServerOptions, TracerConfig } from './types';
 import { loadTraceConfigFromWgConfig } from './trace/config';
 import { TelemetryPluginOptions } from './plugins/telemetry';
 import { createLogger } from './logger';
+import { ServerError } from './error';
 
 export const WunderGraphConfigurationFilename = 'wundergraph.wgconfig';
 
 const isProduction = process.env.NODE_ENV === 'production';
 let WG_CONFIG: WunderGraphConfiguration;
-let clientFactory: InternalClientFactory;
 let logger: pino.Logger;
 
 /**
@@ -74,13 +73,6 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 			path.join(process.env.WG_DIR_ABS!, 'generated', WunderGraphConfigurationFilename)
 		);
 		WG_CONFIG = WunderGraphConfiguration.decode(configContent);
-
-		if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.nodeInternalUrl) {
-			const nodeInternalURL = resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.nodeInternalUrl);
-			clientFactory = internalClientFactory(WG_CONFIG.api.operations, nodeInternalURL);
-		} else {
-			throw new Error('User defined api is not set.');
-		}
 	} catch (err: any) {
 		logger.fatal(err, 'Could not load wundergraph configuration file. Did you forget to run `wunderctl generate` ?');
 		process.exit(1);
@@ -89,8 +81,7 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 
 export function configureWunderGraphServer<
 	GeneratedHooksConfig extends HooksConfiguration = HooksConfiguration,
-	GeneratedInternalClient = InternalClient,
-	GeneratedWebhooksConfig extends HooksConfiguration = WebhooksConfig,
+	GeneratedWebhooksConfig extends WebhooksConfig = WebhooksConfig,
 	TRequestContext = any,
 	TGlobalContext = any
 >(
@@ -154,7 +145,6 @@ const _configureWunderGraphServer = <
 			serverConfig,
 			// only in production because it has no value in development
 			gracefulShutdown: isProduction,
-			clientFactory,
 		}).catch((err) => {
 			logger.fatal(err, 'Could not start the hook server');
 			process.exit(1);
@@ -273,7 +263,6 @@ export const createServer = async ({
 	serverConfig,
 	config,
 	gracefulShutdown,
-	clientFactory,
 	serverHost,
 	serverPort,
 }: CreateServerOptions): Promise<FastifyInstance> => {
@@ -328,7 +317,7 @@ export const createServer = async ({
 		if (serverConfig.context?.request?.create) {
 			const result = await serverConfig.context.request.create(globalContext);
 			if (result === undefined) {
-				throw new Error('could not instantiate request context');
+				throw new ServerError('could not instantiate request context');
 			}
 			return result;
 		}
@@ -407,7 +396,7 @@ export const createServer = async ({
 	 */
 	await fastify.register(async (fastify) => {
 		/**
-		 * Calls on every request. We use it to do pre-init stuff e.g. create the request context and internalClient
+		 * Calls on every request. We use it to do pre-init stuff e.g. create the request context and operations client
 		 * Registering this handler will only affect child plugins
 		 */
 		fastify.addHook<{ Body: FastifyRequestBody }>('preHandler', async (req, reply) => {
@@ -425,7 +414,6 @@ export const createServer = async ({
 				log: createLogger(req.log),
 				user: req.body.__wg.user!,
 				clientRequest,
-				internalClient: clientFactory(headers, clientRequest),
 				operations: new OperationsClient({
 					baseURL: nodeInternalURL,
 					clientRequest,
@@ -550,7 +538,7 @@ export const createServer = async ({
 		  })
 		: ({
 				from() {
-					throw new Error(
+					throw new ServerError(
 						`ORM is not enabled for your application. Set "experimental.orm" to "true" in your \`wundergraph.config.ts\` to enable.`
 					);
 				},
@@ -563,7 +551,6 @@ export const createServer = async ({
 		await fastify.register(require('./plugins/webhooks'), {
 			wundergraphDir,
 			webhooks: config.api.webhooks,
-			internalClientFactory: clientFactory,
 			nodeURL: nodeInternalURL,
 			globalContext,
 			createContext,
@@ -588,7 +575,6 @@ export const createServer = async ({
 			await fastify.register(FastifyFunctionsPlugin, {
 				operations: operationsConfig.typescript_operation_files,
 				operationsRequestContext,
-				internalClientFactory: clientFactory,
 				nodeURL: nodeInternalURL,
 				globalContext,
 				createContext,

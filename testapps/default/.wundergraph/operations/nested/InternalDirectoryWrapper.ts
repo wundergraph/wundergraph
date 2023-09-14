@@ -1,9 +1,14 @@
 import { createOperation } from '../../generated/wundergraph.factory';
 
 export default createOperation.query({
-	handler: async ({ internalClient }) => {
-		const root = await internalClient.queries.InternalRootInternal();
-		const nested = await internalClient.queries.NestedInternalInternal();
+	handler: async ({ operations }) => {
+		const root = await operations.query({
+			operationName: 'internal/rootInternal',
+		});
+
+		const nested = await operations.query({
+			operationName: 'nested/internal/Internal',
+		});
 
 		return {
 			root,

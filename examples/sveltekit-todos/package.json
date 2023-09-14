@@ -55,8 +55,8 @@
 	"type": "module",
 	"dependencies": {
 		"@tanstack/svelte-query": "^4.29.1",
-		"@wundergraph/sdk": "^0.175.0",
-		"@wundergraph/svelte-query": "^0.3.11",
+		"@wundergraph/sdk": "^0.177.0",
+		"@wundergraph/svelte-query": "^0.3.13",
 		"svelte-dnd-action": "^0.9.22"
 	}
 }
