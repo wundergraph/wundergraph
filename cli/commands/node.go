@@ -55,7 +55,7 @@ var nodeStartCmd = &cobra.Command{
 		g.Go(func() error {
 			return StartWunderGraphNode(n,
 				WithIdleHandler(stop),
-				WithRequestLogging(rootFlags.DebugMode),
+				WithRequestResponseLogging(rootFlags.DebugMode),
 			)
 		})
 
@@ -92,11 +92,11 @@ func NewWunderGraphNode(ctx context.Context) (*node.Node, string, error) {
 }
 
 type options struct {
-	hooksServerHealthCheck  bool
-	idleHandler             func()
-	enableRequestLogging    bool
-	natsDefaultServerURL    string
-	serverConfigLoadHandler func(*node.WunderNodeConfig)
+	hooksServerHealthCheck       bool
+	idleHandler                  func()
+	enableRequestResponseLogging bool
+	natsDefaultServerURL         string
+	serverConfigLoadHandler      func(*node.WunderNodeConfig)
 }
 
 type Option func(options *options)
@@ -113,9 +113,11 @@ func WithIdleHandler(idleHandler func()) Option {
 	}
 }
 
-func WithRequestLogging(debugMode bool) Option {
+// WithRequestResponseLogging enables logging all HTTP requests
+// and responses to the stderr
+func WithRequestResponseLogging(enable bool) Option {
 	return func(options *options) {
-		options.enableRequestLogging = debugMode
+		options.enableRequestResponseLogging = enable
 	}
 }
 
@@ -171,6 +173,7 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 		node.WithIntrospection(enableIntrospection),
 		node.WithTraceBatchTimeout(otelBatchTimeout),
 		node.WithNATSDefaultServerURL(options.natsDefaultServerURL),
+		node.WithRequestResponseLogging(options.enableRequestResponseLogging),
 		node.WithServerConfigLoadHandler(func(config *node.WunderNodeConfig) {
 			updateLoggingLevel(config.Api.Options.Logging.Level)
 		}),
@@ -185,10 +188,6 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 
 	if options.hooksServerHealthCheck {
 		nodeOpts = append(nodeOpts, node.WithHooksServerHealthCheck(time.Duration(healthCheckTimeout)*time.Second))
-	}
-
-	if options.enableRequestLogging {
-		nodeOpts = append(nodeOpts, node.WithRequestLogging(options.enableRequestLogging))
 	}
 
 	err = n.StartBlocking(nodeOpts...)
