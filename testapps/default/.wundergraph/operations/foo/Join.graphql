@@ -1,4 +1,4 @@
-query ($userID: Int! @internal) {
+query ($userID: BigInt! @internal) {
 	posts: jsp_getPosts {
 		id
 		title
