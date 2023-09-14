@@ -632,7 +632,7 @@ var upCmd = &cobra.Command{
 				node.WithInsecureCookies(),
 				node.WithIntrospection(true),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
-				node.WithRequestLogging(rootFlags.DebugMode),
+				node.WithRequestResponseLogging(rootFlags.DebugMode),
 				node.WithTraceBatchTimeout(1000 * time.Millisecond),
 				node.WithDevMode(),
 				node.WithNATSDefaultServerURL(natsEmbeddedServerURL),
