@@ -22,6 +22,7 @@
     "packages/protobuf",
     "packages/react-query",
     "packages/react-relay",
+    "packages/rust-client",
     "packages/sdk",
     "packages/solid-query",
     "packages/svelte-query",

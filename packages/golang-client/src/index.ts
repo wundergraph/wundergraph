@@ -1,6 +1,7 @@
 import {
 	BaseTypeScriptDataModel,
 	CodeGenerationConfig,
+	GraphQLOperation,
 	Template,
 	TemplateOutputFile,
 	TypeScriptEnumModels,
@@ -11,7 +12,7 @@ import execa from 'execa';
 import { capitalize } from 'lodash';
 import Handlebars from 'handlebars';
 import { clientTemplate } from './client-template';
-import { OperationType } from '@wundergraph/protobuf';
+import { OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import Logger from '@wundergraph/sdk/internal/logger';
 
 const logger = Logger.child({ plugin: 'golang-client' });
@@ -59,7 +60,7 @@ const gofmt = (code: string) => {
 		// on purpose. Otherwise we throw an error with both the code and
 		// the error message returned by gofmt.
 		if (e instanceof Error && e.message.indexOf('ENOENT') >= 0) {
-			logger.error('gofmt is not installed. If you want to prettify the generated code, please install gofmt');
+			logger.warn('gofmt is not installed. If you want to prettify the generated code, please install gofmt');
 		} else {
 			throw new Error(`failed to format:\n${linefy(code)}\n\n${e}`);
 		}
@@ -103,12 +104,14 @@ export class GolangResponseModels implements Template {
 		const config = generationConfig.config;
 		const content = config.application.Operations.map((op) => {
 			const dataName = '#/definitions/' + op.Name + 'ResponseData';
-			const responseSchema = JSON.parse(JSON.stringify(op.ResponseSchema)) as JSONSchema7;
-			if (responseSchema.properties) {
-				responseSchema.properties['data'] = {
-					$ref: dataName,
-				};
-			}
+			const responseSchema: JSONSchema = {
+				type: 'object',
+				properties: {
+					data: {
+						$ref: dataName,
+					},
+				},
+			};
 			return JSONSchemaToGolangStruct(responseSchema, op.Name + 'Response', true);
 		}).join('\n\n');
 		return Promise.resolve([
@@ -125,6 +128,16 @@ export class GolangResponseModels implements Template {
 	}
 }
 
+const responseDataSchema = (op: GraphQLOperation) => {
+	switch (op.ExecutionEngine) {
+		case OperationExecutionEngine.ENGINE_NODEJS:
+			return op.ResponseSchema;
+		case OperationExecutionEngine.ENGINE_GRAPHQL:
+			return op.ResponseSchema?.properties?.['data'] as JSONSchema7;
+	}
+	throw new Error(`unhandled operation engine ${op.ExecutionEngine}`);
+};
+
 export class GolangResponseDataModels implements Template {
 	constructor(config: GolangClientTemplateConfig = Object.assign({}, defaultTemplateConfig)) {
 		this.config = config;
@@ -133,12 +146,8 @@ export class GolangResponseDataModels implements Template {
 	private readonly config: GolangClientTemplateConfig;
 
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
-		const content = generationConfig.config.application.Operations.filter(
-			(op) => op.ResponseSchema.properties !== undefined && op.ResponseSchema.properties['data'] !== undefined
-		)
-			.map((op) =>
-				JSONSchemaToGolangStruct(op.ResponseSchema.properties!['data'] as JSONSchema7, op.Name + 'ResponseData', false)
-			)
+		const content = generationConfig.config.application.Operations.filter((op) => responseDataSchema(op) !== undefined)
+			.map((op) => JSONSchemaToGolangStruct(responseDataSchema(op), op.Name + 'ResponseData', false))
 			.join('\n\n');
 		return Promise.resolve([
 			{
@@ -249,9 +258,6 @@ const JSONSchemaToGolangStruct = (schema: JSONSchema, structName: string, withEr
 	let out = '';
 	const capitalizeFirstChar = (name: string) => capitalize(name.substring(0, 1)) + name.substring(1);
 	const addJsonTag = (fieldName: string, isArray: boolean) => {
-		if (isArray) {
-			return;
-		}
 		out += ` \`json:"${fieldName},omitempty"\`\n`;
 	};
 	visitJSONSchema(schema, {
@@ -274,14 +280,9 @@ const JSONSchemaToGolangStruct = (schema: JSONSchema, structName: string, withEr
 			enter: (name, isRequired, isArray) => {
 				out += `\t${capitalizeFirstChar(name)}`;
 			},
-			leave: (name, isRequired, isArray) => {
-				if (name) {
-					out += ` \`json:"${name},omitempty"\`\n`;
-				}
-			},
 		},
 		string: (name, isRequired, isArray, enumValues) => {
-			out += `\t${capitalizeFirstChar(name)} ${isArray ? '[]' : ''}${isRequired ? '' : '*'}string `;
+			out += `\t${capitalizeFirstChar(name)} ${isArray ? '[]' : ''}${isRequired ? '' : '*'}string`;
 			addJsonTag(name, isArray);
 		},
 		object: {
@@ -289,10 +290,6 @@ const JSONSchemaToGolangStruct = (schema: JSONSchema, structName: string, withEr
 				out += `\t${capitalizeFirstChar(name)} ${isArray ? '[]' : ''}${isRequired ? '' : '*'}struct {\n`;
 			},
 			leave: (name, isRequired, isArray) => {
-				if (isArray) {
-					out += ' } ';
-					return;
-				}
 				out += `\t}`;
 				addJsonTag(name, isArray);
 			},
@@ -302,13 +299,18 @@ const JSONSchemaToGolangStruct = (schema: JSONSchema, structName: string, withEr
 			addJsonTag(name, isArray);
 		},
 		any: (name, isRequired, isArray) => {
-			out += `\t${capitalizeFirstChar(name)} ${isArray ? '[]' : ''}${isRequired ? '' : '*'}interface{} `;
+			out += `\t${capitalizeFirstChar(name)} ${isArray ? '[]' : ''}${isRequired ? '' : '*'}interface{}`;
 			addJsonTag(name, isArray);
 		},
 		customType: (name, typeName, isRequired, isArray) => {
-			out += `\t${capitalizeFirstChar(name)} ${isArray ? '[]' : ''} ${isRequired ? '' : '*'}${capitalizeFirstChar(
-				typeName
-			)}`;
+			if (typeName.indexOf('{') >= 0) {
+				// Anonymous type not representable by Go
+				// TODO: Do beter with these at some point, use an approach like the Rust generator
+				typeName = `interface{}`;
+			} else {
+				typeName = capitalizeFirstChar(typeName);
+			}
+			out += `\t${capitalizeFirstChar(name)} ${isArray ? '[]' : ''} ${isRequired ? '' : '*'}${typeName}`;
 			addJsonTag(name, isArray);
 		},
 	});
