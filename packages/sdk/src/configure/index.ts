@@ -1148,6 +1148,13 @@ export const configureWunderGraphApplication = <
 				}
 			}
 
+			// Update response types for TS operations. Do this before code generation, since some
+			// of the templates require the output types of the TS operations.
+			const tsOperations: TypeScriptOperation[] = app.Operations.filter(
+				(operation) => operation.ExecutionEngine == OperationExecutionEngine.ENGINE_NODEJS
+			);
+			await updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
+
 			const defaultCodeGenerators: CodeGen = { templates: [...templates.typescript.all] };
 
 			const combined = [
@@ -1163,13 +1170,6 @@ export const configureWunderGraphApplication = <
 					basePath: gen.path || generated,
 				});
 			}
-
-			// Update response types for TS operations. Do this only after code generation completes,
-			// since TS operations need some of the generated files
-			const tsOperations: TypeScriptOperation[] = app.Operations.filter(
-				(operation) => operation.ExecutionEngine == OperationExecutionEngine.ENGINE_NODEJS
-			);
-			await updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
 
 			const storedConfig = storedWunderGraphConfig(resolved, apis.length);
 			const configData = WunderGraphConfiguration.encode(storedConfig).finish();
