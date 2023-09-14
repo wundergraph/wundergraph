@@ -63,7 +63,7 @@ var startCmd = &cobra.Command{
 			return StartWunderGraphNode(n,
 				WithIdleHandler(stop),
 				WithHooksServerHealthCheck(),
-				WithRequestLogging(rootFlags.DebugMode),
+				WithRequestResponseLogging(rootFlags.DebugMode),
 				WithNATSDefaultServerURL(natsEmbeddedServerURL),
 			)
 		})
