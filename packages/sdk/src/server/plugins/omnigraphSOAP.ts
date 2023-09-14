@@ -5,6 +5,7 @@ import { fetch } from '@whatwg-node/fetch';
 import { createExecutorFromSchemaAST } from '@omnigraph/soap';
 import { MeshFetch } from '@graphql-mesh/types';
 import { Agent } from 'https';
+import { loggedFetch } from './fetch';
 
 export interface SoapServerConfig {
 	serverName: string;
@@ -43,8 +44,10 @@ const FastifySoapGraphQLPlugin: FastifyPluginAsync<SoapServerConfig> = async (fa
 		assumeValid: true,
 	});
 
+	const fetchLogger = fastify.log.child({ type: 'SOAP' });
+	const fetchFn = fetchWithHeaders as (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>;
 	// prepare queries executor from schema with soap directives
-	const executor = createExecutorFromSchemaAST(schema, fetchWithHeaders);
+	const executor = createExecutorFromSchemaAST(schema, loggedFetch(fetchLogger, fetchFn));
 
 	fastify.route({
 		method: ['GET', 'POST'],
