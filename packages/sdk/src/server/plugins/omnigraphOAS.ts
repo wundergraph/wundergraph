@@ -6,6 +6,7 @@ import { PubSub } from '@graphql-mesh/utils';
 import { LazyLoggerMessage, Logger, MeshFetch, MeshPubSub } from '@graphql-mesh/types';
 import { processDirectives } from '@omnigraph/openapi';
 import { fetch } from '@whatwg-node/fetch';
+import { loggedFetch } from './fetch';
 
 export interface OpenApiServerConfig {
 	serverName: string;
@@ -65,7 +66,7 @@ const executableSchema = (
 		schema,
 		logger: logWrapper,
 		pubsub,
-		globalFetch: fetch,
+		globalFetch: loggedFetch(logger.child({ type: 'OpenAPI' }), fetch),
 	};
 	if (upstreamURL !== '') {
 		opts['endpoint'] = upstreamURL;
