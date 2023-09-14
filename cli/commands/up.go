@@ -46,8 +46,12 @@ var (
 	disableCache                            bool
 	clearCacheOnStart                       bool
 	enableTUI                               bool
-	logs                                    bool
 	restartFunc                             func()
+)
+
+var (
+	// Deprecated, kept for backwards compat of command line flags
+	logs bool
 )
 
 type cuiHandler struct {
@@ -148,6 +152,9 @@ var upCmd = &cobra.Command{
 	Long:        "Start the WunderGraph application in development mode and watch for changes",
 	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources | telemetry.AnnotationFeatures),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if logs {
+			log.Warn("--logs is deprecated and ignored. Logs are now enabled by default. To enable the TUI, use --ui")
+		}
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
@@ -165,17 +172,6 @@ var upCmd = &cobra.Command{
 		if !isatty.IsTerminal(os.Stdout.Fd()) {
 			// Always use JSON when not in a terminal
 			enableTUI = false
-		}
-
-		// Bubbletea UI is not compatible with regular stdout logging
-		if enableTUI {
-			if rootFlags.DebugMode {
-				log.Warn("Debug mode is enabled. This will disable the TUI.")
-				enableTUI = false
-			} else if logs {
-				log.Warn("Logs are enabled. This will disable the TUI.")
-				enableTUI = false
-			}
 		}
 
 		var consoleUI *cui.UI
@@ -223,7 +219,8 @@ var upCmd = &cobra.Command{
 
 			go func() {
 				if _, err := devTUI.Run(); err != nil {
-					log.Error("error running tui program", zap.Error(err))
+					// Don't use log here because logs are silenced when using the TUI
+					fmt.Fprintf(os.Stderr, "error running tui program: %v\n", err)
 				}
 				cancel()
 			}()
@@ -575,7 +572,9 @@ var upCmd = &cobra.Command{
 			OnAfterBundle: onAfterBuild,
 		})
 
-		consoleHandler.SetConfigBundler(configBundler)
+		if consoleHandler != nil {
+			consoleHandler.SetConfigBundler(configBundler)
+		}
 
 		if devTUI != nil {
 			devTUI.Send(cli.TaskStarted{
@@ -701,8 +700,8 @@ var upCmd = &cobra.Command{
 }
 
 func init() {
-	upCmd.PersistentFlags().BoolVar(&enableTUI, "ui", true, "Enable terminal user interface")
-	upCmd.PersistentFlags().BoolVar(&logs, "logs", false, "Enable log mode. Useful for debugging")
+	upCmd.PersistentFlags().BoolVar(&enableTUI, "ui", false, "Enable terminal user interface")
+	upCmd.PersistentFlags().BoolVar(&logs, "logs", false, "Deprecated: logs are enabled by default")
 	upCmd.PersistentFlags().IntVar(&defaultDataSourcePollingIntervalSeconds, "default-polling-interval", 5, "Default polling interval for data sources")
 	upCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "Disables local caches")
 	upCmd.PersistentFlags().BoolVar(&clearCacheOnStart, "clear-cache", false, "Clears local caches before startup")
