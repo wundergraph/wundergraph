@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.7.13...@wundergraph/golang-client@0.8.0) (2023-09-15)
+
+### Features
+
+* add rust client ([#1266](https://github.com/wundergraph/wundergraph/issues/1266)) ([569a752](https://github.com/wundergraph/wundergraph/commit/569a7528fd68213e1b87feafa0d3e5ba40acb982)) (@fiam)
+
 ## [0.7.13](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.7.12...@wundergraph/golang-client@0.7.13) (2023-09-05)
 
 **Note:** Version bump only for package @wundergraph/golang-client
