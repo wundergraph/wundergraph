@@ -507,20 +507,21 @@ func (v *RedirectURIValidator) GetValidatedRedirectURI(r *http.Request) (redirec
 		}
 		redirectURI = redirectURICookie.Value
 	}
-	if redirectURI == "" {
-		return "", false
-	}
+	return redirectURI, v.IsValid(redirectURI)
+}
+
+func (v *RedirectURIValidator) IsValid(redirectURI string) bool {
 	for i := range v.stringMatchers {
 		if v.stringMatchers[i] == redirectURI {
-			return redirectURI, true
+			return true
 		}
 	}
 	for _, matcher := range v.regexMatchers {
 		if matcher.MatchString(redirectURI) {
-			return redirectURI, true
+			return true
 		}
 	}
-	return redirectURI, false
+	return false
 }
 
 func RedirectAlreadyAuthenticatedUsers(matchString, matchRegex []string) func(handler http.Handler) http.Handler {
