@@ -2,6 +2,7 @@ package authentication
 
 import (
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -18,23 +19,22 @@ type ProviderConfig struct {
 	ForceRedirectHttps bool
 	Cookie             *securecookie.SecureCookie
 	AuthTimeout        time.Duration
-	// DefaultRedirectProtocol indicates the protocol used by default
-	// when ForceRedirectHttps is false and no protocol could be determined
-	DefaultRedirectProtocol string
 }
 
 // RedirectProtocol returns the protocol that should be used for a redirect to
-// this provider and back into the application, set from the ForceRedirectHttps
-// and DefaultRedirectProtocol, and deduced from the client request r when
-// those are empty.
-func (c *ProviderConfig) RedirectProtocol(r *http.Request) string {
+// this provider and back into the application, set from the ForceRedirectHttps.
+// If ForceRedirectHttps is not set the protocol is guessed based on the incoming
+// request and the redirectURI to be used after authentication.
+func (c *ProviderConfig) RedirectProtocol(r *http.Request, redirectURI string) string {
 	if c.ForceRedirectHttps {
 		return "https"
 	}
-	if c.DefaultRedirectProtocol != "" {
-		return c.DefaultRedirectProtocol
-	}
+	// If the incoming request came through HTTPS, use HTTPS
 	if looksLikeHTTPS(r) {
+		return "https"
+	}
+	u, _ := url.Parse(redirectURI)
+	if u != nil && u.Scheme == "https" {
 		return "https"
 	}
 	return "http"

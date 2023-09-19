@@ -95,7 +95,7 @@ func (h *OAuth2AuthenticationHandler) Authorize(w http.ResponseWriter, r *http.R
 	uriWithoutQuery := strings.Replace(r.RequestURI, "?"+r.URL.RawQuery, "", 1)
 	redirectPath := strings.Replace(uriWithoutQuery, AuthorizePath, CallbackPath, 1)
 
-	scheme := h.config.Provider.RedirectProtocol(r)
+	scheme := h.config.Provider.RedirectProtocol(r, redirectURI)
 
 	callbackURI := fmt.Sprintf("%s://%s%s", scheme, r.Host, redirectPath)
 	oauth2Config := oauth2.Config{
@@ -185,10 +185,8 @@ func (h *OAuth2AuthenticationHandler) Callback(w http.ResponseWriter, r *http.Re
 		}
 	}
 
-	scheme := h.config.Provider.RedirectProtocol(r)
-
 	if redirectURI == "" {
-		redirectURI = fmt.Sprintf("%s://%s%s", scheme, r.Host, "/auth/cookie/user")
+		redirectURI = "/auth/cookie/user"
 	}
 
 	//http.Redirect(w, r, redirect, http.StatusFound)
