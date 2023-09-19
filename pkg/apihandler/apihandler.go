@@ -1625,7 +1625,7 @@ func (r *Builder) authenticationHooks() authentication.Hooks {
 
 func (r *Builder) registerAuth() error {
 
-	config, err := loadUserConfiguration(r.api, r.middlewareClient, r.log)
+	config, err := loadUserConfiguration(r.api, r.middlewareClient, r.insecureCookies, r.log)
 	if err != nil {
 		return err
 	}
