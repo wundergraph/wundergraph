@@ -184,13 +184,27 @@ func (m *Metric) AddTag(name string, value string) error {
 	return nil
 }
 
-type GraphQLResponse struct {
-	Data   interface{} `json:"data"`
-	Errors []GraphQLError
+type graphQLResponse struct {
+	Data struct {
+		CollectMetricsV1 struct {
+			Typename string `json:"__typename"`
+			Message  string `json:"message"`
+			Success  bool   `json:"success"`
+		} `json:"collectMetricsV1"`
+	} `json:"data"`
+	Errors []struct {
+		Message string `json:"message"`
+	} `json:"errors"`
 }
 
-type GraphQLError struct {
-	Message string `json:"message"`
+func (r *graphQLResponse) Error() string {
+	var messages []string
+	for _, e := range r.Errors {
+		if e.Message != "" {
+			messages = append(messages, e.Message)
+		}
+	}
+	return strings.Join(messages, ", ")
 }
 
 type MetricClientInfo struct {
@@ -283,16 +297,20 @@ func (c *client) Send(metrics []*Metric) error {
 		return err
 	}
 
-	var graphqlResp GraphQLResponse
+	var graphqlResp graphQLResponse
 	err = json.Unmarshal(respData, &graphqlResp)
 	if err != nil {
 		return err
 	}
 
-	if len(graphqlResp.Errors) > 0 {
-		return fmt.Errorf("error sending telemetry data: %s, statusCode: %d, errors: %s", string(data), resp.StatusCode, graphqlResp.Errors[0].Message)
+	errorMessage := graphqlResp.Error()
+	if errorMessage == "" && graphqlResp.Data.CollectMetricsV1.Message != "" {
+		errorMessage = graphqlResp.Data.CollectMetricsV1.Message
 	}
 
+	if errorMessage != "" || !graphqlResp.Data.CollectMetricsV1.Success {
+		return fmt.Errorf("error sending telemetry data %s: %s", string(data), graphqlResp.Data.CollectMetricsV1.Message)
+	}
 	return nil
 }
 
