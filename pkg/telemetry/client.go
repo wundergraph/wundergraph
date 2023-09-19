@@ -304,7 +304,7 @@ func (c *client) Send(metrics []*Metric) error {
 	}
 
 	errorMessage := graphqlResp.Error()
-	if errorMessage == "" && graphqlResp.Data.CollectMetricsV1.Message != "" {
+	if errorMessage == "" && !graphqlResp.Data.CollectMetricsV1.Success && graphqlResp.Data.CollectMetricsV1.Message != "" {
 		errorMessage = graphqlResp.Data.CollectMetricsV1.Message
 	}
 
