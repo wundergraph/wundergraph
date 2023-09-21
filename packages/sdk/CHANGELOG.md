@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.178.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.177.0...@wundergraph/sdk@0.178.0) (2023-09-15)
+
+### Features
+
+* add rust client ([#1266](https://github.com/wundergraph/wundergraph/issues/1266)) ([569a752](https://github.com/wundergraph/wundergraph/commit/569a7528fd68213e1b87feafa0d3e5ba40acb982)) (@fiam)
+* improved context factory types ([#1250](https://github.com/wundergraph/wundergraph/issues/1250)) ([d1b9596](https://github.com/wundergraph/wundergraph/commit/d1b95962a81418200969e8e69c2df982c6e305c8)) (@Pagebakers)
+* include authentication refresh tokens in User objects ([#1269](https://github.com/wundergraph/wundergraph/issues/1269)) ([d62e15f](https://github.com/wundergraph/wundergraph/commit/d62e15f6f92a3cebc8b4f366be613dd459bda8f5)) (@fiam)
+* log requests and responses to OpenAPI and SOAP upstreams ([#1272](https://github.com/wundergraph/wundergraph/issues/1272)) ([a3ca1b0](https://github.com/wundergraph/wundergraph/commit/a3ca1b0a8ba090513f848b6e9bd60365d9ef9d5b)) (@fiam)
+
+### Bug Fixes
+
+* make errors in GraphQL operations stop code generation in production ([#1267](https://github.com/wundergraph/wundergraph/issues/1267)) ([53111f6](https://github.com/wundergraph/wundergraph/commit/53111f641654d86972fbc234cf0518d72d0d1950)) (@fiam)
+
 ## [0.177.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.176.0...@wundergraph/sdk@0.177.0) (2023-09-05)
 
 ### Features

@@ -1742,19 +1742,6 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 	authorizedRedirectUris := loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUris)
 	authorizedRedirectUriRegexes := loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUriRegexes)
 
-	defaultRedirectProtocol := "http"
-	containsHttps := func(uris []string) bool {
-		for _, value := range uris {
-			if strings.HasPrefix(strings.ToLower((value)), "https://") {
-				return true
-			}
-		}
-		return false
-	}
-	if containsHttps(authorizedRedirectUris) || containsHttps(authorizedRedirectUriRegexes) {
-		defaultRedirectProtocol = "https"
-	}
-
 	router.Use(authentication.RedirectAlreadyAuthenticatedUsers(authorizedRedirectUris, authorizedRedirectUriRegexes))
 	authorizeRouter := router.PathPrefix("/" + authentication.AuthorizePath).Subrouter()
 	authorizeRouter.Use(authentication.ValidateRedirectURIQueryParameter(authorizedRedirectUris, authorizedRedirectUriRegexes))
@@ -1762,12 +1749,11 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 	callbackRouter := router.PathPrefix("/" + authentication.CallbackPath).Subrouter()
 
 	providerConfig := authentication.ProviderConfig{
-		ID:                      provider.Id,
-		InsecureCookies:         r.insecureCookies,
-		ForceRedirectHttps:      r.forceHttpsRedirects,
-		Cookie:                  cookie,
-		AuthTimeout:             authTimeout,
-		DefaultRedirectProtocol: defaultRedirectProtocol,
+		ID:                 provider.Id,
+		InsecureCookies:    r.insecureCookies,
+		ForceRedirectHttps: r.forceHttpsRedirects,
+		Cookie:             cookie,
+		AuthTimeout:        authTimeout,
 	}
 
 	switch provider.Kind {
