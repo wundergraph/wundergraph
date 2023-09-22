@@ -161,7 +161,7 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 }
 
 func (i *InternalBuilder) registerAuth() error {
-	config, err := loadUserConfiguration(i.api, i.middlewareClient, i.log)
+	config, err := loadUserConfiguration(i.api, i.middlewareClient, i.insecureCookies, i.log)
 	if err != nil {
 		return err
 	}
