@@ -98,8 +98,12 @@ func (h *AuthenticationHooks) RevalidateAuthentication(ctx context.Context, user
 	if err != nil {
 		return nil, err
 	}
-	result.AccessToken = user.AccessToken
-	result.IdToken = user.IdToken
+	if len(result.AccessToken) == 0 {
+		result.AccessToken = user.AccessToken
+	}
+	if len(result.IdToken) == 0 {
+		result.IdToken = user.IdToken
+	}
 	return result, nil
 }
 

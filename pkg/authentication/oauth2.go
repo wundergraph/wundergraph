@@ -275,7 +275,7 @@ func (h *OAuth2AuthenticationHandler) authenticate(w http.ResponseWriter, r *htt
 		}
 	}
 
-	if err := user.Save(h.config.Provider.Cookie, w, r, r.Host, h.config.Provider.InsecureCookies); err != nil {
+	if err := user.Save(h.config.Provider.Cookie, w, r, h.config.Provider.InsecureCookies); err != nil {
 		return nil, &authError{
 			Code: authErrorCodeSavedFailed,
 			Err:  fmt.Errorf("could not encode user data: %w", err),

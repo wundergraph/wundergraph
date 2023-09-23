@@ -15,7 +15,7 @@ create_branch=no
 create_pr=no
 commit=no
 
-while getopts "hpb" arg; do
+while getopts "hpcb" arg; do
   case $arg in
     h)
       usage

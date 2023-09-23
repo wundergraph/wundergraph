@@ -286,7 +286,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.178.0
+        specifier: workspace:^0.178.1
         version: link:../sdk
       typescript:
         specifier: ^5.1.6
@@ -628,7 +628,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.178.0
+        specifier: workspace:^0.178.1
         version: link:../sdk
       typescript:
         specifier: ^5.1.6
@@ -709,7 +709,7 @@ importers:
         specifier: ^4.2.5
         version: 4.2.5
       '@wundergraph/wunderctl':
-        specifier: workspace:^0.174.0
+        specifier: workspace:^0.175.0
         version: link:../wunderctl
       axios:
         specifier: ^0.26.1
@@ -27213,7 +27213,7 @@ packages:
     resolution: {directory: packages/sdk, type: directory}
     id: file:packages/sdk
     name: '@wundergraph/sdk'
-    version: 0.178.0
+    version: 0.178.1
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.4.0

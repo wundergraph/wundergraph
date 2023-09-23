@@ -496,6 +496,12 @@ export const introspect = {
 	mongodb: introspectMongoDB,
 	prisma: introspectPrisma,
 	federation: introspectFederation,
+	/**
+	 * @remarks introspect.openApi exists only for backwards compatibility
+	 * purposes. New applications should use introspect.introspectOpenApiV2.
+	 * At some point, introspect.openApi will become an alias to
+	 * introspect.openApiV2.
+	 */
 	openApi: introspectOpenApi,
 	openApiV2: introspectOpenApiV2,
 	soap: introspectSoap,
