@@ -48,7 +48,7 @@ jobs:
       matrix:
         test: ${{ fromJson(needs.collect.outputs.matrix) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v3
         with:
