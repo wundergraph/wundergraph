@@ -47,9 +47,24 @@ const unions = introspect.openApiV2({
 	baseURL: new EnvironmentVariable('OPEN_API_INPUT_UNIONS_URL', ''),
 });
 
+// Only used to test retrieval of the spec via URL
+const notesFromUrl = introspect.openApiV2({
+	apiNamespace: 'notes_from_url',
+	source: {
+		kind: 'url',
+		url: new EnvironmentVariable('NOTES_OPENAPI_URL', 'http://localhost:8091/api.yaml'),
+	},
+	introspection: {
+		headers: (builder) => {
+			builder.addStaticHeader('X-Foo', 'Bar');
+			return builder;
+		},
+	},
+});
+
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [notes, unions],
+	apis: [notes, notesFromUrl, unions],
 	server,
 	operations,
 	options: {
