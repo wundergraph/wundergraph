@@ -44,3 +44,16 @@ Some OpenID Connect Providers, like Auth0, do not support the "End Session Endpo
 Unfortunately, Auth0 also doesn't provide a way to call a back channel API to log out the user.
 In such cases, you have to use a front channel logout after logging the user out of your WunderGraph application.
 If you omit this step, the user is still logged into the OIDC provider through a cookie.
+
+For auth0, a quick way to handle it is to render a hidden iframe with the logout url as the src such as the following.
+```
+<iframe
+  src={`https://${myAuth0Domain}/v2/logout`}
+  style={{ display: "none" }}
+  onLoad={() => {
+    logout({
+      logoutOpenidConnectProvider: true,
+    });
+  }}
+/>
+```
