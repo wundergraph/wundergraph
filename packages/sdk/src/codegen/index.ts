@@ -93,7 +93,7 @@ export class CodeGenerator {
 				Logger.trace(`generating ${template.constructor.name}`);
 				generators.push(
 					template.generate(generateConfig).then((result) => {
-						if (!template.usesOutputPath ?? false) {
+						if (!(template.usesOutputPath ?? false)) {
 							this.cache.set(templateName, {
 								result,
 							});
