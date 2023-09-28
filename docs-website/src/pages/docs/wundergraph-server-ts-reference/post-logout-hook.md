@@ -48,12 +48,12 @@ If you omit this step, the user is still logged into the OIDC provider through a
 For auth0, a quick way to handle it is to render a hidden iframe with the logout url as the src such as the following.
 ```
 <iframe
-  src={`https://${myAuth0Domain}/v2/logout`}
+  src={`${auth0Domain}/v2/logout?returnTo=${encodeURIComponent(
+    `${wgApiURL}/auth/cookie/user/logout`,
+  )}&client_id=${auth0ClientId}`}
   style={{ display: "none" }}
-  onLoad={() => {
-    logout({
-      logoutOpenidConnectProvider: true,
-    });
+  onLoad={async () => {
+    window.location.reload();
   }}
 />
 ```
