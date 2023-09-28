@@ -260,6 +260,7 @@ export class TypeScriptEnumModels implements Template {
 
 export class BaseTypeScriptDataModel implements Template {
 	precedence = 10;
+	usesOutputPath = true;
 
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const definitions: Map<string, JSONSchema7> = new Map();
