@@ -113,16 +113,26 @@ export class CodeGenerator {
 	}
 }
 
+/**
+ * Combines multiple template outputs, that might refer to the same files, consolidating
+ * all outputs referring to the same file into one, without altering the TemplateOutputFile
+ * received as input. When multiple files are merged, the header of all but the first one
+ * is ignored.
+ *
+ * @param outFiles Merged output files for templates
+ * @returns An array with all the TemplateOutputFile referring to the same file merged into one
+ */
 export const mergeTemplateOutput = (outFiles: TemplateOutputFile[]): TemplateOutputFile[] => {
-	const merged: TemplateOutputFile[] = [];
+	const files: Map<string, TemplateOutputFile> = new Map();
 	outFiles.forEach((file) => {
-		const existing = merged.find((out) => out.path === file.path);
+		const existing = files.get(file.path);
 		if (existing) {
 			existing.content += '\n\n' + file.content;
 		} else {
-			merged.push(file);
+			files.set(file.path, Object.assign({}, file));
 		}
 	});
+	const merged = Array.from(files.values());
 	merged.forEach((file) => {
 		while (file.content.search('\n\n\n') !== -1) {
 			file.content = file.content.replace('\n\n\n', '\n\n');
