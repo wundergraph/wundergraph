@@ -1,4 +1,4 @@
-import { CodeGenOutWriter, collectAllTemplates, GenerateCode, Template, TemplateOutputFile } from './index';
+import { CodeGenOutWriter, collectAllTemplates, CodeGenerator, Template, TemplateOutputFile } from './index';
 import { Api } from '../definition';
 import { CodeGenerationConfig } from '../configure';
 import { ConfigurationVariableKind, OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
@@ -34,7 +34,7 @@ test('GenerateCode', async () => {
 
 export const RunTemplateTest = async (...templates: Template[]) => {
 	const fakeFileSystem = new FakeFileSystem();
-	await GenerateCode(
+	await new CodeGenerator().generate(
 		{
 			basePath: './generated',
 			wunderGraphConfig: {

@@ -142,18 +142,28 @@ export class TypeScriptResponseModels implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const content = generationConfig.config.application.Operations.map((op) => {
 			const dataName = '#/definitions/' + operationResponseDataTypename(op);
-			const schema = deepClone(responseSchema(op));
+			// Cloning here is expensive. Instead, save what was where before
+			// overwriting and then restore it
+			const schema = responseSchema(op);
+			let schemaPropertiesData: any | undefined;
 			if (schema.properties) {
+				// Save a copy first
+				schemaPropertiesData = schema.properties['data'];
 				schema.properties['data'] = {
 					$ref: dataName,
 				};
 			}
-			return JSONSchemaToTypescriptInterface(
+			const jsonSchema = JSONSchemaToTypescriptInterface(
 				schema,
 				operationResponseTypename(op),
 				true,
 				op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined
 			);
+			if (schema.properties) {
+				// Restore schema.properties['data']
+				schema.properties['data'] = schemaPropertiesData;
+			}
+			return jsonSchema;
 		}).join('\n\n');
 		return Promise.resolve([
 			{
@@ -379,41 +389,41 @@ const JSONSchemaToTypescriptInterface = (
 
 	const isUnion = !!schema.oneOf;
 
-	let out = '';
+	const out: string[] = [];
 	const writeType = (name: string, isRequired: boolean, typeName: string) => {
-		out += `${name + (isRequired ? '' : '?')}: ${typeName}\n`;
+		out.push(`${name + (isRequired ? '' : '?')}: ${typeName}\n`);
 	};
 	const writeEnumType = (enumName: string) => {
-		out += `${enumName}Values`;
+		out.push(`${enumName}Values`);
 	};
 	visitJSONSchema(schema, {
 		root: {
 			enter: () => {
 				if (isUnion) {
-					out += `export type ${interfaceName} = `;
+					out.push(`export type ${interfaceName} = `);
 					return;
 				}
 
-				out += `export interface ${interfaceName} {\n`;
+				out.push(`export interface ${interfaceName} {\n`);
 			},
 			leave: () => {
 				if (withErrors) {
 					// TODO: Differentiate between ts errors and graphql errors for the base models
 					//  as soon as we have a common abstraction for errors
 					if (typeScriptOperation) {
-						out += `errors?: GraphQLError[];\n`;
+						out.push(`errors?: GraphQLError[];\n`);
 					} else {
-						out += `errors?: GraphQLError[];\n`;
+						out.push(`errors?: GraphQLError[];\n`);
 					}
 				}
 				if (!isUnion) {
-					out += '}';
+					out.push('}');
 				}
 			},
 		},
 		number: (name, isRequired, isArray) => {
 			if (isArray) {
-				out += 'number';
+				out.push('number');
 			} else {
 				writeType(name, isRequired, 'number');
 			}
@@ -421,10 +431,10 @@ const JSONSchemaToTypescriptInterface = (
 		array: {
 			enter: (name, isRequired, isArray) => {
 				if (name === '') return;
-				out += `${name + (isRequired ? '' : '?')}: `;
+				out.push(`${name + (isRequired ? '' : '?')}: `);
 			},
 			leave: (name, isRequired, isArray) => {
-				out += name === '' ? '[]' : '[],';
+				out.push(name === '' ? '[]' : '[],');
 			},
 		},
 		string: (name, isRequired, isArray, enumValues, enumName) => {
@@ -440,14 +450,14 @@ const JSONSchemaToTypescriptInterface = (
 				}
 
 				if (isArray) {
-					out += ' (' + values + ') ';
+					out.push(' (' + values + ') ');
 				} else {
 					writeType(name, isRequired, values);
 				}
 				return;
 			}
 			if (isArray) {
-				out += 'string';
+				out.push('string');
 			} else {
 				writeType(name, isRequired, 'string');
 			}
@@ -455,21 +465,21 @@ const JSONSchemaToTypescriptInterface = (
 		object: {
 			enter: (name, isRequired, isArray) => {
 				if (isArray || isUnion) {
-					out += '{\n';
+					out.push('{\n');
 				} else {
 					writeType(name, isRequired, '{');
 				}
 			},
 			leave: (name, isRequired, isArray) => {
-				out += '}';
+				out.push('}');
 				if (!isArray && !isUnion) {
-					out += ',\n';
+					out.push(',\n');
 				}
 			},
 		},
 		boolean: (name, isRequired, isArray) => {
 			if (isArray) {
-				out += 'boolean';
+				out.push('boolean');
 			} else {
 				writeType(name, isRequired, 'boolean');
 			}
@@ -477,14 +487,14 @@ const JSONSchemaToTypescriptInterface = (
 		any: (name, typename, isRequired, isArray) => {
 			typename = typename || 'JSONValue';
 			if (isArray) {
-				out += typename;
+				out.push(typename);
 			} else {
 				writeType(name, isRequired, typename);
 			}
 		},
 		customType: (name, typeName, isRequired, isArray) => {
 			if (isArray) {
-				out += typeName;
+				out.push(typeName);
 			} else {
 				writeType(name, isRequired, typeName);
 			}
@@ -492,12 +502,12 @@ const JSONSchemaToTypescriptInterface = (
 		oneOf: {
 			afterEach: (index, count) => {
 				if (index !== count - 1) {
-					out += ' | ';
+					out.push(' | ');
 				}
 			},
 		},
 	});
-	return out;
+	return out.join('');
 };
 
 export const loadFile = (file: string | (() => string)): string => {
