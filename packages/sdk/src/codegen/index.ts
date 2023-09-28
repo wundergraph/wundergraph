@@ -13,6 +13,10 @@ export interface Template {
 	generate: (config: CodeGenerationConfig) => Promise<TemplateOutputFile[]>;
 	dependencies?: () => Template[];
 	precedence?: number;
+	// Whether this template takes into account its output path during code generation
+	// If true, its output won't be cached. If the field is not specified, it is assumed
+	// to be false.
+	usesOutputPath?: boolean;
 }
 
 export interface CodeGenConfig {
@@ -89,9 +93,11 @@ export class CodeGenerator {
 				Logger.trace(`generating ${template.constructor.name}`);
 				generators.push(
 					template.generate(generateConfig).then((result) => {
-						this.cache.set(templateName, {
-							result,
-						});
+						if (!template.usesOutputPath ?? false) {
+							this.cache.set(templateName, {
+								result,
+							});
+						}
 						return result;
 					})
 				);

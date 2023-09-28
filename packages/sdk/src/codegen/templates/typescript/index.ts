@@ -18,7 +18,6 @@ import { visitJSONSchema } from '../../jsonschema';
 import { OperationExecutionEngine } from '@wundergraph/protobuf';
 import { GraphQLOperation } from '../../../graphql/operations';
 import { TypeScriptOperationErrors } from './ts-operation-errors';
-import { deepClone } from '../../../utils/helper';
 
 declare module 'json-schema' {
 	export interface JSONSchema7 {
