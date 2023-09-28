@@ -91,8 +91,25 @@ import { useAuth } from 'components/generated/nextjs';
 export default function Page() {
   const { logout } = useAuth();
 
-  return <button onClick={() => logout({ logoutOpenidConnectProvider: true })}>Logout</button>;
+  return <button onClick={() => logout()}>Logout</button>;
 }
+```
+
+Unfortunately, Auth0 also doesn't provide a way to call a back channel API to log out the user.
+In such cases, you have to use a front channel logout after logging the user out of your WunderGraph application.
+If you omit this step, the user is still logged into the OIDC provider through a cookie.
+
+To fully logout, you should render an iframe with the correct logout flow
+```tsx
+<iframe
+  src={`${auth0Domain}/v2/logout?returnTo=${encodeURIComponent(
+    `${wgApiURL}/auth/cookie/user/logout`,
+  )}&client_id=${auth0ClientId}`}
+  style={{ display: "none" }}
+  onLoad={async () => {
+    window.location.reload();
+  }}
+/>
 ```
 
 ### Customize with Hooks
