@@ -6,7 +6,7 @@ description:
 
 ## Introduction
 
-This Todo App demonstrates how to use WunderGraph with Next.js & PostgreSQL.
+This [Todo App](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-postgres-prisma) demonstrates how to use WunderGraph with Next.js & PostgreSQL.
 
 Key features of the App are:
 
