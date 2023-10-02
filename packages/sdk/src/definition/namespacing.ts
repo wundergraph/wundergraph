@@ -26,10 +26,9 @@ import {
 } from '@wundergraph/protobuf';
 import { isRootType } from '../graphql/configuration';
 
-export const wellKnownTypeNames: string[] = [
-	'Query',
-	'Mutation',
-	'Subscription',
+const wellKnownGlobalTypeNames: string[] = ['Query', 'Mutation', 'Subscription'];
+
+const wellKnownScalarTypeNames: string[] = [
 	'String',
 	'Int',
 	'Boolean',
@@ -46,6 +45,10 @@ export const wellKnownTypeNames: string[] = [
 	'_Row',
 ];
 
+export const wellKnownTypeNames = () => {
+	return [...wellKnownGlobalTypeNames, ...wellKnownScalarTypeNames];
+};
+
 const uniqueWellKnownTypes = (schema: DocumentNode): string[] => {
 	const schemaDefinitionNode = schema.definitions.find((node) => node.kind === 'SchemaDefinition') as
 		| SchemaDefinitionNode
@@ -57,7 +60,16 @@ const uniqueWellKnownTypes = (schema: DocumentNode): string[] => {
 	const subscriptionTypeName =
 		schemaDefinitionNode?.operationTypes.find((op) => op.operation === 'subscription')?.type.name.value ||
 		'Subscription';
-	return [...new Set([...wellKnownTypeNames, queryTypeName, mutationTypeName, subscriptionTypeName])];
+	const scalarTypes = wellKnownScalarTypeNames.filter((type) => {
+		// Make sure the upstream schema doesn't already define an object type with this name
+		const typeDefinition = schema.definitions.find((node) => {
+			return node.kind == Kind.OBJECT_TYPE_DEFINITION && node.name.value === type;
+		});
+		return typeDefinition === undefined;
+	});
+	return [
+		...new Set([...wellKnownGlobalTypeNames, ...scalarTypes, queryTypeName, mutationTypeName, subscriptionTypeName]),
+	];
 };
 
 const wellKnownDirectives: string[] = ['include', 'skip', 'deprecated', 'specifiedBy'];
