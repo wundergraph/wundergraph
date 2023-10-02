@@ -26,7 +26,13 @@ import {
 } from '@wundergraph/protobuf';
 import { isRootType } from '../graphql/configuration';
 
-const wellKnownGlobalTypeNames: string[] = ['Query', 'Mutation', 'Subscription'];
+const wellKnownGlobalTypeNames: string[] = [
+	'Query',
+	'Mutation',
+	'Subscription',
+	// We need this one for introspect.openApi
+	'UnspecifiedHttpResponse',
+];
 
 const wellKnownScalarTypeNames: string[] = [
 	'String',
@@ -41,7 +47,7 @@ const wellKnownScalarTypeNames: string[] = [
 	'Time',
 	'UUID',
 	'_Any',
-	'UnspecifiedHttpResponse',
+	'',
 	'_Row',
 ];
 
