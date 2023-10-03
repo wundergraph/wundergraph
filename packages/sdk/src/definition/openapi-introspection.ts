@@ -26,6 +26,7 @@ import { printSchemaWithDirectives } from '@graphql-tools/utils';
 import { introspectGraphql } from './graphql-introspection';
 import { WgEnv } from '../configure/options';
 import { InputVariable, mapInputVariable, resolveVariable } from '../configure/variables';
+import { validateNamespace } from './namespacing';
 
 export interface OpenAPIIntrospectionFile {
 	kind: 'file';
@@ -214,6 +215,10 @@ export const openApiSpecificationToGraphQLApi = async (
 		const introspectionHeadersBuilder = new HeadersBuilder();
 		introspection.introspection.headers(introspectionHeadersBuilder);
 		introspectionHeaders = resolveIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
+	}
+
+	if (introspection.apiNamespace) {
+		validateNamespace(introspection.apiNamespace);
 	}
 
 	const openApiLogger = logger ? new OpenAPILogger(logger.child({ component: '@wundergraph/openapi' })) : undefined;
