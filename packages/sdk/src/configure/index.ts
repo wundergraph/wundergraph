@@ -14,7 +14,6 @@ import {
 	visit,
 } from 'graphql';
 import { JSONSchema7 as JSONSchema } from 'json-schema';
-import objectHash from 'object-hash';
 import { camelCase } from 'lodash';
 import { buildGenerator, getProgramFromFiles, JsonSchemaGenerator, programFromConfig } from 'typescript-json-schema';
 import { ZodType } from 'zod';
@@ -45,7 +44,7 @@ import {
 	TypeScriptOperationFile,
 	WellKnownClaim,
 } from '../graphql/operations';
-import { GenerateCode, Template } from '../codegen';
+import { CodeGenerator, Template } from '../codegen';
 import {
 	ArgumentRenderConfiguration,
 	ArgumentSource,
@@ -87,7 +86,7 @@ import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations
 import zodToJsonSchema from 'zod-to-json-schema';
 import { GenerateConfig, OperationsGenerationConfig } from './codegeneration';
 import { generateOperations } from '../codegen/generateoperations';
-import { configurationHash } from '../codegen/templates/typescript/helpers';
+import { configurationHash, fastHash } from '../codegen/templates/typescript/helpers';
 import templates from '../codegen/templates';
 import { WunderGraphConfigurationFilename } from '../server/server';
 import { InternalHookConfig, InternalIntergration, WunderGraphAppConfig } from '../integrations/types';
@@ -1148,6 +1147,7 @@ export const configureWunderGraphApplication = <
 				}
 			}
 
+			logger.debug('generating response types for TypeScript operations');
 			// Update response types for TS operations. Do this before code generation, since some
 			// of the templates require the output types of the TS operations.
 			const tsOperations: TypeScriptOperation[] = app.Operations.filter(
@@ -1162,15 +1162,17 @@ export const configureWunderGraphApplication = <
 				...(config.generate?.codeGenerators || []),
 				...(config.codeGenerators || []),
 			];
+			const codeGenerator = new CodeGenerator();
 			for (let i = 0; i < combined.length; i++) {
 				const gen = combined[i];
-				await GenerateCode({
+				await codeGenerator.generate({
 					wunderGraphConfig: resolved,
 					templates: gen.templates,
 					basePath: gen.path || generated,
 				});
 			}
 
+			logger.debug('writing configuration');
 			const storedConfig = storedWunderGraphConfig(resolved, apis.length);
 			const configData = WunderGraphConfiguration.encode(storedConfig).finish();
 			fs.writeFileSync(path.join(generated, WunderGraphConfigurationFilename), configData);
@@ -1184,6 +1186,7 @@ export const configureWunderGraphApplication = <
 				baseURL: publicNodeUrl,
 			});
 
+			logger.debug('generating Postman operations');
 			writeWunderGraphFileSync('postman', postman.toJSON());
 
 			const openApiBuilder = new OpenApiBuilder({
@@ -1194,6 +1197,7 @@ export const configureWunderGraphApplication = <
 
 			const openApiSpec = openApiBuilder.build(app.Operations);
 
+			logger.debug('generating OpenAPI server specification');
 			writeWunderGraphFileSync('openapi', openApiSpec);
 
 			Logger.info('Build completed.');
@@ -1522,11 +1526,11 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 		contents.push(`export type ${responseTypeName(op)} = ExtractResponse<typeof ${name}>`);
 		const implementationFilePath = operationFilePath(wgDirAbs, op);
 		const implementationContents = fs.readFileSync(implementationFilePath, { encoding: 'utf8' });
-		operationHashes.push(objectHash(implementationContents));
+		operationHashes.push(fastHash(implementationContents));
 	}
 
 	const cache = new LocalCache().bucket('operationTypes');
-	const cacheKey = `ts.operationTypes.${objectHash([contents, operationHashes])}`;
+	const cacheKey = `ts.operationTypes.${fastHash([contents, operationHashes])}`;
 	const cachedData = await cache.getJSON(cacheKey);
 	if (cachedData) {
 		return cachedData as Record<string, JSONSchema>;
