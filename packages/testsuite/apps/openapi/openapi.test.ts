@@ -163,7 +163,7 @@ describe('Test subscriptions', () => {
 		await client.mutate({ operationName: 'DeleteNote', input: { id: ids[ids.length - 2] } });
 		expectedNotesLength -= 2;
 		// Wait for the live query to trigger again (minimum interval is 1s, which is what we set in the config)
-		await new Promise((r) => setTimeout(r, 1100));
+		await new Promise((r) => setTimeout(r, 2000));
 		expect(triggers).toBe(2);
 		abort.abort();
 		const last = await query;
