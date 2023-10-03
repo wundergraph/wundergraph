@@ -139,6 +139,8 @@ export const fastHash = (obj: any) => {
 			case 'undefined':
 			case 'boolean':
 				break;
+			case 'function':
+				return value.toString();
 			default:
 				throw new Error(`can't use fastHash on non-object values: ${value} of type ${typeof value}`);
 		}
