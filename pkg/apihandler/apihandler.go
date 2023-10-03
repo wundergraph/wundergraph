@@ -1392,6 +1392,7 @@ type httpFlushWriterPing struct {
 
 func (p *httpFlushWriterPing) Close() {
 	if p != nil {
+		p.notify <- struct{}{}
 		close(p.notify)
 		p.ticker.Stop()
 	}
@@ -1406,6 +1407,7 @@ type httpFlushWriter struct {
 	jsonPatch              JSONPatchConfiguration
 	deduplicate            bool
 	close                  func()
+	closed                 bool
 	buf                    bytes.Buffer
 	lastMessage            bytes.Buffer
 	ping                   *httpFlushWriterPing
@@ -1448,6 +1450,9 @@ func (f *httpFlushWriter) StartPinging(interval time.Duration) {
 			case <-f.ctx.Done():
 				return
 			case <-f.ping.notify:
+				if f.closed {
+					return
+				}
 				f.ping.ticker.Reset(f.ping.interval)
 				continue
 			}
@@ -1493,6 +1498,9 @@ func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
 }
 
 func (f *httpFlushWriter) Close() {
+	f.output.mu.Lock()
+	defer f.output.mu.Unlock()
+	f.closed = true
 	f.ping.Close()
 	if f.sse {
 		f.output.WriteFlushing([]byte("event: done\n\n"))
