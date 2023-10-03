@@ -32,6 +32,8 @@ const wellKnownGlobalTypeNames: string[] = [
 	'Subscription',
 	// We need this one for introspect.openApi
 	'UnspecifiedHttpResponse',
+	// This is used by raw SQL support
+	'_Row',
 ];
 
 const wellKnownScalarTypeNames: string[] = [
@@ -48,7 +50,6 @@ const wellKnownScalarTypeNames: string[] = [
 	'UUID',
 	'_Any',
 	'',
-	'_Row',
 ];
 
 export const wellKnownTypeNames = () => {
