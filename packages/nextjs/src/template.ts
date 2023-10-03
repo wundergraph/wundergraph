@@ -13,8 +13,7 @@ import {
 	TypeScriptResponseModels,
 	TypeScriptEnumModels,
 } from '@wundergraph/sdk';
-import { modelImports } from '@wundergraph/sdk/internal/codegen';
-import hash from 'object-hash';
+import { configurationHash, modelImports } from '@wundergraph/sdk/internal/codegen';
 import { OperationType } from '@wundergraph/protobuf';
 import {} from '@wundergraph/sdk/dist/configure';
 
@@ -22,24 +21,19 @@ export class NextJsTemplate implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const config = generationConfig.config;
 		const tmpl = Handlebars.compile(handlebarTemplate);
-		const content = tmpl({
+		const imports = modelImports(config.application, false, true);
+		const queriesWithInput = config.application.Operations.filter(filterOperation(OperationType.QUERY, true));
+		const queriesWithoutInput = config.application.Operations.filter(filterOperation(OperationType.QUERY, false));
+		const args = {
 			baseURL: config.deployment.environment.baseUrl,
 			sdkVersion: config.sdkVersion,
-			applicationHash: hash(config).substring(0, 8),
+			applicationHash: configurationHash(config),
 			roleDefinitions: config.authentication.roles.map((role) => '"' + role + '"').join(' | '),
-			modelImports: modelImports(config.application, false, true),
-			queriesWithInput: config.application.Operations.filter(filterOperation(OperationType.QUERY, true)).map(
-				mapOperation
-			),
-			queriesWithoutInput: config.application.Operations.filter(filterOperation(OperationType.QUERY, false)).map(
-				mapOperation
-			),
-			liveQueriesWithInput: config.application.Operations.filter(filterOperation(OperationType.QUERY, true))
-				.filter(isLiveQuery)
-				.map(mapOperation),
-			liveQueriesWithoutInput: config.application.Operations.filter(filterOperation(OperationType.QUERY, false))
-				.filter(isLiveQuery)
-				.map(mapOperation),
+			modelImports: imports,
+			queriesWithInput: queriesWithInput.map(mapOperation),
+			queriesWithoutInput: queriesWithoutInput.map(mapOperation),
+			liveQueriesWithInput: queriesWithInput.filter(isLiveQuery).map(mapOperation),
+			liveQueriesWithoutInput: queriesWithoutInput.filter(isLiveQuery).map(mapOperation),
 			mutationsWithInput: config.application.Operations.filter(filterOperation(OperationType.MUTATION, true)).map(
 				mapOperation
 			),
@@ -56,7 +50,8 @@ export class NextJsTemplate implements Template {
 			authProviders: config.authentication.cookieBased.map((provider) => provider.id),
 			hasS3Providers: config.application.S3UploadProvider.length !== 0,
 			s3Providers: config.application.S3UploadProvider.map((provider) => provider.name),
-		});
+		};
+		const content = tmpl(args);
 		return Promise.resolve([
 			{
 				path: 'nextjs.ts',
@@ -79,12 +74,13 @@ export class NextJsTemplate implements Template {
 }
 
 const filterOperation = (operationType: OperationType, withInput: boolean) => (operation: GraphQLOperation) => {
+	const variableCount = operation.VariablesSchema.properties
+		? Object.keys(operation.VariablesSchema.properties).length
+		: 0;
 	return (
 		operation.OperationType === operationType &&
 		!operation.Internal &&
-		(withInput
-			? Object.keys(operation.VariablesSchema.properties || {}).length !== 0
-			: Object.keys(operation.VariablesSchema.properties || {}).length === 0)
+		(withInput ? variableCount !== 0 : variableCount === 0)
 	);
 };
 

@@ -334,9 +334,6 @@ importers:
       handlebars:
         specifier: ^4.7.7
         version: 4.7.7
-      object-hash:
-        specifier: ^2.2.0
-        version: 2.2.0
       react-ssr-prepass:
         specifier: ^1.5.0
         version: 1.5.0(react@18.2.0)
@@ -362,9 +359,6 @@ importers:
       '@types/node-fetch':
         specifier: 2.6.2
         version: 2.6.2
-      '@types/object-hash':
-        specifier: ^1.3.4
-        version: 1.3.4
       '@types/react':
         specifier: ^18.0.15
         version: 18.0.24
@@ -25559,7 +25553,7 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 16.18.14
-      acorn: 8.8.2
+      acorn: 8.10.0
       acorn-walk: 8.2.0
       arg: 4.1.3
       create-require: 1.1.1
@@ -25621,7 +25615,7 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 18.16.16
-      acorn: 8.8.2
+      acorn: 8.10.0
       acorn-walk: 8.2.0
       arg: 4.1.3
       create-require: 1.1.1
@@ -27213,7 +27207,6 @@ packages:
     resolution: {directory: packages/sdk, type: directory}
     id: file:packages/sdk
     name: '@wundergraph/sdk'
-    version: 0.178.1
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.4.0
