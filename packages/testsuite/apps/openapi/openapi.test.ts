@@ -158,10 +158,12 @@ describe('Test subscriptions', () => {
 				triggers++;
 			}
 		);
-		// Now delete the last 2 notes
+		// Await for the initial trigger
+		await new Promise((r) => setTimeout(r, 2000));
+		// Now delete the last note
+		expect(triggers).toBe(1);
+		expectedNotesLength -= 1;
 		await client.mutate({ operationName: 'DeleteNote', input: { id: ids[ids.length - 1] } });
-		await client.mutate({ operationName: 'DeleteNote', input: { id: ids[ids.length - 2] } });
-		expectedNotesLength -= 2;
 		// Wait for the live query to trigger again (minimum interval is 1s, which is what we set in the config)
 		await new Promise((r) => setTimeout(r, 2000));
 		expect(triggers).toBe(2);
