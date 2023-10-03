@@ -18,7 +18,7 @@ import (
 
 const (
 	subscriptionServerPingIntervalEnvKey  = "WG_SUBSCRIPTION_SERVER_PING_INTERVAL"
-	defaultSubscriptionServerPingInterval = 30 * time.Second
+	defaultSubscriptionServerPingInterval = 0 * time.Second
 )
 
 type Server struct {

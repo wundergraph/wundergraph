@@ -1,11 +1,4 @@
-import {
-	BaseTypeScriptDataModel,
-	CodeGenerationConfig,
-	GraphQLOperation,
-	Template,
-	TemplateOutputFile,
-	TypeScriptEnumModels,
-} from '@wundergraph/sdk';
+import { CodeGenerationConfig, GraphQLOperation, Template, TemplateOutputFile } from '@wundergraph/sdk';
 import { hasInput, visitJSONSchema } from '@wundergraph/sdk/internal/codegen';
 import { JSONSchema7 as JSONSchema, JSONSchema7 } from 'json-schema';
 import execa from 'execa';
@@ -216,7 +209,7 @@ export class GolangModelsBase implements Template {
 	}
 
 	dependencies(): Template[] {
-		return [new BaseTypeScriptDataModel(), new TypeScriptEnumModels()];
+		return [];
 	}
 }
 
