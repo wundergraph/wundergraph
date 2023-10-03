@@ -130,5 +130,19 @@ export const configurationHash = (config: ResolvedWunderGraphConfig) => {
  * @returns
  */
 export const fastHash = (obj: any) => {
-	return crypto.createHash('md5').update(JSON.stringify(obj)).digest('hex');
+	const stringified = JSON.stringify(obj, (_, value) => {
+		// Make sure we only hash primitive types
+		switch (typeof value) {
+			case 'object':
+			case 'string':
+			case 'number':
+			case 'undefined':
+			case 'boolean':
+				break;
+			default:
+				throw new Error(`can't use fastHash on non-object values: ${value} of type ${typeof value}`);
+		}
+		return value;
+	});
+	return crypto.createHash('md5').update(stringified).digest('hex');
 };
