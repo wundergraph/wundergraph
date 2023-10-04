@@ -190,7 +190,16 @@ configureWunderGraphApplication({
 				path: '../components/generated',
 			},
 		],
+		operationsGenerator: (config) => {
+			// include all root fields from the "weather" & "federated" API Namespace
+			config.includeNamespaces('weather', 'federated');
+			// we could also exclude the root field "me" from the "federated" API Namespace
+			config.filterRootFields(
+				(field) => field.operationType === 'query' && field.apiNamespace === 'federated' && field.name === 'me'
+			);
+		},
 	},
+
 	cors: {
 		...cors.allowAll,
 		allowedOrigins: ['http://localhost:3003'],
