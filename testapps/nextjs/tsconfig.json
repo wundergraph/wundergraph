@@ -15,7 +15,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "#/generated/*": [".wundergraph/generated/*"]
+    }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".wundergraph/**/*.ts"],
   "exclude": ["node_modules"]
