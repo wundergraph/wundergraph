@@ -1,4 +1,4 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
 
 settings:
   autoInstallPeers: true
@@ -7099,7 +7099,7 @@ packages:
       '@graphql-mesh/utils': 0.94.6(@graphql-mesh/cross-helpers@0.4.0)(@graphql-mesh/types@0.94.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
       '@json-schema-tools/meta-schema': 1.7.0
-      '@whatwg-node/fetch': 0.9.4
+      '@whatwg-node/fetch': 0.9.9
       ajv: 8.12.0
       ajv-formats: 2.1.1(ajv@8.12.0)
       dset: 3.1.2

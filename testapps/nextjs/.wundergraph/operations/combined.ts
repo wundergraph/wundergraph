@@ -1,4 +1,4 @@
-import { createOperation, z } from '../generated/wundergraph.factory';
+import { createOperation, z } from '#/generated/wundergraph.factory';
 
 export default createOperation.query({
 	input: z.object({
