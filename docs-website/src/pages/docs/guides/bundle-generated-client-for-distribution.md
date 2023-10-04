@@ -35,7 +35,7 @@ Create a new `client` folder inside your `packages` folder (or any other folder 
   },
   "devDependencies": {
     "tsup": "^6.7.0",
-    "zod": "^3.21.4"
+    "zod": "^3.22.3"
   }
 }
 ```
