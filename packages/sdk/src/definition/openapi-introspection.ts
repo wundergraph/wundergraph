@@ -243,6 +243,8 @@ export const openApiSpecificationToGraphQLApi = async (
 	// as logic of translating api calls stored in the directives we need print schema with directives
 	const schema = printSchemaWithDirectives(graphQLSchema);
 
+	logger?.trace({ schema }, 'generated GraphQL schema from OpenAPI spec');
+
 	return introspectGraphql(
 		{
 			url: `${WgEnv.ServerUrl}-openapi`, // workaround to been able to identify openapi proxy
