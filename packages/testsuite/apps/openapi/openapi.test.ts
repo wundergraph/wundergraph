@@ -253,3 +253,16 @@ describe('Test error responses', () => {
 		]);
 	});
 });
+
+describe('Test object types overlapping with well known scalar types', () => {
+	test('query an object named Time', async () => {
+		const result = await wg.client().query({
+			operationName: 'Time',
+		});
+
+		expect(result.error).toBeUndefined();
+		expect(result.data?.notes_time?.hours).toBeDefined();
+		expect(result.data?.notes_time?.minutes).toBeDefined();
+		expect(result.data?.notes_time?.seconds).toBeDefined();
+	});
+});

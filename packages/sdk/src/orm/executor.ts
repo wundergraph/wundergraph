@@ -187,7 +187,7 @@ export class NamespacingExecutor implements Executor {
 			},
 
 			[Kind.NAMED_TYPE]: (node) => {
-				if (!wellKnownTypeNames.includes(node.name.value)) {
+				if (!wellKnownTypeNames().includes(node.name.value)) {
 					return {
 						...node,
 						name: {
