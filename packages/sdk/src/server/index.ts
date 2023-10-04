@@ -24,6 +24,7 @@ export type {
 	MutationHookWithoutInput,
 	SubscriptionHook,
 	SubscriptionHookWithoutInput,
+	CustomContext,
 } from './types';
 export type {
 	SubscriptionRequestOptions,

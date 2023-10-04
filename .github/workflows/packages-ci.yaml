@@ -32,7 +32,7 @@ env:
 jobs:
   build_test:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v3
         with:
@@ -60,6 +60,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
+      - name: Set up cargo cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            packages/testsuite/apps/basic/rust/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('packages/testsuite/apps/basic/rust/Cargo.toml') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
       - name: Install Protoc
         uses: abelfodil/protoc-action@v1
         with:
@@ -81,6 +93,10 @@ jobs:
 
       - name: Run testsuite
         run: pnpm test:suite:ci
+
+      - name: Run Rust tests
+        working-directory: packages/testsuite/apps/basic/rust
+        run: ./test.sh
 
       - name: Determine changed files
         id: changed

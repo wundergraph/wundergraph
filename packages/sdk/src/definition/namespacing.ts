@@ -64,6 +64,18 @@ const wellKnownDirectives: string[] = ['include', 'skip', 'deprecated', 'specifi
 const omnigraphOpenApiDirectives: string[] = ['oneOf'];
 const knownDirectives: string[] = [...wellKnownDirectives, ...omnigraphOpenApiDirectives];
 
+/***
+ * Validates that namespace is a valid GraphQL identifier
+ */
+export const validateNamespace = (namespace?: string) => {
+	if (namespace) {
+		const regex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+		if (!regex.test(namespace)) {
+			throw new Error(`Invalid namespace: ${namespace}. Namespace must be a valid GraphQL identifier.`);
+		}
+	}
+};
+
 export const applyNameSpaceToCustomJsonScalars = (namespace?: string, customJsonScalars?: Set<string>): Set<string> => {
 	if (!customJsonScalars) {
 		return new Set<string>();
@@ -71,6 +83,7 @@ export const applyNameSpaceToCustomJsonScalars = (namespace?: string, customJson
 	if (!namespace || customJsonScalars.size < 1) {
 		return customJsonScalars;
 	}
+	validateNamespace(namespace);
 	const namespacedScalars = new Set<string>();
 	for (const scalar of customJsonScalars) {
 		namespacedScalars.add(`${namespace}_${scalar}`);
@@ -86,6 +99,7 @@ export const applyNameSpaceToGraphQLSchema = (
 	if (namespace === undefined || namespace === '') {
 		return print(parse(schema));
 	}
+	validateNamespace(namespace);
 
 	const document = parse(schema);
 	const schemaDefinitionNode = document.definitions.find((node) => node.kind === 'SchemaDefinition') as
@@ -274,6 +288,7 @@ export const applyNameSpaceToTypeFields = (
 	if (namespace === undefined || namespace === '') {
 		return fields;
 	}
+	validateNamespace(namespace);
 	return fields.map((typeField) => {
 		const isRoot = isRootType(typeField.typeName, schema);
 		return {
@@ -291,6 +306,7 @@ export const applyNameSpaceToSingleTypeFields = (
 	if (namespace === undefined || namespace === '') {
 		return fields;
 	}
+	validateNamespace(namespace);
 	return fields.map((field) => {
 		const isRoot = isRootType(field.typeName, schema);
 		return {
@@ -309,6 +325,7 @@ export const applyNameSpaceToFieldConfigurations = (
 	if (namespace === undefined || namespace === '') {
 		return fields;
 	}
+	validateNamespace(namespace);
 	const mapped = fields.map((field) => {
 		const isRoot = isRootType(field.typeName, schema);
 		const skipRename = skipRenameRootFields.find((skip) => skip === field.fieldName) !== undefined;
@@ -398,6 +415,7 @@ export const applyNamespaceToExistingRootFieldConfigurations = (
 	if (namespace === undefined || namespace === '') {
 		return fields;
 	}
+	validateNamespace(namespace);
 	return fields.map((field) => {
 		const isRoot = isRootType(field.typeName, schema);
 		return {
@@ -416,6 +434,7 @@ export const applyNamespaceToExistingRootFieldConfigurationsWithPathRewrite = (
 	if (namespace === undefined || namespace === '') {
 		return fields;
 	}
+	validateNamespace(namespace);
 	return fields.map((field) => {
 		const isRoot = isRootType(field.typeName, schema);
 		const hasPath = field.path.length !== 0;
@@ -503,6 +522,7 @@ export const applyNamespaceToDirectiveConfiguration = (
 	if (namespace === undefined || namespace === '') {
 		return [];
 	}
+	validateNamespace(namespace);
 	const out: DirectiveConfiguration[] = [];
 	schema.getDirectives().forEach((directive) => {
 		if (knownDirectives.find((w) => w === directive.name) !== undefined) {

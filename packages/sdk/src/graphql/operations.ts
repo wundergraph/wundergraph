@@ -167,201 +167,203 @@ export const parseGraphQLOperations = (
 	const customJsonScalars = options.customJsonScalars ?? new Set<string>();
 	const wgRoleEnum = parsedGraphQLSchema.getType('WG_ROLE')?.astNode;
 	loadOperationsOutput.graphql_operation_files?.forEach((operationFile) => {
+		let ast: DocumentNode;
 		try {
-			const ast = parse(operationFile.content);
-			visit(ast, {
-				OperationDefinition: {
-					enter: (node) => {
-						const content = print(node);
-						const parsedOperation = parse(content);
-						const operationWithoutHooksVariables = visit(parsedOperation, {
-							VariableDefinition: {
-								enter: (node) => {
-									if (node.directives?.some((directive) => directive.name.value === 'hooksVariable')) {
-										return null;
-									}
-								},
-							},
-						});
-						const errors = validate(parsedGraphQLSchema, operationWithoutHooksVariables);
-						if (errors.length > 0) {
-							Logger.error(`Error parsing operation ${operationFile.file_path}: ${errors.join(',')}`);
-							Logger.error('Skipping operation');
-							if (WG_PRETTY_GRAPHQL_VALIDATION_ERRORS) {
-								console.log('\n' + errors.join(',') + '\n');
-							}
-							return;
-						}
-
-						const transformations: PostResolveTransformation[] = [];
-
-						const operation: GraphQLOperation = {
-							Name: operationFile.operation_name,
-							Description: loadOperationDescription(operationFile, options.wgDirAbs),
-							PathName: operationFile.api_mount_path,
-							Content: stripIgnoredCharacters(removeTransformDirectives(content)),
-							OperationType: parseOperationTypeNode(node.operation),
-							ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
-							VariablesSchema: operationVariablesToJSONSchema(
-								parsedGraphQLSchema,
-								node,
-								[],
-								options.keepFromClaimVariables,
-								false,
-								customJsonScalars
-							),
-							InterpolationVariablesSchema: operationVariablesToJSONSchema(
-								parsedGraphQLSchema,
-								node,
-								options.interpolateVariableDefinitionAsJSON || [],
-								options.keepFromClaimVariables,
-								false,
-								customJsonScalars
-							),
-							InternalVariablesSchema: operationVariablesToJSONSchema(
-								parsedGraphQLSchema,
-								node,
-								[],
-								true,
-								false,
-								customJsonScalars
-							),
-							InjectedVariablesSchema: operationVariablesToJSONSchema(
-								parsedGraphQLSchema,
-								node,
-								[],
-								true,
-								true,
-								customJsonScalars
-							),
-							ResponseSchema: operationResponseToJSONSchema(
-								parsedGraphQLSchema,
-								ast,
-								node,
-								transformations,
-								customJsonScalars
-							),
-							AuthorizationConfig: {
-								claims: [],
-								roleConfig: {
-									requireMatchAll: [],
-									requireMatchAny: [],
-									denyMatchAll: [],
-									denyMatchAny: [],
-								},
-							},
-							HooksConfiguration: {
-								preResolve: false,
-								postResolve: false,
-								mutatingPreResolve: false,
-								mutatingPostResolve: false,
-								mockResolve: {
-									enable: false,
-									subscriptionPollingIntervalMillis: 0,
-								},
-								httpTransportOnResponse: false,
-								httpTransportOnRequest: false,
-								customResolve: false,
-							},
-							VariablesConfiguration: {
-								injectVariables: [],
-							},
-							Internal: false,
-							PostResolveTransformations: transformations.length > 0 ? transformations : undefined,
-						};
-						node.variableDefinitions?.forEach((variable) => {
-							handleFromClaimDirectives(variable, operation, options.customClaims ?? {});
-							handleJsonSchemaDirectives(variable, operation);
-							handleUuidDirectives(variable, operation);
-							handleDateTimeDirectives(variable, operation);
-							handleInjectEnvironmentVariableDirectives(variable, operation);
-						});
-
-						const internalOperationDirective =
-							node.directives?.find((d) => d.name.value === 'internalOperation') !== undefined;
-						if (internalOperationDirective) {
-							Logger.warn(
-								'Use of internalOperation directive is deprecated. ' +
-									'More details here: https://docs.wundergraph.com/docs/directives-reference/internal-operation-directive'
-							);
-						}
-						operation.Internal =
-							internalOperationDirective || isInternalOperationByAPIMountPath(operationFile.api_mount_path);
-
-						if (node.directives?.find((d) => d.name.value === 'requireAuthentication') !== undefined) {
-							operation.AuthenticationConfig = {
-								...operation.AuthenticationConfig,
-								required: true,
-							};
-						}
-
-						if (wgRoleEnum && wgRoleEnum.kind === 'EnumTypeDefinition') {
-							const rbac = node.directives?.find((d) => d.name.value === 'rbac');
-							rbac?.arguments?.forEach((arg) => {
-								if (arg.value.kind !== 'ListValue') {
-									return;
-								}
-								const values = arg.value.values
-									.map((v) => {
-										if (v.kind !== 'EnumValue') {
-											return '';
-										}
-										return v.value;
-									})
-									.filter((v) => wgRoleEnum.values?.find((n) => n.name.value === v) !== undefined);
-								switch (arg.name.value) {
-									case 'requireMatchAll':
-										operation.AuthorizationConfig.roleConfig.requireMatchAll = [
-											...new Set([...operation.AuthorizationConfig.roleConfig.requireMatchAll, ...values]),
-										];
-										return;
-									case 'requireMatchAny':
-										operation.AuthorizationConfig.roleConfig.requireMatchAny = [
-											...new Set([...operation.AuthorizationConfig.roleConfig.requireMatchAny, ...values]),
-										];
-										return;
-									case 'denyMatchAll':
-										operation.AuthorizationConfig.roleConfig.denyMatchAll = [
-											...new Set([...operation.AuthorizationConfig.roleConfig.denyMatchAll, ...values]),
-										];
-										return;
-									case 'denyMatchAny':
-										operation.AuthorizationConfig.roleConfig.denyMatchAny = [
-											...new Set([...operation.AuthorizationConfig.roleConfig.denyMatchAny, ...values]),
-										];
-										return;
-								}
-							});
-						}
-						if (
-							operation.AuthorizationConfig.roleConfig.denyMatchAny.length +
-								operation.AuthorizationConfig.roleConfig.denyMatchAll.length +
-								operation.AuthorizationConfig.roleConfig.requireMatchAll.length +
-								operation.AuthorizationConfig.roleConfig.requireMatchAny.length !==
-							0
-						) {
-							operation.AuthenticationConfig = {
-								...operation.AuthenticationConfig,
-								required: true,
-							};
-						}
-						if (operation.AuthorizationConfig.claims.length !== 0) {
-							operation.AuthenticationConfig = {
-								...operation.AuthenticationConfig,
-								required: true,
-							};
-						}
-						parsed.operations.push(operation);
-					},
-				},
-			});
-		} catch (e) {
-			Logger.error(e);
-			Logger.error(`Operations document: ${operationFile.content}`);
-			Logger.error('No Operations found! Please create at least one Operation in the directory ./operations');
-			Logger.error("Operation files must have the file extension '.graphql', otherwise they are ignored.");
-			Logger.error("Operations don't need to be named, the file name is responsible for the operation name.");
+			ast = parse(operationFile.content);
+		} catch (e: any) {
+			throw new Error(`could not parse ${operationFile.file_path}: ${e}`);
 		}
+		visit(ast, {
+			OperationDefinition: {
+				enter: (node) => {
+					const content = print(node);
+					const parsedOperation = parse(content);
+					const operationWithoutHooksVariables = visit(parsedOperation, {
+						VariableDefinition: {
+							enter: (node) => {
+								if (node.directives?.some((directive) => directive.name.value === 'hooksVariable')) {
+									return null;
+								}
+							},
+						},
+					});
+					const errors = validate(parsedGraphQLSchema, operationWithoutHooksVariables);
+					if (errors.length > 0) {
+						const err = new Error(`Error parsing operation ${operationFile.file_path}: ${errors.join(',')}`);
+						const isProduction = process.env.NODE_ENV === 'production';
+						if (isProduction) {
+							throw err;
+						}
+						Logger.error(err);
+						Logger.error('Skipping operation');
+						if (WG_PRETTY_GRAPHQL_VALIDATION_ERRORS) {
+							console.log('\n' + errors.join(',') + '\n');
+						}
+						return;
+					}
+
+					const transformations: PostResolveTransformation[] = [];
+
+					const operation: GraphQLOperation = {
+						Name: operationFile.operation_name,
+						Description: loadOperationDescription(operationFile, options.wgDirAbs),
+						PathName: operationFile.api_mount_path,
+						Content: stripIgnoredCharacters(removeTransformDirectives(content)),
+						OperationType: parseOperationTypeNode(node.operation),
+						ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+						VariablesSchema: operationVariablesToJSONSchema(
+							parsedGraphQLSchema,
+							node,
+							[],
+							options.keepFromClaimVariables,
+							false,
+							customJsonScalars
+						),
+						InterpolationVariablesSchema: operationVariablesToJSONSchema(
+							parsedGraphQLSchema,
+							node,
+							options.interpolateVariableDefinitionAsJSON || [],
+							options.keepFromClaimVariables,
+							false,
+							customJsonScalars
+						),
+						InternalVariablesSchema: operationVariablesToJSONSchema(
+							parsedGraphQLSchema,
+							node,
+							[],
+							true,
+							false,
+							customJsonScalars
+						),
+						InjectedVariablesSchema: operationVariablesToJSONSchema(
+							parsedGraphQLSchema,
+							node,
+							[],
+							true,
+							true,
+							customJsonScalars
+						),
+						ResponseSchema: operationResponseToJSONSchema(
+							parsedGraphQLSchema,
+							ast,
+							node,
+							transformations,
+							customJsonScalars
+						),
+						AuthorizationConfig: {
+							claims: [],
+							roleConfig: {
+								requireMatchAll: [],
+								requireMatchAny: [],
+								denyMatchAll: [],
+								denyMatchAny: [],
+							},
+						},
+						HooksConfiguration: {
+							preResolve: false,
+							postResolve: false,
+							mutatingPreResolve: false,
+							mutatingPostResolve: false,
+							mockResolve: {
+								enable: false,
+								subscriptionPollingIntervalMillis: 0,
+							},
+							httpTransportOnResponse: false,
+							httpTransportOnRequest: false,
+							customResolve: false,
+						},
+						VariablesConfiguration: {
+							injectVariables: [],
+						},
+						Internal: false,
+						PostResolveTransformations: transformations.length > 0 ? transformations : undefined,
+					};
+					node.variableDefinitions?.forEach((variable) => {
+						handleFromClaimDirectives(variable, operation, options.customClaims ?? {});
+						handleJsonSchemaDirectives(variable, operation);
+						handleUuidDirectives(variable, operation);
+						handleDateTimeDirectives(variable, operation);
+						handleInjectEnvironmentVariableDirectives(variable, operation);
+					});
+
+					const internalOperationDirective =
+						node.directives?.find((d) => d.name.value === 'internalOperation') !== undefined;
+					if (internalOperationDirective) {
+						Logger.warn(
+							'Use of internalOperation directive is deprecated. ' +
+								'More details here: https://docs.wundergraph.com/docs/directives-reference/internal-operation-directive'
+						);
+					}
+					operation.Internal =
+						internalOperationDirective || isInternalOperationByAPIMountPath(operationFile.api_mount_path);
+
+					if (node.directives?.find((d) => d.name.value === 'requireAuthentication') !== undefined) {
+						operation.AuthenticationConfig = {
+							...operation.AuthenticationConfig,
+							required: true,
+						};
+					}
+
+					if (wgRoleEnum && wgRoleEnum.kind === 'EnumTypeDefinition') {
+						const rbac = node.directives?.find((d) => d.name.value === 'rbac');
+						rbac?.arguments?.forEach((arg) => {
+							if (arg.value.kind !== 'ListValue') {
+								return;
+							}
+							const values = arg.value.values
+								.map((v) => {
+									if (v.kind !== 'EnumValue') {
+										return '';
+									}
+									return v.value;
+								})
+								.filter((v) => wgRoleEnum.values?.find((n) => n.name.value === v) !== undefined);
+							switch (arg.name.value) {
+								case 'requireMatchAll':
+									operation.AuthorizationConfig.roleConfig.requireMatchAll = [
+										...new Set([...operation.AuthorizationConfig.roleConfig.requireMatchAll, ...values]),
+									];
+									return;
+								case 'requireMatchAny':
+									operation.AuthorizationConfig.roleConfig.requireMatchAny = [
+										...new Set([...operation.AuthorizationConfig.roleConfig.requireMatchAny, ...values]),
+									];
+									return;
+								case 'denyMatchAll':
+									operation.AuthorizationConfig.roleConfig.denyMatchAll = [
+										...new Set([...operation.AuthorizationConfig.roleConfig.denyMatchAll, ...values]),
+									];
+									return;
+								case 'denyMatchAny':
+									operation.AuthorizationConfig.roleConfig.denyMatchAny = [
+										...new Set([...operation.AuthorizationConfig.roleConfig.denyMatchAny, ...values]),
+									];
+									return;
+							}
+						});
+					}
+					if (
+						operation.AuthorizationConfig.roleConfig.denyMatchAny.length +
+							operation.AuthorizationConfig.roleConfig.denyMatchAll.length +
+							operation.AuthorizationConfig.roleConfig.requireMatchAll.length +
+							operation.AuthorizationConfig.roleConfig.requireMatchAny.length !==
+						0
+					) {
+						operation.AuthenticationConfig = {
+							...operation.AuthenticationConfig,
+							required: true,
+						};
+					}
+					if (operation.AuthorizationConfig.claims.length !== 0) {
+						operation.AuthenticationConfig = {
+							...operation.AuthenticationConfig,
+							required: true,
+						};
+					}
+					parsed.operations.push(operation);
+				},
+			},
+		});
 	});
 	return parsed;
 };
@@ -1579,7 +1581,7 @@ export const loadOperations = async (schemaFileName: string): Promise<LoadOperat
 	out.info?.forEach((msg) => Logger.info(msg));
 	out.errors?.forEach((msg) => Logger.error(msg));
 
-	const isTuiEnabled = process.env['WG_ENABLE_TUI'] === 'true';
+	const isTuiEnabled = process.env.WG_ENABLE_TUI === 'true';
 
 	if (isTuiEnabled && out.errors?.length) {
 		if (out.invalid?.length) {

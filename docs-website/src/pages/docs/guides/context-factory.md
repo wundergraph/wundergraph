@@ -29,6 +29,12 @@ export class MyContext {
   }
 }
 
+declare module '@wundergraph/sdk/server' {
+  export interface CustomContext {
+    request: MyContext;
+  }
+}
+
 export default configureWunderGraphServer(() => ({
   hooks: {
     queries: {
@@ -109,7 +115,7 @@ export default configureWunderGraphServer(() => ({
       apiNamespace: 'embedded',
       serverName: 'embedded',
       schema: new GraphQLSchema({
-        query: new GraphQLObjectType<any, GraphQLExecutionContext<MyCustomContext>>({
+        query: new GraphQLObjectType<any, GraphQLExecutionContext>({
           name: 'Query',
           fields: {
             fromCustomContext: {
@@ -142,6 +148,12 @@ class MyRequestContext {
     constructor(private ctx: MyGlobalContext)
 }
 
+declare module '@wundergraph/sdk/server' {
+	export interface CustomContext {
+    global: MyGlobalContext;
+		request: MyContext;
+	}
+}
 
 export default configureWunderGraphServer(() => ({
   hooks: {

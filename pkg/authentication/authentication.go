@@ -44,7 +44,8 @@ func init() {
 
 type UserLoader struct {
 	log             *zap.Logger
-	s               *securecookie.SecureCookie
+	cookie          *securecookie.SecureCookie
+	insecureCookies bool
 	cache           *ristretto.Cache
 	client          *http.Client
 	userLoadConfigs []*UserLoadConfig
@@ -214,6 +215,7 @@ type User struct {
 	AccessToken    json.RawMessage `json:"accessToken,omitempty"`
 	RawAccessToken string          `json:"rawAccessToken,omitempty"`
 	IdToken        json.RawMessage `json:"idToken,omitempty"`
+	RefreshToken   string          `json:"refreshToken,omitempty"`
 	RawIDToken     string          `json:"rawIdToken,omitempty"`
 }
 
@@ -297,7 +299,7 @@ func (u *User) HasExpired() bool {
 	return false
 }
 
-func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http.Request, domain string, insecureCookies bool) error {
+func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http.Request, insecureCookies bool) error {
 
 	rawIdToken := u.RawIDToken
 
@@ -320,11 +322,13 @@ func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http
 		return err
 	}
 
+	cookieDomain := removeSubdomain(sanitizeDomain(r.Host))
+
 	cookie := &http.Cookie{
 		Name:     userCookieName,
 		Value:    encoded,
 		Path:     "/",
-		Domain:   removeSubdomain(sanitizeDomain(domain)),
+		Domain:   cookieDomain,
 		MaxAge:   authenticationCookieMaxAge,
 		Secure:   !insecureCookies,
 		HttpOnly: true,
@@ -342,7 +346,7 @@ func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http
 		Name:     idCookieName,
 		Value:    encoded,
 		Path:     "/",
-		Domain:   removeSubdomain(sanitizeDomain(domain)),
+		Domain:   cookieDomain,
 		MaxAge:   authenticationCookieMaxAge,
 		Secure:   !insecureCookies,
 		HttpOnly: true,
@@ -354,7 +358,7 @@ func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http
 	return nil
 }
 
-func (u *User) Load(loader *UserLoader, r *http.Request) error {
+func (u *User) Load(loader *UserLoader, w http.ResponseWriter, r *http.Request) error {
 	if err := u.loadUser(loader, r); err != nil {
 		return err
 	}
@@ -369,6 +373,9 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 			return errors.New("user has expired")
 		}
 		*u = *revalidated
+		if u.FromCookie {
+			return u.Save(loader.cookie, w, r, loader.insecureCookies)
+		}
 	}
 	return nil
 }
@@ -419,7 +426,7 @@ func (u *User) loadUser(loader *UserLoader, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	err = loader.s.Decode(userCookieName, cookie.Value, u)
+	err = loader.cookie.Decode(userCookieName, cookie.Value, u)
 	if err == nil {
 		u.FromCookie = true
 	}
@@ -427,7 +434,7 @@ func (u *User) loadUser(loader *UserLoader, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	err = loader.s.Decode(idCookieName, cookie.Value, &u.RawIDToken)
+	err = loader.cookie.Decode(idCookieName, cookie.Value, &u.RawIDToken)
 	u.IdToken = tryParseJWT(u.RawIDToken)
 	return err
 }
@@ -506,20 +513,21 @@ func (v *RedirectURIValidator) GetValidatedRedirectURI(r *http.Request) (redirec
 		}
 		redirectURI = redirectURICookie.Value
 	}
-	if redirectURI == "" {
-		return "", false
-	}
+	return redirectURI, v.IsValid(redirectURI)
+}
+
+func (v *RedirectURIValidator) IsValid(redirectURI string) bool {
 	for i := range v.stringMatchers {
 		if v.stringMatchers[i] == redirectURI {
-			return redirectURI, true
+			return true
 		}
 	}
 	for _, matcher := range v.regexMatchers {
 		if matcher.MatchString(redirectURI) {
-			return redirectURI, true
+			return true
 		}
 	}
-	return redirectURI, false
+	return false
 }
 
 func RedirectAlreadyAuthenticatedUsers(matchString, matchRegex []string) func(handler http.Handler) http.Handler {
@@ -655,11 +663,12 @@ func (e *RBACEnforcer) containsOne(slice []string, one string) bool {
 }
 
 type LoadUserConfig struct {
-	Log           *zap.Logger
-	Cookie        *securecookie.SecureCookie
-	CSRFSecret    []byte
-	JwksProviders []*wgpb.JwksAuthProvider
-	Hooks         Hooks
+	Log             *zap.Logger
+	Cookie          *securecookie.SecureCookie
+	InsecureCookies bool
+	CSRFSecret      []byte
+	JwksProviders   []*wgpb.JwksAuthProvider
+	Hooks           Hooks
 }
 
 func NewLoadUserMw(config LoadUserConfig) func(handler http.Handler) http.Handler {
@@ -741,7 +750,8 @@ func NewLoadUserMw(config LoadUserConfig) func(handler http.Handler) http.Handle
 	loader := &UserLoader{
 		log:             config.Log,
 		userLoadConfigs: jwkConfigs,
-		s:               config.Cookie,
+		cookie:          config.Cookie,
+		insecureCookies: config.InsecureCookies,
 		cache:           cache,
 		client: &http.Client{
 			Timeout: time.Second * 10,
@@ -752,7 +762,7 @@ func NewLoadUserMw(config LoadUserConfig) func(handler http.Handler) http.Handle
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			var user User
-			err := user.Load(loader, r)
+			err := user.Load(loader, w, r)
 			if err == nil {
 				r = r.WithContext(context.WithValue(r.Context(), "user", &user))
 			}
@@ -799,7 +809,7 @@ func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		err = user.Save(u.Cookie, w, r, u.Host, u.InsecureCookies)
+		err = user.Save(u.Cookie, w, r, u.InsecureCookies)
 		if err != nil {
 			u.Log.Error("RevalidateAuthentication could not save cookie", zap.Error(err))
 			http.Error(w, err.Error(), http.StatusInternalServerError)

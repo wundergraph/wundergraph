@@ -1,4 +1,5 @@
 import objectHash from 'object-hash';
+import crypto from 'crypto';
 
 import type { GraphQLOperation } from '../../../graphql/operations';
 import type { ResolvedApplication, ResolvedWunderGraphConfig } from '../../../configure';
@@ -118,5 +119,32 @@ export const modelImports = (
 };
 
 export const configurationHash = (config: ResolvedWunderGraphConfig) => {
-	return objectHash(config).substring(0, 8);
+	return fastHash(config).substring(0, 8);
+};
+
+/**
+ * Creates a hash that is not cryptographically secure but fast to compute. Any changes
+ * to the input are guaranteed to change the hash, but the hash might also change when
+ * the input is modified in non-meaningful ways (e.g. changing the order of keys in an object).
+ * @param obj
+ * @returns
+ */
+export const fastHash = (obj: any) => {
+	const stringified = JSON.stringify(obj, (_, value) => {
+		// Make sure we only hash primitive types
+		switch (typeof value) {
+			case 'object':
+			case 'string':
+			case 'number':
+			case 'undefined':
+			case 'boolean':
+				break;
+			case 'function':
+				return value.toString();
+			default:
+				throw new Error(`can't use fastHash on non-object values: ${value} of type ${typeof value}`);
+		}
+		return value;
+	});
+	return crypto.createHash('md5').update(stringified).digest('hex');
 };

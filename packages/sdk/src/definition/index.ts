@@ -24,7 +24,7 @@ import { applyNameSpaceToGraphQLSchema } from './namespacing';
 import { InputVariable, mapInputVariable } from '../configure/variables';
 import { introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
-import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
+import { IHeadersBuilder, IntrospectionHeadersBuilder } from './headers-builder';
 import { introspectOpenApi, introspectOpenApiV2 } from './openapi-introspection';
 import {
 	introspectMongoDB,
@@ -298,7 +298,7 @@ export interface GraphQLIntrospection extends GraphQLUpstream, GraphQLIntrospect
 export interface GraphQLFederationUpstream extends Omit<Omit<GraphQLUpstream, 'introspection'>, 'apiNamespace'> {
 	name?: string;
 	loadSchemaFromString?: GraphQLIntrospectionOptions['loadSchemaFromString'];
-	introspection?: IntrospectionFetchOptions & GraphqlIntrospectionHeaders;
+	introspection?: IntrospectionFetchOptions & IntrospectionHeadersOptions;
 }
 
 export interface GraphQLFederationIntrospection extends IntrospectionConfiguration {
@@ -415,8 +415,8 @@ export interface JWTAuthenticationWithAccessTokenExchange {
 
 export type JWTSigningMethod = 'HS256';
 
-export interface GraphqlIntrospectionHeaders {
-	headers?: (builder: IGraphqlIntrospectionHeadersBuilder) => IGraphqlIntrospectionHeadersBuilder;
+export interface IntrospectionHeadersOptions {
+	headers?: (builder: IntrospectionHeadersBuilder) => IntrospectionHeadersBuilder;
 }
 
 export interface GraphQLUpstream extends HTTPUpstream {
@@ -425,7 +425,7 @@ export interface GraphQLUpstream extends HTTPUpstream {
 	path?: InputVariable;
 	subscriptionsURL?: InputVariable;
 	subscriptionsUseSSE?: boolean;
-	introspection?: IntrospectionFetchOptions & GraphqlIntrospectionHeaders;
+	introspection?: IntrospectionFetchOptions & IntrospectionHeadersOptions;
 }
 
 export interface StaticApiCustom {
@@ -496,6 +496,12 @@ export const introspect = {
 	mongodb: introspectMongoDB,
 	prisma: introspectPrisma,
 	federation: introspectFederation,
+	/**
+	 * @remarks introspect.openApi exists only for backwards compatibility
+	 * purposes. New applications should use introspect.introspectOpenApiV2.
+	 * At some point, introspect.openApi will become an alias to
+	 * introspect.openApiV2.
+	 */
 	openApi: introspectOpenApi,
 	openApiV2: introspectOpenApiV2,
 	soap: introspectSoap,

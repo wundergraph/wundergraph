@@ -11,7 +11,6 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/securecookie"
 	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 )
@@ -23,32 +22,24 @@ type GithubCookieHandler struct {
 func NewGithubCookieHandler(config GithubConfig, hooks Hooks, log *zap.Logger) *GithubCookieHandler {
 	handler := &GithubCookieHandler{}
 	handler.auth2 = NewOAuth2AuthenticationHandler(OAuth2AuthenticationConfig{
-		ProviderID:   config.ProviderID,
+		Provider:     config.Provider,
 		ClientID:     config.ClientID,
 		ClientSecret: config.ClientID,
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://github.com/login/oauth/authorize",
 			TokenURL: "https://github.com/login/oauth/access_token",
 		},
-		Scopes:             []string{oidc.ScopeOpenID, "profile", "user:email"},
-		AuthTimeout:        config.AuthTimeout,
-		ForceRedirectHttps: config.ForceRedirectHttps,
-		Hooks:              hooks,
-		Cookie:             config.Cookie,
-		InsecureCookies:    config.InsecureCookies,
-		Log:                log,
+		Scopes: []string{oidc.ScopeOpenID, "profile", "user:email"},
+		Hooks:  hooks,
+		Log:    log,
 	}, handler)
 	return handler
 }
 
 type GithubConfig struct {
-	ClientID           string
-	ClientSecret       string
-	ProviderID         string
-	InsecureCookies    bool
-	ForceRedirectHttps bool
-	Cookie             *securecookie.SecureCookie
-	AuthTimeout        time.Duration
+	Provider     ProviderConfig
+	ClientID     string
+	ClientSecret string
 }
 
 type GithubUserInfo struct {
@@ -70,8 +61,8 @@ type GithubUserEmail struct {
 }
 
 func (h *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Router) {
-	authorizeRouter.Path(fmt.Sprintf("/%s", h.auth2.config.ProviderID)).Methods(http.MethodGet).HandlerFunc(h.auth2.Authorize)
-	callbackRouter.Path(fmt.Sprintf("/%s", h.auth2.config.ProviderID)).Methods(http.MethodGet).HandlerFunc(h.auth2.Callback)
+	authorizeRouter.Path(fmt.Sprintf("/%s", h.auth2.config.Provider.ID)).Methods(http.MethodGet).HandlerFunc(h.auth2.Authorize)
+	callbackRouter.Path(fmt.Sprintf("/%s", h.auth2.config.Provider.ID)).Methods(http.MethodGet).HandlerFunc(h.auth2.Callback)
 }
 
 func (*GithubCookieHandler) User(ctx context.Context, log *zap.Logger, token *oauth2.Token) (*User, error) {
@@ -155,5 +146,6 @@ func (*GithubCookieHandler) User(ctx context.Context, log *zap.Logger, token *oa
 		RawAccessToken: accessToken,
 		IdToken:        tryParseJWT(idToken),
 		RawIDToken:     idToken,
+		RefreshToken:   token.RefreshToken,
 	}, nil
 }

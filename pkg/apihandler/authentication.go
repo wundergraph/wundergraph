@@ -21,7 +21,7 @@ func authenticationHooks(api *Api, client *hooks.Client, log *zap.Logger) authen
 	})
 }
 
-func loadUserConfiguration(api *Api, client *hooks.Client, log *zap.Logger) (authentication.LoadUserConfig, error) {
+func loadUserConfiguration(api *Api, client *hooks.Client, insecureCookies bool, log *zap.Logger) (authentication.LoadUserConfig, error) {
 	var hashKey, blockKey, csrfSecret []byte
 
 	if h := loadvariable.String(api.AuthenticationConfig.CookieBased.HashKey); h != "" {
@@ -56,10 +56,11 @@ func loadUserConfiguration(api *Api, client *hooks.Client, log *zap.Logger) (aut
 	authHooks := authenticationHooks(api, client, log)
 
 	return authentication.LoadUserConfig{
-		Log:           log,
-		Cookie:        cookie,
-		CSRFSecret:    csrfSecret,
-		JwksProviders: jwksProviders,
-		Hooks:         authHooks,
+		Log:             log,
+		Cookie:          cookie,
+		InsecureCookies: insecureCookies,
+		CSRFSecret:      csrfSecret,
+		JwksProviders:   jwksProviders,
+		Hooks:           authHooks,
 	}, nil
 }

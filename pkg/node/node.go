@@ -1,14 +1,19 @@
 package node
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
+	"net/http/httptest"
+	"net/http/httputil"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/dgraph-io/ristretto"
@@ -77,13 +82,13 @@ type Node struct {
 }
 
 type options struct {
-	staticConfig         *WunderNodeConfig
-	fileSystemConfig     *string
-	enableRequestLogging bool
-	forceHttpsRedirects  bool
-	enableIntrospection  bool
-	configFileChange     chan struct{}
-	globalRateLimit      struct {
+	staticConfig                 *WunderNodeConfig
+	fileSystemConfig             *string
+	enableRequestResponseLogging bool
+	forceHttpsRedirects          bool
+	enableIntrospection          bool
+	configFileChange             chan struct{}
+	globalRateLimit              struct {
 		enable      bool
 		requests    int
 		perDuration time.Duration
@@ -188,9 +193,9 @@ func WithConfigFileChange(event chan struct{}) Option {
 	}
 }
 
-func WithRequestLogging(enable bool) Option {
+func WithRequestResponseLogging(enable bool) Option {
 	return func(options *options) {
-		options.enableRequestLogging = enable
+		options.enableRequestResponseLogging = enable
 	}
 }
 
@@ -553,13 +558,13 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	transportFactory := apihandler.NewApiTransportFactory(apihandler.ApiTransportOptions{
 		API:                  nodeConfig.Api,
 		HooksClient:          hooksClient,
-		EnableRequestLogging: n.options.enableRequestLogging,
+		EnableRequestLogging: n.options.enableRequestResponseLogging,
 		EnableTracing:        nodeConfig.Api.Options.OpenTelemetry.Enabled,
 		Metrics:              n.metrics,
 	})
 
 	n.log.Debug("http.Client.Transport",
-		zap.Bool("enableRequestLogging", n.options.enableRequestLogging),
+		zap.Bool("enableRequestLogging", n.options.enableRequestResponseLogging),
 	)
 
 	loaderOptions := engineconfigloader.EngineConfigLoaderOptions{
@@ -576,7 +581,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	builderConfig := apihandler.BuilderConfig{
 		InsecureCookies:            n.options.insecureCookies,
 		ForceHttpsRedirects:        n.options.forceHttpsRedirects,
-		EnableRequestLogging:       n.options.enableRequestLogging,
+		EnableRequestLogging:       n.options.enableRequestResponseLogging,
 		EnableIntrospection:        n.options.enableIntrospection,
 		GitHubAuthDemoClientID:     n.options.githubAuthDemo.ClientID,
 		GitHubAuthDemoClientSecret: n.options.githubAuthDemo.ClientSecret,
@@ -787,6 +792,9 @@ func (n *Node) setupGlobalMiddlewares(router *mux.Router, nodeConfig *WunderNode
 			zap.Strings("allowedOrigins", loadvariable.Strings(corsConfig.AllowedOrigins)),
 		)
 	}
+	if n.options.enableRequestResponseLogging {
+		return logRequestResponseHandler(os.Stderr, handler)
+	}
 	return handler
 }
 
@@ -899,4 +907,62 @@ func (n *Node) reloadFileConfig(filePath string) error {
 	n.configCh <- config
 
 	return nil
+}
+
+// shouldLogWithHeader returns true iff a request or response with the
+// given headers should be logged
+func shouldLogWithHeader(header http.Header) bool {
+	// If the request looks like a file upload, avoid printing the whole
+	// encoded file as a debug message.
+	return !strings.HasPrefix(header.Get("Content-Type"), "multipart/form-data")
+}
+
+// returns an http.Handler that logs all requests and responses to the given io.Writer.
+// If reading or copying any of the data fails, it panics. DON'T USE THIS IN PRODUCTION
+func logRequestResponseHandler(output io.Writer, handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requestBody, err := io.ReadAll(r.Body)
+		if err != nil {
+			panic(err)
+		}
+		r.Body = io.NopCloser(bytes.NewReader(requestBody))
+		requestAnnotation := ""
+		shouldRequestLogBody := shouldLogWithHeader(r.Header)
+		if !shouldRequestLogBody {
+			requestAnnotation = " (body omitted)"
+		}
+		request, err := httputil.DumpRequest(r, shouldRequestLogBody)
+		r.Body = io.NopCloser(bytes.NewReader(requestBody))
+		if err != nil {
+			panic(err)
+		}
+		fmt.Fprintf(output, "incoming request%s: %s\n", requestAnnotation, string(request))
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, r)
+		resp := rec.Result()
+		defer resp.Body.Close()
+		responseBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
+		resp.Body = io.NopCloser(bytes.NewReader(responseBody))
+		responseAnnotation := ""
+		shouldLogResponseBody := shouldLogWithHeader(resp.Header)
+		if !shouldLogResponseBody {
+			responseAnnotation = " (body omitted)"
+		}
+		response, err := httputil.DumpResponse(resp, shouldLogResponseBody)
+		resp.Body = io.NopCloser(bytes.NewReader(responseBody))
+		if err != nil {
+			panic(err)
+		}
+		fmt.Fprintf(output, "outgoing response%s: %s\n", responseAnnotation, string(response))
+		for k := range resp.Header {
+			w.Header()[k] = resp.Header[k]
+		}
+		w.WriteHeader(resp.StatusCode)
+		if _, err := io.Copy(w, resp.Body); err != nil {
+			panic(err)
+		}
+	})
 }

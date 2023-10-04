@@ -5,7 +5,7 @@
   "scripts": {
     "start": "npm run start:services && run-p wundergraph open",
     "start:services": "docker-compose up -d",
-    "wundergraph": "wunderctl up --logs",
+    "wundergraph": "wunderctl up",
     "open": "npm run wait-on:services && open-cli http://localhost:16686",
     "wait-on:services": "wait-on -d 2000 http://localhost:16686",
     "build:wundergraph": "wunderctl generate",
@@ -17,7 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.177.0",
+    "@wundergraph/sdk": "^0.178.1",
     "graphql": "^16.3.0"
   },
   "devDependencies": {

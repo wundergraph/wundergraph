@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/http/httputil"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -123,11 +123,10 @@ type Builder struct {
 
 	planConfig plan.Configuration
 
-	insecureCookies      bool
-	forceHttpsRedirects  bool
-	enableRequestLogging bool
-	enableIntrospection  bool
-	devMode              bool
+	insecureCookies     bool
+	forceHttpsRedirects bool
+	enableIntrospection bool
+	devMode             bool
 
 	renameTypeNames []resolve.RenameTypeName
 
@@ -161,7 +160,6 @@ func NewBuilder(pool *pool.Pool,
 		insecureCookies:            config.InsecureCookies,
 		middlewareClient:           hooksClient,
 		forceHttpsRedirects:        config.ForceHttpsRedirects,
-		enableRequestLogging:       config.EnableRequestLogging,
 		enableIntrospection:        config.EnableIntrospection,
 		githubAuthDemoClientID:     config.GitHubAuthDemoClientID,
 		githubAuthDemoClientSecret: config.GitHubAuthDemoClientSecret,
@@ -174,10 +172,6 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	r.api = api
 
 	r.router = r.createSubRouter(router)
-
-	if r.enableRequestLogging {
-		r.router.Use(logRequestMiddleware(os.Stderr))
-	}
 
 	for _, webhook := range api.Webhooks {
 		err = r.registerWebhook(webhook)
@@ -339,32 +333,6 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	}
 
 	return streamClosers, err
-}
-
-func shouldLogRequestBody(request *http.Request) bool {
-	// If the request looks like a file upload, avoid printing the whole
-	// encoded file as a debug message.
-	return !strings.HasPrefix(request.Header.Get("Content-Type"), "multipart/form-data")
-}
-
-// returns a middleware that logs all requests to the given io.Writer
-func logRequestMiddleware(logger io.Writer) mux.MiddlewareFunc {
-	return func(handler http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, request *http.Request) {
-			logBody := shouldLogRequestBody(request)
-			suffix := ""
-			if !logBody {
-				suffix = "<body omitted>"
-			}
-			requestDump, err := httputil.DumpRequest(request, logBody)
-			if err == nil {
-				fmt.Fprintf(logger, "\n\n--- ClientRequest start ---\n\n%s%s\n\n\n\n--- ClientRequest end ---\n\n",
-					string(requestDump), suffix,
-				)
-			}
-			handler.ServeHTTP(w, request)
-		})
-	}
 }
 
 func mergeRequiredFields(fields plan.FieldConfigurations, fieldsRequired plan.FieldConfigurations) plan.FieldConfigurations {
@@ -1408,6 +1376,10 @@ type httpFlushWriterOutput struct {
 func (o *httpFlushWriterOutput) WriteFlushing(data []byte) (int, error) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
+	return o.WriteFlushingLocked(data)
+}
+
+func (o *httpFlushWriterOutput) WriteFlushingLocked(data []byte) (int, error) {
 	var n int
 	var err error
 	if data != nil {
@@ -1423,9 +1395,16 @@ type httpFlushWriterPing struct {
 	notify   chan struct{}
 }
 
+func (p *httpFlushWriterPing) Notify() {
+	select {
+	case p.notify <- struct{}{}:
+	default:
+	}
+}
+
 func (p *httpFlushWriterPing) Close() {
 	if p != nil {
-		close(p.notify)
+		p.Notify()
 		p.ticker.Stop()
 	}
 }
@@ -1439,6 +1418,7 @@ type httpFlushWriter struct {
 	jsonPatch              JSONPatchConfiguration
 	deduplicate            bool
 	close                  func()
+	closed                 atomic.Bool
 	buf                    bytes.Buffer
 	lastMessage            bytes.Buffer
 	ping                   *httpFlushWriterPing
@@ -1471,16 +1451,26 @@ func (f *httpFlushWriter) StartPinging(interval time.Duration) {
 	f.ping = &httpFlushWriterPing{
 		interval: interval,
 		ticker:   time.NewTicker(interval),
-		notify:   make(chan struct{}, 1),
+		// make room for a ping reset and a close
+		notify: make(chan struct{}, 2),
 	}
 	go func() {
 		for {
 			select {
 			case <-f.ping.ticker.C:
-				f.output.WriteFlushing([]byte{'\n'})
+				f.output.mu.Lock()
+				if f.closed.Load() {
+					f.output.mu.Unlock()
+					return
+				}
+				f.output.WriteFlushingLocked([]byte{'\n'})
+				f.output.mu.Unlock()
 			case <-f.ctx.Done():
 				return
 			case <-f.ping.notify:
+				if f.closed.Load() {
+					return
+				}
 				f.ping.ticker.Reset(f.ping.interval)
 				continue
 			}
@@ -1490,10 +1480,7 @@ func (f *httpFlushWriter) StartPinging(interval time.Duration) {
 
 func (f *httpFlushWriter) resetPingTimer() {
 	if f.ping != nil {
-		select {
-		case f.ping.notify <- struct{}{}:
-		default:
-		}
+		f.ping.Notify()
 	}
 }
 
@@ -1526,9 +1513,12 @@ func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
 }
 
 func (f *httpFlushWriter) Close() {
+	f.output.mu.Lock()
+	defer f.output.mu.Unlock()
+	f.closed.Store(true)
 	f.ping.Close()
 	if f.sse {
-		f.output.WriteFlushing([]byte("event: done\n\n"))
+		f.output.WriteFlushingLocked([]byte("event: done\n\n"))
 	}
 }
 
@@ -1658,7 +1648,7 @@ func (r *Builder) authenticationHooks() authentication.Hooks {
 
 func (r *Builder) registerAuth() error {
 
-	config, err := loadUserConfiguration(r.api, r.middlewareClient, r.log)
+	config, err := loadUserConfiguration(r.api, r.middlewareClient, r.insecureCookies, r.log)
 	if err != nil {
 		return err
 	}
@@ -1772,18 +1762,22 @@ func (r *Builder) configureOpenIDConnectProviders() (*authentication.OpenIDConne
 
 func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.AuthProvider, cookie *securecookie.SecureCookie, authTimeout time.Duration) {
 
-	router.Use(authentication.RedirectAlreadyAuthenticatedUsers(
-		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUris),
-		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUriRegexes),
-	))
+	authorizedRedirectUris := loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUris)
+	authorizedRedirectUriRegexes := loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUriRegexes)
 
+	router.Use(authentication.RedirectAlreadyAuthenticatedUsers(authorizedRedirectUris, authorizedRedirectUriRegexes))
 	authorizeRouter := router.PathPrefix("/" + authentication.AuthorizePath).Subrouter()
-	authorizeRouter.Use(authentication.ValidateRedirectURIQueryParameter(
-		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUris),
-		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUriRegexes),
-	))
+	authorizeRouter.Use(authentication.ValidateRedirectURIQueryParameter(authorizedRedirectUris, authorizedRedirectUriRegexes))
 
 	callbackRouter := router.PathPrefix("/" + authentication.CallbackPath).Subrouter()
+
+	providerConfig := authentication.ProviderConfig{
+		ID:                 provider.Id,
+		InsecureCookies:    r.insecureCookies,
+		ForceRedirectHttps: r.forceHttpsRedirects,
+		Cookie:             cookie,
+		AuthTimeout:        authTimeout,
+	}
 
 	switch provider.Kind {
 	case wgpb.AuthProviderKind_AuthProviderGithub:
@@ -1801,13 +1795,9 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			}
 		}
 		github := authentication.NewGithubCookieHandler(authentication.GithubConfig{
-			ClientID:           loadvariable.String(provider.GithubConfig.ClientId),
-			ClientSecret:       loadvariable.String(provider.GithubConfig.ClientSecret),
-			ProviderID:         provider.Id,
-			InsecureCookies:    r.insecureCookies,
-			ForceRedirectHttps: r.forceHttpsRedirects,
-			Cookie:             cookie,
-			AuthTimeout:        authTimeout,
+			Provider:     providerConfig,
+			ClientID:     loadvariable.String(provider.GithubConfig.ClientId),
+			ClientSecret: loadvariable.String(provider.GithubConfig.ClientSecret),
 		}, r.authenticationHooks(), r.log)
 		github.Register(authorizeRouter, callbackRouter)
 		r.log.Debug("api.configureCookieProvider",
@@ -1831,15 +1821,11 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 		}
 
 		openID, err := authentication.NewOpenIDConnectCookieHandler(authentication.OpenIDConnectConfig{
-			Issuer:             loadvariable.String(provider.OidcConfig.Issuer),
-			ClientID:           loadvariable.String(provider.OidcConfig.ClientId),
-			ClientSecret:       loadvariable.String(provider.OidcConfig.ClientSecret),
-			QueryParameters:    queryParameters,
-			ProviderID:         provider.Id,
-			InsecureCookies:    r.insecureCookies,
-			ForceRedirectHttps: r.forceHttpsRedirects,
-			Cookie:             cookie,
-			AuthTimeout:        authTimeout,
+			Provider:        providerConfig,
+			Issuer:          loadvariable.String(provider.OidcConfig.Issuer),
+			ClientID:        loadvariable.String(provider.OidcConfig.ClientId),
+			ClientSecret:    loadvariable.String(provider.OidcConfig.ClientSecret),
+			QueryParameters: queryParameters,
 		}, r.authenticationHooks(), r.log)
 		if err != nil {
 			r.log.Error("creating OIDC auth provider", zap.Error(err))
