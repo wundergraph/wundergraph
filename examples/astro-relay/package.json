@@ -13,8 +13,8 @@
     "build:wundergraph": "wunderctl generate"
   },
   "dependencies": {
-    "@wundergraph/react-relay": "^0.4.15",
-    "@wundergraph/sdk": "^0.178.1",
+    "@wundergraph/react-relay": "^0.4.16",
+    "@wundergraph/sdk": "^0.179.0",
     "astro": "^2.4.1",
     "react": "^18.2.0",
     "react-relay": "^15.0.0",
