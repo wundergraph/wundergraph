@@ -19,7 +19,7 @@ export const createWunderGraphNext = (options: CreateWunderGraphNextOptions) => 
         baseURL
     } : undefined);
     
-    return createWunderGraphNextInternal<Operations>({
+    return createWunderGraphNextInternal<Operations, typeof client>({
         client,
         ...rest
     })

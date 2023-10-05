@@ -1,9 +1,14 @@
-import { OperationsDefinition } from '@wundergraph/sdk/client';
+import { Client, OperationsDefinition } from '@wundergraph/sdk/client';
 import { createHooks, UseQueryHook, UseSubscriptionHook } from '@wundergraph/swr';
 import { WithWunderGraphOptions } from './types';
 import { withWunderGraph } from './with-wundergraph';
 
-export const createWunderGraphNext = <Operations extends OperationsDefinition>(options: WithWunderGraphOptions) => {
+export const createWunderGraphNext = <
+	Operations extends OperationsDefinition,
+	WunderGraphClient extends Client = Client
+>(
+	options: WithWunderGraphOptions<WunderGraphClient>
+) => {
 	const { client, ...rest } = options;
 
 	const hooks = createHooks<Operations>(client);
