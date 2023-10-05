@@ -26,6 +26,7 @@ import { printSchemaWithDirectives } from '@graphql-tools/utils';
 import { introspectGraphql } from './graphql-introspection';
 import { WgEnv } from '../configure/options';
 import { InputVariable, mapInputVariable, resolveVariable } from '../configure/variables';
+import { validateNamespace } from './namespacing';
 
 export interface OpenAPIIntrospectionFile {
 	kind: 'file';
@@ -216,6 +217,10 @@ export const openApiSpecificationToGraphQLApi = async (
 		introspectionHeaders = resolveIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
 	}
 
+	if (introspection.apiNamespace) {
+		validateNamespace(introspection.apiNamespace);
+	}
+
 	const openApiLogger = logger ? new OpenAPILogger(logger.child({ component: '@wundergraph/openapi' })) : undefined;
 
 	const options: OpenApiOptions = {
@@ -237,6 +242,8 @@ export const openApiSpecificationToGraphQLApi = async (
 
 	// as logic of translating api calls stored in the directives we need print schema with directives
 	const schema = printSchemaWithDirectives(graphQLSchema);
+
+	logger?.trace({ schema }, 'generated GraphQL schema from OpenAPI spec');
 
 	return introspectGraphql(
 		{

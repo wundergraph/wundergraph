@@ -132,3 +132,27 @@ paths:
                   id:
                     type: integer
                     format: int64
+
+  /time:
+    get:
+      summary: Returns the current time
+      responses:
+        '200':
+          description: The current time
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Time'
+
+components:
+  schemas:
+    Time:
+      type: object
+      properties:
+        hours:
+          type: number
+        minutes:
+          type: number
+        seconds:
+          type: number
+      required: ['hours', 'minutes', 'seconds']

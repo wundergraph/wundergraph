@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -1375,6 +1376,10 @@ type httpFlushWriterOutput struct {
 func (o *httpFlushWriterOutput) WriteFlushing(data []byte) (int, error) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
+	return o.WriteFlushingLocked(data)
+}
+
+func (o *httpFlushWriterOutput) WriteFlushingLocked(data []byte) (int, error) {
 	var n int
 	var err error
 	if data != nil {
@@ -1390,9 +1395,16 @@ type httpFlushWriterPing struct {
 	notify   chan struct{}
 }
 
+func (p *httpFlushWriterPing) Notify() {
+	select {
+	case p.notify <- struct{}{}:
+	default:
+	}
+}
+
 func (p *httpFlushWriterPing) Close() {
 	if p != nil {
-		close(p.notify)
+		p.Notify()
 		p.ticker.Stop()
 	}
 }
@@ -1406,6 +1418,7 @@ type httpFlushWriter struct {
 	jsonPatch              JSONPatchConfiguration
 	deduplicate            bool
 	close                  func()
+	closed                 atomic.Bool
 	buf                    bytes.Buffer
 	lastMessage            bytes.Buffer
 	ping                   *httpFlushWriterPing
@@ -1438,16 +1451,26 @@ func (f *httpFlushWriter) StartPinging(interval time.Duration) {
 	f.ping = &httpFlushWriterPing{
 		interval: interval,
 		ticker:   time.NewTicker(interval),
-		notify:   make(chan struct{}, 1),
+		// make room for a ping reset and a close
+		notify: make(chan struct{}, 2),
 	}
 	go func() {
 		for {
 			select {
 			case <-f.ping.ticker.C:
-				f.output.WriteFlushing([]byte{'\n'})
+				f.output.mu.Lock()
+				if f.closed.Load() {
+					f.output.mu.Unlock()
+					return
+				}
+				f.output.WriteFlushingLocked([]byte{'\n'})
+				f.output.mu.Unlock()
 			case <-f.ctx.Done():
 				return
 			case <-f.ping.notify:
+				if f.closed.Load() {
+					return
+				}
 				f.ping.ticker.Reset(f.ping.interval)
 				continue
 			}
@@ -1457,10 +1480,7 @@ func (f *httpFlushWriter) StartPinging(interval time.Duration) {
 
 func (f *httpFlushWriter) resetPingTimer() {
 	if f.ping != nil {
-		select {
-		case f.ping.notify <- struct{}{}:
-		default:
-		}
+		f.ping.Notify()
 	}
 }
 
@@ -1493,9 +1513,12 @@ func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
 }
 
 func (f *httpFlushWriter) Close() {
+	f.output.mu.Lock()
+	defer f.output.mu.Unlock()
+	f.closed.Store(true)
 	f.ping.Close()
 	if f.sse {
-		f.output.WriteFlushing([]byte("event: done\n\n"))
+		f.output.WriteFlushingLocked([]byte("event: done\n\n"))
 	}
 }
 

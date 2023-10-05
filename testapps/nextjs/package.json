@@ -25,6 +25,9 @@
     "nextDev": "next dev --port 3003",
     "start": "next start --port 3003"
   },
+  "imports": {
+    "#/generated/*": "./.wundergraph/generated/*"
+  },
   "dependencies": {
     "@graphql-yoga/node": "^2.13.13",
     "@tanstack/react-query": "^4.20.4",
@@ -37,7 +40,7 @@
     "react-dom": "^18.2.0",
     "stripe": "^11.12.0",
     "swr": "^2.2.0",
-    "zod": "^3.20.2"
+    "zod": "^3.22.3"
   },
   "devDependencies": {
     "@types/node": "^18.16.0",

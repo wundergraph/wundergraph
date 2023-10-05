@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.178.1",
+  "version": "0.179.0",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -182,16 +182,16 @@
   "dependencies": {
     "@fastify/formbody": "^7.3.0",
     "@fastify/multipart": "^7.7.3",
-    "@graphql-mesh/cross-helpers": "^0.4.0",
-    "@graphql-mesh/store": "0.94.6",
-    "@graphql-mesh/types": "0.94.6",
-    "@graphql-mesh/utils": "0.94.6",
+    "@graphql-mesh/cross-helpers": "^0.4.1",
+    "@graphql-mesh/store": "0.95.6",
+    "@graphql-mesh/types": "0.95.6",
+    "@graphql-mesh/utils": "0.95.6",
     "@graphql-tools/merge": "^9.0.0",
     "@graphql-tools/schema": "^8.5.1",
     "@graphql-tools/utils": "^9.2.1",
-    "@omnigraph/json-schema": "0.94.2",
-    "@omnigraph/openapi": "0.94.6",
-    "@omnigraph/soap": "0.94.6",
+    "@omnigraph/json-schema": "0.95.7",
+    "@omnigraph/openapi": "0.95.7",
+    "@omnigraph/soap": "0.95.6",
     "@opentelemetry/api": "^1.4.1",
     "@opentelemetry/core": "^1.13.0",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.39.1",
@@ -204,7 +204,7 @@
     "@wundergraph/orm": "workspace:*",
     "@wundergraph/protobuf": "workspace:^0.118.2",
     "@wundergraph/straightforward": "^4.2.5",
-    "@wundergraph/wunderctl": "workspace:^0.175.0",
+    "@wundergraph/wunderctl": "workspace:^0.176.0",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",
@@ -222,6 +222,7 @@
     "https-proxy-agent": "^5.0.1",
     "ix": "^5.0.0",
     "js-yaml": "^4.1.0",
+    "json-machete": "0.95.6",
     "json-schema": "^0.4.0",
     "json-schema-to-typescript": "^11.0.3",
     "json-stream-stringify": "^3.1.0",
@@ -242,8 +243,8 @@
     "tslib": "^2.5.0",
     "typescript-json-schema": "^0.55.0",
     "write-file-atomic": "^5.0.0",
-    "zod": "^3.20.2",
-    "zod-to-json-schema": "^3.20.2"
+    "zod": "^3.22.3",
+    "zod-to-json-schema": "^3.21.4"
   },
   "jest": {
     "preset": "ts-jest",
