@@ -11,7 +11,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@wundergraph/sdk": "^0.178.1",
+    "@wundergraph/sdk": "^0.179.0",
     "astro": "^2.1.8"
   },
   "devDependencies": {
