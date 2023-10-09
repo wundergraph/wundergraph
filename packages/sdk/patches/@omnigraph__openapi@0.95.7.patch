@@ -1,0 +1,28 @@
+diff --git a/cjs/getJSONSchemaOptionsFromOpenAPIOptions.js b/cjs/getJSONSchemaOptionsFromOpenAPIOptions.js
+index 6b0fa1b9c1223baf06bac3db5c1353919bdd7eab..83e7d0b977d3c160ad5498912f7c45444e91e617 100644
+--- a/cjs/getJSONSchemaOptionsFromOpenAPIOptions.js
++++ b/cjs/getJSONSchemaOptionsFromOpenAPIOptions.js
+@@ -240,7 +240,8 @@ async function getJSONSchemaOptionsFromOpenAPIOptions(name, { source, fallbackFo
+             if ('requestBody' in methodObj) {
+                 const requestBodyObj = methodObj.requestBody;
+                 if ('content' in requestBodyObj) {
+-                    const contentKey = Object.keys(requestBodyObj.content)[0];
++                    const contentKeys = Object.keys(requestBodyObj.content);
++                    const contentKey = contentKeys.find(contentKey => typeof contentKey === 'string' && contentKey.match('json')) || contentKeys[0];
+                     const contentSchema = requestBodyObj.content[contentKey]?.schema;
+                     if (contentSchema && Object.keys(contentSchema).length > 0) {
+                         operationConfig.requestSchema = contentSchema;
+diff --git a/esm/getJSONSchemaOptionsFromOpenAPIOptions.js b/esm/getJSONSchemaOptionsFromOpenAPIOptions.js
+index ab8124775d4f88586cc2d88d24778cc1e04ba6e9..0897139d00ea49e4ef6f2591612ebf9737597e56 100644
+--- a/esm/getJSONSchemaOptionsFromOpenAPIOptions.js
++++ b/esm/getJSONSchemaOptionsFromOpenAPIOptions.js
+@@ -237,7 +237,8 @@ export async function getJSONSchemaOptionsFromOpenAPIOptions(name, { source, fal
+             if ('requestBody' in methodObj) {
+                 const requestBodyObj = methodObj.requestBody;
+                 if ('content' in requestBodyObj) {
+-                    const contentKey = Object.keys(requestBodyObj.content)[0];
++                    const contentKeys = Object.keys(requestBodyObj.content);
++                    const contentKey = contentKeys.find(contentKey => typeof contentKey === 'string' && contentKey.match('json')) || contentKeys[0];
+                     const contentSchema = requestBodyObj.content[contentKey]?.schema;
+                     if (contentSchema && Object.keys(contentSchema).length > 0) {
+                         operationConfig.requestSchema = contentSchema;

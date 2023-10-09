@@ -1,0 +1,26 @@
+diff --git a/node_modules/@graphql-mesh/string-interpolation/cjs/interpolator.js b/node_modules/@graphql-mesh/string-interpolation/cjs/interpolator.js
+index bb1bdae..4f5adff 100644
+--- a/node_modules/@graphql-mesh/string-interpolation/cjs/interpolator.js
++++ b/node_modules/@graphql-mesh/string-interpolation/cjs/interpolator.js
+@@ -99,7 +99,7 @@ class Interpolator {
+     }
+     applyRule(str, rule, data = {}) {
+         const dataToReplace = this.applyData(rule.key, data);
+-        if (dataToReplace) {
++        if (dataToReplace !== undefined) {
+             return str.replace(rule.replace, this.applyModifiers(rule.modifiers, dataToReplace, data));
+         }
+         else if (rule.alternativeText) {
+diff --git a/node_modules/@graphql-mesh/string-interpolation/esm/interpolator.js b/node_modules/@graphql-mesh/string-interpolation/esm/interpolator.js
+index 67e4eaa..dc72572 100644
+--- a/node_modules/@graphql-mesh/string-interpolation/esm/interpolator.js
++++ b/node_modules/@graphql-mesh/string-interpolation/esm/interpolator.js
+@@ -95,7 +95,7 @@ export class Interpolator {
+     }
+     applyRule(str, rule, data = {}) {
+         const dataToReplace = this.applyData(rule.key, data);
+-        if (dataToReplace) {
++        if (dataToReplace !== undefined) {
+             return str.replace(rule.replace, this.applyModifiers(rule.modifiers, dataToReplace, data));
+         }
+         else if (rule.alternativeText) {

@@ -128,6 +128,7 @@
   ],
   "files": [
     "dist",
+    "patches",
     "tsconfig.json"
   ],
   "bin": {
@@ -156,7 +157,8 @@
     "test": "jest && npm run test:types",
     "test:types": "tsd",
     "test:int": "TEST_INTEGRATION=true jest",
-    "test:update-snapshots": "jest -u"
+    "test:update-snapshots": "jest -u",
+    "postinstall": "patch-package"
   },
   "devDependencies": {
     "@types/chai": "^4.2.22",
@@ -231,6 +233,7 @@
     "object-hash": "^2.2.0",
     "openai": "^3.3.0",
     "openapi-types": "12.1.0",
+    "patch-package": "^8.0.0",
     "pino": "^8.11.0",
     "postman-collection": "^4.1.7",
     "prettier": "2.8.7",
@@ -256,5 +259,10 @@
   "tsd": {
     "directory": "test-d"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "patchedDependencies": {
+    "graphql-scalars@1.22.2": "patches/graphql-scalars@1.22.2.patch",
+    "@graphql-mesh/string-interpolation@0.5.2": "patches/@graphql-mesh__string-interpolation@0.5.2.patch",
+    "@omnigraph/openapi@0.95.7": "patches/@omnigraph__openapi@0.95.7.patch"
+  }
 }
