@@ -119,6 +119,16 @@ export const createOpenAPITestServer = (port: number) => {
 		reply.code(200).header('content-type', 'application/json; charset=utf-8').send(response);
 	});
 
+	server.get('/time', async (request, reply) => {
+		const now = new Date();
+		const response = {
+			hours: now.getHours(),
+			minutes: now.getMinutes(),
+			seconds: now.getSeconds(),
+		};
+		reply.code(200).header('content-type', 'application/json; charset=utf-8').send(response);
+	});
+
 	server.listen({ port: port }, (err, address) => {
 		if (err) {
 			console.error(err);

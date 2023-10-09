@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.14.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.14.4...@wundergraph/nextjs@0.14.5) (2023-10-04)
+
+### Performance Improvements
+
+* make wunderctl generate faster, add a few more trace log messages ([#1294](https://github.com/wundergraph/wundergraph/issues/1294)) ([7a88489](https://github.com/wundergraph/wundergraph/commit/7a884893f2e6055200275aa58957b089a8707798)) (@fiam)
+
 ## [0.14.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.14.3...@wundergraph/nextjs@0.14.4) (2023-09-22)
 
 **Note:** Version bump only for package @wundergraph/nextjs

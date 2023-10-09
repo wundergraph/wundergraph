@@ -15,8 +15,8 @@ export interface HeaderConfiguration {
 	defaultValue?: string;
 }
 
-export interface IGraphqlIntrospectionHeadersBuilder {
-	addStaticHeader: (key: string, value: InputVariable) => IGraphqlIntrospectionHeadersBuilder;
+export interface IntrospectionHeadersBuilder {
+	addStaticHeader: (key: string, value: InputVariable) => IntrospectionHeadersBuilder;
 }
 
 export interface IHeadersBuilder {
@@ -117,4 +117,34 @@ export const mapHeaders = (builder: HeadersBuilder): { [key: string]: HTTPHeader
 	});
 
 	return headers;
+};
+
+export const resolveIntrospectionHeaders = (
+	headers?: { [key: string]: HTTPHeader },
+	extra?: Record<string, string>
+): Record<string, string> => {
+	const result = Object.assign({}, extra ?? {});
+	if (headers !== undefined) {
+		Object.keys(headers).forEach((key) => {
+			if (headers[key].values.length === 1) {
+				const kind = headers[key].values[0].kind;
+				switch (kind) {
+					case ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE:
+						result[key] = headers[key].values[0].staticVariableContent;
+						break;
+					case ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE:
+						if (process.env[headers[key].values[0].environmentVariableName] !== undefined) {
+							result[key] = process.env[headers[key].values[0].environmentVariableName]!;
+						} else if (headers[key].values[0].environmentVariableDefaultValue !== undefined) {
+							result[key] = headers[key].values[0].environmentVariableDefaultValue;
+						}
+						break;
+					default:
+						throw new Error(`cannot resolve introspection header kind ${kind}`);
+				}
+			}
+		});
+	}
+
+	return result;
 };

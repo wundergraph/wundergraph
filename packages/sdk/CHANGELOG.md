@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.179.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.178.1...@wundergraph/sdk@0.179.0) (2023-10-04)
+
+### Features
+
+* add support for using environment variables and header in OAS introspection ([#1286](https://github.com/wundergraph/wundergraph/issues/1286)) ([7408324](https://github.com/wundergraph/wundergraph/commit/7408324ee65b2773c7ac32a7a19ad9282e3c4469)), closes [#1231](https://github.com/wundergraph/wundergraph/issues/1231) [#1232](https://github.com/wundergraph/wundergraph/issues/1232) (@fiam)
+
+### Bug Fixes
+
+* properly validate api namespaces ([#1301](https://github.com/wundergraph/wundergraph/issues/1301)) ([8b2af9e](https://github.com/wundergraph/wundergraph/commit/8b2af9e0c1041655b876b3ce1266e4680cad30b7)), closes [#1202](https://github.com/wundergraph/wundergraph/issues/1202) (@fiam)
+* respect upstream object types when their name collides with a well known scalar ([#1300](https://github.com/wundergraph/wundergraph/issues/1300)) ([2b8bf1f](https://github.com/wundergraph/wundergraph/commit/2b8bf1fd54eedd644fc8038e1ba1df2541008602)), closes [#1290](https://github.com/wundergraph/wundergraph/issues/1290) (@fiam)
+* update OAS dependencies to fix GQL generation of required fields inside allOf ([#1304](https://github.com/wundergraph/wundergraph/issues/1304)) ([5b51637](https://github.com/wundergraph/wundergraph/commit/5b516379a3ec1ae668405f7a5a102309c91b5694)) (@fiam)
+* updated zod to 3.22.3 ([#1303](https://github.com/wundergraph/wundergraph/issues/1303)) ([83a08a7](https://github.com/wundergraph/wundergraph/commit/83a08a7676a956c0ac7508e02f8530ce9f56909a)) (@Pagebakers)
+
+### Performance Improvements
+
+* make wunderctl generate faster, add a few more trace log messages ([#1294](https://github.com/wundergraph/wundergraph/issues/1294)) ([7a88489](https://github.com/wundergraph/wundergraph/commit/7a884893f2e6055200275aa58957b089a8707798)) (@fiam)
+
 ## [0.178.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.178.0...@wundergraph/sdk@0.178.1) (2023-09-22)
 
 **Note:** Version bump only for package @wundergraph/sdk
