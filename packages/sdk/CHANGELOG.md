@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.179.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.179.0...@wundergraph/sdk@0.179.1) (2023-10-10)
+
+### Bug Fixes
+
+* fixed issue where int64 in open api specs would fail to parse ([#1312](https://github.com/wundergraph/wundergraph/issues/1312)) ([5f9a180](https://github.com/wundergraph/wundergraph/commit/5f9a1801a40c7a56abc1a7a11cc1dc0d585faaa1)) (@Pagebakers)
+* setup patches for dependencies with issues ([#1311](https://github.com/wundergraph/wundergraph/issues/1311)) ([9af12b1](https://github.com/wundergraph/wundergraph/commit/9af12b1601e7db17e6b2e9dcc27c3cefd6821fe2)), closes [#1199](https://github.com/wundergraph/wundergraph/issues/1199) [#1200](https://github.com/wundergraph/wundergraph/issues/1200) (@fiam)
+
 ## [0.179.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.178.1...@wundergraph/sdk@0.179.0) (2023-10-04)
 
 ### Features

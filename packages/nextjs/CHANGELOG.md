@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.14.6](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.14.5...@wundergraph/nextjs@0.14.6) (2023-10-10)
+
+### Bug Fixes
+
+* fixed issue where createWunderGraphNext would not return correct… ([#1307](https://github.com/wundergraph/wundergraph/issues/1307)) ([62f54b1](https://github.com/wundergraph/wundergraph/commit/62f54b1a7fbfe23dc944b1c4ea0ee5332071208f)) (@Pagebakers)
+
 ## [0.14.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.14.4...@wundergraph/nextjs@0.14.5) (2023-10-04)
 
 ### Performance Improvements
