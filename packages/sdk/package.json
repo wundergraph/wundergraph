@@ -158,7 +158,7 @@
     "test:types": "tsd",
     "test:int": "TEST_INTEGRATION=true jest",
     "test:update-snapshots": "jest -u",
-    "postinstall": "patch-package || true"
+    "postinstall": "patch-package || (exit 0)"
   },
   "devDependencies": {
     "@types/chai": "^4.2.22",
