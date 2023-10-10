@@ -143,6 +143,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Time'
+  /bigint:
+    post:
+      summary: Returns a big integer
+      parameters:
+        - name: quantity
+          in: body
+          required: true
+          description: quantity
+          schema:
+            type: object
+            properties:
+              quantity:
+                type: integer
+                format: int64
+      responses:
+        '200':
+          description: A big integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  quantity:
+                    type: integer
+                    format: int64
 
 components:
   schemas:
