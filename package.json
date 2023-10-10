@@ -89,6 +89,11 @@
       "zod": "^3.22.3",
       "json-machete": "0.94.5",
       "@graphql-mesh/store": "0.94.5"
+    },
+    "patchedDependencies": {
+      "graphql-scalars@1.22.2": "patches/graphql-scalars@1.22.2.patch",
+      "@graphql-mesh/string-interpolation@0.5.2": "patches/@graphql-mesh__string-interpolation@0.5.2.patch",
+      "@omnigraph/openapi@0.95.7": "patches/@omnigraph__openapi@0.95.7.patch"
     }
   }
 }

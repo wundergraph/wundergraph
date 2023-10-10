@@ -1,0 +1,26 @@
+diff --git a/cjs/interpolator.js b/cjs/interpolator.js
+index bb1bdae46068876af46a5aa9b88108870eb501a3..4f5adff0d22bf6371294c96118f007ecb337aa0d 100644
+--- a/cjs/interpolator.js
++++ b/cjs/interpolator.js
+@@ -99,7 +99,7 @@ class Interpolator {
+     }
+     applyRule(str, rule, data = {}) {
+         const dataToReplace = this.applyData(rule.key, data);
+-        if (dataToReplace) {
++        if (dataToReplace !== undefined) {
+             return str.replace(rule.replace, this.applyModifiers(rule.modifiers, dataToReplace, data));
+         }
+         else if (rule.alternativeText) {
+diff --git a/esm/interpolator.js b/esm/interpolator.js
+index 67e4eaa53de7821ede15da6e696b16c95a40becb..dc7257271dbd8508ef00b4eb32fbc61914f71e3e 100644
+--- a/esm/interpolator.js
++++ b/esm/interpolator.js
+@@ -95,7 +95,7 @@ export class Interpolator {
+     }
+     applyRule(str, rule, data = {}) {
+         const dataToReplace = this.applyData(rule.key, data);
+-        if (dataToReplace) {
++        if (dataToReplace !== undefined) {
+             return str.replace(rule.replace, this.applyModifiers(rule.modifiers, dataToReplace, data));
+         }
+         else if (rule.alternativeText) {

@@ -1,0 +1,44 @@
+diff --git a/cjs/scalars/iso-date/validator.js b/cjs/scalars/iso-date/validator.js
+index 4e151fa1c1a1f3d37018063d729641983c54d8a2..5e0a16c9c0aa41ef952818be92b76346cb56260b 100644
+--- a/cjs/scalars/iso-date/validator.js
++++ b/cjs/scalars/iso-date/validator.js
+@@ -46,7 +46,7 @@ const leapYear = (year) => {
+ //
+ const validateTime = (time) => {
+     time = time === null || time === void 0 ? void 0 : time.toUpperCase();
+-    const TIME_REGEX = /^([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])(\.\d{1,})?(([Z])|([+|-]([01][0-9]|2[0-3]):[0-5][0-9]))$/;
++    const TIME_REGEX = /^([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])(\.\d{1,})?(([Z])|([+|-]([01][0-9]|2[0-3]):?[0-5][0-9]))$/;
+     return TIME_REGEX.test(time);
+ };
+ exports.validateTime = validateTime;
+@@ -117,7 +117,7 @@ exports.validateDate = validateDate;
+ //
+ const validateDateTime = (dateTimeString) => {
+     dateTimeString = dateTimeString === null || dateTimeString === void 0 ? void 0 : dateTimeString.toUpperCase();
+-    const RFC_3339_REGEX = /^(\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60))(\.\d{1,})?(([Z])|([+|-]([01][0-9]|2[0-3]):[0-5][0-9]))$/;
++    const RFC_3339_REGEX = /^(\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60))(\.\d{1,})?(([Z])|([+|-]([01][0-9]|2[0-3]):?[0-5][0-9]))$/;
+     // Validate the structure of the date-string
+     if (!RFC_3339_REGEX.test(dateTimeString)) {
+         return false;
+diff --git a/esm/scalars/iso-date/validator.js b/esm/scalars/iso-date/validator.js
+index 73429a5fc28112d0e1b3876140c38c7d2ffe0040..ff0f0a5179b00045e0156e14732a63462ddf204b 100644
+--- a/esm/scalars/iso-date/validator.js
++++ b/esm/scalars/iso-date/validator.js
+@@ -43,7 +43,7 @@ const leapYear = (year) => {
+ //
+ export const validateTime = (time) => {
+     time = time === null || time === void 0 ? void 0 : time.toUpperCase();
+-    const TIME_REGEX = /^([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])(\.\d{1,})?(([Z])|([+|-]([01][0-9]|2[0-3]):[0-5][0-9]))$/;
++    const TIME_REGEX = /^([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])(\.\d{1,})?(([Z])|([+|-]([01][0-9]|2[0-3]):?[0-5][0-9]))$/;
+     return TIME_REGEX.test(time);
+ };
+ // Function that checks whether a date-string is RFC 3339 compliant.
+@@ -112,7 +112,7 @@ export const validateDate = (datestring) => {
+ //
+ export const validateDateTime = (dateTimeString) => {
+     dateTimeString = dateTimeString === null || dateTimeString === void 0 ? void 0 : dateTimeString.toUpperCase();
+-    const RFC_3339_REGEX = /^(\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60))(\.\d{1,})?(([Z])|([+|-]([01][0-9]|2[0-3]):[0-5][0-9]))$/;
++    const RFC_3339_REGEX = /^(\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60))(\.\d{1,})?(([Z])|([+|-]([01][0-9]|2[0-3]):?[0-5][0-9]))$/;
+     // Validate the structure of the date-string
+     if (!RFC_3339_REGEX.test(dateTimeString)) {
+         return false;
