@@ -1,0 +1,5 @@
+mutation ($input: notes_post_bigint_request_Input!) {
+	notes_post_bigint(input: $input) {
+		quantity
+	}
+}

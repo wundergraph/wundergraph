@@ -266,3 +266,19 @@ describe('Test object types overlapping with well known scalar types', () => {
 		expect(result.data?.notes_time?.seconds).toBeDefined();
 	});
 });
+
+describe('It should parse Bigint', () => {
+	test('query an object named Time', async () => {
+		const result = await wg.client().mutate({
+			operationName: 'Bigint',
+			input: {
+				input: {
+					quantity: 10,
+				},
+			},
+		});
+
+		expect(result.error).toBeUndefined();
+		expect(result.data?.notes_post_bigint?.quantity).toBeDefined();
+	});
+});

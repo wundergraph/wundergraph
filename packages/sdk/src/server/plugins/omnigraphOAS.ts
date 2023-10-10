@@ -8,6 +8,14 @@ import { processDirectives } from '@omnigraph/openapi';
 import { fetch } from '@whatwg-node/fetch';
 import { loggedFetch } from './fetch';
 
+/**
+ * @TODO - remove this once we have a proper fix for the issue
+ *
+ * This is a workaround for the issue described here:
+ * https://github.com/Urigo/graphql-mesh/issues/6054
+ */
+import 'json-bigint-patch';
+
 export interface OpenApiServerConfig {
 	serverName: string;
 	schema: string;
