@@ -1,3 +1,4 @@
+import { Response } from '@whatwg-node/fetch';
 import { FastifyBaseLogger } from 'fastify';
 
 type FetchFn = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
