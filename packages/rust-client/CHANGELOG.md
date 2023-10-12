@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/rust-client@0.1.3...@wundergraph/rust-client@0.1.4) (2023-10-12)
+
+**Note:** Version bump only for package @wundergraph/rust-client
+
 ## [0.1.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/rust-client@0.1.2...@wundergraph/rust-client@0.1.3) (2023-10-10)
 
 **Note:** Version bump only for package @wundergraph/rust-client

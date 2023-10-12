@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/svelte-query",
-  "version": "0.3.17",
+  "version": "0.3.18",
   "license": "Apache-2.0",
   "description": "WunderGraph Svelte Query Integration",
   "module": "./dist/index.js",

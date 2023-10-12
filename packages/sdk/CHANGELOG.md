@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.179.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.179.1...@wundergraph/sdk@0.179.2) (2023-10-12)
+
+### Bug Fixes
+
+* added missing fetch polyfill for node 16 in oas introspection ([#1313](https://github.com/wundergraph/wundergraph/issues/1313)) ([b486dbc](https://github.com/wundergraph/wundergraph/commit/b486dbcee7e04c599bdf6b5cd03d463929e375f4)) (@Pagebakers)
+
 ## [0.179.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.179.0...@wundergraph/sdk@0.179.1) (2023-10-10)
 
 ### Bug Fixes
