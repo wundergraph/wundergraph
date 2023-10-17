@@ -20,6 +20,9 @@ patchedDependencies:
   graphql-scalars@1.22.2:
     hash: ngndi4ac2m7jiobiqhmho5ah7q
     path: patches/graphql-scalars@1.22.2.patch
+  json-machete@0.94.5:
+    hash: bwtwfthnrebvr2m4retxnutmeu
+    path: patches/json-machete@0.94.5.patch
 
 importers:
 
@@ -771,7 +774,7 @@ importers:
         version: 0.0.8
       json-machete:
         specifier: 0.94.5
-        version: 0.94.5(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.5.0)
+        version: 0.94.5(patch_hash=bwtwfthnrebvr2m4retxnutmeu)(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.5.0)
       json-schema:
         specifier: ^0.4.0
         version: 0.4.0
@@ -7064,7 +7067,7 @@ packages:
       graphql: 16.6.0
       graphql-compose: 9.0.10(graphql@16.6.0)
       graphql-scalars: 1.22.2(patch_hash=ngndi4ac2m7jiobiqhmho5ah7q)(graphql@16.6.0)
-      json-machete: 0.94.5(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.5.0)
+      json-machete: 0.94.5(patch_hash=bwtwfthnrebvr2m4retxnutmeu)(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.5.0)
       pascal-case: 3.1.2
       qs: 6.11.2
       to-json-schema: 0.2.5
@@ -7096,7 +7099,7 @@ packages:
       graphql: 16.6.0
       graphql-compose: 9.0.10(graphql@16.6.0)
       graphql-scalars: 1.22.2(patch_hash=ngndi4ac2m7jiobiqhmho5ah7q)(graphql@16.6.0)
-      json-machete: 0.94.5(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
+      json-machete: 0.94.5(patch_hash=bwtwfthnrebvr2m4retxnutmeu)(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
       pascal-case: 3.1.2
       qs: 6.11.2
       to-json-schema: 0.2.5
@@ -7121,7 +7124,7 @@ packages:
       '@omnigraph/json-schema': 0.95.7(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.5.0)
       change-case: 4.1.2
       graphql: 16.6.0
-      json-machete: 0.94.5(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.5.0)
+      json-machete: 0.94.5(patch_hash=bwtwfthnrebvr2m4retxnutmeu)(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.5.0)
       openapi-types: 12.1.0
       tslib: 2.5.0
     transitivePeerDependencies:
@@ -7146,7 +7149,7 @@ packages:
       '@omnigraph/json-schema': 0.95.7(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
       change-case: 4.1.2
       graphql: 16.6.0
-      json-machete: 0.94.5(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
+      json-machete: 0.94.5(patch_hash=bwtwfthnrebvr2m4retxnutmeu)(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
       openapi-types: 12.1.0
       tslib: 2.6.0
     transitivePeerDependencies:
@@ -18276,7 +18279,7 @@ packages:
   /json-buffer@3.0.1:
     resolution: {integrity: sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==}
 
-  /json-machete@0.94.5(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.5.0):
+  /json-machete@0.94.5(patch_hash=bwtwfthnrebvr2m4retxnutmeu)(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.5.0):
     resolution: {integrity: sha512-36j6xl/xzpB0ypK5+HsIDoENoOxKVTd0UUMCqv7aXekzdYwdVvvczdvLEywTGB/pOEawfHR2ZJ5gIrkGlP2CIg==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
@@ -18299,8 +18302,9 @@ packages:
       tslib: 2.5.0
       url-join: 4.0.1
     dev: false
+    patched: true
 
-  /json-machete@0.94.5(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0):
+  /json-machete@0.94.5(patch_hash=bwtwfthnrebvr2m4retxnutmeu)(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0):
     resolution: {integrity: sha512-36j6xl/xzpB0ypK5+HsIDoENoOxKVTd0UUMCqv7aXekzdYwdVvvczdvLEywTGB/pOEawfHR2ZJ5gIrkGlP2CIg==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
@@ -18323,6 +18327,7 @@ packages:
       tslib: 2.6.0
       url-join: 4.0.1
     dev: false
+    patched: true
 
   /json-parse-better-errors@1.0.2:
     resolution: {integrity: sha512-mrqyZKfX5EhL7hvqcV6WG1yYjnjeuYDzDhhcAAUrq8Po85NBQBJP+ZDUT75qZQ98IkUoBqdkExkukOU7Ts2wrw==}
@@ -27162,7 +27167,6 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.179.2
     hasBin: true
     requiresBuild: true
     dependencies:
@@ -27209,7 +27213,7 @@ packages:
       ix: 5.0.0
       js-yaml: 4.1.0
       json-bigint-patch: 0.0.8
-      json-machete: 0.94.5(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
+      json-machete: 0.94.5(patch_hash=bwtwfthnrebvr2m4retxnutmeu)(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-mesh/utils@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
       json-schema: 0.4.0
       json-schema-to-typescript: 11.0.5
       json-stream-stringify: 3.1.0
