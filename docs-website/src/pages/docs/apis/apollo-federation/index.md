@@ -9,7 +9,7 @@ Federation helps companies implement GraphQL at scale and allows you to combine 
 It brings a lot of useful features to implement Graphs across multiple teams in a "federated" way, hence the name.
 It was [invented and specified by Apollo](https://www.apollographql.com/docs/federation/federation-spec/).
 
-WunderGraph is extremely fast executing GraphQL Operations and is therefor a great fit for a Federation Gateway.
+WunderGraph is extremely fast executing GraphQL Operations and is therefore a great fit for a Federation Gateway.
 
 ## Add a Apollo Federation DataSource
 

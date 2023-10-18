@@ -12,7 +12,7 @@ whereas others really just need a quick way to build an API on top of a database
 
 There are a lot of tools out there that turn a database into an API.
 What's special about the combination of WunderGraph and Prisma is that you're building on top of two giants.
-Prisma is a very mature and well maintained project, [it's written in Rust and therefor very performant](https://github.com/prisma/prisma-engines).
+Prisma is a very mature and well maintained project, [it's written in Rust and therefore very performant](https://github.com/prisma/prisma-engines).
 WunderGraph uses Prisma internally to generate a GraphQL Schema from the database and translate GraphQL Operations into efficient SQL statements.
 
 However, Prisma needs a powerful sidekick to turn your database into a production-grade API.
