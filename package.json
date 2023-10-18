@@ -93,7 +93,8 @@
     "patchedDependencies": {
       "graphql-scalars@1.22.2": "patches/graphql-scalars@1.22.2.patch",
       "@graphql-mesh/string-interpolation@0.5.2": "patches/@graphql-mesh__string-interpolation@0.5.2.patch",
-      "@omnigraph/openapi@0.95.7": "patches/@omnigraph__openapi@0.95.7.patch"
+      "@omnigraph/openapi@0.95.7": "patches/@omnigraph__openapi@0.95.7.patch",
+      "json-machete@0.94.5": "patches/json-machete@0.94.5.patch"
     }
   }
 }
