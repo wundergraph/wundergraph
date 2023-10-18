@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.179.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.179.2...@wundergraph/sdk@0.179.3) (2023-10-18)
+
+### Bug Fixes
+
+* patch json-machete to propagate required from root objects to subobjects ([#1318](https://github.com/wundergraph/wundergraph/issues/1318)) ([7b2d097](https://github.com/wundergraph/wundergraph/commit/7b2d09797e28548a9f7afdfac8731db719a6ad93)) (@fiam)
+
 ## [0.179.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.179.1...@wundergraph/sdk@0.179.2) (2023-10-12)
 
 ### Bug Fixes
