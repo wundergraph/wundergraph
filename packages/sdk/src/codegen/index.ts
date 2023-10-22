@@ -105,10 +105,10 @@ export class CodeGenerator {
 			}
 		});
 		const resolved = await Promise.all(generators);
-		const rawOutFiles: TemplateOutputFile[] = resolved.reduce((previousValue, currentValue) => [
-			...previousValue,
-			...currentValue,
-		], []);
+		const rawOutFiles: TemplateOutputFile[] = resolved.reduce(
+			(previousValue, currentValue) => [...previousValue, ...currentValue],
+			[]
+		);
 		const outFiles = mergeTemplateOutput(rawOutFiles);
 		outFiles.forEach((file) => {
 			const content = `${file.header || ''}${file.content}`;
