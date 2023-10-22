@@ -1,6 +1,6 @@
 # This file is auto generated.
 # Remove/modify this header if you want to customize the operation.
-query federated_topProducts_query($first: Int, $random: Boolean) {
+query federated_topProducts_query($first: Int = 5, $random: Boolean) {
   federated_topProducts(first: $first, random: $random) {
     name
     price
