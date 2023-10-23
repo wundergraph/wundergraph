@@ -788,9 +788,9 @@ class RESTApiBuilder {
 													value: schema.default,
 												},
 										  }
-										: (astFromValueUntyped(defaultValue) as any)
+										: astFromValueUntyped(defaultValue)
 									: undefined,
-							},
+							} as InputValueDefinitionNode,
 						],
 					};
 					done = true;
