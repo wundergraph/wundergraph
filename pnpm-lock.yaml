@@ -704,8 +704,8 @@ importers:
         specifier: ^3.9.2
         version: 3.15.2
       '@whatwg-node/fetch':
-        specifier: ^0.9.4
-        version: 0.9.4
+        specifier: ^0.9.13
+        version: 0.9.13
       '@wundergraph/orm':
         specifier: workspace:*
         version: link:../orm
@@ -4846,7 +4846,7 @@ packages:
     resolution: {integrity: sha512-uN3kLzLN+RdQP4A8qMAWRxPCRACReyG381O+FIa7l3r5pikLH01hB/3rq+8grsypsPzDNM8zJzejckccqLa5tQ==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
-      '@graphql-mesh/store': ^0.95.6
+      '@graphql-mesh/store': 0.94.5
       '@graphql-tools/utils': ^9.2.1 || ^10.0.0
       graphql: '*'
       tslib: ^2.4.0
@@ -4864,7 +4864,7 @@ packages:
     resolution: {integrity: sha512-uN3kLzLN+RdQP4A8qMAWRxPCRACReyG381O+FIa7l3r5pikLH01hB/3rq+8grsypsPzDNM8zJzejckccqLa5tQ==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
-      '@graphql-mesh/store': ^0.95.6
+      '@graphql-mesh/store': 0.94.5
       '@graphql-tools/utils': ^9.2.1 || ^10.0.0
       graphql: '*'
       tslib: ^2.4.0
@@ -7060,7 +7060,7 @@ packages:
       '@graphql-mesh/utils': 0.95.6(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.5.0)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
       '@json-schema-tools/meta-schema': 1.7.0
-      '@whatwg-node/fetch': 0.9.9
+      '@whatwg-node/fetch': 0.9.13
       ajv: 8.12.0
       ajv-formats: 2.1.1(ajv@8.12.0)
       dset: 3.1.2
@@ -7092,7 +7092,7 @@ packages:
       '@graphql-mesh/utils': 0.95.6(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.95.6)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.0)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
       '@json-schema-tools/meta-schema': 1.7.0
-      '@whatwg-node/fetch': 0.9.9
+      '@whatwg-node/fetch': 0.9.13
       ajv: 8.12.0
       ajv-formats: 2.1.1(ajv@8.12.0)
       dset: 3.1.2
@@ -9732,35 +9732,8 @@ packages:
       urlpattern-polyfill: 9.0.0
     dev: false
 
-  /@whatwg-node/fetch@0.9.4:
-    resolution: {integrity: sha512-nR0nZeOCy4M4ep/nwuGdQxRlOrHqmA5M3t+laOAsPEwwnpoTmA4DSuopyD5Dqk7+sFaOiX328HeGhvwj4HHdng==}
-    engines: {node: '>=16.0.0'}
-    dependencies:
-      '@whatwg-node/node-fetch': 0.4.3
-      urlpattern-polyfill: 9.0.0
-    dev: false
-
-  /@whatwg-node/fetch@0.9.9:
-    resolution: {integrity: sha512-OTVoDm039CNyAWSRc2WBimMl/N9J4Fk2le21Xzcf+3OiWPNNSIbMnpWKBUyraPh2d9SAEgoBdQxTfVNihXgiUw==}
-    engines: {node: '>=16.0.0'}
-    dependencies:
-      '@whatwg-node/node-fetch': 0.4.19
-      urlpattern-polyfill: 9.0.0
-    dev: false
-
   /@whatwg-node/node-fetch@0.4.19:
     resolution: {integrity: sha512-AW7/m2AuweAoSXmESrYQr/KBafueScNbn2iNO0u6xFr2JZdPmYsSm5yvAXYk6yDLv+eDmSSKrf7JnFZ0CsJIdA==}
-    engines: {node: '>=16.0.0'}
-    dependencies:
-      '@whatwg-node/events': 0.1.1
-      busboy: 1.6.0
-      fast-querystring: 1.1.2
-      fast-url-parser: 1.1.3
-      tslib: 2.6.0
-    dev: false
-
-  /@whatwg-node/node-fetch@0.4.3:
-    resolution: {integrity: sha512-C+nki+rxOM4mEfQwxohx4QXlPV96oQfQNFR94/3jp125vh+UW/r0CAG/ELUFQSJIcSFAQJarq+mZGiv46Jg7ag==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@whatwg-node/events': 0.1.1
@@ -27155,7 +27128,7 @@ packages:
   /zod-to-json-schema@3.21.4(zod@3.22.3):
     resolution: {integrity: sha512-fjUZh4nQ1s6HMccgIeE0VP4QG/YRGPmyjO9sAh890aQKPEk3nqbfUXhMFaC+Dr5KvYBm8BCyvfpZf2jY9aGSsw==}
     peerDependencies:
-      zod: ^3.21.4
+      zod: ^3.22.3
     dependencies:
       zod: 3.22.3
     dev: false
@@ -27167,7 +27140,6 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.179.3
     hasBin: true
     requiresBuild: true
     dependencies:

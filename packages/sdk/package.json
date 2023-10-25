@@ -202,7 +202,7 @@
     "@opentelemetry/sdk-trace-node": "^1.13.0",
     "@opentelemetry/semantic-conventions": "^1.13.0",
     "@prisma/generator-helper": "^3.9.2",
-    "@whatwg-node/fetch": "^0.9.4",
+    "@whatwg-node/fetch": "^0.9.13",
     "@wundergraph/orm": "workspace:*",
     "@wundergraph/protobuf": "workspace:^0.118.2",
     "@wundergraph/straightforward": "^4.2.5",
