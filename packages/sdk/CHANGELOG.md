@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.180.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.179.3...@wundergraph/sdk@0.180.0) (2023-10-25)
+
+### Features
+
+* add default values support for generated operations ([#1323](https://github.com/wundergraph/wundergraph/issues/1323)) ([49e2df1](https://github.com/wundergraph/wundergraph/commit/49e2df1dff7d5fcb4bb670c593c3e4d1fed7fdd2)) (@uroslates)
+
+### Bug Fixes
+
+* fixed issue where open api mutation would cause gateway timeout after redirect ([#1324](https://github.com/wundergraph/wundergraph/issues/1324)) ([ec37337](https://github.com/wundergraph/wundergraph/commit/ec37337cd8b21562ed1d0400d0d0c295da4bb943)) (@Pagebakers)
+
 ## [0.179.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.179.2...@wundergraph/sdk@0.179.3) (2023-10-18)
 
 ### Bug Fixes
