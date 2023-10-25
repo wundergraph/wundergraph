@@ -887,16 +887,24 @@ export const operationVariablesToJSONSchema = (
 			nonNullType = true;
 		}
 		const name = variable.variable.name.value;
-		schema.properties![name] = typeSchema(
-			schema,
-			schema,
-			graphQLSchema,
-			interpolateVariableDefinitionAsJSON,
-			type,
-			name,
-			nonNullType,
-			customJsonScalars
-		);
+		const defaultValue = variable.defaultValue;
+		const props = {
+			...typeSchema(
+				schema,
+				schema,
+				graphQLSchema,
+				interpolateVariableDefinitionAsJSON,
+				type,
+				name,
+				nonNullType,
+				customJsonScalars
+			),
+		};
+		const defaultValueProp = (defaultValue || ({} as any)).value;
+		if (defaultValueProp) {
+			props.default = defaultValueProp;
+		}
+		schema.properties![name] = props;
 		if (Object.keys(skipFields).length > 0) {
 			applySkipFields(skipFields, schema, schema, name);
 		}
