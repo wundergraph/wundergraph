@@ -26,7 +26,7 @@ export const loggedFetch = <F extends FetchFn>(logger: FastifyBaseLogger, fetchF
 				...init,
 			});
 			const text = await resp.text();
-			const duration = new Date().getDate() - before.getDate();
+			const duration = new Date().getTime() - before.getTime();
 			logger.debug(
 				{ headers: Object.fromEntries(resp.headers.entries()), status: resp.status, text, duration: `${duration}ms` },
 				'upstream response'
