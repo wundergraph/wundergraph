@@ -18581,23 +18581,23 @@ exports[`httpbin: httpbin_fields 1`] = `
 
 exports[`httpbin: httpbin_schema 1`] = `
 "type Query {
-  api_status(code: Int!): JSON
+  api_status(code: Int! = 200): JSON
   api_get: JSON
   api_xml: JSON
   api_ip: JSON
   api_userAgent: JSON
   api_headers: JSON
-  api_delay(seconds: Int!): JSON
-  api_cache(maxAge: Int!): JSON
+  api_delay(seconds: Int! = 2): JSON
+  api_cache(maxAge: Int! = 10): JSON
   api_uuid: JSON
   api_anything: JSON
   api_gzip: JSON
-  api_base64(value: String!): JSON
+  api_base64(value: String! = "aGVsbG8gd29ybGQNCg%3D%3D"): JSON
   api_deflate: JSON
   api_brotli: JSON
   api_responseHeaders: JSON
-  api_bytes(number: String!): JSON
-  api_redirectTo(url: String!): JSON
+  api_bytes(number: String! = "1024"): JSON
+  api_redirectTo(url: String! = "http://example.com"): JSON
   api_stream(number: Int!): JSON
 }
 
@@ -20566,7 +20566,7 @@ exports[`petstore: petstore_fields 1`] = `
 
 exports[`petstore: petstore_schema 1`] = `
 "type Query {
-  api_findPetsByStatus(status: api_findPetsByStatus_status): [api_Pet]
+  api_findPetsByStatus(status: api_findPetsByStatus_status = available): [api_Pet]
   api_findPetsByTags(tags: [String]): [api_Pet]
   api_getPetById(petId: Int!): api_Pet
   api_getInventory: JSON

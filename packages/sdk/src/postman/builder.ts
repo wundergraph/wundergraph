@@ -11,6 +11,7 @@ export interface JSONSchemaParameterPath {
 	path: string[];
 	required: boolean;
 	type: string;
+	value?: any;
 }
 
 const buildItem = (op: GraphQLOperation, operationURL: string, opName: string) => {
@@ -132,7 +133,7 @@ const mutationRequestJson = (url: string, paths: JSONSchemaParameterPath[]): str
 			key: path.path.join('.'),
 			disabled: !path.required,
 			description: `Type ${path.type}, ${path.required ? 'Required' : 'Optional'}`,
-			value: '',
+			value: path.value || '',
 			type: 'text',
 		});
 	}
@@ -155,7 +156,7 @@ const queryRequestJson = (url: string, paths: JSONSchemaParameterPath[]): string
 			{
 				key: path.path.join('.'),
 				disabled: !path.required,
-				value: '',
+				value: path.value || '',
 				description: `Type ${path.type}, ${path.required ? 'Required' : 'Optional'}`,
 			},
 		]);
@@ -164,7 +165,6 @@ const queryRequestJson = (url: string, paths: JSONSchemaParameterPath[]): string
 	return request.toJSON();
 };
 
-// TODO: Add "default" values
 // path syntax follows https://github.com/tidwall/sjson#path-syntax
 export function buildPath(
 	path: string[],
@@ -200,6 +200,7 @@ export function buildPath(
 		path,
 		required: false, // ignore it for now because this would make all variants required
 		type: typeof obj.type === 'string' ? obj.type : 'any',
+		value: obj.default,
 	});
 
 	paths.sort(function (a, b) {
