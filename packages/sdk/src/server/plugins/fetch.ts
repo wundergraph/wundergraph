@@ -15,15 +15,16 @@ type FetchFn = (input: RequestInfo | URL, init?: RequestInit) => Promise<Respons
  * @returns A wrapper to fetch that logs requests and responses
  */
 export const loggedFetch = <F extends FetchFn>(logger: FastifyBaseLogger, fetchFn: F): F => {
-	const fn = async (...args: [RequestInfo | URL, RequestInit?]): Promise<Response> => {
-		const input = args[0];
-		const init = args[1];
+	const fn = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
 		logger.debug({ input, init }, 'upstream request');
 		const before = new Date();
 		try {
 			// make sure we pass all arguments, since the fetch functions from mesh
 			// do use extra ones
-			const resp = await fetchFn(...args);
+			const resp = await fetchFn(input, {
+				redirect: 'manual',
+				...init,
+			});
 			const text = await resp.text();
 			const duration = new Date().getDate() - before.getDate();
 			logger.debug(
