@@ -921,6 +921,12 @@ func shouldLogWithHeader(header http.Header) bool {
 // If reading or copying any of the data fails, it panics. DON'T USE THIS IN PRODUCTION
 func logRequestResponseHandler(output io.Writer, handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Do not intercept streaming responses
+		query := r.URL.Query()
+		if query.Has(apihandler.WgLiveParam) || query.Has(apihandler.WgSSEParam) || query.Has(apihandler.WgJSONPatchParam) {
+			handler.ServeHTTP(w, r)
+			return
+		}
 		requestBody, err := io.ReadAll(r.Body)
 		if err != nil {
 			panic(err)
