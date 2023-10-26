@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.180.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.180.0...@wundergraph/sdk@0.180.1) (2023-10-26)
+
+### Bug Fixes
+
+* deprecated openapi v1 introspection ([#1326](https://github.com/wundergraph/wundergraph/issues/1326)) ([8a4c5dc](https://github.com/wundergraph/wundergraph/commit/8a4c5dcc99f26b58aa294ba0ec6d41f0e55ff986)) (@Pagebakers)
+* update to wunderctl 0.176.1 ([#1327](https://github.com/wundergraph/wundergraph/issues/1327)) ([5a24fb5](https://github.com/wundergraph/wundergraph/commit/5a24fb5c31b6113bd88303aae298f7e3e1422310)) (@Pagebakers)
+
 ## [0.180.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.179.3...@wundergraph/sdk@0.180.0) (2023-10-25)
 
 ### Features

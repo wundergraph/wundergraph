@@ -299,7 +299,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.180.0
+        specifier: workspace:^0.180.1
         version: link:../sdk
       typescript:
         specifier: ^5.1.6
@@ -635,7 +635,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.180.0
+        specifier: workspace:^0.180.1
         version: link:../sdk
       typescript:
         specifier: ^5.1.6
@@ -4846,7 +4846,7 @@ packages:
     resolution: {integrity: sha512-uN3kLzLN+RdQP4A8qMAWRxPCRACReyG381O+FIa7l3r5pikLH01hB/3rq+8grsypsPzDNM8zJzejckccqLa5tQ==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
-      '@graphql-mesh/store': 0.94.5
+      '@graphql-mesh/store': ^0.95.6
       '@graphql-tools/utils': ^9.2.1 || ^10.0.0
       graphql: '*'
       tslib: ^2.4.0
@@ -4864,7 +4864,7 @@ packages:
     resolution: {integrity: sha512-uN3kLzLN+RdQP4A8qMAWRxPCRACReyG381O+FIa7l3r5pikLH01hB/3rq+8grsypsPzDNM8zJzejckccqLa5tQ==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
-      '@graphql-mesh/store': 0.94.5
+      '@graphql-mesh/store': ^0.95.6
       '@graphql-tools/utils': ^9.2.1 || ^10.0.0
       graphql: '*'
       tslib: ^2.4.0
@@ -27128,7 +27128,7 @@ packages:
   /zod-to-json-schema@3.21.4(zod@3.22.3):
     resolution: {integrity: sha512-fjUZh4nQ1s6HMccgIeE0VP4QG/YRGPmyjO9sAh890aQKPEk3nqbfUXhMFaC+Dr5KvYBm8BCyvfpZf2jY9aGSsw==}
     peerDependencies:
-      zod: ^3.22.3
+      zod: ^3.21.4
     dependencies:
       zod: 3.22.3
     dev: false
@@ -27140,6 +27140,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
+    version: 0.180.1
     hasBin: true
     requiresBuild: true
     dependencies:

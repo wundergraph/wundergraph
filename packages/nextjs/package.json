@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/nextjs",
-  "version": "0.14.9",
+  "version": "0.14.10",
   "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
