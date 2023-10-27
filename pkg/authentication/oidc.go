@@ -70,13 +70,14 @@ func NewOpenIDConnectCookieHandler(config OpenIDConnectConfig, hooks Hooks, log 
 	}
 
 	handler.auth2 = NewOAuth2AuthenticationHandler(OAuth2AuthenticationConfig{
-		Provider:     config.Provider,
-		ClientID:     config.ClientID,
-		ClientSecret: config.ClientSecret,
-		Endpoint:     provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
-		Hooks:        hooks,
-		Log:          log,
+		Provider:        config.Provider,
+		ClientID:        config.ClientID,
+		ClientSecret:    config.ClientSecret,
+		Endpoint:        provider.Endpoint(),
+		Scopes:          []string{oidc.ScopeOpenID, "profile", "email"},
+		QueryParameters: config.QueryParameters,
+		Hooks:           hooks,
+		Log:             log,
 	}, handler)
 
 	return handler, nil
