@@ -16,8 +16,8 @@
   "license": "ISC",
   "dependencies": {
     "@apollo/client": "^3.6.9",
-    "@wundergraph/nextjs": "^0.14.5",
-    "@wundergraph/sdk": "^0.179.0",
+    "@wundergraph/nextjs": "^0.14.10",
+    "@wundergraph/sdk": "^0.180.1",
     "graphql": "^16.5.0",
     "next": "^13.1.1",
     "react": "^18.0.0",
