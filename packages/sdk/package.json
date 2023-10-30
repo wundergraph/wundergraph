@@ -185,15 +185,15 @@
     "@fastify/formbody": "^7.3.0",
     "@fastify/multipart": "^7.7.3",
     "@graphql-mesh/cross-helpers": "^0.4.1",
-    "@graphql-mesh/store": "0.95.6",
-    "@graphql-mesh/types": "0.95.6",
-    "@graphql-mesh/utils": "0.95.6",
+    "@graphql-mesh/store": "0.96.0",
+    "@graphql-mesh/types": "0.96.0",
+    "@graphql-mesh/utils": "0.96.0",
     "@graphql-tools/merge": "^9.0.0",
     "@graphql-tools/schema": "^8.5.1",
     "@graphql-tools/utils": "^9.2.1",
-    "@omnigraph/json-schema": "0.95.7",
-    "@omnigraph/openapi": "0.95.7",
-    "@omnigraph/soap": "0.95.6",
+    "@omnigraph/json-schema": "0.96.0",
+    "@omnigraph/openapi": "0.96.0",
+    "@omnigraph/soap": "0.96.0",
     "@opentelemetry/api": "^1.4.1",
     "@opentelemetry/core": "^1.13.0",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.39.1",
@@ -225,7 +225,7 @@
     "ix": "^5.0.0",
     "js-yaml": "^4.1.0",
     "json-bigint-patch": "^0.0.8",
-    "json-machete": "0.95.6",
+    "json-machete": "0.96.0",
     "json-schema": "^0.4.0",
     "json-schema-to-typescript": "^11.0.3",
     "json-stream-stringify": "^3.1.0",
@@ -262,9 +262,8 @@
   },
   "sideEffects": false,
   "patchedDependencies": {
-    "graphql-scalars@1.22.2": "patches/graphql-scalars@1.22.2.patch",
-    "@graphql-mesh/string-interpolation@0.5.2": "patches/@graphql-mesh__string-interpolation@0.5.2.patch",
-    "@omnigraph/openapi@0.95.7": "patches/@omnigraph__openapi@0.95.7.patch",
-    "json-machete@0.94.5": "patches/json-machete@0.94.5.patch"
+    "json-machete@0.96.0": "patches/json-machete@0.96.0.patch",
+    "graphql-scalars@1.22.4": "patches/graphql-scalars@1.22.4.patch",
+    "@omnigraph/json-schema@0.96.0": "patches/@omnigraph__json-schema@0.96.0.patch"
   }
 }
