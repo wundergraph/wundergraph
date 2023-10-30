@@ -287,6 +287,8 @@ export const createServer = async ({
 		},
 	});
 
+	const globalFetch = serverConfig.unsafe_globalFetch || fetch;
+
 	const globalContext = serverConfig.context?.global?.create ? await serverConfig.context.global.create() : undefined;
 
 	/**
@@ -477,6 +479,7 @@ export const createServer = async ({
 						mountPath,
 						upstreamURL,
 						schema,
+						globalFetch,
 					});
 					break;
 				case 'soap':
@@ -484,6 +487,7 @@ export const createServer = async ({
 						serverName,
 						mountPath,
 						schema,
+						globalFetch,
 					});
 					break;
 			}

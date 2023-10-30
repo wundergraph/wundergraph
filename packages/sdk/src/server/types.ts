@@ -1,4 +1,4 @@
-import type { Headers } from '@whatwg-node/fetch';
+import type { fetch } from '@whatwg-node/fetch';
 import type { GraphQLServerConfig } from './plugins/graphql';
 import type { ConfigurationVariable, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import type { WebhooksConfig } from '../webhooks/types';
@@ -308,6 +308,11 @@ export interface WunderGraphServerConfig<
 	 * Context creation/release
 	 */
 	context?: WunderGraphServerContext<TRequestContext, TGlobalContext>;
+	/**
+	 * Fetch implementation to use instead of the default `@whatwg-node/fetch`.
+	 * @warning This is used for testing purposes only and might be removed in the future.
+	 */
+	unsafe_globalFetch?: typeof fetch;
 }
 
 // internal representation of the fully resolved server config
@@ -322,6 +327,7 @@ export interface WunderGraphHooksAndServerConfig<
 	graphqlServers?: GraphQLServerConfig[];
 	options?: ServerOptions;
 	integrations?: InternalIntergration[];
+	unsafe_globalFetch?: typeof fetch;
 }
 
 export interface OnConnectionInitHookRequestBody extends FastifyRequestBody {
