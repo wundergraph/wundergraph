@@ -86,15 +86,12 @@
   "pnpm": {
     "overrides": {
       "@tanstack/query-core": "^4.29.1",
-      "zod": "^3.22.3",
-      "json-machete": "0.94.5",
-      "@graphql-mesh/store": "0.94.5"
+      "zod": "^3.22.3"
     },
     "patchedDependencies": {
-      "graphql-scalars@1.22.2": "patches/graphql-scalars@1.22.2.patch",
-      "@graphql-mesh/string-interpolation@0.5.2": "patches/@graphql-mesh__string-interpolation@0.5.2.patch",
-      "@omnigraph/openapi@0.95.7": "patches/@omnigraph__openapi@0.95.7.patch",
-      "json-machete@0.94.5": "patches/json-machete@0.94.5.patch"
+      "json-machete@0.96.0": "patches/json-machete@0.96.0.patch",
+      "graphql-scalars@1.22.4": "patches/graphql-scalars@1.22.4.patch",
+      "@omnigraph/json-schema@0.96.0": "patches/@omnigraph__json-schema@0.96.0.patch"
     }
   }
 }

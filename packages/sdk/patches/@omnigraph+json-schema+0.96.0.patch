@@ -1,0 +1,26 @@
+diff --git a/node_modules/@omnigraph/json-schema/cjs/addRootFieldResolver.js b/node_modules/@omnigraph/json-schema/cjs/addRootFieldResolver.js
+index f25b76e..8c6931f 100644
+--- a/node_modules/@omnigraph/json-schema/cjs/addRootFieldResolver.js
++++ b/node_modules/@omnigraph/json-schema/cjs/addRootFieldResolver.js
+@@ -226,7 +226,7 @@ function addHTTPRootFieldResolver(schema, field, logger, globalFetch, { path, op
+                 operationLogger.debug(` => Return type is not a JSON so returning ${responseText}`);
+                 return responseText;
+             }
+-            else if (response.status === 204) {
++            else if (response.status === 204 || (response.status === 200 && responseText === '')) {
+                 responseJson = {};
+             }
+             else if (response.status.toString().startsWith('2')) {
+diff --git a/node_modules/@omnigraph/json-schema/esm/addRootFieldResolver.js b/node_modules/@omnigraph/json-schema/esm/addRootFieldResolver.js
+index 296f3bb..e8baafe 100644
+--- a/node_modules/@omnigraph/json-schema/esm/addRootFieldResolver.js
++++ b/node_modules/@omnigraph/json-schema/esm/addRootFieldResolver.js
+@@ -222,7 +222,7 @@ export function addHTTPRootFieldResolver(schema, field, logger, globalFetch, { p
+                 operationLogger.debug(` => Return type is not a JSON so returning ${responseText}`);
+                 return responseText;
+             }
+-            else if (response.status === 204) {
++            else if (response.status === 204 || (response.status === 200 && responseText === '')) {
+                 responseJson = {};
+             }
+             else if (response.status.toString().startsWith('2')) {
