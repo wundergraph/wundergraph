@@ -6,22 +6,6 @@ export interface GraphQLErrorLocation {
 	column: number;
 }
 
-interface GraphQLErrorExtensionHTTP {
-	/**
-	 * status contains the response status code
-	 */
-	status?: number;
-	/**
-	 * statusText contains the text associated with the status code.
-	 * e.g. For a 404 it will be "Not Found"
-	 * */
-	statusText?: string;
-	/**
-	 * headers contains the response headers sent by the OpenAPI upstream
-	 */
-	headers?: Record<string, string>;
-}
-
 interface GraphQLErrorExtensionRequest {
 	/**
 	 * OpenAPI request URL sent by the gateway
@@ -39,13 +23,22 @@ interface GraphQLErrorExtensionRequest {
  */
 interface GraphQLErrorExtensions {
 	/**
-	 * http information, only included in OpenAPI responses
-	 */
-	http?: GraphQLErrorExtensionHTTP;
-	/**
 	 * request sent by the gateway to the OpenAPI upstream
 	 */
 	request?: GraphQLErrorExtensionRequest;
+	/**
+	 * headers sent by the OpenAPI upstream. All header names are normalized to lowercase.
+	 */
+	responseHeaders?: Record<string, string>;
+	/**
+	 * response status code sent by the OpenAPI upstream
+	 */
+	responseStatus?: number;
+	/**
+	 * responseStatusText contains the text associated with the status code.
+	 * e.g. For a 404 it will be "Not Found"
+	 */
+	responseStatusText?: string;
 	/**
 	 * response text sent by the OpenAPI upstream
 	 */
@@ -186,8 +179,8 @@ const getHttpResponseErrorFromGraphQLError = (error: GraphQLError): HttpResponse
 	const extensions = (error as GraphQLErrorWithExtensions)?.extensions;
 	if (extensions) {
 		return {
-			statusCode: extensions.http?.status,
-			headers: extensions.http?.headers,
+			statusCode: extensions.responseStatus,
+			headers: extensions.responseHeaders,
 			text: extensions.responseText,
 		};
 	}
