@@ -21,10 +21,11 @@ export interface OpenApiServerConfig {
 	schema: string;
 	mountPath: string;
 	upstreamURL?: string;
+	globalFetch?: typeof fetch;
 }
 
 const FastifyOASGraphQLPlugin: FastifyPluginAsync<OpenApiServerConfig> = async (fastify, config) => {
-	const schema = executableSchema(config.schema, fastify.log, config.upstreamURL);
+	const schema = executableSchema(config.schema, fastify.log, config.upstreamURL, config.globalFetch);
 
 	fastify.route({
 		method: ['GET', 'POST'],
@@ -60,7 +61,8 @@ const FastifyOASGraphQLPlugin: FastifyPluginAsync<OpenApiServerConfig> = async (
 const executableSchema = (
 	schemaStr: string,
 	logger: FastifyBaseLogger,
-	upstreamURL: string | undefined
+	upstreamURL: string | undefined,
+	globalFetch: typeof fetch = fetch
 ): GraphQLSchema => {
 	const schema = buildSchema(schemaStr, {
 		assumeValidSDL: true,
@@ -74,7 +76,7 @@ const executableSchema = (
 		schema,
 		logger: logWrapper,
 		pubsub,
-		globalFetch: loggedFetch(logger.child({ type: 'OpenAPI' }), fetch),
+		globalFetch: loggedFetch(logger.child({ type: 'OpenAPI' }), globalFetch),
 	};
 	if (upstreamURL !== '') {
 		opts['endpoint'] = upstreamURL;
