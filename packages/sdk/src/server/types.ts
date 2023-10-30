@@ -312,7 +312,7 @@ export interface WunderGraphServerConfig<
 	 * Fetch implementation to use instead of the default `@whatwg-node/fetch`.
 	 * @warning This is used for testing purposes only and might be removed in the future.
 	 */
-	unsafe_globalFetch?: typeof fetch;
+	__unstable_fetch?: typeof fetch;
 }
 
 // internal representation of the fully resolved server config
@@ -327,7 +327,7 @@ export interface WunderGraphHooksAndServerConfig<
 	graphqlServers?: GraphQLServerConfig[];
 	options?: ServerOptions;
 	integrations?: InternalIntergration[];
-	unsafe_globalFetch?: typeof fetch;
+	__unstable_fetch?: typeof fetch;
 }
 
 export interface OnConnectionInitHookRequestBody extends FastifyRequestBody {

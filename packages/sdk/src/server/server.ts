@@ -287,7 +287,7 @@ export const createServer = async ({
 		},
 	});
 
-	const globalFetch = serverConfig.unsafe_globalFetch || fetch;
+	const globalFetch = serverConfig.__unstable_fetch || fetch;
 
 	const globalContext = serverConfig.context?.global?.create ? await serverConfig.context.global.create() : undefined;
 
