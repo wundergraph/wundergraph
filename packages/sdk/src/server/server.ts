@@ -1,5 +1,5 @@
 import closeWithGrace from 'close-with-grace';
-import { Headers } from '@whatwg-node/fetch';
+import { Headers, fetch } from '@whatwg-node/fetch';
 import process from 'node:process';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import Fastify, { FastifyInstance } from 'fastify';
@@ -287,6 +287,8 @@ export const createServer = async ({
 		},
 	});
 
+	const globalFetch = serverConfig.__unstable_fetch || fetch;
+
 	const globalContext = serverConfig.context?.global?.create ? await serverConfig.context.global.create() : undefined;
 
 	/**
@@ -420,6 +422,7 @@ export const createServer = async ({
 					extraHeaders: headers,
 					tracer: fastify.tracer,
 					traceContext: req.telemetry?.context,
+					customFetch: globalFetch,
 				}),
 				context: await createContext(globalContext),
 			};
@@ -477,6 +480,7 @@ export const createServer = async ({
 						mountPath,
 						upstreamURL,
 						schema,
+						globalFetch,
 					});
 					break;
 				case 'soap':
@@ -484,6 +488,7 @@ export const createServer = async ({
 						serverName,
 						mountPath,
 						schema,
+						globalFetch,
 					});
 					break;
 			}
