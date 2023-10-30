@@ -11,32 +11,34 @@ export interface SoapServerConfig {
 	serverName: string;
 	schema: string;
 	mountPath: string;
+	globalFetch: typeof fetch;
 }
 
 // fetchWithHeaders - wraps fetch function to pass headers from context to fetch options
-const fetchWithHeaders = (url: string, options?: RequestInit, context?: any, info?: GraphQLResolveInfo) => {
-	/*
-	 * temporary workaround to pass headers to fetch
-	 * current drawback is that it will pass all headers from the wundernode request to the wundergraph server
-	 * */
+const fetchWithHeaders =
+	(fetchFn: MeshFetch) => (url: string, options?: RequestInit, context?: any, info?: GraphQLResolveInfo) => {
+		/*
+		 * temporary workaround to pass headers to fetch
+		 * current drawback is that it will pass all headers from the wundernode request to the wundergraph server
+		 * */
 
-	const headers = {
-		...context?.headers,
-		...options?.headers,
+		const headers = {
+			...context?.headers,
+			...options?.headers,
+		};
+
+		// workaround to deal with https://github.com/node-fetch/node-fetch/discussions/1678
+		delete headers.host;
+		delete headers.referer;
+
+		const opts = {
+			...options,
+			headers,
+			agent: new Agent({ family: 4 }),
+		};
+
+		return fetchFn(url, opts, context, info);
 	};
-
-	// workaround to deal with https://github.com/node-fetch/node-fetch/discussions/1678
-	delete headers.host;
-	delete headers.referer;
-
-	const opts = {
-		...options,
-		headers,
-		agent: new Agent({ family: 4 }),
-	};
-
-	return (fetch as MeshFetch)(url, opts, context, info);
-};
 
 const FastifySoapGraphQLPlugin: FastifyPluginAsync<SoapServerConfig> = async (fastify, config) => {
 	const schema = buildSchema(config.schema, {
@@ -45,9 +47,9 @@ const FastifySoapGraphQLPlugin: FastifyPluginAsync<SoapServerConfig> = async (fa
 	});
 
 	const fetchLogger = fastify.log.child({ type: 'SOAP' });
-	const fetchFn = fetchWithHeaders as (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>;
+	const fetchFn = fetchWithHeaders(config.globalFetch);
 	// prepare queries executor from schema with soap directives
-	const executor = createExecutorFromSchemaAST(schema, loggedFetch(fetchLogger, fetchFn));
+	const executor = createExecutorFromSchemaAST(schema, loggedFetch(fetchLogger, fetchFn as typeof fetch));
 
 	fastify.route({
 		method: ['GET', 'POST'],
