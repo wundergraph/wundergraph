@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.22](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.5.21...@wundergraph/solid-query@0.5.22) (2023-10-30)
+
+**Note:** Version bump only for package @wundergraph/solid-query
+
 ## [0.5.21](https://github.com/wundergraph/wundergraph/compare/@wundergraph/solid-query@0.5.20...@wundergraph/solid-query@0.5.21) (2023-10-26)
 
 **Note:** Version bump only for package @wundergraph/solid-query

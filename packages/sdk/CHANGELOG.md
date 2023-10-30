@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.181.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.180.1...@wundergraph/sdk@0.181.0) (2023-10-30)
+
+### Features
+
+* upgrade [@graph-mesh](https://github.com/graph-mesh) and [@omnigraph](https://github.com/omnigraph) dependencies, update patches too ([#1331](https://github.com/wundergraph/wundergraph/issues/1331)) ([ab2770c](https://github.com/wundergraph/wundergraph/commit/ab2770c8d94122ae11d9db41ffa1d5a2b42f9051)) (@fiam)
+
+### Bug Fixes
+
+* add globalfetch configuration option to server ([#1330](https://github.com/wundergraph/wundergraph/issues/1330)) ([3053f02](https://github.com/wundergraph/wundergraph/commit/3053f02f273efb4bde761591e65f2946e8581de5)) (@Pagebakers)
+* update wunderctl to 0.176.2 ([#1332](https://github.com/wundergraph/wundergraph/issues/1332)) ([b338e99](https://github.com/wundergraph/wundergraph/commit/b338e994c061afa1f1f0574012629b7a2625aabc)) (@Pagebakers)
+
 ## [0.180.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.180.0...@wundergraph/sdk@0.180.1) (2023-10-26)
 
 ### Bug Fixes
