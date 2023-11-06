@@ -2224,6 +2224,7 @@ func validateInputVariables(ctx context.Context, log *zap.Logger, variables []by
 		return false
 	}
 	if !valid {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		if _, err := io.Copy(w, &buf); err != nil {
 			log.Error("copying validation to response", zap.Error(err))
