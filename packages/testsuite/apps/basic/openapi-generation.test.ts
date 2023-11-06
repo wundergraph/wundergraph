@@ -24,10 +24,10 @@ describe('OpenAPI spec generation', () => {
 		const data = await readFile(filePath, { encoding: 'utf-8' });
 		const spec = JSON.parse(data);
 
-		const countryByFilter = spec.paths?.['/functions/simple'];
-		expect(countryByFilter).toBeDefined();
+		const simple = spec.paths?.['/functions/simple'];
+		expect(simple).toBeDefined();
 
-		const response = countryByFilter?.['get']?.['responses']?.['200'];
+		const response = simple?.['get']?.['responses']?.['200'];
 		expect(response).toBeDefined();
 
 		const responseSchema = response['content']?.['application/json']?.['schema'];
