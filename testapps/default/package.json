@@ -20,7 +20,8 @@
     "build": "pnpm generate && pnpm check",
     "start": "wunderctl start",
     "generate": "wunderctl generate",
-    "check": "tsc"
+    "check": "tsc",
+    "test": "vitest"
   },
   "dependencies": {
     "@octokit/webhooks-types": "^6.10.0",
@@ -34,6 +35,9 @@
     "typescript": "^5.1.6",
     "zod": "^3.22.3",
     "zod-to-json-schema": "^3.21.4"
+  },
+  "devDependencies": {
+    "vitest": "^0.34.6"
   },
   "sideEffects": false
 }
