@@ -18,7 +18,7 @@
     "build:sdk": "pnpm -r run --filter='./packages/sdk' build",
     "watch:libs": "pnpm -r --parallel run --filter='./packages/*' --filter='!./docs-website' build --watch",
     "watch:sdk": "pnpm -r run --filter='./packages/sdk' watch",
-    "test": "pnpm run -r --parallel --filter='!./packages/testsuite' test",
+    "test": "pnpm run -r --parallel --filter='!./packages/testsuite' --filter='!./testapps/*' test",
     "test:suite:ci": "pnpm run -r --filter='./packages/testsuite' test:ci",
     "format": "prettier --write --loglevel warn '**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}'",
     "format:examples": "prettier --write --loglevel warn 'examples/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}'",
