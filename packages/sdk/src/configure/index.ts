@@ -1604,6 +1604,7 @@ const updateTypeScriptOperationsResponseSchemas = async (wgDirAbs: string, opera
 			op.ResponseSchema = {
 				type: 'object',
 				additionalProperties: false,
+				properties: {},
 			};
 		}
 	}
