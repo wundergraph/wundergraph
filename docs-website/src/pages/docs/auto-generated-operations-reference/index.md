@@ -31,7 +31,7 @@ import { configureWunderGraphGeneration } from '@wundergraph/sdk';
 
 export default configureWunderGraphGeneration({
   codeGenerators: [], // abbreviated for brevity
-  operationsGeneration: (config) => {
+  operationsGenerator: (config) => {
     // include all root fields from the "weather" & "federated" API Namespace
     config.includeNamespaces('weather', 'federated');
     // we could also exclude the root field "me" from the "federated" API Namespace
