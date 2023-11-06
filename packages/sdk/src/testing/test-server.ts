@@ -15,6 +15,12 @@ export interface ServerStartOptions {
 	 * @default None
 	 */
 	env?: Record<string, string>;
+	/**
+	 * Timeout in milliseconds to wait for the server to start.
+	 *
+	 * @default 30000
+	 */
+	timeout?: number;
 }
 export interface ServerOptions<ClientType extends Client = Client> {
 	/**
@@ -145,7 +151,11 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 	 * Start the server. If the server is already running,
 	 * it does nothing.
 	 */
-	async start(opts?: ServerStartOptions): Promise<void> {
+	async start(opts: ServerStartOptions = {}): Promise<void> {
+		const { timeout = 30000 } = opts;
+
+		const retryDelay = 100;
+
 		if (this.subprocess) {
 			// Already running
 			return;
@@ -205,7 +215,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			}
 		};
 		try {
-			await retry(checkHealth, { retries: 100, delay: 100 });
+			await retry(checkHealth, { retries: Math.ceil(timeout / retryDelay), delay: retryDelay });
 		} catch (e: any) {
 			await this.stopSubprocess(subprocess);
 			throw new Error(`could not start WunderGraph server: ${e}`);

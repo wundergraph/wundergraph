@@ -12,6 +12,12 @@ export interface TestServersStartOptions {
 	 * Additional environment variables to set.
 	 */
 	env?: Record<string, string>;
+	/**
+	 * Timeout in milliseconds to wait for servers to start.
+	 *
+	 * @default 30000
+	 */
+	timeout?: number;
 }
 
 export class WunderGraphTestServers<ClientType extends Client = Client> {
@@ -37,6 +43,7 @@ export class WunderGraphTestServers<ClientType extends Client = Client> {
 
 		await this.testServer.start({
 			env,
+			timeout: options?.timeout,
 		});
 
 		return () => this.stop();
