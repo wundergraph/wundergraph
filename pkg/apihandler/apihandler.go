@@ -2224,6 +2224,7 @@ func validateInputVariables(ctx context.Context, log *zap.Logger, variables []by
 		return false
 	}
 	if !valid {
+		// verbose errors (validator.disableVerboseErrors) is not disabled so we expect json here
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		if _, err := io.Copy(w, &buf); err != nil {
