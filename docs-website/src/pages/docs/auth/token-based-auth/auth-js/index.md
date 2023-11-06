@@ -14,6 +14,29 @@ Before starting you need to have a Next.js application with NextAuth.js installe
 Make sure you have enabled the `jwt` session strategy. You can find more information about the `jwt` strategy in the [NextAuth.js documentation](https://next-auth.js.org/configuration/options#session).
 {% /callout %}
 
+## Create userInfo endpoint
+
+First, we need to create an endpoint that returns the user information. This endpoint will be called by WunderGraph to fetch the user information.
+
+Create `pages/api/auth/userInfo.ts` in your Next.js application.
+
+```ts {% filename="pages/api/auth/session.ts" %}
+import { getToken } from 'next-auth/jwt';
+
+export default async (req, res) => {
+  // If you don't have NEXTAUTH_SECRET set, you will have to pass your secret as `secret` to `getToken`
+  const token = await getToken({ req });
+  if (token) {
+    res.status(200);
+    res.json({ name: token.name, email: token.email, picture: token.picture });
+  } else {
+    // Not Signed in
+    res.status(401);
+  }
+  res.end();
+};
+```
+
 ## Configure WunderGraph
 
 ### wundergraph.config.ts
@@ -26,7 +49,7 @@ authentication: {
     tokenBased: {
         providers: [
             {
-                userInfoEndpoint: 'http://localhost:3000/api/auth/session',
+                userInfoEndpoint: 'http://localhost:3000/api/auth/userInfo',
             },
         ],
     },
