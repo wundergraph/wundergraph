@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.181.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.181.0...@wundergraph/sdk@0.181.1) (2023-11-06)
+
+### Bug Fixes
+
+* make test server start timeout configurable ([#1335](https://github.com/wundergraph/wundergraph/issues/1335)) ([2df1109](https://github.com/wundergraph/wundergraph/commit/2df1109f01887cc27f40ae0635f2ec64f6886ade)) (@Pagebakers)
+* update to wunderctl 0.176.3 ([#1340](https://github.com/wundergraph/wundergraph/issues/1340)) ([42c4046](https://github.com/wundergraph/wundergraph/commit/42c4046056b4b5e886a62f948585e73709723192)) (@Pagebakers)
+
 ## [0.181.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.180.1...@wundergraph/sdk@0.181.0) (2023-10-30)
 
 ### Features
