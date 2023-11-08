@@ -1,11 +1,12 @@
+import crypto from 'crypto';
 import path from 'path';
 
 import execa from 'execa';
 import Handlebars from 'handlebars';
-import { JSONSchema7 as JSONSchema } from 'json-schema';
+import { JSONSchema7 as JSONSchema, JSONSchema7Definition } from 'json-schema';
 import { capitalize } from 'lodash';
 
-import { OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
+import { OperationType } from '@wundergraph/protobuf';
 import { CodeGenerationConfig, GraphQLOperation, Template, TemplateOutputFile } from '@wundergraph/sdk';
 import { hasInput } from '@wundergraph/sdk/internal/codegen';
 import {
@@ -247,7 +248,7 @@ class rustEncoder {
 	}
 
 	private encodeFieldName(name: string) {
-		const fieldName = toSnakeCase(name);
+		const fieldName = toSnakeCase(name.replace(/@/g, '_'));
 		// From https://doc.rust-lang.org/reference/keywords.html
 		const reserved = [
 			// strict keywords
@@ -316,7 +317,21 @@ class rustEncoder {
 		return fieldName;
 	}
 
+	private isEncodableTypename(name: string) {
+		return (
+			name === 'ResponseError<"ResponseError">' || !(name.includes('<') || name.includes('{') || name.includes('|'))
+		);
+	}
+
 	private encodeTypeName(name: string) {
+		if (name === 'ResponseError<"ResponseError">') {
+			return 'ResponseError';
+		}
+		if (!this.isEncodableTypename(name)) {
+			const sum = crypto.createHash('sha1');
+			sum.update(name);
+			return `Anonymous${sum.digest('hex')}`;
+		}
 		return toCamelCase(name);
 	}
 
@@ -333,6 +348,67 @@ class rustEncoder {
 		this.output += typeDefinition;
 	}
 
+	private encodeObject(typeSchema: JSONSchema, optional: boolean, typeName?: string): string {
+		if (!typeName) {
+			throw new Error(`no type name for ${JSON.stringify(typeSchema)}`);
+		}
+		const structTypeName = this.encodeTypeName(typeName);
+		let def = typeAnnotations;
+		def += `pub struct ${structTypeName} {\n`;
+		const typeProperties = typeSchema.properties ?? {};
+		const typeRequiredProperties = typeSchema.required ?? [];
+		for (const propName of Object.keys(typeProperties)) {
+			const propSchema = typeProperties[propName];
+			if (typeof propSchema === 'boolean') {
+				throw new Error(`can't encode ${propName} in ${typeName}`);
+			}
+			// Provide a fallback typeName for anonymous embedded objects
+			const propTypeName = `${typeName}_${propName}`;
+			let propType = this.encodeType(propSchema, propTypeName);
+			if (!propType) {
+				throw new Error(`property ${propName} with schema ${JSON.stringify(propSchema)} returned an empty type`);
+			}
+			const isRequiredInType = typeRequiredProperties.includes(propName);
+			if (!isRequiredInType) {
+				propType = `Option<${propType}>`;
+			}
+			if (!isRequiredInType || optional) {
+				def += `\t#[serde(skip_serializing_if = "Option::is_none")]\n`;
+			}
+			def += `\t#[serde(rename(serialize = "${propName}", deserialize = "${propName}"))]\n`;
+			def += `\tpub ${this.encodeFieldName(propName)}: ${propType},\n`;
+		}
+		def += `}\n\n`;
+		this.outputTypeDefinition(structTypeName, def);
+		return structTypeName;
+	}
+
+	private encodeAnyOf(typeSchema: JSONSchema, optional: boolean, typeName?: string): string {
+		const anyOf = typeSchema.anyOf ?? [];
+		if (!typeName) {
+			throw new Error(`no type name for ${JSON.stringify(typeSchema)}`);
+		}
+		const enumTypeName = this.encodeTypeName(typeName);
+		let def = typeAnnotations;
+		def += `#[serde(untagged)]\n`;
+		def += `pub enum ${enumTypeName} {\n`;
+		for (let ii = 0; ii < anyOf.length; ii++) {
+			const variantTypeName = `${typeName}_${ii}`;
+			const variantSchema = anyOf[ii];
+			if (typeof variantSchema === 'boolean') {
+				throw new Error(`can't encode variant ${ii} in ${typeName}`);
+			}
+			const variantType = this.encodeType(variantSchema, variantTypeName);
+			if (!variantType) {
+				throw new Error(`variant ${ii} with schema ${JSON.stringify(variantSchema)} returned an empty type`);
+			}
+			def += `\t${toCamelCase(variantType)}(${variantType}),\n`;
+		}
+		def += `}\n\n`;
+		this.outputTypeDefinition(enumTypeName, def);
+		return enumTypeName;
+	}
+
 	private encodeType(typeSchema: JSONSchema, typeName?: string): string {
 		if (typeSchema.$ref) {
 			if (!typeSchema.$ref.startsWith('#/')) {
@@ -347,9 +423,14 @@ class rustEncoder {
 				}
 				current = next;
 			}
-			return this.encodeType(current as JSONSchema, refComponents[refComponents.length - 1]);
+			let refTypeName = refComponents[refComponents.length - 1];
+			if (refTypeName.includes('{')) {
+				refTypeName = typeName ?? refTypeName;
+			}
+			return this.encodeType(current as JSONSchema, refTypeName);
 		}
 		let type = typeSchema.type;
+		let anyOf = typeSchema.anyOf;
 		let optional = false;
 		if (Array.isArray(type)) {
 			if (type.includes('null')) {
@@ -357,12 +438,14 @@ class rustEncoder {
 				type = type.filter((x) => x !== 'null');
 			}
 			if (type.length > 1) {
-				throw new Error(`can't encode type ${type}`);
+				anyOf = type as unknown as JSONSchema7Definition[];
+				//				throw new Error(`can't encode type ${type}`);
+			} else {
+				type = type[0];
 			}
-			type = type[0];
-		} else if (!type) {
+		} else if (!type && (anyOf?.length ?? 0) == 0) {
 			if (typeof typeSchema !== 'object' || Object.keys(typeSchema).length !== 0) {
-				throw new Error(`invalid type schema ${typeSchema}`);
+				throw new Error(`invalid type schema ${JSON.stringify(typeSchema)}`);
 			}
 		}
 		const ifOptional = (typeName: string) => {
@@ -371,6 +454,10 @@ class rustEncoder {
 			}
 			return typeName;
 		};
+		if ((anyOf?.length ?? 0) > 0) {
+			const enumTypeName = this.encodeAnyOf(typeSchema, optional, typeName);
+			return ifOptional(enumTypeName);
+		}
 		switch (type) {
 			case 'boolean':
 				return ifOptional('bool');
@@ -391,37 +478,7 @@ class rustEncoder {
 				const itemType = this.encodeType(itemSchema, `${typeName}_item`);
 				return ifOptional(`Vec<${itemType}>`);
 			case 'object':
-				if (!typeName) {
-					throw new Error(`no type name for ${JSON.stringify(typeSchema)}`);
-				}
-				const structTypeName = this.encodeTypeName(typeName);
-				let def = typeAnnotations;
-				def += `pub struct ${structTypeName} {\n`;
-				const typeProperties = typeSchema.properties ?? {};
-				const typeRequiredProperties = typeSchema.required ?? [];
-				for (const propName of Object.keys(typeProperties)) {
-					const propSchema = typeProperties[propName];
-					if (typeof propSchema === 'boolean') {
-						throw new Error(`can't encode ${propName} in ${typeName}`);
-					}
-					// Provide a fallback typeName for anonymous embedded objects
-					const propTypeName = `${typeName}_${propName}`;
-					let propType = this.encodeType(propSchema, propTypeName);
-					if (!propType) {
-						throw new Error(`property ${propName} with schema ${JSON.stringify(propSchema)} returned an empty type`);
-					}
-					const isRequiredInType = typeRequiredProperties.includes(propName);
-					if (!isRequiredInType) {
-						propType = `Option<${propType}>`;
-					}
-					if (!isRequiredInType || optional) {
-						def += `\t#[serde(skip_serializing_if = "Option::is_none")]\n`;
-					}
-					def += `\t#[serde(rename(serialize = "${propName}", deserialize = "${propName}"))]\n`;
-					def += `\tpub ${this.encodeFieldName(propName)}: ${propType},\n`;
-				}
-				def += `}\n\n`;
-				this.outputTypeDefinition(structTypeName, def);
+				const structTypeName = this.encodeObject(typeSchema, optional, typeName);
 				return ifOptional(structTypeName);
 			case undefined:
 				return ifOptional('std::collections::HashMap<String, serde_json::Value>');
@@ -461,21 +518,7 @@ class Responses implements Template {
 		let definedTypes: Map<string, string> | undefined;
 		const contents: string[] = [];
 		for (const op of generationConfig.config.application.Operations) {
-			// GraphQL operations have root "data" and "errors" fields. We handle this
-			// separately so we don't need a wrapper struct.
-			// TypeScript operations contain the data at the root level hence we take
-			// op.ResponseSchema directly for those
-			let responseSchema: JSONSchema;
-			switch (op.ExecutionEngine) {
-				case OperationExecutionEngine.ENGINE_GRAPHQL:
-					responseSchema = op.ResponseSchema.properties?.['data'] as JSONSchema;
-					break;
-				case OperationExecutionEngine.ENGINE_NODEJS:
-					responseSchema = op.ResponseSchema;
-					break;
-				default:
-					throw new Error(`invalid execution operation execution engine ${op.ExecutionEngine}`);
-			}
+			const responseSchema = op.ResponseSchema.properties?.['data'] as JSONSchema;
 			if (typeof responseSchema === 'undefined') {
 				throw new Error(`could to retrieve response schema for ${op.Name}`);
 			}
@@ -540,10 +583,17 @@ impl ${typeName} {
 };
 
 const operationContext = (op: GraphQLOperation) => {
+	let responseTypeName = operationResponseTypename(op);
+	const responseData = op.ResponseSchema.properties?.['data'] as JSONSchema;
+	// If the returned type is just a $ref, we won't generate a type for the container
+	// just the $ref itself
+	if (responseData?.$ref) {
+		responseTypeName = responseData.$ref.replace('#/definitions/', '');
+	}
 	return {
 		name: toSnakeCase(op.Name),
 		inputTypeName: toCamelCase(operationInputTypename(op)),
-		responseTypeName: toCamelCase(operationResponseTypename(op)),
+		responseTypeName: toCamelCase(responseTypeName),
 		allowNoSnakeCase: toSnakeCase(op.Name).includes('__'),
 		path: op.PathName,
 		hasInput: hasInput(op),
