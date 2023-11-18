@@ -23,6 +23,12 @@ const notes = introspect.openApiV2({
 			name: String!
 			date: Int!
 		}
+
+		input JSONDataInput {
+			id: Int!
+			name: String!
+			date: Int!
+		}
 	`,
 	replaceCustomScalarTypeFields: [
 		{
@@ -34,6 +40,16 @@ const notes = introspect.openApiV2({
 			entityName: 'Query',
 			fieldName: 'reminders',
 			responseTypeReplacement: '[Reminder]',
+		},
+		{
+			entityName: 'Query',
+			fieldName: 'echoData',
+			responseTypeReplacement: 'JSONData',
+		},
+		{
+			entityName: 'queryInput_echoData_data_Input',
+			fieldName: 'input',
+			responseTypeReplacement: 'JSONDataInput',
 		},
 	],
 });

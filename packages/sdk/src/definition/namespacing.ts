@@ -467,42 +467,25 @@ export const applyNamespaceToExistingRootFieldConfigurationsWithPathRewrite = (
 	});
 };
 
-export const generateTypeConfigurationsForNamespace = (schema: string, namespace?: string): TypeConfiguration[] => {
-	if (namespace === undefined || namespace === '') {
-		return [];
-	}
-	const out: TypeConfiguration[] = [];
-	const document = parse(schema);
-	const keep = uniqueWellKnownTypes(document);
-	visit(document, {
-		InputObjectTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		ObjectTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		EnumTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		UnionTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		ScalarTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		InterfaceTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-	});
-	return out;
-};
-
-export const generateTypeConfigurationsForNamespaceWithExisting = (
+export const generateTypeConfigurationsForNamespace = (
 	schema: string,
-	existing: TypeConfiguration[],
-	namespace?: string
+	namespace?: string,
+	replacedTypeNamesFromScalars?: Map<string, string>
 ): TypeConfiguration[] => {
 	if (namespace === undefined || namespace === '') {
 		return [];
 	}
-	const out: TypeConfiguration[] = existing;
+	const replacedTypeNames = replacedTypeNamesFromScalars ?? new Map<string, string>();
+	const out: TypeConfiguration[] = [];
 	const document = parse(schema);
 	const keep = uniqueWellKnownTypes(document);
 	visit(document, {
-		InputObjectTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		ObjectTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		EnumTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		UnionTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		ScalarTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		InterfaceTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
+		InputObjectTypeDefinition: (node) => pushTypeConfiguration(out, keep, replacedTypeNames, namespace, node),
+		ObjectTypeDefinition: (node) => pushTypeConfiguration(out, keep, replacedTypeNames, namespace, node),
+		EnumTypeDefinition: (node) => pushTypeConfiguration(out, keep, replacedTypeNames, namespace, node),
+		UnionTypeDefinition: (node) => pushTypeConfiguration(out, keep, replacedTypeNames, namespace, node),
+		ScalarTypeDefinition: (node) => pushTypeConfiguration(out, keep, replacedTypeNames, namespace, node),
+		InterfaceTypeDefinition: (node) => pushTypeConfiguration(out, keep, replacedTypeNames, namespace, node),
 	});
 	return out;
 };
@@ -510,6 +493,7 @@ export const generateTypeConfigurationsForNamespaceWithExisting = (
 const pushTypeConfiguration = (
 	out: TypeConfiguration[],
 	keep: string[],
+	replacedTypeNames: Map<string, string>,
 	namespace: string,
 	node:
 		| InputObjectTypeDefinitionNode
@@ -528,9 +512,10 @@ const pushTypeConfiguration = (
 		existing.typeName = namespace + '_' + typeName;
 		return;
 	}
+	const renameTo = replacedTypeNames.get(typeName) ?? typeName;
 	out.push({
 		typeName: namespace + '_' + typeName,
-		renameTo: typeName,
+		renameTo,
 	});
 };
 
