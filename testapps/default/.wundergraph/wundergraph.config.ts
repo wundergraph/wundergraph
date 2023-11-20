@@ -43,26 +43,6 @@ const federationLocalUpstreams = [
 	},
 ];
 
-const federationCloudUpstreams = [
-	{
-		url: 'https://wg-federation-demo-accounts.fly.dev/graphql',
-	},
-	{
-		url: 'https://wg-federation-demo-products.fly.dev/graphql',
-	},
-	{
-		url: 'https://wg-federation-demo-reviews.fly.dev/graphql',
-	},
-	{
-		url: 'https://wg-federation-demo-inventory.fly.dev/graphql',
-	},
-];
-
-const federatedApi = introspect.federation({
-	apiNamespace: 'federated',
-	upstreams: federationCloudUpstreams,
-});
-
 const spacex = introspect.graphql({
 	apiNamespace: 'spacex',
 	url: 'https://spacex-api.fly.dev/graphql/',
@@ -118,7 +98,7 @@ const kv = introspect.natsKV({
 
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [jsp, weather, countries, spacex, chinook, db, jsp2, usersPost, federatedApi, kv],
+	apis: [jsp, weather, countries, spacex, chinook, db, jsp2, usersPost, kv],
 	server,
 	operations,
 	generate,
