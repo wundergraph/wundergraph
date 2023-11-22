@@ -226,8 +226,6 @@ export class Client {
 
 		if (!response.ok) {
 			return { error: await this.handleClientResponseError(response) };
-		} else if (response.status === 204) {
-			return {};
 		}
 
 		const json = await response.json();
