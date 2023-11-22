@@ -410,7 +410,7 @@ test('generate type configurations for namespace', () => {
 });
 
 test('generate type configurations for undefined namespace', () => {
-	const actual = generateTypeConfigurationsForNamespace(starWarsSchema, undefined);
+	const actual = generateTypeConfigurationsForNamespace(starWarsSchema);
 	const expected: TypeConfiguration[] = [];
 	assert.equal(JSON.stringify(actual, null, '  '), JSON.stringify(expected, null, '  '));
 });
