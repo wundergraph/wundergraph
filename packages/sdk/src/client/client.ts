@@ -170,16 +170,6 @@ export class Client {
 			};
 		}
 
-		if (resp.data === undefined) {
-			return {
-				error: new ResponseError({
-					code: 'ResponseError',
-					statusCode,
-					message: 'Server returned no data',
-				}),
-			};
-		}
-
 		return {
 			data: resp.data,
 		};
@@ -236,6 +226,8 @@ export class Client {
 
 		if (!response.ok) {
 			return { error: await this.handleClientResponseError(response) };
+		} else if (response.status === 204) {
+			return {};
 		}
 
 		const json = await response.json();

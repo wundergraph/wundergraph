@@ -930,22 +930,18 @@ type CSRFConfig struct {
 func NewCSRFMw(config CSRFConfig) func(handler http.Handler) http.Handler {
 	return func(unprotected http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if user := UserFromContext(r.Context()); user != nil && user.FromCookie {
-				domain := removeSubdomain(sanitizeDomain(r.Host))
-				csrfMiddleware := csrf.Protect(config.Secret,
-					csrf.Path("/"),
-					csrf.Domain(domain),
-					csrf.CookieName("csrf"),
-					csrf.RequestHeader("X-CSRF-Token"),
-					csrf.HttpOnly(true),
-					csrf.Secure(!config.InsecureCookies),
-					csrf.SameSite(csrf.SameSiteStrictMode),
-					csrf.ErrorHandler(&CSRFErrorHandler{}),
-				)
-				csrfMiddleware(unprotected).ServeHTTP(w, r)
-				return
-			}
-			unprotected.ServeHTTP(w, r)
+			domain := removeSubdomain(sanitizeDomain(r.Host))
+			csrfMiddleware := csrf.Protect(config.Secret,
+				csrf.Path("/"),
+				csrf.Domain(domain),
+				csrf.CookieName("csrf"),
+				csrf.RequestHeader("X-CSRF-Token"),
+				csrf.HttpOnly(true),
+				csrf.Secure(!config.InsecureCookies),
+				csrf.SameSite(csrf.SameSiteStrictMode),
+				csrf.ErrorHandler(&CSRFErrorHandler{}),
+			)
+			csrfMiddleware(unprotected).ServeHTTP(w, r)
 		})
 	}
 }
