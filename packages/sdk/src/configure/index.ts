@@ -1576,8 +1576,11 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 	for (const op of operations) {
 		try {
 			const schema = generator.getSchemaForSymbol(responseTypeName(op));
-			delete schema.$schema;
-			schemas[op.Name] = schema as JSONSchema;
+			// if typescript operation returns undefined don't add the schema.
+			if (schema.type !== 'undefined') {
+				delete schema.$schema;
+				schemas[op.Name] = schema as JSONSchema;
+			}
 		} catch (e: any) {
 			Logger.warn(`could not generate response schema for ${op.Name}: ${e}`);
 		}
@@ -1593,7 +1596,9 @@ const updateTypeScriptOperationsResponseSchemas = async (wgDirAbs: string, opera
 	for (const op of operations) {
 		const schema = schemas[op.Name];
 		if (schema) {
-			op.ResponseSchema = schema;
+			op.ResponseSchema.properties = {
+				data: schema,
+			};
 		} else {
 			// For functions that don't return anything, we return an empty JSON object
 			op.ResponseSchema = {

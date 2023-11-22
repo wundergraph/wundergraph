@@ -53,6 +53,28 @@ paths:
                     text:
                       type: string
 
+  /notes/echo_data:
+    get:
+      operationId: echoData
+      parameters:
+        - name: data
+          in: query
+          type: object
+          required: true
+          properties:
+            input:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          application/json:
+            schema:
+              type: object
+              properties:
+                jsonData:
+                  type: object
+                  additionalProperties: true
+
   /notes/note/{noteID}:
     get:
       summary: Returns a note by ID
