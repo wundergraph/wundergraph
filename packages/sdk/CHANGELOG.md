@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.181.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.181.1...@wundergraph/sdk@0.181.2) (2023-11-24)
+
+### Bug Fixes
+
+* accept undefined data in client and support anonymous mutations ([#1346](https://github.com/wundergraph/wundergraph/issues/1346)) ([60d7f70](https://github.com/wundergraph/wundergraph/commit/60d7f706d1f4e94a25c512e76a9163fcf5417f57)) (@Pagebakers)
+* openapi schema for typescript operations ([#1339](https://github.com/wundergraph/wundergraph/issues/1339)) ([5b7e84d](https://github.com/wundergraph/wundergraph/commit/5b7e84d01215bc09735fae8c2f26f43ef7734290)) (@Pagebakers)
+* take schema extensions into account when renaming input types for upstream ([#1344](https://github.com/wundergraph/wundergraph/issues/1344)) ([eaad52d](https://github.com/wundergraph/wundergraph/commit/eaad52d4a3bfce3c9a640bc65603ec8171f0b92f)) (@fiam)
+* test server timeout ([#1347](https://github.com/wundergraph/wundergraph/issues/1347)) ([add29dd](https://github.com/wundergraph/wundergraph/commit/add29ddd84c1bc32398b519e6689ce026cd865ff)) (@Pagebakers)
+
 ## [0.181.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.181.0...@wundergraph/sdk@0.181.1) (2023-11-06)
 
 ### Bug Fixes

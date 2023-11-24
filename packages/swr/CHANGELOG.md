@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.18.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.17.23...@wundergraph/swr@0.18.0) (2023-11-24)
+
+### Features
+
+* nextjs 14 support ([#1338](https://github.com/wundergraph/wundergraph/issues/1338)) ([a8cd3c6](https://github.com/wundergraph/wundergraph/commit/a8cd3c69c4394e6581c07d731957f51f10215f79)) (@Pagebakers)
+
 ## [0.17.23](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.17.22...@wundergraph/swr@0.17.23) (2023-11-06)
 
 **Note:** Version bump only for package @wundergraph/swr
