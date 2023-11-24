@@ -215,7 +215,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			}
 		};
 		try {
-			await retry(checkHealth, { retries: Math.ceil(timeout / retryDelay), delay: retryDelay });
+			await retry(checkHealth, { retries: Math.ceil(timeout / retryDelay), delay: retryDelay, timeout: 'INFINITELY' });
 		} catch (e: any) {
 			await this.stopSubprocess(subprocess);
 			throw new Error(`could not start WunderGraph server: ${e}`);
