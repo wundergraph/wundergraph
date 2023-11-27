@@ -6,6 +6,9 @@ import * as fs from 'fs';
 
 const wg = createTestServer({
 	dir: __dirname,
+	env: {
+		WG_DISABLE_EMBEDDED_NATS: 'false',
+	},
 });
 
 beforeEach(async () => {
