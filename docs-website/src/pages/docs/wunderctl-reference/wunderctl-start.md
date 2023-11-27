@@ -10,7 +10,7 @@ To start the development process you should use `wunderctl up` instead.
 
 {% callout type="warning" %}
 `wunderctl start` not doing any kind of generation.
-It is requires generated files from `wunderctl generate`.
+It requires generated files from `wunderctl generate`.
 {% /callout %}
 
 {% callout type="warning" %}
