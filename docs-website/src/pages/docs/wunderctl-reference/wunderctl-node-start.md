@@ -7,7 +7,7 @@ The cmd `wunderctl node start` starts WunderNode in the production mode.
 
 {% callout type="warning" %}
 `wunderctl node start` not doing any kind of generation.
-It is requires generated files from `wunderctl generate`.
+It requires generated files from `wunderctl generate`.
 {% /callout %}
 
 {% callout type="warning" %}

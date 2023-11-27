@@ -7,7 +7,7 @@ The cmd `wunderctl server start` starts WunderGraph Server in the production mod
 
 {% callout type="warning" %}
 `wunderctl server start` not doing any kind of generation.
-It is requires generated files from `wunderctl generate`.
+It requires generated files from `wunderctl generate`.
 {% /callout %}
 
 {% callout type="warning" %}
