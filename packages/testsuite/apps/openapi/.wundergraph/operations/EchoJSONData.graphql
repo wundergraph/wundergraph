@@ -1,0 +1,6 @@
+query ($data: notes_queryInput_echoData_data_Input!) {
+	notes_echoData(data: $data) {
+		id
+		name
+	}
+}

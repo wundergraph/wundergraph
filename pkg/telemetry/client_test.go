@@ -36,12 +36,8 @@ func TestSendUsageMetric(t *testing.T) {
 
 		res.WriteHeader(http.StatusOK)
 
-		var graphqlResp GraphQLResponse
-		graphqlResp.Data = map[string]interface{}{
-			"CollectMetricsV1": map[string]interface{}{
-				"success": true,
-			},
-		}
+		var graphqlResp graphQLResponse
+		graphqlResp.Data.CollectMetricsV1.Success = true
 
 		respData, err := json.Marshal(graphqlResp)
 		assert.NoError(t, err)
@@ -75,11 +71,47 @@ func TestSendFailOnGraphQLError(t *testing.T) {
 
 		res.WriteHeader(http.StatusOK)
 
-		var graphqlResp GraphQLResponse
-		graphqlResp.Errors = []GraphQLError{
+		var graphqlResp graphQLResponse
+		graphqlResp.Errors = []struct {
+			Message string `json:"message"`
+		}{
 			{"Error"},
 		}
 
+		respData, err := json.Marshal(graphqlResp)
+		assert.NoError(t, err)
+
+		res.Write(respData)
+	}))
+
+	defer testServer.Close()
+
+	client := NewClient(testServer.URL,
+		&MetricClientInfo{
+			OsName:           "LINUX",
+			CpuCount:         1,
+			IsCI:             false,
+			WunderctlVersion: "0.100.1",
+			AnonymousID:      "123456",
+		},
+		WithTimeout(2*time.Second),
+	)
+
+	err := client.Send([]*Metric{NewUsageMetric("foo")})
+
+	assert.Error(t, err, "Expected error on graphql error")
+}
+
+func TestSendFailOnErrorResponse(t *testing.T) {
+
+	testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		// Validate method and auth header
+		assert.Equal(t, "POST", req.Method)
+
+		res.WriteHeader(http.StatusOK)
+
+		var graphqlResp graphQLResponse
+		graphqlResp.Data.CollectMetricsV1.Message = "failed"
 		respData, err := json.Marshal(graphqlResp)
 		assert.NoError(t, err)
 
@@ -122,12 +154,8 @@ func TestSendDurationMetric(t *testing.T) {
 
 		res.WriteHeader(http.StatusOK)
 
-		var graphqlResp GraphQLResponse
-		graphqlResp.Data = map[string]interface{}{
-			"CollectMetricsV1": map[string]interface{}{
-				"success": true,
-			},
-		}
+		var graphqlResp graphQLResponse
+		graphqlResp.Data.CollectMetricsV1.Success = true
 
 		respData, err := json.Marshal(graphqlResp)
 		assert.NoError(t, err)

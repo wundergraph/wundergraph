@@ -4,9 +4,8 @@ import type { ORM } from '@wundergraph/orm';
 
 import { Webhook, WebhookHeaders, WebhookQuery } from '../../webhooks/types';
 import { Headers } from '@whatwg-node/fetch';
-import type { ClientRequest, RequestMethod } from '../types';
+import type { RequestMethod } from '../types';
 import type { WebhookConfiguration } from '@wundergraph/protobuf';
-import type { InternalClientFactory } from '../internal-client';
 import process from 'node:process';
 import { OperationsClient } from '../operations-client';
 import { propagation, trace } from '@opentelemetry/api';
@@ -21,7 +20,6 @@ export interface WebHookRouteConfig {
 
 interface FastifyWebHooksOptions {
 	webhooks: WebhookConfiguration[];
-	internalClientFactory: InternalClientFactory;
 	orm: ORM<any>;
 	nodeURL: string;
 	globalContext: any;
@@ -31,10 +29,12 @@ interface FastifyWebHooksOptions {
 
 const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async (fastify, config) => {
 	await fastify.register(require('@fastify/formbody'));
+	await fastify.register(require('@fastify/multipart'), { attachFieldsToBody: true });
+
 	for (const hook of config.webhooks) {
 		try {
 			const webhookFilePath = path.join(process.env.WG_DIR_ABS!, 'generated', 'bundle', hook.filePath);
-			const webhook: Webhook<any, any, any, any, any> = (await import(webhookFilePath)).default;
+			const webhook: Webhook<any, any, any, any> = (await import(webhookFilePath)).default;
 
 			fastify.route({
 				url: `/webhooks/${hook.name}`,
@@ -73,7 +73,6 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 							},
 							{
 								log: createLogger(req.log.child({ webhook: hook.name })),
-								internalClient: config.internalClientFactory(headers, clientRequest),
 								operations: operationClient,
 								clientRequest,
 								graph: config.orm.withClientRequest(clientRequest),

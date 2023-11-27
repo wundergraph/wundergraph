@@ -23,6 +23,12 @@ const notes = introspect.openApiV2({
 			name: String!
 			date: Int!
 		}
+
+		input JSONDataInput {
+			id: Int!
+			name: String!
+			date: Int!
+		}
 	`,
 	replaceCustomScalarTypeFields: [
 		{
@@ -34,6 +40,16 @@ const notes = introspect.openApiV2({
 			entityName: 'Query',
 			fieldName: 'reminders',
 			responseTypeReplacement: '[Reminder]',
+		},
+		{
+			entityName: 'Query',
+			fieldName: 'echoData',
+			responseTypeReplacement: 'JSONData',
+		},
+		{
+			entityName: 'queryInput_echoData_data_Input',
+			fieldName: 'input',
+			responseTypeReplacement: 'JSONDataInput',
 		},
 	],
 });
@@ -47,9 +63,24 @@ const unions = introspect.openApiV2({
 	baseURL: new EnvironmentVariable('OPEN_API_INPUT_UNIONS_URL', ''),
 });
 
+// Only used to test retrieval of the spec via URL
+const notesFromUrl = introspect.openApiV2({
+	apiNamespace: 'notes_from_url',
+	source: {
+		kind: 'url',
+		url: new EnvironmentVariable('NOTES_OPENAPI_URL', 'http://localhost:8091/api.yaml'),
+	},
+	introspection: {
+		headers: (builder) => {
+			builder.addStaticHeader('X-Foo', 'Bar');
+			return builder;
+		},
+	},
+});
+
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [notes, unions],
+	apis: [notes, notesFromUrl, unions],
 	server,
 	operations,
 	options: {

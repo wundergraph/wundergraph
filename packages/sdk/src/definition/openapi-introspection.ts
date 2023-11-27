@@ -10,6 +10,8 @@ import {
 	ApiIntrospectionOptions,
 	GraphQLApi,
 	HTTPUpstream,
+	IntrospectionFetchOptions,
+	IntrospectionHeadersOptions,
 	ReplaceCustomScalarTypeFieldConfiguration,
 	RESTApi,
 } from './index';
@@ -17,13 +19,14 @@ import { openApiSpecificationToRESTApiObject } from '../v2openapi';
 import { introspectWithCache } from './introspection-cache';
 import { OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 import yaml from 'js-yaml';
-import { HeadersBuilder } from './headers-builder';
+import { HeadersBuilder, mapHeaders, resolveIntrospectionHeaders } from './headers-builder';
 import { getJSONSchemaOptionsFromOpenAPIOptions } from '@omnigraph/openapi';
 import { loadNonExecutableGraphQLSchemaFromJSONSchemas } from '@omnigraph/json-schema';
 import { printSchemaWithDirectives } from '@graphql-tools/utils';
 import { introspectGraphql } from './graphql-introspection';
 import { WgEnv } from '../configure/options';
-import { InputVariable } from '../configure/variables';
+import { InputVariable, mapInputVariable, resolveVariable } from '../configure/variables';
+import { validateNamespace } from './namespacing';
 
 export interface OpenAPIIntrospectionFile {
 	kind: 'file';
@@ -42,7 +45,7 @@ export interface OpenAPIIntrospectionObject {
 
 export interface OpenAPIIntrospectionUrl {
 	kind: 'url';
-	url: string;
+	url: InputVariable;
 }
 
 /*
@@ -109,7 +112,7 @@ export type OpenAPIIntrospectionV2Source =
 	| OpenAPIIntrospectionUrl;
 
 export interface OpenAPIIntrospectionV2
-	extends Omit<HTTPUpstream, 'authentication' | 'mTLS' | 'requestTimeoutSeconds'> {
+	extends Omit<HTTPUpstream, 'authentication' | 'mTLS' | 'requestTimeoutSeconds' | 'introspection'> {
 	source: OpenAPIIntrospectionV2Source;
 	baseURL?: InputVariable;
 	customJSONScalars?: string[];
@@ -119,6 +122,7 @@ export interface OpenAPIIntrospectionV2
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
+	introspection?: IntrospectionFetchOptions & IntrospectionHeadersOptions;
 }
 
 /**
@@ -169,10 +173,7 @@ export const introspectOpenApiV2 = async (introspection: OpenAPIIntrospectionV2)
 		introspection,
 		configuration,
 		async (introspection: OpenAPIIntrospectionV2, options: ApiIntrospectionOptions): Promise<GraphQLApi> => {
-			const logger = options.logger
-				? new OpenAPILogger(options.logger.child({ component: '@wundergraph/openapi' }))
-				: undefined;
-			return await openApiSpecificationToGraphQLApi(specSource, introspection, options.apiID!, logger);
+			return await openApiSpecificationToGraphQLApi(specSource, introspection, options.apiID!, options.logger);
 		}
 	);
 };
@@ -184,6 +185,7 @@ interface OpenApiOptions {
 	cwd: string;
 	endpoint?: string;
 	name: string;
+	schemaHeaders: Record<string, string>;
 	operationHeaders: Record<string, string>;
 	logger?: GraphQLMeshLogger;
 }
@@ -192,7 +194,7 @@ export const openApiSpecificationToGraphQLApi = async (
 	source: OasSource, // could be json, file path or url
 	introspection: OpenAPIIntrospectionV2,
 	apiID: string,
-	logger?: GraphQLMeshLogger
+	logger?: PinoLogger
 ): Promise<GraphQLApi> => {
 	const headersBuilder = new HeadersBuilder();
 	if (introspection.headers !== undefined) {
@@ -208,12 +210,26 @@ export const openApiSpecificationToGraphQLApi = async (
 		operationHeaders[key] = `{context.headers['${key.toLowerCase()}']}`;
 	}
 
+	let introspectionHeaders: Record<string, string> = {};
+	if (introspection.introspection?.headers) {
+		const introspectionHeadersBuilder = new HeadersBuilder();
+		introspection.introspection.headers(introspectionHeadersBuilder);
+		introspectionHeaders = resolveIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
+	}
+
+	if (introspection.apiNamespace) {
+		validateNamespace(introspection.apiNamespace);
+	}
+
+	const openApiLogger = logger ? new OpenAPILogger(logger.child({ component: '@wundergraph/openapi' })) : undefined;
+
 	const options: OpenApiOptions = {
 		source,
 		cwd: process.cwd(),
 		name: introspection.apiNamespace || 'api',
+		schemaHeaders: introspectionHeaders,
 		operationHeaders,
-		logger,
+		logger: openApiLogger,
 	};
 
 	// get json schema options describing each path in the spec
@@ -226,6 +242,8 @@ export const openApiSpecificationToGraphQLApi = async (
 
 	// as logic of translating api calls stored in the directives we need print schema with directives
 	const schema = printSchemaWithDirectives(graphQLSchema);
+
+	logger?.trace({ schema }, 'generated GraphQL schema from OpenAPI spec');
 
 	return introspectGraphql(
 		{
@@ -251,7 +269,7 @@ const getSource = (source: OpenAPIIntrospectionV2Source): OasSource => {
 		case 'file':
 			return source.filePath; // let omnigraph read spec
 		case 'url':
-			return source.url; // let omnigraph download spec
+			return resolveVariable(source.url); // let omnigraph download spec
 		case 'object':
 			return source.openAPIObject as any;
 		case 'string':

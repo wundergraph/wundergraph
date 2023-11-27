@@ -23,6 +23,13 @@ class RequestContext {
   }
 }
 
+declare module '@wundergraph/sdk/server' {
+  export interface CustomContext {
+    global: GlobalContext;
+    request: RequestContext;
+  }
+}
+
 export default configureWunderGraphServer(() => ({
   hooks: {
     queries: {},

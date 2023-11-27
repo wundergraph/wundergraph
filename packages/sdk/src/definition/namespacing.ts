@@ -26,10 +26,17 @@ import {
 } from '@wundergraph/protobuf';
 import { isRootType } from '../graphql/configuration';
 
-export const wellKnownTypeNames: string[] = [
+const wellKnownGlobalTypeNames: string[] = [
 	'Query',
 	'Mutation',
 	'Subscription',
+	// We need this one for introspect.openApi
+	'UnspecifiedHttpResponse',
+	// This is used by raw SQL support
+	'_Row',
+];
+
+const wellKnownScalarTypeNames: string[] = [
 	'String',
 	'Int',
 	'Boolean',
@@ -42,9 +49,12 @@ export const wellKnownTypeNames: string[] = [
 	'Time',
 	'UUID',
 	'_Any',
-	'UnspecifiedHttpResponse',
-	'_Row',
+	'',
 ];
+
+export const wellKnownTypeNames = () => {
+	return [...wellKnownGlobalTypeNames, ...wellKnownScalarTypeNames];
+};
 
 const uniqueWellKnownTypes = (schema: DocumentNode): string[] => {
 	const schemaDefinitionNode = schema.definitions.find((node) => node.kind === 'SchemaDefinition') as
@@ -57,12 +67,33 @@ const uniqueWellKnownTypes = (schema: DocumentNode): string[] => {
 	const subscriptionTypeName =
 		schemaDefinitionNode?.operationTypes.find((op) => op.operation === 'subscription')?.type.name.value ||
 		'Subscription';
-	return [...new Set([...wellKnownTypeNames, queryTypeName, mutationTypeName, subscriptionTypeName])];
+	const scalarTypes = wellKnownScalarTypeNames.filter((type) => {
+		// Make sure the upstream schema doesn't already define an object type with this name
+		const typeDefinition = schema.definitions.find((node) => {
+			return node.kind == Kind.OBJECT_TYPE_DEFINITION && node.name.value === type;
+		});
+		return typeDefinition === undefined;
+	});
+	return [
+		...new Set([...wellKnownGlobalTypeNames, ...scalarTypes, queryTypeName, mutationTypeName, subscriptionTypeName]),
+	];
 };
 
 const wellKnownDirectives: string[] = ['include', 'skip', 'deprecated', 'specifiedBy'];
 const omnigraphOpenApiDirectives: string[] = ['oneOf'];
 const knownDirectives: string[] = [...wellKnownDirectives, ...omnigraphOpenApiDirectives];
+
+/***
+ * Validates that namespace is a valid GraphQL identifier
+ */
+export const validateNamespace = (namespace?: string) => {
+	if (namespace) {
+		const regex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+		if (!regex.test(namespace)) {
+			throw new Error(`Invalid namespace: ${namespace}. Namespace must be a valid GraphQL identifier.`);
+		}
+	}
+};
 
 export const applyNameSpaceToCustomJsonScalars = (namespace?: string, customJsonScalars?: Set<string>): Set<string> => {
 	if (!customJsonScalars) {
@@ -71,6 +102,7 @@ export const applyNameSpaceToCustomJsonScalars = (namespace?: string, customJson
 	if (!namespace || customJsonScalars.size < 1) {
 		return customJsonScalars;
 	}
+	validateNamespace(namespace);
 	const namespacedScalars = new Set<string>();
 	for (const scalar of customJsonScalars) {
 		namespacedScalars.add(`${namespace}_${scalar}`);
@@ -86,6 +118,7 @@ export const applyNameSpaceToGraphQLSchema = (
 	if (namespace === undefined || namespace === '') {
 		return print(parse(schema));
 	}
+	validateNamespace(namespace);
 
 	const document = parse(schema);
 	const schemaDefinitionNode = document.definitions.find((node) => node.kind === 'SchemaDefinition') as
@@ -274,6 +307,7 @@ export const applyNameSpaceToTypeFields = (
 	if (namespace === undefined || namespace === '') {
 		return fields;
 	}
+	validateNamespace(namespace);
 	return fields.map((typeField) => {
 		const isRoot = isRootType(typeField.typeName, schema);
 		return {
@@ -291,6 +325,7 @@ export const applyNameSpaceToSingleTypeFields = (
 	if (namespace === undefined || namespace === '') {
 		return fields;
 	}
+	validateNamespace(namespace);
 	return fields.map((field) => {
 		const isRoot = isRootType(field.typeName, schema);
 		return {
@@ -309,6 +344,7 @@ export const applyNameSpaceToFieldConfigurations = (
 	if (namespace === undefined || namespace === '') {
 		return fields;
 	}
+	validateNamespace(namespace);
 	const mapped = fields.map((field) => {
 		const isRoot = isRootType(field.typeName, schema);
 		const skipRename = skipRenameRootFields.find((skip) => skip === field.fieldName) !== undefined;
@@ -398,6 +434,7 @@ export const applyNamespaceToExistingRootFieldConfigurations = (
 	if (namespace === undefined || namespace === '') {
 		return fields;
 	}
+	validateNamespace(namespace);
 	return fields.map((field) => {
 		const isRoot = isRootType(field.typeName, schema);
 		return {
@@ -416,6 +453,7 @@ export const applyNamespaceToExistingRootFieldConfigurationsWithPathRewrite = (
 	if (namespace === undefined || namespace === '') {
 		return fields;
 	}
+	validateNamespace(namespace);
 	return fields.map((field) => {
 		const isRoot = isRootType(field.typeName, schema);
 		const hasPath = field.path.length !== 0;
@@ -429,42 +467,25 @@ export const applyNamespaceToExistingRootFieldConfigurationsWithPathRewrite = (
 	});
 };
 
-export const generateTypeConfigurationsForNamespace = (schema: string, namespace?: string): TypeConfiguration[] => {
-	if (namespace === undefined || namespace === '') {
-		return [];
-	}
-	const out: TypeConfiguration[] = [];
-	const document = parse(schema);
-	const keep = uniqueWellKnownTypes(document);
-	visit(document, {
-		InputObjectTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		ObjectTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		EnumTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		UnionTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		ScalarTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		InterfaceTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-	});
-	return out;
-};
-
-export const generateTypeConfigurationsForNamespaceWithExisting = (
+export const generateTypeConfigurationsForNamespace = (
 	schema: string,
-	existing: TypeConfiguration[],
-	namespace?: string
+	namespace?: string,
+	replacedTypeNamesFromScalars?: Map<string, string>
 ): TypeConfiguration[] => {
 	if (namespace === undefined || namespace === '') {
 		return [];
 	}
-	const out: TypeConfiguration[] = existing;
+	const replacedTypeNames = replacedTypeNamesFromScalars ?? new Map<string, string>();
+	const out: TypeConfiguration[] = [];
 	const document = parse(schema);
 	const keep = uniqueWellKnownTypes(document);
 	visit(document, {
-		InputObjectTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		ObjectTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		EnumTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		UnionTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		ScalarTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
-		InterfaceTypeDefinition: (node) => pushTypeConfiguration(out, keep, namespace, node),
+		InputObjectTypeDefinition: (node) => pushTypeConfiguration(out, keep, replacedTypeNames, namespace, node),
+		ObjectTypeDefinition: (node) => pushTypeConfiguration(out, keep, replacedTypeNames, namespace, node),
+		EnumTypeDefinition: (node) => pushTypeConfiguration(out, keep, replacedTypeNames, namespace, node),
+		UnionTypeDefinition: (node) => pushTypeConfiguration(out, keep, replacedTypeNames, namespace, node),
+		ScalarTypeDefinition: (node) => pushTypeConfiguration(out, keep, replacedTypeNames, namespace, node),
+		InterfaceTypeDefinition: (node) => pushTypeConfiguration(out, keep, replacedTypeNames, namespace, node),
 	});
 	return out;
 };
@@ -472,6 +493,7 @@ export const generateTypeConfigurationsForNamespaceWithExisting = (
 const pushTypeConfiguration = (
 	out: TypeConfiguration[],
 	keep: string[],
+	replacedTypeNames: Map<string, string>,
 	namespace: string,
 	node:
 		| InputObjectTypeDefinitionNode
@@ -490,9 +512,10 @@ const pushTypeConfiguration = (
 		existing.typeName = namespace + '_' + typeName;
 		return;
 	}
+	const renameTo = replacedTypeNames.get(typeName) ?? typeName;
 	out.push({
 		typeName: namespace + '_' + typeName,
-		renameTo: typeName,
+		renameTo,
 	});
 };
 
@@ -503,6 +526,7 @@ export const applyNamespaceToDirectiveConfiguration = (
 	if (namespace === undefined || namespace === '') {
 		return [];
 	}
+	validateNamespace(namespace);
 	const out: DirectiveConfiguration[] = [];
 	schema.getDirectives().forEach((directive) => {
 		if (knownDirectives.find((w) => w === directive.name) !== undefined) {

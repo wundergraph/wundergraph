@@ -39,7 +39,7 @@ import {
 	GraphQLApi,
 	GraphQLIntrospection,
 } from './index';
-import { HeadersBuilder, mapHeaders } from './headers-builder';
+import { HeadersBuilder, mapHeaders, resolveIntrospectionHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
 import { urlHash, urlIsLocalNetwork } from '../localcache';
 import { Logger } from '../logger';
@@ -56,30 +56,11 @@ class MissingKeyError extends Error {
 }
 
 export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HTTPHeader }): Record<string, string> => {
-	const baseHeaders: Record<string, string> = {
+	const extra: Record<string, string> = {
 		'Content-Type': 'application/json',
 		Accept: 'application/json',
 	};
-	if (headers !== undefined) {
-		Object.keys(headers).forEach((key) => {
-			if (headers[key].values.length === 1) {
-				switch (headers[key].values[0].kind) {
-					case ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE:
-						baseHeaders[key] = headers[key].values[0].staticVariableContent;
-						break;
-					case ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE:
-						if (process.env[headers[key].values[0].environmentVariableName] !== undefined) {
-							baseHeaders[key] = process.env[headers[key].values[0].environmentVariableName]!;
-						} else if (headers[key].values[0].environmentVariableDefaultValue !== undefined) {
-							baseHeaders[key] = headers[key].values[0].environmentVariableDefaultValue;
-						}
-						break;
-				}
-			}
-		});
-	}
-
-	return baseHeaders;
+	return resolveIntrospectionHeaders(headers, extra);
 };
 
 export const graphqlIntrospectionCacheConfiguration = async (
@@ -131,6 +112,7 @@ export const introspectGraphql = async (
 		schemaSDL: schemaSDLWithCustomScalars,
 		customScalarTypeFields,
 		customScalarTypeNames, // Remove the necessity to manually provide custom scalar types
+		replacedTypeNames,
 	} = transformSchema.replaceCustomScalars(cleanUpstreamSchema, introspection);
 
 	const { schemaSDL, argumentReplacements } = transformSchema.replaceCustomNumericScalars(
@@ -233,7 +215,7 @@ export const introspectGraphql = async (
 			},
 		],
 		applyNameSpaceToFieldConfigurations(Fields, graphQLSchema, skipRenameRootFields, introspection.apiNamespace),
-		generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
+		generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace, replacedTypeNames),
 		[],
 		applyNameSpaceToCustomJsonScalars(introspection.apiNamespace, customScalarTypeNames),
 		{

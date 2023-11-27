@@ -8,11 +8,9 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/securecookie"
 	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 )
@@ -72,17 +70,14 @@ func NewOpenIDConnectCookieHandler(config OpenIDConnectConfig, hooks Hooks, log 
 	}
 
 	handler.auth2 = NewOAuth2AuthenticationHandler(OAuth2AuthenticationConfig{
-		ProviderID:         config.ProviderID,
-		ClientID:           config.ClientID,
-		ClientSecret:       config.ClientSecret,
-		Endpoint:           provider.Endpoint(),
-		Scopes:             []string{oidc.ScopeOpenID, "profile", "email"},
-		AuthTimeout:        config.AuthTimeout,
-		ForceRedirectHttps: config.ForceRedirectHttps,
-		Hooks:              hooks,
-		Cookie:             config.Cookie,
-		InsecureCookies:    config.InsecureCookies,
-		Log:                log,
+		Provider:        config.Provider,
+		ClientID:        config.ClientID,
+		ClientSecret:    config.ClientSecret,
+		Endpoint:        provider.Endpoint(),
+		Scopes:          []string{oidc.ScopeOpenID, "profile", "email"},
+		QueryParameters: config.QueryParameters,
+		Hooks:           hooks,
+		Log:             log,
 	}, handler)
 
 	return handler, nil
@@ -94,15 +89,11 @@ type QueryParameter struct {
 }
 
 type OpenIDConnectConfig struct {
-	Issuer             string
-	ClientID           string
-	ClientSecret       string
-	QueryParameters    []QueryParameter
-	ProviderID         string
-	InsecureCookies    bool
-	ForceRedirectHttps bool
-	Cookie             *securecookie.SecureCookie
-	AuthTimeout        time.Duration
+	Provider        ProviderConfig
+	Issuer          string
+	ClientID        string
+	ClientSecret    string
+	QueryParameters []QueryParameter
 }
 
 type ClaimsInfo struct {
@@ -124,7 +115,8 @@ type Claims struct {
 	Picture           string                 `json:"picture"`
 	Website           string                 `json:"website"`
 	Email             string                 `json:"email"`
-	EmailVerified     bool                   `json:"email_verified"`
+	EmailVerified     bool                   `json:"-"`
+	EmailVerifiedRaw  interface{}            `json:"email_verified"`
 	Gender            string                 `json:"gender"`
 	BirthDate         string                 `json:"birthdate"`
 	ZoneInfo          string                 `json:"zoneinfo"`
@@ -180,8 +172,8 @@ func (c *Claims) Custom() map[string]interface{} {
 }
 
 func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *mux.Router) {
-	authorizeRouter.Path(fmt.Sprintf("/%s", h.auth2.config.ProviderID)).Methods(http.MethodGet).HandlerFunc(h.auth2.Authorize)
-	callbackRouter.Path(fmt.Sprintf("/%s", h.auth2.config.ProviderID)).Methods(http.MethodGet).HandlerFunc(h.auth2.Callback)
+	authorizeRouter.Path(fmt.Sprintf("/%s", h.auth2.config.Provider.ID)).Methods(http.MethodGet).HandlerFunc(h.auth2.Authorize)
+	callbackRouter.Path(fmt.Sprintf("/%s", h.auth2.config.Provider.ID)).Methods(http.MethodGet).HandlerFunc(h.auth2.Callback)
 }
 
 func (h *OpenIDConnectCookieHandler) User(ctx context.Context, log *zap.Logger, token *oauth2.Token) (*User, error) {
@@ -219,6 +211,7 @@ func (h *OpenIDConnectCookieHandler) User(ctx context.Context, log *zap.Logger, 
 	user.RawAccessToken = accessToken
 	user.RawIDToken = idToken
 	user.IdToken = idTokenJSON
+	user.RefreshToken = token.RefreshToken
 
 	return user, nil
 }

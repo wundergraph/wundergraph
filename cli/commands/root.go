@@ -25,6 +25,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
+	"github.com/wundergraph/wundergraph/pkg/restart"
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
 )
 
@@ -63,7 +64,8 @@ var (
 	// By default it is 5 seconds but for CI and debugging purposes it should be set much lower
 	otelBatchTimeout time.Duration
 
-	rootFlags helpers.RootFlags
+	rootFlags        helpers.RootFlags
+	debugBindAddress string
 
 	red    = color.New(color.FgHiRed)
 	green  = color.New(color.FgHiGreen)
@@ -196,6 +198,7 @@ var rootCmd = &cobra.Command{
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		workaroundBugWithDuplicatedFlags(cmd)
 		updateFlagsFromEnvironment(cmd)
+		restart.Await()
 
 		switch cmd.Name() {
 		// skip any setup to avoid logging anything
@@ -270,17 +273,13 @@ type BuildTimeConfig struct {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
-	// Instead of recover()'ing, use a boolean that we set to false
-	// at the of the function to keep track of whether we've panic()'ed
-	// or not. This allows us to set an appropriate exit code while
-	// showing the whole panic stack, which might be useful for fixing the
-	// problem.
-	didPanic := true
 	var err error
 	defer func() {
-		// In case of a panic or error we want to flush the telemetry data
+		// In case of a panic or error we want to flush the telemetry data.
+		// Don't try to recover() here because it would suppress printing
+		// the stack.
 		FlushTelemetry()
-		if didPanic || err != nil {
+		if err != nil {
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s\n", err)
 			}
@@ -291,7 +290,6 @@ func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
 	BuildInfo = buildInfo
 	GitHubAuthDemo = githubAuthDemo
 	err = rootCmd.Execute()
-	didPanic = false
 }
 
 func FlushTelemetry() {
@@ -351,6 +349,7 @@ type configScriptEnvOptions struct {
 	EnableCache                   bool
 	DefaultPollingIntervalSeconds int
 	FirstRun                      bool
+	EnableTUI                     bool
 }
 
 // configScriptEnv returns the environment variables that scripts running the SDK configuration
@@ -366,6 +365,7 @@ func configScriptEnv(opts configScriptEnvOptions) []string {
 		// WG_INTROSPECTION_CACHE_SKIP=true causes the cache to try to load the remote data on the first run
 		env = append(env, "WG_INTROSPECTION_CACHE_SKIP=true")
 	}
+	env = append(env, "WG_ENABLE_TUI="+strconv.FormatBool(opts.EnableTUI))
 	return env
 }
 
@@ -394,6 +394,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&rootFlags.Log, logLevelFlagName, "l", "info", "Sets the log level")
 	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "Allows you to load environment variables from an env file. Defaults to .env in the current directory.")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.DebugMode, "debug", false, "Enables the debug mode so that all requests and responses will be logged")
+	rootCmd.PersistentFlags().StringVar(&debugBindAddress, "debug-bind-address", "127.0.0.1:9229", "Default host:port to bind to, will only work in conjunction with --debug")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.Telemetry, "telemetry", !isTelemetryDisabled, "Enables telemetry. Telemetry allows us to accurately gauge WunderGraph feature usage, pain points, and customization across all users.")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.TelemetryDebugMode, "telemetry-debug", isTelemetryDebugEnabled, "Enables the debug mode for telemetry. Understand what telemetry is being sent to us.")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, prettyLoggingFlagName, false, "Enables pretty logging")

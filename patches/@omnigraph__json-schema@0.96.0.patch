@@ -1,0 +1,26 @@
+diff --git a/cjs/addRootFieldResolver.js b/cjs/addRootFieldResolver.js
+index f25b76e716c42359d98e24010f860fd4b1008a4a..8c6931ff981c3bbbf070dfc3f28db7fe11da0bd7 100644
+--- a/cjs/addRootFieldResolver.js
++++ b/cjs/addRootFieldResolver.js
+@@ -226,7 +226,7 @@ function addHTTPRootFieldResolver(schema, field, logger, globalFetch, { path, op
+                 operationLogger.debug(` => Return type is not a JSON so returning ${responseText}`);
+                 return responseText;
+             }
+-            else if (response.status === 204) {
++            else if (response.status === 204 || (response.status === 200 && responseText === '')) {
+                 responseJson = {};
+             }
+             else if (response.status.toString().startsWith('2')) {
+diff --git a/esm/addRootFieldResolver.js b/esm/addRootFieldResolver.js
+index 296f3bb20c8037a9e384bd7ccbf785a451dc2750..e8baafe46996d713f80c983c7e553bf7dbd4612a 100644
+--- a/esm/addRootFieldResolver.js
++++ b/esm/addRootFieldResolver.js
+@@ -222,7 +222,7 @@ export function addHTTPRootFieldResolver(schema, field, logger, globalFetch, { p
+                 operationLogger.debug(` => Return type is not a JSON so returning ${responseText}`);
+                 return responseText;
+             }
+-            else if (response.status === 204) {
++            else if (response.status === 204 || (response.status === 200 && responseText === '')) {
+                 responseJson = {};
+             }
+             else if (response.status.toString().startsWith('2')) {

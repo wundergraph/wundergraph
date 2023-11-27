@@ -37,6 +37,10 @@ type OpenTelemetry struct {
 	Sampler              float64
 }
 
+type SubscriptionOptions struct {
+	ServerPingInterval time.Duration
+}
+
 type PrometheusOptions struct {
 	Enabled bool
 	Port    int
@@ -50,6 +54,7 @@ type Options struct {
 	Logging             Logging
 	DefaultTimeout      time.Duration
 	DefaultHTTPProxyURL *url.URL
+	Subscriptions       SubscriptionOptions
 	Prometheus          PrometheusOptions
 	OpenTelemetry       OpenTelemetry
 }

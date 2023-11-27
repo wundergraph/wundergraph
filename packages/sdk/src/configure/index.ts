@@ -14,7 +14,6 @@ import {
 	visit,
 } from 'graphql';
 import { JSONSchema7 as JSONSchema } from 'json-schema';
-import objectHash from 'object-hash';
 import { camelCase } from 'lodash';
 import { buildGenerator, getProgramFromFiles, JsonSchemaGenerator, programFromConfig } from 'typescript-json-schema';
 import { ZodType } from 'zod';
@@ -45,7 +44,7 @@ import {
 	TypeScriptOperationFile,
 	WellKnownClaim,
 } from '../graphql/operations';
-import { GenerateCode, Template } from '../codegen';
+import { CodeGenerator, Template } from '../codegen';
 import {
 	ArgumentRenderConfiguration,
 	ArgumentSource,
@@ -87,11 +86,10 @@ import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations
 import zodToJsonSchema from 'zod-to-json-schema';
 import { GenerateConfig, OperationsGenerationConfig } from './codegeneration';
 import { generateOperations } from '../codegen/generateoperations';
-import { configurationHash } from '../codegen/templates/typescript/helpers';
+import { configurationHash, fastHash } from '../codegen/templates/typescript/helpers';
 import templates from '../codegen/templates';
 import { WunderGraphConfigurationFilename } from '../server/server';
-import { InternalIntergration, WunderGraphAppConfig } from '../integrations/types';
-import { DynamicTransportConfig } from '../advanced-hooks';
+import { InternalHookConfig, InternalIntergration, WunderGraphAppConfig } from '../integrations/types';
 
 export const WG_GENERATE_CONFIG_JSON = process.env['WG_GENERATE_CONFIG_JSON'] === 'true';
 
@@ -148,31 +146,7 @@ export interface WunderGraphConfigApplicationConfig<
 	authentication?: {
 		cookieBased?: {
 			providers: AuthenticationProvider[];
-			// authorizedRedirectUris is a whitelist of allowed URIs to redirect to after a successful login
-			// the values are used as exact string matches
-			// URIs always match, independent of a trailing slash or not
-			// e.g. if an authorized URI is "http://localhost:3000", the URI "http://localhost:3000/" would also match
-			// or if the authorized URI is "http://localhost:3000/auth", the URI "http://localhost:3000/auth/" would also match
-			// if you need more flexibility, use authorizedRedirectUriRegexes instead
-			authorizedRedirectUris?: InputVariable[];
-			// authorizedRedirectUriRegexes is a whitelist of allowed URIs to redirect to after a successful login using regexes
-			// make sure to set boundaries properly, e.g:
-			// "^http://localhost:3000$"
-			// without boundaries, all URIs would match, e.g:
-			// "http://localhost:3000" would match if the URI was "http://localhost:3000/anything" because of the missing boundary
-			authorizedRedirectUriRegexes?: InputVariable[];
-			// secureCookieHashKey is used to encrypt user cookies, should be 11 bytes
-			secureCookieHashKey?: InputVariable;
-			// secureCookieBlockKey is used to encrypt user cookies, should be 32 bytes
-			secureCookieBlockKey?: InputVariable;
-			// csrfTokenSecret is the secret to enable the csrf middleware, should be 32 bytes
-			csrfTokenSecret?: InputVariable;
-			/**
-			 * Optional timeout used for storing temporary data during authentication
-			 * @default 600 (10 minutes)
-			 */
-			timeoutSeconds?: InputVariable<number>;
-		};
+		} & AuthenticationConfig;
 		tokenBased?: {
 			providers: TokenAuthProvider[];
 		};
@@ -214,6 +188,43 @@ export interface WunderGraphConfigApplicationConfig<
 
 	/** @deprecated */
 	links?: LinkConfiguration;
+}
+
+export interface AuthenticationConfig {
+	/**
+	 * authorizedRedirectUris is a whitelist of allowed URIs to redirect to after a successful login
+	 * the values are used as exact string matches
+	 * URIs always match, independent of a trailing slash or not
+	 * e.g. if an authorized URI is "http://localhost:3000", the URI "http://localhost:3000/" would also match
+	 * or if the authorized URI is "http://localhost:3000/auth", the URI "http://localhost:3000/auth/" would also match
+	 * if you need more flexibility, use authorizedRedirectUriRegexes instead
+	 */
+	authorizedRedirectUris?: InputVariable[];
+	/**
+	 * 	authorizedRedirectUriRegexes is a whitelist of allowed URIs to redirect to after a successful login using regexes
+	 * make sure to set boundaries properly, e.g:
+	 * "^http://localhost:3000$"
+	 * without boundaries, all URIs would match, e.g:
+	 * "http://localhost:3000" would match if the URI was "http://localhost:3000/anything" because of the missing boundary
+	 */
+	authorizedRedirectUriRegexes?: InputVariable[];
+	/**
+	 * secureCookieHashKey is used to encrypt user cookies, should be 11 bytes
+	 */
+	secureCookieHashKey?: InputVariable;
+	/**
+	 * secureCookieBlockKey is used to encrypt user cookies, should be 32 bytes
+	 */
+	secureCookieBlockKey?: InputVariable;
+	/**
+	 * csrfTokenSecret is the secret to enable the csrf middleware, should be 32 bytes
+	 */
+	csrfTokenSecret?: InputVariable;
+	/**
+	 * Optional timeout used for storing temporary data during authentication
+	 * @default 600 (10 minutes)
+	 */
+	timeoutSeconds?: InputVariable<number>;
 }
 
 export interface TokenAuthProvider {
@@ -315,13 +326,38 @@ export interface S3UploadProfile {
 export type S3UploadProfiles = Record<string, S3UploadProfile>;
 
 export interface S3UploadConfiguration {
+	/**
+	 * The name of the S3 upload provider, used in the client to select the provider
+	 */
 	name: string;
+	/**
+	 * The S3 endpoint url
+	 */
 	endpoint: InputVariable;
+	/**
+	 * The access key id
+	 */
 	accessKeyID: InputVariable;
+	/**
+	 * The secret access key
+	 */
 	secretAccessKey: InputVariable;
+	/**
+	 * The bucket name
+	 */
 	bucketName: InputVariable;
+	/**
+	 * The bucket location, eg "eu-central-1"
+	 */
 	bucketLocation: InputVariable;
-	useSSL: boolean;
+	/**
+	 * Whether to use SSL, always enable this for production
+	 * @default true
+	 * */
+	useSSL?: boolean;
+	/**
+	 * Upload profiles to restrict uploads to certain file types, sizes, etc.
+	 */
 	uploadProfiles?: S3UploadProfiles;
 }
 
@@ -1111,6 +1147,14 @@ export const configureWunderGraphApplication = <
 				}
 			}
 
+			logger.debug('generating response types for TypeScript operations');
+			// Update response types for TS operations. Do this before code generation, since some
+			// of the templates require the output types of the TS operations.
+			const tsOperations: TypeScriptOperation[] = app.Operations.filter(
+				(operation) => operation.ExecutionEngine == OperationExecutionEngine.ENGINE_NODEJS
+			);
+			await updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
+
 			const defaultCodeGenerators: CodeGen = { templates: [...templates.typescript.all] };
 
 			const combined = [
@@ -1118,22 +1162,17 @@ export const configureWunderGraphApplication = <
 				...(config.generate?.codeGenerators || []),
 				...(config.codeGenerators || []),
 			];
+			const codeGenerator = new CodeGenerator();
 			for (let i = 0; i < combined.length; i++) {
 				const gen = combined[i];
-				await GenerateCode({
+				await codeGenerator.generate({
 					wunderGraphConfig: resolved,
 					templates: gen.templates,
 					basePath: gen.path || generated,
 				});
 			}
 
-			// Update response types for TS operations. Do this only after code generation completes,
-			// since TS operations need some of the generated files
-			const tsOperations: TypeScriptOperation[] = app.Operations.filter(
-				(operation) => operation.ExecutionEngine == OperationExecutionEngine.ENGINE_NODEJS
-			);
-			await updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
-
+			logger.debug('writing configuration');
 			const storedConfig = storedWunderGraphConfig(resolved, apis.length);
 			const configData = WunderGraphConfiguration.encode(storedConfig).finish();
 			fs.writeFileSync(path.join(generated, WunderGraphConfigurationFilename), configData);
@@ -1147,6 +1186,7 @@ export const configureWunderGraphApplication = <
 				baseURL: publicNodeUrl,
 			});
 
+			logger.debug('generating Postman operations');
 			writeWunderGraphFileSync('postman', postman.toJSON());
 
 			const openApiBuilder = new OpenApiBuilder({
@@ -1157,6 +1197,7 @@ export const configureWunderGraphApplication = <
 
 			const openApiSpec = openApiBuilder.build(app.Operations);
 
+			logger.debug('generating OpenAPI server specification');
 			writeWunderGraphFileSync('openapi', openApiSpec);
 
 			Logger.info('Build completed.');
@@ -1254,7 +1295,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 	for (const integration of integrations) {
 		const httpTransport = integration.hooks['http:transport'];
 		if (httpTransport) {
-			const config = httpTransport as unknown as DynamicTransportConfig;
+			const config = httpTransport as unknown as InternalHookConfig;
 			if (config.match) {
 				const matches = Array.isArray(config.match) ? config.match : [config.match];
 				for (const match of matches) {
@@ -1263,7 +1304,9 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 						id,
 						type: HookType.HTTP_TRANSPORT,
 						matcher: {
-							operationType: match.operationType ? operationTypes[match.operationType] : undefined,
+							operationType: match.operationType
+								? operationTypes[match.operationType as keyof typeof operationTypes]
+								: undefined,
 							datasources: (match as { datasources?: string[] }).datasources ?? [],
 						},
 					});
@@ -1319,7 +1362,7 @@ const storedWunderGraphConfig = (config: ResolvedWunderGraphConfig, apiCount: nu
 					bucketName: mapInputVariable(provider.bucketName),
 					endpoint: mapInputVariable(provider.endpoint),
 					secretAccessKey: mapInputVariable(provider.secretAccessKey),
-					useSSL: provider.useSSL,
+					useSSL: provider.useSSL ?? true,
 					uploadProfiles: uploadProfiles,
 				};
 			}),
@@ -1483,11 +1526,11 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 		contents.push(`export type ${responseTypeName(op)} = ExtractResponse<typeof ${name}>`);
 		const implementationFilePath = operationFilePath(wgDirAbs, op);
 		const implementationContents = fs.readFileSync(implementationFilePath, { encoding: 'utf8' });
-		operationHashes.push(objectHash(implementationContents));
+		operationHashes.push(fastHash(implementationContents));
 	}
 
 	const cache = new LocalCache().bucket('operationTypes');
-	const cacheKey = `ts.operationTypes.${objectHash([contents, operationHashes])}`;
+	const cacheKey = `ts.operationTypes.${fastHash([contents, operationHashes])}`;
 	const cachedData = await cache.getJSON(cacheKey);
 	if (cachedData) {
 		return cachedData as Record<string, JSONSchema>;
@@ -1533,8 +1576,11 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 	for (const op of operations) {
 		try {
 			const schema = generator.getSchemaForSymbol(responseTypeName(op));
-			delete schema.$schema;
-			schemas[op.Name] = schema as JSONSchema;
+			// if typescript operation returns undefined don't add the schema.
+			if (schema.type !== 'undefined') {
+				delete schema.$schema;
+				schemas[op.Name] = schema as JSONSchema;
+			}
 		} catch (e: any) {
 			Logger.warn(`could not generate response schema for ${op.Name}: ${e}`);
 		}
@@ -1550,7 +1596,9 @@ const updateTypeScriptOperationsResponseSchemas = async (wgDirAbs: string, opera
 	for (const op of operations) {
 		const schema = schemas[op.Name];
 		if (schema) {
-			op.ResponseSchema = schema;
+			op.ResponseSchema.properties = {
+				data: schema,
+			};
 		} else {
 			// For functions that don't return anything, we return an empty JSON object
 			op.ResponseSchema = {
@@ -1735,7 +1783,7 @@ const loadAndApplyNodeJsOperationOverrides = async (
 // this function.
 const applyNodeJsOperationOverrides = (
 	operation: TypeScriptOperation,
-	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any, any>
+	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any>
 ): TypeScriptOperation => {
 	if (overrides.inputSchema) {
 		const schema = zodToJsonSchema(overrides.inputSchema) as any;

@@ -1,4 +1,4 @@
-import { createOperation, z } from '../generated/wundergraph.factory';
+import { createOperation, z } from '#/generated/wundergraph.factory';
 
 export default createOperation.query({
 	input: z.object({
@@ -6,7 +6,7 @@ export default createOperation.query({
 		code: z.string(),
 	}),
 	handler: async (ctx) => {
-		// using ctx.internalClient, we can call the previously defined GraphQL Operations
+		// using ctx.operations, we can call the previously defined GraphQL Operations
 		// both input and response of the GraphQL Operations are fully typed
 		const country = await ctx.operations.query({
 			operationName: 'Country',

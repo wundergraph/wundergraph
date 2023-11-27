@@ -2,8 +2,8 @@ import { FieldConfig, OperationsGenerationConfig } from '../configure/codegenera
 import { ResolvedApplication, ResolvedWunderGraphConfig } from '../configure';
 import path from 'path';
 import fs from 'fs';
-import { buildOperationNodeForField } from '@graphql-tools/utils';
-import { buildSchema, OperationTypeNode, print } from 'graphql';
+import { buildOperationNodeForField, Maybe } from '@graphql-tools/utils';
+import { buildSchema, GraphQLObjectType, OperationTypeNode, print, visit } from 'graphql';
 
 export interface GenerateConfig {
 	app: ResolvedApplication;
@@ -26,11 +26,35 @@ export const generateOperations = async (config: GenerateConfig) => {
 		if (!fs.existsSync(operationDir)) {
 			fs.mkdirSync(operationDir, { recursive: true });
 		}
-		const operationNode = buildOperationNodeForField({
+		let operationNode = buildOperationNodeForField({
 			field: field.name,
 			schema,
 			kind: field.operationType as OperationTypeNode,
 		});
+		let opType: Maybe<GraphQLObjectType>;
+		if (field.operationType === OperationTypeNode.QUERY) {
+			opType = schema.getQueryType();
+		} else if (field.operationType === OperationTypeNode.MUTATION) {
+			opType = schema.getMutationType();
+		} else if (field.operationType === OperationTypeNode.SUBSCRIPTION) {
+			opType = schema.getSubscriptionType();
+		}
+		const matchedField = (opType?.getFields() || {})[field.name];
+		if (matchedField) {
+			operationNode = visit(operationNode, {
+				VariableDefinition: {
+					leave: (node, key, parent, path, ancestors) => {
+						const variableName = node.variable.name.value;
+						const matchingArg = (matchedField?.args || []).find((arg) => arg.name === variableName);
+						const defaultValue = matchingArg?.astNode?.defaultValue;
+						return {
+							...node,
+							defaultValue,
+						};
+					},
+				},
+			});
+		}
 		const operationContent = operationsHeader + print(operationNode);
 		const operationFilePath = buildFieldPath(config, field);
 		generatedFiles.push(operationFilePath);

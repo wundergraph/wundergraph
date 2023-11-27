@@ -7,14 +7,16 @@ export default configureWunderGraphServer(() => ({
 			/**
 			 * mutatingPostResolve is a hook that is called after the user has been authenticate.
 			 */
-			mutatingPostAuthentication: async ({ user, internalClient, log }) => {
+			mutatingPostAuthentication: async ({ user, operations, log }) => {
 				const roles: Role[] = [];
 
-				const client = internalClient.withHeaders({
+				const client = operations.withHeaders({
 					Authorization: `token ${user.rawAccessToken}`,
 				});
 
-				const { data } = await client.queries.HasWunderGraphStarred();
+				const { data } = await client.query({
+					operationName: 'HasWunderGraphStarred',
+				});
 
 				// Only allow the user to access the server if they have starred the repo
 				if (

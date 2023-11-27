@@ -158,12 +158,14 @@ describe('Test subscriptions', () => {
 				triggers++;
 			}
 		);
-		// Now delete the last 2 notes
+		// Await for the initial trigger
+		await new Promise((r) => setTimeout(r, 2000));
+		// Now delete the last note
+		expect(triggers).toBe(1);
+		expectedNotesLength -= 1;
 		await client.mutate({ operationName: 'DeleteNote', input: { id: ids[ids.length - 1] } });
-		await client.mutate({ operationName: 'DeleteNote', input: { id: ids[ids.length - 2] } });
-		expectedNotesLength -= 2;
 		// Wait for the live query to trigger again (minimum interval is 1s, which is what we set in the config)
-		await new Promise((r) => setTimeout(r, 1100));
+		await new Promise((r) => setTimeout(r, 2000));
 		expect(triggers).toBe(2);
 		abort.abort();
 		const last = await query;
@@ -249,5 +251,34 @@ describe('Test error responses', () => {
 				what: 'Christmas Day Dinner',
 			},
 		]);
+	});
+});
+
+describe('Test object types overlapping with well known scalar types', () => {
+	test('query an object named Time', async () => {
+		const result = await wg.client().query({
+			operationName: 'Time',
+		});
+
+		expect(result.error).toBeUndefined();
+		expect(result.data?.notes_time?.hours).toBeDefined();
+		expect(result.data?.notes_time?.minutes).toBeDefined();
+		expect(result.data?.notes_time?.seconds).toBeDefined();
+	});
+});
+
+describe('It should parse Bigint', () => {
+	test('query an object named Time', async () => {
+		const result = await wg.client().mutate({
+			operationName: 'Bigint',
+			input: {
+				input: {
+					quantity: 10,
+				},
+			},
+		});
+
+		expect(result.error).toBeUndefined();
+		expect(result.data?.notes_post_bigint?.quantity).toBeDefined();
 	});
 });

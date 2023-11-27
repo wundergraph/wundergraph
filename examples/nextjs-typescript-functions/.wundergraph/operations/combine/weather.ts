@@ -5,12 +5,14 @@ export default createOperation.query({
 		code: z.string(),
 	}),
 	handler: async (ctx) => {
-		const country = await ctx.internalClient.queries.Country({
+		const country = await ctx.operations.query({
+			operationName: 'Country',
 			input: {
 				code: ctx.input.code,
 			},
 		});
-		const weather = await ctx.internalClient.queries.Weather({
+		const weather = await ctx.operations.query({
+			operationName: 'Weather',
 			input: {
 				city: country.data?.countries_country?.capital || '',
 			},

@@ -88,20 +88,21 @@ So, you're safe to use `process.env.{VARIABLE_NAME}` in your `wundergraph.server
 
 By default, when no options are passed to `wundergraph.config.ts` or `wundergraph.server.ts`, we will use environment variables with default values:
 
-| Variable name           | Description                                                        | Default value           |
-| ----------------------- | ------------------------------------------------------------------ | ----------------------- |
-| `WG_LOG_LEVEL`          | The log level of the `WunderNode`/`WunderGraph Server`.            | `info`                  |
-| `WG_NODE_URL`           | The internal URL of the `WunderNode`.                              | `http://localhost:9991` |
-| `WG_NODE_INTERNAL_URL`  | The internal URL of the `WunderNode` handling internal operations. | `http://localhost:9993` |
-| `WG_PUBLIC_NODE_URL`    | The publicly available URL of the `WunderNode`.                    | `http://localhost:9991` |
-| `WG_NODE_HOST`          | The host of the `WunderNode`.                                      | `localhost`             |
-| `WG_NODE_PORT`          | The port of the `WunderNode`.                                      | `9991`                  |
-| `WG_NODE_INTERNAL_PORT` | The port of the `WunderNode` for internal operations.              | `9993`                  |
-| `WG_SERVER_URL`         | The URL of the `WunderGraph Server`.                               | `http://localhost:9992` |
-| `WG_SERVER_HOST`        | The host of the `WunderGraph Server`.                              | `localhost`             |
-| `WG_SERVER_PORT`        | The port of the `WunderGraph Server`.                              | `9992`                  |
-| `WG_PROMETHEUS_ENABLED` | Whether to enable Prometheus metrics.                              | `true`                  |
-| `WG_PROMETHEUS_PORT`    | Port used to serve Prometheus metrics.                             | `8881`                  |
+| Variable name                          | Description                                                          | Default value           |
+| -------------------------------------- | -------------------------------------------------------------------- | ----------------------- |
+| `WG_LOG_LEVEL`                         | The log level of the `WunderNode`/`WunderGraph Server`.              | `info`                  |
+| `WG_NODE_URL`                          | The internal URL of the `WunderNode`.                                | `http://localhost:9991` |
+| `WG_NODE_INTERNAL_URL`                 | The internal URL of the `WunderNode` handling internal operations.   | `http://localhost:9993` |
+| `WG_PUBLIC_NODE_URL`                   | The publicly available URL of the `WunderNode`.                      | `http://localhost:9991` |
+| `WG_NODE_HOST`                         | The host of the `WunderNode`.                                        | `localhost`             |
+| `WG_NODE_PORT`                         | The port of the `WunderNode`.                                        | `9991`                  |
+| `WG_NODE_INTERNAL_PORT`                | The port of the `WunderNode` for internal operations.                | `9993`                  |
+| `WG_SERVER_URL`                        | The URL of the `WunderGraph Server`.                                 | `http://localhost:9992` |
+| `WG_SERVER_HOST`                       | The host of the `WunderGraph Server`.                                | `localhost`             |
+| `WG_SERVER_PORT`                       | The port of the `WunderGraph Server`.                                | `9992`                  |
+| `WG_PROMETHEUS_ENABLED`                | Whether to enable Prometheus metrics. \*Enterprise license required. | `false`                 |
+| `WG_PROMETHEUS_PORT`                   | Port used to serve Prometheus metrics.                               | `8881`                  |
+| `WG_SUBSCRIPTION_SERVER_PING_INTERVAL` | Ping interval when serving subscriptions, as a duration (e.g. `30s`) | `off`                   |
 
 ### Available log levels
 

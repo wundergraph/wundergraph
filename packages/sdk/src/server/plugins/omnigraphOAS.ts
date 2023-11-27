@@ -6,16 +6,26 @@ import { PubSub } from '@graphql-mesh/utils';
 import { LazyLoggerMessage, Logger, MeshFetch, MeshPubSub } from '@graphql-mesh/types';
 import { processDirectives } from '@omnigraph/openapi';
 import { fetch } from '@whatwg-node/fetch';
+import { loggedFetch } from './fetch';
+
+/**
+ * @TODO - remove this once we have a proper fix for the issue
+ *
+ * This is a workaround for the issue described here:
+ * https://github.com/Urigo/graphql-mesh/issues/6054
+ */
+import 'json-bigint-patch';
 
 export interface OpenApiServerConfig {
 	serverName: string;
 	schema: string;
 	mountPath: string;
 	upstreamURL?: string;
+	globalFetch?: typeof fetch;
 }
 
 const FastifyOASGraphQLPlugin: FastifyPluginAsync<OpenApiServerConfig> = async (fastify, config) => {
-	const schema = executableSchema(config.schema, fastify.log, config.upstreamURL);
+	const schema = executableSchema(config.schema, fastify.log, config.upstreamURL, config.globalFetch);
 
 	fastify.route({
 		method: ['GET', 'POST'],
@@ -51,7 +61,8 @@ const FastifyOASGraphQLPlugin: FastifyPluginAsync<OpenApiServerConfig> = async (
 const executableSchema = (
 	schemaStr: string,
 	logger: FastifyBaseLogger,
-	upstreamURL: string | undefined
+	upstreamURL: string | undefined,
+	globalFetch: typeof fetch = fetch
 ): GraphQLSchema => {
 	const schema = buildSchema(schemaStr, {
 		assumeValidSDL: true,
@@ -65,7 +76,7 @@ const executableSchema = (
 		schema,
 		logger: logWrapper,
 		pubsub,
-		globalFetch: fetch,
+		globalFetch: loggedFetch(logger.child({ type: 'OpenAPI' }), globalFetch),
 	};
 	if (upstreamURL !== '') {
 		opts['endpoint'] = upstreamURL;

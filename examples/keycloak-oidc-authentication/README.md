@@ -30,7 +30,23 @@ npm install && npm start
 On the NextJS frontend, click the "Login" button.
 Once the login is complete, the Frontend will automatically fetch the data and inject the bearer token into the origin request.
 
-[Keycloak console](http://localhost:8080/) user name: admin, password: admin
+### 4. Keycloak console
+
+- `http://localhost:8080/`
+- user name: admin
+- password: admin
+
+### 5. (Optional): Populating User.roles with Keycloak Client and Realm Roles
+
+By default, Keycloak roles are exposed through `realm_access.roles` and `resource_access.<client_id>.roles` claims. If you wish to populate the `User.roles` field with these roles, you will need to configure Keycloak's mapper settings accordingly.
+
+Follow these steps to achieve this configuration:
+
+1. Open the Keycloak admin console and select the `demo` realm.
+2. Navigate to `Clients Scope` > `roles` > `Mappers` > `realm roles` and perform the following configuration:
+   - Set **Token Claim Name** to `roles`.
+   - Ensure all switch prefixed with **Add to ...** are enabled.
+3. Do the same for `client roles` under the same Mappers tab.
 
 ## Learn More
 

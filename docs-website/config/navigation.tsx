@@ -361,10 +361,15 @@ const navigation = [
 					},
 				],
 			},
-			// {
-			// 	title: 'Configuring WunderGraph',
-			// 	links: [],
-			// },
+			{
+				title: 'Configuring WunderGraph',
+				links: [
+					{
+						title: 'Using path aliases',
+						href: '/docs/guides/using-path-aliases',
+					},
+				],
+			},
 			{
 				title: 'IDE',
 				links: [

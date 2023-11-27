@@ -1,6 +1,6 @@
 import type { DehydratedState, VueQueryPluginOptions } from '@tanstack/vue-query';
 import { VueQueryPlugin, QueryClient, hydrate, dehydrate } from '@tanstack/vue-query';
-import { useState } from '#app';
+import { useState } from '#imports';
 
 import { createHooks } from '@wundergraph/vue-query';
 import { createClient, Operations } from '../.wundergraph/components/generated/client';

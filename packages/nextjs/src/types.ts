@@ -3,9 +3,9 @@ import { Middleware } from 'swr';
 
 export type SSRCache = Record<string, any>;
 
-export interface WunderGraphProviderProps {
+export interface WunderGraphProviderProps<WunderGraphClient extends Client = Client> {
 	children: React.ReactNode;
-	client: Client;
+	client: WunderGraphClient;
 	context?: React.Context<WunderGraphContextValue | null>;
 	ssrCache?: SSRCache;
 	user?: User;
@@ -19,11 +19,11 @@ export interface WunderGraphContextValue {
 	user?: User;
 }
 
-export interface WithWunderGraphOptions {
+export interface WithWunderGraphOptions<WunderGraphClient extends Client = Client> {
 	/**
 	 * The WunderGraph client.
 	 */
-	client: Client;
+	client: WunderGraphClient;
 	/**
 	 * The cache key used for user data.
 	 * @default wg_user

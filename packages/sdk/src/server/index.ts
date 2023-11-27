@@ -1,5 +1,4 @@
 export type { HooksConfiguration } from './types';
-export type { OperationArgsWithInput, InternalClient } from './internal-client';
 export type { GraphQLServerConfig } from './plugins/graphql';
 
 export type {
@@ -25,6 +24,7 @@ export type {
 	MutationHookWithoutInput,
 	SubscriptionHook,
 	SubscriptionHookWithoutInput,
+	CustomContext,
 } from './types';
 export type {
 	SubscriptionRequestOptions,

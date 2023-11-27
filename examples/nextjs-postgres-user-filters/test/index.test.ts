@@ -38,19 +38,19 @@ describe('Test User and Nodes', () => {
 			input: {
 				data: [
 					{
-						name: 'A',
+						name: 'E',
 						created_at: new Date(2020, 1, 1).toISOString(),
 					},
 					{
-						name: 'B',
+						name: 'F',
 						created_at: new Date(2020, 1, 2).toISOString(),
 					},
 					{
-						name: 'C',
+						name: 'G',
 						created_at: new Date(2020, 1, 3).toISOString(),
 					},
 					{
-						name: 'D',
+						name: 'H',
 						created_at: new Date(2020, 1, 4).toISOString(),
 					},
 				],
@@ -62,7 +62,7 @@ describe('Test User and Nodes', () => {
 			input: {
 				where: {
 					name: {
-						equals: 'A',
+						equals: 'E',
 					},
 				},
 			},

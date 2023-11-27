@@ -98,8 +98,12 @@ func (h *AuthenticationHooks) RevalidateAuthentication(ctx context.Context, user
 	if err != nil {
 		return nil, err
 	}
-	result.AccessToken = user.AccessToken
-	result.IdToken = user.IdToken
+	if len(result.AccessToken) == 0 {
+		result.AccessToken = user.AccessToken
+	}
+	if len(result.IdToken) == 0 {
+		result.IdToken = user.IdToken
+	}
 	return result, nil
 }
 
@@ -142,9 +146,9 @@ func runMutatingAuthenticationHook(ctx context.Context, hook MiddlewareHook, cli
 		log.Error("hook failed", zap.Error(err))
 		return nil, err
 	}
-	if out.Error != "" {
-		log.Error("returned an error", zap.String("error", out.Error))
-		return nil, AuthenticationDeniedError(out.Error)
+	if err := out.ResponseError(); err != nil {
+		log.Error("returned an error", zap.Error(err))
+		return nil, AuthenticationDeniedError(err.Error())
 	}
 	var res mutatingPostAuthenticationResponse
 	if err := json.Unmarshal(out.Response, &res); err != nil {

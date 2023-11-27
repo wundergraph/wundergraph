@@ -10,6 +10,7 @@ import logger from '../logger';
 import { FastifyHooksOptions } from '../server/plugins/hooks';
 import merge from 'lodash/merge';
 import { OperationsConfiguration } from '../configure/operations';
+import { NodeOptions } from '../configure/options';
 
 async function withTakingALongTimeMsg<T>({
 	name,
@@ -28,12 +29,12 @@ async function withTakingALongTimeMsg<T>({
 	return result;
 }
 
-export const runHookConfigSetup = async ({ config }: { config: WunderGraphConfig }) => {
-	const operations = config.operations || {};
+const prepareConfig = (config: WunderGraphConfig): WunderGraphAppConfig => {
+	const { operations = {}, authentication, ...rest } = config;
+	const { providers, redirectUris = [] } = authentication || {};
 
-	let wgConfig: WunderGraphAppConfig = {
-		...config,
-		// @todo move this to the app config
+	return {
+		...rest,
 		operations: {
 			defaultConfig: merge(
 				{
@@ -89,11 +90,18 @@ export const runHookConfigSetup = async ({ config }: { config: WunderGraphConfig
 			},
 			cookieBased: {
 				providers: [],
+				authorizedRedirectUriRegexes: redirectUris,
 			},
 		},
 	};
+};
 
-	const integrations = config.datasources.concat(config.integrations || []);
+export const runHookConfigSetup = async ({ config }: { config: WunderGraphConfig }) => {
+	let wgConfig = prepareConfig(config);
+
+	const integrations = config.datasources
+		.concat(config.integrations || [])
+		.concat(config.authentication?.providers || []);
 
 	for (const integration of integrations) {
 		if (integration.hooks?.['config:setup']) {
@@ -115,7 +123,7 @@ export const runHookConfigSetup = async ({ config }: { config: WunderGraphConfig
 							},
 						};
 					}
-					wgConfig.authentication[type]?.providers?.push(authProvider);
+					wgConfig.authentication[type]?.providers?.push(authProvider as any);
 				},
 				addS3Provider: (s3Provider: S3UploadConfiguration) => {
 					if (!wgConfig.s3UploadProvider) {

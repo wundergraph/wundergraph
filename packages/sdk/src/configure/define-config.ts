@@ -13,9 +13,11 @@ export const createWunderGraphApplication = async <
 	TPublicClaim extends TCustomClaim | WellKnownClaim
 >(
 	config: WunderGraphConfig,
-	server?: WunderGraphHooksAndServerConfig
+	server: WunderGraphHooksAndServerConfig = {}
 ) => {
 	const appConfig = await runHookConfigSetup({ config });
+
+	server.integrations = config.integrations || [];
 
 	appConfig.server = server;
 

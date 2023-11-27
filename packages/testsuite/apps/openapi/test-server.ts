@@ -119,6 +119,29 @@ export const createOpenAPITestServer = (port: number) => {
 		reply.code(200).header('content-type', 'application/json; charset=utf-8').send(response);
 	});
 
+	server.get('/time', async (request, reply) => {
+		const now = new Date();
+		const response = {
+			hours: now.getHours(),
+			minutes: now.getMinutes(),
+			seconds: now.getSeconds(),
+		};
+		reply.code(200).header('content-type', 'application/json; charset=utf-8').send(response);
+	});
+
+	server.post<{ Body: string }>('/bigint', async (request, reply) => {
+		let json;
+		try {
+			json = JSON.parse(request.body);
+		} catch {
+			throw new Error('Input required');
+		}
+		const response = {
+			quantity: json.quantity,
+		};
+		reply.code(200).header('content-type', 'application/json; charset=utf-8').send(response);
+	});
+
 	server.listen({ port: port }, (err, address) => {
 		if (err) {
 			console.error(err);

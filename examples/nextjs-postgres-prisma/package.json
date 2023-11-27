@@ -7,7 +7,7 @@
     "start:services": "docker-compose up -d",
     "wait-on:services": "wait-on -d 5000 tcp:54322",
     "setup": "npm run migrate init",
-    "wundergraph": "wunderctl up --logs",
+    "wundergraph": "wunderctl up",
     "build:wundergraph": "wunderctl generate",
     "build:next": "next build",
     "build": "npm run build:wundergraph && npm run build:next",
@@ -22,10 +22,10 @@
   },
   "dependencies": {
     "@prisma/client": "^4.11.0",
-    "@wundergraph/nextjs": "^0.13.10",
-    "@wundergraph/sdk": "^0.174.5",
+    "@wundergraph/nextjs": "^0.14.10",
+    "@wundergraph/sdk": "^0.180.1",
     "graphql": "^16.3.0",
-    "next": "^13.1.1",
+    "next": "^14.0.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "swr": "^2.2.0"

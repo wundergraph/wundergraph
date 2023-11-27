@@ -7,6 +7,7 @@ import objectHash from 'object-hash';
 import writeFileAtomic from 'write-file-atomic';
 
 import logger from '../logger';
+import { toJson } from '../utils/tojson';
 
 interface CacheSetOptions {
 	ttlSeconds?: number;
@@ -210,7 +211,7 @@ export class LocalCacheBucket {
 	async setJSON(key: any, data: any, opts?: CacheSetOptions): Promise<boolean> {
 		let encoded: string;
 		try {
-			encoded = JSON.stringify(data);
+			encoded = await toJson(data);
 		} catch (e: any) {
 			logger.error(`error storing encoding cached data: ${e}`);
 			return false;

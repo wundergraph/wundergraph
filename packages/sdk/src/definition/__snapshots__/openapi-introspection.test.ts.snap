@@ -4312,7 +4312,7 @@ type LookmlModel {
 
 type LookmlModelExplore {
   "(DEPRECATED) Array of access filter field names"
-  access_filter_fields: [String]
+  access_filter_fields: [String] @deprecated(reason: "deprecated")
   "Access filters"
   access_filters: [LookmlModelExploreAccessFilter]
   "Aliases"
@@ -9252,7 +9252,7 @@ type ScheduledPlan {
   "Custom url path and parameters for the scheduled entity"
   custom_url_params: String
   "(DEPRECATED) Alias for filters_string field"
-  dashboard_filters: String
+  dashboard_filters: String @deprecated(reason: "deprecated")
   "Id of a dashboard"
   dashboard_id: String
   "Name of a datagroup; if specified will run when datagroup triggered (can't be used with cron string)"
@@ -9616,7 +9616,7 @@ type Setting {
   "Toggle extension framework on or off"
   extension_framework_enabled: Boolean!
   "(DEPRECATED) Toggle extension extension load url on or off. Do not use. This is temporary setting that will eventually become a noop and subsequently deleted."
-  extension_load_url_enabled: Boolean!
+  extension_load_url_enabled: Boolean! @deprecated(reason: "deprecated")
   "Change the base portion of your Looker instance URL setting"
   host_url: String!
   "Toggle marketplace auto install on or off. Note that auto install only runs if marketplace is enabled."
@@ -9924,7 +9924,7 @@ type ThemeSettings {
   "Source specification for font"
   font_source: String
   "(DEPRECATED) Info button color"
-  info_button_color: String!
+  info_button_color: String! @deprecated(reason: "deprecated")
   "Primary button color"
   primary_button_color: String!
   "Toggle to show the dashboard header. Defaults to true."
@@ -9956,7 +9956,7 @@ type ThemeSettings {
   "Color for titles"
   title_color: String!
   "(DEPRECATED) Warning button color"
-  warn_button_color: String!
+  warn_button_color: String! @deprecated(reason: "deprecated")
 }
 
 input ThemeSettings_Input {
@@ -10089,7 +10089,7 @@ type User {
   "(Embed only) ID of user's group folder based on the external_group_id optionally specified during embed user login"
   embed_group_folder_id: String
   "(DEPRECATED) (Embed only) ID of user's group space based on the external_group_id optionally specified during embed user login"
-  embed_group_space_id: String
+  embed_group_space_id: String @deprecated(reason: "deprecated")
   "First name"
   first_name: String
   "Array of ids of the groups for this user"
@@ -15872,7 +15872,7 @@ type LookmlModel {
 
 type LookmlModelExplore {
   "(DEPRECATED) Array of access filter field names"
-  access_filter_fields: [String]
+  access_filter_fields: [String] @deprecated(reason: "deprecated")
   "Access filters"
   access_filters: [LookmlModelExploreAccessFilter]
   "Aliases"
@@ -20812,7 +20812,7 @@ type ScheduledPlan {
   "Custom url path and parameters for the scheduled entity"
   custom_url_params: String
   "(DEPRECATED) Alias for filters_string field"
-  dashboard_filters: String
+  dashboard_filters: String @deprecated(reason: "deprecated")
   "Id of a dashboard"
   dashboard_id: String
   "Name of a datagroup; if specified will run when datagroup triggered (can't be used with cron string)"
@@ -21176,7 +21176,7 @@ type Setting {
   "Toggle extension framework on or off"
   extension_framework_enabled: Boolean!
   "(DEPRECATED) Toggle extension extension load url on or off. Do not use. This is temporary setting that will eventually become a noop and subsequently deleted."
-  extension_load_url_enabled: Boolean!
+  extension_load_url_enabled: Boolean! @deprecated(reason: "deprecated")
   "Change the base portion of your Looker instance URL setting"
   host_url: String!
   "Toggle marketplace auto install on or off. Note that auto install only runs if marketplace is enabled."
@@ -21484,7 +21484,7 @@ type ThemeSettings {
   "Source specification for font"
   font_source: String
   "(DEPRECATED) Info button color"
-  info_button_color: String!
+  info_button_color: String! @deprecated(reason: "deprecated")
   "Primary button color"
   primary_button_color: String!
   "Toggle to show the dashboard header. Defaults to true."
@@ -21516,7 +21516,7 @@ type ThemeSettings {
   "Color for titles"
   title_color: String!
   "(DEPRECATED) Warning button color"
-  warn_button_color: String!
+  warn_button_color: String! @deprecated(reason: "deprecated")
 }
 
 input ThemeSettings_Input {
@@ -21649,7 +21649,7 @@ type User {
   "(Embed only) ID of user's group folder based on the external_group_id optionally specified during embed user login"
   embed_group_folder_id: String
   "(DEPRECATED) (Embed only) ID of user's group space based on the external_group_id optionally specified during embed user login"
-  embed_group_space_id: String
+  embed_group_space_id: String @deprecated(reason: "deprecated")
   "First name"
   first_name: String
   "Array of ids of the groups for this user"
@@ -23588,7 +23588,7 @@ type EpisodeObject {
   "True if the episode is playable in the given market. Otherwise false."
   is_playable: Boolean!
   "The language used in the episode, identified by a [ISO 639](https://en.wikipedia.org/wiki/ISO_639) code. This field is deprecated and might be removed in the future. Please use the \`languages\` field instead."
-  language: String
+  language: String @deprecated(reason: "deprecated")
   "A list of the languages used in the episode, identified by their [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639) code."
   languages: [String]!
   "The name of the episode."
@@ -25177,7 +25177,7 @@ type SimplifiedEpisodeObject {
   "True if the episode is playable in the given market. Otherwise false."
   is_playable: Boolean!
   "The language used in the episode, identified by a [ISO 639](https://en.wikipedia.org/wiki/ISO_639) code. This field is deprecated and might be removed in the future. Please use the \`languages\` field instead."
-  language: String
+  language: String @deprecated(reason: "deprecated")
   "A list of the languages used in the episode, identified by their [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639) code."
   languages: [String]!
   "The name of the episode."
@@ -25653,7 +25653,7 @@ type query_get_audio_analysis_oneOf_0_meta {
 "Indicates the modality (major or minor) of a section, the type of scale from which its melodic content is derived. This field will contain a 0 for \\"minor\\", a 1 for \\"major\\", or a -1 for no result. Note that the major key (e.g. C major) could more likely be confused with the minor key at 3 semitones lower (e.g. A minor) as both keys carry the same pitches."
 enum query_get_audio_analysis_oneOf_0_sections_items_mode {
   NEGATIVE_1 @enum(value: "-1")
-  _0 @enum(value: "\\"0\\"")
+  _0 @enum(value: "0")
   _1 @enum(value: "1")
 }
 
@@ -26240,7 +26240,7 @@ type EpisodeObject {
   "True if the episode is playable in the given market. Otherwise false."
   is_playable: Boolean!
   "The language used in the episode, identified by a [ISO 639](https://en.wikipedia.org/wiki/ISO_639) code. This field is deprecated and might be removed in the future. Please use the \`languages\` field instead."
-  language: String
+  language: String @deprecated(reason: "deprecated")
   "A list of the languages used in the episode, identified by their [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639) code."
   languages: [String]!
   "The name of the episode."
@@ -27829,7 +27829,7 @@ type SimplifiedEpisodeObject {
   "True if the episode is playable in the given market. Otherwise false."
   is_playable: Boolean!
   "The language used in the episode, identified by a [ISO 639](https://en.wikipedia.org/wiki/ISO_639) code. This field is deprecated and might be removed in the future. Please use the \`languages\` field instead."
-  language: String
+  language: String @deprecated(reason: "deprecated")
   "A list of the languages used in the episode, identified by their [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639) code."
   languages: [String]!
   "The name of the episode."

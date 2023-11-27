@@ -1,0 +1,50 @@
+diff --git a/cjs/healJSONSchema.js b/cjs/healJSONSchema.js
+index 030aea21d1a515edd8462ba368afe894b6a765fe..36ffc5a6eefbb54e9b944c4295c457648bbef8ec 100644
+--- a/cjs/healJSONSchema.js
++++ b/cjs/healJSONSchema.js
+@@ -98,6 +98,20 @@ async function healJSONSchema(schema, { logger = new utils_1.DefaultLogger('heal
+                     subSchema.oneOf.push(...subSchema.allOf[0].oneOf);
+                     delete subSchema.allOf;
+                 }
++                // Required is inherited with swagger, but not when generating the Graphql types
++                if (subSchema.required?.length && subSchema.allOf?.length) {
++                    logger.debug(`${path} has a required definition and allOf definition. Applying required to sub schemas.`);
++                    subSchema.allOf = subSchema.allOf.map((schema) => {
++                        if (schema.$resolvedRef) {
++                            return schema;
++                        }
++                        if (!schema.required) {
++                            schema.required = [];
++                        }
++                        schema.required = schema.required.concat(subSchema.required);
++                        return schema;
++                    });
++                }
+                 // If they have title, it makes sense to keep them to reflect the schema in a better way
+                 if (!subSchema.title) {
+                     if (subSchema.anyOf != null &&
+diff --git a/esm/healJSONSchema.js b/esm/healJSONSchema.js
+index 9f1629fc7f3c61cc03207629202573fa5b1c1af1..44bd535b75036c18d0e5bf39fcba114ba41e4237 100644
+--- a/esm/healJSONSchema.js
++++ b/esm/healJSONSchema.js
+@@ -94,6 +94,20 @@ export async function healJSONSchema(schema, { logger = new DefaultLogger('healJ
+                     subSchema.oneOf.push(...subSchema.allOf[0].oneOf);
+                     delete subSchema.allOf;
+                 }
++                // Required is inherited with swagger, but not when generating the Graphql types
++                if (subSchema.required?.length && subSchema.allOf?.length) {
++                    logger.debug(`${path} has a required definition and allOf definition. Applying required to sub schemas.`);
++                    subSchema.allOf = subSchema.allOf.map((schema) => {
++                        if (schema.$resolvedRef) {
++                            return schema;
++                        }
++                        if (!schema.required) {
++                            schema.required = [];
++                        }
++                        schema.required = schema.required.concat(subSchema.required);
++                        return schema;
++                    });
++                }
+                 // If they have title, it makes sense to keep them to reflect the schema in a better way
+                 if (!subSchema.title) {
+                     if (subSchema.anyOf != null &&

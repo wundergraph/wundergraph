@@ -6,6 +6,7 @@ export interface ReplaceCustomScalarsResult {
 	schemaSDL: string;
 	customScalarTypeFields: SingleTypeField[];
 	customScalarTypeNames: Set<string>;
+	replacedTypeNames: Map<string, string>;
 }
 
 export const replaceCustomScalars = (
@@ -14,12 +15,18 @@ export const replaceCustomScalars = (
 ): ReplaceCustomScalarsResult => {
 	const replacements = introspection.replaceCustomScalarTypeFields;
 	if (!replacements || replacements.length < 1) {
-		return { schemaSDL, customScalarTypeFields: [], customScalarTypeNames: new Set<string>() };
+		return {
+			schemaSDL,
+			customScalarTypeFields: [],
+			customScalarTypeNames: new Set<string>(),
+			replacedTypeNames: new Map<string, string>(),
+		};
 	}
 	const replacementsByParentName = getCustomScalarReplacementsByParent(replacements);
 	const replacementsByInterfaceName = new Map<string, Map<string, string>>();
 	const replacementScalars = new Set<SingleTypeField>();
 	const replacementScalarTypeNames = new Set<string>();
+	const replacedTypeNames = new Map<string, string>();
 	let currentParentInterfaces: string[] = [];
 	let currentValidParentTypeName = '';
 	let customScalarReplacementTypeNameForField = '';
@@ -123,9 +130,11 @@ export const replaceCustomScalars = (
 				return false;
 			}
 			if (customScalarReplacementTypeNameForInputValue) {
+				replacedTypeNames.set(customScalarReplacementTypeNameForInputValue, node.name.value);
 				return { ...node, name: { ...node.name, value: customScalarReplacementTypeNameForInputValue } };
 			}
 			if (customScalarReplacementTypeNameForField) {
+				replacedTypeNames.set(customScalarReplacementTypeNameForField, node.name.value);
 				return { ...node, name: { ...node.name, value: customScalarReplacementTypeNameForField } };
 			}
 		},
@@ -137,6 +146,7 @@ export const replaceCustomScalars = (
 			schemaSDL: schema,
 			customScalarTypeFields: Array.from(replacementScalars),
 			customScalarTypeNames: replacementScalarTypeNames,
+			replacedTypeNames,
 		};
 	}
 
@@ -182,6 +192,7 @@ export const replaceCustomScalars = (
 		schemaSDL: schema,
 		customScalarTypeFields: Array.from(replacementScalars),
 		customScalarTypeNames: replacementScalarTypeNames,
+		replacedTypeNames,
 	};
 };
 

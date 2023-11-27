@@ -24,6 +24,7 @@ import {
 	ClientOperationErrorCodes,
 	NoUserError,
 } from './errors';
+import { deepClone } from '../utils/helper';
 
 // We follow https://docs.wundergraph.com/docs/architecture/wundergraph-rpc-protocol-explained
 
@@ -75,6 +76,7 @@ export class Client {
 	protected readonly baseHeaders: Headers = {};
 	private extraHeaders: Headers = {};
 	private csrfToken: string | undefined;
+	private userIsAuthenticated: boolean | undefined;
 	protected readonly csrfEnabled: boolean = true;
 
 	public static buildCacheKey(query: OperationRequestOptions): string {
@@ -164,16 +166,6 @@ export class Client {
 					code: resp.errors[0]?.code,
 					message: resp.errors[0]?.message,
 					errors: resp.errors,
-				}),
-			};
-		}
-
-		if (resp.data === undefined) {
-			return {
-				error: new ResponseError({
-					code: 'ResponseError',
-					statusCode,
-					message: 'Server returned no data',
 				}),
 			};
 		}
@@ -318,11 +310,12 @@ export class Client {
 					Accept: 'text/plain',
 				},
 			});
-			this.csrfToken = await res.text();
 
-			if (!this.csrfToken) {
+			if (res.status !== 200) {
 				throw new Error('Failed to get CSRF token. Please make sure you are authenticated.');
 			}
+
+			this.csrfToken = await res.text();
 		}
 		return this.csrfToken;
 	}
@@ -340,7 +333,7 @@ export class Client {
 
 		const headers: Headers = {};
 
-		if (this.isAuthenticatedOperation(options.operationName) && this.csrfEnabled) {
+		if (this.shouldIncludeCsrfToken(this.isAuthenticatedOperation(options.operationName))) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 
@@ -403,15 +396,19 @@ export class Client {
 		});
 
 		if (!response.ok) {
+			this.userIsAuthenticated = false;
 			throw await this.handleClientResponseError(response);
 		}
 
 		if (response.status == 204) {
+			this.userIsAuthenticated = false;
 			// No user is signed in. Keep this in sync with pkg/authentication/authentication.go
 			throw new NoUserError({ statusCode: response.status });
 		}
 
-		return response.json();
+		const user = response.json();
+		this.userIsAuthenticated = true;
+		return user;
 	}
 
 	/**
@@ -495,6 +492,9 @@ export class Client {
 					eventSource.close();
 					return;
 				}
+				if (ev.data == '') {
+					return;
+				}
 				const jsonResp = JSON.parse(ev.data);
 				// we parse the json response, which might be a json patch (array) or a full response (object)
 				if (lastResponse !== null && Array.isArray(jsonResp)) {
@@ -508,7 +508,7 @@ export class Client {
 					// it's not a patch, so we just set the lastResponse to the current response
 					lastResponse = jsonResp as GraphQLResponse;
 				}
-				const clientResponse = this.convertGraphQLResponse(lastResponse);
+				const clientResponse = this.convertGraphQLResponse(deepClone(lastResponse));
 				cb(clientResponse);
 			});
 			if (subscription?.abortSignal) {
@@ -579,13 +579,21 @@ export class Client {
 			if (message.endsWith('\n\n')) {
 				const parts = message.substring(0, message.length - '\n\n'.length).split('\n\n');
 				for (const part of parts) {
+					if (part == '') {
+						// Empty payload to keep the connection alive
+						continue;
+					}
 					const jsonResp = JSON.parse(part);
 					if (lastResponse !== null && Array.isArray(jsonResp)) {
 						lastResponse = applyPatch(lastResponse, jsonResp).newDocument as GraphQLResponse;
 					} else {
 						lastResponse = jsonResp as GraphQLResponse;
 					}
-					yield this.convertGraphQLResponse(lastResponse, response.status);
+					// XXX: This needs to be cloned before we send it to the client,
+					// otherwise we will overwrite the value the client receives
+					//  in the next iteration
+					const result = deepClone(lastResponse);
+					yield this.convertGraphQLResponse(result, response.status);
 				}
 				message = '';
 			}
@@ -611,7 +619,7 @@ export class Client {
 
 		const headers: Headers = {};
 
-		if (this.csrfEnabled && (validation?.requireAuthentication ?? true)) {
+		if (this.shouldIncludeCsrfToken(validation?.requireAuthentication ?? true)) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 
@@ -744,5 +752,26 @@ export class Client {
 		}
 
 		return ok;
+	}
+
+	private shouldIncludeCsrfToken(orCondition: boolean) {
+		if (this.csrfEnabled) {
+			if (orCondition) {
+				return true;
+			}
+			if (typeof this.userIsAuthenticated !== 'undefined') {
+				return this.userIsAuthenticated;
+			}
+			// If fetchUser has never been called and we're in a browser
+			// assume we do need the CSRF token. This shouldn't be a problem
+			// because the CSRF token generator is always available
+			if (typeof window !== 'undefined') {
+				// Browser
+				return true;
+			}
+			// Backend
+			return false;
+		}
+		return false;
 	}
 }

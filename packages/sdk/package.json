@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.174.5",
+  "version": "0.181.2",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -51,9 +51,17 @@
       "types": "./dist/integrations/datasources/index.d.ts",
       "default": "./dist/integrations/datasources/index.js"
     },
+    "./auth": {
+      "types": "./dist/integrations/auth/index.d.ts",
+      "default": "./dist/integrations/auth/index.js"
+    },
     "./advanced-hooks": {
-      "types": "./dist/advanced-hooks/index.d.ts",
-      "default": "./dist/advanced-hooks/index.js"
+      "types": "./dist/enterprise/advanced-hooks/index.d.ts",
+      "default": "./dist/enterprise/advanced-hooks/index.js"
+    },
+    "./enterprise": {
+      "types": "./dist/enterprise/index.d.ts",
+      "default": "./dist/enterprise/index.js"
     },
     "./dist/*": {
       "types": "./dist/*.d.ts",
@@ -89,14 +97,20 @@
       "orm": [
         "./dist/orm"
       ],
-      "datasources": [
-        "./dist/integrations/datasources"
-      ],
       "integrations": [
         "./dist/integrations"
       ],
+      "datasources": [
+        "./dist/integrations/datasources"
+      ],
+      "auth": [
+        "./dist/integrations/auth"
+      ],
+      "enterprise": [
+        "./dist/enterprise"
+      ],
       "advanced-hooks": [
-        "./dist/advanced-hooks"
+        "./dist/enterprise/advanced-hooks"
       ]
     }
   },
@@ -114,6 +128,7 @@
   ],
   "files": [
     "dist",
+    "patches",
     "tsconfig.json"
   ],
   "bin": {
@@ -140,9 +155,10 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest && npm run test:types",
-    "test:types": "tsd --typings ./tsconfig.json",
+    "test:types": "tsd",
     "test:int": "TEST_INTEGRATION=true jest",
-    "test:update-snapshots": "jest -u"
+    "test:update-snapshots": "jest -u",
+    "postinstall": "patch-package || (exit 0)"
   },
   "devDependencies": {
     "@types/chai": "^4.2.22",
@@ -167,16 +183,17 @@
   },
   "dependencies": {
     "@fastify/formbody": "^7.3.0",
-    "@graphql-mesh/cross-helpers": "^0.4.0",
-    "@graphql-mesh/store": "0.94.5",
-    "@graphql-mesh/types": "0.94.5",
-    "@graphql-mesh/utils": "0.94.5",
+    "@fastify/multipart": "^7.7.3",
+    "@graphql-mesh/cross-helpers": "^0.4.1",
+    "@graphql-mesh/store": "0.96.0",
+    "@graphql-mesh/types": "0.96.0",
+    "@graphql-mesh/utils": "0.96.0",
     "@graphql-tools/merge": "^9.0.0",
     "@graphql-tools/schema": "^8.5.1",
     "@graphql-tools/utils": "^9.2.1",
-    "@omnigraph/json-schema": "0.94.2",
-    "@omnigraph/openapi": "0.94.5",
-    "@omnigraph/soap": "0.94.5",
+    "@omnigraph/json-schema": "0.96.0",
+    "@omnigraph/openapi": "0.96.0",
+    "@omnigraph/soap": "0.96.0",
     "@opentelemetry/api": "^1.4.1",
     "@opentelemetry/core": "^1.13.0",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.39.1",
@@ -185,11 +202,11 @@
     "@opentelemetry/sdk-trace-node": "^1.13.0",
     "@opentelemetry/semantic-conventions": "^1.13.0",
     "@prisma/generator-helper": "^3.9.2",
-    "@whatwg-node/fetch": "^0.9.4",
+    "@whatwg-node/fetch": "^0.9.13",
     "@wundergraph/orm": "workspace:*",
     "@wundergraph/protobuf": "workspace:^0.118.2",
     "@wundergraph/straightforward": "^4.2.5",
-    "@wundergraph/wunderctl": "workspace:^0.170.0",
+    "@wundergraph/wunderctl": "workspace:^0.176.3",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",
@@ -207,13 +224,17 @@
     "https-proxy-agent": "^5.0.1",
     "ix": "^5.0.0",
     "js-yaml": "^4.1.0",
+    "json-bigint-patch": "^0.0.8",
+    "json-machete": "0.96.0",
     "json-schema": "^0.4.0",
     "json-schema-to-typescript": "^11.0.3",
+    "json-stream-stringify": "^3.1.0",
     "lodash": "^4.17.21",
     "long": "^5.2.0",
     "object-hash": "^2.2.0",
     "openai": "^3.3.0",
     "openapi-types": "12.1.0",
+    "patch-package": "^8.0.0",
     "pino": "^8.11.0",
     "postman-collection": "^4.1.7",
     "prettier": "2.8.7",
@@ -226,8 +247,8 @@
     "tslib": "^2.5.0",
     "typescript-json-schema": "^0.55.0",
     "write-file-atomic": "^5.0.0",
-    "zod": "^3.20.2",
-    "zod-to-json-schema": "^3.20.2"
+    "zod": "^3.22.3",
+    "zod-to-json-schema": "^3.21.4"
   },
   "jest": {
     "preset": "ts-jest",
@@ -239,5 +260,10 @@
   "tsd": {
     "directory": "test-d"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "patchedDependencies": {
+    "json-machete@0.96.0": "patches/json-machete@0.96.0.patch",
+    "graphql-scalars@1.22.4": "patches/graphql-scalars@1.22.4.patch",
+    "@omnigraph/json-schema@0.96.0": "patches/@omnigraph__json-schema@0.96.0.patch"
+  }
 }

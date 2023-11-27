@@ -85,7 +85,6 @@ export class NamespacingExecutor implements Executor {
 	}
 
 	// @todo utilize (or re-implement for now) `Client` methods from `./client/client.ts`
-	// OR just take an `InternalClient` instance
 
 	#buildOperationPayload(
 		document: DocumentNode,
@@ -188,7 +187,7 @@ export class NamespacingExecutor implements Executor {
 			},
 
 			[Kind.NAMED_TYPE]: (node) => {
-				if (!wellKnownTypeNames.includes(node.name.value)) {
+				if (!wellKnownTypeNames().includes(node.name.value)) {
 					return {
 						...node,
 						name: {

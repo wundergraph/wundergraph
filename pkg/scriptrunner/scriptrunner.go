@@ -283,17 +283,17 @@ func newCmd(options CmdOptions) (*gocmd.Cmd, chan struct{}) {
 		for cmd.Stdout != nil || cmd.Stderr != nil {
 			select {
 			case line, open := <-cmd.Stdout:
-				fmt.Fprintln(options.stdout, line)
 				if !open {
 					cmd.Stdout = nil
 					continue
 				}
+				fmt.Fprintln(options.stdout, line)
 			case line, open := <-cmd.Stderr:
-				fmt.Fprintln(stderrPipe, line)
 				if !open {
 					cmd.Stderr = nil
 					continue
 				}
+				fmt.Fprintln(stderrPipe, line)
 			}
 		}
 	}()

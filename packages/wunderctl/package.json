@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/wunderctl",
-  "version": "0.170.0",
+  "version": "0.176.3",
   "license": "Apache-2.0",
   "description": "WunderGraph Command Line Interface",
   "main": "./dist/index.js",

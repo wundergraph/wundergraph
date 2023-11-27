@@ -3,6 +3,62 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.24](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.23...@wundergraph/react-relay@0.4.24) (2023-11-24)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.4.23](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.22...@wundergraph/react-relay@0.4.23) (2023-11-06)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.4.22](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.21...@wundergraph/react-relay@0.4.22) (2023-10-30)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.4.21](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.20...@wundergraph/react-relay@0.4.21) (2023-10-26)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.4.20](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.19...@wundergraph/react-relay@0.4.20) (2023-10-25)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.4.19](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.18...@wundergraph/react-relay@0.4.19) (2023-10-18)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.4.18](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.17...@wundergraph/react-relay@0.4.18) (2023-10-12)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.4.17](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.16...@wundergraph/react-relay@0.4.17) (2023-10-10)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.4.16](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.15...@wundergraph/react-relay@0.4.16) (2023-10-04)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.4.15](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.14...@wundergraph/react-relay@0.4.15) (2023-09-22)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.4.14](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.13...@wundergraph/react-relay@0.4.14) (2023-09-15)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.4.13](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.12...@wundergraph/react-relay@0.4.13) (2023-09-05)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.4.12](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.11...@wundergraph/react-relay@0.4.12) (2023-09-01)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
+## [0.4.11](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.10...@wundergraph/react-relay@0.4.11) (2023-08-24)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
 ## [0.4.10](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.9...@wundergraph/react-relay@0.4.10) (2023-08-21)
 
 **Note:** Version bump only for package @wundergraph/react-relay

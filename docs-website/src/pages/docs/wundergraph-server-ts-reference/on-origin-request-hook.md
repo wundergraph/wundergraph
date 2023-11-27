@@ -20,7 +20,6 @@ The `onOriginRequest` hook is called with the following parameters:
 - `clientRequest`: The original client request object, including Headers
 - `log`: The logger object
 - `operations`: The operations client, used to call other (internal) operations
-- `internalClient`: The internal client object, _deprecated_
 - `request`: The HTTP request to be sent to the remote service
 - `operation`: The operation (name and type) that triggered the hook.
 

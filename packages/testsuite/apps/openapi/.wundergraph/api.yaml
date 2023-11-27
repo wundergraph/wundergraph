@@ -53,6 +53,28 @@ paths:
                     text:
                       type: string
 
+  /notes/echo_data:
+    get:
+      operationId: echoData
+      parameters:
+        - name: data
+          in: query
+          type: object
+          required: true
+          properties:
+            input:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          application/json:
+            schema:
+              type: object
+              properties:
+                jsonData:
+                  type: object
+                  additionalProperties: true
+
   /notes/note/{noteID}:
     get:
       summary: Returns a note by ID
@@ -132,3 +154,52 @@ paths:
                   id:
                     type: integer
                     format: int64
+
+  /time:
+    get:
+      summary: Returns the current time
+      responses:
+        '200':
+          description: The current time
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Time'
+  /bigint:
+    post:
+      summary: Returns a big integer
+      parameters:
+        - name: quantity
+          in: body
+          required: true
+          description: quantity
+          schema:
+            type: object
+            properties:
+              quantity:
+                type: integer
+                format: int64
+      responses:
+        '200':
+          description: A big integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  quantity:
+                    type: integer
+                    format: int64
+
+components:
+  schemas:
+    Time:
+      type: object
+      properties:
+        hours:
+          type: number
+        minutes:
+          type: number
+        seconds:
+          type: number
+      required: ['hours', 'minutes', 'seconds']
