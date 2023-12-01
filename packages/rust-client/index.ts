@@ -36,6 +36,12 @@ const defaultTemplateConfig: RustClientTemplateConfig = {
 	packageName: 'app',
 };
 
+const getAnyOf = (schema: JSONSchema) => {
+	// Since anyOf is very unergonomic to express with the rust type system,
+	// we handle both oneOf and anyOf as oneOf
+	return schema.anyOf ?? schema.oneOf ?? [];
+};
+
 const rustfmt = (code: string) => {
 	try {
 		// check if gofmt is installed
@@ -364,6 +370,9 @@ class rustEncoder {
 			}
 			// Provide a fallback typeName for anonymous embedded objects
 			const propTypeName = `${typeName}_${propName}`;
+			if ((propSchema.type as any) === 'undefined') {
+				continue;
+			}
 			let propType = this.encodeType(propSchema, propTypeName);
 			if (!propType) {
 				throw new Error(`property ${propName} with schema ${JSON.stringify(propSchema)} returned an empty type`);
@@ -384,7 +393,7 @@ class rustEncoder {
 	}
 
 	private encodeAnyOf(typeSchema: JSONSchema, optional: boolean, typeName?: string): string {
-		const anyOf = typeSchema.anyOf ?? [];
+		const anyOf = getAnyOf(typeSchema);
 		if (!typeName) {
 			throw new Error(`no type name for ${JSON.stringify(typeSchema)}`);
 		}
@@ -402,7 +411,7 @@ class rustEncoder {
 			if (!variantType) {
 				throw new Error(`variant ${ii} with schema ${JSON.stringify(variantSchema)} returned an empty type`);
 			}
-			def += `\t${toCamelCase(variantType)}(${variantType}),\n`;
+			def += `\t${toCamelCase(variantType.replace(/<|>/g, '_'))}(${variantType}),\n`;
 		}
 		def += `}\n\n`;
 		this.outputTypeDefinition(enumTypeName, def);
@@ -430,7 +439,7 @@ class rustEncoder {
 			return this.encodeType(current as JSONSchema, refTypeName);
 		}
 		let type = typeSchema.type;
-		let anyOf = typeSchema.anyOf;
+		let anyOf = getAnyOf(typeSchema);
 		let optional = false;
 		if (Array.isArray(type)) {
 			if (type.includes('null')) {
