@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.10](https://github.com/wundergraph/wundergraph/compare/@wundergraph/rust-client@0.1.9...@wundergraph/rust-client@0.1.10) (2023-11-24)
+
+### Bug Fixes
+
+* openapi schema for typescript operations ([#1339](https://github.com/wundergraph/wundergraph/issues/1339)) ([5b7e84d](https://github.com/wundergraph/wundergraph/commit/5b7e84d01215bc09735fae8c2f26f43ef7734290)) (@Pagebakers)
+
 ## [0.1.9](https://github.com/wundergraph/wundergraph/compare/@wundergraph/rust-client@0.1.8...@wundergraph/rust-client@0.1.9) (2023-11-06)
 
 **Note:** Version bump only for package @wundergraph/rust-client

@@ -167,6 +167,11 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		let subprocess: Subprocess | undefined;
 		if (manageServer) {
 			let cmd = ['start'];
+			// Don't start the embedded NATS server by default as it can cause
+			// performance issues in tests and we don't actually always need it.
+			if (!env.WG_DISABLE_EMBEDDED_NATS) {
+				env.WG_DISABLE_EMBEDDED_NATS = 'true';
+			}
 			env = { ...env, ...(this.options.env ?? {}), ...(opts?.env ?? {}) };
 			if (this.options.debug || process.env.WG_TEST_DEBUG) {
 				cmd.push('--debug', '--pretty-logging');
@@ -215,7 +220,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			}
 		};
 		try {
-			await retry(checkHealth, { retries: Math.ceil(timeout / retryDelay), delay: retryDelay });
+			await retry(checkHealth, { retries: Math.ceil(timeout / retryDelay), delay: retryDelay, timeout: 'INFINITELY' });
 		} catch (e: any) {
 			await this.stopSubprocess(subprocess);
 			throw new Error(`could not start WunderGraph server: ${e}`);

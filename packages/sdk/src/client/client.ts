@@ -170,16 +170,6 @@ export class Client {
 			};
 		}
 
-		if (resp.data === undefined) {
-			return {
-				error: new ResponseError({
-					code: 'ResponseError',
-					statusCode,
-					message: 'Server returned no data',
-				}),
-			};
-		}
-
 		return {
 			data: resp.data,
 		};
@@ -320,11 +310,12 @@ export class Client {
 					Accept: 'text/plain',
 				},
 			});
-			this.csrfToken = await res.text();
 
-			if (!this.csrfToken) {
+			if (res.status !== 200) {
 				throw new Error('Failed to get CSRF token. Please make sure you are authenticated.');
 			}
+
+			this.csrfToken = await res.text();
 		}
 		return this.csrfToken;
 	}
