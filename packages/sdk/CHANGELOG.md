@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.181.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.181.2...@wundergraph/sdk@0.181.3) (2023-12-01)
+
+### Bug Fixes
+
+* disable embedded nats server in tests by default ([#1349](https://github.com/wundergraph/wundergraph/issues/1349)) ([9a162c6](https://github.com/wundergraph/wundergraph/commit/9a162c6f1394c409238ec146dc02b7a7d852287b)) (@Pagebakers)
+
 ## [0.181.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.181.1...@wundergraph/sdk@0.181.2) (2023-11-24)
 
 ### Bug Fixes

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/rust-client@0.1.10...@wundergraph/rust-client@0.2.0) (2023-12-01)
+
+### Features
+
+* add support for oneOf in the rust client ([#1352](https://github.com/wundergraph/wundergraph/issues/1352)) ([b3b6288](https://github.com/wundergraph/wundergraph/commit/b3b62886740c0c5b27705841fd8aaa9b77ded7ab)) (@fiam)
+
 ## [0.1.10](https://github.com/wundergraph/wundergraph/compare/@wundergraph/rust-client@0.1.9...@wundergraph/rust-client@0.1.10) (2023-11-24)
 
 ### Bug Fixes
