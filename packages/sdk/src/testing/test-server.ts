@@ -2,8 +2,8 @@ import { Client, CreateClientConfig } from '../client';
 import { Subprocess, wunderctl } from '../wunderctlexec';
 import { retry } from 'ts-retry-promise';
 import { join } from 'node:path';
-import terminate from 'terminate/promise';
 import { freeport, fileExists } from './util';
+import psTree from 'ps-tree';
 
 type FetchFn = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>;
 
@@ -222,7 +222,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		try {
 			await retry(checkHealth, { retries: Math.ceil(timeout / retryDelay), delay: retryDelay, timeout: 'INFINITELY' });
 		} catch (e: any) {
-			await this.stopSubprocess(subprocess);
+			this.stopSubprocess(subprocess);
 			throw new Error(`could not start WunderGraph server: ${e}`);
 		}
 		// Server is up and running
@@ -241,7 +241,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 
 		this.stopped = true;
 
-		await this.stopSubprocess(this.subprocess);
+		this.stopSubprocess(this.subprocess);
 
 		this.stopped = false;
 		this.subprocess = undefined;
@@ -262,16 +262,25 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		};
 	}
 
-	private async stopSubprocess(proc?: Subprocess): Promise<void> {
+	private stopSubprocess(proc: Subprocess | undefined, signal: string | number | undefined = 'SIGKILL'): void {
 		if (proc?.pid) {
-			try {
-				await terminate(proc.pid);
-			} catch (e: any) {
-				// Ignore if the process is already gone
-				if (e.code !== 'ESRCH') {
-					throw e;
+			const ppid: number = proc.pid;
+
+			psTree(ppid, (err: Error | null, children: readonly psTree.PS[]): void => {
+				if (err !== null) throw err;
+
+				const pids: number[] = [ppid, ...children.map((process): number => parseInt(process.PID))];
+				for (const pid of pids) {
+					try {
+						process.kill(pid, signal);
+					} catch (e: any) {
+						// Ignore if the process is already gone
+						if (e.code !== 'ESRCH') {
+							throw e;
+						}
+					}
 				}
-			}
+			});
 		}
 	}
 
