@@ -26,10 +26,14 @@ export const generateOperations = async (config: GenerateConfig) => {
 		if (!fs.existsSync(operationDir)) {
 			fs.mkdirSync(operationDir, { recursive: true });
 		}
+
+		const options = config.operationGenerationConfig.getOptions(field.apiNamespace);
+
 		let operationNode = buildOperationNodeForField({
 			field: field.name,
 			schema,
 			kind: field.operationType as OperationTypeNode,
+			...options,
 		});
 		let opType: Maybe<GraphQLObjectType>;
 		if (field.operationType === OperationTypeNode.QUERY) {
