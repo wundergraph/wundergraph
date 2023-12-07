@@ -9,11 +9,19 @@ export interface GenerateConfig {
 
 export type OperationsGeneration = (config: OperationsGenerationConfig) => void;
 
+export type OperationsGenerationNamespaceOptions = {
+	depthLimit?: number;
+	circularReferenceDepth?: number;
+	argNames?: string[];
+	ignore?: string[];
+};
+
 export class OperationsGenerationConfig {
 	private rootFields: FieldConfig[] = [];
 	private basePath: string = '';
 	private namespaces: string[];
 	private pristine: boolean = true;
+	private options: Record<string, OperationsGenerationNamespaceOptions> = {};
 
 	constructor(config: {
 		app: WunderGraphConfigApplicationConfig<any, any>;
@@ -107,6 +115,14 @@ export class OperationsGenerationConfig {
 			return [];
 		}
 		return this.rootFields;
+	}
+
+	public setOptions(namespace: string, options: OperationsGenerationNamespaceOptions) {
+		this.options[namespace] = options;
+	}
+
+	public getOptions(namespace: string): OperationsGenerationNamespaceOptions {
+		return this.options[namespace] || {};
 	}
 }
 
