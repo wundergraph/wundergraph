@@ -34,7 +34,7 @@ export class OperationsGenerationConfig {
 		const queryTypeName = schema.getQueryType()?.name || '';
 		const mutationTypeName = schema.getMutationType()?.name || '';
 		const subscriptionTypeName = schema.getSubscriptionType()?.name || '';
-		let currentOperationType: 'query' | 'mutation' | 'subscription' = 'query';
+		let currentOperationType: 'query' | 'mutation' | 'subscription' | undefined = 'query';
 		visit(doc, {
 			ObjectTypeDefinition: (node) => {
 				switch (node.name.value) {
@@ -49,11 +49,18 @@ export class OperationsGenerationConfig {
 						return;
 					default:
 						// don't visit other types
+						currentOperationType = undefined;
 						return false;
 				}
 			},
 			FieldDefinition: (node) => {
 				const namespaceIndex = node.name.value.indexOf('_');
+
+				if (!currentOperationType) {
+					// ignore fields that are not part of a root type
+					return;
+				}
+
 				this.rootFields.push({
 					operationType: currentOperationType,
 					name: node.name.value,
