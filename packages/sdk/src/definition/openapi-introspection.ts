@@ -27,6 +27,7 @@ import { introspectGraphql } from './graphql-introspection';
 import { WgEnv } from '../configure/options';
 import { InputVariable, mapInputVariable, resolveVariable } from '../configure/variables';
 import { validateNamespace } from './namespacing';
+import { GraphQLScalarType } from 'graphql';
 
 export interface OpenAPIIntrospectionFile {
 	kind: 'file';
@@ -123,6 +124,10 @@ export interface OpenAPIIntrospectionV2
 	schemaExtension?: string;
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 	introspection?: IntrospectionFetchOptions & IntrospectionHeadersOptions;
+	/**
+	 * This allows you to map OpenAPI formats to custom GraphQL scalars.
+	 */
+	getScalarForFormat?: (format: string) => GraphQLScalarType | undefined;
 }
 
 /**
@@ -238,6 +243,7 @@ export const openApiSpecificationToGraphQLApi = async (
 	const graphQLSchema = await loadNonExecutableGraphQLSchemaFromJSONSchemas(options.name, {
 		...options,
 		...extraJSONSchemaOptions,
+		getScalarForFormat: introspection.getScalarForFormat,
 	});
 
 	// as logic of translating api calls stored in the directives we need print schema with directives
