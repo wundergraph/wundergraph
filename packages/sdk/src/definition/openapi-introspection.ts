@@ -127,7 +127,7 @@ export interface OpenAPIIntrospectionV2
 	/**
 	 * This allows you to map OpenAPI formats to custom GraphQL scalars.
 	 */
-	getScalarForFormat?: (format: string) => GraphQLScalarType | undefined;
+	getScalarForFormat?: (format: string) => GraphQLScalarType | void;
 }
 
 /**
