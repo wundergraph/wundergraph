@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.27](https://github.com/wundergraph/wundergraph/compare/@wundergraph/svelte-query@0.3.26...@wundergraph/svelte-query@0.3.27) (2023-12-13)
+
+**Note:** Version bump only for package @wundergraph/svelte-query
+
 ## [0.3.26](https://github.com/wundergraph/wundergraph/compare/@wundergraph/svelte-query@0.3.25...@wundergraph/svelte-query@0.3.26) (2023-12-07)
 
 **Note:** Version bump only for package @wundergraph/svelte-query

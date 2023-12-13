@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.181.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.181.4...@wundergraph/sdk@0.181.5) (2023-12-13)
+
+### Bug Fixes
+
+* fixed issue where fields in operation generator would be added as subscription root type ([#1359](https://github.com/wundergraph/wundergraph/issues/1359)) ([c66ea6e](https://github.com/wundergraph/wundergraph/commit/c66ea6e998cbfae8984d245241ecf973e721adca)) (@Pagebakers)
+
 ## [0.181.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.181.3...@wundergraph/sdk@0.181.4) (2023-12-07)
 
 ### Bug Fixes

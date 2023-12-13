@@ -283,7 +283,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.181.4
+        specifier: workspace:^0.181.5
         version: link:../sdk
       typescript:
         specifier: ^5.1.6
@@ -619,7 +619,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.181.4
+        specifier: workspace:^0.181.5
         version: link:../sdk
       typescript:
         specifier: ^5.1.6
@@ -655,14 +655,14 @@ importers:
         specifier: ^10.0.11
         version: 10.0.11(graphql@16.6.0)
       '@omnigraph/json-schema':
-        specifier: 0.97.2
-        version: 0.97.2(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0)
+        specifier: 0.97.3
+        version: 0.97.3(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0)
       '@omnigraph/openapi':
-        specifier: 0.97.2
-        version: 0.97.2(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0)
+        specifier: 0.97.3
+        version: 0.97.3(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0)
       '@omnigraph/soap':
-        specifier: 0.96.2
-        version: 0.96.2(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0)
+        specifier: 0.96.3
+        version: 0.96.3(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0)
       '@opentelemetry/api':
         specifier: ^1.4.1
         version: 1.4.1
@@ -691,7 +691,7 @@ importers:
         specifier: ^0.9.13
         version: 0.9.13
       '@wundergraph/orm':
-        specifier: workspace:*
+        specifier: workspace:^0.3.1
         version: link:../orm
       '@wundergraph/protobuf':
         specifier: workspace:^0.118.2
@@ -8079,8 +8079,8 @@ packages:
     resolution: {integrity: sha512-lDNv83BeEyxxukdQ0UttiUXawk9+6DkdjjFtm2GFED+24IQhTVaoSbwV9vWWKONyGLzRmCQqZmoEWkDhkEmPlw==}
     dev: false
 
-  /@omnigraph/json-schema@0.97.2(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0):
-    resolution: {integrity: sha512-11+Y5FDJifSoeoDKiqgCzu73tfYEVDxClRmrB5M8Yrhz1BA9epBup9y6AB+ZFz66HIg8D0qDOnTw/pscqbL8KQ==}
+  /@omnigraph/json-schema@0.97.3(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0):
+    resolution: {integrity: sha512-aCLjQuOR7xMF+yp5Iw5/4hofPT+vdY1OCqPl8h2UE/mIzhoyYcXGILR2XLAARnsQVoO6b5e4Q82BJ9jiFfEg+g==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       '@graphql-mesh/cross-helpers': ^0.4.1
@@ -8111,8 +8111,8 @@ packages:
       url-join: 4.0.1
     dev: false
 
-  /@omnigraph/json-schema@0.97.2(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2):
-    resolution: {integrity: sha512-11+Y5FDJifSoeoDKiqgCzu73tfYEVDxClRmrB5M8Yrhz1BA9epBup9y6AB+ZFz66HIg8D0qDOnTw/pscqbL8KQ==}
+  /@omnigraph/json-schema@0.97.3(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2):
+    resolution: {integrity: sha512-aCLjQuOR7xMF+yp5Iw5/4hofPT+vdY1OCqPl8h2UE/mIzhoyYcXGILR2XLAARnsQVoO6b5e4Q82BJ9jiFfEg+g==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       '@graphql-mesh/cross-helpers': ^0.4.1
@@ -8143,8 +8143,8 @@ packages:
       url-join: 4.0.1
     dev: false
 
-  /@omnigraph/openapi@0.97.2(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0):
-    resolution: {integrity: sha512-jZVCv9hgsXSlKe3B7+U/mSlhk+xzNW7QXokPPwLTE/S3vKy4D571CsF50wycbtgPy5CiNwON9mS5EpKIAunfuQ==}
+  /@omnigraph/openapi@0.97.3(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0):
+    resolution: {integrity: sha512-gw9oP/pIYcwPWgIK41U6v6qgGOR99pxxHl81XdvlYIvHgsYcI12C52lkBkr5uK3COdM22CP8hSADhMJQzSWifA==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       '@graphql-mesh/cross-helpers': ^0.4.1
@@ -8157,7 +8157,7 @@ packages:
       '@graphql-mesh/string-interpolation': 0.5.3(graphql@16.6.0)(tslib@2.5.0)
       '@graphql-mesh/types': 0.96.2(@graphql-mesh/store@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0)
       '@graphql-mesh/utils': 0.96.2(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0)
-      '@omnigraph/json-schema': 0.97.2(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0)
+      '@omnigraph/json-schema': 0.97.3(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0)
       change-case: 4.1.2
       graphql: 16.6.0
       json-machete: 0.97.1(tslib@2.5.0)
@@ -8167,8 +8167,8 @@ packages:
       - '@graphql-tools/utils'
     dev: false
 
-  /@omnigraph/openapi@0.97.2(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2):
-    resolution: {integrity: sha512-jZVCv9hgsXSlKe3B7+U/mSlhk+xzNW7QXokPPwLTE/S3vKy4D571CsF50wycbtgPy5CiNwON9mS5EpKIAunfuQ==}
+  /@omnigraph/openapi@0.97.3(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2):
+    resolution: {integrity: sha512-gw9oP/pIYcwPWgIK41U6v6qgGOR99pxxHl81XdvlYIvHgsYcI12C52lkBkr5uK3COdM22CP8hSADhMJQzSWifA==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       '@graphql-mesh/cross-helpers': ^0.4.1
@@ -8181,7 +8181,7 @@ packages:
       '@graphql-mesh/string-interpolation': 0.5.3(graphql@16.6.0)(tslib@2.6.2)
       '@graphql-mesh/types': 0.96.2(@graphql-mesh/store@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2)
       '@graphql-mesh/utils': 0.96.2(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2)
-      '@omnigraph/json-schema': 0.97.2(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2)
+      '@omnigraph/json-schema': 0.97.3(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2)
       change-case: 4.1.2
       graphql: 16.6.0
       json-machete: 0.97.1(tslib@2.6.2)
@@ -8191,8 +8191,8 @@ packages:
       - '@graphql-tools/utils'
     dev: false
 
-  /@omnigraph/soap@0.96.2(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0):
-    resolution: {integrity: sha512-OFmoATHzDgJzktvVbWhNAsa+Z+q3K+nouD+8n/fpVvDfijD8XJzipeL6e6lORd3rsaZFIBZiE0robSLTrKIX3Q==}
+  /@omnigraph/soap@0.96.3(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.5.0):
+    resolution: {integrity: sha512-HxIYg5enBrdYclkLDNa/tGgemTyrR+lEUtA5cy1s7ILF92DNU5n8+r7V2izZDcHWLDSVTqIXfHx8DYhuWXuSUg==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       '@graphql-mesh/types': ^0.96.2
@@ -8213,8 +8213,8 @@ packages:
       - tslib
     dev: false
 
-  /@omnigraph/soap@0.96.2(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2):
-    resolution: {integrity: sha512-OFmoATHzDgJzktvVbWhNAsa+Z+q3K+nouD+8n/fpVvDfijD8XJzipeL6e6lORd3rsaZFIBZiE0robSLTrKIX3Q==}
+  /@omnigraph/soap@0.96.3(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2):
+    resolution: {integrity: sha512-HxIYg5enBrdYclkLDNa/tGgemTyrR+lEUtA5cy1s7ILF92DNU5n8+r7V2izZDcHWLDSVTqIXfHx8DYhuWXuSUg==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       '@graphql-mesh/types': ^0.96.2
@@ -29253,9 +29253,9 @@ packages:
       '@graphql-tools/merge': 9.0.1(graphql@16.6.0)
       '@graphql-tools/schema': 10.0.2(graphql@16.6.0)
       '@graphql-tools/utils': 10.0.11(graphql@16.6.0)
-      '@omnigraph/json-schema': 0.97.2(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2)
-      '@omnigraph/openapi': 0.97.2(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2)
-      '@omnigraph/soap': 0.96.2(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2)
+      '@omnigraph/json-schema': 0.97.3(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2)
+      '@omnigraph/openapi': 0.97.3(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2)
+      '@omnigraph/soap': 0.96.3(@graphql-mesh/types@0.96.2)(@graphql-mesh/utils@0.96.2)(@graphql-tools/utils@10.0.11)(graphql@16.6.0)(tslib@2.6.2)
       '@opentelemetry/api': 1.6.0
       '@opentelemetry/core': 1.17.1(@opentelemetry/api@1.6.0)
       '@opentelemetry/exporter-trace-otlp-proto': 0.39.1(@opentelemetry/api@1.6.0)
