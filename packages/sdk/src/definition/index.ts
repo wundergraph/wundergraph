@@ -499,10 +499,16 @@ export const introspect = {
 	/**
 	 * @deprecated introspect.openApi exists only for backwards compatibility
 	 * purposes. New applications should use introspect.openApiV2.
-	 * At some point, introspect.openApi will become an alias to
-	 * introspect.openApiV2.
+	 * On January 1st 2024, introspect.openApi be renamed to
+	 * introspect.openApi_compat.
 	 */
 	openApi: introspectOpenApi,
+	/**
+	 * @important introspect.openApiV2 is the new way to introspect OpenAPI
+	 * APIs. It is not backwards compatible with introspect.openApi.
+	 * On January 1st 2024, introspect.openApiV2 will become the default
+	 * introspection method for OpenAPI APIs and will be renamed to introspect.openApi.
+	 */
 	openApiV2: introspectOpenApiV2,
 	soap: introspectSoap,
 	natsKV: introspectNatsKV,
