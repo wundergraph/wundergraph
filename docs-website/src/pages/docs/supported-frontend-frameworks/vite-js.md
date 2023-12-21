@@ -12,7 +12,7 @@ so you can use the WunderGraph TypeScript client,
 combine it with the SWR integration,
 and use it with frameworks like Next.JS, Vite, or even plain React.
 
-## Examples of using Next.js and WunderGraph
+## Examples of using Vite and WunderGraph
 
 If you're looking for examples, here's a list:
 
