@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.28](https://github.com/wundergraph/wundergraph/compare/@wundergraph/vue-query@0.2.27...@wundergraph/vue-query@0.2.28) (2024-01-05)
+
+**Note:** Version bump only for package @wundergraph/vue-query
+
 ## [0.2.27](https://github.com/wundergraph/wundergraph/compare/@wundergraph/vue-query@0.2.26...@wundergraph/vue-query@0.2.27) (2023-12-13)
 
 **Note:** Version bump only for package @wundergraph/vue-query

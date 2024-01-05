@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.15.3...@wundergraph/nextjs@0.15.4) (2024-01-05)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
 ## [0.15.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.15.2...@wundergraph/nextjs@0.15.3) (2023-12-13)
 
 **Note:** Version bump only for package @wundergraph/nextjs

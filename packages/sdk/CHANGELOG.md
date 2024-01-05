@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.182.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.181.5...@wundergraph/sdk@0.182.0) (2024-01-05)
+
+### Features
+
+* add withheaders method to client ([#1361](https://github.com/wundergraph/wundergraph/issues/1361)) ([a3d57f7](https://github.com/wundergraph/wundergraph/commit/a3d57f73662e58b5ba435a243a4fc302f7e7287e)) (@Pagebakers)
+
 ## [0.181.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.181.4...@wundergraph/sdk@0.181.5) (2023-12-13)
 
 ### Bug Fixes
