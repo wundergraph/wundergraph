@@ -160,6 +160,12 @@ export class WunderGraphClient extends Client {
 	public async fetchUser<TUser extends PublicUser = PublicUser>(options?: FetchUserRequestOptions) {
 		return super.fetchUser<TUser>(options);
 	}
+	public withHeaders = (headers: { [key: string]: string }) => {
+		return new WunderGraphClient({
+			...this.options,
+			extraHeaders: headers,
+		});
+	};
 }
 
 export const createClient = (config?: CreateClientConfig) => {
