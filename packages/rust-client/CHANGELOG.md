@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/rust-client@0.2.3...@wundergraph/rust-client@0.3.0) (2024-01-12)
+
+### Features
+
+* add derive Clone to rust client types ([#1362](https://github.com/wundergraph/wundergraph/issues/1362)) ([3e25bd7](https://github.com/wundergraph/wundergraph/commit/3e25bd7b058a29e1aff4a71c18cd3b1830c355f9)) (@Aenimus)
+
 ## [0.2.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/rust-client@0.2.2...@wundergraph/rust-client@0.2.3) (2024-01-05)
 
 **Note:** Version bump only for package @wundergraph/rust-client

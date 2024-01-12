@@ -294,7 +294,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.182.0
+        specifier: workspace:^0.182.1
         version: link:../sdk
       typescript:
         specifier: ^5.1.6
@@ -630,7 +630,7 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
       '@wundergraph/sdk':
-        specifier: workspace:^0.182.0
+        specifier: workspace:^0.182.1
         version: link:../sdk
       typescript:
         specifier: ^5.1.6
@@ -6062,7 +6062,7 @@ packages:
       '@graphql-mesh/types': 0.96.0(@graphql-mesh/store@0.96.0)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.2)
       '@graphql-tools/delegate': 10.0.3(graphql@16.6.0)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
-      '@whatwg-node/fetch': 0.9.14
+      '@whatwg-node/fetch': 0.9.13
       dset: 3.1.3
       graphql: 16.6.0
       js-yaml: 4.1.0
@@ -8131,7 +8131,7 @@ packages:
       '@graphql-mesh/utils': 0.96.0(@graphql-mesh/cross-helpers@0.4.1)(@graphql-mesh/types@0.96.0)(@graphql-tools/utils@9.2.1)(graphql@16.6.0)(tslib@2.6.2)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
       '@json-schema-tools/meta-schema': 1.7.0
-      '@whatwg-node/fetch': 0.9.14
+      '@whatwg-node/fetch': 0.9.13
       ajv: 8.12.0
       ajv-formats: 2.1.1(ajv@8.12.0)
       dset: 3.1.3
@@ -29215,7 +29215,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.182.0
+    version: 0.182.1
     hasBin: true
     requiresBuild: true
     dependencies:
