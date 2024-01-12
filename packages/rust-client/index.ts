@@ -230,7 +230,7 @@ class CargoToml implements Template {
 	}
 }
 
-const typeAnnotations = `#[derive(Debug, serde::Serialize, serde::Deserialize)]\n`;
+const typeAnnotations = `#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]\n`;
 
 class rustEncoder {
 	private readonly types: Map<string, string>;
