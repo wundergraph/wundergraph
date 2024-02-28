@@ -135,6 +135,11 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		return {
 			login: (authProviderID: Operations['authProvider'], redirectURI?: string | undefined) =>
 				client.login(authProviderID, redirectURI),
+			loginWithQuery: (
+				authProviderID: Operations['authProvider'],
+				query: URLSearchParams,
+				redirectURI?: string | undefined
+			) => client.loginWithQueryParams(authProviderID, query, redirectURI),
 			logout: async (options?: LogoutOptions | undefined) => {
 				const result = await client.logout(options);
 				// reset user in the cache and don't trigger a refetch

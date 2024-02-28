@@ -5,11 +5,11 @@ import { useQuery, useUser, useAuth, withWunderGraph } from '../components/gener
 
 const JobsPage: NextPage = () => {
 	const user = useUser();
-	const { login, logout } = useAuth();
+	const { login, loginWithQuery, logout } = useAuth();
 	const [city, setCity] = useState<string>('Berlin');
 	const onClick = () => {
 		if (!user.data) {
-			login('github');
+			loginWithQuery('auth0', new URLSearchParams({ organization: 'wundergraph' }));
 		} else {
 			logout();
 		}
