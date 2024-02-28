@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.183.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.182.1...@wundergraph/sdk@0.183.0) (2024-02-28)
+
+### Features
+
+* allow forwarding query params on login ([#1370](https://github.com/wundergraph/wundergraph/issues/1370)) ([660a8d0](https://github.com/wundergraph/wundergraph/commit/660a8d0416b20a92f29fce3010e9e8f37dc50354)) (@jensneuse)
+
 ## [0.182.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.182.0...@wundergraph/sdk@0.182.1) (2024-01-12)
 
 **Note:** Version bump only for package @wundergraph/sdk
