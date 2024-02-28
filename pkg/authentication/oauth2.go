@@ -145,6 +145,18 @@ func (h *OAuth2AuthenticationHandler) Authorize(w http.ResponseWriter, r *http.R
 	for i, p := range h.config.QueryParameters {
 		opts[i] = oauth2.SetAuthURLParam(p.Name, p.Value)
 	}
+WithNext:
+	for k := range r.URL.Query() {
+		if k == "redirect_uri" {
+			continue
+		}
+		for _, p := range h.config.QueryParameters {
+			if p.Name == k {
+				continue WithNext
+			}
+			opts = append(opts, oauth2.SetAuthURLParam(k, r.URL.Query().Get(k)))
+		}
+	}
 
 	redirectToProvider := oauth2Config.AuthCodeURL(state, opts...)
 	h.config.Log.Debug("redirecting to authentication provider", zap.String("url", redirectToProvider))

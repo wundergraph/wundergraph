@@ -715,6 +715,19 @@ export class Client {
 		window.location.assign(url);
 	}
 
+	public loginWithQueryParams(authProviderID: string, queryParams: URLSearchParams, redirectURI?: string) {
+		// browser check
+		if (typeof window === 'undefined') {
+			throw new Error('login() can only be called in a browser environment');
+		}
+
+		queryParams.set('redirect_uri', redirectURI || window.location.toString());
+
+		const url = this.addUrlParams(`${this.options.baseURL}/auth/cookie/authorize/${authProviderID}`, queryParams);
+
+		window.location.assign(url);
+	}
+
 	public async logout(options?: LogoutOptions): Promise<boolean> {
 		// browser check
 		if (typeof window === 'undefined') {
