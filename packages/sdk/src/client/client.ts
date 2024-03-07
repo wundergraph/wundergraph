@@ -17,12 +17,12 @@ import {
 import { serialize } from '../utils';
 import { applyPatch } from 'fast-json-patch';
 import {
-	ResponseError,
-	InputValidationError,
 	AuthorizationError,
-	ValidationResponseJSON,
 	ClientOperationErrorCodes,
+	InputValidationError,
 	NoUserError,
+	ResponseError,
+	ValidationResponseJSON,
 } from './errors';
 import { deepClone } from '../utils/helper';
 
@@ -736,6 +736,7 @@ export class Client {
 
 		const params = new URLSearchParams({
 			logout_openid_connect_provider: options?.logoutOpenidConnectProvider ? 'true' : 'false',
+			...(options?.isFederated ? { federated: '' } : {}),
 		});
 
 		const url = this.addUrlParams(`${this.options.baseURL}/auth/cookie/user/logout`, params);

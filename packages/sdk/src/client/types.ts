@@ -184,6 +184,8 @@ export interface LogoutOptions {
 	 * Callback to be run after a succesful logout
 	 * */
 	after?: () => void;
+
+	isFederated?: boolean;
 }
 
 export type HasRequiredInput<Input extends object | undefined> = Input extends object
