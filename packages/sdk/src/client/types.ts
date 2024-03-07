@@ -184,7 +184,10 @@ export interface LogoutOptions {
 	 * Callback to be run after a succesful logout
 	 * */
 	after?: () => void;
-
+	/**
+	 * Whether the federated parameter should be appended to the logout request
+	 * https://auth0.com/docs/authenticate/login/logout/log-users-out-of-idps#alternative-logout
+	 * */
 	isFederated?: boolean;
 }
 
