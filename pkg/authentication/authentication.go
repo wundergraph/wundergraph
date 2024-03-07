@@ -851,6 +851,8 @@ type UserLogoutHandler struct {
 	Log             *zap.Logger
 }
 
+const logoutOpenidConnectProvider = "logout_openid_connect_provider"
+
 func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resetUserCookies(w, r, !u.InsecureCookies)
 	user := UserFromContext(r.Context())
@@ -864,7 +866,7 @@ func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if strings.ToLower(r.URL.Query().Get("logout_openid_connect_provider")) == "true" {
+	if strings.ToLower(r.URL.Query().Get(logoutOpenidConnectProvider)) == "true" {
 		if err := u.logoutFromProvider(w, r, user); err != nil {
 			if u.Log != nil {
 				u.Log.Warn("could not disconnect user from OIDC provider", zap.Error(err))
@@ -872,6 +874,8 @@ func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+const ForwardedQueryParamsKey = "forwarded_query_params"
 
 func (u *UserLogoutHandler) logoutFromProvider(w http.ResponseWriter, r *http.Request, user *User) error {
 	if user.ProviderName != "oidc" {
@@ -884,7 +888,17 @@ func (u *UserLogoutHandler) logoutFromProvider(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		return err
 	}
-	result, err := provider.Disconnect(r.Context(), user)
+
+	params := r.URL.Query()
+	// do not forward the "logout_openid_connect_provider" param
+	delete(params, logoutOpenidConnectProvider)
+
+	ctx := r.Context()
+	if len(params) > 0 {
+		ctx = context.WithValue(ctx, ForwardedQueryParamsKey, params)
+	}
+
+	result, err := provider.Disconnect(ctx, user)
 	if err != nil {
 		return err
 	}
