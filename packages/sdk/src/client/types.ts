@@ -184,6 +184,12 @@ export interface LogoutOptions {
 	 * Callback to be run after a succesful logout
 	 * */
 	after?: () => void;
+	/**
+	 * Parameters to be appended to the logout request
+	 * Of particular note is the federated parameter:
+	 * https://auth0.com/docs/authenticate/login/logout/log-users-out-of-idps#alternative-logout
+	 * */
+	parameters?: URLSearchParams;
 }
 
 export type HasRequiredInput<Input extends object | undefined> = Input extends object

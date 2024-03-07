@@ -381,7 +381,14 @@ func (p *OpenIDConnectProvider) disconnectDefault(ctx context.Context, user *Use
 	return nil, nil
 }
 
-func (p *OpenIDConnectProvider) disconnectAuth0(_ context.Context, _ *User) (*OpenIDDisconnectResult, error) {
+func (p *OpenIDConnectProvider) disconnectAuth0(ctx context.Context, _ *User) (*OpenIDDisconnectResult, error) {
+	params, ok := ctx.Value(ForwardedQueryParamsKey).(url.Values)
+
+	if params != nil && ok {
+		return &OpenIDDisconnectResult{
+			Redirect: fmt.Sprintf("%sv2/logout?client_id=%s&%s", p.config.Issuer, p.clientID, params.Encode()),
+		}, nil
+	}
 	return &OpenIDDisconnectResult{
 		Redirect: fmt.Sprintf("%sv2/logout?client_id=%s", p.config.Issuer, p.clientID),
 	}, nil
