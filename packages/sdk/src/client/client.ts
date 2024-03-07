@@ -739,7 +739,7 @@ export class Client {
 		});
 
 		if (options?.parameters) {
-			for (const [key, value] of options?.parameters) {
+			for (const [key, value] of options.parameters) {
 				params.append(key, value);
 			}
 		}
