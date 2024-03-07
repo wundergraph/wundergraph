@@ -736,8 +736,13 @@ export class Client {
 
 		const params = new URLSearchParams({
 			logout_openid_connect_provider: options?.logoutOpenidConnectProvider ? 'true' : 'false',
-			...(options?.isFederated ? { federated: '' } : {}),
 		});
+
+		if (options?.parameters) {
+			for (const [key, value] of options?.parameters) {
+				params.append(key, value);
+			}
+		}
 
 		const url = this.addUrlParams(`${this.options.baseURL}/auth/cookie/user/logout`, params);
 
