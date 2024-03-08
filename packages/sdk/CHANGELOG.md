@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.184.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.183.0...@wundergraph/sdk@0.184.0) (2024-03-08)
+
+### Features
+
+* allow forwarding of params from client logout ([#1374](https://github.com/wundergraph/wundergraph/issues/1374)) ([85fdd01](https://github.com/wundergraph/wundergraph/commit/85fdd01282c70b96d6592432e4b30180fd1a7586)) (@Aenimus)
+
 ## [0.183.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.182.1...@wundergraph/sdk@0.183.0) (2024-02-28)
 
 ### Features
