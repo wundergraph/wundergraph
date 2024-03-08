@@ -16,8 +16,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@wundergraph/sdk": "^0.183.0",
-    "@wundergraph/swr": "^0.19.0",
+    "@wundergraph/sdk": "^0.184.0",
+    "@wundergraph/swr": "^0.19.1",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "swr": "^2.2.0"
