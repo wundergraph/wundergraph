@@ -16,8 +16,8 @@
     "cleanup": "cd minio && docker-compose down -v"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.15.6",
-    "@wundergraph/sdk": "^0.183.0",
+    "@wundergraph/nextjs": "^0.15.7",
+    "@wundergraph/sdk": "^0.184.0",
     "graphql": "^16.3.0",
     "next": "^14.0.1",
     "react": "^18.0.0",
