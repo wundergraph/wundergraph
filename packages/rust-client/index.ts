@@ -384,6 +384,10 @@ class rustEncoder {
 			if (!propType) {
 				throw new Error(`property ${propName} with schema ${JSON.stringify(propSchema)} returned an empty type`);
 			}
+			const isRequiredInType = typeRequiredProperties.includes(propName);
+			if (!isRequiredInType && !propType.startsWith('Option<')) {
+				propType = `Option<${propType}>`;
+			}
 			if (propType.startsWith('Option<')) {
 				def += `\t#[serde(skip_serializing_if = "Option::is_none")]\n`;
 			}
