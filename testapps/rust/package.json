@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@test/simple",
+  "name": "@test/rust",
   "version": "0.1.0",
   "repository": {
     "type": "git",
