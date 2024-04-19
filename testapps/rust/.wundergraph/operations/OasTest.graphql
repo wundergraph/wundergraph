@@ -1,0 +1,3 @@
+mutation ($input: Body_Input) {
+	post_test(input: $input)
+}
