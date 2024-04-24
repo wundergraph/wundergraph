@@ -457,6 +457,45 @@ describe('OpenAPI builder', () => {
 		expect(schemas?.['User_3']).toEqual(user3Schema);
 	});
 
+	test('Tags generate for operations', async () => {
+		const tagOperations = [
+			{
+				Name: 'QueryWithNoTagAndNoParent',
+				PathName: 'queryone',
+				OperationType: OperationType.QUERY,
+			},
+			{
+				Name: 'QueryWithTagAndNoParent',
+				PathName: 'querytwo',
+				OperationType: OperationType.MUTATION,
+				Tags: ['CustomTagName'],
+			},
+			{
+				Name: 'QueryWithTagAndParent',
+				PathName: 'users/querythree',
+				OperationType: OperationType.MUTATION,
+				Tags: ['Users'],
+			},
+			{
+				Name: 'QueryWithNoTagAndParent',
+				PathName: 'users/queryfour',
+				OperationType: OperationType.MUTATION,
+				Tags: ['CustomTagName2'],
+			},
+		] as GraphQLOperation[];
+		const builder = new OpenApiBuilder({
+			title: 'WunderGraph',
+			version: '0',
+			baseURL: 'http://localhost:9991',
+			enableTagAutoGrouping: true,
+		});
+		const result = builder.build(tagOperations);
+		expect(result.paths['/queryone']['get']?.tags).toBeUndefined();
+		expect(result.paths['/querytwo']['post']?.tags).toEqual(['CustomTagName']);
+		expect(result.paths['/users/querythree']['post']?.tags).toEqual(['Users']);
+		expect(result.paths['/users/queryfour']['post']?.tags).toEqual(['CustomTagName2']);
+	});
+
 	test('OpenAPI Builder', async () => {
 		const builder = new OpenApiBuilder({
 			title: 'WunderGraph',

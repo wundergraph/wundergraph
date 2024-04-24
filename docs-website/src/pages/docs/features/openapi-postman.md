@@ -31,3 +31,8 @@ configureWunderGraphApplication({
   },
 });
 ```
+
+Additional `openApi` options:
+
+- `enableTagAutoGrouping`: Operations with an ancestor folder `operations/foo/bar/cat` and `operations/foo/dog` will be outputted
+  with a `foo` [tag](https://swagger.io/docs/specification/grouping-operations-with-tags/) in the generated `wundergraph.openapi.json` specification. (Operations without a parent (`e.g. operations/foo`) are not assigned a tag.) The tag generation can be individually overriden with the `tags` field in individual typescript operations

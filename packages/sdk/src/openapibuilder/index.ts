@@ -82,6 +82,7 @@ interface OpenApiOperation {
 	parameters?: OpenApiParameter[];
 	requestBody?: OpenApiRequestBody;
 	responses: Record<string, OpenApiResponse>;
+	tags?: string[];
 
 	// WunderGraph extensions
 	'x-wundergraph-operation-type': OperationTypeName;
@@ -114,6 +115,7 @@ export interface OpenApiBuilderOptions {
 	version: string;
 	summary?: string;
 	description?: string;
+	enableTagAutoGrouping?: boolean;
 }
 
 /**
@@ -176,11 +178,30 @@ export class OpenApiBuilder {
 		}
 		return {
 			operationId: op.Name,
+			...this.operationTags(op),
 			'x-wundergraph-operation-type': operationType,
 			'x-wundergraph-requires-authentication': op?.AuthenticationConfig?.required ?? false,
 		};
 	}
 
+	/*
+		Case 1: Defined tags, array ['foo'] or ['foo', 'bar'] => consume these ['foo'] or ['foo', 'bar']
+		Case 2: Undefined tags, where operation exists at parent level (operations/foo) => no tags
+		Case 3: Undefined tags, where operation exists at a subpath level (operations/foo/bar) => ['foo']
+	*/
+	private operationTags(op: GraphQLOperation) {
+		if (op.Tags && op.Tags.length > 0) {
+			return { tags: op.Tags };
+		} else if (this.config.enableTagAutoGrouping) {
+			const subpaths = op.PathName.split('/');
+			const root = subpaths[0];
+			if (subpaths.length > 1) {
+				const tag = `${root[0].toUpperCase()}${root.slice(1)}`;
+				return { tags: [tag] };
+			}
+		}
+		return {};
+	}
 	private queryOperation(op: GraphQLOperation): OpenApiOperation {
 		const parameters: OpenApiParameter[] = [];
 		const paths: JSONSchemaParameterPath[] = [];

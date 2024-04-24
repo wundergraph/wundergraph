@@ -58,6 +58,7 @@ export const isInternalOperationByAPIMountPath = (path: string) => {
 export interface GraphQLOperation {
 	Name: string;
 	Description: string;
+	Tags?: string[];
 	PathName: string;
 	Content: string;
 	OperationType: OperationType;

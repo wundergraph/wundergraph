@@ -116,6 +116,7 @@ const createQuery =
 		input,
 		description = '',
 		response,
+		tags,
 		handler,
 		live,
 		cache,
@@ -127,6 +128,7 @@ const createQuery =
 		input?: Input;
 		description?: string;
 		errors?: { new (): OperationError }[];
+		tags?: string[];
 		response?: ZodResponse;
 		handler: ZodResponse extends z.ZodObject<any>
 			? (
@@ -169,6 +171,7 @@ const createQuery =
 			type: 'query',
 			description,
 			inputSchema: input,
+			tags,
 			responseSchema: response,
 			queryHandler: handler,
 			internal: internal || false,
@@ -200,6 +203,7 @@ const createMutation =
 	<Input extends z.ZodObject<any> = any, InferredResponse = unknown, ZodResponse = unknown>({
 		input,
 		description = '',
+		tags,
 		response,
 		handler,
 		requireAuthentication,
@@ -209,6 +213,7 @@ const createMutation =
 	}: {
 		input?: Input;
 		description?: string;
+		tags?: string[];
 		errors?: { new (): OperationError }[];
 		response?: ZodResponse;
 		handler: ZodResponse extends z.ZodObject<any>
@@ -249,6 +254,7 @@ const createMutation =
 		return {
 			type: 'mutation',
 			description,
+			tags,
 			inputSchema: input,
 			responseSchema: response,
 			mutationHandler: handler,
@@ -277,6 +283,7 @@ const createSubscription =
 	<Input extends z.ZodObject<any> = any, InferredResponse = unknown, ZodResponse = unknown>({
 		input,
 		description = '',
+		tags,
 		handler,
 		response,
 		requireAuthentication,
@@ -286,6 +293,7 @@ const createSubscription =
 	}: {
 		input?: Input;
 		description?: string;
+		tags?: string[];
 		errors?: { new (): OperationError }[];
 		response?: ZodResponse;
 		handler: SubscriptionHandler<
@@ -314,6 +322,7 @@ const createSubscription =
 		return {
 			type: 'subscription',
 			description,
+			tags,
 			subscriptionHandler: handler,
 			inputSchema: input,
 			responseSchema: response,
@@ -373,6 +382,7 @@ export type NodeJSOperation<
 	description?: string;
 	inputSchema?: z.ZodObject<any>;
 	responseSchema?: ZodResponse;
+	tags?: string[];
 	queryHandler?: ZodResponse extends z.ZodObject<any>
 		? (
 				ctx: HandlerContext<

@@ -181,6 +181,7 @@ export interface WunderGraphConfigApplicationConfig<
 	openApi?: {
 		title?: string;
 		apiVersion?: string;
+		enableTagAutoGrouping?: boolean;
 	};
 
 	/** @deprecated: Not used anymore */
@@ -1192,6 +1193,7 @@ export const configureWunderGraphApplication = <
 			const openApiBuilder = new OpenApiBuilder({
 				title: config.openApi?.title || 'WunderGraph Application',
 				version: config.openApi?.apiVersion || '0',
+				enableTagAutoGrouping: config.openApi?.enableTagAutoGrouping ?? false,
 				baseURL: publicNodeUrl,
 			});
 
@@ -1792,6 +1794,9 @@ const applyNodeJsOperationOverrides = (
 	}
 	if (overrides.description) {
 		operation.Description = overrides.description;
+	}
+	if (overrides.tags) {
+		operation.Tags = overrides.tags;
 	}
 	if (overrides.liveQuery) {
 		operation.LiveQuery = {
