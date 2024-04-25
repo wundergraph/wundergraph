@@ -66,8 +66,8 @@ interface OpenApiMediaType {
 
 interface OpenApiRequestBody {
 	description?: string;
-	content: Record<string, OpenApiMediaType>;
-	required: boolean;
+	content: Record<string, OpenApiMediaType | never>;
+	required?: boolean;
 }
 
 interface OpenApiResponse {
@@ -206,18 +206,30 @@ export class OpenApiBuilder {
 	}
 
 	private mutationOperation(op: GraphQLOperation): OpenApiOperation {
-		return {
+		const isPayloadEmpty = Object.keys(op.VariablesSchema.properties ?? {}).length > 0;
+		const requestBody = (
+			isPayloadEmpty
+				? {
+						content: {
+							'application/json': {
+								schema: op.VariablesSchema,
+							},
+						},
+						required: true,
+				  }
+				: {
+						content: {
+							'application/json': {},
+						},
+				  }
+		) as NonNullable<OpenApiOperation['requestBody']>;
+
+		const operation = {
 			...this.commonOperation(op),
-			requestBody: {
-				content: {
-					'application/json': {
-						schema: op.VariablesSchema,
-					},
-				},
-				required: true,
-			},
+			requestBody,
 			responses: this.operationResponses(op),
 		};
+		return operation;
 	}
 
 	private validComponentsSchemaName(name: string) {

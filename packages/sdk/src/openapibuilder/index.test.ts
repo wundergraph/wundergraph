@@ -211,6 +211,8 @@ describe('OpenAPI builder', () => {
 				PathName: 'MutationPath',
 				OperationType: OperationType.MUTATION,
 				AuthenticationConfig: { required: true },
+				VariablesSchema: personSchema,
+				ResponseSchema: personSchema,
 			},
 			{
 				Name: 'Subscription',
@@ -457,6 +459,25 @@ describe('OpenAPI builder', () => {
 		expect(schemas?.['User_3']).toEqual(user3Schema);
 	});
 
+	test('Empty payload in mutation returns properly formatted openapi schema', () => {
+		const operations = [
+			{
+				Name: 'Mutate',
+				PathName: 'path/mutate',
+				OperationType: OperationType.MUTATION,
+				ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+				VariablesSchema: emptySchema,
+				ResponseSchema: emptySchema,
+			},
+		] as unknown as GraphQLOperation[];
+
+		const result = build(operations);
+		const operation = result.paths['/path/mutate'].post;
+		const requestBodyContent = operation?.requestBody?.content;
+		const requestBodyRequired = operation?.requestBody?.required;
+		expect(requestBodyRequired).toBeFalsy();
+		expect(requestBodyContent?.['application/json']).toEqual({});
+	});
 	test('OpenAPI Builder', async () => {
 		const builder = new OpenApiBuilder({
 			title: 'WunderGraph',
