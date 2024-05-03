@@ -183,6 +183,12 @@ export class Client {
 		if (response.status === 401) {
 			return new AuthorizationError();
 		}
+		else if (response.status === 500) {
+            return new ResponseError({
+                statusCode: 500,
+                message: 'Internal server error',
+            });
+        }
 
 		const text = await response.text();
 
