@@ -88,7 +88,7 @@ use crate::mutations::Mutations;
 use crate::subscriptions::Subscriptions;
 use crate::live_queries::LiveQueries;
 
-
+#[derive(Clone)]
 pub struct Client {
 	client: Arc<${clientPackageNamespace}::Client>,
 }
