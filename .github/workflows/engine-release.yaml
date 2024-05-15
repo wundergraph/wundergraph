@@ -39,8 +39,10 @@ jobs:
           git fetch --tags
           git checkout 3.6.6
           popd
+          brew doctor
+          brew cleanup
           brew tap mitchellh/gon
-          brew install mitchellh/gon/gon
+          brew install gon
 
       - name: Import Code-Signing Certificates
         uses: Apple-Actions/import-codesign-certs@v1
