@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.33](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.32...@wundergraph/react-relay@0.4.33) (2024-05-15)
+
+**Note:** Version bump only for package @wundergraph/react-relay
+
 ## [0.4.32](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-relay@0.4.31...@wundergraph/react-relay@0.4.32) (2024-04-19)
 
 **Note:** Version bump only for package @wundergraph/react-relay
