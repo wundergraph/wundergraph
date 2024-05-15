@@ -34,13 +34,6 @@ jobs:
 
       - name: Install Gon
         run: |
-          pushd .
-          cd /usr/local/Homebrew
-          git fetch --tags
-          git checkout 3.6.6
-          popd
-          brew doctor
-          brew cleanup
           brew tap mitchellh/gon
           brew install gon
 
