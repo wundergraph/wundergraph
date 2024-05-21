@@ -1,7 +1,6 @@
 'use server';
 
 import { client } from '@/lib/wundergraph';
-import { data } from 'autoprefixer';
 import { revalidatePath } from 'next/cache';
 import { AllTodosResponseData } from '../../.wundergraph/generated/models';
 
