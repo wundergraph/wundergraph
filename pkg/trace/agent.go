@@ -60,13 +60,20 @@ func createExporter(c Config) (sdktrace.SpanExporter, error) {
 }
 
 func startAgent(log *zap.Logger, c Config) (*sdktrace.TracerProvider, error) {
+	var sampler sdktrace.Sampler
+	if c.Sampler == 1 {
+		// if sampler is set to 1 then always sample regardless of what the parent conveys
+		sampler = sdktrace.AlwaysSample()
+	} else {
+		sampler = sdktrace.ParentBased(
+			sdktrace.TraceIDRatioBased(c.Sampler),
+			// By default of the parent span is sampled, the child span will be sampled.
+		)
+	}
 	opts := []sdktrace.TracerProviderOption{
 		// Set the sampling rate based on the parent span to 100%
 		sdktrace.WithSampler(
-			sdktrace.ParentBased(
-				sdktrace.TraceIDRatioBased(c.Sampler),
-				// By default of the parent span is sampled, the child span will be sampled.
-			),
+			sampler,
 		),
 		// Record information about this application in a Resource.
 		sdktrace.WithResource(resource.NewSchemaless(semconv.ServiceNameKey.String(c.Name))),
