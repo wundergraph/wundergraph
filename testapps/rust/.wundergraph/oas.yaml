@@ -1,0 +1,41 @@
+openapi: 3.1.0
+info:
+  title: Test Ref Recursion
+  version: 1.0.0
+paths:
+  /test:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Body'
+      responses:
+        '200':
+          description: Successful response
+components:
+  schemas:
+    Body:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+        ref:
+          $ref: '#/components/schemas/Ref'
+    Ref:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+        nested:
+          id:
+            type: string
+            format: uuid
+          $ref: '#/components/schemas/Ref'

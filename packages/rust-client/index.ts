@@ -88,7 +88,7 @@ use crate::mutations::Mutations;
 use crate::subscriptions::Subscriptions;
 use crate::live_queries::LiveQueries;
 
-
+#[derive(Clone)]
 pub struct Client {
 	client: Arc<${clientPackageNamespace}::Client>,
 }
@@ -234,10 +234,16 @@ const typeAnnotations = `#[derive(Clone, Debug, serde::Serialize, serde::Deseria
 
 class rustEncoder {
 	private readonly types: Map<string, string>;
+	private handledRefPaths: Set<string>;
+	private structNameByTypeName: Map<string, string>;
+	private encodedObjectTypeNames: Set<string>;
 	private output: string = '';
 
 	constructor(private rootSchema: JSONSchema, private rootTypeName: string, definedTypes?: Map<string, string>) {
 		this.types = definedTypes ?? new Map();
+		this.handledRefPaths = new Set<string>();
+		this.structNameByTypeName = new Map<string, string>();
+		this.encodedObjectTypeNames = new Set<string>();
 	}
 
 	encode() {
@@ -358,6 +364,7 @@ class rustEncoder {
 		if (!typeName) {
 			throw new Error(`no type name for ${JSON.stringify(typeSchema)}`);
 		}
+		this.encodedObjectTypeNames.add(typeName);
 		const structTypeName = this.encodeTypeName(typeName);
 		let def = typeAnnotations;
 		def += `pub struct ${structTypeName} {\n`;
@@ -373,15 +380,15 @@ class rustEncoder {
 			if ((propSchema.type as any) === 'undefined') {
 				continue;
 			}
-			let propType = this.encodeType(propSchema, propTypeName);
+			let propType = this.structNameByTypeName.get(propTypeName) || this.encodeType(propSchema, propTypeName);
 			if (!propType) {
 				throw new Error(`property ${propName} with schema ${JSON.stringify(propSchema)} returned an empty type`);
 			}
 			const isRequiredInType = typeRequiredProperties.includes(propName);
-			if (!isRequiredInType) {
+			if (!isRequiredInType && !propType.startsWith('Option<')) {
 				propType = `Option<${propType}>`;
 			}
-			if (!isRequiredInType || optional) {
+			if (propType.startsWith('Option<')) {
 				def += `\t#[serde(skip_serializing_if = "Option::is_none")]\n`;
 			}
 			def += `\t#[serde(rename(serialize = "${propName}", deserialize = "${propName}"))]\n`;
@@ -419,7 +426,7 @@ class rustEncoder {
 	}
 
 	private encodeType(typeSchema: JSONSchema, typeName?: string): string {
-		if (typeSchema.$ref) {
+		if (typeSchema.$ref && !this.handledRefPaths.has(typeSchema.$ref)) {
 			if (!typeSchema.$ref.startsWith('#/')) {
 				throw new Error(`can't resolve ref ${typeSchema.$ref}`);
 			}
@@ -436,7 +443,19 @@ class rustEncoder {
 			if (refTypeName.includes('{')) {
 				refTypeName = typeName ?? refTypeName;
 			}
+			this.handledRefPaths.add(typeSchema.$ref);
 			return this.encodeType(current as JSONSchema, refTypeName);
+		}
+		if (typeSchema.$ref && typeName) {
+			this.structNameByTypeName.set(typeName, this.encodeTypeName(typeName));
+		}
+		if (typeSchema.$ref && this.rootSchema.definitions) {
+			const refComponents = typeSchema.$ref.substring(2).split('/');
+			const refTypeName = refComponents[refComponents.length - 1];
+			if (this.rootSchema.definitions[refTypeName]) {
+				typeSchema = this.rootSchema.definitions[refTypeName] as JSONSchema;
+				typeName = refTypeName;
+			}
 		}
 		let type = typeSchema.type;
 		let anyOf = getAnyOf(typeSchema);
@@ -487,6 +506,9 @@ class rustEncoder {
 				const itemType = this.encodeType(itemSchema, `${typeName}_item`);
 				return ifOptional(`Vec<${itemType}>`);
 			case 'object':
+				if (typeName && this.encodedObjectTypeNames.has(typeName)) {
+					return ifOptional(this.encodeTypeName(typeName));
+				}
 				const structTypeName = this.encodeObject(typeSchema, optional, typeName);
 				return ifOptional(structTypeName);
 			case undefined:

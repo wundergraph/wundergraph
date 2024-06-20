@@ -12,8 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/golang-client": "^0.8.17",
-    "@wundergraph/sdk": "^0.184.0",
+    "@wundergraph/golang-client": "^0.8.19",
+    "@wundergraph/sdk": "^0.184.2",
     "graphql": "^16.3.0"
   },
   "devDependencies": {

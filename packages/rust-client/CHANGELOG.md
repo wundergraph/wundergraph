@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/rust-client@0.3.3...@wundergraph/rust-client@0.4.0) (2024-05-15)
+
+### Features
+
+* add Clone trait to Rust Client ([#1387](https://github.com/wundergraph/wundergraph/issues/1387)) ([2ff5f3b](https://github.com/wundergraph/wundergraph/commit/2ff5f3b0675e6c089b520d230493452e4d211fb7)) (@Aenimus)
+
+## [0.3.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/rust-client@0.3.2...@wundergraph/rust-client@0.3.3) (2024-04-19)
+
+### Bug Fixes
+
+* recursive oas references in rust client generation ([#1379](https://github.com/wundergraph/wundergraph/issues/1379)) ([f25b833](https://github.com/wundergraph/wundergraph/commit/f25b8334b5d7590ffc0d495647d61281b0eb7305)) (@Aenimus)
+
 ## [0.3.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/rust-client@0.3.1...@wundergraph/rust-client@0.3.2) (2024-03-08)
 
 **Note:** Version bump only for package @wundergraph/rust-client
