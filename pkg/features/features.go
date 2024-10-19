@@ -232,10 +232,11 @@ func EnabledFeatures(wunderGraphDir string) ([]Feature, error) {
 
 var (
 	enterpriseFeatures = map[Feature]struct{}{
-		AdvancedHooks: {},
-		SOAP:          {},
-		Prometheus:    {},
-		OpenTelemetry: {},
+		// Making all features available to users without enterprise license
+		// AdvancedHooks: {},
+		// SOAP:          {},
+		// Prometheus:    {},
+		// OpenTelemetry: {},
 	}
 
 	// enterprise features available for all WG cloud users
