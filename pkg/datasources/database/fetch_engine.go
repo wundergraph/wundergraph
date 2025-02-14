@@ -210,7 +210,9 @@ func (e *Engine) BinaryPlatformName() (string, error) {
 	distro := getLinuxDistro()
 	if distro == "alpine" {
 		distro = "linux-musl"
-	}
+	} else {
+		distro = "linux"
+  }
 
 	ssl, err := getOpenSSL()
 	if err != nil {
