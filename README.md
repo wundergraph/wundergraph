@@ -1,3 +1,11 @@
+> ⚠️ **Project Shutdown Notice**  
+> This project has been archived and will be made **private on Wednesday, April 16, 2025**.  
+> We're focusing our efforts on [WunderGraph Cosmo](https://github.com/wundergraph/cosmo), our GraphQL federation platform.  
+> Learn more and join the discussion [here](https://github.com/wundergraph/wundergraph/issues/1412).
+
+</br>
+</br>
+
 <div align="center">
 
 ![wunderctl](https://img.shields.io/npm/v/@wundergraph/sdk.svg)
